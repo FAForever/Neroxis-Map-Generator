@@ -39,7 +39,7 @@ public strictfp class MapGenerator {
 		}
 	}
 
-	private void save(String folderPath, String prefix, SCMap map, long seed) {
+	public void save(String folderPath, String prefix, SCMap map, long seed) {
 		try {
 			File file = new File(folderPath + prefix + "_" + seed);
 			file.mkdirs();
@@ -53,7 +53,7 @@ public strictfp class MapGenerator {
 		}
 	}
 
-	private SCMap generate(long seed) {
+	public SCMap generate(long seed) {
 		final Random random = new Random(seed);
 		final SCMap map = new SCMap(512, 6, 64, 10);
 
