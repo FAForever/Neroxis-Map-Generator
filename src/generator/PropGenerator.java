@@ -1,12 +1,12 @@
 package generator;
 
-import java.util.Random;
-
 import map.BinaryMask;
 import map.Prop;
 import map.SCMap;
 import util.Vector2f;
 import util.Vector3f;
+
+import java.util.Random;
 
 public strictfp class PropGenerator {
 	public final String[] TREE_GROUPS = {

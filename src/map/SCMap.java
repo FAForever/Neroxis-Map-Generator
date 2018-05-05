@@ -1,11 +1,11 @@
 package map;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public strictfp class SCMap {
 

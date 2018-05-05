@@ -1,9 +1,9 @@
 package export;
 
+import map.SCMap;
+
 import java.io.*;
 import java.nio.file.Path;
-
-import map.*;
 
 public strictfp class ScenarioExporter {
 
