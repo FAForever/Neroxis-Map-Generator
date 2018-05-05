@@ -31,8 +31,8 @@ public strictfp class PropGenerator {
 			"/env/evergreen/props/rocks/fieldstone04_prop.bp"
 	};
 
-	SCMap map;
-	Random random;
+	private final SCMap map;
+	private final Random random;
 
 	public PropGenerator(SCMap map, long seed) {
 		this.map = map;
@@ -52,10 +52,10 @@ public strictfp class PropGenerator {
 		return v;
 	}
 
-	public void randomizeVectorPair(Vector3f v1, Vector3f v2) {
-		placeOnHeightmap(random.nextFloat() * map.getSize(), random.nextFloat() * map.getSize(), v1);
-		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
-	}
+//	public void randomizeVectorPair(Vector3f v1, Vector3f v2) {
+//		placeOnHeightmap(random.nextFloat() * map.getSize(), random.nextFloat() * map.getSize(), v1);
+//		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
+//	}
 
 	public void generateProps(BinaryMask spawnable,String[] paths, float separation) {
 		BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());

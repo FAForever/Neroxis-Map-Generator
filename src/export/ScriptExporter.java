@@ -5,13 +5,11 @@ import java.io.*;
 import map.*;
 
 public strictfp class ScriptExporter {
-	
-	private static DataOutputStream out;
 
-	public static void exportScript(String folderPath, String mapname, SCMap map) throws IOException {
+    public static void exportScript(String folderPath, String mapname, SCMap map) throws IOException {
 		File file = new File(folderPath + mapname + File.separator + mapname + "_script.lua");
 		file.createNewFile();
-		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		out.writeBytes("local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')\n");
 		out.writeBytes("function OnPopulate()\n");
 		out.writeBytes("ScenarioUtils.InitializeArmies()\n");

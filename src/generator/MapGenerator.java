@@ -15,7 +15,7 @@ public strictfp class MapGenerator {
 	
 	public static final String VERSION = "0.1.0";
 
-	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+	public static void main(String[] args) throws ExecutionException, InterruptedException {
 		try {
 			String folderPath = args[0];
 			long seed = Long.parseLong(args[1]);
@@ -39,7 +39,7 @@ public strictfp class MapGenerator {
 		}
 	}
 
-	public void save(String folderPath, String prefix, SCMap map, long seed) {
+	private void save(String folderPath, String prefix, SCMap map, long seed) {
 		try {
 			File file = new File(folderPath + prefix + "_" + seed);
 			file.mkdirs();
@@ -53,7 +53,7 @@ public strictfp class MapGenerator {
 		}
 	}
 
-	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
+	private SCMap generate(long seed) {
 		final Random random = new Random(seed);
 		final SCMap map = new SCMap(512, 6, 64, 10);
 

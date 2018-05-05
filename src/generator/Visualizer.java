@@ -17,7 +17,7 @@ public strictfp class Visualizer extends JPanel {
 
 	public Visualizer() {
 		frame = new JFrame("NeroxisGen");
-		maps = new ArrayList<SCMap>();
+		maps = new ArrayList<>();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setUndecorated(true);
 		frame.setResizable(false);

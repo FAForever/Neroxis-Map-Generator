@@ -5,13 +5,11 @@ import java.io.*;
 import map.*;
 
 public strictfp class ScenarioExporter {
-	
-	private static DataOutputStream out;
 
 	public static void exportScenario(String folderPath, String mapname, SCMap map) throws IOException {
 		File file = new File(folderPath + mapname + File.separator + mapname + "_scenario.lua");
 		file.createNewFile();
-		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		out.writeBytes("version = 3\n");
 		out.writeBytes("ScenarioInfo = {\n");
 		out.writeBytes("  name = '" + mapname + "',\n");
