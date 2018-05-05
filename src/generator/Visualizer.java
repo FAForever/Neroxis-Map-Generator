@@ -1,13 +1,10 @@
 package generator;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.ArrayList;
+import map.SCMap;
 
 import javax.swing.*;
-
-import map.SCMap;
+import java.awt.*;
+import java.util.ArrayList;
 
 //Yes, that's swing. Get over it.
 public strictfp class Visualizer extends JPanel {

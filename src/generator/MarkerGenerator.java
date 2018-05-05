@@ -1,9 +1,11 @@
 package generator;
 
-import java.util.Random;
+import map.BinaryMask;
+import map.SCMap;
+import util.Vector2f;
+import util.Vector3f;
 
-import map.*;
-import util.*;
+import java.util.Random;
 
 public strictfp class MarkerGenerator {
 	private final SCMap map;

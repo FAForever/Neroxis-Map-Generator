@@ -1,9 +1,9 @@
 package map;
 
+import util.Vector2f;
+
 import java.util.Arrays;
 import java.util.Random;
-
-import util.Vector2f;
 
 public strictfp class BinaryMask {
 	private boolean[][] mask;
