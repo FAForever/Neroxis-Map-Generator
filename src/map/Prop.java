@@ -3,9 +3,9 @@ package map;
 import util.Vector3f;
 
 public strictfp class Prop {
-	private final String path;
-	private final Vector3f position;
-	private final float rotation;
+	private String path;
+	private Vector3f position;
+	private float rotation;
 
 	public Prop(String path, Vector3f position, float rotation) {
 		this.path = path;
