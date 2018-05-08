@@ -4,6 +4,7 @@ import static util.Swapper.swap;
 
 import java.io.*;
 import java.awt.image.*;
+import java.nio.file.Path;
 
 import map.*;
 import util.*;
@@ -22,8 +23,8 @@ public strictfp class SCMapExporter {
 
 	private static DataOutputStream out;
 
-	public static void exportSCMAP(String folderPath, String mapname, SCMap map) throws IOException {
-		File file = new File(folderPath + mapname + File.separator + mapname + ".scmap");
+	public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
+		File file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
 		file.createNewFile();
 		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 

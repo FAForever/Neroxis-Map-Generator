@@ -1,13 +1,14 @@
 package export;
 
 import java.io.*;
+import java.nio.file.Path;
 
 import map.*;
 
 public strictfp class ScenarioExporter {
 
-	public static void exportScenario(String folderPath, String mapname, SCMap map) throws IOException {
-		File file = new File(folderPath + mapname + File.separator + mapname + "_scenario.lua");
+	public static void exportScenario(Path folderPath, String mapname, SCMap map) throws IOException {
+		File file = folderPath.resolve(mapname).resolve(mapname + "_scenario.lua").toFile();
 		file.createNewFile();
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		out.writeBytes("version = 3\n");
