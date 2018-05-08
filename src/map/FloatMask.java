@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.Random;
 
 public strictfp class FloatMask {
-	float[][] mask;
-	private Random random;
-	private Symmetry symmetry = Symmetry.POINT;
+	private float[][] mask;
+	private final Random random;
+	private final Symmetry symmetry = Symmetry.POINT;
 
 	public FloatMask(int size, long seed) {
 		mask = new float[size][size];

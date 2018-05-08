@@ -7,8 +7,8 @@ import util.Vector2f;
 
 public strictfp class BinaryMask {
 	private boolean[][] mask;
-	private Random random;
-	private Symmetry symmetry = Symmetry.POINT;
+	private final Random random;
+	private final Symmetry symmetry = Symmetry.POINT;
 
 	public BinaryMask(int size, long seed) {
 		mask = new boolean[size][size];
@@ -194,11 +194,14 @@ public strictfp class BinaryMask {
 
 		for (int y = 0; y < getSize(); y++) {
 			for (int x = 0; x < getSize(); x++) {
-				if (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1]) || (x < getSize() - 1 && !mask[x + 1][y]) || (y < getSize() - 1 && !mask[x][y + 1]))
-						&& ((x > 0 && mask[x - 1][y]) || (y > 0 && mask[x][y - 1]) || (x < getSize() - 1 && mask[x + 1][y]) || (y < getSize() - 1 && mask[x][y + 1])))
-					maskCopy[x][y] = true;
-				else
-					maskCopy[x][y] = false;
+				maskCopy[x][y] = ((x > 0 && !mask[x - 1][y])
+										|| (y > 0 && !mask[x][y - 1])
+										|| (x < getSize() - 1 && !mask[x + 1][y])
+										|| (y < getSize() - 1 && !mask[x][y + 1]))
+									&& ((x > 0 && mask[x - 1][y])
+										|| (y > 0 && mask[x][y - 1])
+										|| (x < getSize() - 1 && mask[x + 1][y])
+										|| (y < getSize() - 1 && mask[x][y + 1]));
 			}
 		}
 		mask = maskCopy;

@@ -6,8 +6,8 @@ import map.*;
 import util.*;
 
 public strictfp class MarkerGenerator {
-	SCMap map;
-	Random random;
+	private final SCMap map;
+	private final Random random;
 
 	public MarkerGenerator(SCMap map, long seed) {
 		this.map = map;
@@ -26,7 +26,7 @@ public strictfp class MarkerGenerator {
 		return v;
 	}
 
-	public void randomizeVectorPair(Vector3f v1, Vector3f v2) {
+	private void randomizeVectorPair(Vector3f v1, Vector3f v2) {
 		placeOnHeightmap((int)(random.nextFloat() * map.getSize()), (int)(random.nextFloat() * map.getSize()), v1);
 		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
 	}	
@@ -105,8 +105,7 @@ public strictfp class MarkerGenerator {
 			valid = false;
 		if (map.getMexs()[index].z > map.getSize() - edgeSpacing)
 			valid = false;
-		dx = map.getSize() / 2 - map.getMexs()[index].x;
-		dz = map.getSize() / 2 - map.getMexs()[index].z;
+
 		for (int i = 0; i < map.getMexs().length; i++) {
 			if (i != index) {
 				dx = map.getMexs()[i].x - map.getMexs()[index].x;
@@ -132,8 +131,7 @@ public strictfp class MarkerGenerator {
 			valid = false;
 		if (map.getHydros()[index].z > map.getSize() - edgeSpacing)
 			valid = false;
-		dx = map.getSize() / 2 - map.getHydros()[index].x;
-		dz = map.getSize() / 2 - map.getHydros()[index].z;
+
 		for (int i = 0; i < map.getHydros().length; i++) {
 			if (i != index) {
 				dx = map.getHydros()[i].x - map.getHydros()[index].x;

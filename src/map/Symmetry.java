@@ -1,3 +1,5 @@
 package map;
 
-public enum Symmetry {NONE, POINT};
+public enum Symmetry {
+    NONE, POINT
+}

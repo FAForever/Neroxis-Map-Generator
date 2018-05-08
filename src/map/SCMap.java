@@ -80,31 +80,31 @@ public strictfp class SCMap {
 			"", };
 	public final float[] TERRAIN_NORMALS_SCALES = { 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f };
 
-	private int size; // must be a power of 2. 512 equals a 10x10km Map
+	private final int size; // must be a power of 2. 512 equals a 10x10km Map
 
-	private Vector3f[] spawns;
-	private Vector3f[] mexs;
-	private Vector3f[] hydros;
-	private ArrayList<Prop> props;
+	private final Vector3f[] spawns;
+	private final Vector3f[] mexs;
+	private final Vector3f[] hydros;
+	private final ArrayList<Prop> props;
 
-	private BufferedImage preview;
-	private BufferedImage heightmap;
-	private BufferedImage normalMap;
-	private BufferedImage textureMasksLow;
-	private BufferedImage textureMasksHigh;
+	private final BufferedImage preview;
+	private final BufferedImage heightmap;
+	private final BufferedImage normalMap;
+	private final BufferedImage textureMasksLow;
+	private final BufferedImage textureMasksHigh;
 
-	private BufferedImage waterMap;
-	private BufferedImage waterFoamMask;
-	private BufferedImage waterFlatnessMask;
-	private BufferedImage waterDepthBiasMask;
-	private BufferedImage terrainType;
+	private final BufferedImage waterMap;
+	private final BufferedImage waterFoamMask;
+	private final BufferedImage waterFlatnessMask;
+	private final BufferedImage waterDepthBiasMask;
+	private final BufferedImage terrainType;
 
 	public SCMap(int size, int spawnCount, int mexCount, int hydroCount) {
 		this.size = size;
 		spawns = new Vector3f[spawnCount];
 		mexs = new Vector3f[mexCount];
 		hydros = new Vector3f[hydroCount];
-		props = new ArrayList<Prop>();
+		props = new ArrayList<>();
 
 		preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
 		heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
