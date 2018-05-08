@@ -2,6 +2,7 @@ package generator;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
@@ -39,14 +40,17 @@ public strictfp class MapGenerator {
 		}
 	}
 
-	public void save(String folderPath, String prefix, SCMap map, long seed) {
+	public void save(String folderName, String prefix, SCMap map, long seed) {
+		String mapName = prefix + "_" + seed;
+
 		try {
-			File file = new File(folderPath + prefix + "_" + seed);
-			file.mkdirs();
-			SCMapExporter.exportSCMAP(folderPath, prefix + "_" + seed, map);
-			SaveExporter.exportSave(folderPath, prefix + "_" + seed, map);
-			ScenarioExporter.exportScenario(folderPath, prefix + "_" + seed, map);
-			ScriptExporter.exportScript(folderPath, prefix + "_" + seed, map);
+			Path folderPath = Paths.get(folderName);
+			folderPath.resolve(mapName).toFile().mkdirs();
+
+			SCMapExporter.exportSCMAP(folderPath, mapName, map);
+			SaveExporter.exportSave(folderPath, mapName, map);
+			ScenarioExporter.exportScenario(folderPath, mapName, map);
+			ScriptExporter.exportScript(folderPath, mapName, map);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

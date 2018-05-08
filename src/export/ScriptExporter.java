@@ -1,13 +1,14 @@
 package export;
 
 import java.io.*;
+import java.nio.file.Path;
 
 import map.*;
 
 public strictfp class ScriptExporter {
 
-    public static void exportScript(String folderPath, String mapname, SCMap map) throws IOException {
-		File file = new File(folderPath + mapname + File.separator + mapname + "_script.lua");
+    public static void exportScript(Path folderPath, String mapname, SCMap map) throws IOException {
+		File file = folderPath.resolve(mapname).resolve(mapname + "_script.lua").toFile();
 		file.createNewFile();
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		out.writeBytes("local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')\n");
