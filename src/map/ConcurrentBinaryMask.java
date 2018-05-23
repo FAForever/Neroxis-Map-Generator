@@ -9,20 +9,27 @@ public class ConcurrentBinaryMask implements ConcurrentMask {
 	private BinaryMask binaryMask;
 	private String name = "new binary mask";
 
-	{
-		Pipeline.add(this, Arrays.asList(), res ->
-			Arrays.asList()
-		);
-	}
-
 	public ConcurrentBinaryMask(int size, long seed, String name) {
 		this.binaryMask = new BinaryMask(size, seed);
 		this.name = name;
+
+		Pipeline.add(this, Arrays.asList(), res ->
+				Arrays.asList()
+		);
 	}
 
 	public ConcurrentBinaryMask(ConcurrentBinaryMask mask, long seed, String name) {
 		this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
 		this.name = name;
+
+		if(name.equals("mocked")) {
+			this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
+		} else {
+			Pipeline.add(this, Arrays.asList(mask), res -> {
+				this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
+				return Arrays.asList(this.binaryMask);
+			});
+		}
 	}
 
 	public ConcurrentBinaryMask randomize(float density) {

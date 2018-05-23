@@ -9,20 +9,26 @@ public class ConcurrentFloatMask implements ConcurrentMask {
 	private FloatMask floatMask;
 	private String name = "new float mask";
 
-	{
+	public ConcurrentFloatMask(int size, long seed, String name) {
+		this.floatMask = new FloatMask(size, seed);
+		this.name = name;
+
 		Pipeline.add(this, Arrays.asList(), res ->
 				Arrays.asList()
 		);
 	}
 
-	public ConcurrentFloatMask(int size, long seed, String name) {
-		this.floatMask = new FloatMask(size, seed);
-		this.name = name;
-	}
-
 	public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
-		this.floatMask = new FloatMask(mask.getFloatMask(), seed);
 		this.name = name;
+
+		if(name.equals("mocked")) {
+			this.floatMask = new FloatMask(mask.getFloatMask(), seed);
+		} else {
+			Pipeline.add(this, Arrays.asList(mask), res -> {
+				this.floatMask = new FloatMask(mask.getFloatMask(), seed);
+				return Arrays.asList(this.floatMask);
+			});
+		}
 	}
 
 	public ConcurrentFloatMask init(ConcurrentBinaryMask other, float low, float high) {
@@ -77,7 +83,7 @@ public class ConcurrentFloatMask implements ConcurrentMask {
 
 	@Override
 	public ConcurrentFloatMask mockClone() {
-		return new ConcurrentFloatMask(this, 0, "mock");
+		return new ConcurrentFloatMask(this, 0, "mocked");
 	}
 
 	@Override
