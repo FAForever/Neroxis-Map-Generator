@@ -92,12 +92,11 @@ public strictfp class MapGenerator {
 		heightmapBase.init(land, 25f, 25f);
 		heightmapLand.maskToHeightmap(0.025f, 0.25f, 95, land).smooth(2);
 
-		heightmapMountains.maskToMoutains(2f, 0.5f, land);
+		heightmapMountains.maskToMoutains(2f, 0.5f, mountains);
 		plateaus.combine(mountains);
 		heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
 		heightmapMountains.add(heightmapPlateaus).smooth(1);
-
-
+  
 		final ConcurrentBinaryMask grass = new ConcurrentBinaryMask(land, random.nextLong(), "grass");
 		final ConcurrentFloatMask grassTexture = new ConcurrentFloatMask(256, random.nextLong(), "grassTexture");
 		final ConcurrentBinaryMask rock = new ConcurrentBinaryMask(mountains, random.nextLong(), "rock");
