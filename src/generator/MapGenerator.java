@@ -9,6 +9,7 @@ import util.Pipeline;
 
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -22,14 +23,15 @@ public strictfp class MapGenerator {
 		try {
 			String folderPath = args[0];
 			long seed = Long.parseLong(args[1]);
-			String version = args[2];	
+			String version = args[2];
+			String mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
 			
 			if(version.equals(VERSION)) {
 				MapGenerator generator = new MapGenerator();
-				System.out.println("Generating map NeroxisGen_" + VERSION + "_" + seed);
+				System.out.println("Generating map " + mapName);
 				SCMap map = generator.generate(seed);
 				System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
-				generator.save(folderPath, "NeroxisGen_" + VERSION, map, seed);
+				generator.save(folderPath, mapName, map, seed);
 				System.out.println("Done");
 				
 			} else {
@@ -37,18 +39,16 @@ public strictfp class MapGenerator {
 				
 			}
 		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-			System.out.println("Usage: generator [saveFileName] [seed] [expectedVersion]");
+			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
 			
 		}
 	}
 
-	public void save(String folderName, String prefix, SCMap map, long seed) {
-		String mapName = prefix + "_" + seed;
-
+	public void save(String folderName, String mapName, SCMap map, long seed) {
 		try {
 			Path folderPath = Paths.get(folderName);
-			folderPath.resolve(mapName).toFile().mkdirs();
-
+			Files.deleteIfExists(folderPath.resolve(mapName));
+			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
 			SaveExporter.exportSave(folderPath, mapName, map);
 			ScenarioExporter.exportScenario(folderPath, mapName, map);
@@ -96,7 +96,7 @@ public strictfp class MapGenerator {
 		plateaus.combine(mountains);
 		heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
 		heightmapMountains.add(heightmapPlateaus).smooth(1);
-  
+
 		final ConcurrentBinaryMask grass = new ConcurrentBinaryMask(land, random.nextLong(), "grass");
 		final ConcurrentFloatMask grassTexture = new ConcurrentFloatMask(256, random.nextLong(), "grassTexture");
 		final ConcurrentBinaryMask rock = new ConcurrentBinaryMask(mountains, random.nextLong(), "rock");
