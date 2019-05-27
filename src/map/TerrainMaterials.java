@@ -12,18 +12,18 @@ public strictfp class TerrainMaterials {
     public final float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
 
 
-    public TerrainMaterials(Material[] materials, Material lastTexture){
+    public TerrainMaterials(Material[] materials, Material macroTexture){
         for(int i = 0; i < TERRAIN_TEXTURE_COUNT; i++) {
             boolean isEmpty = i >= materials.length;
             if (i < TERRAIN_NORMAL_COUNT) {
                 texturePaths[i] = isEmpty ? "" : materials[i].texturePath;
-                textureScales[i] = isEmpty ? 4f : materials[i].scale;
+                textureScales[i] = isEmpty ? 4f : materials[i].textureScale;
                 normalPaths[i] = isEmpty ? "" : materials[i].normalPath;
-                normalScales[i] = isEmpty ? 4f : materials[i].scale;
+                normalScales[i] = isEmpty ? 4f : materials[i].normalScale;
             }
             else{
-                texturePaths[i] = lastTexture.texturePath;
-                textureScales[i] = lastTexture.scale;
+                texturePaths[i] = macroTexture.texturePath;
+                textureScales[i] = macroTexture.textureScale;
             }
         }
     }
