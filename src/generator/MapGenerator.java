@@ -8,10 +8,13 @@ import map.*;
 import util.Pipeline;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.MalformedParametersException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -39,15 +42,16 @@ public strictfp class MapGenerator {
 				
 			}
 		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-			
+			throw new IllegalArgumentException("\nUsage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
 		}
 	}
 
 	public void save(String folderName, String mapName, SCMap map, long seed) {
 		try {
 			Path folderPath = Paths.get(folderName);
-			Files.deleteIfExists(folderPath.resolve(mapName));
+			Files.walk(folderPath.resolve(mapName))	// Empties the folder in case it exists
+					.sorted(Comparator.reverseOrder()).map(Path::toFile)
+					.forEach(File::delete);
 			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
 			SaveExporter.exportSave(folderPath, mapName, map);
