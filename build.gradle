@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'net.neroxis'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/resources']
+        }
+    }
+}
+
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    implementation 'com.google.code.gson:gson:2.8.5'
+}
