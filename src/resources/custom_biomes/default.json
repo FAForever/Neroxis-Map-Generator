@@ -65,6 +65,6 @@
 	"macroTexture":{
 		"environment":"evergreen",
 		"name":"macrotexture000",
-		"scale":4
+		"scale":128
 	}
 }
