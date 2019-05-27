@@ -54,34 +54,11 @@ public strictfp class SCMap {
 	public final Vector2f[] WAVE_NORMAL_MOVEMENTS = { new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f) };
 	public final String[] WAVE_TEXTURE_PATHS = { "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds" }; // always same?
 
-	public final int TERRAIN_TEXTURE_COUNT = 10;
-	public final String[] TERRAIN_TEXTURE_PATHS = {
-			"/env/evergreen/layers/SandLight_albedo.dds",
-			"/env/evergreen/layers/grass001_albedo.dds",
-			"/env/evergreen/layers/Dirt001_albedo.dds",
-			"/env/evergreen/layers/RockMed_albedo.dds",
-			"/env/evergreen/layers/snow001_albedo.dds",
-			"",
-			"",
-			"",
-			"",
-			"/env/evergreen/layers/macrotexture000_albedo.dds" };
-	public final float[] TERRAIN_TEXTURE_SCALES = { 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 128f };
-	public final int TERRAIN_NORMALS_COUNT = 9;
-	public final String[] TERRAIN_NORMALS_PATHS = {
-			"/env/evergreen/layers/SandLight_normals.dds",
-			"/env/evergreen/layers/grass001_normals.dds",
-			"/env/evergreen/layers/Dirt001_normals.dds",
-			"/env/evergreen/layers/RockMed_normals.dds",
-			"/env/evergreen/layers/snow001_normals.dds",
-			"",
-			"",
-			"",
-			"", };
-	public final float[] TERRAIN_NORMALS_SCALES = { 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f, 4f };
+	public final TerrainMaterials terrainMaterials;
 
 	private final int size; // must be a power of 2. 512 equals a 10x10km Map
 
+	private final String defaultEnvironment ="evergreen";
 	private final Vector3f[] spawns;
 	private final Vector3f[] mexs;
 	private final Vector3f[] hydros;
@@ -122,6 +99,17 @@ public strictfp class SCMap {
 		}
 		waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
 		terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
+
+		terrainMaterials = new TerrainMaterials(
+			new Material[]{
+				new Material(defaultEnvironment, "SandLight", 4f),
+				new Material(defaultEnvironment, "grass001", 4f),
+				new Material(defaultEnvironment, "Dirt001", 4f),
+				new Material(defaultEnvironment, "RockMed", 4f),
+				new Material(defaultEnvironment, "snow001", 4f)
+			},
+			new Material(defaultEnvironment, "macrotexture000", 128f)
+		);
 	}
 
 	public int getSize() {

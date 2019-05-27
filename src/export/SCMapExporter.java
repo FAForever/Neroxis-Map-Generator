@@ -108,13 +108,13 @@ public strictfp class SCMapExporter {
 		for (int i = 0; i < 24; i++) {
 			writeByte((byte) 0); // unknown
 		}
-		for (int i = 0; i < map.TERRAIN_TEXTURE_COUNT; i++) {
-			writeStringNull(map.TERRAIN_TEXTURE_PATHS[i]);
-			writeFloat(map.TERRAIN_TEXTURE_SCALES[i]);
+		for (int i = 0; i < map.terrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
+			writeStringNull(map.terrainMaterials.texturePaths[i]);
+			writeFloat(map.terrainMaterials.textureScales[i]);
 		}
-		for (int i = 0; i < map.TERRAIN_NORMALS_COUNT; i++) {
-			writeStringNull(map.TERRAIN_NORMALS_PATHS[i]);
-			writeFloat(map.TERRAIN_NORMALS_SCALES[i]);
+		for (int i = 0; i < map.terrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+			writeStringNull(map.terrainMaterials.normalPaths[i]);
+			writeFloat(map.terrainMaterials.normalScales[i]);
 		}
 
 		writeInt(0); // unknown
