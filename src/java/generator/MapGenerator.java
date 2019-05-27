@@ -50,9 +50,11 @@ public strictfp class MapGenerator {
 	public void save(String folderName, String mapName, SCMap map, long seed) {
 		try {
 			Path folderPath = Paths.get(folderName);
-			Files.walk(folderPath.resolve(mapName))	// Empties the folder in case it exists
-					.sorted(Comparator.reverseOrder()).map(Path::toFile)
-					.forEach(File::delete);
+			if (Files.exists(folderPath.resolve(mapName))) {
+				Files.walk(folderPath.resolve(mapName))    // Empties the folder in case it exists
+						.sorted(Comparator.reverseOrder()).map(Path::toFile)
+						.forEach(File::delete);
+			}
 			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
 			SaveExporter.exportSave(folderPath, mapName, map);
