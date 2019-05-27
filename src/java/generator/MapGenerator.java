@@ -1,5 +1,6 @@
 package generator;
 
+import biomes.Biomes;
 import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
@@ -64,6 +65,7 @@ public strictfp class MapGenerator {
 	}
 
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
+		Biomes.load();
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
 		final SCMap map = new SCMap(512, 6, 64, 10);
@@ -172,6 +174,13 @@ public strictfp class MapGenerator {
 		lightGrassTexture.init(lightGrass, 0, 0.999f).smooth(2);
 
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
+
+		TerrainMaterials mapMaterials = Biomes.terrainMaterials.get(random.nextInt(Biomes.terrainMaterials.size()));
+		map.terrainMaterials.texturePaths = mapMaterials.texturePaths;
+		map.terrainMaterials.textureScales = mapMaterials.textureScales;
+		map.terrainMaterials.normalPaths = mapMaterials.normalPaths;
+		map.terrainMaterials.normalScales = mapMaterials.normalScales;
+
 
 		land.getBinaryMask().shrink(256);
 

@@ -1,32 +1,21 @@
 package biomes;
 
-import com.google.gson.Gson;
-import lombok.Data;
+import java.util.List;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-@Data
+// used in disk operations to be converted into a material later
 public strictfp class Biome {
+    public String name;
+    public List<BiomeMaterial> materials;
+    public BiomeMaterialElement macroTexture;
+}
 
-	private final String data1;
-	private final int data2;
+strictfp class BiomeMaterial{
+    public BiomeMaterialElement texture;
+    public BiomeMaterialElement normal;
+}
 
-
-	//TODO: remove me, JSON demo
-	public static void main(String args[]) {
-		Gson gson = new Gson();
-		try {
-			Biome grassBiome = gson.fromJson(new String(Files.readAllBytes(Paths.get(Biome.class.getClassLoader().getResource("grassBiome.json").toURI()))), Biome.class);
-
-			System.out.println(grassBiome.getData1());
-			System.out.println(grassBiome.getData2());
-		} catch (IOException e) {
-			e.printStackTrace();//TODO
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-	}
+strictfp class BiomeMaterialElement{
+    public String environment;
+    public String name;
+    public float scale;
 }

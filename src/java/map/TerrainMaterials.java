@@ -6,10 +6,10 @@ public strictfp class TerrainMaterials {
     public final int TERRAIN_TEXTURE_COUNT = 10;
     public final int TERRAIN_NORMAL_COUNT = 9;
 
-    public final String[] texturePaths = new String[TERRAIN_TEXTURE_COUNT];
-    public final float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
-    public final String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
-    public final float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
+    public String[] texturePaths = new String[TERRAIN_TEXTURE_COUNT];
+    public float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
+    public String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
+    public float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
 
 
     public TerrainMaterials(Material[] materials, Material macroTexture){
