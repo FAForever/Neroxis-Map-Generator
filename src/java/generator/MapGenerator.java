@@ -60,7 +60,7 @@ public strictfp class MapGenerator {
 			Path folderPath = Paths.get(folderName);
 			if (Files.exists(folderPath.resolve(mapName))) {
 				Files.walk(folderPath.resolve(mapName))    // Empties the folder in case it exists
-						.sorted(Comparator.reverseOrder()).map(Path::toFile)
+						.sorted(Comparator.naturalOrder()).map(Path::toFile)
 						.forEach(File::delete);
 			}
 			Files.createDirectory(folderPath.resolve(mapName));
