@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static map.SCMap.*;
+
 @Data
 public strictfp class Biomes {
 
@@ -76,6 +78,12 @@ public strictfp class Biomes {
 				if (Files.exists(waterPath)){
 					content = new String(Files.readAllBytes(waterPath));
 					waterSettings = gson.fromJson(content, WaterSettings.class);
+
+					// We always set elevation and other settings back to the original value
+					// because the map generator does not expect to have a varying water height
+					waterSettings.Elevation = WATER_HEIGHT;
+					waterSettings.ElevationDeep = WATER_DEEP_HEIGHT;
+					waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
 				}
 				else{
 					waterSettings = new WaterSettings();
