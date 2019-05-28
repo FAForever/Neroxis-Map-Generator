@@ -58,7 +58,7 @@ public strictfp class SCMap {
 
 	private final int size; // must be a power of 2. 512 equals a 10x10km Map
 
-	private final String defaultEnvironment ="evergreen";
+	private static final String DEFAULT_ENVIRONMENT ="evergreen";
 	private final Vector3f[] spawns;
 	private final Vector3f[] mexs;
 	private final Vector3f[] hydros;
@@ -102,13 +102,13 @@ public strictfp class SCMap {
 
 		terrainMaterials = new TerrainMaterials(
 			new Material[]{
-				new Material(defaultEnvironment, "SandLight", 4f),
-				new Material(defaultEnvironment, "grass001", 4f),
-				new Material(defaultEnvironment, "Dirt001", 4f),
-				new Material(defaultEnvironment, "RockMed", 4f),
-				new Material(defaultEnvironment, "snow001", 4f)
+				new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
+				new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
+				new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
+				new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
+				new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
 			},
-			new Material(defaultEnvironment, "macrotexture000", 128f)
+			new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
 		);
 	}
 

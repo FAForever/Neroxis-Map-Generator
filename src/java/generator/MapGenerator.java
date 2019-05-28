@@ -24,12 +24,22 @@ public strictfp class MapGenerator {
 	public static final String VERSION = "0.1.0";
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+		String folderPath ="";
+		String version ="";
+		String mapName ="";
+		long seed = 0L;
+
 		try {
-			String folderPath = args[0];
-			long seed = Long.parseLong(args[1]);
-			String version = args[2];
-			String mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
-			
+			folderPath = args[0];
+			seed = Long.parseLong(args[1]);
+			version = args[2];
+			mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
+		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
+			System.exit(1);
+		}
+		finally {
 			if(version.equals(VERSION)) {
 				MapGenerator generator = new MapGenerator();
 				System.out.println("Generating map " + mapName);
@@ -37,13 +47,11 @@ public strictfp class MapGenerator {
 				System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
 				generator.save(folderPath, mapName, map, seed);
 				System.out.println("Done");
-				
+
 			} else {
 				System.out.println("This generator only supports version " + VERSION);
-				
+
 			}
-		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-			throw new IllegalArgumentException("\nUsage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
 		}
 	}
 
@@ -67,7 +75,6 @@ public strictfp class MapGenerator {
 	}
 
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
-		Biomes.load();
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
 		final SCMap map = new SCMap(512, 6, 64, 10);

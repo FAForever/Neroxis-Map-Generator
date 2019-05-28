@@ -1,12 +1,15 @@
 package map;
 
+import lombok.Getter;
+
+@Getter
 public strictfp class Material {
     private static String pathFormat = "/env/%s/layers/%s_%s.dds";
 
-    final String texturePath;
-    final String normalPath;
-    final float textureScale;
-    final float normalScale;
+    private final String texturePath;
+    private final String normalPath;
+    private final float textureScale;
+    private final float normalScale;
 
     public Material(String environment, String name, float scale)  {
         this(environment, name, name, scale);
