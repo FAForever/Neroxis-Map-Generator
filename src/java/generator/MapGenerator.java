@@ -62,6 +62,7 @@ public strictfp class MapGenerator {
 				Files.walk(folderPath.resolve(mapName))    // Empties the folder in case it exists
 						.sorted(Comparator.naturalOrder()).map(Path::toFile)
 						.forEach(File::delete);
+				Files.deleteIfExists(folderPath.resolve(mapName));
 			}
 			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
