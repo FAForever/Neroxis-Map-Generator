@@ -1,8 +1,10 @@
 package map;
 
+import biomes.Biome;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
+import util.serialized.WaterSettings;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ public strictfp class SCMap {
 	public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = { new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f) };
 	public static final String[] WAVE_TEXTURE_PATHS = { "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds" }; // always same?
 
-	public final TerrainMaterials terrainMaterials;
+	public final Biome biome;
 
 	private final int size; // must be a power of 2. 512 equals a 10x10km Map
 
@@ -100,15 +102,18 @@ public strictfp class SCMap {
 		waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
 		terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
 
-		terrainMaterials = new TerrainMaterials(
-			new Material[]{
-				new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
-				new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
-				new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
-				new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
-				new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
-			},
-			new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
+		biome = new Biome(
+			new TerrainMaterials(
+				new Material[]{
+						new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
+						new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
+						new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
+						new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
+						new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
+				},
+				new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
+			),
+			new WaterSettings()
 		);
 	}
 

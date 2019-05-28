@@ -1,10 +1,14 @@
 package biomes;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import lombok.Data;
 import map.Material;
 import map.TerrainMaterials;
+import util.serialized.MaterialSet;
+import util.serialized.WaterSettings;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -17,7 +21,7 @@ import java.util.List;
 @Data
 public strictfp class Biomes {
 
-	public static List<TerrainMaterials> terrainMaterials = new ArrayList<>();
+	public static List<Biome> list = new ArrayList<>();
 
 	static{
 
@@ -27,20 +31,26 @@ public strictfp class Biomes {
 		}
 		catch (Exception e){
 			e.printStackTrace();
+			System.exit(1);
 		}
 
 		Gson gson = new Gson();
 		String content = "";
 		try {
 			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(biomePath);
-			for (final Path fileEntry : directoryStream) {
+			for (final Path dirEntry : directoryStream) {
 
-				content = new String(Files.readAllBytes(fileEntry));
-				Biome newBiome = gson.fromJson(content, Biome.class);
-				Material[] materials = new Material[newBiome.materials.size()];
+				// ├ Biome
+				// ├-- materials.json <required>
+				// └-- WaterSettings.scmwtr <optional>
+
+				// Materials
+				content = new String(Files.readAllBytes(dirEntry.resolve("materials.json")));
+				MaterialSet newMatSet = gson.fromJson(content, MaterialSet.class);
+				Material[] materials = new Material[newMatSet.materials.size()];
 
 				for(int i = 0; i < materials.length; i++){
-					BiomeMaterial biomeMaterial = newBiome.materials.get(i);
+					MaterialSet.Material biomeMaterial = newMatSet.materials.get(i);
 					materials[i] = new Material(
 						biomeMaterial.texture.environment,
 						biomeMaterial.normal.environment,
@@ -51,14 +61,26 @@ public strictfp class Biomes {
 					);
 				}
 
-				terrainMaterials.add(new TerrainMaterials(
+				TerrainMaterials terrainMaterials = new TerrainMaterials(
 					materials,
 					new Material(
-						newBiome.macroTexture.environment,
-						newBiome.macroTexture.name,
-						newBiome.macroTexture.scale
+						newMatSet.macroTexture.environment,
+						newMatSet.macroTexture.name,
+						newMatSet.macroTexture.scale
 					)
-				));
+				);
+
+				// Water
+				WaterSettings waterSettings;
+				Path waterPath = dirEntry.resolve("WaterSettings.scmwtr");
+				if (Files.exists(waterPath)){
+					content = new String(Files.readAllBytes(waterPath));
+					waterSettings = gson.fromJson(content, WaterSettings.class);
+				}
+				else{
+					waterSettings = new WaterSettings();
+				}
+				list.add(new Biome(terrainMaterials, waterSettings));
 			}
 		}
 		catch (IOException e){

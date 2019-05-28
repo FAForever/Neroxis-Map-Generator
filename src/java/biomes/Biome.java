@@ -1,21 +1,14 @@
 package biomes;
 
-import java.util.List;
+import map.TerrainMaterials;
+import util.serialized.WaterSettings;
 
-// used in disk operations to be converted into a material later
 public strictfp class Biome {
-    public String name;
-    public List<BiomeMaterial> materials;
-    public BiomeMaterialElement macroTexture;
-}
+    public TerrainMaterials terrainMaterials;
+    public WaterSettings waterSettings;
 
-strictfp class BiomeMaterial{
-    public BiomeMaterialElement texture;
-    public BiomeMaterialElement normal;
-}
-
-strictfp class BiomeMaterialElement{
-    public String environment;
-    public String name;
-    public float scale;
+    public Biome(TerrainMaterials terrainMaterials, WaterSettings waterSettings){
+        this.terrainMaterials = terrainMaterials;
+        this.waterSettings = waterSettings;
+    }
 }

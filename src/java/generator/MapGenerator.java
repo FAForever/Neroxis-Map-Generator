@@ -1,5 +1,6 @@
 package generator;
 
+import biomes.Biome;
 import biomes.Biomes;
 import export.SCMapExporter;
 import export.SaveExporter;
@@ -185,11 +186,9 @@ public strictfp class MapGenerator {
 
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
 
-		TerrainMaterials mapMaterials = Biomes.terrainMaterials.get(random.nextInt(Biomes.terrainMaterials.size()));
-		map.terrainMaterials.texturePaths = mapMaterials.texturePaths;
-		map.terrainMaterials.textureScales = mapMaterials.textureScales;
-		map.terrainMaterials.normalPaths = mapMaterials.normalPaths;
-		map.terrainMaterials.normalScales = mapMaterials.normalScales;
+		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
+		map.biome.terrainMaterials = biomeSet.terrainMaterials;
+        map.biome.waterSettings = biomeSet.waterSettings;
 
 
 		land.getBinaryMask().shrink(256);
