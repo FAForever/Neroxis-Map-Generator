@@ -10,9 +10,7 @@ import map.*;
 import util.Pipeline;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.MalformedParametersException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,8 +59,14 @@ public strictfp class MapGenerator {
 			Path folderPath = Paths.get(folderName);
 			if (Files.exists(folderPath.resolve(mapName))) {
 				Files.walk(folderPath.resolve(mapName))    // Empties the folder in case it exists
-						.sorted(Comparator.naturalOrder()).map(Path::toFile)
-						.forEach(File::delete);
+						.forEach((x) -> {
+							try {
+								Files.delete(x);
+							}
+							catch (IOException e){
+								System.err.println("Error while destroying the previously generated map.");
+							}
+						});
 				Files.deleteIfExists(folderPath.resolve(mapName));
 			}
 			Files.createDirectory(folderPath.resolve(mapName));
@@ -73,6 +77,7 @@ public strictfp class MapGenerator {
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.err.println("Error while saving the map.");
 		}
 	}
 
