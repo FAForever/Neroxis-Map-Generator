@@ -3,8 +3,8 @@ package map;
 public strictfp class TerrainMaterials {
 
     // engine limitations - must stay 9 and 10 always
-    public final int TERRAIN_TEXTURE_COUNT = 10;
-    public final int TERRAIN_NORMAL_COUNT = 9;
+    public static final int TERRAIN_TEXTURE_COUNT = 10;
+    public static final int TERRAIN_NORMAL_COUNT = 9;
 
     public String[] texturePaths = new String[TERRAIN_TEXTURE_COUNT];
     public float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];

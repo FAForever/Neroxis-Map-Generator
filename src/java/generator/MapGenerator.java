@@ -187,8 +187,8 @@ public strictfp class MapGenerator {
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
 
 		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
-		map.biome.terrainMaterials = biomeSet.terrainMaterials;
-        map.biome.waterSettings = biomeSet.waterSettings;
+		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
+        map.biome.setWaterSettings(biomeSet.getWaterSettings());
 
 
 		land.getBinaryMask().shrink(256);
