@@ -33,6 +33,7 @@ public strictfp class Biomes {
 		}
 		catch (Exception e){
 			e.printStackTrace();
+			System.err.println("An error occured while trying to get the custom_biomes directory path.");
 			System.exit(1);
 		}
 
