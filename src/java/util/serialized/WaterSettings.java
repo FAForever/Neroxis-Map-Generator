@@ -1,6 +1,7 @@
 package util.serialized;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -47,28 +48,17 @@ public strictfp class WaterSettings {
             Vector2f[] waveNormalMovements){
         List<WaveTexture> texs = new LinkedList<>();
         for (int i = 0; i < WAVE_NORMAL_COUNT; i++){
-            texs.add(
-                new WaveTexture(
-                    waveTexturePaths[i],
-                    waveNormalMovements[i],
-                    waveNormalRepeats[i]
-                )
-            );
+            texs.add( new WaveTexture(waveTexturePaths[i], waveNormalMovements[i], waveNormalRepeats[i] ));
         }
         WaveTexture[] finalArray = new WaveTexture[texs.size()];
         texs.toArray(finalArray);
         return finalArray;
     }
-
+    
+    @AllArgsConstructor
     public static class WaveTexture{
         public String TexPath;
         public Vector2f NormalMovement;
         public float NormalRepeat;
-
-        WaveTexture(String texPath, Vector2f normalMovement, float normalRepeat){
-            this.TexPath = texPath;
-            this.NormalMovement = normalMovement;
-            this.NormalRepeat = normalRepeat;
-        }
     }
 }
