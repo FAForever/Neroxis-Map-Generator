@@ -9,8 +9,10 @@ import java.util.List;
 
 import static map.SCMap.*;
 
-// Used in disk operations
-// Compliant with ozonex's WaterSettings format
+/** Used in disk operations to be converted into a material later
+ * Compliant with ozonex's WaterSettings format
+ * */
+
 public strictfp class WaterSettings {
     public boolean HasWater;
     public float Elevation;

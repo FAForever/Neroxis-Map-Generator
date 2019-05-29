@@ -103,17 +103,17 @@ public strictfp class SCMap {
 		terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
 
 		biome = new Biome(
-			new TerrainMaterials(
-				new Material[]{
-						new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
-						new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
-						new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
-						new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
-						new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
-				},
-				new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
-			),
-			new WaterSettings()
+				new TerrainMaterials(
+						new Material[]{
+								new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
+								new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
+								new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
+								new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
+								new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
+						},
+						new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
+				),
+				new WaterSettings()
 		);
 	}
 

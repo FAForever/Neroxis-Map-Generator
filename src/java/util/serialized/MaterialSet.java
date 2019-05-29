@@ -2,7 +2,7 @@ package util.serialized;
 
 import java.util.List;
 
-// used in disk operations to be converted into a material later
+/** Used in disk operations to be converted into a material later */
 public strictfp class MaterialSet {
     public String name;
     public List<Material> materials;
