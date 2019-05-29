@@ -14,55 +14,32 @@ import static map.SCMap.*;
  * */
 
 public strictfp class WaterSettings {
-    public boolean HasWater;
-    public float Elevation;
-    public float ElevationDeep;
-    public float ElevationAbyss;
+    public boolean HasWater = true;
+    public float Elevation = WATER_HEIGHT;
+    public float ElevationDeep = WATER_DEEP_HEIGHT;
+    public float ElevationAbyss = WATER_ABYSS_HEIGHT;
 
 
-    public Vector3f SurfaceColor;
-    public Vector2f ColorLerp;
-    public float RefractionScale;
-    public float FresnelBias;
-    public float FresnelPower;
+    public Vector3f SurfaceColor = WATER_SURFACE_COLOR;
+    public Vector2f ColorLerp = WATER_COLOR_LERP;
+    public float RefractionScale = WATER_REFRACTION;
+    public float FresnelBias = WATER_FRESNEL_BIAS;
+    public float FresnelPower = WATER_FRESNEL_POWER;
 
-    public float UnitReflection;
-    public float SkyReflection;
+    public float UnitReflection = WATER_UNIT_REFLECTION;
+    public float SkyReflection = WATER_SKY_REFLECTION;
 
-    public float SunShininess;
-    public float SunStrength;
-    public Vector3f SunDirection;
-    public Vector3f SunColor;
-    public float SunReflection;
-    public float SunGlow;
+    public float SunShininess = WATER_SUN_SHININESS;
+    public float SunStrength = WATER_SUN_STRENGH;
+    public Vector3f SunDirection = WATER_SUN_DIRECTION;
+    public Vector3f SunColor = WATER_SUN_COLOR;
+    public float SunReflection = WATER_SUN_REFLECTION;
+    public float SunGlow = WATER_SUN_GLOW;
 
-    public String TexPathCubemap;
-    public String TexPathWaterRamp;
+    public String TexPathCubemap = WATER_CUBEMAP_PATH;
+    public String TexPathWaterRamp = WATER_RAMP_PATH;
 
-    public WaveTexture[] WaveTextures;
-
-    public WaterSettings(){
-        HasWater = true;
-        Elevation = WATER_HEIGHT;
-        ElevationDeep = WATER_DEEP_HEIGHT;
-        ElevationAbyss = WATER_ABYSS_HEIGHT;
-        SurfaceColor = WATER_SURFACE_COLOR;
-        ColorLerp = WATER_COLOR_LERP;
-        RefractionScale = WATER_REFRACTION;
-        FresnelBias = WATER_FRESNEL_BIAS;
-        FresnelPower = WATER_FRESNEL_POWER;
-        UnitReflection = WATER_UNIT_REFLECTION;
-        SkyReflection = WATER_SKY_REFLECTION;
-        SunShininess = WATER_SUN_SHININESS;
-        SunStrength = WATER_SUN_STRENGH;
-        SunDirection = WATER_SUN_DIRECTION;
-        SunColor = WATER_SUN_COLOR;
-        SunReflection = WATER_SUN_REFLECTION;
-        SunGlow = WATER_SUN_GLOW;
-        TexPathCubemap = WATER_CUBEMAP_PATH;
-        TexPathWaterRamp = WATER_RAMP_PATH;
-        WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
-    }
+    public WaveTexture[] WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
 
     private static WaveTexture[] makeWaveTextures(
             String[] waveTexturePaths,
