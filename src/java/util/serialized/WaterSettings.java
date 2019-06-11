@@ -50,9 +50,7 @@ public strictfp class WaterSettings {
         for (int i = 0; i < WAVE_NORMAL_COUNT; i++){
             texs.add( new WaveTexture(waveTexturePaths[i], waveNormalMovements[i], waveNormalRepeats[i] ));
         }
-        WaveTexture[] finalArray = new WaveTexture[texs.size()];
-        texs.toArray(finalArray);
-        return finalArray;
+        return texs.toArray(new WaveTexture[texs.size()]);
     }
     
     @AllArgsConstructor
