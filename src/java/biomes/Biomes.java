@@ -38,70 +38,90 @@ public strictfp class Biomes {
 		}
 
 		Gson gson = new Gson();
-		String content = "";
-		try {
-			DirectoryStream<Path> directoryStream = Files.newDirectoryStream(biomePath);
-			for (final Path dirEntry : directoryStream) {
+                    try{
+                        Files.list(biomePath).forEachOrdered(path -> {
 
-				// ├ Biome
-				// ├-- materials.json <required>
-				// └-- WaterSettings.scmwtr <optional>
+                                // ├ Biome
+                                // ├-- materials.json <required>
+                                // └-- WaterSettings.scmwtr <optional>
 
-				// Materials
-				content = new String(Files.readAllBytes(dirEntry.resolve("materials.json")));
-				MaterialSet newMatSet = gson.fromJson(content, MaterialSet.class);
-				Material[] materials = new Material[newMatSet.materials.size()];
+                                // Materials
+                                String content = null;
+                                MaterialSet newMatSet = null;
+                                
+                                // Reading file
+                                try{
+                                    content = new String(Files.readAllBytes(path.resolve("materials.json")));
+                                }
+                                catch (IOException e){
+                                        e.printStackTrace();
+                                        System.out.printf("An error occured while loading biome %s", path);
+                                        System.exit(1);
+                                }
+                                
+                                // Parsing json to get materialSet
+                                try{
+                                    newMatSet = gson.fromJson(content, MaterialSet.class);
+                                }
+                                catch (JsonParseException e) {
+                                        e.printStackTrace();
+                                        System.out.printf("An error occured while parsing the following biome:\n%s",content);
+                                        System.exit(1);
+                                }
 
-				for(int i = 0; i < materials.length; i++){
-					MaterialSet.Material biomeMaterial = newMatSet.materials.get(i);
-					materials[i] = new Material(
-						biomeMaterial.texture.environment,
-						biomeMaterial.normal.environment,
-						biomeMaterial.texture.name,
-						biomeMaterial.normal.name,
-						biomeMaterial.texture.scale,
-						biomeMaterial.normal.scale
-					);
-				}
+                                Material[] materials = new Material[newMatSet.materials.size()];
 
-				TerrainMaterials terrainMaterials = new TerrainMaterials(
-					materials,
-					new Material(
-						newMatSet.macroTexture.environment,
-						newMatSet.macroTexture.name,
-						newMatSet.macroTexture.scale
-					)
-				);
+                                for(int i = 0; i < materials.length; i++){
+                                        MaterialSet.Material biomeMaterial = newMatSet.materials.get(i);
+                                        materials[i] = new Material(
+                                                biomeMaterial.texture.environment,
+                                                biomeMaterial.normal.environment,
+                                                biomeMaterial.texture.name,
+                                                biomeMaterial.normal.name,
+                                                biomeMaterial.texture.scale,
+                                                biomeMaterial.normal.scale
+                                        );
+                                }
 
-				// Water
-				WaterSettings waterSettings;
-				Path waterPath = dirEntry.resolve("WaterSettings.scmwtr");
-				if (Files.exists(waterPath)){
-					content = new String(Files.readAllBytes(waterPath));
-					waterSettings = gson.fromJson(content, WaterSettings.class);
+                                TerrainMaterials terrainMaterials = new TerrainMaterials(
+                                        materials,
+                                        new Material(
+                                                newMatSet.macroTexture.environment,
+                                                newMatSet.macroTexture.name,
+                                                newMatSet.macroTexture.scale
+                                        )
+                                );
 
-					// We always set elevation and other settings back to the original value
-					// because the map generator does not expect to have a varying water height
-					waterSettings.Elevation = WATER_HEIGHT;
-					waterSettings.ElevationDeep = WATER_DEEP_HEIGHT;
-					waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
-				}
-				else{
-					waterSettings = new WaterSettings();
-				}
-				list.add(new Biome(terrainMaterials, waterSettings));
-			}
-		}
-		catch (IOException e){
-			e.printStackTrace();
-			System.out.println("An error occured while loading biomes. Please check that all biomes JSONs are correct.");
-			System.exit(1);
-		}
-		catch (JsonParseException e) {
-			e.printStackTrace();
-			System.out.println("An error occured while loading the following biome:");
-			System.out.println(content);
-			System.exit(1);
-		}
+                                // Water parameters
+                                WaterSettings waterSettings;
+                                Path waterPath = path.resolve("WaterSettings.scmwtr");
+                                if (Files.exists(waterPath)){
+                                    try{
+                                        content = new String(Files.readAllBytes(waterPath));
+                                    }
+                                    catch (IOException e){
+                                            e.printStackTrace();
+                                            System.out.printf("An error occured while loading watter settings of biome %s", path);
+                                            System.exit(1);
+                                    }
+                                        waterSettings = gson.fromJson(content, WaterSettings.class);
+
+                                        // We always set elevation and other settings back to the original value
+                                        // because the map generator does not expect to have a varying water height
+                                        waterSettings.Elevation = WATER_HEIGHT;
+                                        waterSettings.ElevationDeep = WATER_DEEP_HEIGHT;
+                                        waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
+                                }
+                                else{
+                                        waterSettings = new WaterSettings();
+                                }
+                                list.add(new Biome(terrainMaterials, waterSettings));
+                        });
+                    }
+                    catch (IOException e){
+                            e.printStackTrace();
+                            System.out.println("An error occured while loading biomes. Please check that all biomes JSONs are correct.");
+                            System.exit(1);
+                    }
 	}
 }
