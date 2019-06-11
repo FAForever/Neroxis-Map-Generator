@@ -7,11 +7,9 @@ import map.TerrainMaterials;
 import util.serialized.WaterSettings;
 
 @AllArgsConstructor
+@Getter @Setter
 public strictfp class Biome {
 
-    @Getter @Setter
     TerrainMaterials terrainMaterials;
-
-    @Getter @Setter
     WaterSettings waterSettings;
 }

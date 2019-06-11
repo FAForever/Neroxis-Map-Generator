@@ -58,7 +58,7 @@ public strictfp class MapGenerator {
 		try {
 			Path folderPath = Paths.get(folderName);
 			if (Files.exists(folderPath.resolve(mapName))) {
-				Files.walk(folderPath.resolve(mapName))    // Empties the folder in case it exists
+				Files.walk(folderPath.resolve(mapName)) 
 						.forEach((x) -> {
 							try {
 								Files.delete(x);
