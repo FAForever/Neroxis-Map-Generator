@@ -17,6 +17,8 @@ import static util.Swapper.swap;
 
 public strictfp class SCMapExporter {
 
+	public static File file;
+
 	private static final byte[] DDS_HEADER_1 = { 68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, -1,
 			2, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -30,7 +32,7 @@ public strictfp class SCMapExporter {
 	private static DataOutputStream out;
 
 	public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
-		File file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
+		file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
 		file.createNewFile();
 		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 

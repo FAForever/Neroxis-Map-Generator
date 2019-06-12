@@ -1,5 +1,12 @@
 package map;
 
+import lombok.SneakyThrows;
+
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -192,5 +199,21 @@ public strictfp class FloatMask {
 				}
 			}
 		}
+	}
+
+	// -------------------------------------------
+
+	@SneakyThrows
+	public void writeToFile(Path path) {
+		Files.createFile(path);
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
+
+		for(int x = 0;x < getSize();x++) {
+			for(int y = 0;y < getSize();y++) {
+				out.writeFloat(mask[x][y]);
+			}
+		}
+
+		out.close();
 	}
 }

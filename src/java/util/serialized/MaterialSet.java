@@ -8,12 +8,12 @@ public strictfp class MaterialSet {
     public List<Material> materials;
     public MaterialElement macroTexture;
 
-    public class Material {
+    public strictfp class Material {
         public MaterialElement texture;
         public MaterialElement normal;
     }
 
-    public class MaterialElement {
+    public strictfp class MaterialElement {
         public String environment;
         public String name;
         public float scale;

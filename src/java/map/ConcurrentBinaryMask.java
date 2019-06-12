@@ -2,9 +2,10 @@ package map;
 
 import util.Pipeline;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 
-public class ConcurrentBinaryMask implements ConcurrentMask {
+public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 
 	private BinaryMask binaryMask;
 	private String name = "new binary mask";
@@ -122,6 +123,11 @@ public class ConcurrentBinaryMask implements ConcurrentMask {
 		);
 	}
 
+
+	@Override
+	public void writeToFile(Path path) {
+		binaryMask.writeToFile(path);
+	}
 
 	public BinaryMask getBinaryMask() {
 		return binaryMask;
