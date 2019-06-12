@@ -8,9 +8,10 @@ import java.nio.file.Path;
 public strictfp class SaveExporter {
 	
 	private static DataOutputStream out;
-	
+	public static File file;
+
 	public static void exportSave(Path folderPath, String mapname, SCMap map) throws IOException {
-		File file = folderPath.resolve(mapname).resolve(mapname + "_save.lua").toFile();
+		file = folderPath.resolve(mapname).resolve(mapname + "_save.lua").toFile();
 		file.createNewFile();
 		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		out.writeBytes("Scenario = {\n");

@@ -2,9 +2,10 @@ package map;
 
 import util.Pipeline;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 
-public class ConcurrentFloatMask implements ConcurrentMask {
+public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 
 	private FloatMask floatMask;
 	private String name = "new float mask";
@@ -74,8 +75,10 @@ public class ConcurrentFloatMask implements ConcurrentMask {
 		);
 	}
 
-
-
+	@Override
+	public void writeToFile(Path path) {
+		floatMask.writeToFile(path);
+	}
 
 	public FloatMask getFloatMask() {
 		return floatMask;

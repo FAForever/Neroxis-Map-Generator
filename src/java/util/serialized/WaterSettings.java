@@ -1,6 +1,5 @@
 package util.serialized;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import util.Vector2f;
 import util.Vector3f;
@@ -54,7 +53,7 @@ public strictfp class WaterSettings {
     }
     
     @AllArgsConstructor
-    public static class WaveTexture{
+    public static strictfp class WaveTexture{
         public String TexPath;
         public Vector2f NormalMovement;
         public float NormalRepeat;

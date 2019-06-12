@@ -1,16 +1,18 @@
 package util;
 
+import generator.MapGenerator;
 import map.ConcurrentBinaryMask;
 import map.ConcurrentFloatMask;
 import map.ConcurrentMask;
 
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Pipeline {
+public strictfp class Pipeline {
 
 	public static CompletableFuture<List<ConcurrentMask>> started = new CompletableFuture();
 	private static List<Entry> pipeline = new ArrayList<>();
@@ -41,6 +43,9 @@ public class Pipeline {
                 .thenApplyAsync(function)
                 .thenRun(() -> {
                     System.out.printf("Done: %s(%d)\n", executingMask.getName(), index);
+					if(MapGenerator.DEBUG) {
+						executingMask.writeToFile(Paths.get(".", "debug", index + ".mask"));
+					}
                 });
         Entry entry = new Entry(index, executingMask, dependencies, newFuture);
 
@@ -121,7 +126,7 @@ public class Pipeline {
 	}
 
 
-	public static class Entry {
+	public static strictfp class Entry {
 		private int index;
 		private ConcurrentMask executingMask;
 		private Set<Entry> dependencies;
@@ -178,5 +183,10 @@ public class Pipeline {
         public int getIndex() {
             return index;
         }
+
     }
+
+	public static int getPipelineSize() {
+		return pipeline.size();
+	}
 }

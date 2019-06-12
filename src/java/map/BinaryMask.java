@@ -1,7 +1,13 @@
 package map;
 
+import lombok.SneakyThrows;
 import util.Vector2f;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -253,7 +259,7 @@ public strictfp class BinaryMask {
 	}
 
 	public BinaryMask combine(BinaryMask other) {
-		int size = Math.max(getSize(), other.getSize());
+		int size = StrictMath.max(getSize(), other.getSize());
 		if (getSize() != size)
 			enlarge(size);
 		if (other.getSize() != size)
@@ -269,7 +275,7 @@ public strictfp class BinaryMask {
 	}
 
 	public BinaryMask intersect(BinaryMask other) {
-		int size = Math.max(getSize(), other.getSize());
+		int size = StrictMath.max(getSize(), other.getSize());
 		if (getSize() != size)
 			enlarge(size);
 		if (other.getSize() != size)
@@ -285,7 +291,7 @@ public strictfp class BinaryMask {
 	}
 
 	public BinaryMask minus(BinaryMask other) {
-		int size = Math.max(getSize(), other.getSize());
+		int size = StrictMath.max(getSize(), other.getSize());
 		if (getSize() != size)
 			enlarge(size);
 		if (other.getSize() != size)
@@ -351,5 +357,21 @@ public strictfp class BinaryMask {
 			}
 		}
 		return null;
+	}
+
+	// --------------------------------------------------
+
+	@SneakyThrows
+	public void writeToFile(Path path) {
+		Files.createFile(path);
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
+
+		for(int x = 0;x < getSize();x++) {
+			for(int y = 0;y < getSize();y++) {
+				out.writeBoolean(mask[x][y]);
+			}
+		}
+
+		out.close();
 	}
 }

@@ -6,23 +6,45 @@ import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
 import export.ScriptExporter;
+import lombok.SneakyThrows;
 import map.*;
+import util.FileUtils;
 import util.Pipeline;
 
 import java.awt.*;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 public strictfp class MapGenerator {
-	
-	public static final String VERSION = "0.1.0";
 
-	public static void main(String[] args) throws ExecutionException, InterruptedException {
+	public static final boolean DEBUG = true;
+
+	public static final String VERSION = "0.1.1";
+
+	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+
+		if (DEBUG) {
+			Path debugDir = Paths.get(".", "debug");
+			FileUtils.deleteRecursiveIfExists(debugDir);
+			Files.createDirectory(debugDir);
+		}
+
+		if (DEBUG && args.length == 0) {
+			args = new String[]{
+					".",
+					String.valueOf(1234),
+					VERSION,
+					"debugMap"
+			};
+		}
 
 		String folderPath ="";
 		String version ="";
@@ -36,45 +58,37 @@ public strictfp class MapGenerator {
 			mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
 		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
 			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-			System.exit(1);
+			return;
 		}
-		finally {
-			if(version.equals(VERSION)) {
-				MapGenerator generator = new MapGenerator();
-				System.out.println("Generating map " + mapName);
-				SCMap map = generator.generate(seed);
-				System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
-				generator.save(folderPath, mapName, map, seed);
-				System.out.println("Done");
 
-			} else {
-				System.out.println("This generator only supports version " + VERSION);
 
-			}
+		if (! version.equals(VERSION)) {
+			System.out.println("This generator only supports version " + VERSION);
+			return;
 		}
+
+		MapGenerator generator = new MapGenerator();
+		System.out.println("Generating map " + mapName);
+		SCMap map = generator.generate(seed);
+		System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
+		generator.save(folderPath, mapName, map, seed);
+		System.out.println("Done");
+
+		generator.generateDebugOutput();
 	}
 
 	public void save(String folderName, String mapName, SCMap map, long seed) {
 		try {
 			Path folderPath = Paths.get(folderName);
-			if (Files.exists(folderPath.resolve(mapName))) {
-				Files.walk(folderPath.resolve(mapName)) 
-						.forEach((x) -> {
-							try {
-								Files.delete(x);
-							}
-							catch (IOException e){
-								System.err.println("Error while destroying the previously generated map.");
-							}
-						});
-				Files.deleteIfExists(folderPath.resolve(mapName));
-			}
+
+			FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
+
 			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
 			SaveExporter.exportSave(folderPath, mapName, map);
 			ScenarioExporter.exportScenario(folderPath, mapName, map);
 			ScriptExporter.exportScript(folderPath, mapName, map);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("Error while saving the map.");
@@ -193,7 +207,7 @@ public strictfp class MapGenerator {
 
 		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
 		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
-        map.biome.setWaterSettings(biomeSet.getWaterSettings());
+		map.biome.setWaterSettings(biomeSet.getWaterSettings());
 
 
 		land.getBinaryMask().shrink(256);
@@ -230,5 +244,47 @@ public strictfp class MapGenerator {
 		}
 
 		return map;
+	}
+
+	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
+	private void generateDebugOutput() {
+		if(!DEBUG) {
+			return;
+		}
+
+		FileWriter writer = new FileWriter(Paths.get(".", "debug", "summary.txt").toFile());
+		Path masksDir = Paths.get(".", "debug");
+
+		for(int i = 0;i < Pipeline.getPipelineSize();i++) {
+			Path maskFile = masksDir.resolve(i + ".mask");
+			writer.write(String.format("%d:\t%s\n", i, hashFiles(maskFile)));
+		}
+
+		String mapHash = hashFiles(SCMapExporter.file.toPath(), SaveExporter.file.toPath());
+		System.out.println("Map hash: " + mapHash);
+		writer.write(String.format("Map hash:\t%s", mapHash));
+		writer.flush();
+		writer.close();
+	}
+
+	private String hashFiles(Path... files) throws NoSuchAlgorithmException, IOException {
+		StringBuilder sb = new StringBuilder();
+		Arrays.stream(files).map(this::hashFile).forEach(sb::append);
+		byte[] hash = MessageDigest.getInstance("SHA-256").digest(sb.toString().getBytes());
+		return toHex(hash);
+	}
+
+	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
+	private String hashFile(Path file) {
+		byte[] hash = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file));
+		return toHex(hash);
+	}
+
+	private String toHex(byte[] data) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0;i < data.length;i++) {
+			sb.append(String.format("%02x", data[i]));
+		}
+		return sb.toString();
 	}
 }
