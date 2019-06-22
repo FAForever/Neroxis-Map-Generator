@@ -1,0 +1,71 @@
+{
+	"name":"Syrtis",
+	"materials":[
+	
+		{
+			"texture":{
+				"environment":"Red Barrens",
+				"name":"RB_Sand",
+				"scale":4
+			},
+			"normal":{
+				"environment":"Red Barrens",
+				"name":"RB_Rock06",
+				"scale":4
+			}
+		},
+		{
+			"texture":{
+				"environment":"Red Barrens",
+				"name":"RB_RedMud",
+				"scale":6
+			},
+			"normal":{
+				"environment":"Red Barrens",
+				"name":"RB_RedMud",
+				"scale":6
+			}
+		},
+		{
+			"texture":{
+				"environment":"Red Barrens",
+				"name":"RB_Cracked",
+				"scale":6
+			},
+			"normal":{
+				"environment":"Red Barrens",
+				"name":"RB_Cracked",
+				"scale":6
+			}
+		},
+		{
+			"texture":{
+				"environment":"Red Barrens",
+				"name":"RB_Rock07",
+				"scale":8
+			},
+			"normal":{
+				"environment":"Red Barrens",
+				"name":"RB_Rock09",
+				"scale":4
+			}
+		},
+		{
+			"texture":{
+				"environment":"Red Barrens",
+				"name":"RB_Rock06",
+				"scale":16
+			},
+			"normal":{
+				"environment":"Red Barrens",
+				"name":"RB_Rock",
+				"scale":4
+			}
+		}
+	],
+	"macroTexture":{
+		"environment":"Common",
+		"name":"None",
+		"scale":73
+	}
+}

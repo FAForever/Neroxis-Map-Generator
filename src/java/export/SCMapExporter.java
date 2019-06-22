@@ -1,9 +1,11 @@
 package export;
 
 import map.SCMap;
+import map.TerrainMaterials;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
+import util.serialized.WaterSettings;
 
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
@@ -72,49 +74,52 @@ public strictfp class SCMapExporter {
 		writeFloat(map.FOG_END);
 
 		// water
-		writeByte((byte) 1); // map has water
-		writeFloat(map.WATER_HEIGHT);
-		writeFloat(map.WATER_DEEP_HEIGHT);
-		writeFloat(map.WATER_ABYSS_HEIGHT);
-		writeVector3f(map.WATER_SURFACE_COLOR);
-		writeVector2f(map.WATER_COLOR_LERP);
-		writeFloat(map.WATER_REFRACTION);
-		writeFloat(map.WATER_FRESNEL_BIAS);
-		writeFloat(map.WATER_FRESNEL_POWER);
-		writeFloat(map.WATER_UNIT_REFLECTION);
-		writeFloat(map.WATER_SKY_REFLECTION);
-		writeFloat(map.WATER_SUN_SHININESS);
-		writeFloat(map.WATER_SUN_STRENGH);
-		writeVector3f(map.WATER_SUN_DIRECTION);
-		writeVector3f(map.WATER_SUN_COLOR);
-		writeFloat(map.WATER_SUN_REFLECTION);
-		writeFloat(map.WATER_SUN_GLOW);
-		writeStringNull(map.WATER_CUBEMAP_PATH);
-		writeStringNull(map.WATER_RAMP_PATH);
+		WaterSettings mapWaterSettings = map.biome.getWaterSettings();
+		writeByte((byte)(mapWaterSettings.HasWater ? 1 : 0));
+		writeFloat(mapWaterSettings.Elevation);
+		writeFloat(mapWaterSettings.ElevationDeep);
+		writeFloat(mapWaterSettings.ElevationAbyss);
+		writeVector3f(mapWaterSettings.SurfaceColor);
+		writeVector2f(mapWaterSettings.ColorLerp);
+		writeFloat(mapWaterSettings.RefractionScale);
+		writeFloat(mapWaterSettings.FresnelBias);
+		writeFloat(mapWaterSettings.FresnelPower);
+		writeFloat(mapWaterSettings.UnitReflection);
+		writeFloat(mapWaterSettings.SkyReflection);
+		writeFloat(mapWaterSettings.SunShininess);
+		writeFloat(mapWaterSettings.SunStrength);
+		writeVector3f(mapWaterSettings.SunDirection);
+		writeVector3f(mapWaterSettings.SunColor);
+		writeFloat(mapWaterSettings.SunReflection);
+		writeFloat(mapWaterSettings.SunGlow);
+		writeStringNull(mapWaterSettings.TexPathCubemap);
+		writeStringNull(mapWaterSettings.TexPathWaterRamp);
 
 		// waves
-		for (int i = 0; i < map.WAVE_NORMAL_COUNT; i++) {
-			writeFloat(map.WAVE_NORMAL_REPEATS[i]);
+		for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+			writeFloat(mapWaterSettings.WaveTextures[i].NormalRepeat);
 		}
-		for (int i = 0; i < map.WAVE_NORMAL_COUNT; i++) {
-			writeVector2f(map.WAVE_NORMAL_MOVEMENTS[i]);
-			writeStringNull(map.WAVE_TEXTURE_PATHS[i]);
+
+		for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+			writeVector2f(mapWaterSettings.WaveTextures[i].NormalMovement);
+			writeStringNull(mapWaterSettings.WaveTextures[i].TexPath);
 		}
 
 		// wave generators
 		writeInt(0); // wave generator count
 
 		// terrain textures
+		TerrainMaterials mapTerrainMaterials = map.biome.getTerrainMaterials();
 		for (int i = 0; i < 24; i++) {
 			writeByte((byte) 0); // unknown
 		}
-		for (int i = 0; i < map.TERRAIN_TEXTURE_COUNT; i++) {
-			writeStringNull(map.TERRAIN_TEXTURE_PATHS[i]);
-			writeFloat(map.TERRAIN_TEXTURE_SCALES[i]);
+		for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
+			writeStringNull(mapTerrainMaterials.texturePaths[i]);
+			writeFloat(mapTerrainMaterials.textureScales[i]);
 		}
-		for (int i = 0; i < map.TERRAIN_NORMALS_COUNT; i++) {
-			writeStringNull(map.TERRAIN_NORMALS_PATHS[i]);
-			writeFloat(map.TERRAIN_NORMALS_SCALES[i]);
+		for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+			writeStringNull(mapTerrainMaterials.normalPaths[i]);
+			writeFloat(mapTerrainMaterials.normalScales[i]);
 		}
 
 		writeInt(0); // unknown

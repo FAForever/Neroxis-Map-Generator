@@ -1,5 +1,7 @@
 package generator;
 
+import biomes.Biome;
+import biomes.Biomes;
 import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -20,12 +23,22 @@ public strictfp class MapGenerator {
 	public static final String VERSION = "0.1.0";
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+		String folderPath ="";
+		String version ="";
+		String mapName ="";
+		long seed = 0L;
+
 		try {
-			String folderPath = args[0];
-			long seed = Long.parseLong(args[1]);
-			String version = args[2];
-			String mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
-			
+			folderPath = args[0];
+			seed = Long.parseLong(args[1]);
+			version = args[2];
+			mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
+		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
+			System.exit(1);
+		}
+		finally {
 			if(version.equals(VERSION)) {
 				MapGenerator generator = new MapGenerator();
 				System.out.println("Generating map " + mapName);
@@ -33,21 +46,29 @@ public strictfp class MapGenerator {
 				System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
 				generator.save(folderPath, mapName, map, seed);
 				System.out.println("Done");
-				
+
 			} else {
 				System.out.println("This generator only supports version " + VERSION);
-				
+
 			}
-		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-			
 		}
 	}
 
 	public void save(String folderName, String mapName, SCMap map, long seed) {
 		try {
 			Path folderPath = Paths.get(folderName);
-			Files.deleteIfExists(folderPath.resolve(mapName));
+			if (Files.exists(folderPath.resolve(mapName))) {
+				Files.walk(folderPath.resolve(mapName)) 
+						.forEach((x) -> {
+							try {
+								Files.delete(x);
+							}
+							catch (IOException e){
+								System.err.println("Error while destroying the previously generated map.");
+							}
+						});
+				Files.deleteIfExists(folderPath.resolve(mapName));
+			}
 			Files.createDirectory(folderPath.resolve(mapName));
 			SCMapExporter.exportSCMAP(folderPath, mapName, map);
 			SaveExporter.exportSave(folderPath, mapName, map);
@@ -56,6 +77,7 @@ public strictfp class MapGenerator {
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.err.println("Error while saving the map.");
 		}
 	}
 
@@ -168,6 +190,11 @@ public strictfp class MapGenerator {
 		lightGrassTexture.init(lightGrass, 0, 0.999f).smooth(2);
 
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
+
+		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
+		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
+        map.biome.setWaterSettings(biomeSet.getWaterSettings());
+
 
 		land.getBinaryMask().shrink(256);
 
