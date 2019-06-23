@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public strictfp class Material {
-    private static String pathFormat = "/env/%s/layers/%s_%s.dds";
+    private static String texturePathFormat = "/env/%s/layers/%s_albedo.dds";
+    private static String normalPathFormat = "/env/%s/layers/%s.dds";
 
     private final String texturePath;
     private final String normalPath;
@@ -23,7 +24,7 @@ public strictfp class Material {
     }
     public Material(String texEnv, String normalEnv, String texture, String normal, float textureScale, float normalScale) {
         texturePath = String.format(pathFormat, texEnv, texture, "albedo");
-        normalPath = String.format(pathFormat, normalEnv, normal, "normals");
+        normalPath = String.format(pathFormat, normalEnv, normal);
         this.textureScale= textureScale;
         this.normalScale=normalScale;
     }
