@@ -1,0 +1,118 @@
+{
+  "name": "Overlord",
+  "materials": [
+    {
+      "texture": {
+        "environment": "tropical",
+        "name": "trop_sand",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_dirt002",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "eg_rock_normal",
+        "scale": 12.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "lava",
+        "name": "lav_macrotexture000",
+        "scale": 12.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_cracked02_normal",
+        "scale": 6.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tropical",
+        "name": "trrock006",
+        "scale": 12.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "evrock007_normal",
+        "scale": 12.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "lava",
+        "name": "lav_rock03",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_rock04_normals",
+        "scale": 8.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evrock002",
+        "scale": 16.8
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "eg_snow_normal",
+        "scale": 16.5
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evgrass010",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "eg_grass002_normal",
+        "scale": 10.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tropical",
+        "name": "trop_sand",
+        "scale": 16.0
+      },
+      "normal": {
+        "environment": "tropical",
+        "name": "tr_reef_coral_normal",
+        "scale": 10.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "lava",
+        "name": "lav_rock03b",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_rock04_normals",
+        "scale": 6.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

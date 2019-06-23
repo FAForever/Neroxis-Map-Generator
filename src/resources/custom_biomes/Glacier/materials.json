@@ -1,118 +1,70 @@
 {
-	"name":"Glacier",
-	"materials":[
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_sandLight2",
-				"scale":11
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_sandLight2",
-				"scale":8
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_ice004a",
-				"scale":12
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_ice003",
-				"scale":5
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_Rock03",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_ice003",
-				"scale":4
-			}
-		},
-		{
-			"texture":{
-				"environment":"Evergreen2",
-				"name":"Eg_dirt001",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Evergreen2",
-				"name":"Eg_rock",
-				"scale":6
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_Ice003b",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_Ice003",
-				"scale":6
-			}
-		},
-		{
-			"texture":{
-				"environment":"Evergreen2",
-				"name":"EvGrass007",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Evergreen2",
-				"name":"EG_Rock",
-				"scale":6
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_Ice004a",
-				"scale":15
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_Ice003",
-				"scale":11
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_sandLight2",
-				"scale":11
-			},
-			"normal":{
-				"environment":"Evergreen2",
-				"name":"EG_Snow",
-				"scale":10
-			}
-		},
-		{
-			"texture":{
-				"environment":"Tundra",
-				"name":"Tund_sandLight2",
-				"scale":4
-			},
-			"normal":{
-				"environment":"Tundra",
-				"name":"Tund_sandLight",
-				"scale":7.30
-			}
-		}
-	],
-	"macroTexture":{
-		"environment":"Common",
-		"name":"None",
-		"scale":73
-	}
+  "name": "SCMP_008",
+  "materials": [
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice004a",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_rock_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_snow",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_rock_normal",
+        "scale": 8.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_snow",
+        "scale": 11.3
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_sandlight_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice002",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_none_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice001",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_none_normal",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "tundra",
+    "name": "macroice",
+    "scale": 13.75
+  }
 }

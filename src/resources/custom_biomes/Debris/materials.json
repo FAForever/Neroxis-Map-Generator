@@ -1,0 +1,118 @@
+{
+  "name": "Debris",
+  "materials": [
+    {
+      "texture": {
+        "environment": "tropical",
+        "name": "tr_ground001",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_sandlight_normal",
+        "scale": 8.8
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_gravel2",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "eg_gravel2_normal",
+        "scale": 6.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_rock",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "Dirt001_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evrock006b",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "evrock006_normal",
+        "scale": 10.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "ev_reef_coral",
+        "scale": 9.0
+      },
+      "normal": {
+        "environment": "tropical",
+        "name": "tr_reef_coral_normal",
+        "scale": 9.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "ev_reef_sand",
+        "scale": 5.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 5.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_grass001",
+        "scale": 12.0
+      },
+      "normal": {
+        "environment": "tropical",
+        "name": "trbush_moss_normal",
+        "scale": 12.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evgrass010a",
+        "scale": 12.0
+      },
+      "normal": {
+        "environment": "tropical",
+        "name": "trtrans002_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_grass002c",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tropical",
+        "name": "trtrans002_normal",
+        "scale": 7.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

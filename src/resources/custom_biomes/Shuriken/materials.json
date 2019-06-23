@@ -1,0 +1,70 @@
+{
+  "name": "Shuriken",
+  "materials": [
+    {
+      "texture": {
+        "environment": "geothermal",
+        "name": "geo_dirt_01",
+        "scale": 3.0
+      },
+      "normal": {
+        "environment": "geothermal",
+        "name": "geo_lavadk_01_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "geothermal",
+        "name": "geo_lavamd_02",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "grass001_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "geothermal",
+        "name": "geo_ashley_01",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "Dirt001_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "geothermal",
+        "name": "geo_dirt_01",
+        "scale": 9.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "RockMed_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "geothermal",
+        "name": "geo_rock001",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "snow001_normals",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

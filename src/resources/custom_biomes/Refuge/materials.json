@@ -1,0 +1,70 @@
+{
+  "name": "Refuge",
+  "materials": [
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_snow",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_snow03_normal",
+        "scale": 8.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_snow",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_sanddark_normal",
+        "scale": 2.5
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice001",
+        "scale": 6.8
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_none_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice004a",
+        "scale": 6.8
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_rock02_normal",
+        "scale": 6.8
+      }
+    },
+    {
+      "texture": {
+        "environment": "tundra",
+        "name": "tund_ice004",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_rock02_normal",
+        "scale": 5.25
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "tundra",
+    "name": "macroice",
+    "scale": 48.5
+  }
+}
