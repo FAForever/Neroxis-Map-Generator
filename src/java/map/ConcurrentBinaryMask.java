@@ -26,7 +26,7 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 			this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
 		} else {
 			Pipeline.add(this, Arrays.asList(mask), res -> {
-				this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
+				this.binaryMask = new BinaryMask(((ConcurrentBinaryMask)res.get(0)).getBinaryMask(), seed);
 				return Arrays.asList(this.binaryMask);
 			});
 		}
