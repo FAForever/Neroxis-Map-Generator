@@ -1,71 +1,70 @@
 {
-	"name":"Syrtis",
-	"materials":[
-	
-		{
-			"texture":{
-				"environment":"Red Barrens",
-				"name":"RB_Sand",
-				"scale":4
-			},
-			"normal":{
-				"environment":"Red Barrens",
-				"name":"RB_Rock06",
-				"scale":4
-			}
-		},
-		{
-			"texture":{
-				"environment":"Red Barrens",
-				"name":"RB_RedMud",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Red Barrens",
-				"name":"RB_RedMud",
-				"scale":6
-			}
-		},
-		{
-			"texture":{
-				"environment":"Red Barrens",
-				"name":"RB_Cracked",
-				"scale":6
-			},
-			"normal":{
-				"environment":"Red Barrens",
-				"name":"RB_Cracked",
-				"scale":6
-			}
-		},
-		{
-			"texture":{
-				"environment":"Red Barrens",
-				"name":"RB_Rock07",
-				"scale":8
-			},
-			"normal":{
-				"environment":"Red Barrens",
-				"name":"RB_Rock09",
-				"scale":4
-			}
-		},
-		{
-			"texture":{
-				"environment":"Red Barrens",
-				"name":"RB_Rock06",
-				"scale":16
-			},
-			"normal":{
-				"environment":"Red Barrens",
-				"name":"RB_Rock",
-				"scale":4
-			}
-		}
-	],
-	"macroTexture":{
-		"environment":"Common",
-		"name":"None",
-		"scale":73
-	}
+  "name": "adaptive_syrtis_major",
+  "materials": [
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_sand",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_rock06_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_redmud",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_redmud_normal",
+        "scale": 6.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_cracked",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_cracked_normal",
+        "scale": 6.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock07",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_rock09_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock06",
+        "scale": 16.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_rock_normal",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "red barrens",
+    "name": "macrotexture001",
+    "scale": 128.0
+  }
 }
