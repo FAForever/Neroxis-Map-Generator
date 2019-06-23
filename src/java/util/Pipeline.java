@@ -150,7 +150,7 @@ public strictfp class Pipeline {
 			});
 		}
 
-		public ConcurrentMask getResult(ConcurrentMask requestingMask) {
+		public synchronized ConcurrentMask getResult(ConcurrentMask requestingMask) {
 			if(requestingMask == executingMask) {
                 return executingMask;
             } /*else if(dependants.size() == 1) {

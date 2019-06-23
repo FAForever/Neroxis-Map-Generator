@@ -20,7 +20,6 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 	}
 
 	public ConcurrentBinaryMask(ConcurrentBinaryMask mask, long seed, String name) {
-		this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
 		this.name = name;
 
 		if(name.equals("mocked")) {
