@@ -262,8 +262,10 @@ public strictfp class BinaryMask {
 		int size = StrictMath.max(getSize(), other.getSize());
 		if (getSize() != size)
 			enlarge(size);
-		if (other.getSize() != size)
+		if (other.getSize() != size) {
+			other = new BinaryMask(other, 0);
 			other.enlarge(size);
+		}
 		boolean[][] maskCopy = new boolean[getSize()][getSize()];
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
