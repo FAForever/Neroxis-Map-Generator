@@ -109,6 +109,6 @@ public strictfp class Biomes {
         waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
 
 
-        list.add(new Biome(terrainMaterials, waterSettings));
+        list.add(new Biome(newMatSet.name, terrainMaterials, waterSettings));
     }
 }

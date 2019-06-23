@@ -103,6 +103,7 @@ public strictfp class SCMap {
 		terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
 
 		biome = new Biome(
+				"Default",
 				new TerrainMaterials(
 						new Material[]{
 								new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),

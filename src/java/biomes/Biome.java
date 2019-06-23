@@ -9,7 +9,7 @@ import util.serialized.WaterSettings;
 @AllArgsConstructor
 @Getter @Setter
 public strictfp class Biome {
-
+    String name;
     TerrainMaterials terrainMaterials;
     WaterSettings waterSettings;
 }
