@@ -11,7 +11,11 @@ import map.*;
 import util.FileUtils;
 import util.Pipeline;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -214,32 +218,24 @@ public strictfp class MapGenerator {
 		land.getBinaryMask().shrink(256);
 
 		Graphics g = map.getPreview().getGraphics();
+		float heatmapDeadZone = 0.1f;
+		int heatmapGradientSteps = 16;
 		for (int x = 0; x < 256; x++) {
 			for (int y = 0; y < 256; y++) {
-				int red = 0;
-				int green = 0;
-				int blue = 127;
-				if (land.getBinaryMask().get(x, y)) {
-					red = 191;
-					green = 191;
-					blue = 0;
-				}
-				if (grass.getBinaryMask().get(x, y)) {
-					red = 0;
-					green = 127;
-					blue = 0;
-				}
-				if (lightGrass.get(x, y)) {
-					red = 0;
-					green = 191;
-					blue = 0;
-				}
-				if (rock.getBinaryMask().get(x, y)) {
-					red = 96;
-					green = 96;
-					blue = 96;
-				}
-				g.setColor(new Color(red, green, blue));
+				int scaledX = x*2;
+				int scaledY = y*2;
+
+				float delta = ((float)map.getHeightmap().getRaster().getSample(scaledX,scaledY,0))
+						* SCMap.HEIGHTMAP_SCALE
+						* (1/50f); // Magic number to make the colors more readable
+				delta = (Math.round(delta*heatmapGradientSteps + 0.5f) -0.5f)/heatmapGradientSteps;
+				delta = (1f-heatmapDeadZone) - delta*(1f-heatmapDeadZone*2f);
+
+				float saturation = 0.7f;
+				saturation -= lightGrassTexture.get(x,y)*0.4f; // Forests darken the preview a bit
+
+				Color color = Color.getHSBColor(delta, saturation, 0.6f);
+				g.setColor(color);
 				g.fillRect(x, y, 1, 1);
 			}
 		}
