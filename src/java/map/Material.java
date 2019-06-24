@@ -23,7 +23,7 @@ public strictfp class Material {
         this(environment, environment, texture, normal, textureScale, normalScale);
     }
     public Material(String texEnv, String normalEnv, String texture, String normal, float textureScale, float normalScale) {
-        texturePath = String.format(texturePathFormat, texEnv, texture, "albedo");
+        texturePath = String.format(texturePathFormat, texEnv, texture);
         normalPath = String.format(normalPathFormat, normalEnv, normal);
         this.textureScale= textureScale;
         this.normalScale=normalScale;
