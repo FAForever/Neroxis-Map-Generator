@@ -7,11 +7,14 @@ import util.Vector3f;
 import util.Vector4f;
 import util.serialized.WaterSettings;
 
+import javax.imageio.ImageIO;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static util.Swapper.swap;
 
@@ -172,6 +175,16 @@ public strictfp class SCMapExporter {
 
 		out.flush();
 		out.close();
+
+		String fileFormat = "png";
+		File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
+		RenderedImage renderedImage = map.getPreview();
+		try{
+			ImageIO.write(renderedImage, fileFormat, previewFile);
+		}
+		catch (IOException e) {
+			System.out.println("Could not write the preview image\n"+e.toString());
+		}
 	}
 
 	private static void writeFloat(float f) throws IOException {
