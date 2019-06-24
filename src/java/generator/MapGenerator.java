@@ -217,44 +217,15 @@ public strictfp class MapGenerator {
 
 		land.getBinaryMask().shrink(256);
 
-		Graphics g = map.getPreview().getGraphics();
-		float heatmapDeadZone = 0.1f;
-		int heatmapGradientSteps = 16;
-		for (int x = 0; x < 256; x++) {
-			for (int y = 0; y < 256; y++) {
+	    Preview.generate(
+	    		map.getPreview(),
+				map,
+				lightGrassTexture,
+				rock.getBinaryMask(),
+				grass.getBinaryMask(),
+				lightGrass
+		);
 
-				int scaledX = x*2;
-				int scaledY = y*2;
-
-				float elevation =
-						((float)map.getHeightmap().getRaster().getSample(scaledX,scaledY,0))
-						* SCMap.HEIGHTMAP_SCALE;
-
-				float delta = elevation * (1/50f); // Magic number to make the colors more readable
-				delta = (StrictMath.round(delta * heatmapGradientSteps + 0.5f) -0.5f) / heatmapGradientSteps;
-				delta = (1f - heatmapDeadZone) - delta * (1f - heatmapDeadZone * 2f);
-
-				float saturation = 0.7f;
-				float value = 0.6f;
-
-				saturation -= lightGrassTexture.get(x,y) * 0.4f; // Forests darken the preview a bit
-
-				if (rock.getBinaryMask().get(x,y)){
-					delta *= 0.9f;
-				}
-				else if (
-						!grass.getBinaryMask().get(x,y) &&
-						!lightGrass.get(x,y) &&
-						!rock.getBinaryMask().get(x,y)
-				){
-					value -= 0.1f;	// Lakes appear darker
-				}
-
-				Color color = Color.getHSBColor(delta, saturation, value);
-				g.setColor(color);
-				g.fillRect(x, y, 1, 1);
-			}
-		}
 
 		return map;
 	}
