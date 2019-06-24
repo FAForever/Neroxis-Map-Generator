@@ -15,7 +15,8 @@ public strictfp class Preview {
     static final float HEATMAP_DEADZONE = 0f;
     static final int HEATMAP_GRADIENT_STEPS = 255;
     static final Gradient HEATMAP_GRADIENT;
-    static final float HEATMAP_SATURATION = 0.8f;
+    static final float HEATMAP_SATURATION = 1f;
+    static final float HEATMAP_GAMMA = 1f;
 
     static{
         HEATMAP_GRADIENT = new Gradient();
@@ -42,7 +43,7 @@ public strictfp class Preview {
 
                 Color color = HEATMAP_GRADIENT.evaluate(delta);
                 float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-                Color desaturated = Color.getHSBColor(hsb[0], hsb[1]*HEATMAP_SATURATION, hsb[2]);
+                Color desaturated = Color.getHSBColor(hsb[0], hsb[1]*HEATMAP_SATURATION, hsb[2]*HEATMAP_GAMMA);
                 image.setRGB(x, y, desaturated.getRGB());
             }
         }
