@@ -210,7 +210,7 @@ public strictfp class MapGenerator {
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
 
 		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
-		System.out.println(String.format("Using biome %s", biomeSet.getName()));
+		System.out.printf(String.format("Using biome %s", biomeSet.getName()));
 		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
 		map.biome.setWaterSettings(biomeSet.getWaterSettings());
 
@@ -228,11 +228,11 @@ public strictfp class MapGenerator {
 				float delta = ((float)map.getHeightmap().getRaster().getSample(scaledX,scaledY,0))
 						* SCMap.HEIGHTMAP_SCALE
 						* (1/50f); // Magic number to make the colors more readable
-				delta = (Math.round(delta*heatmapGradientSteps + 0.5f) -0.5f)/heatmapGradientSteps;
-				delta = (1f-heatmapDeadZone) - delta*(1f-heatmapDeadZone*2f);
+				delta = (StrictMath.round(delta * heatmapGradientSteps + 0.5f) -0.5f) / heatmapGradientSteps;
+				delta = (1f - heatmapDeadZone) - delta * (1f - heatmapDeadZone * 2f);
 
 				float saturation = 0.7f;
-				saturation -= lightGrassTexture.get(x,y)*0.4f; // Forests darken the preview a bit
+				saturation -= lightGrassTexture.get(x,y) * 0.4f; // Forests darken the preview a bit
 
 				Color color = Color.getHSBColor(delta, saturation, 0.6f);
 				g.setColor(color);
