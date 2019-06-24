@@ -14,7 +14,6 @@ import java.awt.image.DataBufferUShort;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static util.Swapper.swap;
 

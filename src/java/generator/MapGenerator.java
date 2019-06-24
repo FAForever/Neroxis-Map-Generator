@@ -11,11 +11,6 @@ import map.*;
 import util.FileUtils;
 import util.Pipeline;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -155,6 +150,11 @@ public strictfp class MapGenerator {
 		rock.inflate(3).combine(plateaus).combine(plateaus2).shrink(256);
 		rockTexture.init(rock, 0, 0.999f).smooth(1);
 
+		ConcurrentBinaryMask cliffs = new ConcurrentBinaryMask(plateaus.getBinaryMask().getSize(), seed, "cliffs")
+				.combine(plateaus)
+				.combine(plateaus2)
+                .shrink(256);
+
 
 		grass.minus(rock);
 
@@ -217,13 +217,10 @@ public strictfp class MapGenerator {
 
 		land.getBinaryMask().shrink(256);
 
-	    Preview.generate(
-	    		map.getPreview(),
-				map,
-				lightGrassTexture,
-				rock.getBinaryMask(),
-				grass.getBinaryMask(),
-				lightGrass
+		Preview.generate(
+			map.getPreview(),
+			map,
+			rock.getBinaryMask()
 		);
 
 
