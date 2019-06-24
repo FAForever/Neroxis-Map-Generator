@@ -1,25 +1,23 @@
 package util;
 
+import lombok.AllArgsConstructor;
+
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public strictfp class Gradient {
-    public Map<Float, Color> colors = new HashMap<>();
+    public Map<Float, Color> colors = new TreeMap<>();
 
     public void addColor(float period, Color color){
         colors.put(period, color);
-        colors
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey())
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2));
     }
 
     public Color evaluate(float period){
         if (period > 1f || period < 0f){
-            throw new RuntimeException("Period must be comprised between 0 and 1");
+            throw new RuntimeException("Period must be comprised between 0 and 1 (supplied: "+period+")");
         }
 
         float previousKey = 0f;
@@ -46,9 +44,9 @@ public strictfp class Gradient {
 
     private Color lerp(Color a, Color b, float step){
         return new Color(
-                lerp(a.getRed(), b.getRed(), step),
-                lerp(a.getGreen(), b.getGreen(), step),
-                lerp(a.getBlue(), b.getBlue(), step)
+                Math.round(lerp(a.getRed(), b.getRed(), step)),
+                Math.round(lerp(a.getGreen(), b.getGreen(), step)),
+                Math.round(lerp(a.getBlue(), b.getBlue(), step))
         );
     }
 }
