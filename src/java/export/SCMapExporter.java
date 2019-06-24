@@ -176,14 +176,14 @@ public strictfp class SCMapExporter {
 		out.flush();
 		out.close();
 
-		String fileFormat = "png";
+		final String fileFormat = "png";
 		File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
 		RenderedImage renderedImage = map.getPreview();
 		try{
 			ImageIO.write(renderedImage, fileFormat, previewFile);
 		}
 		catch (IOException e) {
-			System.out.println("Could not write the preview image\n"+e.toString());
+			System.out.printf("Could not write the preview image\n"+e.toString());
 		}
 	}
 
