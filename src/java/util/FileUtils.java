@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,7 +27,9 @@ public class FileUtils {
 		}
 
 		if(Files.isDirectory(path)) {
-			Files.list(path).forEach(FileUtils::deleteRecursiveIfExists);
+			Stream<Path> files = Files.list(path);
+			files.forEach(FileUtils::deleteRecursiveIfExists);
+			files.close();
 		}
 
 		Files.delete(path);
