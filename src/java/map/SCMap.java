@@ -6,7 +6,6 @@ import util.Vector3f;
 import util.Vector4f;
 import util.serialized.WaterSettings;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
