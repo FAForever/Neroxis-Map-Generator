@@ -1,9 +1,11 @@
 package map;
 
 import biomes.Biome;
+
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
+import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 import java.awt.image.BufferedImage;
@@ -114,7 +116,8 @@ public strictfp class SCMap {
 						},
 						new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
 				),
-				new WaterSettings()
+				new WaterSettings(),
+				new LightingSettings()
 		);
 	}
 

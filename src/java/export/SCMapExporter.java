@@ -5,6 +5,7 @@ import map.TerrainMaterials;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
+import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 import javax.imageio.ImageIO;
@@ -66,16 +67,19 @@ public strictfp class SCMapExporter {
 		writeInt(1); // cubemap count
 		writeStringNull(map.CUBEMAP_NAME);
 		writeStringNull(map.CUBEMAP_PATH);
-		writeFloat(map.LIGHTING_MULTIPLIER);
-		writeVector3f(map.SUN_DIRECTION);
-		writeVector3f(map.SUN_AMBIANCE_COLOR);
-		writeVector3f(map.SUN_COLOR);
-		writeVector3f(map.SHADOW_COLOR);
-		writeVector4f(map.SPECULAR_COLOR);
-		writeFloat(map.BLOOM);
-		writeVector3f(map.FOG_COLOR);
-		writeFloat(map.FOG_START);
-		writeFloat(map.FOG_END);
+
+		// lighting
+		LightingSettings mapLightingSettings = map.biome.getLightingSettings();
+		writeFloat(mapLightingSettings.LightingMultiplier);
+		writeVector3f(mapLightingSettings.SunDirection);
+		writeVector3f(mapLightingSettings.SunAmbience);
+		writeVector3f(mapLightingSettings.SunColor);
+		writeVector3f(mapLightingSettings.ShadowFillColor);
+		writeVector4f(mapLightingSettings.SpecularColor);
+		writeFloat(mapLightingSettings.Bloom);
+		writeVector3f(mapLightingSettings.FogColor);
+		writeFloat(mapLightingSettings.FogStart);
+		writeFloat(mapLightingSettings.FogEnd);
 
 		// water
 		WaterSettings mapWaterSettings = map.biome.getWaterSettings();

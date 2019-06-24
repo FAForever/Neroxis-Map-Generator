@@ -6,6 +6,7 @@ import map.Material;
 import map.TerrainMaterials;
 import util.FileUtils;
 import util.PlatformUtils;
+import util.serialized.LightingSettings;
 import util.serialized.MaterialSet;
 import util.serialized.WaterSettings;
 
@@ -30,8 +31,9 @@ public strictfp class Biomes {
         // ├ Biome
         // ├-- materials.json <required>
         // └-- WaterSettings.scmwtr <optional>
-        // Materials
+        // └-- Light.scmlighting <optional>
 
+        // Materials
         try {
             if (PlatformUtils.isRunningFromJAR()) {
                 List<String> files = FileUtils.listFilesInZipDirectory(CUSTOM_BIOMES_DIR, PlatformUtils.getRunnableJarFile());
@@ -108,7 +110,20 @@ public strictfp class Biomes {
         waterSettings.ElevationDeep = WATER_DEEP_HEIGHT;
         waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
 
+        // Lighting settings
+        LightingSettings lightingSettings = null;
+        try {
+            lightingSettings = FileUtils.deserialize(path, "Light.scmlighting", LightingSettings.class);
+        } catch (IOException e) {
+            System.out.printf("Did not find light settings for biome: %s, falling back to default\n", path);
+            lightingSettings = new LightingSettings();
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+            System.out.printf("An error occured while parsing the following biome: %s\n", path);
+            System.exit(1);
+        }
 
-        list.add(new Biome(newMatSet.name, terrainMaterials, waterSettings));
+
+        list.add(new Biome(newMatSet.name, terrainMaterials, waterSettings, lightingSettings));
     }
 }
