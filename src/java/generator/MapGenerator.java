@@ -70,7 +70,7 @@ public strictfp class MapGenerator {
 		System.out.println("Generating map " + mapName);
 		SCMap map = generator.generate(seed);
 		System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
-		generator.save(folderPath, mapName+"_lighting", map, seed);
+		generator.save(folderPath, mapName, map, seed);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
@@ -210,7 +210,6 @@ public strictfp class MapGenerator {
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
 
 		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
-		biomeSet = Biomes.list.get(4);
 
 		System.out.printf(String.format("Using biome %s", biomeSet.getName()));
 		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
