@@ -1,0 +1,70 @@
+{
+  "name": "Red",
+  "materials": [
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_cracked",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "paradise",
+        "name": "sand000_normals",
+        "scale": 26.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_redmud",
+        "scale": 8.8
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "grass001_normals",
+        "scale": 13.8
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock08",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "dirt001_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock09",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "rockmed_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen",
+        "name": "snow001",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "snow001_normals",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

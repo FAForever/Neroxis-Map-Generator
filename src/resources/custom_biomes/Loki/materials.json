@@ -1,0 +1,82 @@
+{
+  "name": "Loki",
+  "materials": [
+    {
+      "texture": {
+        "environment": "evergreen",
+        "name": "sandwet",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "grass001_normals",
+        "scale": 13.75
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evtrans03",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "swamp",
+        "name": "sw_grass_03_normals",
+        "scale": 1.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evgrass010a",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "grass001_normals",
+        "scale": 16.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "evgrass004",
+        "scale": 12.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "grass000_normals",
+        "scale": 20.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen2",
+        "name": "eg_gravel2",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen2",
+        "name": "evrock006_normal",
+        "scale": 16.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "evergreen",
+        "name": "sandlight002",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "sandlight_normals",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 77.5
+  }
+}

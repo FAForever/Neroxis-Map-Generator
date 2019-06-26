@@ -1,0 +1,70 @@
+{
+  "HasWater": true,
+  "Elevation": 24.0,
+  "ElevationDeep": 18.0,
+  "ElevationAbyss": 10.0,
+  "SurfaceColor": {
+    "x": 0.75,
+    "y": 0.8,
+    "z": 1.35
+  },
+  "ColorLerp": {
+    "x": 0.064,
+    "y": 0.119
+  },
+  "RefractionScale": 0.375,
+  "FresnelBias": 0.15,
+  "FresnelPower": 1.6,
+  "UnitReflection": 0.5,
+  "SkyReflection": 1.5,
+  "SunShininess": 30.0,
+  "SunStrength": 8.0,
+  "SunDirection": {
+    "x": 0.09954818,
+    "y": -0.9626309,
+    "z": 0.2518569
+  },
+  "SunColor": {
+    "x": 1.83,
+    "y": 1.29,
+    "z": 0.95
+  },
+  "SunReflection": 3.5,
+  "SunGlow": 0.05,
+  "TexPathCubemap": "/textures/engine/watercubemap.dds",
+  "TexPathWaterRamp": "/textures/engine/waterramp_redrock.dds",
+  "WaveTextures": [
+    {
+      "TexPath": "/textures/engine/waves.dds",
+      "NormalMovement": {
+        "x": 0.3493152,
+        "y": -0.663685858
+      },
+      "NormalRepeat": 0.0009
+    },
+    {
+      "TexPath": "/textures/engine/waves.dds",
+      "NormalMovement": {
+        "x": 0.05,
+        "y": -0.095
+      },
+      "NormalRepeat": 0.009
+    },
+    {
+      "TexPath": "/textures/engine/waves.dds",
+      "NormalMovement": {
+        "x": 0.01,
+        "y": 0.03
+      },
+      "NormalRepeat": 0.05
+    },
+    {
+      "TexPath": "/textures/engine/waves.dds",
+      "NormalMovement": {
+        "x": 0.0005,
+        "y": 0.0009
+      },
+      "NormalRepeat": 0.5
+    }
+  ]
+}
