@@ -1,0 +1,118 @@
+{
+  "name": "Monument",
+  "materials": [
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_sand",
+        "scale": 1.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_cracked02_normals",
+        "scale": 1.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_sanddark02",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 20.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_gravel01",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_gravel_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock06",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_rock06_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock08",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_rock09_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock09",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_cracked02_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_cracked",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_cracked02_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "paradise",
+        "name": "dirt001",
+        "scale": 40.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_cracked02_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "utility",
+        "name": "farms001",
+        "scale": 15.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_none_normal",
+        "scale": 10.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 1.0
+  }
+}

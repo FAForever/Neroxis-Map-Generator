@@ -1,0 +1,70 @@
+{
+  "name": "Joust",
+  "materials": [
+    {
+      "texture": {
+        "environment": "evergreen",
+        "name": "sandlight",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "sandlight_normals",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_sanddark02",
+        "scale": 2.5
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sanddark_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_sandmed",
+        "scale": 16.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 8.75
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_rock",
+        "scale": 6.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_rock_normal",
+        "scale": 16.5
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_rock06",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "evergreen",
+        "name": "snow001_normals",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

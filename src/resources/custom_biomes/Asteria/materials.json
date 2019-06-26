@@ -1,0 +1,70 @@
+{
+  "name": "Asteria",
+  "materials": [
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_sanddark02",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_rock03a_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_gravel01",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_sandmed02",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_sandlight_normal",
+        "scale": 4.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_rock01",
+        "scale": 8.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_rock_normal",
+        "scale": 8.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_gravel",
+        "scale": 4.0
+      },
+      "normal": {
+        "environment": "desert",
+        "name": "des_gravel_normal",
+        "scale": 4.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}

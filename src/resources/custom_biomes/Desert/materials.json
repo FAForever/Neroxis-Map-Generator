@@ -1,0 +1,70 @@
+{
+  "name": "Desert",
+  "materials": [
+    {
+      "texture": {
+        "environment": "desert",
+        "name": "des_gravel01",
+        "scale": 20.75
+      },
+      "normal": {
+        "environment": "paradise",
+        "name": "sand000_normals",
+        "scale": 20.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_cracked",
+        "scale": 10.0
+      },
+      "normal": {
+        "environment": "red barrens",
+        "name": "rb_cracked02_normal",
+        "scale": 10.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock",
+        "scale": 30.0
+      },
+      "normal": {
+        "environment": "crystalline",
+        "name": "cr_07_01_normal",
+        "scale": 20.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "red barrens",
+        "name": "rb_rock06",
+        "scale": 20.0
+      },
+      "normal": {
+        "environment": "lava",
+        "name": "lav_rock04_normals",
+        "scale": 20.0
+      }
+    },
+    {
+      "texture": {
+        "environment": "paradise",
+        "name": "sand000",
+        "scale": 30.0
+      },
+      "normal": {
+        "environment": "tundra",
+        "name": "tund_sandlight_normal",
+        "scale": 20.0
+      }
+    }
+  ],
+  "macroTexture": {
+    "environment": "evergreen",
+    "name": "macrotexture000",
+    "scale": 128.0
+  }
+}
