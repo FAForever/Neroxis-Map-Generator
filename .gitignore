@@ -10,6 +10,11 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.gradle/
+.idea/
+build/
+debug/
+debugMap/
 
 # External tool builders
 .externalToolBuilders/

@@ -106,6 +106,7 @@ public strictfp class Biomes {
 
         // We always set elevation and other settings back to the original value
         // because the map generator does not expect to have a varying water height
+        waterSettings.HasWater = true;
         waterSettings.Elevation = WATER_HEIGHT;
         waterSettings.ElevationDeep = WATER_DEEP_HEIGHT;
         waterSettings.ElevationAbyss = WATER_ABYSS_HEIGHT;
