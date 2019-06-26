@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 group 'net.neroxis'
@@ -29,4 +30,10 @@ repositories {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.8'
     implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'generator.MapGenerator'
+    }
 }
