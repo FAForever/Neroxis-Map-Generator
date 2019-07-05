@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -34,6 +35,7 @@ public strictfp class MapGenerator {
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
 	private static long SEED = 1234L;
+	private static Optional<Biome> BIOME = Optional.empty();
 
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
@@ -44,8 +46,7 @@ public strictfp class MapGenerator {
 			Files.createDirectory(debugDir);
 		}
 
-		interpretArguments(ArgumentParser.parse(args));
-
+		interpretArguments(args);
 
 		MapGenerator generator = new MapGenerator();
 		System.out.println("Generating map " + MAP_NAME);
@@ -190,9 +191,9 @@ public strictfp class MapGenerator {
 
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));
 
-		Biome biomeSet = Biomes.list.get(random.nextInt(Biomes.list.size()));
+		Biome biomeSet = BIOME.orElseGet(() -> Biomes.getRandomBiome(random));
 
-		System.out.printf(String.format("Using biome %s", biomeSet.getName()));
+		System.out.printf("Using biome %s\n", biomeSet.getName());
 		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
 		map.biome.setWaterSettings(biomeSet.getWaterSettings());
 		map.biome.setLightingSettings(biomeSet.getLightingSettings());
@@ -209,6 +210,25 @@ public strictfp class MapGenerator {
 		return map;
 	}
 
+	private static void interpretArguments(String[] args) {
+		if (args.length == 0 || args[0].startsWith("--")) {
+			interpretArguments(ArgumentParser.parse(args));
+		} else {
+			try {
+				FOLDER_PATH = args[0];
+				SEED = Long.parseLong(args[1]);
+				if (!VERSION.equals(args[2])) {
+					System.out.println("This generator only supports version " + VERSION);
+					System.exit(-1);
+				}
+				MAP_NAME = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + SEED;
+			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+				System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
+				return;
+			}
+		}
+	}
+
 	private static void interpretArguments(Map<String, String> arguments) {
 		if (arguments.containsKey("help")) {
 			System.out.println("map-gen usage:\n" +
@@ -216,7 +236,9 @@ public strictfp class MapGenerator {
 					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
 					"--seed arg                           mandatory, set the seed for the generated map\n" +
 					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
-					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n");
+					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n" +
+					"--with-biome name                    optional (=random), generates the map with the specified (by name) biome, this BREAKS DETERMINISM with other generators\n" +
+					"--with-biome-folder path             optional (=random), generates the map with the specified (as folder on system file system) biome, this BREAKS DETERMINISM with other generators\n");
 			System.exit(0);
 		}
 
@@ -230,12 +252,26 @@ public strictfp class MapGenerator {
 
 		if (!VERSION.equals(arguments.get("version"))) {
 			System.out.println("This generator only supports version " + VERSION);
+			System.exit(-1);
 		}
 
 		if (arguments.containsKey("map-name")) {
 			MAP_NAME = arguments.get("map-name");
 		} else {
 			MAP_NAME = "NeroxisGen_" + VERSION + "_" + SEED;
+		}
+
+		if (arguments.containsKey("with-biome")) {
+			BIOME = Optional.of(Biomes.getBiomeByName(arguments.get("with-biome")));
+		}
+
+		if(arguments.containsKey("with-biome-folder")) {
+			Path path = Paths.get(arguments.get("with-biome-folder"));
+			if(! Files.isDirectory(path)) {
+				System.out.printf("Biome path %s is not a folder\n", arguments.get("with-biome-folder"));
+				System.exit(-1);
+			}
+			BIOME = Optional.of(Biomes.loadBiome(path));
 		}
 	}
 
