@@ -8,6 +8,7 @@ import export.ScenarioExporter;
 import export.ScriptExporter;
 import lombok.SneakyThrows;
 import map.*;
+import util.ArgumentParser;
 import util.FileUtils;
 import util.Pipeline;
 
@@ -19,6 +20,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -26,7 +28,13 @@ public strictfp class MapGenerator {
 
 	public static final boolean DEBUG = false;
 
-	public static final String VERSION = "0.1.3";
+	public static final String VERSION = "0.1.6";
+
+	//read from cli args
+	private static String FOLDER_PATH = ".";
+	private static String MAP_NAME = "debugMap";
+	private static long SEED = 1234L;
+
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -36,41 +44,14 @@ public strictfp class MapGenerator {
 			Files.createDirectory(debugDir);
 		}
 
-		if (DEBUG && args.length == 0) {
-			args = new String[]{
-					".",
-					String.valueOf(1234),
-					VERSION,
-					"debugMap"
-			};
-		}
+		interpretArguments(ArgumentParser.parse(args));
 
-		String folderPath ="";
-		String version ="";
-		String mapName ="";
-		long seed = 0L;
-
-		try {
-			folderPath = args[0];
-			seed = Long.parseLong(args[1]);
-			version = args[2];
-			mapName = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + seed;
-		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-			System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-			return;
-		}
-
-
-		if (! version.equals(VERSION)) {
-			System.out.println("This generator only supports version " + VERSION);
-			return;
-		}
 
 		MapGenerator generator = new MapGenerator();
-		System.out.println("Generating map " + mapName);
-		SCMap map = generator.generate(seed);
-		System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath());
-		generator.save(folderPath, mapName, map, seed);
+		System.out.println("Generating map " + MAP_NAME);
+		SCMap map = generator.generate(SEED);
+		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath());
+		generator.save(FOLDER_PATH, MAP_NAME, map, SEED);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
@@ -226,6 +207,36 @@ public strictfp class MapGenerator {
 
 
 		return map;
+	}
+
+	private static void interpretArguments(Map<String, String> arguments) {
+		if (arguments.containsKey("help")) {
+			System.out.println("map-gen usage:\n" +
+					"--help                               produce help message\n" +
+					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
+					"--seed arg                           mandatory, set the seed for the generated map\n" +
+					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
+					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n");
+			System.exit(0);
+		}
+
+		if (!Arrays.asList("folder-path", "seed", "version").stream().allMatch(arguments::containsKey) && !DEBUG) {
+			System.out.println("Missing necessary argument.");
+			System.exit(-1);
+		}
+
+		FOLDER_PATH = arguments.get("folder-path");
+		SEED = Long.parseLong(arguments.get("seed"));
+
+		if (!VERSION.equals(arguments.get("version"))) {
+			System.out.println("This generator only supports version " + VERSION);
+		}
+
+		if (arguments.containsKey("map-name")) {
+			MAP_NAME = arguments.get("map-name");
+		} else {
+			MAP_NAME = "NeroxisGen_" + VERSION + "_" + SEED;
+		}
 	}
 
 	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
