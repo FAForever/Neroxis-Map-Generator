@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 import static map.SCMap.*;
 
@@ -38,12 +40,12 @@ public strictfp class Biomes {
             if (PlatformUtils.isRunningFromJAR()) {
                 List<String> files = FileUtils.listFilesInZipDirectory(CUSTOM_BIOMES_DIR, PlatformUtils.getRunnableJarFile());
 
-                files.forEach(Biomes::loadBiome);
+                files.stream().map(Biomes::loadBiome).forEach(list::add);
             } else {
                 Path biomePath = null;
                 biomePath = Paths.get(Biome.class.getClassLoader().getResource(CUSTOM_BIOMES_DIR).toURI());
 
-                Files.list(biomePath).forEachOrdered(Biomes::loadBiome);
+                Files.list(biomePath).map(Biomes::loadBiome).forEachOrdered(list::add);
             }
         } catch(IOException | URISyntaxException e) {
             e.printStackTrace();
@@ -52,7 +54,7 @@ public strictfp class Biomes {
         }
     }
 
-    private static void loadBiome(Object path) {
+    public static Biome loadBiome(Object path) {
         String content = null;
         MaterialSet newMatSet = null;
 
@@ -125,6 +127,18 @@ public strictfp class Biomes {
         }
 
 
-        list.add(new Biome(newMatSet.name, terrainMaterials, waterSettings, lightingSettings));
+        return new Biome(newMatSet.name, terrainMaterials, waterSettings, lightingSettings);
+    }
+
+
+    public static Biome getRandomBiome(Random random) {
+        return list.get(random.nextInt(list.size()));
+    }
+
+    public static Biome getBiomeByName(String name) {
+        return list.stream()
+                .filter(b -> Objects.equals(b.name, name))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Couldn't find a biome for name: " + name));
     }
 }
