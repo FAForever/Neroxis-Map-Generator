@@ -19,12 +19,12 @@ public strictfp class MarkerGenerator {
 	private void placeOnHeightmap(float x, float z, Vector3f v) {
 		v.x = x;
 		v.z = z;
-		v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+		v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
 	}
 	
 	private Vector3f placeOnHeightmap(float x, float z) {
 		Vector3f v = new Vector3f(x, 0, z);
-		v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+		v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
 		return v;
 	}
 
@@ -82,13 +82,13 @@ public strictfp class MarkerGenerator {
 			placeOnHeightmap(map.getSpawns()[i].x + dx, map.getSpawns()[i].z + dz, map.getHydros()[i]);
 		}
 
-		for (int i = baseHydroCount; i < map.getHydros().length; i+= 2) {
+		for (int i = baseHydroCount; i < map.getHydros().length - 1; i += 2) {
 			map.getHydros()[i] = new Vector3f(0, 0, 0);
 			map.getHydros()[i + 1] = new Vector3f(0, 0, 0);
 			randomizeVectorPair(map.getHydros()[i], map.getHydros()[i + 1]);
 		}
 
-		for (int i = baseHydroCount; i < map.getHydros().length; i+= 2) {
+		for (int i = baseHydroCount; i < map.getHydros().length; i += 2) {
 			while (!isHydroValid(i, 64, 16, 32, spawnable)) {
 				randomizeVectorPair(map.getHydros()[i], map.getHydros()[i + 1]);
 			}

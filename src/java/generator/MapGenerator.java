@@ -34,6 +34,7 @@ public strictfp class MapGenerator {
 	//read from cli args
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
+	private static int SPAWN_COUNT = 6;
 	private static long SEED = 1234L;
 	private static Optional<Biome> BIOME = Optional.empty();
 
@@ -79,7 +80,7 @@ public strictfp class MapGenerator {
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
-		final SCMap map = new SCMap(512, 6, 64, 10);
+		final SCMap map = new SCMap(512, SPAWN_COUNT, 12 * SPAWN_COUNT, SPAWN_COUNT * 2);
 
 		final ConcurrentBinaryMask land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
 		final ConcurrentBinaryMask mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
@@ -144,7 +145,7 @@ public strictfp class MapGenerator {
 
 		Pipeline.await(heightmapBase);
 		map.setHeightmap(heightmapBase.getFloatMask());
-		map.getHeightmap().getRaster().setPixel(0, 0, new int[] { 0 });
+		map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
 
 		Pipeline.stop();
 		System.out.printf("Terrain generation done: %d ms\n", System.currentTimeMillis() - startTime);
@@ -152,7 +153,7 @@ public strictfp class MapGenerator {
 		MarkerGenerator markerGenerator = new MarkerGenerator(map, random.nextLong());
 		BinaryMask spawnsMask = new BinaryMask(grass.getBinaryMask(), random.nextLong());
 		spawnsMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(16).trimEdge(20).fillCircle(256, 256, 128, false);
-		markerGenerator.generateSpawns(spawnsMask, 64);
+		markerGenerator.generateSpawns(spawnsMask, 64f * 6 / SPAWN_COUNT);
 		BinaryMask resourceMask = new BinaryMask(grass.getBinaryMask().minus(rock.getBinaryMask()), random.nextLong());
 		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5);
 		markerGenerator.generateMexs(resourceMask);
@@ -201,9 +202,9 @@ public strictfp class MapGenerator {
 		land.getBinaryMask().shrink(256);
 
 		Preview.generate(
-			map.getPreview(),
-			map,
-			rock.getBinaryMask()
+				map.getPreview(),
+				map,
+				rock.getBinaryMask()
 		);
 
 
@@ -216,7 +217,8 @@ public strictfp class MapGenerator {
 		} else {
 			try {
 				FOLDER_PATH = args[0];
-				SEED = Long.parseLong(args[1]);
+				long seedWithOptions = Long.parseLong(args[1]);
+				readSeedWithOptions(seedWithOptions);
 				if (!VERSION.equals(args[2])) {
 					System.out.println("This generator only supports version " + VERSION);
 					System.exit(-1);
@@ -229,26 +231,54 @@ public strictfp class MapGenerator {
 		}
 	}
 
+	private static void readSeedWithOptions(long seedWithOptions) {
+		SPAWN_COUNT = (byte) (seedWithOptions & 0b11111111);
+		System.out.println("Read option from seed, spawn count is: " + SPAWN_COUNT);
+		if (SPAWN_COUNT > 16 || SPAWN_COUNT < 2 || SPAWN_COUNT % 2 != 0) {
+			System.out.println("Spawn count has illegal value falling back on default");
+			SPAWN_COUNT = 6;
+		}
+		SEED = seedWithOptions;
+	}
+
 	private static void interpretArguments(Map<String, String> arguments) {
 		if (arguments.containsKey("help")) {
 			System.out.println("map-gen usage:\n" +
 					"--help                               produce help message\n" +
 					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
 					"--seed arg                           mandatory, set the seed for the generated map\n" +
+					"--seedWithOptions arg                mandatory, if no seed is set, also contains other options in the seed.\n" +
 					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
 					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n" +
 					"--with-biome name                    optional (=random), generates the map with the specified (by name) biome, this BREAKS DETERMINISM with other generators\n" +
-					"--with-biome-folder path             optional (=random), generates the map with the specified (as folder on system file system) biome, this BREAKS DETERMINISM with other generators\n");
+					"--with-biome-folder path             optional (=random), generates the map with the specified (as folder on system file system) biome, this BREAKS DETERMINISM with other generators\n" +
+					"--spawns number             		  optional (=6), sets the amount of players on the map. \n");
 			System.exit(0);
 		}
 
-		if (!Arrays.asList("folder-path", "seed", "version").stream().allMatch(arguments::containsKey) && !DEBUG) {
+		if (!Arrays.asList("folder-path", "version").stream().allMatch(arguments::containsKey) && !DEBUG) {
 			System.out.println("Missing necessary argument.");
 			System.exit(-1);
 		}
 
+		if (!arguments.containsKey("spawns") && !arguments.containsKey("seedWithOptions")) {
+			System.out.println("Missing necessary seed or seedWithOptions argument.");
+			System.exit(-1);
+		}
+
+		if (arguments.containsKey("spawns")) {
+			SPAWN_COUNT = Integer.parseInt(arguments.get("spawns"));
+		}
+
+		if (arguments.containsKey("seedWithOptions")) {
+			readSeedWithOptions(Long.parseLong(arguments.get("seedWithOptions")));
+		}
+
 		FOLDER_PATH = arguments.get("folder-path");
-		SEED = Long.parseLong(arguments.get("seed"));
+
+		if (arguments.containsKey("seed")) {
+			SEED = Long.parseLong(arguments.get("seed"));
+		}
 
 		if (!VERSION.equals(arguments.get("version"))) {
 			System.out.println("This generator only supports version " + VERSION);
@@ -265,9 +295,9 @@ public strictfp class MapGenerator {
 			BIOME = Optional.of(Biomes.getBiomeByName(arguments.get("with-biome")));
 		}
 
-		if(arguments.containsKey("with-biome-folder")) {
+		if (arguments.containsKey("with-biome-folder")) {
 			Path path = Paths.get(arguments.get("with-biome-folder"));
-			if(! Files.isDirectory(path)) {
+			if (!Files.isDirectory(path)) {
 				System.out.printf("Biome path %s is not a folder\n", arguments.get("with-biome-folder"));
 				System.exit(-1);
 			}
@@ -277,7 +307,7 @@ public strictfp class MapGenerator {
 
 	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
 	private void generateDebugOutput() {
-		if(!DEBUG) {
+		if (!DEBUG) {
 			return;
 		}
 
