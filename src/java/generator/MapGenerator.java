@@ -173,13 +173,16 @@ public strictfp class MapGenerator {
 		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
 		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		BinaryMask cliffRockMask = new BinaryMask(rock.getBinaryMask(), random.nextLong());
+		cliffRockMask.intersect(land.getBinaryMask()).minus(mountains.getBinaryMask());
 		BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
 		treeMask.enlarge(513).deflate(5).fillCircle(256, 256, 96, false).minus(noProps).trimEdge(3);
-		fieldStoneMask.enlarge(513).deflate(5).fillCircle(256, 256, 96, true).minus(noProps).trimEdge(10);
+		fieldStoneMask.enlarge(513).deflate(5).minus(noProps).trimEdge(10);
 
 		propGenerator.generateProps(treeMask, propGenerator.TREE_GROUPS, 3f);
+		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 2f);
 		propGenerator.generateProps(treeMask, propGenerator.ROCKS, 10f);
 		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 30f);
 
