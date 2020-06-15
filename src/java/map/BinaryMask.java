@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
+import generator.VisualDebugger;
+
 public strictfp class BinaryMask {
 	private boolean[][] mask;
 	private final Random random;
@@ -65,6 +67,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		applySymmetry();
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -74,6 +77,7 @@ public strictfp class BinaryMask {
 				mask[x][y] = !mask[x][y];
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -89,6 +93,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = largeMask;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -108,6 +113,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = smallMask;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -135,6 +141,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -176,6 +183,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -192,6 +200,7 @@ public strictfp class BinaryMask {
 		}
 		mask = maskCopy;
 		applySymmetry();
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -212,6 +221,7 @@ public strictfp class BinaryMask {
 		}
 		mask = maskCopy;
 		applySymmetry();
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -233,6 +243,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -273,6 +284,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -289,6 +301,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -305,6 +318,7 @@ public strictfp class BinaryMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -323,6 +337,7 @@ public strictfp class BinaryMask {
 				}
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 	
@@ -335,6 +350,7 @@ public strictfp class BinaryMask {
 				mask[getSize() - 1 - b][a] = false;
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 	
