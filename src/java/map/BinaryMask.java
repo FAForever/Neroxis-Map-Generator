@@ -13,7 +13,7 @@ import java.util.Random;
 
 import generator.VisualDebugger;
 
-public strictfp class BinaryMask {
+public strictfp class BinaryMask implements Mask {
 	private boolean[][] mask;
 	private final Random random;
 	private final Symmetry symmetry = Symmetry.POINT;
@@ -391,5 +391,10 @@ public strictfp class BinaryMask {
 		}
 
 		out.close();
+	}
+	
+	@Override
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this);
 	}
 }

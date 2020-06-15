@@ -203,4 +203,8 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 	public String getName() {
 		return name;
 	}
+	
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this.binaryMask);
+	}
 }

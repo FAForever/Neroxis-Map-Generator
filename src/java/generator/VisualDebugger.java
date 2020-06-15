@@ -1,101 +1,142 @@
 package generator;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.Insets;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import java.util.HashSet;
+import java.util.Set;
 
 import map.BinaryMask;
 import map.FloatMask;
+import map.Mask;
 
 public class VisualDebugger {
 
-	public static boolean ENABLED = false;// disables mask concurrency
-	public static int perPixelSize = 3;// scale factor for debug image
+	public static boolean ENABLED = false;// when enabled, mask concurrency is disabled
 	
-	private static boolean isRecording = false;
+	// If true, color representation of float masks is scaled to include negative ranges.
+	// If false, all negative values are colored as checkerboard, leaving more color space
+	// for positive numbers.
+	public static boolean ignoreNegativeRange = false;
+	
+	private static boolean isRecordingAllMasks = false;
 	private static BufferedImage currentImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-	private static GraphicsConfiguration gc;
-	private static JFrame frame;
+	private static Set<Integer> whitelistMasks = null;
 	
-	// PUBLIC
-	
-	static void startRecording() {
-		isRecording = true;
-		if (frame == null) {
-			frame = new JFrame(gc);
-			JPanel panel = new JPanel() {
-				@Override
-		        protected void paintComponent(Graphics g) {				
-		            super.paintComponent(g);
-		            Graphics2D g2d = (Graphics2D) g.create();
-	                int x = (getWidth() - currentImage.getWidth()) / 2;
-	                int y = (getHeight() - currentImage.getHeight()) / 2;
-	                g2d.drawImage(currentImage, x, y, this);
-	                g2d.dispose();
-		        }
-				@Override
-				public Dimension getPreferredSize() {
-					return new Dimension(currentImage.getWidth(), currentImage.getHeight());
-				}
-			};
-			frame.add(panel);
-			frame.setVisible(true);
-			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			setFrameSize();
+	public static void whitelistMask(Mask binaryOrFloatMask) {
+		if (whitelistMasks == null) {
+			whitelistMasks = new HashSet<>();
 		}
+		whitelistMasks.add(binaryOrFloatMask.hashCode());
 	}
 	
-	static void stopRecording() {
-		isRecording = false;
+	public static void start() {
+		VisualDebuggerGui.createGui(new VisualDebuggerGui.ImagePanel(() -> currentImage, 10));
+	}
+	
+	public static void startRecordAll() {
+		isRecordingAllMasks = true;
+	}
+	
+	public static void stopRecordAll() {
+		isRecordingAllMasks = false;
 	}
 	
 	public static void visualizeMask(BinaryMask mask) {
-		if (!ENABLED || !isRecording) return;
+		if (!shouldRecord(mask)) {
+			return;
+		}
 		visualize((x, y) -> {
 			return mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB();
-		}, mask.getSize());
+		}, mask.getSize(), "" + mask.hashCode());
 	}
 	
 	public static void visualizeMask(FloatMask mask) {
-		if (!ENABLED || !isRecording) return;
-		// TODO untested
+		if (!shouldRecord(mask)) {
+			return;
+		}
 		visualize((x, y) -> {
 			float value = mask.get(x, y);
 			// if |value| <  1, scale white to black
 			// if |value| 1-10, scale green to red
-			// if |value| > 10, just output blue
-			if (value >= -1 && value <= 1) {
-				float normalized = ((value + 1) / 2);// map to 0 to 1
-				int singleColor = ((int) (normalized * 255)) & 0xFF;
-				return 0xFF_00_00_00
-						& (singleColor << 16)
-						& (singleColor << 8)
-						& (singleColor);
+			// if |value| 10-50, dark blue to blue
+			// if |value| > 100, just output blue
+			
+			if (ignoreNegativeRange && value < 0) {
+				// checkerboard
+				return (x + y) % 2 == 0 ?
+						0xFF_66_66_66 : 0xDD_DD_DD_DD ;
 			}
-			else if (value >= -10 && value <= 10) {
-				float normalized = ((value + 10) / 20);// map to 0 to 1
-				int green = ((int) (255 - (normalized * 255))) & 0xFF;
-				int red = ((int) (normalized * 255)) & 0xFF;
-				return 0xFF_00_00_00
-						& (red << 16)
-						& (green << 8);
+			// For each range we interpolate from color white to the color given in the corresponding mask.
+			// Ranges must be ordered smallest to biggest. Anything bigger than biggest range becomes black.
+			// Anything smaller than smallest becomes checkerboard.
+			int[] colors = new int[] {
+					0xFF_FF_00_00,
+					0xFF_00_FF_00,
+					0xFF_00_00_FF,
+					0xFF_FF_00_FF,
+					0xFF_00_FF_FF,
+					0xFF_00_00_00};
+			int[] ranges = new int[] {1, 2, 5, 10, 20, 50};
+			
+			for (int i = 0; i < colors.length; i++) {
+				int color = colors[i];
+				int rangeMaxAbs = ranges[i];
+				if (value >= -rangeMaxAbs && value <= rangeMaxAbs) {
+					int rangeMinAbs = i > 0 ? ranges[i - 1] : 0;
+					float normalized = normalize(value, rangeMinAbs, rangeMaxAbs);
+					float inverted = Math.max(0, 1 - normalized);
+					
+					int r = (color >>> 16) & 0xFF;
+					int g = (color >>>  8) & 0xFF;
+					int b =  color         & 0xFF;
+					
+					r = r + (int) (inverted * (255 - r));
+					g = g + (int) (inverted * (255 - g));
+					b = b + (int) (inverted * (255 - b));
+					
+					return 0xFF_00_00_00 | (r << 16)| (g << 8) | b;
+				}
+			}
+			if (value < 0) {
+				// checkerboard / dither
+				return (x + y) % 2 == 0 ?
+						0xFF_66_66_66 : 0xDD_DD_DD_DD ;
 			} else {
-				return 0xFF_00_00_FF;
+				return 0xFF_00_00_00;
 			}
-		}, mask.getSize());
+		}, mask.getSize(), "" + mask.hashCode());
 	}
 	
-	// PRIVATE
+	private static boolean shouldRecord(Mask mask) {
+		if (!ENABLED) {
+			return false;
+		}
+		return (whitelistMasks == null && isRecordingAllMasks)
+				|| (whitelistMasks != null && whitelistMasks.contains(mask.hashCode()));
+	}
+	
+	/**
+	 * Normalize value range from given range to [0, 1].
+	 * If {@link #ignoreNegativeRange} is true, given value must be positive.
+	 * Given ranges must be positive. Math.abs(value) must be between rangeMin and rangeMax.
+	 */
+	private static float normalize(float value, float rangeMin, float rangeMax) {
+		float rangeDiff = rangeMax - rangeMin;
+		float result;
+		if (ignoreNegativeRange) {
+			result = (value - rangeMin) / rangeDiff;
+		} else {
+			float negColorSpace = 0.3f;// how much of the color space is given to negative numbers
+			if (value >= 0) {
+				result = negColorSpace + ((value - rangeMin) * (1 - negColorSpace) / rangeDiff);
+				result = (float) Math.pow(result, 1.4);
+			} else {
+				result = negColorSpace + ((value + rangeMin) * negColorSpace / rangeDiff);
+			}
+		}
+		return result;
+	}
 	
 	@FunctionalInterface
 	private interface ImageSource {
@@ -105,7 +146,8 @@ public class VisualDebugger {
 		public int get(int x, int y);
 	}
 	
-	private static void visualize(ImageSource imageSource, int size) {
+	private static void visualize(ImageSource imageSource, int size, String maskName) {
+		int perPixelSize = calculateAutoZoom(size);
 		int imageSize = size * perPixelSize;
 		currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 		// iterate source pixels
@@ -122,15 +164,20 @@ public class VisualDebugger {
 				}
 			}
 		}
-		
-		frame.repaint();
-		setFrameSize();
+		VisualDebuggerGui.update("Mask: " + maskName + ", Zoom: x" + perPixelSize);
 	}
 	
-	private static void setFrameSize() {
-		Insets insets = frame.getInsets();
-		int insetsWidth = insets.left + insets.right + 10;
-		int insetsHeight = insets.top + insets.bottom + 10;
-		frame.setSize(insetsWidth + currentImage.getWidth(), insetsHeight + currentImage.getHeight());
+	private static int calculateAutoZoom(int imageSize) {
+		int perPixelSize;
+		if (imageSize <= 32) {
+			perPixelSize = 5;
+		} else if (imageSize <= 128) {
+			perPixelSize = 3;
+		} else if (imageSize <= 256) {
+			perPixelSize = 2;
+		} else {
+			perPixelSize = 1;
+		}
+		return perPixelSize;
 	}
 }
