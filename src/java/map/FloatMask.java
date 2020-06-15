@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
-public strictfp class FloatMask {
+import generator.VisualDebugger;
+
+public strictfp class FloatMask implements Mask {
 	private float[][] mask;
 	private final Random random;
 	private final Symmetry symmetry = Symmetry.POINT;
@@ -62,6 +64,7 @@ public strictfp class FloatMask {
 				}
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -71,6 +74,7 @@ public strictfp class FloatMask {
 				mask[x][y] += other.get(x, y);
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 	
@@ -80,6 +84,7 @@ public strictfp class FloatMask {
 				mask[x][y] = StrictMath.max(mask[x][y],other.get(x, y));
 			}
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -94,6 +99,7 @@ public strictfp class FloatMask {
 			otherCopy.acid(0.5f);
 		}
 		applySymmetry();
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 	
@@ -111,6 +117,7 @@ public strictfp class FloatMask {
 			add(layer.init(otherCopy, 0 , -underWaterSlope));
 			otherCopy.acid(0.5f);
 		}
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -133,6 +140,7 @@ public strictfp class FloatMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -174,6 +182,7 @@ public strictfp class FloatMask {
 			}
 		}
 		mask = maskCopy;
+		VisualDebugger.visualizeMask(this);
 		return this;
 	}
 
@@ -215,5 +224,10 @@ public strictfp class FloatMask {
 		}
 
 		out.close();
+	}
+	
+	@Override
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this);
 	}
 }

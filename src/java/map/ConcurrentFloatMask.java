@@ -123,4 +123,8 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	public String getName() {
 		return name;
 	}
+	
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this.floatMask);
+	}
 }
