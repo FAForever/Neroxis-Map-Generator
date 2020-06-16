@@ -230,4 +230,8 @@ public strictfp class FloatMask implements Mask {
 	public void startVisualDebugger() {
 		VisualDebugger.whitelistMask(this);
 	}
+	
+	public void startVisualDebugger(String maskName) {
+		VisualDebugger.whitelistMask(this, maskName);
+	}
 }

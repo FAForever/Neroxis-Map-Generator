@@ -1,6 +1,7 @@
 package util;
 
 import generator.MapGenerator;
+import generator.VisualDebugger;
 import map.ConcurrentBinaryMask;
 import map.ConcurrentFloatMask;
 import map.ConcurrentMask;
@@ -18,12 +19,20 @@ public strictfp class Pipeline {
 	private static List<Entry> pipeline = new ArrayList<>();
 
     public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>, ?> function) {
-        addInternal(executingMask, dep, function);
+    	if (VisualDebugger.ENABLED) {
+			function.apply(dep);
+			return executingMask;
+		}
+    	addInternal(executingMask, dep, function);
         return executingMask;
     }
 
     public static ConcurrentFloatMask add(ConcurrentFloatMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>,?> function) {
-        addInternal(executingMask, dep, function);
+    	if (VisualDebugger.ENABLED) {
+			function.apply(dep);
+			return executingMask;
+		}
+    	addInternal(executingMask, dep, function);
         return executingMask;
     }
 

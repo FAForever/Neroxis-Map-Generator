@@ -3,7 +3,9 @@ package generator;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import map.BinaryMask;
@@ -20,13 +22,17 @@ public class VisualDebugger {
 	public static boolean ignoreNegativeRange = false;
 	
 	private static boolean isDrawAllMasks = false;
-	private static Set<Integer> drawMasksWhitelist = null;// whitelisted masks are always drawn
+	private static Map<Integer, String> drawMasksWhitelist = null;
 	
 	public static void whitelistMask(Mask binaryOrFloatMask) {
+		whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
+	}
+	
+	public static void whitelistMask(Mask binaryOrFloatMask, String name) {
 		if (drawMasksWhitelist == null) {
-			drawMasksWhitelist = new HashSet<>();
+			drawMasksWhitelist = new HashMap<>();
 		}
-		drawMasksWhitelist.add(binaryOrFloatMask.hashCode());
+		drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
 	}
 	
 	public static void startRecordAll() {
@@ -43,7 +49,7 @@ public class VisualDebugger {
 		}
 		visualize((x, y) -> {
 			return mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB();
-		}, mask.getSize(), "" + mask.hashCode());
+		}, mask.getSize(), mask.hashCode());
 	}
 	
 	public static void visualizeMask(FloatMask mask) {
@@ -95,7 +101,7 @@ public class VisualDebugger {
 			} else {
 				return 0xFF_00_00_00;
 			}
-		}, mask.getSize(), "" + mask.hashCode());
+		}, mask.getSize(), mask.hashCode());
 	}
 	
 	private static boolean shouldRecord(Mask mask) {
@@ -103,7 +109,7 @@ public class VisualDebugger {
 			return false;
 		}
 		return (drawMasksWhitelist == null && isDrawAllMasks)
-				|| (drawMasksWhitelist != null && drawMasksWhitelist.contains(mask.hashCode()));
+				|| (drawMasksWhitelist != null && drawMasksWhitelist.containsKey(mask.hashCode()));
 	}
 	
 	/**
@@ -136,7 +142,7 @@ public class VisualDebugger {
 		public int get(int x, int y);
 	}
 	
-	private static void visualize(ImageSource imageSource, int size, String maskName) {
+	private static void visualize(ImageSource imageSource, int size, int maskHash) {
 		int perPixelSize = calculateAutoZoom(size);
 		int imageSize = size * perPixelSize;
 		BufferedImage currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
@@ -158,6 +164,7 @@ public class VisualDebugger {
 			VisualDebuggerGui.createGui();
 		}
 		VisualDebuggerGui.update("lastChanged", currentImage, perPixelSize);
+		String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
 		VisualDebuggerGui.update(maskName, currentImage, perPixelSize);
 	}
 	
