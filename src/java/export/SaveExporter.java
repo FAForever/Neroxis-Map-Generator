@@ -1,6 +1,7 @@
 package export;
 
 import map.SCMap;
+import util.Vector3f;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -67,10 +68,10 @@ public strictfp class SaveExporter {
 		out.writeBytes("  next_unit_id = '1',\n");
 		out.writeBytes("  Armies = {\n");
 		for(int i = 0; i < map.getSpawns().length; i++) {
-			saveArmy("ARMY_"+ (i+1));
+			saveArmy("ARMY_"+ (i+1), map);
 		}
-		saveArmy("ARMY_9");
-		saveArmy("NEUTRAL_CIVILIAN");
+		saveArmy("ARMY_17", map);
+		saveArmy("NEUTRAL_CIVILIAN", map);
 		out.writeBytes("  },\n");
 		out.writeBytes("}\n");
 
@@ -78,7 +79,7 @@ public strictfp class SaveExporter {
 		out.close();
 	}
 	
-	private static void saveArmy(String name) throws IOException {
+	private static void saveArmy(String name, SCMap map) throws IOException {
 		out.writeBytes("    ['" + name + "'] = {\n");
 		out.writeBytes("      personality = '',\n");
 		out.writeBytes("      plans = '',\n");
@@ -89,12 +90,35 @@ public strictfp class SaveExporter {
 		out.writeBytes("      ['Units'] = GROUP {\n");
 		out.writeBytes("        orders = '',\n");
 		out.writeBytes("        platoon = '',\n");
-		out.writeBytes("        Units = {\n");
-		out.writeBytes("          ['INITIAL'] = GROUP {\n");
-		out.writeBytes("            orders = '',\n");
-		out.writeBytes("            platoon = '',\n");
-		out.writeBytes("            Units = {},\n");
-		out.writeBytes("          },\n");
+		if(name.equals("ARMY_17")) {
+			out.writeBytes("        Units = {\n");
+			out.writeBytes("          ['INITIAL'] = GROUP {\n");
+			out.writeBytes("            orders = '',\n");
+			out.writeBytes("            platoon = '',\n");
+			out.writeBytes("            Units = {\n");
+			for(int i = 0; i < map.getUnitCount(); i++) {
+				saveUnit(map.getUnit(i), i);
+			}
+			out.writeBytes("            },\n");
+			out.writeBytes("          },\n");
+			out.writeBytes("          ['WRECKAGE'] = GROUP {\n");
+			out.writeBytes("            orders = '',\n");
+			out.writeBytes("            platoon = '',\n");
+			out.writeBytes("            Units = {\n");
+			for(int i = 0; i < map.getWreckCount(); i++) {
+				saveUnit(map.getWreck(i), i);
+			}
+			out.writeBytes("            },\n");
+			out.writeBytes("          },\n");
+		}
+		else {
+			out.writeBytes("        Units = {\n");
+			out.writeBytes("          ['INITIAL'] = GROUP {\n");
+			out.writeBytes("            orders = '',\n");
+			out.writeBytes("            platoon = '',\n");
+			out.writeBytes("            Units = {},\n");
+			out.writeBytes("          },\n");
+		}
 		out.writeBytes("        },\n");
 		out.writeBytes("      },\n");
 		out.writeBytes("      PlatoonBuilders = {\n");
@@ -102,5 +126,17 @@ public strictfp class SaveExporter {
 		out.writeBytes("        Builders = {},\n");
 		out.writeBytes("      },\n");
 		out.writeBytes("    },\n");	
+	}
+
+	private static void saveUnit(map.Unit unit, int i) throws IOException {
+		out.writeBytes(String.format("['UNIT_%d'] = {\n", i));
+		out.writeBytes(String.format("	type = '%s',\n", unit.getType()));
+		out.writeBytes("			orders = '',\n");
+		out.writeBytes("			platoon = '',\n");
+		Vector3f v = unit.getPosition();
+		out.writeBytes(String.format("			Position = { %f, %f, %f },\n", v.x, v.y, v.z));
+		float rot = unit.getRotation();
+		out.writeBytes(String.format("			Orientation = { 0, %f, 0 },\n", rot));
+		out.writeBytes("},\n");
 	}
 }

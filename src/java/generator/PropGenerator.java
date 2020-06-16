@@ -63,8 +63,8 @@ public strictfp class PropGenerator {
 		while (location != null) {
 			spawnableCopy.fillCircle(location.x, location.y, separation, false);
 			spawnableCopy.fillCircle(map.getSize() - location.x, map.getSize() - location.y, separation, false);
-			Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location.x, location.y), random.nextFloat());
-			Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), prop1.getRotation() + 0.5f);
+			Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location.x, location.y), random.nextFloat()*3.14159f);
+			Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), prop1.getRotation() + 3.14159f);
 			map.addProp(prop1);
 			map.addProp(prop2);
 			location = spawnableCopy.getRandomPosition();

@@ -32,8 +32,10 @@ public strictfp class MapGenerator {
 	public static final String VERSION = "0.1.6";
 
 	//read from cli args
+//	private static Random randomseed = new Random();
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
+//	private static long SEED = randomseed.nextLong();
 	private static long SEED = 1234L;
 	private static Optional<Biome> BIOME = Optional.empty();
 
@@ -169,6 +171,29 @@ public strictfp class MapGenerator {
 		for (int i = 0; i < map.getHydros().length; i++) {
 			noProps.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 7, true);
 		}
+
+		WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
+		BinaryMask t1LandWreckMask = new BinaryMask(64, random.nextLong());
+		t1LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).deflate(1);
+		BinaryMask t2LandWreckMask = new BinaryMask(64, random.nextLong());
+		t2LandWreckMask.randomize(0.005f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask);
+		BinaryMask t3LandWreckMask = new BinaryMask(64, random.nextLong());
+		t3LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
+		BinaryMask t2NavyWreckMask = new BinaryMask(64, random.nextLong());
+		t2NavyWreckMask.randomize(0.01f).intersect(land.getBinaryMask().outline()).minus(noProps);
+		BinaryMask navyFactoryWreckMask = new BinaryMask(64, random.nextLong());
+		navyFactoryWreckMask.randomize(0.01f).minus(grass.getBinaryMask()).minus(noProps).deflate(5);
+		UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
+
+		wreckGenerator.generateWrecks(t1LandWreckMask, wreckGenerator.T1_Land, 2f);
+		wreckGenerator.generateWrecks(t2LandWreckMask, wreckGenerator.T2_Land, 15f);
+		wreckGenerator.generateWrecks(t3LandWreckMask, wreckGenerator.T3_Land, 30f);
+		wreckGenerator.generateWrecks(t2NavyWreckMask, wreckGenerator.T2_Navy, 60f);
+		wreckGenerator.generateWrecks(navyFactoryWreckMask, wreckGenerator.Navy_Factory, 120f);
+
+		BinaryMask allWreckMask = new BinaryMask(513, random.nextLong());
+		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
+		noProps.combine(allWreckMask);
 
 		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());

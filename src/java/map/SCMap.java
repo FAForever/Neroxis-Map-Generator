@@ -67,6 +67,8 @@ public strictfp class SCMap {
 	private final Vector3f[] mexs;
 	private final Vector3f[] hydros;
 	private final ArrayList<Prop> props;
+	private final ArrayList<Unit> units;
+	private final ArrayList<Unit> wrecks;
 
 	private final BufferedImage preview;
 	private final BufferedImage heightmap;
@@ -86,6 +88,8 @@ public strictfp class SCMap {
 		mexs = new Vector3f[mexCount];
 		hydros = new Vector3f[hydroCount];
 		props = new ArrayList<>();
+		units = new ArrayList<>();
+		wrecks = new ArrayList<>();
 
 		preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
 		heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
@@ -147,6 +151,30 @@ public strictfp class SCMap {
 	
 	public void addProp(Prop prop){
 		props.add(prop);
+	}
+
+	public int getUnitCount() {
+		return units.size();
+	}
+
+	public Unit getUnit(int i){
+		return units.get(i);
+	}
+
+	public void addUnit(Unit unit){
+		units.add(unit);
+	}
+
+	public int getWreckCount() {
+		return wrecks.size();
+	}
+
+	public Unit getWreck(int i){
+		return wrecks.get(i);
+	}
+
+	public void addWreck(Unit wreck){
+		wrecks.add(wreck);
 	}
 
 	public BufferedImage getPreview() {
