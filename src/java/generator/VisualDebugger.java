@@ -20,7 +20,6 @@ public class VisualDebugger {
 	public static boolean ignoreNegativeRange = false;
 	
 	private static boolean isRecordingAllMasks = false;
-	private static BufferedImage currentImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 	private static Set<Integer> whitelistMasks = null;
 	
 	public static void whitelistMask(Mask binaryOrFloatMask) {
@@ -28,10 +27,6 @@ public class VisualDebugger {
 			whitelistMasks = new HashSet<>();
 		}
 		whitelistMasks.add(binaryOrFloatMask.hashCode());
-	}
-	
-	public static void start() {
-		VisualDebuggerGui.createGui(new VisualDebuggerGui.ImagePanel(() -> currentImage, 10));
 	}
 	
 	public static void startRecordAll() {
@@ -149,7 +144,7 @@ public class VisualDebugger {
 	private static void visualize(ImageSource imageSource, int size, String maskName) {
 		int perPixelSize = calculateAutoZoom(size);
 		int imageSize = size * perPixelSize;
-		currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
+		BufferedImage currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 		// iterate source pixels
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
@@ -164,7 +159,11 @@ public class VisualDebugger {
 				}
 			}
 		}
-		VisualDebuggerGui.update("Mask: " + maskName + ", Zoom: x" + perPixelSize);
+		if (!VisualDebuggerGui.isCreated()) {
+			VisualDebuggerGui.createGui();
+		}
+		VisualDebuggerGui.update("lastChanged", currentImage, perPixelSize);
+		VisualDebuggerGui.update(maskName, currentImage, perPixelSize);
 	}
 	
 	private static int calculateAutoZoom(int imageSize) {
