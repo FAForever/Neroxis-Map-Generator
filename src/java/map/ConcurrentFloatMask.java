@@ -15,6 +15,10 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	public ConcurrentFloatMask(int size, long seed, String name) {
 		this.floatMask = new FloatMask(size, seed);
 		this.name = name;
+		
+		Pipeline.add(this, Arrays.asList(), res ->
+				Arrays.asList()
+		);
 	}
 
 	public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
