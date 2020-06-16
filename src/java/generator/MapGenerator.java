@@ -174,7 +174,7 @@ public strictfp class MapGenerator {
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
 		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
-		cliffRockMask.intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask());
+		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(land.getBinaryMask().invert());
 		BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
@@ -182,9 +182,9 @@ public strictfp class MapGenerator {
 		fieldStoneMask.enlarge(513).deflate(5).minus(noProps).trimEdge(10);
 
 		propGenerator.generateProps(treeMask, propGenerator.TREE_GROUPS, 3f);
-		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 2f);
+		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 1f);
 		propGenerator.generateProps(treeMask, propGenerator.ROCKS, 10f);
-		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 30f);
+		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 60f);
 
 		BinaryMask lightGrass = new BinaryMask(grass.getBinaryMask(), random.nextLong());
 		lightGrass.randomize(0.5f);
