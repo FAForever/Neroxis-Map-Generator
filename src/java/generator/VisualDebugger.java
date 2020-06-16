@@ -50,21 +50,18 @@ public class VisualDebugger {
 		if (!shouldRecord(mask)) {
 			return;
 		}
+		ImageSource checkerBoard = (x , y) -> {
+			return (x + y) % 2 == 0 ? 0xFF_66_66_66 : 0xDD_DD_DD_DD ;
+		};
 		visualize((x, y) -> {
 			float value = mask.get(x, y);
-			// if |value| <  1, scale white to black
-			// if |value| 1-10, scale green to red
-			// if |value| 10-50, dark blue to blue
-			// if |value| > 100, just output blue
 			
 			if (ignoreNegativeRange && value < 0) {
-				// checkerboard
-				return (x + y) % 2 == 0 ?
-						0xFF_66_66_66 : 0xDD_DD_DD_DD ;
+				return checkerBoard.get(x, y);
 			}
-			// For each range we interpolate from color white to the color given in the corresponding mask.
-			// Ranges must be ordered smallest to biggest. Anything bigger than biggest range becomes black.
-			// Anything smaller than smallest becomes checkerboard.
+			// For each range we interpolate from color white to the color given in the corresponding array.
+			// Ranges must be positive and ordered smallest to biggest. Anything bigger than biggest range
+			// becomes black. Anything smaller than smallest becomes checkerboard.
 			int[] colors = new int[] {
 					0xFF_FF_00_00,
 					0xFF_00_FF_00,
@@ -94,9 +91,7 @@ public class VisualDebugger {
 				}
 			}
 			if (value < 0) {
-				// checkerboard
-				return (x + y) % 2 == 0 ?
-						0xFF_66_66_66 : 0xDD_DD_DD_DD ;
+				return checkerBoard.get(x, y);
 			} else {
 				return 0xFF_00_00_00;
 			}
