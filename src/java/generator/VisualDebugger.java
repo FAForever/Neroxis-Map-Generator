@@ -12,29 +12,29 @@ import map.Mask;
 
 public class VisualDebugger {
 
-	public static boolean ENABLED = false;// when enabled, mask concurrency is disabled
+	public static final boolean ENABLED = false;// when enabled, mask concurrency is disabled
 	
-	// If true, color representation of float masks is scaled to include negative ranges.
-	// If false, all negative values are colored as checkerboard, leaving more color space
+	// If false, color representation of float masks is scaled to include negative ranges.
+	// If true, all negative values are colored as checkerboard, leaving more color space
 	// for positive numbers.
 	public static boolean ignoreNegativeRange = false;
 	
-	private static boolean isRecordingAllMasks = false;
-	private static Set<Integer> whitelistMasks = null;
+	private static boolean isDrawAllMasks = false;
+	private static Set<Integer> drawMasksWhitelist = null;// whitelisted masks are always drawn
 	
 	public static void whitelistMask(Mask binaryOrFloatMask) {
-		if (whitelistMasks == null) {
-			whitelistMasks = new HashSet<>();
+		if (drawMasksWhitelist == null) {
+			drawMasksWhitelist = new HashSet<>();
 		}
-		whitelistMasks.add(binaryOrFloatMask.hashCode());
+		drawMasksWhitelist.add(binaryOrFloatMask.hashCode());
 	}
 	
 	public static void startRecordAll() {
-		isRecordingAllMasks = true;
+		isDrawAllMasks = true;
 	}
 	
 	public static void stopRecordAll() {
-		isRecordingAllMasks = false;
+		isDrawAllMasks = false;
 	}
 	
 	public static void visualizeMask(BinaryMask mask) {
@@ -94,7 +94,7 @@ public class VisualDebugger {
 				}
 			}
 			if (value < 0) {
-				// checkerboard / dither
+				// checkerboard
 				return (x + y) % 2 == 0 ?
 						0xFF_66_66_66 : 0xDD_DD_DD_DD ;
 			} else {
@@ -107,8 +107,8 @@ public class VisualDebugger {
 		if (!ENABLED) {
 			return false;
 		}
-		return (whitelistMasks == null && isRecordingAllMasks)
-				|| (whitelistMasks != null && whitelistMasks.contains(mask.hashCode()));
+		return (drawMasksWhitelist == null && isDrawAllMasks)
+				|| (drawMasksWhitelist != null && drawMasksWhitelist.contains(mask.hashCode()));
 	}
 	
 	/**
