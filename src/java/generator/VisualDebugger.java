@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import map.BinaryMask;
 import map.FloatMask;
@@ -14,11 +12,14 @@ import map.Mask;
 
 public class VisualDebugger {
 
-	public static final boolean ENABLED = false;// when enabled, mask concurrency is disabled
+	/** When enabled, mask concurrency is disabled.
+	 */
+	public static final boolean ENABLED = false;
 	
-	// If false, color representation of float masks is scaled to include negative ranges.
-	// If true, all negative values are colored as checkerboard, leaving more color space
-	// for positive numbers.
+	/** If false, color representation of float masks is scaled to include negative ranges.
+	 * If true, all negative values are colored as checkerboard, leaving more color space
+	 * for positive numbers.
+	 */
 	public static boolean ignoreNegativeRange = false;
 	
 	private static boolean isDrawAllMasks = false;
