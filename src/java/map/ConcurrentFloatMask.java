@@ -15,10 +15,6 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	public ConcurrentFloatMask(int size, long seed, String name) {
 		this.floatMask = new FloatMask(size, seed);
 		this.name = name;
-
-		Pipeline.add(this, Arrays.asList(), res ->
-				Arrays.asList()
-		);
 	}
 
 	public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
@@ -35,10 +31,6 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	}
 
 	public ConcurrentFloatMask init(ConcurrentBinaryMask other, float low, float high) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.init(other.getBinaryMask(), low, high);
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this, other), res -> {
 				return this.floatMask.init(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), low, high);
 			}
@@ -46,60 +38,30 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	}
 
 	public ConcurrentFloatMask add(ConcurrentFloatMask other) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.add(other.getFloatMask());
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this, other), res ->
 				this.floatMask.add(((ConcurrentFloatMask)res.get(1)).getFloatMask())
 		);
 	}
 
-	public ConcurrentFloatMask max(ConcurrentBinaryMask other) {
-		if (VisualDebugger.ENABLED) {
-			throw new UnsupportedOperationException();
-		}
-		return Pipeline.add(this, Arrays.asList(this, other), res ->
-				// Probably a bug, res should be BinaryMask
-				this.floatMask.max(((ConcurrentFloatMask)res.get(1)).getFloatMask())
-		);
-	}
-
 	public ConcurrentFloatMask maskToMoutains(float firstSlope, float slope, ConcurrentBinaryMask other) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.maskToMoutains(firstSlope, slope, other.getBinaryMask());
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this, other), res ->
 				this.floatMask.maskToMoutains(firstSlope, slope, ((ConcurrentBinaryMask)res.get(1)).getBinaryMask())
 		);
 	}
 
 	public ConcurrentFloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, ConcurrentBinaryMask other) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.maskToHeightmap(slope, underWaterSlope, maxRepeat, other.getBinaryMask());
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this, other), res ->
 				this.floatMask.maskToHeightmap(slope, underWaterSlope, maxRepeat, ((ConcurrentBinaryMask)res.get(1)).getBinaryMask())
 		);
 	}
 
 	public ConcurrentFloatMask smooth(float radius) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.smooth(radius);
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this), res ->
 				this.floatMask.smooth(radius)
 		);
 	}
 
 	public ConcurrentFloatMask smooth(float radius, ConcurrentBinaryMask limiter) {
-		if (VisualDebugger.ENABLED) {
-			this.floatMask.smooth(radius, limiter.getBinaryMask());
-			return this;
-		}
 		return Pipeline.add(this, Arrays.asList(this, limiter), res ->
 				this.floatMask.smooth(radius, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
 		);
@@ -126,5 +88,9 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	
 	public void startVisualDebugger() {
 		VisualDebugger.whitelistMask(this.floatMask);
+	}
+	
+	public void startVisualDebugger(String maskName) {
+		VisualDebugger.whitelistMask(this.floatMask, maskName);
 	}
 }
