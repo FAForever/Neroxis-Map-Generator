@@ -17,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
+import lombok.Value;
+
 public class VisualDebuggerGui {
 
 	public static final boolean AUTO_SELECT_NEW_MASKS = false;
@@ -63,22 +65,9 @@ public class VisualDebuggerGui {
 		}
 	}
 	
+	@Value
 	public static class MaskListItem {
-		public final String maskName;
-		public MaskListItem(String maskName) {
-			this.maskName = maskName;
-		}
-		@Override
-		public int hashCode() {
-			return maskName.hashCode();
-		}
-		@Override
-		public boolean equals(Object other) {
-			if (other instanceof MaskListItem) {
-				return this.maskName.equals(((MaskListItem)other).maskName);
-			}
-			return false;
-		}
+		String maskName;
 		@Override
 		public String toString() {
 			return "  " + maskName + "  ";
