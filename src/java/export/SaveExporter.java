@@ -30,7 +30,7 @@ public strictfp class SaveExporter {
 			out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
 			out.writeBytes("        },\n");
 		}
-		for(int i = 0; i < map.getMexs().length; i++) {
+		for(int i = 0; i < map.getMexes().length; i++) {
 			out.writeBytes("        ['MASS_" + (i+1) +"'] = {\n");
 			out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
 			out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
@@ -39,7 +39,7 @@ public strictfp class SaveExporter {
 			out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
 			out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
 			out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-			out.writeBytes("          ['position'] = VECTOR3( " + (map.getMexs()[i].x + 0.5f) + ", " + map.getMexs()[i].y + ", " + (map.getMexs()[i].z + 0.5f) + " ),\n");
+			out.writeBytes("          ['position'] = VECTOR3( " + (map.getMexes()[i].x + 0.5f) + ", " + map.getMexes()[i].y + ", " + (map.getMexes()[i].z + 0.5f) + " ),\n");
 			out.writeBytes("        },\n");
 		}
 		for(int i = 0; i < map.getHydros().length; i++) {
