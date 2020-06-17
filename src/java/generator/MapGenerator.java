@@ -180,7 +180,8 @@ public strictfp class MapGenerator {
 		BinaryMask t3LandWreckMask = new BinaryMask(64, random.nextLong());
 		t3LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
 		BinaryMask t2NavyWreckMask = new BinaryMask(64, random.nextLong());
-		t2NavyWreckMask.randomize(0.01f).intersect(land.getBinaryMask().outline()).minus(noProps);
+		BinaryMask navyLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
+		t2NavyWreckMask.randomize(0.01f).intersect(navyLandCopy.outline()).minus(noProps);
 		BinaryMask navyFactoryWreckMask = new BinaryMask(64, random.nextLong());
 		navyFactoryWreckMask.randomize(0.01f).minus(grass.getBinaryMask()).minus(noProps).deflate(2).trimEdge(10);
 		UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
