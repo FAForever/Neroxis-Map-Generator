@@ -174,7 +174,8 @@ public strictfp class MapGenerator {
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
 		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
-		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(land.getBinaryMask().invert());
+		BinaryMask cliffLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
+		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(cliffLandCopy.invert());
 		BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
