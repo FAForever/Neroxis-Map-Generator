@@ -9,8 +9,8 @@ import util.Vector3f;
 import java.util.Random;
 
 public strictfp class UnitGenerator {
-    public final String[] STRUCTURES = {
-
+    public static final String[] STRUCTURES = {
+        //Add Civilian Structures here
     };
 
     private final SCMap map;
@@ -24,13 +24,13 @@ public strictfp class UnitGenerator {
     private Vector3f placeOnHeightmap(float x, float z, Vector3f v) {
         v.x = x;
         v.z = z;
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (SCMap.HEIGHTMAP_SCALE);
         return v;
     }
 
     private Vector3f placeOnHeightmap(float x, float z) {
         Vector3f v = new Vector3f(x, 0, z);
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (SCMap.HEIGHTMAP_SCALE);
         return v;
     }
 

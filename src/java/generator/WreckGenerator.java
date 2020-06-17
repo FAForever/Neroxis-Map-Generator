@@ -9,13 +9,13 @@ import util.Vector3f;
 import java.util.Random;
 
 public strictfp class WreckGenerator {
-    public final String[] T1_Land = {
+    public static final String[] T1_Land = {
             "UEL0201",
             "URL0107",
             "UAL0201",
             "XSL0201"
     };
-    public final String[] T2_Land = {
+    public static final String[] T2_Land = {
             "DRL0204",
             "URL0202",
             "DEL0204",
@@ -25,7 +25,7 @@ public strictfp class WreckGenerator {
             "XSL0203",
             "XSL0202"
     };
-    public final String[] T3_Land = {
+    public static final String[] T3_Land = {
             "XEL0305",
             "UEL0303",
             "URL0303",
@@ -33,13 +33,13 @@ public strictfp class WreckGenerator {
             "UAL0303",
             "XSL0303"
     };
-    public final String[] T2_Navy = {
+    public static final String[] T2_Navy = {
             "UES0201",
             "URS0201",
             "XSS0201",
             "UAS0201"
     };
-    public final String[] Navy_Factory = {
+    public static final String[] Navy_Factory = {
             "UEB0103",
             "URB0103",
             "UAB0103",
@@ -57,13 +57,13 @@ public strictfp class WreckGenerator {
     private Vector3f placeOnHeightmap(float x, float z, Vector3f v) {
         v.x = x;
         v.z = z;
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (SCMap.HEIGHTMAP_SCALE);
         return v;
     }
 
     private Vector3f placeOnHeightmap(float x, float z) {
         Vector3f v = new Vector3f(x, 0, z);
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
+        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (SCMap.HEIGHTMAP_SCALE);
         return v;
     }
 
