@@ -28,11 +28,6 @@ public strictfp class MarkerGenerator {
 		v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[] { 0 })[0] * (map.HEIGHTMAP_SCALE);
 		return v;
 	}
-
-	private void randomizeVectorPair(Vector3f v1, Vector3f v2) {
-		placeOnHeightmap((int)(random.nextFloat() * map.getSize()), (int)(random.nextFloat() * map.getSize()), v1);
-		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
-	}	
 	
 	public void generateSpawns(BinaryMask spawnable, float separation) {
 		BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
@@ -61,47 +56,58 @@ public strictfp class MarkerGenerator {
 			spawnable.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, false);
 		}
 
-		int totalExpMexCount = random.nextInt(map.getMexes().length/2-baseMexCount/2)*2;
-		generateMexExpansions(spawnable, baseMexCount, totalExpMexCount);
+		int possibleExpMexCount = random.nextInt((map.getMexes().length-baseMexCount)/2)*2;
+		int actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
 
-		for (int i = baseMexCount+totalExpMexCount; i < map.getMexes().length; i+= 2) {
+		for (int i = baseMexCount+actualExpMexCount; i < map.getMexes().length; i+= 2) {
+			Vector2f mexLocation = spawnable.getRandomPosition();
+
+			if (mexLocation == null) {
+				break;
+			}
+
 			map.getMexes()[i] = new Vector3f(0, 0, 0);
 			map.getMexes()[i + 1] = new Vector3f(0, 0, 0);
-			randomizeVectorPair(map.getMexes()[i], map.getMexes()[i + 1]);
-		}
 
-		for (int i = baseMexCount+totalExpMexCount; i < map.getMexes().length; i+= 2) {
-			while (!isMexValid(i, mexSpacing, mexSpacing, spawnable)) {
-				randomizeVectorPair(map.getMexes()[i], map.getMexes()[i + 1]);
-			}
+			placeOnHeightmap(mexLocation.x, mexLocation.y, map.getMexes()[i]);
+			placeOnHeightmap(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, map.getMexes()[i+1]);
+
+			spawnable.fillCircle(mexLocation.x, mexLocation.y, mexSpacing, false);
+			spawnable.fillCircle(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, mexSpacing, false);
 		}
 	}
 
-	public void generateMexExpansions(BinaryMask spawnable, int baseMexCount, int totalExpMexCount) {
+	public int generateMexExpansions(BinaryMask spawnable, int baseMexCount, int possibleExpMexCount) {
 		Vector2f expLocation;
 		Vector2f mexLocation;
+		int actualExpMexCount = possibleExpMexCount;
 		int expMexCount;
-		int expMexCountLeft = totalExpMexCount;
+		int expMexCountLeft = possibleExpMexCount;
 		int iMex = baseMexCount;
 		int expMexSpacing = 10;
 		int expSize = 10;
-		int expSpacing = 60;
+		int expSpacing = 64;
 
 		BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
 		BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong());
 
 		for (int i = 0; i < map.getSpawns().length; i++) {
-			spawnableCopy.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 64, false);
+			spawnableCopy.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, false);
 		}
 
 		while (expMexCountLeft>0){
 			expLocation = spawnableCopy.getRandomPosition();
 
-			while (!isMexExpValid(expLocation, expSize, .5f, spawnable)) {
+			while (!isMexExpValid(expLocation, expSize, .5f, spawnable) && expLocation != null) {
 				spawnableCopy.fillCircle(expLocation.x, expLocation.y,1, false);
 				spawnableCopy.fillCircle(map.getSize() - expLocation.x, map.getSize() - expLocation.y,1, false);
 
 				expLocation = spawnableCopy.getRandomPosition();
+			}
+
+			if (expLocation == null){
+				actualExpMexCount = possibleExpMexCount - expMexCountLeft;
+				break;
 			}
 
 			spawnableCopy.fillCircle(expLocation.x, expLocation.y, expSpacing, false);
@@ -111,10 +117,14 @@ public strictfp class MarkerGenerator {
 			expansion.fillCircle(map.getSize() - expLocation.x, map.getSize() - expLocation.y, 1, true);
 			expansion.inflate(expSize).intersect(spawnable);
 
-			expMexCount = StrictMath.min((random.nextInt(2)+3)*2,expMexCountLeft);
+			expMexCount = StrictMath.min((random.nextInt(3)+2)*2,expMexCountLeft);
 
 			for (int i = iMex; i < iMex+expMexCount; i+= 2) {
 				mexLocation = expansion.getRandomPosition();
+				if (mexLocation==null){
+					expMexCount = i - iMex - 2;
+					break;
+				}
 
 				map.getMexes()[i] = new Vector3f(0, 0, 0);
 				map.getMexes()[i + 1] = new Vector3f(0, 0, 0);
@@ -125,8 +135,11 @@ public strictfp class MarkerGenerator {
 				expansion.fillCircle(mexLocation.x, mexLocation.y, expMexSpacing, false);
 				expansion.fillCircle(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, expMexSpacing, false);
 
-				spawnable.fillCircle(mexLocation.x, mexLocation.y, mexSpacing, false);
-				spawnable.fillCircle(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, mexSpacing, false);
+				spawnableCopy.fillCircle(mexLocation.x, mexLocation.y, expSpacing, false);
+				spawnableCopy.fillCircle(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, expSpacing, false);
+
+				spawnable.fillCircle(mexLocation.x, mexLocation.y, mexSpacing*2, false);
+				spawnable.fillCircle(map.getSize() - mexLocation.x, map.getSize() - mexLocation.y, mexSpacing*2, false);
 			}
 
 			iMex += expMexCount;
@@ -134,56 +147,37 @@ public strictfp class MarkerGenerator {
 			expansion.fillCircle(map.getSize() - expLocation.x, map.getSize() - expLocation.y, expSize +1, false);
 			expMexCountLeft -= expMexCount;
 		}
+		return actualExpMexCount;
 	}
 
 	public void generateHydros(BinaryMask spawnable) {
 		int baseHydroCount = map.getSpawns().length;
+		int hydroSpacing = 64;
 
 		for (int i = 0; i < map.getSpawns().length; i++) {
-			int dx = map.getSpawns()[i].x < map.getSize() / 2 ? -4 : +4;
-			int dz = map.getSpawns()[i].z < map.getSize() / 2 ? -14 : +14;
+			int dx = map.getSpawns()[i].x < (float) map.getSize() / 2 ? -4 : +4;
+			int dz = map.getSpawns()[i].z < (float) map.getSize() / 2 ? -14 : +14;
 			map.getHydros()[i] = new Vector3f(0, 0, 0);
 			placeOnHeightmap(map.getSpawns()[i].x + dx, map.getSpawns()[i].z + dz, map.getHydros()[i]);
 			spawnable.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, false);
 		}
 
 		for (int i = baseHydroCount; i < map.getHydros().length; i+= 2) {
+			Vector2f hydroLocation = spawnable.getRandomPosition();
+
+			if (hydroLocation == null) {
+				break;
+			}
+
 			map.getHydros()[i] = new Vector3f(0, 0, 0);
 			map.getHydros()[i + 1] = new Vector3f(0, 0, 0);
-			randomizeVectorPair(map.getHydros()[i], map.getHydros()[i + 1]);
-		}
 
-		for (int i = baseHydroCount; i < map.getHydros().length; i+= 2) {
-			while (!isHydroValid(i, 64, 16, 32, spawnable)) {
-				randomizeVectorPair(map.getHydros()[i], map.getHydros()[i + 1]);
-			}
-		}
-	}
+			placeOnHeightmap(hydroLocation.x, hydroLocation.y, map.getHydros()[i]);
+			placeOnHeightmap(map.getSize() - hydroLocation.x, map.getSize() - hydroLocation.y, map.getHydros()[i+1]);
 
-	private boolean isMexValid(int index, float distance, float edgeSpacing, BinaryMask spawnable) {
-		boolean valid = true;
-		float dx;
-		float dz;
-		if (map.getMexes()[index].x < edgeSpacing)
-			valid = false;
-		if (map.getMexes()[index].z < edgeSpacing)
-			valid = false;
-		if (map.getMexes()[index].x > map.getSize() - edgeSpacing)
-			valid = false;
-		if (map.getMexes()[index].z > map.getSize() - edgeSpacing)
-			valid = false;
-
-		for (int i = 0; i < map.getMexes().length; i++) {
-			if (i != index && map.getMexes()[index]!=null) {
-				dx = map.getMexes()[i].x - map.getMexes()[index].x;
-				dz = map.getMexes()[i].z - map.getMexes()[index].z;
-				if (Math.sqrt(dx * dx + dz * dz) < distance)
-					valid = false;
-			}
+			spawnable.fillCircle(hydroLocation.x, hydroLocation.y, hydroSpacing, false);
+			spawnable.fillCircle(map.getSize() - hydroLocation.x, map.getSize() - hydroLocation.y, hydroSpacing, false);
 		}
-		if (!spawnable.get((int) map.getMexes()[index].x, (int) map.getMexes()[index].z))
-			valid = false;
-		return valid;
 	}
 
 	private boolean isMexExpValid(Vector2f location, float size, float density, BinaryMask spawnable) {
@@ -201,39 +195,4 @@ public strictfp class MarkerGenerator {
 		if (count/(size*size)<density) {valid = false;}
 		return valid;
 	}
-
-	private boolean isHydroValid(int index, float hydroDistance, float mexDistance, float edgeSpacing, BinaryMask spawnable) {
-		boolean valid = true;
-		float dx;
-		float dz;
-		if (map.getHydros()[index].x < edgeSpacing)
-			valid = false;
-		if (map.getHydros()[index].z < edgeSpacing)
-			valid = false;
-		if (map.getHydros()[index].x > map.getSize() - edgeSpacing)
-			valid = false;
-		if (map.getHydros()[index].z > map.getSize() - edgeSpacing)
-			valid = false;
-
-		for (int i = 0; i < map.getHydros().length; i++) {
-			if (i != index) {
-				dx = map.getHydros()[i].x - map.getHydros()[index].x;
-				dz = map.getHydros()[i].z - map.getHydros()[index].z;
-				if (Math.sqrt(dx * dx + dz * dz) < hydroDistance)
-					valid = false;
-			}
-		}
-		for (int i = 0; i < map.getMexes().length; i++) {
-			if (i != index) {
-				dx = map.getMexes()[i].x - map.getHydros()[index].x;
-				dz = map.getMexes()[i].z - map.getHydros()[index].z;
-				if (Math.sqrt(dx * dx + dz * dz) < mexDistance)
-					valid = false;
-			}
-		}
-		if (!spawnable.get((int) map.getHydros()[index].x, (int) map.getHydros()[index].z))
-			valid = false;
-		return valid;
-	}
-
 }
