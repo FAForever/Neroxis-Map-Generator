@@ -52,11 +52,6 @@ public strictfp class PropGenerator {
 		return v;
 	}
 
-//	public void randomizeVectorPair(Vector3f v1, Vector3f v2) {
-//		placeOnHeightmap(random.nextFloat() * map.getSize(), random.nextFloat() * map.getSize(), v1);
-//		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
-//	}
-
 	public void generateProps(BinaryMask spawnable,String[] paths, float separation) {
 		BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
 		Vector2f location = spawnableCopy.getRandomPosition();

@@ -2,6 +2,7 @@ package map;
 
 import biomes.Biome;
 
+import lombok.Getter;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
@@ -11,6 +12,7 @@ import util.serialized.WaterSettings;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+@Getter
 public strictfp class SCMap {
 
 	public static final int SIGNATURE = 443572557;
@@ -125,22 +127,6 @@ public strictfp class SCMap {
 		);
 	}
 
-	public int getSize() {
-		return size;
-	}
-
-	public Vector3f[] getSpawns() {
-		return spawns;
-	}
-
-	public Vector3f[] getMexs() {
-		return mexs;
-	}
-
-	public Vector3f[] getHydros() {
-		return hydros;
-	}
-	
 	public int getPropCount() {
 		return props.size();
 	}
@@ -177,24 +163,12 @@ public strictfp class SCMap {
 		wrecks.add(wreck);
 	}
 
-	public BufferedImage getPreview() {
-		return preview;
-	}
-
 	public void setHeightmap(FloatMask heightmap) {
 		for (int y = 0; y < size + 1; y++) {
 			for (int x = 0; x < size + 1; x++) {
 				this.heightmap.getRaster().setPixel(x, y, new int[] { (short) (heightmap.get(x, y) / HEIGHTMAP_SCALE) });
 			}
 		}
-	}
-
-	public BufferedImage getHeightmap() {
-		return heightmap;
-	}
-
-	public BufferedImage getNormalMap() {
-		return normalMap;
 	}
 
 	public void setTextureMaskLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
@@ -205,31 +179,4 @@ public strictfp class SCMap {
 		}
 	}
 
-	public BufferedImage getTextureMasksLow() {
-		return textureMasksLow;
-	}
-
-	public BufferedImage getTextureMasksHigh() {
-		return textureMasksHigh;
-	}
-
-	public BufferedImage getWaterMap() {
-		return waterMap;
-	}
-
-	public BufferedImage getWaterFoamMask() {
-		return waterFoamMask;
-	}
-
-	public BufferedImage getWaterFlatnessMask() {
-		return waterFlatnessMask;
-	}
-
-	public BufferedImage getWaterDepthBiasMask() {
-		return waterDepthBiasMask;
-	}
-
-	public BufferedImage getTerrainType() {
-		return terrainType;
-	}
 }

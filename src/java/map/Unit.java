@@ -1,11 +1,13 @@
 package map;
 
+import lombok.Getter;
 import util.Vector3f;
 
+@Getter
 public strictfp class Unit {
-    private String type;
-    private Vector3f position;
-    private float rotation;
+    private final String type;
+    private final Vector3f position;
+    private final float rotation;
 
     public Unit(String type, Vector3f position, float rotation) {
         this.type = type;
@@ -13,15 +15,4 @@ public strictfp class Unit {
         this.rotation = rotation;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public float getRotation() {
-        return rotation;
-    }
 }
