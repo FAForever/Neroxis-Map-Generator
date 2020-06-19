@@ -30,9 +30,10 @@ public strictfp class MapGenerator {
 	public static final String VERSION = "0.1.6";
 
 	//read from cli args
+	private static Random randomseed = new Random();
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
-	private static long SEED = 1234L;
+	private static long SEED = randomseed.nextLong();
 	private static Optional<Biome> BIOME = Optional.empty();
 
 	//read from key value arguments or map name
