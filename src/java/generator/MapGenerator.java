@@ -38,7 +38,7 @@ public strictfp class MapGenerator {
 
 	//read from key value arguments or map name
 	private static int SPAWN_COUNT = 6;
-	private static float LAND_DENSITY = .2f;
+	private static float LAND_DENSITY = 1f;
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -283,7 +283,7 @@ public strictfp class MapGenerator {
 
 		if (arguments.containsKey("land-density")) {
 			LAND_DENSITY = Float.parseFloat(arguments.get("land-density"));
-			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*255)/255;
+			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
 		}
 
 		generateMapName();
@@ -322,7 +322,7 @@ public strictfp class MapGenerator {
 			}
 		}
 		if (optionBytes.length>1){
-			LAND_DENSITY = (float) optionBytes[1]/255;
+			LAND_DENSITY = (float) optionBytes[1]/127;
 		}
 	}
 
@@ -331,7 +331,7 @@ public strictfp class MapGenerator {
 		ByteBuffer seedBuffer = ByteBuffer.allocate(8);
 		seedBuffer.putLong(SEED);
 		String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
-		byte[] optionArray = {(byte) SPAWN_COUNT, (byte) (LAND_DENSITY*255)};
+		byte[] optionArray = {(byte) SPAWN_COUNT, (byte) (LAND_DENSITY*127)};
 		String optionString = Base64.getEncoder().encodeToString(optionArray);
 		MAP_NAME = String.format(mapNameFormat, VERSION, seedString, optionString);
 	}
