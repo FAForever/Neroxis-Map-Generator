@@ -225,7 +225,11 @@ public strictfp class MapGenerator {
 		else {
 			try {
 				FOLDER_PATH = args[0];
-				SEED = Long.parseLong(args[1]);
+				try {
+					SEED = Long.parseLong(args[1]);
+				} catch (NumberFormatException nfe) {
+					System.out.println("Seed not numeric using default seed or mapname");
+				}
 				if (!VERSION.equals(args[2])) {
 					System.out.println("This generator only supports version " + VERSION);
 					System.exit(-1);
