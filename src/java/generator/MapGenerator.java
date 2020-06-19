@@ -248,24 +248,28 @@ public strictfp class MapGenerator {
 			System.out.println("map-gen usage:\n" +
 					"--help                               produce help message\n" +
 					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
-					"--seed arg                           mandatory, set the seed for the generated map\n" +
-					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
+					"--seed arg                           optional, set the seed for the generated map\n" +
+					"--map-name arg                       optional, set the map name for the generated map\n" +
 					"--spawn-count arg                    optional, set the spawn count for the generated map\n" +
-					"--land-density arg                    optional, set the land density for the generated map\n");
+					"--land-density arg                   optional, set the land density for the generated map\n");
 			System.exit(0);
 		}
 
-		if (!Arrays.asList("folder-path", "seed", "version").stream().allMatch(arguments::containsKey) && !DEBUG) {
+		if (!Arrays.asList("folder-path").stream().allMatch(arguments::containsKey) && !DEBUG) {
 			System.out.println("Missing necessary argument.");
 			System.exit(-1);
 		}
 
 		FOLDER_PATH = arguments.get("folder-path");
-		SEED = Long.parseLong(arguments.get("seed"));
 
-		if (!VERSION.equals(arguments.get("version"))) {
-			System.out.println("This generator only supports version " + VERSION);
-			System.exit(-1);
+		if (arguments.containsKey("map-name")) {
+			MAP_NAME = arguments.get("map-name");
+			parseMapName();
+			return;
+		}
+
+		if (arguments.containsKey("seed")) {
+			SEED = Long.parseLong(arguments.get("seed"));
 		}
 
 		if (arguments.containsKey("spawn-count")) {
@@ -276,6 +280,7 @@ public strictfp class MapGenerator {
 			LAND_DENSITY = Float.parseFloat(arguments.get("land-density"));
 			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*255)/255;
 		}
+
 		generateMapName();
 	}
 
