@@ -98,11 +98,21 @@ public strictfp class MarkerGenerator {
 		while (expMexCountLeft>0){
 			expLocation = spawnableCopy.getRandomPosition();
 
+			if (expLocation == null){
+				actualExpMexCount = possibleExpMexCount - expMexCountLeft;
+				break;
+			}
+
 			while (!isMexExpValid(expLocation, expSize, .5f, spawnable) && expLocation != null) {
 				spawnableCopy.fillCircle(expLocation.x, expLocation.y,1, false);
 				spawnableCopy.fillCircle(map.getSize() - expLocation.x, map.getSize() - expLocation.y,1, false);
 
 				expLocation = spawnableCopy.getRandomPosition();
+
+				if (expLocation == null){
+					actualExpMexCount = possibleExpMexCount - expMexCountLeft;
+					break;
+				}
 			}
 
 			if (expLocation == null){
