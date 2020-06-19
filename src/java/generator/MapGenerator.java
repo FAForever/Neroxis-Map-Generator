@@ -14,15 +14,13 @@ import util.Pipeline;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public strictfp class MapGenerator {
@@ -37,6 +35,9 @@ public strictfp class MapGenerator {
 	private static long SEED = 1234L;
 	private static Optional<Biome> BIOME = Optional.empty();
 
+	//read from key value arguments or map name
+	private static int SPAWN_COUNT = 6;
+	private static float LAND_DENSITY = .2f;
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -49,10 +50,10 @@ public strictfp class MapGenerator {
 		interpretArguments(args);
 
 		MapGenerator generator = new MapGenerator();
-		System.out.println("Generating map " + MAP_NAME);
+		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
 		SCMap map = generator.generate(SEED);
 		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath());
-		generator.save(FOLDER_PATH, MAP_NAME, map, SEED);
+		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map, SEED);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
@@ -79,14 +80,16 @@ public strictfp class MapGenerator {
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
-		final SCMap map = new SCMap(512, 6, 64, 10);
+		final int mexCount = SPAWN_COUNT*8 + 4/(SPAWN_COUNT/2)*2 + random.nextInt(40/SPAWN_COUNT)*SPAWN_COUNT;
+		final int hydroCount = SPAWN_COUNT + random.nextInt(SPAWN_COUNT/2)*2;
+		final SCMap map = new SCMap(512, SPAWN_COUNT, mexCount, hydroCount);
 
 		final ConcurrentBinaryMask land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
 		final ConcurrentBinaryMask mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
 		final ConcurrentBinaryMask plateaus = new ConcurrentBinaryMask(32, random.nextLong(), "plateaus");
 		final ConcurrentBinaryMask ramps = new ConcurrentBinaryMask(128, random.nextLong(), "ramps");
 
-		land.randomize(0.2f).inflate(1).cutCorners().enlarge(32).acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		land.randomize(LAND_DENSITY).inflate(1).cutCorners().enlarge(32).acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		mountains.randomize(0.05f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		plateaus.randomize(0.1f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		ramps.randomize(0.1f);
@@ -213,7 +216,13 @@ public strictfp class MapGenerator {
 	private static void interpretArguments(String[] args) {
 		if (args.length == 0 || args[0].startsWith("--")) {
 			interpretArguments(ArgumentParser.parse(args));
-		} else {
+		}
+		else if (args.length == 2){
+			FOLDER_PATH = args[0];
+			MAP_NAME = args[1];
+			parseMapName();
+		}
+		else {
 			try {
 				FOLDER_PATH = args[0];
 				SEED = Long.parseLong(args[1]);
@@ -221,10 +230,15 @@ public strictfp class MapGenerator {
 					System.out.println("This generator only supports version " + VERSION);
 					System.exit(-1);
 				}
-				MAP_NAME = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + SEED;
+				if (args.length>=4) {
+					MAP_NAME = args[3];
+					parseMapName();
+				}
+				else {
+					generateMapName();
+				}
 			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
 				System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-				return;
 			}
 		}
 	}
@@ -236,9 +250,8 @@ public strictfp class MapGenerator {
 					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
 					"--seed arg                           mandatory, set the seed for the generated map\n" +
 					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
-					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n" +
-					"--with-biome name                    optional (=random), generates the map with the specified (by name) biome, this BREAKS DETERMINISM with other generators\n" +
-					"--with-biome-folder path             optional (=random), generates the map with the specified (as folder on system file system) biome, this BREAKS DETERMINISM with other generators\n");
+					"--spawn-count arg                    optional, set the spawn count for the generated map\n" +
+					"--land-density arg                    optional, set the land density for the generated map\n");
 			System.exit(0);
 		}
 
@@ -255,25 +268,64 @@ public strictfp class MapGenerator {
 			System.exit(-1);
 		}
 
-		if (arguments.containsKey("map-name")) {
-			MAP_NAME = arguments.get("map-name");
-		} else {
-			MAP_NAME = "NeroxisGen_" + VERSION + "_" + SEED;
+		if (arguments.containsKey("spawn-count")) {
+			SPAWN_COUNT = Integer.parseInt(arguments.get("spawn-count"));
 		}
 
-		if (arguments.containsKey("with-biome")) {
-			BIOME = Optional.of(Biomes.getBiomeByName(arguments.get("with-biome")));
+		if (arguments.containsKey("land-density")) {
+			LAND_DENSITY = Float.parseFloat(arguments.get("land-density"));
+			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*255)/255;
 		}
+		generateMapName();
+	}
 
-		if(arguments.containsKey("with-biome-folder")) {
-			Path path = Paths.get(arguments.get("with-biome-folder"));
-			if(! Files.isDirectory(path)) {
-				System.out.printf("Biome path %s is not a folder\n", arguments.get("with-biome-folder"));
-				System.exit(-1);
-			}
-			BIOME = Optional.of(Biomes.loadBiome(path));
+	private static void parseMapName() {
+		MAP_NAME = MAP_NAME.replace('-','/');
+		if (!MAP_NAME.startsWith("neroxis_map_generator")){
+			throw new IllegalArgumentException("Map name is not a generated map");
+		}
+		String[] args = MAP_NAME.split("_");
+		if (args.length<4){
+			throw new RuntimeException("Version not specified");
+		}
+		String version = args[3];
+		if (!VERSION.equals(version)){
+			throw new RuntimeException("Unsupported generator version: " + version);
+		}
+		if (args.length>=5) {
+			String seedString = args[4];
+			byte[] seedBytes = Base64.getDecoder().decode(seedString);
+			ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
+			SEED = seedWrapper.getLong();
+		}
+		if (args.length>=6) {
+			String optionString = args[5];
+			byte[] optionBytes = Base64.getDecoder().decode(optionString);
+			parseOptions(optionBytes);
 		}
 	}
+
+	private static void parseOptions(byte[] optionBytes){
+		if (optionBytes.length>0){
+			if (optionBytes[0]<=16){
+				SPAWN_COUNT = optionBytes[0];
+			}
+		}
+		if (optionBytes.length>1){
+			LAND_DENSITY = (float) optionBytes[1]/255;
+		}
+	}
+
+	private static void generateMapName(){
+		String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
+		ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+		seedBuffer.putLong(SEED);
+		String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+		byte[] optionArray = {(byte) SPAWN_COUNT, (byte) (LAND_DENSITY*255)};
+		String optionString = Base64.getEncoder().encodeToString(optionArray);
+		MAP_NAME = String.format(mapNameFormat, VERSION, seedString, optionString);
+	}
+
 
 	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
 	private void generateDebugOutput() {
