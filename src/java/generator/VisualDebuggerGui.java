@@ -46,14 +46,14 @@ public class VisualDebuggerGui {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g.create();
-            BufferedImage currentImage = image;
-            int x = (getWidth() - currentImage.getWidth()) / 2;
-            int y = (getHeight() - currentImage.getHeight()) / 2;
-            g2d.drawImage(currentImage, x, y, this);
-            g2d.dispose();
-        }
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g.create();
+			BufferedImage currentImage = image;
+			int x = (getWidth() - currentImage.getWidth()) / 2;
+			int y = (getHeight() - currentImage.getHeight()) / 2;
+			g2d.drawImage(currentImage, x, y, this);
+			g2d.dispose();
+		}
 		@Override
 		public Dimension getPreferredSize() {
 			BufferedImage currentImage = image;
