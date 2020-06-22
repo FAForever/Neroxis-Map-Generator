@@ -187,7 +187,7 @@ public strictfp class MapGenerator {
 
 		t1LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).deflate(1);
 		t2LandWreckMask.randomize(0.005f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask);
-		t3LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
+		t3LandWreckMask.randomize(0.001f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
 		t2NavyWreckMask.randomize(0.01f).intersect(navyLandCopy.outline()).minus(noProps);
 		navyFactoryWreckMask.randomize(0.01f).minus(grass.getBinaryMask()).minus(noProps).deflate(2).trimEdge(10);
 		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
