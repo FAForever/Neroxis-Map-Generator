@@ -52,19 +52,14 @@ public strictfp class PropGenerator {
 		return v;
 	}
 
-//	public void randomizeVectorPair(Vector3f v1, Vector3f v2) {
-//		placeOnHeightmap(random.nextFloat() * map.getSize(), random.nextFloat() * map.getSize(), v1);
-//		placeOnHeightmap(map.getSize() - v1.x, map.getSize() - v1.z, v2);
-//	}
-
 	public void generateProps(BinaryMask spawnable,String[] paths, float separation) {
 		BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
 		Vector2f location = spawnableCopy.getRandomPosition();
 		while (location != null) {
 			spawnableCopy.fillCircle(location.x, location.y, separation, false);
 			spawnableCopy.fillCircle(map.getSize() - location.x, map.getSize() - location.y, separation, false);
-			Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location.x, location.y), random.nextFloat());
-			Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), prop1.getRotation() + 0.5f);
+			Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location.x, location.y), random.nextFloat()*3.14159f);
+			Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), prop1.getRotation() + 3.14159f);
 			map.addProp(prop1);
 			map.addProp(prop2);
 			location = spawnableCopy.getRandomPosition();

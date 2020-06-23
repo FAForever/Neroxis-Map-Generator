@@ -38,6 +38,9 @@ public strictfp class ScenarioExporter {
 		out.writeBytes("},\n");
 		out.writeBytes("        },\n");
 		out.writeBytes("      },\n");
+		out.writeBytes("      customprops = {\n");
+		out.writeBytes("        ['ExtraArmies'] = STRING( 'ARMY_17 NEUTRAL_CIVILIAN' ),\n");
+		out.writeBytes("      },\n");
 		out.writeBytes("    },\n");
 		out.writeBytes("  },\n");
 		for (int i = 0; i < map.getSpawns().length; i++) {

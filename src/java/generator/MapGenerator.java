@@ -137,6 +137,7 @@ public strictfp class MapGenerator {
 		grassTexture.init(grass, 0, 0.999f).smooth(2);
 
 		ConcurrentBinaryMask plateaus2 = new ConcurrentBinaryMask(plateaus, random.nextLong(), "plateaus2");
+
 		plateaus.outline().inflate(2).minus(ramps);
 		plateaus2.deflate(1).outline().inflate(2).minus(ramps);
 		rock.inflate(3).combine(plateaus).combine(plateaus2).shrink(256);
@@ -160,11 +161,14 @@ public strictfp class MapGenerator {
 		System.out.printf("Terrain generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
 		MarkerGenerator markerGenerator = new MarkerGenerator(map, random.nextLong());
+
 		BinaryMask spawnsMask = new BinaryMask(grass.getBinaryMask(), random.nextLong());
-		spawnsMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(16).trimEdge(20).fillCircle(256, 256, 128, false);
-		markerGenerator.generateSpawns(spawnsMask, 64);
 		BinaryMask resourceMask = new BinaryMask(grass.getBinaryMask().minus(rock.getBinaryMask()), random.nextLong());
-		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5).trimEdge(15);
+
+		spawnsMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(16).trimEdge(20).fillCircle(256, 256, 128, false);
+		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5);
+
+		markerGenerator.generateSpawns(spawnsMask, 64);
 		markerGenerator.generateMexes(resourceMask);
 		markerGenerator.generateHydros(resourceMask);
 
@@ -180,13 +184,40 @@ public strictfp class MapGenerator {
 			noProps.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 7, true);
 		}
 
+		WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
+		UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
+
+		BinaryMask t1LandWreckMask = new BinaryMask(64, random.nextLong());
+		BinaryMask t2LandWreckMask = new BinaryMask(64, random.nextLong());
+		BinaryMask t3LandWreckMask = new BinaryMask(64, random.nextLong());
+		BinaryMask t2NavyWreckMask = new BinaryMask(64, random.nextLong());
+		BinaryMask navyFactoryWreckMask = new BinaryMask(64, random.nextLong());
+		BinaryMask navyLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
+		BinaryMask allWreckMask = new BinaryMask(513, random.nextLong());
+
+		t1LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noProps).deflate(1);
+		t2LandWreckMask.randomize(0.005f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask);
+		t3LandWreckMask.randomize(0.001f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
+		t2NavyWreckMask.randomize(0.01f).intersect(navyLandCopy.outline()).minus(noProps);
+		navyFactoryWreckMask.randomize(0.01f).minus(grass.getBinaryMask()).minus(noProps).deflate(2).trimEdge(10);
+		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
+		noProps.combine(allWreckMask);
+
+		wreckGenerator.generateWrecks(t1LandWreckMask, WreckGenerator.T1_Land, 2f);
+		wreckGenerator.generateWrecks(t2LandWreckMask, WreckGenerator.T2_Land, 15f);
+		wreckGenerator.generateWrecks(t3LandWreckMask, WreckGenerator.T3_Land, 30f);
+		wreckGenerator.generateWrecks(t2NavyWreckMask, WreckGenerator.T2_Navy, 60f);
+		wreckGenerator.generateWrecks(navyFactoryWreckMask, WreckGenerator.Navy_Factory, 120f);
+
 		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
+
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
-		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
 		BinaryMask cliffLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
+    BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
+    
 		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(cliffLandCopy.invert());
-		BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
+		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
 		treeMask.enlarge(513).deflate(5).minus(noProps).trimEdge(3);
@@ -198,9 +229,12 @@ public strictfp class MapGenerator {
 		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 60f);
 
 		BinaryMask lightGrass = new BinaryMask(grass.getBinaryMask(), random.nextLong());
+
 		lightGrass.randomize(0.5f);
 		lightGrass.minus(rock.getBinaryMask()).intersect(grass.getBinaryMask()).minus(treeMask.shrink(256));
+
 		FloatMask lightGrassTexture = new FloatMask(256, random.nextLong());
+
 		lightGrassTexture.init(lightGrass, 0, 0.999f).smooth(2);
 
 		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture, rockTexture.getFloatMask(), new FloatMask(513, 0));

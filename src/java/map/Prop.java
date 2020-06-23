@@ -1,7 +1,9 @@
 package map;
 
+import lombok.Getter;
 import util.Vector3f;
 
+@Getter
 public strictfp class Prop {
 	private String path;
 	private Vector3f position;
@@ -13,15 +15,4 @@ public strictfp class Prop {
 		this.rotation = rotation;
 	}
 
-	public String getPath() {
-		return path;
-	}
-
-	public Vector3f getPosition() {
-		return position;
-	}
-
-	public float getRotation() {
-		return rotation;
-	}
 }

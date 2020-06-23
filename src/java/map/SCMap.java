@@ -2,6 +2,7 @@ package map;
 
 import biomes.Biome;
 
+import lombok.Getter;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
@@ -11,6 +12,7 @@ import util.serialized.WaterSettings;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+@Getter
 public strictfp class SCMap {
 
 	public static final int SIGNATURE = 443572557;
@@ -67,6 +69,8 @@ public strictfp class SCMap {
 	private final Vector3f[] mexes;
 	private final Vector3f[] hydros;
 	private final ArrayList<Prop> props;
+	private final ArrayList<Unit> units;
+	private final ArrayList<Unit> wrecks;
 
 	private final BufferedImage preview;
 	private final BufferedImage heightmap;
@@ -86,6 +90,8 @@ public strictfp class SCMap {
 		mexes = new Vector3f[mexCount];
 		hydros = new Vector3f[hydroCount];
 		props = new ArrayList<>();
+		units = new ArrayList<>();
+		wrecks = new ArrayList<>();
 
 		preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
 		heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
@@ -149,8 +155,28 @@ public strictfp class SCMap {
 		props.add(prop);
 	}
 
-	public BufferedImage getPreview() {
-		return preview;
+	public int getUnitCount() {
+		return units.size();
+	}
+
+	public Unit getUnit(int i){
+		return units.get(i);
+	}
+
+	public void addUnit(Unit unit){
+		units.add(unit);
+	}
+
+	public int getWreckCount() {
+		return wrecks.size();
+	}
+
+	public Unit getWreck(int i){
+		return wrecks.get(i);
+	}
+
+	public void addWreck(Unit wreck){
+		wrecks.add(wreck);
 	}
 
 	public void setHeightmap(FloatMask heightmap) {
@@ -161,14 +187,6 @@ public strictfp class SCMap {
 		}
 	}
 
-	public BufferedImage getHeightmap() {
-		return heightmap;
-	}
-
-	public BufferedImage getNormalMap() {
-		return normalMap;
-	}
-
 	public void setTextureMaskLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
 		for (int y = 0; y < size / 2; y++) {
 			for (int x = 0; x < size / 2; x++) {
@@ -177,31 +195,4 @@ public strictfp class SCMap {
 		}
 	}
 
-	public BufferedImage getTextureMasksLow() {
-		return textureMasksLow;
-	}
-
-	public BufferedImage getTextureMasksHigh() {
-		return textureMasksHigh;
-	}
-
-	public BufferedImage getWaterMap() {
-		return waterMap;
-	}
-
-	public BufferedImage getWaterFoamMask() {
-		return waterFoamMask;
-	}
-
-	public BufferedImage getWaterFlatnessMask() {
-		return waterFlatnessMask;
-	}
-
-	public BufferedImage getWaterDepthBiasMask() {
-		return waterDepthBiasMask;
-	}
-
-	public BufferedImage getTerrainType() {
-		return terrainType;
-	}
 }
