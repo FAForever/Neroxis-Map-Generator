@@ -154,8 +154,8 @@ public strictfp class MapGenerator {
 		spawnsMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(16).trimEdge(20).fillCircle(256, 256, 128, false);
 		markerGenerator.generateSpawns(spawnsMask, 64);
 		BinaryMask resourceMask = new BinaryMask(grass.getBinaryMask().minus(rock.getBinaryMask()), random.nextLong());
-		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5);
-		markerGenerator.generateMexs(resourceMask);
+		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5).trimEdge(15);
+		markerGenerator.generateMexes(resourceMask);
 		markerGenerator.generateHydros(resourceMask);
 
 		BinaryMask noProps = new BinaryMask(rock.getBinaryMask(), random.nextLong());
@@ -163,8 +163,8 @@ public strictfp class MapGenerator {
 		for (int i = 0; i < map.getSpawns().length; i++) {
 			noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
 		}
-		for (int i = 0; i < map.getMexs().length; i++) {
-			noProps.fillCircle(map.getMexs()[i].x, map.getMexs()[i].z, 5, true);
+		for (int i = 0; i < map.getMexes().length; i++) {
+			noProps.fillCircle(map.getMexes()[i].x, map.getMexes()[i].z, 5, true);
 		}
 		for (int i = 0; i < map.getHydros().length; i++) {
 			noProps.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 7, true);
