@@ -59,6 +59,7 @@ public strictfp class MapGenerator {
 		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
 		SCMap map = generator.generate(RANDOM.nextLong());
 		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','-'));
+
 		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map);
 		System.out.println("Done");
 
@@ -349,7 +350,7 @@ public strictfp class MapGenerator {
 	}
 
 	private static void randomizeOptions(){
-		SPAWN_COUNT = (RANDOM.nextInt(7)+1)*2;
+		SPAWN_COUNT = 6;
 		LAND_DENSITY = StrictMath.min((RANDOM.nextInt(127)+20.0f)/127,1);
 		PLATEAU_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
 		MOUNTAIN_DENSITY = (float) RANDOM.nextInt(127)/127*0.1f;
