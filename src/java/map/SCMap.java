@@ -66,7 +66,7 @@ public strictfp class SCMap {
 
 	private static final String DEFAULT_ENVIRONMENT ="evergreen";
 	private final Vector3f[] spawns;
-	private final Vector3f[] mexs;
+	private final Vector3f[] mexes;
 	private final Vector3f[] hydros;
 	private final ArrayList<Prop> props;
 	private final ArrayList<Unit> units;
@@ -87,7 +87,7 @@ public strictfp class SCMap {
 	public SCMap(int size, int spawnCount, int mexCount, int hydroCount) {
 		this.size = size;
 		spawns = new Vector3f[spawnCount];
-		mexs = new Vector3f[mexCount];
+		mexes = new Vector3f[mexCount];
 		hydros = new Vector3f[hydroCount];
 		props = new ArrayList<>();
 		units = new ArrayList<>();
@@ -127,6 +127,22 @@ public strictfp class SCMap {
 		);
 	}
 
+	public int getSize() {
+		return size;
+	}
+
+	public Vector3f[] getSpawns() {
+		return spawns;
+	}
+
+	public Vector3f[] getMexes() {
+		return mexes;
+	}
+
+	public Vector3f[] getHydros() {
+		return hydros;
+	}
+	
 	public int getPropCount() {
 		return props.size();
 	}

@@ -14,29 +14,36 @@ import util.Pipeline;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public strictfp class MapGenerator {
 
 	public static final boolean DEBUG = false;
 
-	public static final String VERSION = "0.1.6";
+	public static final String VERSION = "1.0.0";
+
+	private static final Random SEED_GEN = new Random();
 
 	//read from cli args
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
-	private static long SEED = 1234L;
+	private static long SEED = SEED_GEN.nextLong();
+	private static Random RANDOM = new Random(SEED);
 	private static Optional<Biome> BIOME = Optional.empty();
 
+	//read from key value arguments or map name
+	private static int SPAWN_COUNT;
+	private static float LAND_DENSITY;
+	private static float PLATEAU_DENSITY;
+	private static float MOUNTAIN_DENSITY;
+	private static float RAMP_DENSITY;
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -49,16 +56,17 @@ public strictfp class MapGenerator {
 		interpretArguments(args);
 
 		MapGenerator generator = new MapGenerator();
-		System.out.println("Generating map " + MAP_NAME);
-		SCMap map = generator.generate(SEED);
-		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath());
-		generator.save(FOLDER_PATH, MAP_NAME, map, SEED);
+		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
+		SCMap map = generator.generate(RANDOM.nextLong());
+		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','-'));
+
+		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
 	}
 
-	public void save(String folderName, String mapName, SCMap map, long seed) {
+	public void save(String folderName, String mapName, SCMap map) {
 		try {
 			Path folderPath = Paths.get(folderName);
 
@@ -79,17 +87,19 @@ public strictfp class MapGenerator {
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
-		final SCMap map = new SCMap(512, 6, 64, 10);
+		final int mexCount = SPAWN_COUNT*8 + 4/(SPAWN_COUNT/2)*2 + random.nextInt(40/SPAWN_COUNT)*SPAWN_COUNT;
+		final int hydroCount = SPAWN_COUNT + random.nextInt(SPAWN_COUNT/2)*2;
+		final SCMap map = new SCMap(512, SPAWN_COUNT, mexCount, hydroCount);
 
 		final ConcurrentBinaryMask land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
 		final ConcurrentBinaryMask mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
 		final ConcurrentBinaryMask plateaus = new ConcurrentBinaryMask(32, random.nextLong(), "plateaus");
 		final ConcurrentBinaryMask ramps = new ConcurrentBinaryMask(128, random.nextLong(), "ramps");
 
-		land.randomize(0.2f).inflate(1).cutCorners().enlarge(32).acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		mountains.randomize(0.05f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		plateaus.randomize(0.1f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		ramps.randomize(0.1f);
+		land.randomize(LAND_DENSITY).inflate(1).cutCorners().enlarge(32).acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		mountains.randomize(MOUNTAIN_DENSITY).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		plateaus.randomize(PLATEAU_DENSITY).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		ramps.randomize(RAMP_DENSITY);
 
 		plateaus.intersect(land).minus(mountains);
 		ramps.intersect(plateaus).outline().minus(plateaus).intersect(land).minus(mountains).inflate(2);
@@ -159,7 +169,7 @@ public strictfp class MapGenerator {
 		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5);
 
 		markerGenerator.generateSpawns(spawnsMask, 64);
-		markerGenerator.generateMexs(resourceMask);
+		markerGenerator.generateMexes(resourceMask);
 		markerGenerator.generateHydros(resourceMask);
 
 		BinaryMask noProps = new BinaryMask(rock.getBinaryMask(), random.nextLong());
@@ -167,8 +177,8 @@ public strictfp class MapGenerator {
 		for (int i = 0; i < map.getSpawns().length; i++) {
 			noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
 		}
-		for (int i = 0; i < map.getMexs().length; i++) {
-			noProps.fillCircle(map.getMexs()[i].x, map.getMexs()[i].z, 5, true);
+		for (int i = 0; i < map.getMexes().length; i++) {
+			noProps.fillCircle(map.getMexes()[i].x, map.getMexes()[i].z, 5, true);
 		}
 		for (int i = 0; i < map.getHydros().length; i++) {
 			noProps.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 7, true);
@@ -202,17 +212,21 @@ public strictfp class MapGenerator {
 		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
 
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
-		BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
-
+		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
+		BinaryMask cliffLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
+    BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
+    
+		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(cliffLandCopy.invert());
 		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
-		treeMask.enlarge(513).deflate(5).fillCircle(256, 256, 96, false).minus(noProps).trimEdge(3);
-		fieldStoneMask.enlarge(513).deflate(5).fillCircle(256, 256, 96, true).minus(noProps).trimEdge(10);
+		treeMask.enlarge(513).deflate(5).minus(noProps).trimEdge(3);
+		fieldStoneMask.enlarge(513).deflate(5).minus(noProps).trimEdge(10);
 
 		propGenerator.generateProps(treeMask, propGenerator.TREE_GROUPS, 3f);
+		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 1f);
 		propGenerator.generateProps(treeMask, propGenerator.ROCKS, 10f);
-		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 30f);
+		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 60f);
 
 		BinaryMask lightGrass = new BinaryMask(grass.getBinaryMask(), random.nextLong());
 
@@ -247,18 +261,35 @@ public strictfp class MapGenerator {
 	private static void interpretArguments(String[] args) {
 		if (args.length == 0 || args[0].startsWith("--")) {
 			interpretArguments(ArgumentParser.parse(args));
-		} else {
+		}
+		else if (args.length == 2){
+			FOLDER_PATH = args[0];
+			MAP_NAME = args[1];
+			parseMapName();
+		}
+		else {
 			try {
 				FOLDER_PATH = args[0];
-				SEED = Long.parseLong(args[1]);
+				try {
+					SEED = Long.parseLong(args[1]);
+					RANDOM = new Random(SEED);
+				} catch (NumberFormatException nfe) {
+					System.out.println("Seed not numeric using default seed or mapname");
+				}
 				if (!VERSION.equals(args[2])) {
 					System.out.println("This generator only supports version " + VERSION);
 					System.exit(-1);
 				}
-				MAP_NAME = args.length >= 4 ? args[3] : "NeroxisGen_" + VERSION + "_" + SEED;
+				if (args.length>=4) {
+					MAP_NAME = args[3];
+					parseMapName();
+				}
+				else {
+					randomizeOptions();
+					generateMapName();
+				}
 			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
 				System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-				return;
 			}
 		}
 	}
@@ -268,46 +299,136 @@ public strictfp class MapGenerator {
 			System.out.println("map-gen usage:\n" +
 					"--help                               produce help message\n" +
 					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
-					"--seed arg                           mandatory, set the seed for the generated map\n" +
-					"--version arg                        mandatory, request a specific map version, this generator only supports one version\n" +
-					"--map-name arg                       optional (=NeroxisGen_version_seed), specify a name for the generated map\n" +
-					"--with-biome name                    optional (=random), generates the map with the specified (by name) biome, this BREAKS DETERMINISM with other generators\n" +
-					"--with-biome-folder path             optional (=random), generates the map with the specified (as folder on system file system) biome, this BREAKS DETERMINISM with other generators\n");
+					"--seed arg                           optional, set the seed for the generated map\n" +
+					"--map-name arg                       optional, set the map name for the generated map\n" +
+					"--spawn-count arg                    optional, set the spawn count for the generated map\n" +
+					"--land-density arg                   optional, set the land density for the generated map\n" +
+					"--plateau-density arg                optional, set the plateau density for the generated map (max .2)\n" +
+					"--mountain-density arg               optional, set the mountain density for the generated map (max .1)\n" +
+					"--ramp-density arg                   optional, set the ramp density for the generated map\n (max .2)");
 			System.exit(0);
 		}
 
-		if (!Arrays.asList("folder-path", "seed", "version").stream().allMatch(arguments::containsKey) && !DEBUG) {
+		if (!Arrays.asList("folder-path").stream().allMatch(arguments::containsKey) && !DEBUG) {
 			System.out.println("Missing necessary argument.");
 			System.exit(-1);
 		}
 
 		FOLDER_PATH = arguments.get("folder-path");
-		SEED = Long.parseLong(arguments.get("seed"));
-
-		if (!VERSION.equals(arguments.get("version"))) {
-			System.out.println("This generator only supports version " + VERSION);
-			System.exit(-1);
-		}
 
 		if (arguments.containsKey("map-name")) {
 			MAP_NAME = arguments.get("map-name");
-		} else {
-			MAP_NAME = "NeroxisGen_" + VERSION + "_" + SEED;
+			parseMapName();
+			return;
 		}
 
-		if (arguments.containsKey("with-biome")) {
-			BIOME = Optional.of(Biomes.getBiomeByName(arguments.get("with-biome")));
+		if (arguments.containsKey("seed")) {
+			SEED = Long.parseLong(arguments.get("seed"));
+			RANDOM = new Random(SEED);
+		}
+		randomizeOptions();
+
+		if (arguments.containsKey("spawn-count")) {
+			SPAWN_COUNT = Integer.parseInt(arguments.get("spawn-count"));
 		}
 
-		if(arguments.containsKey("with-biome-folder")) {
-			Path path = Paths.get(arguments.get("with-biome-folder"));
-			if(! Files.isDirectory(path)) {
-				System.out.printf("Biome path %s is not a folder\n", arguments.get("with-biome-folder"));
-				System.exit(-1);
+		if (arguments.containsKey("land-density")) {
+			LAND_DENSITY = Float.parseFloat(arguments.get("land-density"));
+			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("plateau-density")) {
+			PLATEAU_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")),0.2f);
+			PLATEAU_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("mountain-density")) {
+			MOUNTAIN_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")),0.1f);
+			MOUNTAIN_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("ramp-density")) {
+			RAMP_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")),0.2f);
+			RAMP_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		generateMapName();
+	}
+
+	private static void parseMapName() {
+		MAP_NAME = MAP_NAME.replace('-','/');
+		if (!MAP_NAME.startsWith("neroxis_map_generator")){
+			throw new IllegalArgumentException("Map name is not a generated map");
+		}
+		String[] args = MAP_NAME.split("_");
+		if (args.length<4){
+			throw new RuntimeException("Version not specified");
+		}
+		String version = args[3];
+		if (!VERSION.equals(version)){
+			throw new RuntimeException("Unsupported generator version: " + version);
+		}
+		if (args.length>=5) {
+			String seedString = args[4];
+			try {
+				SEED = Long.parseLong(seedString);
+			} catch (NumberFormatException nfe) {
+				byte[] seedBytes = Base64.getDecoder().decode(seedString);
+				ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
+				SEED = seedWrapper.getLong();
 			}
-			BIOME = Optional.of(Biomes.loadBiome(path));
+			RANDOM = new Random(SEED);
+			randomizeOptions();
+		}
+		if (args.length>=6) {
+			String optionString = args[5];
+			byte[] optionBytes = Base64.getDecoder().decode(optionString);
+			parseOptions(optionBytes);
 		}
 	}
+
+	private static void randomizeOptions(){
+		SPAWN_COUNT = 6;
+		LAND_DENSITY = StrictMath.min((RANDOM.nextInt(127)+20.0f)/127,1);
+		PLATEAU_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
+		MOUNTAIN_DENSITY = (float) RANDOM.nextInt(127)/127*0.1f;
+		RAMP_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
+	}
+
+	private static void parseOptions(byte[] optionBytes){
+		if (optionBytes.length>0){
+			if (optionBytes[0]<=16){
+				SPAWN_COUNT = optionBytes[0];
+			}
+		}
+		if (optionBytes.length>1){
+			LAND_DENSITY = (float) optionBytes[1]/127;
+		}
+		if (optionBytes.length>2){
+			PLATEAU_DENSITY = (float) optionBytes[2]/127*0.2f;
+		}
+		if (optionBytes.length>3){
+			MOUNTAIN_DENSITY = (float) optionBytes[3]/127*0.1f;
+		}
+		if (optionBytes.length>4){
+			RAMP_DENSITY = (float) optionBytes[4]/127*0.2f;
+		}
+	}
+
+	private static void generateMapName(){
+		String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
+		ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+		seedBuffer.putLong(SEED);
+		String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+		byte[] optionArray = {(byte) SPAWN_COUNT,
+				(byte) (LAND_DENSITY*127),
+				(byte) (PLATEAU_DENSITY/0.2f*127),
+				(byte) (MOUNTAIN_DENSITY/0.1f*127),
+				(byte) (RAMP_DENSITY/0.2f*127)};
+		String optionString = Base64.getEncoder().encodeToString(optionArray);
+		MAP_NAME = String.format(mapNameFormat, VERSION, seedString, optionString);
+	}
+
 
 	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
 	private void generateDebugOutput() {
