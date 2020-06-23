@@ -1,23 +1,12 @@
 package generator;
 
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import lombok.Value;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.WindowConstants;
-
-import lombok.Value;
 
 public class VisualDebuggerGui {
 
@@ -119,19 +108,31 @@ public class VisualDebuggerGui {
 	}
 	
 	public static void update(String uniqueMaskName, BufferedImage image, int zoomFactor) {
-		boolean isNewMask = !maskNameToCanvas.containsKey(uniqueMaskName);
-		if (isNewMask) {
-			maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
-			listModel.addElement(new MaskListItem(uniqueMaskName));
-		}
-		ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
-		canvas.setViewModel(image, zoomFactor);
-		if (isNewMask && (listModel.getSize() == 1 || AUTO_SELECT_NEW_MASKS)) {
-			list.setSelectedIndex(listModel.getSize() - 1);
-		} else {
-			MaskListItem selected = list.getSelectedValue();
-			if (selected != null && selected.maskName.equals(uniqueMaskName)) {
-				updateVisibleCanvas(uniqueMaskName, canvas);
+		if (!uniqueMaskName.isEmpty()) {
+			if (!uniqueMaskName.equals("lastChanged")) {
+				int count = 0;
+				for (int i = 0; i < listModel.getSize(); i++) {
+					if (listModel.get(i).maskName.matches(uniqueMaskName + ".*")) {
+						count++;
+					}
+					;
+				}
+				uniqueMaskName = uniqueMaskName + count;
+			}
+			boolean isNewMask = !maskNameToCanvas.containsKey(uniqueMaskName);
+			if (isNewMask) {
+				maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
+				listModel.addElement(new MaskListItem(uniqueMaskName));
+			}
+			ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
+			canvas.setViewModel(image, zoomFactor);
+			if (isNewMask && (listModel.getSize() == 1 || AUTO_SELECT_NEW_MASKS)) {
+				list.setSelectedIndex(listModel.getSize() - 1);
+			} else {
+				MaskListItem selected = list.getSelectedValue();
+				if (selected != null && selected.maskName.equals(uniqueMaskName)) {
+					updateVisibleCanvas(uniqueMaskName, canvas);
+				}
 			}
 		}
 	}

@@ -1,20 +1,20 @@
 package generator;
 
-import java.awt.Color;
+import map.BinaryMask;
+import map.FloatMask;
+import map.Mask;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
 import java.util.Map;
 
-import map.BinaryMask;
-import map.FloatMask;
-import map.Mask;
-
 public class VisualDebugger {
 
 	/** When enabled, mask concurrency is disabled.
 	 */
-	public static final boolean ENABLED = false;
+	public static final boolean ENABLED = true;
 	
 	/** If false, color representation of float masks is scaled to include negative ranges.
 	 * If true, all negative values are colored as checkerboard, leaving more color space
@@ -164,22 +164,12 @@ public class VisualDebugger {
 		if (!VisualDebuggerGui.isCreated()) {
 			VisualDebuggerGui.createGui();
 		}
-		VisualDebuggerGui.update("lastChanged", currentImage, perPixelSize);
 		String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
-		VisualDebuggerGui.update(maskName, currentImage, perPixelSize);
+		String function = new Throwable().getStackTrace()[2].getMethodName();
+		VisualDebuggerGui.update(maskName + " " + function, currentImage, perPixelSize);
 	}
 	
 	private static int calculateAutoZoom(int imageSize) {
-		int perPixelSize;
-		if (imageSize <= 32) {
-			perPixelSize = 5;
-		} else if (imageSize <= 128) {
-			perPixelSize = 3;
-		} else if (imageSize <= 256) {
-			perPixelSize = 2;
-		} else {
-			perPixelSize = 1;
-		}
-		return perPixelSize;
+		return 513/imageSize;
 	}
 }
