@@ -29,16 +29,21 @@ public strictfp class MapGenerator {
 
 	public static final String VERSION = "1.0.0";
 
+	private static final Random SEED_GEN = new Random();
+
 	//read from cli args
-	private static Random randomseed = new Random();
 	private static String FOLDER_PATH = ".";
 	private static String MAP_NAME = "debugMap";
-	private static long SEED = randomseed.nextLong();
+	private static long SEED = SEED_GEN.nextLong();
+	private static Random RANDOM = new Random(SEED);
 	private static Optional<Biome> BIOME = Optional.empty();
 
 	//read from key value arguments or map name
-	private static int SPAWN_COUNT = 6;
-	private static float LAND_DENSITY = 1f;
+	private static int SPAWN_COUNT;
+	private static float LAND_DENSITY;
+	private static float PLATEAU_DENSITY;
+	private static float MOUNTAIN_DENSITY;
+	private static float RAMP_DENSITY;
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -52,15 +57,15 @@ public strictfp class MapGenerator {
 
 		MapGenerator generator = new MapGenerator();
 		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
-		SCMap map = generator.generate(SEED);
-		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath());
-		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map, SEED);
+		SCMap map = generator.generate(RANDOM.nextLong());
+		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','-'));
+		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
 	}
 
-	public void save(String folderName, String mapName, SCMap map, long seed) {
+	public void save(String folderName, String mapName, SCMap map) {
 		try {
 			Path folderPath = Paths.get(folderName);
 
@@ -91,9 +96,9 @@ public strictfp class MapGenerator {
 		final ConcurrentBinaryMask ramps = new ConcurrentBinaryMask(128, random.nextLong(), "ramps");
 
 		land.randomize(LAND_DENSITY).inflate(1).cutCorners().enlarge(32).acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		mountains.randomize(0.05f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		plateaus.randomize(0.1f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
-		ramps.randomize(0.1f);
+		mountains.randomize(MOUNTAIN_DENSITY).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		plateaus.randomize(PLATEAU_DENSITY).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
+		ramps.randomize(RAMP_DENSITY);
 
 		plateaus.intersect(land).minus(mountains);
 		ramps.intersect(plateaus).outline().minus(plateaus).intersect(land).minus(mountains).inflate(2);
@@ -228,6 +233,7 @@ public strictfp class MapGenerator {
 				FOLDER_PATH = args[0];
 				try {
 					SEED = Long.parseLong(args[1]);
+					RANDOM = new Random(SEED);
 				} catch (NumberFormatException nfe) {
 					System.out.println("Seed not numeric using default seed or mapname");
 				}
@@ -240,6 +246,7 @@ public strictfp class MapGenerator {
 					parseMapName();
 				}
 				else {
+					randomizeOptions();
 					generateMapName();
 				}
 			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
@@ -256,7 +263,10 @@ public strictfp class MapGenerator {
 					"--seed arg                           optional, set the seed for the generated map\n" +
 					"--map-name arg                       optional, set the map name for the generated map\n" +
 					"--spawn-count arg                    optional, set the spawn count for the generated map\n" +
-					"--land-density arg                   optional, set the land density for the generated map\n");
+					"--land-density arg                   optional, set the land density for the generated map\n" +
+					"--plateau-density arg                optional, set the plateau density for the generated map (max .2)\n" +
+					"--mountain-density arg               optional, set the mountain density for the generated map (max .1)\n" +
+					"--ramp-density arg                   optional, set the ramp density for the generated map\n (max .2)");
 			System.exit(0);
 		}
 
@@ -275,7 +285,9 @@ public strictfp class MapGenerator {
 
 		if (arguments.containsKey("seed")) {
 			SEED = Long.parseLong(arguments.get("seed"));
+			RANDOM = new Random(SEED);
 		}
+		randomizeOptions();
 
 		if (arguments.containsKey("spawn-count")) {
 			SPAWN_COUNT = Integer.parseInt(arguments.get("spawn-count"));
@@ -284,6 +296,21 @@ public strictfp class MapGenerator {
 		if (arguments.containsKey("land-density")) {
 			LAND_DENSITY = Float.parseFloat(arguments.get("land-density"));
 			LAND_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("plateau-density")) {
+			PLATEAU_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")),0.2f);
+			PLATEAU_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("mountain-density")) {
+			MOUNTAIN_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")),0.1f);
+			MOUNTAIN_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("ramp-density")) {
+			RAMP_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")),0.2f);
+			RAMP_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
 		}
 
 		generateMapName();
@@ -304,15 +331,29 @@ public strictfp class MapGenerator {
 		}
 		if (args.length>=5) {
 			String seedString = args[4];
-			byte[] seedBytes = Base64.getDecoder().decode(seedString);
-			ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
-			SEED = seedWrapper.getLong();
+			try {
+				SEED = Long.parseLong(seedString);
+			} catch (NumberFormatException nfe) {
+				byte[] seedBytes = Base64.getDecoder().decode(seedString);
+				ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
+				SEED = seedWrapper.getLong();
+			}
+			RANDOM = new Random(SEED);
+			randomizeOptions();
 		}
 		if (args.length>=6) {
 			String optionString = args[5];
 			byte[] optionBytes = Base64.getDecoder().decode(optionString);
 			parseOptions(optionBytes);
 		}
+	}
+
+	private static void randomizeOptions(){
+		SPAWN_COUNT = (RANDOM.nextInt(7)+1)*2;
+		LAND_DENSITY = StrictMath.min((RANDOM.nextInt(127)+20.0f)/127,1);
+		PLATEAU_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
+		MOUNTAIN_DENSITY = (float) RANDOM.nextInt(127)/127*0.1f;
+		RAMP_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
 	}
 
 	private static void parseOptions(byte[] optionBytes){
@@ -324,6 +365,15 @@ public strictfp class MapGenerator {
 		if (optionBytes.length>1){
 			LAND_DENSITY = (float) optionBytes[1]/127;
 		}
+		if (optionBytes.length>2){
+			PLATEAU_DENSITY = (float) optionBytes[2]/127*0.2f;
+		}
+		if (optionBytes.length>3){
+			MOUNTAIN_DENSITY = (float) optionBytes[3]/127*0.1f;
+		}
+		if (optionBytes.length>4){
+			RAMP_DENSITY = (float) optionBytes[4]/127*0.2f;
+		}
 	}
 
 	private static void generateMapName(){
@@ -331,7 +381,11 @@ public strictfp class MapGenerator {
 		ByteBuffer seedBuffer = ByteBuffer.allocate(8);
 		seedBuffer.putLong(SEED);
 		String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
-		byte[] optionArray = {(byte) SPAWN_COUNT, (byte) (LAND_DENSITY*127)};
+		byte[] optionArray = {(byte) SPAWN_COUNT,
+				(byte) (LAND_DENSITY*127),
+				(byte) (PLATEAU_DENSITY/0.2f*127),
+				(byte) (MOUNTAIN_DENSITY/0.1f*127),
+				(byte) (RAMP_DENSITY/0.2f*127)};
 		String optionString = Base64.getEncoder().encodeToString(optionArray);
 		MAP_NAME = String.format(mapNameFormat, VERSION, seedString, optionString);
 	}
