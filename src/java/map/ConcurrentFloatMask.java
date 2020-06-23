@@ -1,11 +1,10 @@
 package map;
 
+import generator.VisualDebugger;
 import util.Pipeline;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-
-import generator.VisualDebugger;
 
 public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 
@@ -24,7 +23,7 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
 		this.name = name;
 
-		if(name.equals("mocked") || VisualDebugger.ENABLED) {
+		if(name.equals("mocked")) {
 			this.floatMask = new FloatMask(mask.getFloatMask(), seed);
 		} else {
 			Pipeline.add(this, Arrays.asList(mask), res -> {
