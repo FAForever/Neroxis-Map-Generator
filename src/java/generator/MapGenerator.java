@@ -59,7 +59,10 @@ public strictfp class MapGenerator {
 		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
 		SCMap map = generator.generate(RANDOM.nextLong());
 		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','-'));
-
+		System.out.println("Land Density: "+LAND_DENSITY);
+		System.out.println("Plateau Density: "+PLATEAU_DENSITY);
+		System.out.println("Mountain Density: "+MOUNTAIN_DENSITY);
+		System.out.println("Ramp Density: "+RAMP_DENSITY);
 		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map);
 		System.out.println("Done");
 
@@ -166,7 +169,7 @@ public strictfp class MapGenerator {
 		BinaryMask resourceMask = new BinaryMask(grass.getBinaryMask().minus(rock.getBinaryMask()), random.nextLong());
 
 		spawnsMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(16).trimEdge(20).fillCircle(256, 256, 128, false);
-		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5);
+		resourceMask.enlarge(513).minus(ramps.getBinaryMask()).deflate(5).trimEdge(20);
 
 		markerGenerator.generateSpawns(spawnsMask, 64);
 		markerGenerator.generateMexes(resourceMask);
