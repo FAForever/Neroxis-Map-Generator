@@ -56,14 +56,15 @@ public strictfp class MapGenerator {
 		interpretArguments(args);
 
 		MapGenerator generator = new MapGenerator();
-		System.out.println("Generating map " + MAP_NAME.replace('/','-'));
+		System.out.println("Generating map " + MAP_NAME.replace('/','^'));
 		SCMap map = generator.generate(RANDOM.nextLong());
-		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','-'));
+		System.out.println("Saving map to " + Paths.get(FOLDER_PATH).toAbsolutePath() + "\\" + MAP_NAME.replace('/','^'));
+		System.out.println("Seed: "+SEED);
 		System.out.println("Land Density: "+LAND_DENSITY);
 		System.out.println("Plateau Density: "+PLATEAU_DENSITY);
 		System.out.println("Mountain Density: "+MOUNTAIN_DENSITY);
 		System.out.println("Ramp Density: "+RAMP_DENSITY);
-		generator.save(FOLDER_PATH, MAP_NAME.replace('/','-'), map);
+		generator.save(FOLDER_PATH, MAP_NAME.replace('/','^'), map);
 		System.out.println("Done");
 
 		generator.generateDebugOutput();
@@ -359,7 +360,7 @@ public strictfp class MapGenerator {
 	}
 
 	private static void parseMapName() {
-		MAP_NAME = MAP_NAME.replace('-','/');
+		MAP_NAME = MAP_NAME.replace('^','/');
 		if (!MAP_NAME.startsWith("neroxis_map_generator")){
 			throw new IllegalArgumentException("Map name is not a generated map");
 		}
