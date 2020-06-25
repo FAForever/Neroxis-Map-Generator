@@ -90,7 +90,7 @@ public strictfp class MapGenerator {
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
-		final int mexCount = SPAWN_COUNT*8 + 4/(SPAWN_COUNT/2)*2 + random.nextInt(40/SPAWN_COUNT)*SPAWN_COUNT;
+		final int mexCount = SPAWN_COUNT*8 + 4/(SPAWN_COUNT/2)*SPAWN_COUNT + random.nextInt(40/SPAWN_COUNT)*SPAWN_COUNT;
 		final int hydroCount = SPAWN_COUNT + random.nextInt(SPAWN_COUNT/2)*2;
 		final SCMap map = new SCMap(512, SPAWN_COUNT, mexCount, hydroCount);
 
@@ -202,7 +202,7 @@ public strictfp class MapGenerator {
 		t2LandWreckMask.randomize(0.005f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask);
 		t3LandWreckMask.randomize(0.001f).intersect(grass.getBinaryMask()).minus(noProps).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(128);
 		t2NavyWreckMask.randomize(0.01f).intersect(navyLandCopy.outline()).minus(noProps);
-		navyFactoryWreckMask.randomize(0.01f).minus(grass.getBinaryMask()).minus(noProps).deflate(2).trimEdge(10);
+		navyFactoryWreckMask.randomize(0.01f).minus(land.getBinaryMask()).minus(noProps).deflate(3).trimEdge(10);
 		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
 		noProps.combine(allWreckMask);
 
@@ -217,7 +217,7 @@ public strictfp class MapGenerator {
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
 		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
 		BinaryMask cliffLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
-    BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
+    	BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
     
 		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).minus(cliffLandCopy.invert());
 		treeMask.randomize(0.2f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
