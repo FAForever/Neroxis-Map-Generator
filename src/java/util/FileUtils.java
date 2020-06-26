@@ -83,7 +83,7 @@ public class FileUtils {
 			dir = dir.substring(0, dir.length() - 1);
 		}
 
-		Pattern pattern = Pattern.compile(String.format(DIRECTORY_PATTERN, dir));
+		Pattern pattern = Pattern.compile(String.format( DIRECTORY_PATTERN, dir));
 		return listFilesInZip(zipFile).stream()
 				.filter(f -> pattern.matcher(f).matches())
 				.collect(Collectors.toList());
