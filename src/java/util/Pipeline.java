@@ -157,7 +157,7 @@ public strictfp class Pipeline {
 				return executingMask;
 			} */ else {
 				if(maskBackups.isEmpty()) {
-					new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName())).printStackTrace();
+					new RuntimeException(String.format( "No backup mask left: %d, requested from: %s", index, requestingMask.getName())).printStackTrace();
 					return null;
 				}
 				return maskBackups.remove(0);

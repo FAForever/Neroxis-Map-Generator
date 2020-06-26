@@ -129,7 +129,7 @@ public strictfp class SaveExporter {
 	}
 
 	private static void saveUnit(map.Unit unit, int i) throws IOException {
-		out.writeBytes(String.format("['UNIT_%d'] = {\n", i));
+		out.writeBytes(String.format( "['UNIT_%d'] = {\n", i));
 		out.writeBytes(String.format("	type = '%s',\n", unit.getType()));
 		out.writeBytes("			orders = '',\n");
 		out.writeBytes("			platoon = '',\n");

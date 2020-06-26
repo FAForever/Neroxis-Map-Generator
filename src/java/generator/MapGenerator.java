@@ -47,6 +47,7 @@ public strictfp class MapGenerator {
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
+		Locale.setDefault(Locale.US);
 		if (DEBUG) {
 			Path debugDir = Paths.get(".", "debug");
 			FileUtils.deleteRecursiveIfExists(debugDir);
@@ -430,7 +431,7 @@ public strictfp class MapGenerator {
 				(byte) (MOUNTAIN_DENSITY/0.1f*127),
 				(byte) (RAMP_DENSITY/0.2f*127)};
 		String optionString = Base64.getEncoder().encodeToString(optionArray);
-		MAP_NAME = String.format(mapNameFormat, VERSION, seedString, optionString);
+		MAP_NAME = String.format( mapNameFormat, VERSION, seedString, optionString);
 	}
 
 
@@ -445,7 +446,7 @@ public strictfp class MapGenerator {
 
 		for(int i = 0;i < Pipeline.getPipelineSize();i++) {
 			Path maskFile = masksDir.resolve(i + ".mask");
-			writer.write(String.format("%d:\t%s\n", i, hashFiles(maskFile)));
+			writer.write(String.format( "%d:\t%s\n", i, hashFiles(maskFile)));
 		}
 
 		String mapHash = hashFiles(SCMapExporter.file.toPath(), SaveExporter.file.toPath());
