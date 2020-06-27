@@ -1,5 +1,6 @@
 package map;
 
+import generator.VisualDebugger;
 import util.Pipeline;
 
 import java.nio.file.Path;
@@ -140,5 +141,13 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 	@Override
 	public String getName() {
 		return name;
+	}
+	
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this.binaryMask);
+	}
+	
+	public void startVisualDebugger(String maskName) {
+		VisualDebugger.whitelistMask(this.binaryMask, maskName);
 	}
 }

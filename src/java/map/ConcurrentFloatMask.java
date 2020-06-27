@@ -1,5 +1,6 @@
 package map;
 
+import generator.VisualDebugger;
 import util.Pipeline;
 
 import java.nio.file.Path;
@@ -45,12 +46,6 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 		);
 	}
 
-	public ConcurrentFloatMask max(ConcurrentBinaryMask other) {
-		return Pipeline.add(this, Arrays.asList(this, other), res ->
-				this.floatMask.max(((ConcurrentFloatMask)res.get(1)).getFloatMask())
-		);
-	}
-
 	public ConcurrentFloatMask maskToMoutains(float firstSlope, float slope, ConcurrentBinaryMask other) {
 		return Pipeline.add(this, Arrays.asList(this, other), res ->
 				this.floatMask.maskToMoutains(firstSlope, slope, ((ConcurrentBinaryMask)res.get(1)).getBinaryMask())
@@ -92,5 +87,13 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 	@Override
 	public String getName() {
 		return name;
+	}
+	
+	public void startVisualDebugger() {
+		VisualDebugger.whitelistMask(this.floatMask);
+	}
+	
+	public void startVisualDebugger(String maskName) {
+		VisualDebugger.whitelistMask(this.floatMask, maskName);
 	}
 }

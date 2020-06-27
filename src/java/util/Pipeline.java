@@ -18,12 +18,12 @@ public strictfp class Pipeline {
 	private static List<Entry> pipeline = new ArrayList<>();
 
     public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>, ?> function) {
-        addInternal(executingMask, dep, function);
+    	addInternal(executingMask, dep, function);
         return executingMask;
     }
 
     public static ConcurrentFloatMask add(ConcurrentFloatMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>,?> function) {
-        addInternal(executingMask, dep, function);
+    	addInternal(executingMask, dep, function);
         return executingMask;
     }
 
