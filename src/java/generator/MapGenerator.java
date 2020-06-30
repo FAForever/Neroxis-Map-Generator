@@ -27,7 +27,7 @@ public strictfp class MapGenerator {
 
 	public static final boolean DEBUG = false;
 
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.1";
 
 	private static final Random SEED_GEN = new Random();
 
