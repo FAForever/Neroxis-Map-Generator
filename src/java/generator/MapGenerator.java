@@ -44,6 +44,8 @@ public strictfp class MapGenerator {
 	private static float PLATEAU_DENSITY;
 	private static float MOUNTAIN_DENSITY;
 	private static float RAMP_DENSITY;
+	private static float RECLAIM_DENSITY;
+	private static int MEX_COUNT;
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
@@ -65,6 +67,8 @@ public strictfp class MapGenerator {
 		System.out.println("Plateau Density: "+PLATEAU_DENSITY);
 		System.out.println("Mountain Density: "+MOUNTAIN_DENSITY);
 		System.out.println("Ramp Density: "+RAMP_DENSITY);
+		System.out.println("Reclaim Density: "+RECLAIM_DENSITY);
+		System.out.println("Mex Count: "+MEX_COUNT);
 		generator.save(FOLDER_PATH, MAP_NAME.replace('/','^'), map);
 		System.out.println("Done");
 
@@ -92,9 +96,8 @@ public strictfp class MapGenerator {
 	public SCMap generate(long seed) throws ExecutionException, InterruptedException {
 		long startTime = System.currentTimeMillis();
 		final Random random = new Random(seed);
-		final int mexCount = SPAWN_COUNT*8 + 4/(SPAWN_COUNT/2)*SPAWN_COUNT + random.nextInt(40/SPAWN_COUNT)*SPAWN_COUNT;
 		final int hydroCount = SPAWN_COUNT + random.nextInt(SPAWN_COUNT/2)*2;
-		final SCMap map = new SCMap(512, SPAWN_COUNT, mexCount, hydroCount);
+		final SCMap map = new SCMap(512, SPAWN_COUNT, MEX_COUNT*SPAWN_COUNT, hydroCount);
 
 		final ConcurrentBinaryMask land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
 		final ConcurrentBinaryMask mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
@@ -211,11 +214,11 @@ public strictfp class MapGenerator {
 		BinaryMask navyLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
 		BinaryMask allWreckMask = new BinaryMask(513, random.nextLong());
 
-		t1LandWreckMask.randomize(0.01f).intersect(grass.getBinaryMask()).minus(noWrecks).deflate(1).trimEdge(20);
-		t2LandWreckMask.randomize(0.005f).intersect(grass.getBinaryMask()).minus(noWrecks).minus(t1LandWreckMask).trimEdge(20);
-		t3LandWreckMask.randomize(0.001f).intersect(grass.getBinaryMask()).minus(noWrecks).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(64);
-		t2NavyWreckMask.randomize(0.01f).intersect(navyLandCopy.outline()).minus(noWrecks).trimEdge(20);
-		navyFactoryWreckMask.randomize(0.005f).minus(land.getBinaryMask()).minus(noWrecks).deflate(3).trimEdge(20);
+		t1LandWreckMask.randomize(RECLAIM_DENSITY*.015f).intersect(grass.getBinaryMask()).minus(noWrecks).deflate(1).trimEdge(20);
+		t2LandWreckMask.randomize(RECLAIM_DENSITY*0.01f).intersect(grass.getBinaryMask()).minus(noWrecks).minus(t1LandWreckMask).trimEdge(20);
+		t3LandWreckMask.randomize(RECLAIM_DENSITY*0.002f).intersect(grass.getBinaryMask()).minus(noWrecks).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(64);
+		t2NavyWreckMask.randomize(RECLAIM_DENSITY*0.015f).intersect(navyLandCopy.outline()).minus(noWrecks).trimEdge(20);
+		navyFactoryWreckMask.randomize(RECLAIM_DENSITY*0.0075f).minus(land.getBinaryMask()).minus(noWrecks).deflate(3).trimEdge(20);
 		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
 		noProps.combine(allWreckMask);
 
@@ -228,22 +231,22 @@ public strictfp class MapGenerator {
 		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
 
 		BinaryMask treeMask = new BinaryMask(32, random.nextLong());
-		BinaryMask cliffRockMask = new BinaryMask(land.getBinaryMask(), random.nextLong());
+		BinaryMask cliffRockMask = new BinaryMask(32, random.nextLong());
 		BinaryMask cliffLandCopy = new BinaryMask(land.getBinaryMask(), random.nextLong());
-    	BinaryMask fieldStoneMask = new BinaryMask(treeMask, random.nextLong());
+    	BinaryMask fieldStoneMask = new BinaryMask(128, random.nextLong());
 		BinaryMask rockFieldMask = new BinaryMask(128, random.nextLong());
-    
-		cliffRockMask.randomize(.2f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).intersect(cliffLandCopy);
-		fieldStoneMask.invert().enlarge(256).intersect(grass.getBinaryMask());
-		fieldStoneMask.enlarge(513).deflate(5).minus(noProps).trimEdge(10);
+
+		cliffRockMask.randomize(.15f).intersect(rock.getBinaryMask()).minus(plateaus.getBinaryMask()).minus(mountains.getBinaryMask()).intersect(cliffLandCopy);
+		fieldStoneMask.randomize(RECLAIM_DENSITY*.005f).enlarge(256).intersect(grass.getBinaryMask());
+		fieldStoneMask.enlarge(513).minus(noProps).trimEdge(10);
 		treeMask.randomize(0.1f).inflate(1).cutCorners().acid(0.5f).enlarge(128).smooth(4).acid(0.5f);
 		treeMask.enlarge(256).intersect(grass.getBinaryMask());
 		treeMask.enlarge(513).deflate(5).minus(noProps).trimEdge(3).fillCircle(256,256,96,false);
-		rockFieldMask.randomize(.001f).trimEdge(48).inflate(3).acid(.5f).intersect(land.getBinaryMask()).minus(mountains.getBinaryMask()).minus(noProps);
+		rockFieldMask.randomize(RECLAIM_DENSITY*.005f).trimEdge(48).inflate(3).acid(.5f).intersect(land.getBinaryMask()).minus(mountains.getBinaryMask()).minus(noProps);
 
 
-		propGenerator.generateProps(treeMask, propGenerator.TREE_GROUPS, 4.5f);
-		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 3f);
+		propGenerator.generateProps(treeMask, propGenerator.TREE_GROUPS, 3f);
+		propGenerator.generateProps(cliffRockMask, propGenerator.ROCKS, 1.5f);
 		propGenerator.generateProps(fieldStoneMask, propGenerator.FIELD_STONES, 60f);
 		propGenerator.generateProps(rockFieldMask, propGenerator.ROCKS, 2f);
 
@@ -324,7 +327,9 @@ public strictfp class MapGenerator {
 					"--land-density arg                   optional, set the land density for the generated map\n" +
 					"--plateau-density arg                optional, set the plateau density for the generated map (max .2)\n" +
 					"--mountain-density arg               optional, set the mountain density for the generated map (max .1)\n" +
-					"--ramp-density arg                   optional, set the ramp density for the generated map\n (max .2)");
+					"--ramp-density arg                   optional, set the ramp density for the generated map (max .2)\n +" +
+					"--reclaim-density arg                optional, set the reclaim density for the generated map\n +" +
+					"--mex-count arg                      optional, set the mex count per player for the generated map\n +");
 			System.exit(0);
 		}
 
@@ -358,17 +363,26 @@ public strictfp class MapGenerator {
 
 		if (arguments.containsKey("plateau-density")) {
 			PLATEAU_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")),0.2f);
-			PLATEAU_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+			PLATEAU_DENSITY = (float) StrictMath.round(PLATEAU_DENSITY*127)/127;
 		}
 
 		if (arguments.containsKey("mountain-density")) {
 			MOUNTAIN_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")),0.1f);
-			MOUNTAIN_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+			MOUNTAIN_DENSITY = (float) StrictMath.round(MOUNTAIN_DENSITY*127)/127;
 		}
 
 		if (arguments.containsKey("ramp-density")) {
 			RAMP_DENSITY = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")),0.2f);
-			RAMP_DENSITY = (float) StrictMath.round(LAND_DENSITY*127)/127;
+			RAMP_DENSITY = (float) StrictMath.round(RAMP_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("reclaim-density")) {
+			RECLAIM_DENSITY = Float.parseFloat(arguments.get("reclaim-density"));
+			RECLAIM_DENSITY = (float) StrictMath.round(RECLAIM_DENSITY*127)/127;
+		}
+
+		if (arguments.containsKey("mex-count")) {
+			MEX_COUNT = Integer.parseInt(arguments.get("mex-count"));
 		}
 
 		generateMapName();
@@ -412,6 +426,8 @@ public strictfp class MapGenerator {
 		PLATEAU_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
 		MOUNTAIN_DENSITY = (float) RANDOM.nextInt(127)/127*0.075f;
 		RAMP_DENSITY = (float) RANDOM.nextInt(127)/127*0.2f;
+		RECLAIM_DENSITY = (float) RANDOM.nextInt(127)/127;
+		MEX_COUNT = 8 + 4/(SPAWN_COUNT/2) + RANDOM.nextInt(40/SPAWN_COUNT);
 	}
 
 	private static void parseOptions(byte[] optionBytes){
@@ -432,6 +448,12 @@ public strictfp class MapGenerator {
 		if (optionBytes.length>4){
 			RAMP_DENSITY = (float) optionBytes[4]/127*0.2f;
 		}
+		if (optionBytes.length>5){
+			RECLAIM_DENSITY = (float) optionBytes[5]/127;
+		}
+		if (optionBytes.length>6){
+			MEX_COUNT = optionBytes[6];
+		}
 	}
 
 	private static void generateMapName(){
@@ -443,7 +465,9 @@ public strictfp class MapGenerator {
 				(byte) (LAND_DENSITY*127),
 				(byte) (PLATEAU_DENSITY/0.2f*127),
 				(byte) (MOUNTAIN_DENSITY/0.1f*127),
-				(byte) (RAMP_DENSITY/0.2f*127)};
+				(byte) (RAMP_DENSITY/0.2f*127),
+				(byte) (RECLAIM_DENSITY*127),
+				(byte) (MEX_COUNT)};
 		String optionString = Base64.getEncoder().encodeToString(optionArray);
 		MAP_NAME = String.format( mapNameFormat, VERSION, seedString, optionString);
 	}
