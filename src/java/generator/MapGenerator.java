@@ -209,12 +209,11 @@ public strictfp class MapGenerator {
 		ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(513, random.nextLong(), "heightmapMountains");
 		ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(513, random.nextLong(), "heightmapPlateaus");
 
-		heightmapBase.init(land, 25f, 25f);
-		heightmapLand.maskToHeightmap(0.025f, 0.25f, 95, land).smooth(2);
-
-		heightmapMountains.maskToMoutains(2f, 0.5f, mountains);
 		plateaus.combine(mountains);
+		heightmapBase.init(land, 25f, 25f);
 		heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
+		heightmapLand.maskToHeightmap(0.025f, 0.25f, 95, land).smooth(2);
+		heightmapMountains.maskToMoutains(2f, 0.5f, mountains);
 		heightmapMountains.add(heightmapPlateaus).smooth(1);
 
 		heightmapBase.add(heightmapLand);
@@ -222,38 +221,30 @@ public strictfp class MapGenerator {
 	}
 
 	private void setupTexturePipeline(){
-		ConcurrentBinaryMask plateauCopy1 = new ConcurrentBinaryMask(plateaus, random.nextLong(), "landCopy");
-		ConcurrentBinaryMask plateauCopy2 = new ConcurrentBinaryMask(plateaus, random.nextLong(), "landCopy");
-
-		grass = new ConcurrentBinaryMask(land, random.nextLong(), "grass");
-		grassTexture = new ConcurrentFloatMask(256, random.nextLong(), "grassTexture");
-		rock = new ConcurrentBinaryMask(mountains, random.nextLong(), "rock");
+		grass = new ConcurrentBinaryMask(513, random.nextLong(), "grass");
+		rock = new ConcurrentBinaryMask(513, random.nextLong(), "rock");
+		ConcurrentBinaryMask lightGrass = new ConcurrentBinaryMask(513, random.nextLong(), "lightGrass");
+		ConcurrentBinaryMask plateauCopy = new ConcurrentBinaryMask(513, random.nextLong(), "plateauCopy");
 		rockTexture = new ConcurrentFloatMask(256, random.nextLong(), "rockTexture");
-
-		grass.deflate(6f).combine(plateaus).shrink(256).inflate(1);
-		grassTexture.init(grass, 0, 0.999f).smooth(2);
-
-		plateauCopy1.outline().inflate(2).minus(ramps);
-		plateauCopy2.deflate(1).outline().inflate(2).minus(ramps);
-		rock.inflate(3).combine(plateauCopy1).combine(plateauCopy2).shrink(256);
-		rockTexture.init(rock, 0, 0.999f).smooth(1);
-
-		grass.minus(rock);
-
-		ConcurrentBinaryMask lightGrass = new ConcurrentBinaryMask(grass, random.nextLong(), "lightGrass");
-
-		lightGrass.randomize(0.5f);
-
+		grassTexture = new ConcurrentFloatMask(256, random.nextLong(), "grassTexture");
 		lightGrassTexture = new ConcurrentFloatMask(256, random.nextLong(), "lightGrassTexture");
+
+		plateauCopy.combine(plateaus).outline().inflate(3).minus(ramps);
+		rock.combine(mountains).inflate(3).combine(plateauCopy).shrink(256);
+		grass.combine(land).deflate(6f).combine(plateaus).shrink(256).inflate(1).minus(rock);
+		lightGrass.randomize(0.5f).shrink(256);
+
+		rockTexture.init(rock, 0, 0.999f).smooth(1);
+		grassTexture.init(grass, 0, 0.999f).smooth(2);
 		lightGrassTexture.init(lightGrass, 0, 0.999f).smooth(2);
 	}
 
 	private void setupMarkerPipeline(){
-		spawnsMask = new ConcurrentBinaryMask(grass, random.nextLong(), "spawns");
-		resourceMask = new ConcurrentBinaryMask(grass.minus(rock), random.nextLong(), "resource");
+		spawnsMask = new ConcurrentBinaryMask(513, random.nextLong(), "spawns");
+		resourceMask = new ConcurrentBinaryMask(513, random.nextLong(), "resource");
 
-		spawnsMask.enlarge(513).minus(ramps).deflate(18).trimEdge(20).fillCircle(256, 256, 128, false);
-		resourceMask.enlarge(513).minus(ramps).deflate(5).trimEdge(20);
+		spawnsMask.combine(land).deflate(6f).combine(plateaus).minus(rock).minus(ramps).deflate(18).trimEdge(20).fillCircle(256, 256, 128, false);
+		resourceMask.combine(land).deflate(6f).combine(plateaus).minus(rock).minus(ramps).deflate(5).trimEdge(20);
 	}
 
 	private void setupWreckPipeline(){
@@ -265,9 +256,9 @@ public strictfp class MapGenerator {
 		allWreckMask = new ConcurrentBinaryMask(513, random.nextLong(),"allWreck");
 		ConcurrentBinaryMask landCopy = new ConcurrentBinaryMask(land, random.nextLong(), "landCopy");
 
-		t1LandWreckMask.randomize(reclaimDensity *.015f).intersect(grass).deflate(1).trimEdge(20);
-		t2LandWreckMask.randomize(reclaimDensity *0.01f).intersect(grass).minus(t1LandWreckMask).trimEdge(20);
-		t3LandWreckMask.randomize(reclaimDensity *0.002f).intersect(grass).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(64);
+		t1LandWreckMask.randomize(reclaimDensity *.015f).intersect(land).deflate(1).trimEdge(20);
+		t2LandWreckMask.randomize(reclaimDensity *0.01f).intersect(land).minus(t1LandWreckMask).trimEdge(20);
+		t3LandWreckMask.randomize(reclaimDensity *0.002f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(64);
 		t2NavyWreckMask.randomize(reclaimDensity *0.015f).intersect(landCopy.outline()).trimEdge(20);
 		navyFactoryWreckMask.randomize(reclaimDensity *0.0075f).minus(land).deflate(3).trimEdge(20);
 		allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
@@ -289,8 +280,8 @@ public strictfp class MapGenerator {
 	}
 
 	private void generateExclusionMasks(){
-		noProps = new BinaryMask(rock.getBinaryMask(), random.nextLong());
-		noProps.combine(ramps.getBinaryMask());
+		noProps = new BinaryMask(256, random.nextLong());
+		noProps.combine(rock.getBinaryMask()).combine(ramps.getBinaryMask());
 		for (int i = 0; i < map.getSpawns().length; i++) {
 			noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
 		}
@@ -302,8 +293,8 @@ public strictfp class MapGenerator {
 		}
 		noProps.combine(allWreckMask.getBinaryMask());
 
-		noWrecks = new BinaryMask(rock.getBinaryMask(), random.nextLong());
-		noWrecks.combine(ramps.getBinaryMask());
+		noWrecks = new BinaryMask(256, random.nextLong());
+		noWrecks.combine(rock.getBinaryMask()).combine(ramps.getBinaryMask());
 		for (int i = 0; i < map.getSpawns().length; i++) {
 			noWrecks.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, true);
 		}
