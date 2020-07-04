@@ -270,7 +270,7 @@ public strictfp class MapGenerator {
         treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
         treeMask.enlarge(256).intersect(grass);
         treeMask.enlarge(513).deflate(5).trimEdge(3).fillCircle(256, 256, 96, false);
-        rockFieldMask.randomize(reclaimDensity *.005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
+        rockFieldMask.randomize(reclaimDensity * .005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
 	}
 
     private void generateExclusionMasks() {
