@@ -15,7 +15,7 @@ public class VisualDebugger {
     /**
      * When enabled, mask concurrency is disabled.
      */
-    public static final boolean ENABLED = true;
+    public static final boolean ENABLED = false;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
