@@ -230,7 +230,7 @@ public strictfp class MapGenerator {
 		lightGrassTexture = new ConcurrentFloatMask(256, random.nextLong(), "lightGrassTexture");
 
 		plateauCopy.combine(plateaus).outline().inflate(3).minus(ramps);
-		rock.combine(mountains).inflate(3).combine(plateauCopy).shrink(256);
+		rock.combine(mountains).combine(plateauCopy).shrink(256);
 		grass.combine(land).deflate(6f).combine(plateaus).shrink(256).inflate(1).minus(rock);
 		lightGrass.randomize(0.5f).shrink(256);
 
