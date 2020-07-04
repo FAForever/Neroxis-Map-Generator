@@ -15,27 +15,34 @@ public class VisualDebugger {
     /**
      * When enabled, mask concurrency is disabled.
      */
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = true;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
-     * If true, all negative values are colored as checkerboard, leaving more color space
-     * for positive numbers.
-     */
-    public static boolean ignoreNegativeRange = false;
+	 * If true, all negative values are colored as checkerboard, leaving more color space
+	 * for positive numbers.
+	 */
+	public static boolean ignoreNegativeRange = false;
 
-    private static boolean isDrawAllMasks = false;
-    private static Map<Integer, String> drawMasksWhitelist = null;
+	private static boolean isDrawAllMasks = false;
+	private static Map<Integer, String> drawMasksWhitelist = null;
 
-    public static void whitelistMask(Mask binaryOrFloatMask) {
-        whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
-    }
+	public static void whitelistMask(Mask binaryOrFloatMask) {
+		whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
+	}
 
-    public static void whitelistMask(Mask binaryOrFloatMask, String name) {
-        if (drawMasksWhitelist == null) {
-            drawMasksWhitelist = new HashMap<>();
-        }
-        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
+	public static void whitelistMask(Mask binaryOrFloatMask, String name) {
+		if (drawMasksWhitelist == null) {
+			drawMasksWhitelist = new HashMap<>();
+		}
+		drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
+		createGUI();
+	}
+
+	public static void createGUI(){
+		if (!VisualDebuggerGui.isCreated()) {
+			VisualDebuggerGui.createGui();
+		}
     }
 
     public static void startRecordAll() {
@@ -133,26 +140,24 @@ public class VisualDebugger {
         return result;
     }
 
-    private static void visualize(ImageSource imageSource, int size, int maskHash) {
-        int perPixelSize = calculateAutoZoom(size);
-        int imageSize = size * perPixelSize;
-        BufferedImage currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
-        // iterate source pixels
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                int color = imageSource.get(x, y);
-                // scale source pixel to filled rectangle so its possible to see stuff
-                for (int yInner = 0; yInner < perPixelSize; yInner++) {
-                    for (int xInner = 0; xInner < perPixelSize; xInner++) {
-                        int drawX = (x * perPixelSize) + xInner;
-                        int drawY = (y * perPixelSize) + yInner;
-                        currentImage.setRGB(drawX, drawY, color);
-                    }
-                }
-            }
-        }
-        if (!VisualDebuggerGui.isCreated()) {
-            VisualDebuggerGui.createGui();
+
+	private static void visualize(ImageSource imageSource, int size, int maskHash) {
+		int perPixelSize = calculateAutoZoom(size);
+		int imageSize = size * perPixelSize;
+		BufferedImage currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
+		// iterate source pixels
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				int color = imageSource.get(x, y);
+				// scale source pixel to filled rectangle so its possible to see stuff
+				for (int yInner = 0; yInner < perPixelSize; yInner++) {
+					for (int xInner = 0; xInner < perPixelSize; xInner++) {
+						int drawX = (x * perPixelSize) + xInner;
+						int drawY = (y * perPixelSize) + yInner;
+						currentImage.setRGB(drawX, drawY, color);
+					}
+				}
+			}
         }
         String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
         String function = new Throwable().getStackTrace()[2].getMethodName();
