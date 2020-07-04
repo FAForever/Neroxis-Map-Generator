@@ -259,18 +259,18 @@ public strictfp class MapGenerator {
     }
 
 	private void setupPropPipeline(){
-		treeMask = new ConcurrentBinaryMask(32, random.nextLong(),"tree");
-		cliffRockMask = new ConcurrentBinaryMask(32, random.nextLong(), "cliffRock");
-		fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), "fieldStone");
-		rockFieldMask = new ConcurrentBinaryMask(128, random.nextLong(), "rockField");
+        treeMask = new ConcurrentBinaryMask(32, random.nextLong(), "tree");
+        cliffRockMask = new ConcurrentBinaryMask(32, random.nextLong(), "cliffRock");
+        fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), "fieldStone");
+        rockFieldMask = new ConcurrentBinaryMask(128, random.nextLong(), "rockField");
 
-		cliffRockMask.randomize(.15f).intersect(rock).minus(plateaus).minus(mountains).intersect(land);
-		fieldStoneMask.randomize(reclaimDensity *.005f).enlarge(256).intersect(grass);
-		fieldStoneMask.enlarge(513).trimEdge(10);
-		treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
-		treeMask.enlarge(256).intersect(grass);
-		treeMask.enlarge(513).deflate(5).trimEdge(3).fillCircle(256,256,96,false);
-		rockFieldMask.randomize(reclaimDensity *.005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
+        cliffRockMask.randomize(.15f).intersect(rock).minus(plateaus).minus(mountains).intersect(land);
+        fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(grass);
+        fieldStoneMask.enlarge(513).trimEdge(10);
+        treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
+        treeMask.enlarge(256).intersect(grass);
+        treeMask.enlarge(513).deflate(5).trimEdge(3).fillCircle(256, 256, 96, false);
+        rockFieldMask.randomize(reclaimDensity *.005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
 	}
 
     private void generateExclusionMasks() {
