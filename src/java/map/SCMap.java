@@ -186,7 +186,7 @@ public strictfp class SCMap {
     public void setTextureMaskLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                textureMasksLow.getRaster().setPixel(x, y, new int[]{(byte) (mask0.get(x, y) * 256f), (byte) (mask1.get(x, y) * 256f), (byte) (mask2.get(x, y) * 256f), (byte) (mask3.get(x, y) * 256f)});
+                textureMasksLow.getRaster().setPixel(x, y, new int[]{(int) (mask0.get(x, y) * 256f), (int) (mask1.get(x, y) * 256f), (int) (mask2.get(x, y) * 256f), (int) (mask3.get(x, y) * 256f)});
             }
         }
     }

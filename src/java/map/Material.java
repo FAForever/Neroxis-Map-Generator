@@ -1,6 +1,9 @@
 package map;
 
 import lombok.Getter;
+import util.serialized.MaterialSet;
+
+import java.awt.*;
 
 @Getter
 public strictfp class Material {
@@ -11,24 +14,30 @@ public strictfp class Material {
     private final String normalPath;
     private final float textureScale;
     private final float normalScale;
+    private final Color previewColor;
 
     public Material(String environment, String name, float scale) {
-        this(environment, name, name, scale);
+        this(environment, name, name, scale, null);
     }
 
-    public Material(String environment, String texture, String normal, float scale) {
-        this(environment, texture, normal, scale, scale);
+    public Material(String environment, String texture, String normal, float scale, MaterialSet.PreviewColor previewColor) {
+        this(environment, texture, normal, scale, scale, previewColor);
     }
 
-    public Material(String environment, String texture, String normal, float textureScale, float normalScale) {
-        this(environment, environment, texture, normal, textureScale, normalScale);
+    public Material(String environment, String texture, String normal, float textureScale, float normalScale, MaterialSet.PreviewColor previewColor) {
+        this(environment, environment, texture, normal, textureScale, normalScale, previewColor);
     }
 
-    public Material(String texEnv, String normalEnv, String texture, String normal, float textureScale, float normalScale) {
+    public Material(String texEnv, String normalEnv, String texture, String normal, float textureScale, float normalScale, MaterialSet.PreviewColor previewColor) {
         texturePath = String.format(texturePathFormat, texEnv, texture);
         normalPath = String.format(normalPathFormat, normalEnv, normal);
         this.textureScale = textureScale;
         this.normalScale = normalScale;
+        if (previewColor != null) {
+            this.previewColor = new Color(previewColor.red, previewColor.green, previewColor.blue);
+        } else {
+            this.previewColor = new Color(127, 127, 127);
+        }
     }
 
 }

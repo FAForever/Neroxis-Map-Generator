@@ -11,6 +11,11 @@
         "environment": "desert",
         "name": "des_rock03a_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 98,
+        "green": 73,
+        "blue": 49
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "desert",
         "name": "des_sandlight_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 82,
+        "green": 65,
+        "blue": 49
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "desert",
         "name": "des_sandlight_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 132,
+        "green": 125,
+        "blue": 107
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "desert",
         "name": "des_rock_normal",
         "scale": 8.0
+      },
+      "previewColor": {
+        "red": 99,
+        "green": 89,
+        "blue": 66
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "desert",
         "name": "des_gravel_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 66,
+        "green": 57,
+        "blue": 33
       }
     }
   ],

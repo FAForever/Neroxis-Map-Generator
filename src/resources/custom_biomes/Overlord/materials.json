@@ -11,6 +11,11 @@
         "environment": "desert",
         "name": "des_sandlight_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 123,
+        "green": 110,
+        "blue": 90
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "evergreen2",
         "name": "eg_rock_normal",
         "scale": 12.0
+      },
+      "previewColor": {
+        "red": 54,
+        "green": 41,
+        "blue": 32
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "red barrens",
         "name": "rb_cracked02_normal",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 35,
+        "green": 32,
+        "blue": 38
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "evergreen2",
         "name": "evrock007_normal",
         "scale": 12.0
+      },
+      "previewColor": {
+        "red": 41,
+        "green": 44,
+        "blue": 35
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "lava",
         "name": "lav_rock04_normals",
         "scale": 8.0
+      },
+      "previewColor": {
+        "red": 16,
+        "green": 12,
+        "blue": 16
       }
     },
     {
@@ -71,6 +96,11 @@
         "environment": "evergreen2",
         "name": "eg_snow_normal",
         "scale": 16.5
+      },
+      "previewColor": {
+        "red": 19,
+        "green": 27,
+        "blue": 30
       }
     },
     {
@@ -83,6 +113,11 @@
         "environment": "evergreen2",
         "name": "eg_grass002_normal",
         "scale": 10.0
+      },
+      "previewColor": {
+        "red": 58,
+        "green": 65,
+        "blue": 33
       }
     },
     {
@@ -95,6 +130,11 @@
         "environment": "tropical",
         "name": "tr_reef_coral_normal",
         "scale": 10.0
+      },
+      "previewColor": {
+        "red": 123,
+        "green": 110,
+        "blue": 90
       }
     },
     {
@@ -107,6 +147,11 @@
         "environment": "lava",
         "name": "lav_rock04_normals",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 16,
+        "green": 12,
+        "blue": 16
       }
     }
   ],

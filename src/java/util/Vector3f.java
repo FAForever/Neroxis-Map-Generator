@@ -10,4 +10,12 @@ public strictfp class Vector3f {
         this.y = y;
         this.z = z;
     }
+
+	public float getAzimuth() {
+		return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
+	}
+
+	public float getElevation() {
+		return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
+	}
 }

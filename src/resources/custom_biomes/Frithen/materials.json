@@ -11,6 +11,11 @@
         "environment": "tundra",
         "name": "tundratrans004_normal",
         "scale": 8.75
+      },
+      "previewColor": {
+        "red": 132,
+        "green": 146,
+        "blue": 148
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "tundra",
         "name": "tund_rock_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 173,
+        "green": 176,
+        "blue": 189
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "tundra",
         "name": "tund_ice003_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 148,
+        "green": 162,
+        "blue": 165
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "crystalline",
         "name": "cr_02_01_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 123,
+        "green": 143,
+        "blue": 184
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "crystalline",
         "name": "cr_rock002b_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 132,
+        "green": 146,
+        "blue": 148
       }
     },
     {
@@ -71,6 +96,11 @@
         "environment": "evergreen2",
         "name": "eg_rock004_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 58,
+        "green": 53,
+        "blue": 49
       }
     },
     {
@@ -83,6 +113,11 @@
         "environment": "tundra",
         "name": "tund_rock_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 41,
+        "green": 37,
+        "blue": 41
       }
     }
   ],

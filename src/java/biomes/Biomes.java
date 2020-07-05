@@ -79,7 +79,8 @@ public strictfp class Biomes {
                     biomeMaterial.texture.name,
                     biomeMaterial.normal.name,
                     biomeMaterial.texture.scale,
-                    biomeMaterial.normal.scale
+                    biomeMaterial.normal.scale,
+                    biomeMaterial.previewColor
             );
         }
 

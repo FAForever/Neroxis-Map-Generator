@@ -34,11 +34,10 @@ public strictfp class SCMapExporter {
 
     public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
         file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
-        boolean status = file.createNewFile();
-        out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-
-        // header
-        writeInt(SCMap.SIGNATURE);
+        boolean status =file.createNewFile();
+		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+		// header
+		writeInt(SCMap.SIGNATURE);
         writeInt(SCMap.VERSION_MAJOR);
         writeInt(-1091567891); // unknown
         writeInt(2); // unknown

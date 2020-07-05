@@ -11,6 +11,11 @@
         "environment": "evergreen2",
         "name": "eg_rock_normal",
         "scale": 5.2
+      },
+      "previewColor": {
+        "red": 54,
+        "green": 41,
+        "blue": 32
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "evergreen",
         "name": "grass001_normals",
         "scale": 9.9
+      },
+      "previewColor": {
+        "red": 38,
+        "green": 48,
+        "blue": 16
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "evergreen",
         "name": "grass000_normals",
         "scale": 30.0
+      },
+      "previewColor": {
+        "red": 58,
+        "green": 65,
+        "blue": 33
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "evergreen",
         "name": "rockmed_normals",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 84,
+        "green": 83,
+        "blue": 79
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "evergreen",
         "name": "snow001_normals",
         "scale": 16.4
+      },
+      "previewColor": {
+        "red": 60,
+        "green": 60,
+        "blue": 57
       }
     }
   ],

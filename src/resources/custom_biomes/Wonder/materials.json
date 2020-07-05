@@ -11,6 +11,11 @@
         "environment": "evergreen2",
         "name": "evrock007_normal",
         "scale": 44.75
+      },
+      "previewColor": {
+        "red": 82,
+        "green": 93,
+        "blue": 90
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "evergreen2",
         "name": "evrock007_normal",
         "scale": 21.5
+      },
+      "previewColor": {
+        "red": 38,
+        "green": 48,
+        "blue": 16
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "evergreen2",
         "name": "evrock007_normal",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 57,
+        "green": 67,
+        "blue": 35
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "evergreen2",
         "name": "eg_none_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 60,
+        "green": 60,
+        "blue": 57
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "tundra",
         "name": "tund_none_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 84,
+        "green": 83,
+        "blue": 79
       }
     },
     {
@@ -71,6 +96,11 @@
         "environment": "crystalline",
         "name": "cr_08_01_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 175,
+        "green": 188,
+        "blue": 222
       }
     }
   ],

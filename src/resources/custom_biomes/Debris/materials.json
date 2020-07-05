@@ -11,6 +11,11 @@
         "environment": "tundra",
         "name": "tund_sandlight_normal",
         "scale": 8.8
+      },
+      "previewColor": {
+        "red": 132,
+        "green": 125,
+        "blue": 107
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "evergreen2",
         "name": "eg_gravel2_normal",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 82,
+        "green": 93,
+        "blue": 90
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "evergreen",
         "name": "Dirt001_normals",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 25,
+        "green": 12,
+        "blue": 8
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "evergreen2",
         "name": "evrock006_normal",
         "scale": 10.0
+      },
+      "previewColor": {
+        "red": 65,
+        "green": 60,
+        "blue": 52
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "tropical",
         "name": "tr_reef_coral_normal",
         "scale": 9.0
+      },
+      "previewColor": {
+        "red": 82,
+        "green": 77,
+        "blue": 66
       }
     },
     {
@@ -71,6 +96,11 @@
         "environment": "desert",
         "name": "des_sandlight_normal",
         "scale": 5.0
+      },
+      "previewColor": {
+        "red": 121,
+        "green": 113,
+        "blue": 82
       }
     },
     {
@@ -83,6 +113,11 @@
         "environment": "tropical",
         "name": "trbush_moss_normal",
         "scale": 12.0
+      },
+      "previewColor": {
+        "red": 33,
+        "green": 39,
+        "blue": 10
       }
     },
     {
@@ -95,6 +130,11 @@
         "environment": "tropical",
         "name": "trtrans002_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 41,
+        "green": 53,
+        "blue": 16
       }
     },
     {
@@ -107,6 +147,11 @@
         "environment": "tropical",
         "name": "trtrans002_normal",
         "scale": 7.0
+      },
+      "previewColor": {
+        "red": 46,
+        "green": 53,
+        "blue": 16
       }
     }
   ],
