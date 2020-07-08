@@ -1,7 +1,6 @@
 package generator;
 
 import map.BinaryMask;
-import map.FloatMask;
 import map.SCMap;
 import util.Gradient;
 
@@ -13,7 +12,7 @@ public strictfp class Preview {
     static final float HEATMAP_SATURATION = 1f;
     static final float HEATMAP_GAMMA = 1f;
 
-    static{
+    static {
         HEATMAP_GRADIENT = new Gradient();
         HEATMAP_GRADIENT.addColor(0f, new Color(48, 48, 154)); // Dark magenta
         HEATMAP_GRADIENT.addColor(0.33f, new Color(0, 153, 255)); // Pale blue
@@ -23,7 +22,7 @@ public strictfp class Preview {
         HEATMAP_GRADIENT.addColor(1f, new Color(255, 255, 255)); // White
     }
 
-    static void generate(BufferedImage image, SCMap map, BinaryMask cliffs){
+    static void generate(BufferedImage image, SCMap map, BinaryMask cliffs) {
         for (int x = 0; x < 256; x++) {
             for (int y = 0; y < 256; y++) {
 
@@ -31,11 +30,11 @@ public strictfp class Preview {
                 int scaledY = y * 2;
 
                 float elevation =
-                        ((float)map.getHeightmap().getRaster().getSample(scaledX,scaledY,0))
+                        ((float) map.getHeightmap().getRaster().getSample(scaledX, scaledY, 0))
                                 * SCMap.HEIGHTMAP_SCALE;
 
-                float delta = elevation * (1/60f); // Magic number to make the colors more readable
-                if (cliffs.get(x,y)){
+                float delta = elevation * (1 / 60f); // Magic number to make the colors more readable
+                if (cliffs.get(x, y)) {
                     delta += 0.033f;
                 }
                 delta = Math.min(Math.max(delta, 0f), 1f);

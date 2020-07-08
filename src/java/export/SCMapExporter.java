@@ -20,231 +20,228 @@ import static util.Swapper.swap;
 
 public strictfp class SCMapExporter {
 
-	public static File file;
+    private static final byte[] DDS_HEADER_1 = {68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, -1,
+            2, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private static final byte[] DDS_HEADER_2 = {68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 4, 0, 0, 0, 68, 88, 84, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private static final byte[] DDS_HEADER_3 = {68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 4, 0, 0, 0, 68, 88, 84, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+    public static File file;
+    private static DataOutputStream out;
 
-	private static final byte[] DDS_HEADER_1 = { 68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, -1,
-			2, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	private static final byte[] DDS_HEADER_2 = { 68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 4, 0, 0, 0, 68, 88, 84, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	private static final byte[] DDS_HEADER_3 = { 68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 4, 0, 0, 0, 68, 88, 84, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+    public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
+        file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
+        boolean status = file.createNewFile();
+        out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 
-	private static DataOutputStream out;
+        // header
+        writeInt(SCMap.SIGNATURE);
+        writeInt(SCMap.VERSION_MAJOR);
+        writeInt(-1091567891); // unknown
+        writeInt(2); // unknown
+        writeFloat(map.getSize()); // width
+        writeFloat(map.getSize()); // height
+        writeInt(0); // unknown
+        writeShort((short) 0); // unknown
+        writeInt(DDS_HEADER_1.length + map.getPreview().getWidth() * map.getPreview().getHeight() * 4); // preview image byte count
+        writeBytes(DDS_HEADER_1);
+        writeInts(((DataBufferInt) map.getPreview().getData().getDataBuffer()).getData()); // preview image data
+        writeInt(SCMap.VERSION_MINOR);
 
-	public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
-		file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
-		file.createNewFile();
-		out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        // heightmap
+        writeInt(map.getSize()); // width
+        writeInt(map.getSize()); // height
+        writeFloat(SCMap.HEIGHTMAP_SCALE);
+        writeShorts(((DataBufferUShort) map.getHeightmap().getData().getDataBuffer()).getData()); // heightmap data
+        writeByte((byte) 0); // unknown
 
-		// header
-		writeInt(map.SIGNATURE);
-		writeInt(map.VERSION_MAJOR);
-		writeInt(-1091567891); // unknown
-		writeInt(2); // unknown
-		writeFloat(map.getSize()); // width
-		writeFloat(map.getSize()); // height
-		writeInt(0); // unknown
-		writeShort((short) 0); // unknown
-		writeInt(DDS_HEADER_1.length + map.getPreview().getWidth() * map.getPreview().getHeight() * 4); // preview image byte count
-		writeBytes(DDS_HEADER_1);
-		writeInts(((DataBufferInt) map.getPreview().getData().getDataBuffer()).getData()); // preview image data
-		writeInt(map.VERSION_MINOR);
+        // textures
+        writeStringNull(SCMap.TERRAIN_SHADER_PATH);
+        writeStringNull(SCMap.BACKGROUND_PATH);
+        writeStringNull(SCMap.SKYCUBE_PATH);
+        writeInt(1); // cubemap count
+        writeStringNull(SCMap.CUBEMAP_NAME);
+        writeStringNull(SCMap.CUBEMAP_PATH);
 
-		// heightmap
-		writeInt(map.getSize()); // width
-		writeInt(map.getSize()); // height
-		writeFloat(map.HEIGHTMAP_SCALE);
-		writeShorts(((DataBufferUShort) map.getHeightmap().getData().getDataBuffer()).getData()); // heightmap data
-		writeByte((byte) 0); // unknown
+        // lighting
+        LightingSettings mapLightingSettings = map.biome.getLightingSettings();
+        writeFloat(mapLightingSettings.LightingMultiplier);
+        writeVector3f(mapLightingSettings.SunDirection);
+        writeVector3f(mapLightingSettings.SunAmbience);
+        writeVector3f(mapLightingSettings.SunColor);
+        writeVector3f(mapLightingSettings.ShadowFillColor);
+        writeVector4f(mapLightingSettings.SpecularColor);
+        writeFloat(mapLightingSettings.Bloom);
+        writeVector3f(mapLightingSettings.FogColor);
+        writeFloat(mapLightingSettings.FogStart);
+        writeFloat(mapLightingSettings.FogEnd);
 
-		// textures
-		writeStringNull(map.TERRAIN_SHADER_PATH);
-		writeStringNull(map.BACKGROUND_PATH);
-		writeStringNull(map.SKYCUBE_PATH);
-		writeInt(1); // cubemap count
-		writeStringNull(map.CUBEMAP_NAME);
-		writeStringNull(map.CUBEMAP_PATH);
+        // water
+        WaterSettings mapWaterSettings = map.biome.getWaterSettings();
+        writeByte((byte) (mapWaterSettings.HasWater ? 1 : 0));
+        writeFloat(mapWaterSettings.Elevation);
+        writeFloat(mapWaterSettings.ElevationDeep);
+        writeFloat(mapWaterSettings.ElevationAbyss);
+        writeVector3f(mapWaterSettings.SurfaceColor);
+        writeVector2f(mapWaterSettings.ColorLerp);
+        writeFloat(mapWaterSettings.RefractionScale);
+        writeFloat(mapWaterSettings.FresnelBias);
+        writeFloat(mapWaterSettings.FresnelPower);
+        writeFloat(mapWaterSettings.UnitReflection);
+        writeFloat(mapWaterSettings.SkyReflection);
+        writeFloat(mapWaterSettings.SunShininess);
+        writeFloat(mapWaterSettings.SunStrength);
+        writeVector3f(mapWaterSettings.SunDirection);
+        writeVector3f(mapWaterSettings.SunColor);
+        writeFloat(mapWaterSettings.SunReflection);
+        writeFloat(mapWaterSettings.SunGlow);
+        writeStringNull(mapWaterSettings.TexPathCubemap);
+        writeStringNull(mapWaterSettings.TexPathWaterRamp);
 
-		// lighting
-		LightingSettings mapLightingSettings = map.biome.getLightingSettings();
-		writeFloat(mapLightingSettings.LightingMultiplier);
-		writeVector3f(mapLightingSettings.SunDirection);
-		writeVector3f(mapLightingSettings.SunAmbience);
-		writeVector3f(mapLightingSettings.SunColor);
-		writeVector3f(mapLightingSettings.ShadowFillColor);
-		writeVector4f(mapLightingSettings.SpecularColor);
-		writeFloat(mapLightingSettings.Bloom);
-		writeVector3f(mapLightingSettings.FogColor);
-		writeFloat(mapLightingSettings.FogStart);
-		writeFloat(mapLightingSettings.FogEnd);
+        // waves
+        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+            writeFloat(mapWaterSettings.WaveTextures[i].NormalRepeat);
+        }
 
-		// water
-		WaterSettings mapWaterSettings = map.biome.getWaterSettings();
-		writeByte((byte)(mapWaterSettings.HasWater ? 1 : 0));
-		writeFloat(mapWaterSettings.Elevation);
-		writeFloat(mapWaterSettings.ElevationDeep);
-		writeFloat(mapWaterSettings.ElevationAbyss);
-		writeVector3f(mapWaterSettings.SurfaceColor);
-		writeVector2f(mapWaterSettings.ColorLerp);
-		writeFloat(mapWaterSettings.RefractionScale);
-		writeFloat(mapWaterSettings.FresnelBias);
-		writeFloat(mapWaterSettings.FresnelPower);
-		writeFloat(mapWaterSettings.UnitReflection);
-		writeFloat(mapWaterSettings.SkyReflection);
-		writeFloat(mapWaterSettings.SunShininess);
-		writeFloat(mapWaterSettings.SunStrength);
-		writeVector3f(mapWaterSettings.SunDirection);
-		writeVector3f(mapWaterSettings.SunColor);
-		writeFloat(mapWaterSettings.SunReflection);
-		writeFloat(mapWaterSettings.SunGlow);
-		writeStringNull(mapWaterSettings.TexPathCubemap);
-		writeStringNull(mapWaterSettings.TexPathWaterRamp);
+        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+            writeVector2f(mapWaterSettings.WaveTextures[i].NormalMovement);
+            writeStringNull(mapWaterSettings.WaveTextures[i].TexPath);
+        }
 
-		// waves
-		for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-			writeFloat(mapWaterSettings.WaveTextures[i].NormalRepeat);
-		}
+        // wave generators
+        writeInt(0); // wave generator count
 
-		for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-			writeVector2f(mapWaterSettings.WaveTextures[i].NormalMovement);
-			writeStringNull(mapWaterSettings.WaveTextures[i].TexPath);
-		}
+        // terrain textures
+        TerrainMaterials mapTerrainMaterials = map.biome.getTerrainMaterials();
+        for (int i = 0; i < 24; i++) {
+            writeByte((byte) 0); // unknown
+        }
+        for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
+            writeStringNull(mapTerrainMaterials.texturePaths[i]);
+            writeFloat(mapTerrainMaterials.textureScales[i]);
+        }
+        for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+            writeStringNull(mapTerrainMaterials.normalPaths[i]);
+            writeFloat(mapTerrainMaterials.normalScales[i]);
+        }
 
-		// wave generators
-		writeInt(0); // wave generator count
+        writeInt(0); // unknown
+        writeInt(0); // unknown
 
-		// terrain textures
-		TerrainMaterials mapTerrainMaterials = map.biome.getTerrainMaterials();
-		for (int i = 0; i < 24; i++) {
-			writeByte((byte) 0); // unknown
-		}
-		for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-			writeStringNull(mapTerrainMaterials.texturePaths[i]);
-			writeFloat(mapTerrainMaterials.textureScales[i]);
-		}
-		for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
-			writeStringNull(mapTerrainMaterials.normalPaths[i]);
-			writeFloat(mapTerrainMaterials.normalScales[i]);
-		}
+        // decals
+        writeInt(0); // decal count
+        writeInt(0); // decal group count
+        writeInt(map.getSize()); // width
+        writeInt(map.getSize()); // height
 
-		writeInt(0); // unknown
-		writeInt(0); // unknown
+        // normal maps
+        writeInt(1); // normal map count
+        writeInt(DDS_HEADER_2.length + map.getNormalMap().getWidth() * map.getNormalMap().getHeight() * 4); // normalmap byte count
+        writeBytes(DDS_HEADER_2); // dds header
+        writeInts(((DataBufferInt) map.getNormalMap().getData().getDataBuffer()).getData()); // normalmap data
 
-		// decals
-		writeInt(0); // decal count
-		writeInt(0); // decal group count
-		writeInt(map.getSize()); // width
-		writeInt(map.getSize()); // height
+        // texture maps
+        writeInt(DDS_HEADER_1.length + map.getTextureMasksLow().getWidth() * map.getTextureMasksLow().getHeight() * 4); // texture masks low byte count
+        writeBytes(DDS_HEADER_1); // dds header
+        writeInts(((DataBufferInt) map.getTextureMasksLow().getData().getDataBuffer()).getData()); // texture masks low data
+        writeInt(DDS_HEADER_1.length + map.getTextureMasksHigh().getWidth() * map.getTextureMasksHigh().getHeight() * 4); // texture maks high byte count
+        writeBytes(DDS_HEADER_1); // dds header
+        writeInts(((DataBufferInt) map.getTextureMasksHigh().getData().getDataBuffer()).getData()); // texture masks high data
 
-		// normal maps
-		writeInt(1); // normal map count
-		writeInt(DDS_HEADER_2.length + map.getNormalMap().getWidth() * map.getNormalMap().getHeight() * 4); // normalmap byte count
-		writeBytes(DDS_HEADER_2); // dds header
-		writeInts(((DataBufferInt) map.getNormalMap().getData().getDataBuffer()).getData()); // normalmap data
+        // water maps
+        writeInt(1); // unknown
+        writeInt(DDS_HEADER_3.length + map.getWaterMap().getWidth() * map.getWaterMap().getHeight()); // watermap byte count
+        writeBytes(DDS_HEADER_3); // dds header
+        writeBytes(((DataBufferByte) map.getWaterMap().getData().getDataBuffer()).getData()); // watermap data
+        writeBytes(((DataBufferByte) map.getWaterFoamMask().getData().getDataBuffer()).getData()); // water foam mask data
+        writeBytes(((DataBufferByte) map.getWaterFlatnessMask().getData().getDataBuffer()).getData()); // water flatness mask data
+        writeBytes(((DataBufferByte) map.getWaterDepthBiasMask().getData().getDataBuffer()).getData()); // water depth bias mask data
 
-		// texture maps
-		writeInt(DDS_HEADER_1.length + map.getTextureMasksLow().getWidth() * map.getTextureMasksLow().getHeight() * 4); // texture masks low byte count
-		writeBytes(DDS_HEADER_1); // dds header
-		writeInts(((DataBufferInt) map.getTextureMasksLow().getData().getDataBuffer()).getData()); // texture masks low data
-		writeInt(DDS_HEADER_1.length + map.getTextureMasksHigh().getWidth() * map.getTextureMasksHigh().getHeight() * 4); // texture maks high byte count
-		writeBytes(DDS_HEADER_1); // dds header
-		writeInts(((DataBufferInt) map.getTextureMasksHigh().getData().getDataBuffer()).getData()); // texture masks high data
+        // terrain type
+        writeInts(((DataBufferInt) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
 
-		// water maps
-		writeInt(1); // unknown
-		writeInt(DDS_HEADER_3.length + map.getWaterMap().getWidth() * map.getWaterMap().getHeight()); // watermap byte count
-		writeBytes(DDS_HEADER_3); // dds header
-		writeBytes(((DataBufferByte) map.getWaterMap().getData().getDataBuffer()).getData()); // watermap data
-		writeBytes(((DataBufferByte) map.getWaterFoamMask().getData().getDataBuffer()).getData()); // water foam mask data
-		writeBytes(((DataBufferByte) map.getWaterFlatnessMask().getData().getDataBuffer()).getData()); // water flatness mask data
-		writeBytes(((DataBufferByte) map.getWaterDepthBiasMask().getData().getDataBuffer()).getData()); // water depth bias mask data
+        // props
+        writeInt(map.getPropCount());
+        for (int i = 0; i < map.getPropCount(); i++) {
+            writeStringNull(map.getProp(i).getPath());
+            writeVector3f(map.getProp(i).getPosition());
+            writeVector3f(new Vector3f((float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
+            writeVector3f(new Vector3f(0f, 1f, 0f));
+            writeVector3f(new Vector3f((float) -StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
+            writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
+        }
 
-		// terrain type
-		writeInts(((DataBufferInt) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
+        out.flush();
+        out.close();
 
-		// props
-		writeInt(map.getPropCount());
-		for (int i = 0; i < map.getPropCount(); i++) {
-			writeStringNull(map.getProp(i).getPath());
-			writeVector3f(map.getProp(i).getPosition());
-			writeVector3f(new Vector3f((float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
-			writeVector3f(new Vector3f(0f, 1f, 0f));
-			writeVector3f(new Vector3f((float) -StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
-			writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
-		}
+        final String fileFormat = "png";
+        File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
+        RenderedImage renderedImage = map.getPreview();
+        try {
+            ImageIO.write(renderedImage, fileFormat, previewFile);
+        } catch (IOException e) {
+            System.out.print("Could not write the preview image\n" + e.toString());
+        }
+    }
 
-		out.flush();
-		out.close();
+    private static void writeFloat(float f) throws IOException {
+        out.writeFloat(swap(f));
+    }
 
-		final String fileFormat = "png";
-		File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
-		RenderedImage renderedImage = map.getPreview();
-		try{
-			ImageIO.write(renderedImage, fileFormat, previewFile);
-		}
-		catch (IOException e) {
-			System.out.printf("Could not write the preview image\n"+e.toString());
-		}
-	}
+    private static void writeInt(int i) throws IOException {
+        out.writeInt(swap(i));
+    }
 
-	private static void writeFloat(float f) throws IOException {
-		out.writeFloat(swap(f));
-	}
+    private static void writeShort(short s) throws IOException {
+        out.writeShort(swap(s));
+    }
 
-	private static void writeInt(int i) throws IOException {
-		out.writeInt(swap(i));
-	}
+    private static void writeByte(byte b) throws IOException {
+        out.writeByte(b);
+    }
 
-	private static void writeShort(short s) throws IOException {
-		out.writeShort(swap(s));
-	}
+    private static void writeBytes(byte[] b) throws IOException {
+        out.write(b);
+    }
 
-	private static void writeByte(byte b) throws IOException {
-		out.writeByte(b);
-	}
+    private static void writeShorts(short[] s) throws IOException {
+        for (short value : s) {
+            writeShort(value);
+        }
+    }
 
-	private static void writeBytes(byte[] b) throws IOException {
-		out.write(b);
-	}
+    private static void writeInts(int[] data) throws IOException {
+        for (int i : data) {
+            writeInt(i);
+        }
+    }
 
-	private static void writeShorts(short[] s) throws IOException {
-		for (short value : s) {
-			writeShort(value);
-		}
-	}
+    private static void writeStringNull(String s) throws IOException {
+        for (int i = 0; i < s.length(); i++) {
+            out.writeByte(s.charAt(i));
+        }
+        out.writeByte(0);
+    }
 
-	private static void writeInts(int[] data) throws IOException {
-		for (int i : data) {
-			writeInt(i);
-		}
-	}
+    private static void writeVector3f(Vector3f v) throws IOException {
+        writeFloat(v.x);
+        writeFloat(v.y);
+        writeFloat(v.z);
+    }
 
-	private static void writeStringNull(String s) throws IOException {
-		for (int i = 0; i < s.length(); i++) {
-			out.writeByte(s.charAt(i));
-		}
-		out.writeByte(0);
-	}
+    private static void writeVector4f(Vector4f v) throws IOException {
+        writeFloat(v.x);
+        writeFloat(v.y);
+        writeFloat(v.z);
+        writeFloat(v.w);
+    }
 
-	private static void writeVector3f(Vector3f v) throws IOException {
-		writeFloat(v.x);
-		writeFloat(v.y);
-		writeFloat(v.z);
-	}
-
-	private static void writeVector4f(Vector4f v) throws IOException {
-		writeFloat(v.x);
-		writeFloat(v.y);
-		writeFloat(v.z);
-		writeFloat(v.w);
-	}
-
-	private static void writeVector2f(Vector2f v) throws IOException {
-		writeFloat(v.x);
-		writeFloat(v.y);
-	}
+    private static void writeVector2f(Vector2f v) throws IOException {
+        writeFloat(v.x);
+        writeFloat(v.y);
+    }
 
 }
