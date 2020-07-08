@@ -43,6 +43,20 @@ public strictfp class Preview {
         AffineTransformOp scaleOpHeight = new AffineTransformOp(atHeight, AffineTransformOp.TYPE_BILINEAR);
         heightMapScaled = scaleOpHeight.filter(heightMap, heightMapScaled);
 
+        BufferedImage textureLowMap = map.getTextureMasksLow();
+        BufferedImage textureLowScaled = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        AffineTransform atTextureLow = new AffineTransform();
+        atTextureLow.scale(256f / textureLowMap.getWidth(), 256f / textureLowMap.getHeight());
+        AffineTransformOp scaleOpTextureLow = new AffineTransformOp(atTextureLow, AffineTransformOp.TYPE_BILINEAR);
+        textureLowScaled = scaleOpTextureLow.filter(textureLowMap, textureLowScaled);
+
+        BufferedImage textureHighMap = map.getTextureMasksHigh();
+        BufferedImage textureHighScaled = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        AffineTransform atTextureHigh = new AffineTransform();
+        atTextureHigh.scale(256f / textureHighMap.getWidth(), 256f / textureHighMap.getHeight());
+        AffineTransformOp scaleOpTextureHigh = new AffineTransformOp(atTextureHigh, AffineTransformOp.TYPE_BILINEAR);
+        textureHighScaled = scaleOpTextureLow.filter(textureHighMap, textureHighScaled);
+
         float landDiffuseCoefficient = .9f;
         float landSpecularCoefficient = .75f;
         float landShininess = 1f;
@@ -61,10 +75,10 @@ public strictfp class Preview {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 if (layerIndex < 5) {
-                    map.getTextureMasksLow().getRaster().getPixel(x, y, textureAlphas);
+                    textureLowScaled.getRaster().getPixel(x, y, textureAlphas);
                     relativeLayerIndex = layerIndex;
                 } else {
-                    map.getTextureMasksHigh().getRaster().getPixel(x, y, textureAlphas);
+                    textureHighScaled.getRaster().getPixel(x, y, textureAlphas);
                     relativeLayerIndex = layerIndex - 4;
                 }
                 image.getRaster().getPixel(x, y, origRGBA);

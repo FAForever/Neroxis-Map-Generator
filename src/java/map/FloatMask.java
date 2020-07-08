@@ -79,12 +79,12 @@ public strictfp class FloatMask implements Mask {
         return this;
     }
 
-    public FloatMask maskToMoutains(float firstSlope, float slope, BinaryMask other) {
+    public FloatMask maskToMountains(float firstSlope, float slope, BinaryMask other) {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
         FloatMask mountainBase = new FloatMask(getSize(), 0);
         add(mountainBase.init(otherCopy, 0, firstSlope));
         otherCopy.acid(0.5f);
-        for (int i = 0; i < getSize(); i++) {
+        while (otherCopy.getCount() > 0) {
             FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, slope));
             otherCopy.acid(0.5f);
@@ -95,14 +95,23 @@ public strictfp class FloatMask implements Mask {
 
     public FloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, BinaryMask other) {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
-        for (int i = 0; i < getSize(); i++) {
+        int count = 0;
+        if (otherCopy.getCount() == otherCopy.getSize() * otherCopy.getSize()) {
             FloatMask layer = new FloatMask(getSize(), 0);
-            add(layer.init(otherCopy, 0, slope));
-            otherCopy.acid(0.5f);
+            add(layer.init(otherCopy, 0, slope * otherCopy.getSize()));
+        } else {
+            while (otherCopy.getCount() > 0 && count < maxRepeat) {
+                count++;
+                FloatMask layer = new FloatMask(getSize(), 0);
+                add(layer.init(otherCopy, 0, slope));
+                otherCopy.acid(0.5f);
+            }
         }
         otherCopy = new BinaryMask(other, random.nextLong());
         otherCopy.invert();
-        for (int i = 0; i < maxRepeat; i++) {
+        count = 0;
+        while (otherCopy.getCount() > 0 && count < maxRepeat) {
+            count++;
             FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, -underWaterSlope));
             otherCopy.acid(0.5f);
@@ -202,7 +211,9 @@ public strictfp class FloatMask implements Mask {
 
     @SneakyThrows
     public void writeToFile(Path path) {
-        Files.createFile(path);
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
 
         for (int x = 0; x < getSize(); x++) {

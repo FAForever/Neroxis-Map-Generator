@@ -25,6 +25,11 @@ public strictfp class UnitGenerator {
         return placeOnHeightmap(v.x, v.y);
     }
 
+    private Vector3f placeOnHeightmap(Vector3f v) {
+        return placeOnHeightmap(v.x, v.z);
+    }
+
+
     private Vector3f placeOnHeightmap(float x, float z) {
         Vector3f v = new Vector3f(x, 0, z);
         v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
@@ -41,11 +46,17 @@ public strictfp class UnitGenerator {
             symLocation = spawnableCopy.getSymmetryPoint(location);
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
-            Unit unit1 = new Unit(type, placeOnHeightmap(location), rot * (float) StrictMath.PI);
-            Unit unit2 = new Unit(unit1.getType(), placeOnHeightmap(symLocation), unit1.getRotation() - (float) StrictMath.PI);
+            Unit unit1 = new Unit(type, location, rot * (float) StrictMath.PI);
+            Unit unit2 = new Unit(unit1.getType(), symLocation, unit1.getRotation() - (float) StrictMath.PI);
             map.addUnit(unit1);
             map.addUnit(unit2);
             location = spawnableCopy.getRandomPosition();
+        }
+    }
+
+    public void setUnitHeights() {
+        for (Unit unit : map.getUnits()) {
+            unit.setPosition(placeOnHeightmap(unit.getPosition()));
         }
     }
 }

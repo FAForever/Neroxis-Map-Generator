@@ -36,9 +36,6 @@ public strictfp class Pipeline {
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
         CompletableFuture<?> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
                 .thenApply(res -> {
-//                    if (MapGenerator.DEBUG) {
-//                        System.out.printf("Start: %s(%d)\n", executingMask.getName(), index);
-//                    }
                     if (addedAfterPipelineStart && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
                         System.err.println("Running non deterministic task added after pipeline start!  " + executingMask.getName());
                     }

@@ -4,9 +4,10 @@ import map.BinaryMask;
 import map.Prop;
 import map.SCMap;
 import util.Vector2f;
-import util.Vector3f;
 
 import java.util.Random;
+
+import static util.Placement.placeOnHeightmap;
 
 public strictfp class PropGenerator {
     public final String[] TREE_GROUPS = {
@@ -39,29 +40,25 @@ public strictfp class PropGenerator {
         random = new Random(seed);
     }
 
-    private Vector3f placeOnHeightmap(Vector2f v) {
-        return placeOnHeightmap(v.x, v.y);
-    }
-
-    private Vector3f placeOnHeightmap(float x, float z) {
-        Vector3f v = new Vector3f(x, 0, z);
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
-        return v;
-    }
-
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
+        spawnableCopy.fillHalf(false);
         Vector2f location = spawnableCopy.getRandomPosition();
         Vector2f symLocation;
         while (location != null) {
             symLocation = spawnableCopy.getSymmetryPoint(location);
             spawnableCopy.fillCircle(location, separation, false);
-            spawnableCopy.fillCircle(symLocation, separation, false);
-            Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location), random.nextFloat() * (float) StrictMath.PI);
-            Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(symLocation), prop1.getRotation() + (float) StrictMath.PI);
+            Prop prop1 = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
+            Prop prop2 = new Prop(prop1.getPath(), symLocation, prop1.getRotation() + (float) StrictMath.PI);
             map.addProp(prop1);
             map.addProp(prop2);
             location = spawnableCopy.getRandomPosition();
+        }
+    }
+
+    public void setPropHeights() {
+        for (Prop prop : map.getProps()) {
+            prop.setPosition(placeOnHeightmap(map, prop.getPosition()));
         }
     }
 }
