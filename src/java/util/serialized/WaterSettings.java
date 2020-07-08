@@ -9,9 +9,10 @@ import java.util.List;
 
 import static map.SCMap.*;
 
-/** Used in disk operations to be converted into a material later
+/**
+ * Used in disk operations to be converted into a material later
  * Compliant with ozonex's WaterSettings format
- * */
+ */
 
 public strictfp class WaterSettings {
     public boolean HasWater = true;
@@ -44,16 +45,16 @@ public strictfp class WaterSettings {
     private static WaveTexture[] makeWaveTextures(
             String[] waveTexturePaths,
             float[] waveNormalRepeats,
-            Vector2f[] waveNormalMovements){
+            Vector2f[] waveNormalMovements) {
         List<WaveTexture> texs = new LinkedList<>();
-        for (int i = 0; i < WAVE_NORMAL_COUNT; i++){
-            texs.add( new WaveTexture(waveTexturePaths[i], waveNormalMovements[i], waveNormalRepeats[i] ));
+        for (int i = 0; i < WAVE_NORMAL_COUNT; i++) {
+            texs.add(new WaveTexture(waveTexturePaths[i], waveNormalMovements[i], waveNormalRepeats[i]));
         }
-        return texs.toArray(new WaveTexture[texs.size()]);
+        return texs.toArray(new WaveTexture[0]);
     }
-    
+
     @AllArgsConstructor
-    public static strictfp class WaveTexture{
+    public static strictfp class WaveTexture {
         public String TexPath;
         public Vector2f NormalMovement;
         public float NormalRepeat;

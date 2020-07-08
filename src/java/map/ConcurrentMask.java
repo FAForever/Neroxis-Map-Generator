@@ -4,8 +4,9 @@ import java.nio.file.Path;
 
 public strictfp interface ConcurrentMask extends Mask {
 
-	public ConcurrentMask mockClone();
-	public String getName();
+    ConcurrentMask mockClone();
 
-	public void writeToFile(Path path);
+    String getName();
+
+    void writeToFile(Path path);
 }

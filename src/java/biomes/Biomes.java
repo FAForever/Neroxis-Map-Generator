@@ -42,12 +42,11 @@ public strictfp class Biomes {
 
                 files.stream().map(Biomes::loadBiome).forEach(list::add);
             } else {
-                Path biomePath = null;
-                biomePath = Paths.get(Biome.class.getClassLoader().getResource(CUSTOM_BIOMES_DIR).toURI());
+                Path biomePath = Paths.get(Biome.class.getClassLoader().getResource(CUSTOM_BIOMES_DIR).toURI());
 
                 Files.list(biomePath).map(Biomes::loadBiome).forEachOrdered(list::add);
             }
-        } catch(IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             System.err.println("An error occured while trying to list the biomes directory path.");
             System.exit(1);

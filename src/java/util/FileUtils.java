@@ -17,88 +17,90 @@ import java.util.zip.ZipInputStream;
 
 public class FileUtils {
 
-	private static Gson gson = new Gson();
-	private static final String DIRECTORY_PATTERN = "%s/[^/]+/";
+    private static final String DIRECTORY_PATTERN = "%s/[^/]+/";
+    private static final Gson gson = new Gson();
 
-	@SneakyThrows
-	public static void deleteRecursiveIfExists(Path path) {
-		if(!Files.exists(path)) {
-			return;
-		}
+    @SneakyThrows
+    public static void deleteRecursiveIfExists(Path path) {
+        if (!Files.exists(path)) {
+            return;
+        }
 
-		if(Files.isDirectory(path)) {
-			Stream<Path> files = Files.list(path);
-			files.forEach(FileUtils::deleteRecursiveIfExists);
-			files.close();
-		}
+        if (Files.isDirectory(path)) {
+            Stream<Path> files = Files.list(path);
+            files.forEach(FileUtils::deleteRecursiveIfExists);
+            files.close();
+        }
 
-		Files.delete(path);
-	}
+        Files.delete(path);
+    }
 
-	/**
-	 * Reads an entire file
-	 * @param path the path to the directory where the file is located, either as path if to be read from the file system or as String if to be read from inside the currently running jar
-	 * @param file the file to be read
-	 * @return the content of the file
-	 */
-	public static byte[] readFully(Object path, String file) throws IOException {
-		if(path instanceof Path) {
-			return Files.readAllBytes(((Path) path).resolve(file));
-		}
+    /**
+     * Reads an entire file
+     *
+     * @param path the path to the directory where the file is located, either as path if to be read from the file system or as String if to be read from inside the currently running jar
+     * @param file the file to be read
+     * @return the content of the file
+     */
+    public static byte[] readFully(Object path, String file) throws IOException {
+        if (path instanceof Path) {
+            return Files.readAllBytes(((Path) path).resolve(file));
+        }
 
-		if(path instanceof String) {
-			if(! ((String) path).endsWith("/")) {
-				path = (String) path + "/";
-			}
+        if (path instanceof String) {
+            if (!((String) path).endsWith("/")) {
+                path = path + "/";
+            }
 
-			InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream((String) path + file);
-			DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream(path + file);
+            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-			int bytesRead;
-			byte[] buffer = new byte[1024];
-			while(-1 != (bytesRead = dataInputStream.read(buffer, 0, 1024))) {
-				outputStream.write(buffer, 0, bytesRead);
-			}
+            int bytesRead;
+            byte[] buffer = new byte[1024];
+            while (-1 != (bytesRead = dataInputStream.read(buffer, 0, 1024))) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
 
-			return outputStream.toByteArray();
-		}
+            return outputStream.toByteArray();
+        }
 
-		throw new IllegalArgumentException("Unknown file type: " + file.getClass());
-	}
+        throw new IllegalArgumentException("Unknown file type: " + file.getClass());
+    }
 
-	/**
-	 * Deserializes a file
-	 * @param file the file to be read, either as path if to be read from the file system or as String if to be read from inside the currently running jar
-	 * @return the deserialized object
-	 */
-	public static <T> T deserialize(Object path, String file, Class clazz) throws IOException {
-		String content = new String(readFully(path, file));
+    /**
+     * Deserializes a file
+     *
+     * @param file the file to be read, either as path if to be read from the file system or as String if to be read from inside the currently running jar
+     * @return the deserialized object
+     */
+    public static <T> T deserialize(Object path, String file, Class clazz) throws IOException {
+        String content = new String(readFully(path, file));
 
-		return (T) gson.fromJson(content, clazz);
-	}
+        return (T) gson.fromJson(content, clazz);
+    }
 
-	public static List<String> listFilesInZipDirectory(String dir, File zipFile) throws IOException {
-		if(dir.endsWith("/")) {
-			dir = dir.substring(0, dir.length() - 1);
-		}
+    public static List<String> listFilesInZipDirectory(String dir, File zipFile) throws IOException {
+        if (dir.endsWith("/")) {
+            dir = dir.substring(0, dir.length() - 1);
+        }
 
-		Pattern pattern = Pattern.compile(String.format( DIRECTORY_PATTERN, dir));
-		return listFilesInZip(zipFile).stream()
-				.filter(f -> pattern.matcher(f).matches())
-				.collect(Collectors.toList());
-	}
+        Pattern pattern = Pattern.compile(String.format(DIRECTORY_PATTERN, dir));
+        return listFilesInZip(zipFile).stream()
+                .filter(f -> pattern.matcher(f).matches())
+                .collect(Collectors.toList());
+    }
 
-	public static List<String> listFilesInZip(File zipFile) throws IOException {
-		List<String> files = new LinkedList<>();
+    public static List<String> listFilesInZip(File zipFile) throws IOException {
+        List<String> files = new LinkedList<>();
 
-		ZipInputStream inputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
+        ZipInputStream inputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
 
-		ZipEntry entry;
-		while((entry = inputStream.getNextEntry()) != null) {
-			files.add(entry.getName());
-		}
+        ZipEntry entry;
+        while ((entry = inputStream.getNextEntry()) != null) {
+            files.add(entry.getName());
+        }
 
-		return Collections.unmodifiableList(files);
-	}
+        return Collections.unmodifiableList(files);
+    }
 }

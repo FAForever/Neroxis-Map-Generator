@@ -5,21 +5,21 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 public strictfp class Gradient {
-    private TreeMap<Float, Color> colors = new TreeMap<>();
+    private final TreeMap<Float, Color> colors = new TreeMap<>();
 
-    public void addColor(float period, Color color){
+    public void addColor(float period, Color color) {
         colors.put(period, color);
     }
 
-    public Color evaluate(float period){
-        if (period > 1f || period < 0f){
-            throw new RuntimeException("Period must be comprised between 0 and 1 (supplied: "+period+")");
+    public Color evaluate(float period) {
+        if (period > 1f || period < 0f) {
+            throw new RuntimeException("Period must be comprised between 0 and 1 (supplied: " + period + ")");
         }
 
         float previousKey = Optional.ofNullable(colors.lowerKey(period)).orElse(0f);
         float nextKey = Optional.ofNullable(colors.higherKey(period)).orElse(0f);
 
-        float step = (period - previousKey)/(nextKey - previousKey);
+        float step = (period - previousKey) / (nextKey - previousKey);
         Color colorA = colors.get(previousKey);
         Color colorB = colors.get(nextKey);
 
@@ -27,11 +27,11 @@ public strictfp class Gradient {
 
     }
 
-    private float lerp(float a, float b, float step){
+    private float lerp(float a, float b, float step) {
         return a + step * (b - a);
     }
 
-    private Color lerp(Color a, Color b, float step){
+    private Color lerp(Color a, Color b, float step) {
         return new Color(
                 Math.round(lerp(a.getRed(), b.getRed(), step)),
                 Math.round(lerp(a.getGreen(), b.getGreen(), step)),

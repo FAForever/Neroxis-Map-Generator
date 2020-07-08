@@ -8,7 +8,8 @@ import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 @AllArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 public strictfp class Biome {
     String name;
     TerrainMaterials terrainMaterials;

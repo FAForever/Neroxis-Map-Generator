@@ -24,64 +24,64 @@ import java.util.*;
 
 public strictfp class MapGenerator {
 
-	public static final boolean DEBUG = false;
-	public static final String VERSION = "1.0.1";
+    public static final boolean DEBUG = false;
+    public static final String VERSION = "1.0.1";
 
-	//read from cli args
-	private static String folderPath = ".";
-	private static String mapName = "debugMap";
-	private static long seed = new Random().nextLong();
-	private static Random random = new Random(seed);
+    //read from cli args
+    private static String folderPath = ".";
+    private static String mapName = "debugMap";
+    private static long seed = new Random().nextLong();
+    private static Random random = new Random(seed);
 
-	//read from key value arguments or map name
-	private static int spawnCount;
-	private static float landDensity;
-	private static float plateauDensity;
-	private static float mountainDensity;
-	private static float rampDensity;
-	private static float reclaimDensity;
-	private static int mexCount;
+    //read from key value arguments or map name
+    private static int spawnCount;
+    private static float landDensity;
+    private static float plateauDensity;
+    private static float mountainDensity;
+    private static float rampDensity;
+    private static float reclaimDensity;
+    private static int mexCount;
 
-	private SCMap map;
+    private SCMap map;
 
-	//masks used in generation
-	private ConcurrentBinaryMask land;
-	private ConcurrentBinaryMask mountains;
-	private ConcurrentBinaryMask plateaus;
-	private ConcurrentBinaryMask ramps;
-	private ConcurrentFloatMask heightmapBase;
-	private ConcurrentBinaryMask grass;
-	private ConcurrentFloatMask grassTexture;
-	private ConcurrentBinaryMask rock;
-	private ConcurrentFloatMask rockTexture;
-	private ConcurrentBinaryMask allWreckMask;
-	private ConcurrentBinaryMask spawnsMask;
-	private ConcurrentBinaryMask resourceMask;
-	private ConcurrentFloatMask lightGrassTexture;
-	private ConcurrentBinaryMask t1LandWreckMask;
-	private ConcurrentBinaryMask t2LandWreckMask;
-	private ConcurrentBinaryMask t3LandWreckMask;
-	private ConcurrentBinaryMask t2NavyWreckMask;
-	private ConcurrentBinaryMask navyFactoryWreckMask;
-	private ConcurrentBinaryMask treeMask;
-	private ConcurrentBinaryMask cliffRockMask;
-	private ConcurrentBinaryMask fieldStoneMask;
-	private ConcurrentBinaryMask rockFieldMask;
-	private BinaryMask noProps;
-	private BinaryMask noWrecks;
+    //masks used in generation
+    private ConcurrentBinaryMask land;
+    private ConcurrentBinaryMask mountains;
+    private ConcurrentBinaryMask plateaus;
+    private ConcurrentBinaryMask ramps;
+    private ConcurrentFloatMask heightmapBase;
+    private ConcurrentBinaryMask grass;
+    private ConcurrentFloatMask grassTexture;
+    private ConcurrentBinaryMask rock;
+    private ConcurrentFloatMask rockTexture;
+    private ConcurrentBinaryMask allWreckMask;
+    private ConcurrentBinaryMask spawnsMask;
+    private ConcurrentBinaryMask resourceMask;
+    private ConcurrentFloatMask lightGrassTexture;
+    private ConcurrentBinaryMask t1LandWreckMask;
+    private ConcurrentBinaryMask t2LandWreckMask;
+    private ConcurrentBinaryMask t3LandWreckMask;
+    private ConcurrentBinaryMask t2NavyWreckMask;
+    private ConcurrentBinaryMask navyFactoryWreckMask;
+    private ConcurrentBinaryMask treeMask;
+    private ConcurrentBinaryMask cliffRockMask;
+    private ConcurrentBinaryMask fieldStoneMask;
+    private ConcurrentBinaryMask rockFieldMask;
+    private BinaryMask noProps;
+    private BinaryMask noWrecks;
 
-	public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
 
-		Locale.setDefault(Locale.US);
-		if (DEBUG) {
-			Path debugDir = Paths.get(".", "debug");
-			FileUtils.deleteRecursiveIfExists(debugDir);
-			Files.createDirectory(debugDir);
-		}
+        Locale.setDefault(Locale.US);
+        if (DEBUG) {
+            Path debugDir = Paths.get(".", "debug");
+            FileUtils.deleteRecursiveIfExists(debugDir);
+            Files.createDirectory(debugDir);
+        }
 
-		interpretArguments(args);
+        interpretArguments(args);
 
-		MapGenerator generator = new MapGenerator();
+        MapGenerator generator = new MapGenerator();
         System.out.println("Generating map " + mapName.replace('/', '^'));
         SCMap map = generator.generate();
         System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath() + "\\" + mapName.replace('/', '^'));
@@ -96,123 +96,312 @@ public strictfp class MapGenerator {
         System.out.println("Done");
 
         generator.generateDebugOutput();
-	}
+    }
 
-	public void save(String folderName, String mapName, SCMap map) {
-		try {
-			Path folderPath = Paths.get(folderName);
+    private static void interpretArguments(String[] args) {
+        if (args.length == 0 || args[0].startsWith("--")) {
+            interpretArguments(ArgumentParser.parse(args));
+        } else if (args.length == 2) {
+            folderPath = args[0];
+            mapName = args[1];
+            parseMapName();
+        } else {
+            try {
+                folderPath = args[0];
+                try {
+                    seed = Long.parseLong(args[1]);
+                    random = new Random(seed);
+                } catch (NumberFormatException nfe) {
+                    System.out.println("Seed not numeric using default seed or mapname");
+                }
+                if (!VERSION.equals(args[2])) {
+                    System.out.println("This generator only supports version " + VERSION);
+                    System.exit(-1);
+                }
+                if (args.length >= 4) {
+                    mapName = args[3];
+                    parseMapName();
+                } else {
+                    randomizeOptions();
+                    generateMapName();
+                }
+            } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+                System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
+            }
+        }
+    }
 
-			FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
+    private static void interpretArguments(Map<String, String> arguments) {
+        if (arguments.containsKey("help")) {
+            System.out.println("map-gen usage:\n" +
+                    "--help                               produce help message\n" +
+                    "--folder-path arg                    mandatory, set the target folder for the generated map\n" +
+                    "--seed arg                           optional, set the seed for the generated map\n" +
+                    "--map-name arg                       optional, set the map name for the generated map\n" +
+                    "--spawn-count arg                    optional, set the spawn count for the generated map\n" +
+                    "--land-density arg                   optional, set the land density for the generated map\n" +
+                    "--plateau-density arg                optional, set the plateau density for the generated map (max .2)\n" +
+                    "--mountain-density arg               optional, set the mountain density for the generated map (max .1)\n" +
+                    "--ramp-density arg                   optional, set the ramp density for the generated map (max .2)\n +" +
+                    "--reclaim-density arg                optional, set the reclaim density for the generated map\n +" +
+                    "--mex-count arg                      optional, set the mex count per player for the generated map\n +");
+            System.exit(0);
+        }
 
-			Files.createDirectory(folderPath.resolve(mapName));
-			SCMapExporter.exportSCMAP(folderPath, mapName, map);
-			SaveExporter.exportSave(folderPath, mapName, map);
-			ScenarioExporter.exportScenario(folderPath, mapName, map);
-			ScriptExporter.exportScript(folderPath, mapName, map);
+        if (!arguments.containsKey("folder-path")) {
+            System.out.println("Missing necessary argument.");
+            System.exit(-1);
+        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Error while saving the map.");
-		}
-	}
+        folderPath = arguments.get("folder-path");
 
-	public SCMap generate() {
-		long startTime = System.currentTimeMillis();
+        if (arguments.containsKey("map-name")) {
+            mapName = arguments.get("map-name");
+            parseMapName();
+            return;
+        }
+
+        if (arguments.containsKey("seed")) {
+            seed = Long.parseLong(arguments.get("seed"));
+            random = new Random(seed);
+        }
+        randomizeOptions();
+
+        if (arguments.containsKey("spawn-count")) {
+            spawnCount = Integer.parseInt(arguments.get("spawn-count"));
+        }
+
+        if (arguments.containsKey("land-density")) {
+            landDensity = Float.parseFloat(arguments.get("land-density"));
+            landDensity = (float) StrictMath.round(landDensity * 127f) / 127f;
+        }
+
+        if (arguments.containsKey("plateau-density")) {
+            plateauDensity = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")), .2f);
+            plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f;
+        }
+
+        if (arguments.containsKey("mountain-density")) {
+            mountainDensity = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")), .1f);
+            mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f;
+        }
+
+        if (arguments.containsKey("ramp-density")) {
+            rampDensity = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")), .2f);
+            rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f;
+        }
+
+        if (arguments.containsKey("reclaim-density")) {
+            reclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
+            reclaimDensity = (float) StrictMath.round(reclaimDensity * 127f) / 127f;
+        }
+
+        if (arguments.containsKey("mex-count")) {
+            mexCount = Integer.parseInt(arguments.get("mex-count"));
+        }
+
+        generateMapName();
+    }
+
+    private static void parseMapName() {
+        mapName = mapName.replace('^', '/');
+        if (!mapName.startsWith("neroxis_map_generator")) {
+            throw new IllegalArgumentException("Map name is not a generated map");
+        }
+        String[] args = mapName.split("_");
+        if (args.length < 4) {
+            throw new RuntimeException("Version not specified");
+        }
+        String version = args[3];
+        if (!VERSION.equals(version)) {
+            throw new RuntimeException("Unsupported generator version: " + version);
+        }
+        if (args.length >= 5) {
+            String seedString = args[4];
+            try {
+                seed = Long.parseLong(seedString);
+            } catch (NumberFormatException nfe) {
+                byte[] seedBytes = Base64.getDecoder().decode(seedString);
+                ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
+                seed = seedWrapper.getLong();
+            }
+            random = new Random(seed);
+            randomizeOptions();
+        }
+        if (args.length >= 6) {
+            String optionString = args[5];
+            byte[] optionBytes = Base64.getDecoder().decode(optionString);
+            parseOptions(optionBytes);
+        }
+    }
+
+    private static void randomizeOptions() {
+        spawnCount = 6;
+        landDensity = StrictMath.min((random.nextInt(127) + 13.0f) / 127f, 1);
+        plateauDensity = (float) random.nextInt(127) / 127f * .2f;
+        mountainDensity = (float) random.nextInt(127) / 127f * .075f;
+        rampDensity = (float) random.nextInt(127) / 127f * .2f;
+        reclaimDensity = (float) random.nextInt(127) / 127f;
+        mexCount = 8 + 4 / (spawnCount / 2) + random.nextInt(40 / spawnCount);
+    }
+
+    private static void parseOptions(byte[] optionBytes) {
+        if (optionBytes.length > 0) {
+            if (optionBytes[0] <= 16) {
+                spawnCount = optionBytes[0];
+            }
+        }
+        if (optionBytes.length > 1) {
+            landDensity = (float) optionBytes[1] / 127f + 13.0f / 127f;
+        }
+        if (optionBytes.length > 2) {
+            plateauDensity = (float) optionBytes[2] / 127f * .2f;
+        }
+        if (optionBytes.length > 3) {
+            mountainDensity = (float) optionBytes[3] / 127f * .075f;
+        }
+        if (optionBytes.length > 4) {
+            rampDensity = (float) optionBytes[4] / 127f * .2f;
+        }
+        if (optionBytes.length > 5) {
+            reclaimDensity = (float) optionBytes[5] / 127f;
+        }
+        if (optionBytes.length > 6) {
+            mexCount = optionBytes[6];
+        }
+    }
+
+    private static void generateMapName() {
+        String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
+        ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+        seedBuffer.putLong(seed);
+        String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+        byte[] optionArray = {(byte) spawnCount,
+                (byte) (landDensity * 127f),
+                (byte) (plateauDensity / .2f * 127f),
+                (byte) (mountainDensity / .1f * 127f),
+                (byte) (rampDensity / .2f * 127f),
+                (byte) (reclaimDensity * 127f),
+                (byte) (mexCount)};
+        String optionString = Base64.getEncoder().encodeToString(optionArray);
+        mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
+    }
+
+    public void save(String folderName, String mapName, SCMap map) {
+        try {
+            Path folderPath = Paths.get(folderName);
+
+            FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
+
+            Files.createDirectory(folderPath.resolve(mapName));
+            SCMapExporter.exportSCMAP(folderPath, mapName, map);
+            SaveExporter.exportSave(folderPath, mapName, map);
+            ScenarioExporter.exportScenario(folderPath, mapName, map);
+            ScriptExporter.exportScript(folderPath, mapName, map);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error while saving the map.");
+        }
+    }
+
+    public SCMap generate() {
+        long startTime = System.currentTimeMillis();
 
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(512, spawnCount, mexCount * spawnCount, hydroCount);
 
-		MarkerGenerator markerGenerator = new MarkerGenerator(map, random.nextLong());
-		WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
-		PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
+        MarkerGenerator markerGenerator = new MarkerGenerator(map, random.nextLong());
+        WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
+        PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
 
-		setupTerrainPipeline();
-		setupHeightmapPipeline();
-		setupTexturePipeline();
-		setupMarkerPipeline();
-		setupWreckPipeline();
-		setupPropPipeline();
+        setupTerrainPipeline();
+        setupHeightmapPipeline();
+        setupTexturePipeline();
+        setupMarkerPipeline();
+        setupWreckPipeline();
+        setupPropPipeline();
 
-		Pipeline.start();
+        Pipeline.start();
 
-		Pipeline.await(heightmapBase);
-		map.setHeightmap(heightmapBase.getFloatMask());
-		map.getHeightmap().getRaster().setPixel(0, 0, new int[] { 0 });
+        Pipeline.await(heightmapBase);
+        map.setHeightmap(heightmapBase.getFloatMask());
+        map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
 
-		Pipeline.await(spawnsMask);
-		markerGenerator.generateSpawns(spawnsMask.getBinaryMask(), 64);
-		Pipeline.await(resourceMask);
-		markerGenerator.generateMexes(resourceMask.getBinaryMask());
-		markerGenerator.generateHydros(resourceMask.getBinaryMask());
+        Pipeline.await(spawnsMask);
+        markerGenerator.generateSpawns(spawnsMask.getBinaryMask(), 64);
+        Pipeline.await(resourceMask);
+        markerGenerator.generateMexes(resourceMask.getBinaryMask());
+        markerGenerator.generateHydros(resourceMask.getBinaryMask());
 
-		Pipeline.stop();
+        Pipeline.stop();
 
-		generateExclusionMasks();
+        generateExclusionMasks();
 
-		map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture.getFloatMask(), rockTexture.getFloatMask(), new FloatMask(513, 0));
+        map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture.getFloatMask(), rockTexture.getFloatMask(), new FloatMask(513, 0));
 
-		wreckGenerator.generateWrecks(t1LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T1_Land, 2f);
-		wreckGenerator.generateWrecks(t2LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T2_Land, 15f);
-		wreckGenerator.generateWrecks(t3LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T3_Land, 30f);
-		wreckGenerator.generateWrecks(t2NavyWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T2_Navy, 60f);
-		wreckGenerator.generateWrecks(navyFactoryWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.Navy_Factory, 120f);
+        wreckGenerator.generateWrecks(t1LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T1_Land, 2f);
+        wreckGenerator.generateWrecks(t2LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T2_Land, 15f);
+        wreckGenerator.generateWrecks(t3LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T3_Land, 30f);
+        wreckGenerator.generateWrecks(t2NavyWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T2_Navy, 60f);
+        wreckGenerator.generateWrecks(navyFactoryWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.Navy_Factory, 120f);
 
-		propGenerator.generateProps(treeMask.getBinaryMask().minus(noProps), propGenerator.TREE_GROUPS, 3f);
-		propGenerator.generateProps(cliffRockMask.getBinaryMask().minus(noProps), propGenerator.ROCKS, 1.5f);
-		propGenerator.generateProps(fieldStoneMask.getBinaryMask().minus(noProps), propGenerator.FIELD_STONES, 60f);
-		propGenerator.generateProps(rockFieldMask.getBinaryMask().minus(noProps), propGenerator.ROCKS, 2f);
+        propGenerator.generateProps(treeMask.getBinaryMask().minus(noProps), propGenerator.TREE_GROUPS, 3f);
+        propGenerator.generateProps(cliffRockMask.getBinaryMask().minus(noProps), propGenerator.ROCKS, 1.5f);
+        propGenerator.generateProps(fieldStoneMask.getBinaryMask().minus(noProps), propGenerator.FIELD_STONES, 60f);
+        propGenerator.generateProps(rockFieldMask.getBinaryMask().minus(noProps), propGenerator.ROCKS, 2f);
 
-		Biome biomeSet = Biomes.getRandomBiome(random);
+        Biome biomeSet = Biomes.getRandomBiome(random);
 
-		System.out.printf("Using biome %s\n", biomeSet.getName());
-		map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
-		map.biome.setWaterSettings(biomeSet.getWaterSettings());
-		map.biome.setLightingSettings(biomeSet.getLightingSettings());
+        System.out.printf("Using biome %s\n", biomeSet.getName());
+        map.biome.setTerrainMaterials(biomeSet.getTerrainMaterials());
+        map.biome.setWaterSettings(biomeSet.getWaterSettings());
+        map.biome.setLightingSettings(biomeSet.getLightingSettings());
 
-		Preview.generate(map.getPreview(), map, rock.getBinaryMask());
+        Preview.generate(map.getPreview(), map, rock.getBinaryMask());
 
-		System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+        System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
-		return map;
-	}
+        return map;
+    }
 
-	private void setupTerrainPipeline(){
-		land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
-		mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
-		plateaus = new ConcurrentBinaryMask(32, random.nextLong(), "plateaus");
-		ramps = new ConcurrentBinaryMask(128, random.nextLong(), "ramps");
+    private void setupTerrainPipeline() {
+        land = new ConcurrentBinaryMask(16, random.nextLong(), "land");
+        mountains = new ConcurrentBinaryMask(32, random.nextLong(), "mountains");
+        plateaus = new ConcurrentBinaryMask(32, random.nextLong(), "plateaus");
+        ramps = new ConcurrentBinaryMask(128, random.nextLong(), "ramps");
 
-		land.randomize(landDensity).inflate(1).cutCorners().enlarge(32).acid(.5f).enlarge(128).smooth(4).acid(.5f);
-		mountains.randomize(mountainDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
-		plateaus.randomize(plateauDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
-		ramps.randomize(rampDensity);
+        land.randomize(landDensity).inflate(1).cutCorners().enlarge(32).acid(.5f).enlarge(128).smooth(4).acid(.5f);
+        mountains.randomize(mountainDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
+        plateaus.randomize(plateauDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
+        ramps.randomize(rampDensity);
 
-		plateaus.intersect(land).minus(mountains);
-		ramps.intersect(plateaus).outline().minus(plateaus).intersect(land).minus(mountains).inflate(2);
-		land.combine(mountains);
+        plateaus.intersect(land).minus(mountains);
+        ramps.intersect(plateaus).outline().minus(plateaus).intersect(land).minus(mountains).inflate(2);
+        land.combine(mountains);
 
-		land.enlarge(513).smooth(6);
-		mountains.enlarge(513).inflate(1).smooth(6);
-		plateaus.enlarge(513).inflate(1).smooth(6);
-		ramps.enlarge(513).smooth(6);
-	}
+        land.enlarge(513).smooth(6);
+        mountains.enlarge(513).inflate(1).smooth(6);
+        plateaus.enlarge(513).inflate(1).smooth(6);
+        ramps.enlarge(513).smooth(6);
+    }
 
-	private void setupHeightmapPipeline(){
-		heightmapBase = new ConcurrentFloatMask(513, random.nextLong(), "heightmapBase");
-		ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(513, random.nextLong(), "heightmapLand");
-		ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(513, random.nextLong(), "heightmapMountains");
-		ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(513, random.nextLong(), "heightmapPlateaus");
+    private void setupHeightmapPipeline() {
+        heightmapBase = new ConcurrentFloatMask(513, random.nextLong(), "heightmapBase");
+        ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(513, random.nextLong(), "heightmapLand");
+        ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(513, random.nextLong(), "heightmapMountains");
+        ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(513, random.nextLong(), "heightmapPlateaus");
 
-		plateaus.combine(mountains);
-		heightmapBase.init(land, 25f, 25f);
-		heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
-		heightmapLand.maskToHeightmap(.025f, .25f, 95, land).smooth(2);
-		heightmapMountains.maskToMoutains(2f, .5f, mountains);
-		heightmapMountains.add(heightmapPlateaus).smooth(1);
+        plateaus.combine(mountains);
+        heightmapBase.init(land, 25f, 25f);
+        heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
+        heightmapLand.maskToHeightmap(.025f, .25f, 95, land).smooth(2);
+        heightmapMountains.maskToMoutains(2f, .5f, mountains);
+        heightmapMountains.add(heightmapPlateaus).smooth(1);
 
-		heightmapBase.add(heightmapLand);
-		heightmapBase.add(heightmapMountains);
-	}
+        heightmapBase.add(heightmapLand);
+        heightmapBase.add(heightmapMountains);
+    }
 
     private void setupTexturePipeline() {
         grass = new ConcurrentBinaryMask(513, random.nextLong(), "grass");
@@ -258,7 +447,7 @@ public strictfp class MapGenerator {
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
-	private void setupPropPipeline(){
+    private void setupPropPipeline() {
         treeMask = new ConcurrentBinaryMask(32, random.nextLong(), "tree");
         cliffRockMask = new ConcurrentBinaryMask(32, random.nextLong(), "cliffRock");
         fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), "fieldStone");
@@ -271,7 +460,7 @@ public strictfp class MapGenerator {
         treeMask.enlarge(256).intersect(grass);
         treeMask.enlarge(513).deflate(5).trimEdge(3).fillCircle(256, 256, 96, false);
         rockFieldMask.randomize(reclaimDensity * .005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
-	}
+    }
 
     private void generateExclusionMasks() {
         noProps = new BinaryMask(256, random.nextLong());
@@ -300,238 +489,45 @@ public strictfp class MapGenerator {
         }
     }
 
-	private static void interpretArguments(String[] args) {
-		if (args.length == 0 || args[0].startsWith("--")) {
-			interpretArguments(ArgumentParser.parse(args));
-		}
-		else if (args.length == 2){
-			folderPath = args[0];
-			mapName = args[1];
-			parseMapName();
-		}
-		else {
-			try {
-				folderPath = args[0];
-				try {
-					seed = Long.parseLong(args[1]);
-					random = new Random(seed);
-				} catch (NumberFormatException nfe) {
-					System.out.println("Seed not numeric using default seed or mapname");
-				}
-				if (!VERSION.equals(args[2])) {
-					System.out.println("This generator only supports version " + VERSION);
-					System.exit(-1);
-				}
-				if (args.length>=4) {
-					mapName = args[3];
-					parseMapName();
-				}
-				else {
-					randomizeOptions();
-					generateMapName();
-				}
-			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-				System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-			}
-		}
-	}
-
-	private static void interpretArguments(Map<String, String> arguments) {
-		if (arguments.containsKey("help")) {
-			System.out.println("map-gen usage:\n" +
-					"--help                               produce help message\n" +
-					"--folder-path arg                    mandatory, set the target folder for the generated map\n" +
-					"--seed arg                           optional, set the seed for the generated map\n" +
-					"--map-name arg                       optional, set the map name for the generated map\n" +
-					"--spawn-count arg                    optional, set the spawn count for the generated map\n" +
-					"--land-density arg                   optional, set the land density for the generated map\n" +
-					"--plateau-density arg                optional, set the plateau density for the generated map (max .2)\n" +
-					"--mountain-density arg               optional, set the mountain density for the generated map (max .1)\n" +
-					"--ramp-density arg                   optional, set the ramp density for the generated map (max .2)\n +" +
-					"--reclaim-density arg                optional, set the reclaim density for the generated map\n +" +
-					"--mex-count arg                      optional, set the mex count per player for the generated map\n +");
-			System.exit(0);
-		}
-
-		if (!arguments.containsKey("folder-path")) {
-			System.out.println("Missing necessary argument.");
-			System.exit(-1);
-		}
-
-		folderPath = arguments.get("folder-path");
-
-		if (arguments.containsKey("map-name")) {
-			mapName = arguments.get("map-name");
-			parseMapName();
-			return;
-		}
-
-		if (arguments.containsKey("seed")) {
-			seed = Long.parseLong(arguments.get("seed"));
-			random = new Random(seed);
-		}
-		randomizeOptions();
-
-		if (arguments.containsKey("spawn-count")) {
-			spawnCount = Integer.parseInt(arguments.get("spawn-count"));
-		}
-
-		if (arguments.containsKey("land-density")) {
-			landDensity = Float.parseFloat(arguments.get("land-density"));
-			landDensity = (float) StrictMath.round(landDensity * 127f) / 127f;
-		}
-
-		if (arguments.containsKey("plateau-density")) {
-			plateauDensity = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")), .2f);
-			plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f;
-		}
-
-		if (arguments.containsKey("mountain-density")) {
-			mountainDensity = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")), .1f);
-			mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f;
-		}
-
-		if (arguments.containsKey("ramp-density")) {
-			rampDensity = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")), .2f);
-			rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f;
-		}
-
-		if (arguments.containsKey("reclaim-density")) {
-			reclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
-			reclaimDensity = (float) StrictMath.round(reclaimDensity * 127f ) / 127f;
-		}
-
-		if (arguments.containsKey("mex-count")) {
-			mexCount = Integer.parseInt(arguments.get("mex-count"));
-		}
-
-		generateMapName();
-	}
-
-	private static void parseMapName() {
-		mapName = mapName.replace('^','/');
-		if (!mapName.startsWith("neroxis_map_generator")){
-			throw new IllegalArgumentException("Map name is not a generated map");
-		}
-		String[] args = mapName.split("_");
-		if (args.length<4){
-			throw new RuntimeException("Version not specified");
-		}
-		String version = args[3];
-		if (!VERSION.equals(version)){
-			throw new RuntimeException("Unsupported generator version: " + version);
-		}
-		if (args.length>=5) {
-			String seedString = args[4];
-			try {
-				seed = Long.parseLong(seedString);
-			} catch (NumberFormatException nfe) {
-				byte[] seedBytes = Base64.getDecoder().decode(seedString);
-				ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
-				seed = seedWrapper.getLong();
-			}
-			random = new Random(seed);
-			randomizeOptions();
-		}
-		if (args.length>=6) {
-			String optionString = args[5];
-			byte[] optionBytes = Base64.getDecoder().decode(optionString);
-			parseOptions(optionBytes);
-		}
-	}
-
-	private static void randomizeOptions(){
-		spawnCount = 6;
-		landDensity = StrictMath.min((random.nextInt(127) + 13.0f) / 127f,1);
-		plateauDensity = (float) random.nextInt(127) / 127f * .2f;
-		mountainDensity = (float) random.nextInt(127) / 127f * .075f;
-		rampDensity = (float) random.nextInt(127) / 127f * .2f;
-		reclaimDensity = (float) random.nextInt(127) / 127f;
-		mexCount = 8 + 4 / (spawnCount / 2) + random.nextInt(40 / spawnCount);
-	}
-
-    private static void parseOptions(byte[] optionBytes) {
-        if (optionBytes.length > 0) {
-            if (optionBytes[0] <= 16) {
-                spawnCount = optionBytes[0];
-            }
+    @SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
+    private void generateDebugOutput() {
+        if (!DEBUG) {
+            return;
         }
-        if (optionBytes.length > 1) {
-            landDensity = (float) optionBytes[1] / 127f + 13.0f / 127f;
+
+        FileWriter writer = new FileWriter(Paths.get(".", "debug", "summary.txt").toFile());
+        Path masksDir = Paths.get(".", "debug");
+
+        for (int i = 0; i < Pipeline.getPipelineSize(); i++) {
+            Path maskFile = masksDir.resolve(i + ".mask");
+            writer.write(String.format("%d:\t%s\n", i, hashFiles(maskFile)));
         }
-        if (optionBytes.length > 2) {
-            plateauDensity = (float) optionBytes[2] / 127f * .2f;
-        }
-        if (optionBytes.length > 3) {
-            mountainDensity = (float) optionBytes[3] / 127f * .075f;
-        }
-        if (optionBytes.length > 4) {
-            rampDensity = (float) optionBytes[4] / 127f * .2f;
-        }
-        if (optionBytes.length > 5) {
-            reclaimDensity = (float) optionBytes[5] / 127f;
-        }
-        if (optionBytes.length > 6) {
-            mexCount = optionBytes[6];
-        }
+
+        String mapHash = hashFiles(SCMapExporter.file.toPath(), SaveExporter.file.toPath());
+        System.out.println("Map hash: " + mapHash);
+        writer.write(String.format("Map hash:\t%s", mapHash));
+        writer.flush();
+        writer.close();
     }
 
-    private static void generateMapName() {
-        String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
-        ByteBuffer seedBuffer = ByteBuffer.allocate(8);
-        seedBuffer.putLong(seed);
-        String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
-        byte[] optionArray = {(byte) spawnCount,
-                (byte) (landDensity * 127f),
-                (byte) (plateauDensity / .2f * 127f),
-                (byte) (mountainDensity / .1f * 127f),
-                (byte) (rampDensity / .2f * 127f),
-                (byte) (reclaimDensity * 127f),
-                (byte) (mexCount)};
-        String optionString = Base64.getEncoder().encodeToString(optionArray);
-        mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
+    private String hashFiles(Path... files) throws NoSuchAlgorithmException {
+        StringBuilder sb = new StringBuilder();
+        Arrays.stream(files).map(this::hashFile).forEach(sb::append);
+        byte[] hash = MessageDigest.getInstance("SHA-256").digest(sb.toString().getBytes());
+        return toHex(hash);
     }
 
+    @SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
+    private String hashFile(Path file) {
+        byte[] hash = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file));
+        return toHex(hash);
+    }
 
-	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
-	private void generateDebugOutput() {
-		if(!DEBUG) {
-			return;
-		}
-
-		FileWriter writer = new FileWriter(Paths.get(".", "debug", "summary.txt").toFile());
-		Path masksDir = Paths.get(".", "debug");
-
-		for(int i = 0;i < Pipeline.getPipelineSize();i++) {
-			Path maskFile = masksDir.resolve(i + ".mask");
-			writer.write(String.format( "%d:\t%s\n", i, hashFiles(maskFile)));
-		}
-
-		String mapHash = hashFiles(SCMapExporter.file.toPath(), SaveExporter.file.toPath());
-		System.out.println("Map hash: " + mapHash);
-		writer.write(String.format("Map hash:\t%s", mapHash));
-		writer.flush();
-		writer.close();
-	}
-
-	private String hashFiles(Path... files) throws NoSuchAlgorithmException {
-		StringBuilder sb = new StringBuilder();
-		Arrays.stream(files).map(this::hashFile).forEach(sb::append);
-		byte[] hash = MessageDigest.getInstance("SHA-256").digest(sb.toString().getBytes());
-		return toHex(hash);
-	}
-
-	@SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
-	private String hashFile(Path file) {
-		byte[] hash = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file));
-		return toHex(hash);
-	}
-
-	private String toHex(byte[] data) {
-		StringBuilder sb = new StringBuilder();
-		for (byte datum : data) {
-			sb.append(String.format("%02x", datum));
-		}
-		return sb.toString();
-	}
+    private String toHex(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for (byte datum : data) {
+            sb.append(String.format("%02x", datum));
+        }
+        return sb.toString();
+    }
 }

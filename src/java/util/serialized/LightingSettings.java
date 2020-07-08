@@ -5,9 +5,10 @@ import util.Vector4f;
 
 import static map.SCMap.*;
 
-/** Used in disk operations to be converted into a material later
+/**
+ * Used in disk operations to be converted into a material later
  * Compliant with ozonex's SCMLighting format
- * */
+ */
 
 public strictfp class LightingSettings {
     public float LightingMultiplier = LIGHTING_MULTIPLIER;
