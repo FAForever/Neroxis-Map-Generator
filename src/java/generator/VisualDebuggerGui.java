@@ -79,7 +79,7 @@ public class VisualDebuggerGui {
     }
 
     public static void createGui() {
-        if (frame != null) {
+        if (frame != null || !VisualDebugger.ENABLED) {
             return;
         }
         frame = new JFrame();
@@ -112,13 +112,16 @@ public class VisualDebuggerGui {
 
     public static void update(String uniqueMaskName, BufferedImage image, int zoomFactor) {
         if (!uniqueMaskName.isEmpty()) {
-            maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             int ind = listModel.getSize();
+            int count = 0;
             for (int i = 0; i < listModel.getSize(); i++) {
                 if (listModel.get(i).maskName.split(" ")[0].equals(uniqueMaskName.split(" ")[0])) {
                     ind = i + 1;
+                    count += 1;
                 }
             }
+            uniqueMaskName = String.format("%s %d", uniqueMaskName, count);
+            maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
             canvas.setViewModel(image, zoomFactor);
