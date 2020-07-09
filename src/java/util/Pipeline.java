@@ -34,7 +34,9 @@ public strictfp class Pipeline {
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
         CompletableFuture<?> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
                 .thenApply(res -> {
-                    System.out.printf("Start: %s(%d)\n", executingMask.getName(), index);
+                    if (MapGenerator.DEBUG) {
+                        System.out.printf("Start: %s(%d)\n", executingMask.getName(), index);
+                    }
                     if (addedAfterPipelineStart && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
                         System.err.println("Running non deterministic task added after pipeline start!  " + executingMask.getName());
                     }
@@ -42,8 +44,8 @@ public strictfp class Pipeline {
                 })
                 .thenApplyAsync(function)
                 .thenRun(() -> {
-                    System.out.printf("Done: %s(%d)\n", executingMask.getName(), index);
                     if (MapGenerator.DEBUG) {
+                        System.out.printf("Done: %s(%d)\n", executingMask.getName(), index);
                         executingMask.writeToFile(Paths.get(".", "debug", index + ".mask"));
                     }
                 });
@@ -53,13 +55,15 @@ public strictfp class Pipeline {
         entry.index = pipeline.size();
         pipeline.add(entry);
 
+        if (MapGenerator.DEBUG) {
+            System.out.printf("%d: New pipeline entry:   %s,  %s,  deps:[%s]\n",
+                    index,
+                    executingMask.getName(),
+                    new Throwable().getStackTrace()[2].getMethodName(),
+                    dependencies.stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
+            );
+        }
 
-        System.out.printf("%d: New pipeline entry:   %s,  %s,  deps:[%s]\n",
-                index,
-                executingMask.getName(),
-                new Throwable().getStackTrace()[2].getMethodName(),
-                dependencies.stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
-        );
     }
 
     public static void start() {

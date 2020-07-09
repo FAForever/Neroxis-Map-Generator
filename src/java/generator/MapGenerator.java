@@ -252,7 +252,7 @@ public strictfp class MapGenerator {
             }
         }
         if (optionBytes.length > 1) {
-            landDensity = (float) optionBytes[1] / 127f + 13.0f / 127f;
+            landDensity = (float) StrictMath.max(optionBytes[1] / 127f, 13.0f / 127f);
         }
         if (optionBytes.length > 2) {
             plateauDensity = (float) optionBytes[2] / 127f * .2f;
@@ -279,7 +279,7 @@ public strictfp class MapGenerator {
         byte[] optionArray = {(byte) spawnCount,
                 (byte) (landDensity * 127f),
                 (byte) (plateauDensity / .2f * 127f),
-                (byte) (mountainDensity / .1f * 127f),
+                (byte) (mountainDensity / .075f * 127f),
                 (byte) (rampDensity / .2f * 127f),
                 (byte) (reclaimDensity * 127f),
                 (byte) (mexCount)};
