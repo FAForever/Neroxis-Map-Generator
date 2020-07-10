@@ -34,7 +34,7 @@ public strictfp class MapGenerator {
     private static Random random = new Random(seed);
 
     //read from key value arguments or map name
-    private static int spawnCount;
+    private static int spawnCount = 6;
     private static float landDensity;
     private static float plateauDensity;
     private static float mountainDensity;
@@ -165,11 +165,12 @@ public strictfp class MapGenerator {
             seed = Long.parseLong(arguments.get("seed"));
             random = new Random(seed);
         }
-        randomizeOptions();
 
         if (arguments.containsKey("spawn-count")) {
             spawnCount = Integer.parseInt(arguments.get("spawn-count"));
         }
+
+        randomizeOptions();
 
         if (arguments.containsKey("land-density")) {
             landDensity = Float.parseFloat(arguments.get("land-density"));
@@ -226,7 +227,9 @@ public strictfp class MapGenerator {
                 seed = seedWrapper.getLong();
             }
             random = new Random(seed);
-            randomizeOptions();
+            if (args.length < 6) {
+                randomizeOptions();
+            }
         }
         if (args.length >= 6) {
             String optionString = args[5];
@@ -236,7 +239,6 @@ public strictfp class MapGenerator {
     }
 
     private static void randomizeOptions() {
-        spawnCount = 6;
         landDensity = StrictMath.min((random.nextInt(127) + 13.0f) / 127f, 1);
         plateauDensity = (float) random.nextInt(127) / 127f * .2f;
         mountainDensity = (float) random.nextInt(127) / 127f * .075f;
@@ -251,6 +253,9 @@ public strictfp class MapGenerator {
                 spawnCount = optionBytes[0];
             }
         }
+
+        randomizeOptions();
+
         if (optionBytes.length > 1) {
             landDensity = (float) StrictMath.max(optionBytes[1] / 127f, 13.0f / 127f);
         }
