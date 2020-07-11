@@ -11,6 +11,11 @@
         "environment": "lava",
         "name": "lav_cracked02_normals",
         "scale": 1.0
+      },
+      "previewColor": {
+        "red": 107,
+        "green": 50,
+        "blue": 27
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "desert",
         "name": "des_sandlight_normal",
         "scale": 20.0
+      },
+      "previewColor": {
+        "red": 98,
+        "green": 73,
+        "blue": 49
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "lava",
         "name": "lav_gravel_normals",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 132,
+        "green": 69,
+        "blue": 49
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "red barrens",
         "name": "rb_rock06_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 71,
+        "green": 25,
+        "blue": 16
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "red barrens",
         "name": "rb_rock09_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 49,
+        "green": 20,
+        "blue": 8
       }
     },
     {
@@ -71,6 +96,11 @@
         "environment": "lava",
         "name": "lav_cracked02_normals",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 57,
+        "green": 18,
+        "blue": 10
       }
     },
     {
@@ -83,6 +113,11 @@
         "environment": "lava",
         "name": "lav_cracked02_normals",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 87,
+        "green": 34,
+        "blue": 16
       }
     },
     {
@@ -95,6 +130,11 @@
         "environment": "lava",
         "name": "lav_cracked02_normals",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 137,
+        "green": 111,
+        "blue": 73
       }
     },
     {
@@ -107,6 +147,11 @@
         "environment": "red barrens",
         "name": "rb_none_normal",
         "scale": 10.0
+      },
+      "previewColor": {
+        "red": 46,
+        "green": 54,
+        "blue": 30
       }
     }
   ],

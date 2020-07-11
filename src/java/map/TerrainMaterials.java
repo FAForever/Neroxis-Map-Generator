@@ -1,5 +1,7 @@
 package map;
 
+import java.awt.*;
+
 public strictfp class TerrainMaterials {
 
     // engine limitations - must stay 9 and 10 always
@@ -10,6 +12,7 @@ public strictfp class TerrainMaterials {
     public float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
     public String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     public float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
+    public Color[] previewColors = new Color[TERRAIN_TEXTURE_COUNT];
 
 
     public TerrainMaterials(Material[] materials, Material macroTexture) {
@@ -24,6 +27,7 @@ public strictfp class TerrainMaterials {
                 texturePaths[i] = macroTexture.getTexturePath();
                 textureScales[i] = macroTexture.getTextureScale();
             }
+            previewColors[i] = isEmpty ? null : materials[i].getPreviewColor();
         }
     }
 }

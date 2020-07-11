@@ -11,6 +11,11 @@
         "environment": "paradise",
         "name": "sand000_normals",
         "scale": 20.0
+      },
+      "previewColor": {
+        "red": 82,
+        "green": 65,
+        "blue": 49
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "red barrens",
         "name": "rb_cracked02_normal",
         "scale": 10.0
+      },
+      "previewColor": {
+        "red": 87,
+        "green": 34,
+        "blue": 16
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "crystalline",
         "name": "cr_07_01_normal",
         "scale": 20.0
+      },
+      "previewColor": {
+        "red": 49,
+        "green": 12,
+        "blue": 0
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "lava",
         "name": "lav_rock04_normals",
         "scale": 20.0
+      },
+      "previewColor": {
+        "red": 71,
+        "green": 25,
+        "blue": 16
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "tundra",
         "name": "tund_sandlight_normal",
         "scale": 20.0
+      },
+      "previewColor": {
+        "red": 110,
+        "green": 89,
+        "blue": 60
       }
     }
   ],

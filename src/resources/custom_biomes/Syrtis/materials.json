@@ -11,6 +11,11 @@
         "environment": "red barrens",
         "name": "rb_rock06_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 107,
+        "green": 50,
+        "blue": 27
       }
     },
     {
@@ -23,6 +28,11 @@
         "environment": "red barrens",
         "name": "rb_redmud_normal",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 90,
+        "green": 36,
+        "blue": 30
       }
     },
     {
@@ -35,6 +45,11 @@
         "environment": "red barrens",
         "name": "rb_cracked_normal",
         "scale": 6.0
+      },
+      "previewColor": {
+        "red": 87,
+        "green": 34,
+        "blue": 16
       }
     },
     {
@@ -47,6 +62,11 @@
         "environment": "red barrens",
         "name": "rb_rock09_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 54,
+        "green": 21,
+        "blue": 10
       }
     },
     {
@@ -59,6 +79,11 @@
         "environment": "red barrens",
         "name": "rb_rock_normal",
         "scale": 4.0
+      },
+      "previewColor": {
+        "red": 71,
+        "green": 25,
+        "blue": 16
       }
     }
   ],

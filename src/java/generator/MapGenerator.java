@@ -257,7 +257,7 @@ public strictfp class MapGenerator {
         randomizeOptions();
 
         if (optionBytes.length > 1) {
-            landDensity = (float) StrictMath.max(optionBytes[1] / 127f, 13.0f / 127f);
+            landDensity = StrictMath.max(optionBytes[1] / 127f, 13.0f / 127f);
         }
         if (optionBytes.length > 2) {
             plateauDensity = (float) optionBytes[2] / 127f * .2f;
@@ -310,7 +310,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    public SCMap generate() {
+    public SCMap generate(){
         long startTime = System.currentTimeMillis();
 
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
@@ -363,7 +363,7 @@ public strictfp class MapGenerator {
         map.biome.setWaterSettings(biomeSet.getWaterSettings());
         map.biome.setLightingSettings(biomeSet.getLightingSettings());
 
-        Preview.generate(map.getPreview(), map, rock.getBinaryMask());
+        Preview.generate(map.getPreview(), map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
