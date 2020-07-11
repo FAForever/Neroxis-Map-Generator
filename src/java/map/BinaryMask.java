@@ -14,42 +14,44 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Getter
-public strictfp class BinaryMask extends Mask {
-    private final Random random;
+public strictfp class BinaryMask implements Mask {
     private boolean[][] mask;
+    private final Symmetry symmetry;
+    private final Symmetry quadSpawnSymmetry;
+    private final Random random;
 
     public BinaryMask(int size, long seed, Symmetry symmetry) {
+        this(size, seed, symmetry, null);
+    }
+
+    public BinaryMask(int size, long seed, Symmetry symmetry, Symmetry quadSpawnSymmetry) {
+        this.mask = new boolean[size][size];
         this.symmetry = symmetry;
-        mask = new boolean[size][size];
-        height = size;
-        width = size;
+        this.random = new Random(seed);
+        if (quadSpawnSymmetry != null) {
+            this.quadSpawnSymmetry = quadSpawnSymmetry;
+        } else {
+            Symmetry[] possibleSymmetries = new Symmetry[]{Symmetry.X, Symmetry.Y};
+            this.quadSpawnSymmetry = possibleSymmetries[random.nextInt(possibleSymmetries.length)];
+        }
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 this.mask[x][y] = false;
             }
         }
-        random = new Random(seed);
     }
 
     public BinaryMask(BinaryMask mask, long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
         this.symmetry = mask.getSymmetry();
-        height = this.mask[0].length;
-        width = this.mask.length;
+        this.quadSpawnSymmetry = mask.getQuadSpawnSymmetry();
+        this.random = new Random(seed);
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
-        random = new Random(seed);
-    }
 
-    public BinaryMask(boolean[][] mask, long seed, Symmetry symmetry) {
-        this.mask = mask;
-        this.symmetry = symmetry;
-        height = this.mask[0].length;
-        width = this.mask.length;
-        random = new Random(seed);
     }
 
     public int getSize() {
@@ -93,8 +95,6 @@ public strictfp class BinaryMask extends Mask {
             }
         }
         mask = largeMask;
-        height = this.getSize();
-        width = this.getSize();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -115,8 +115,6 @@ public strictfp class BinaryMask extends Mask {
             }
         }
         mask = smallMask;
-        height = this.getSize();
-        width = this.getSize();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -327,17 +325,45 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {
+        return fillCenter(extent, value, symmetry);
+    }
+
+    public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
             case POINT:
-                return fillCircle((float) width / 2, (float) height / 2, extent, value);
+                return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent, value);
             case Y:
-                return fillRect(0, height / 2 - extent, width, extent * 2, value);
+                return fillRect(0, getSize() / 2 - extent, getSize(), extent * 2, value);
             case X:
-                return fillRect(width / 2 - extent, 0, extent * 2, height, value);
+                return fillRect(getSize() / 2 - extent, 0, extent * 2, getSize(), value);
             case XY:
                 return fillDiagonal(extent, false, value);
             case YX:
                 return fillDiagonal(extent, true, value);
+            case QUAD:
+                return fillCenter(extent, value, quadSpawnSymmetry);
+            default:
+                return null;
+        }
+    }
+
+    public BinaryMask fillHalf(boolean value) {
+        return fillHalf(value, symmetry);
+    }
+
+    public BinaryMask fillHalf(boolean value, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+            case QUAD:
+                return fillHalf(value, quadSpawnSymmetry);
+            case Y:
+                return fillRect(0, 0, getSize(), getSize() / 2, value);
+            case X:
+                return fillRect(0, 0, getSize() / 2, getSize(), value);
+            case XY:
+                return fillParallelogram(0, 0, getSize(), getSize(), 0, 1, value);
+            case YX:
+                return fillParallelogram(0, 0, getSize(), getSize(), 0, -1, value);
             default:
                 return null;
         }
@@ -379,18 +405,14 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
-        int countY = 0;
-        for (int cy = y; cy < height + y; cy++) {
-            int countX = 0;
-            int calcY = cy + countX * ySlope;
-            for (int cx = x; cx < width + x; cx++) {
-                int calcX = cx + countY * xSlope;
-                if (calcX >= 0 && calcX < this.width && calcY >= 0 && calcY < this.height) {
+        for (int py = 0; py < height; py++) {
+            for (int px = 0; px < width; px++) {
+                int calcX = x + px + py * xSlope;
+                int calcY = y + py + px * ySlope;
+                if (calcX >= 0 && calcX < getSize() && calcY >= 0 && calcY < getSize()) {
                     mask[calcX][calcY] = value;
                 }
-                countX++;
             }
-            countY++;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -398,15 +420,15 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
         int count = 0;
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y < getSize(); y++) {
             for (int cx = -extent; cx < extent; cx++) {
                 int x;
                 if (inverted) {
-                    x = width - (cx + count);
+                    x = getSize() - (cx + count);
                 } else {
                     x = cx + count;
                 }
-                if (x >= 0 && x < width) {
+                if (x >= 0 && x < getSize()) {
                     mask[x][y] = value;
                 }
             }
@@ -452,27 +474,58 @@ public strictfp class BinaryMask extends Mask {
         return null;
     }
 
-    protected void applySymmetry() {
+    public Vector2f getSymmetryPoint(Vector2f v) {
+        return getSymmetryPoint((int) v.x, (int) v.y);
+    }
+
+    public Vector2f getSymmetryPoint(Vector2f v, Symmetry symmetry) {
+        return getSymmetryPoint((int) v.x, (int) v.y, symmetry);
+    }
+
+    public Vector2f getSymmetryPoint(int x, int y) {
+        return getSymmetryPoint(x, y, symmetry);
+    }
+
+    public Vector2f getSymmetryPoint(int x, int y, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+                return new Vector2f(getSize() - x - 1, getSize() - y - 1);
+            case X:
+                return new Vector2f(getSize() - x - 1, y);
+            case Y:
+                return new Vector2f(x, getSize() - y - 1);
+            case XY:
+                return new Vector2f(y, x);
+            case YX:
+                return new Vector2f(getSize() - y - 1, getSize() - x - 1);
+            case QUAD:
+                return getSymmetryPoint(x, y, quadSpawnSymmetry);
+            default:
+                return null;
+        }
+    }
+
+    public void applySymmetry() {
         switch (symmetry) {
             case POINT:
             case Y:
-                for (int y = 0; y < height / 2; y++) {
-                    for (int x = 0; x < width; x++) {
+                for (int y = 0; y < getSize() / 2; y++) {
+                    for (int x = 0; x < getSize(); x++) {
                         Vector2f symPoint = getSymmetryPoint(x, y);
                         mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
                     }
                 }
                 break;
             case X:
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width / 2; x++) {
+                for (int y = 0; y < getSize(); y++) {
+                    for (int x = 0; x < getSize() / 2; x++) {
                         Vector2f symPoint = getSymmetryPoint(x, y);
                         mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
                     }
                 }
                 break;
             case XY:
-                for (int y = 0; y < height; y++) {
+                for (int y = 0; y < getSize(); y++) {
                     for (int x = 0; x <= y; x++) {
                         Vector2f symPoint = getSymmetryPoint(x, y);
                         mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
@@ -480,10 +533,22 @@ public strictfp class BinaryMask extends Mask {
                 }
                 break;
             case YX:
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
+                for (int y = 0; y < getSize(); y++) {
+                    for (int x = 0; x < getSize(); x++) {
                         Vector2f symPoint = getSymmetryPoint(x, y);
                         mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case QUAD:
+                for (int y = 0; y < getSize() / 2; y++) {
+                    for (int x = 0; x < getSize() / 2; x++) {
+                        Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
+                        Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
+                        Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
+                        mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
+                        mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
+                        mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];
                     }
                 }
                 break;

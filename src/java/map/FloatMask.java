@@ -3,7 +3,6 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import util.Vector2f;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -14,32 +13,28 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Getter
-public strictfp class FloatMask extends Mask {
-    private final Random random;
+public strictfp class FloatMask implements Mask {
     private float[][] mask;
+    private final Random random;
 
-    public FloatMask(int size, long seed, Symmetry symmetry) {
-        this.symmetry = symmetry;
-        mask = new float[size][size];
-        height = size;
-        width = size;
+    public FloatMask(int size, long seed) {
+        this.mask = new float[size][size];
+        this.random = new Random(seed);
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 this.mask[x][y] = 0f;
             }
         }
-        random = new Random(seed);
     }
 
     public FloatMask(FloatMask mask, long seed) {
         this.mask = new float[mask.getSize()][mask.getSize()];
-        this.symmetry = mask.getSymmetry();
+        this.random = new Random(seed);
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
-        random = new Random(seed);
     }
 
     public int getSize() {
@@ -86,15 +81,14 @@ public strictfp class FloatMask extends Mask {
 
     public FloatMask maskToMoutains(float firstSlope, float slope, BinaryMask other) {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
-        FloatMask mountainBase = new FloatMask(getSize(), 0, other.getSymmetry());
+        FloatMask mountainBase = new FloatMask(getSize(), 0);
         add(mountainBase.init(otherCopy, 0, firstSlope));
         otherCopy.acid(0.5f);
         for (int i = 0; i < getSize(); i++) {
-            FloatMask layer = new FloatMask(getSize(), 0, other.getSymmetry());
+            FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, slope));
             otherCopy.acid(0.5f);
         }
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -102,14 +96,14 @@ public strictfp class FloatMask extends Mask {
     public FloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, BinaryMask other) {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
         for (int i = 0; i < getSize(); i++) {
-            FloatMask layer = new FloatMask(getSize(), 0, other.getSymmetry());
+            FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, slope));
             otherCopy.acid(0.5f);
         }
         otherCopy = new BinaryMask(other, random.nextLong());
         otherCopy.invert();
         for (int i = 0; i < maxRepeat; i++) {
-            FloatMask layer = new FloatMask(getSize(), 0, other.getSymmetry());
+            FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, -underWaterSlope));
             otherCopy.acid(0.5f);
         }
@@ -204,47 +198,6 @@ public strictfp class FloatMask extends Mask {
             }
         }
     }
-
-    protected void applySymmetry() {
-        switch (symmetry) {
-            case POINT:
-            case Y:
-                for (int y = 0; y < height / 2; y++) {
-                    for (int x = 0; x < width; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
-            case X:
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width / 2; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
-            case XY:
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x <= y; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
-            case YX:
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width - y; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     // -------------------------------------------
 
     @SneakyThrows

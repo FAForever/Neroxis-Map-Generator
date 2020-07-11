@@ -1,28 +1,28 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import util.Pipeline;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
-public strictfp class ConcurrentFloatMask extends ConcurrentMask {
+@Getter
+public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 
     private FloatMask floatMask;
     private String name;
 
-    public ConcurrentFloatMask(int size, long seed, Symmetry symmetry, String name) {
-        this.floatMask = new FloatMask(size, seed, symmetry);
+    public ConcurrentFloatMask(int size, long seed, String name) {
+        this.floatMask = new FloatMask(size, seed);
         this.name = name;
-        this.symmetry = symmetry;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
         this.name = name;
-        this.symmetry = mask.getSymmetry();
 
         if (name.equals("mocked")) {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);
@@ -83,10 +83,6 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         return new ConcurrentFloatMask(this, 0, "mocked");
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this.floatMask);

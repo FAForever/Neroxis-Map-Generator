@@ -167,9 +167,9 @@ public strictfp class SCMapExporter {
         for (int i = 0; i < map.getPropCount(); i++) {
             writeStringNull(map.getProp(i).getPath());
             writeVector3f(map.getProp(i).getPosition());
-            writeVector3f(new Vector3f((float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
+            writeVector3f(new Vector3f((float) StrictMath.sin(map.getProp(i).getRotation()), 0f, (float) StrictMath.cos(map.getProp(i).getRotation())));
             writeVector3f(new Vector3f(0f, 1f, 0f));
-            writeVector3f(new Vector3f((float) -StrictMath.cos(map.getProp(i).getRotation() * 2 * StrictMath.PI), 0f, (float) StrictMath.sin(map.getProp(i).getRotation() * 2 * StrictMath.PI)));
+            writeVector3f(new Vector3f((float) -StrictMath.cos(map.getProp(i).getRotation()), 0f, (float) StrictMath.sin(map.getProp(i).getRotation())));
             writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
         }
 

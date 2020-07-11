@@ -7,14 +7,17 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
-public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
+public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 
     private BinaryMask binaryMask;
     private String name;
 
     public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, String name) {
-        this.binaryMask = new BinaryMask(size, seed, symmetry);
-        this.symmetry = symmetry;
+        this(size, seed, symmetry, null, name);
+    }
+
+    public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, Symmetry quadSpawnSymmetry, String name) {
+        this.binaryMask = new BinaryMask(size, seed, symmetry, quadSpawnSymmetry);
         this.name = name;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
@@ -22,7 +25,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, long seed, String name) {
         this.name = name;
-        this.symmetry = mask.getSymmetry();
 
         if (name.equals("mocked")) {
             this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
