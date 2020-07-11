@@ -1,5 +1,5 @@
 package map;
 
 public strictfp enum Symmetry {
-    NONE, POINT
+    POINT, X, Y, XY, YX, QUAD
 }

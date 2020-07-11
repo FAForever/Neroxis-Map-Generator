@@ -1,12 +1,14 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import util.Pipeline;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
+@Getter
 public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 
     private FloatMask floatMask;
@@ -81,10 +83,6 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
         return new ConcurrentFloatMask(this, 0, "mocked");
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this.floatMask);

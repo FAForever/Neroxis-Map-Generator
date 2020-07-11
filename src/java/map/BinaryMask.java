@@ -1,6 +1,7 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import util.Vector2f;
 
@@ -12,29 +13,45 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
+@Getter
 public strictfp class BinaryMask implements Mask {
-    private final Random random;
-    private final Symmetry symmetry = Symmetry.POINT;
     private boolean[][] mask;
+    private final Symmetry symmetry;
+    private final Symmetry quadSpawnSymmetry;
+    private final Random random;
 
-    public BinaryMask(int size, long seed) {
-        mask = new boolean[size][size];
-        random = new Random(seed);
+    public BinaryMask(int size, long seed, Symmetry symmetry) {
+        this(size, seed, symmetry, null);
+    }
+
+    public BinaryMask(int size, long seed, Symmetry symmetry, Symmetry quadSpawnSymmetry) {
+        this.mask = new boolean[size][size];
+        this.symmetry = symmetry;
+        this.random = new Random(seed);
+        if (quadSpawnSymmetry != null) {
+            this.quadSpawnSymmetry = quadSpawnSymmetry;
+        } else {
+            Symmetry[] possibleSymmetries = new Symmetry[]{Symmetry.X, Symmetry.Y};
+            this.quadSpawnSymmetry = possibleSymmetries[random.nextInt(possibleSymmetries.length)];
+        }
+        for (int y = 0; y < this.getSize(); y++) {
+            for (int x = 0; x < this.getSize(); x++) {
+                this.mask[x][y] = false;
+            }
+        }
     }
 
     public BinaryMask(BinaryMask mask, long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
+        this.symmetry = mask.getSymmetry();
+        this.quadSpawnSymmetry = mask.getQuadSpawnSymmetry();
+        this.random = new Random(seed);
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
-        random = new Random(seed);
-    }
 
-    public BinaryMask(boolean[][] mask, long seed) {
-        this.mask = mask;
-        random = new Random(seed);
     }
 
     public int getSize() {
@@ -43,20 +60,6 @@ public strictfp class BinaryMask implements Mask {
 
     public boolean get(int x, int y) {
         return mask[x][y];
-    }
-
-    private void applySymmetry() {
-        switch (symmetry) {
-            case POINT:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = 0; x < getSize(); x++) {
-                        mask[getSize() - x - 1][getSize() - y - 1] = mask[x][y];
-                    }
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     public BinaryMask randomize(float density) {
@@ -220,7 +223,6 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = maskCopy;
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -322,6 +324,55 @@ public strictfp class BinaryMask implements Mask {
         return this;
     }
 
+    public BinaryMask fillCenter(int extent, boolean value) {
+        return fillCenter(extent, value, symmetry);
+    }
+
+    public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+                return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent, value);
+            case Y:
+                return fillRect(0, getSize() / 2 - extent, getSize(), extent * 2, value);
+            case X:
+                return fillRect(getSize() / 2 - extent, 0, extent * 2, getSize(), value);
+            case XY:
+                return fillDiagonal(extent, false, value);
+            case YX:
+                return fillDiagonal(extent, true, value);
+            case QUAD:
+                return fillCenter(extent, value, quadSpawnSymmetry);
+            default:
+                return null;
+        }
+    }
+
+    public BinaryMask fillHalf(boolean value) {
+        return fillHalf(value, symmetry);
+    }
+
+    public BinaryMask fillHalf(boolean value, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+            case QUAD:
+                return fillHalf(value, quadSpawnSymmetry);
+            case Y:
+                return fillRect(0, 0, getSize(), getSize() / 2, value);
+            case X:
+                return fillRect(0, 0, getSize() / 2, getSize(), value);
+            case XY:
+                return fillParallelogram(0, 0, getSize(), getSize(), 0, 1, value);
+            case YX:
+                return fillParallelogram(0, 0, getSize(), getSize(), 0, -1, value);
+            default:
+                return null;
+        }
+    }
+
+    public BinaryMask fillCircle(Vector2f v, float radius, boolean value) {
+        return fillCircle(v.x, v.y, radius, value);
+    }
+
     public BinaryMask fillCircle(float x, float y, float radius, boolean value) {
         int ex = (int) StrictMath.min(getSize(), x + radius);
         int ey = (int) StrictMath.min(getSize(), y + radius);
@@ -336,6 +387,52 @@ public strictfp class BinaryMask implements Mask {
                     mask[cx][cy] = value;
                 }
             }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask fillRect(Vector2f v, int width, int height, boolean value) {
+        return fillRect((int) v.x, (int) v.y, width, height, value);
+    }
+
+    public BinaryMask fillRect(int x, int y, int width, int height, boolean value) {
+        return fillParallelogram(x, y, width, height, 0, 0, value);
+    }
+
+    public BinaryMask fillParallelogram(Vector2f v, int width, int height, int xSlope, int ySlope, boolean value) {
+        return fillParallelogram((int) v.x, (int) v.y, width, height, xSlope, ySlope, value);
+    }
+
+    public BinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
+        for (int py = 0; py < height; py++) {
+            for (int px = 0; px < width; px++) {
+                int calcX = x + px + py * xSlope;
+                int calcY = y + py + px * ySlope;
+                if (calcX >= 0 && calcX < getSize() && calcY >= 0 && calcY < getSize()) {
+                    mask[calcX][calcY] = value;
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
+        int count = 0;
+        for (int y = 0; y < getSize(); y++) {
+            for (int cx = -extent; cx < extent; cx++) {
+                int x;
+                if (inverted) {
+                    x = getSize() - (cx + count);
+                } else {
+                    x = cx + count;
+                }
+                if (x >= 0 && x < getSize()) {
+                    mask[x][y] = value;
+                }
+            }
+            count++;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -377,6 +474,89 @@ public strictfp class BinaryMask implements Mask {
         return null;
     }
 
+    public Vector2f getSymmetryPoint(Vector2f v) {
+        return getSymmetryPoint((int) v.x, (int) v.y);
+    }
+
+    public Vector2f getSymmetryPoint(Vector2f v, Symmetry symmetry) {
+        return getSymmetryPoint((int) v.x, (int) v.y, symmetry);
+    }
+
+    public Vector2f getSymmetryPoint(int x, int y) {
+        return getSymmetryPoint(x, y, symmetry);
+    }
+
+    public Vector2f getSymmetryPoint(int x, int y, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+                return new Vector2f(getSize() - x - 1, getSize() - y - 1);
+            case X:
+                return new Vector2f(getSize() - x - 1, y);
+            case Y:
+                return new Vector2f(x, getSize() - y - 1);
+            case XY:
+                return new Vector2f(y, x);
+            case YX:
+                return new Vector2f(getSize() - y - 1, getSize() - x - 1);
+            case QUAD:
+                return getSymmetryPoint(x, y, quadSpawnSymmetry);
+            default:
+                return null;
+        }
+    }
+
+    public void applySymmetry() {
+        switch (symmetry) {
+            case POINT:
+            case Y:
+                for (int y = 0; y < getSize() / 2; y++) {
+                    for (int x = 0; x < getSize(); x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case X:
+                for (int y = 0; y < getSize(); y++) {
+                    for (int x = 0; x < getSize() / 2; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case XY:
+                for (int y = 0; y < getSize(); y++) {
+                    for (int x = 0; x <= y; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case YX:
+                for (int y = 0; y < getSize(); y++) {
+                    for (int x = 0; x < getSize(); x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case QUAD:
+                for (int y = 0; y < getSize() / 2; y++) {
+                    for (int x = 0; x < getSize() / 2; x++) {
+                        Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
+                        Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
+                        Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
+                        mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
+                        mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
+                        mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     // --------------------------------------------------
 
     @SneakyThrows
@@ -393,7 +573,6 @@ public strictfp class BinaryMask implements Mask {
         out.close();
     }
 
-    @Override
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this);
     }

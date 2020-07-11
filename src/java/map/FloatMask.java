@@ -1,6 +1,7 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.BufferedOutputStream;
@@ -11,24 +12,29 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
+@Getter
 public strictfp class FloatMask implements Mask {
-    private final Random random;
-    private final Symmetry symmetry = Symmetry.POINT;
     private float[][] mask;
+    private final Random random;
 
     public FloatMask(int size, long seed) {
-        mask = new float[size][size];
-        random = new Random(seed);
+        this.mask = new float[size][size];
+        this.random = new Random(seed);
+        for (int y = 0; y < this.getSize(); y++) {
+            for (int x = 0; x < this.getSize(); x++) {
+                this.mask[x][y] = 0f;
+            }
+        }
     }
 
     public FloatMask(FloatMask mask, long seed) {
         this.mask = new float[mask.getSize()][mask.getSize()];
+        this.random = new Random(seed);
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
-        random = new Random(seed);
     }
 
     public int getSize() {
@@ -37,20 +43,6 @@ public strictfp class FloatMask implements Mask {
 
     public float get(int x, int y) {
         return mask[x][y];
-    }
-
-    private void applySymmetry() {
-        switch (symmetry) {
-            case POINT:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = 0; x < getSize(); x++) {
-                        mask[getSize() - x - 1][getSize() - y - 1] = mask[x][y];
-                    }
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
@@ -97,7 +89,6 @@ public strictfp class FloatMask implements Mask {
             add(layer.init(otherCopy, 0, slope));
             otherCopy.acid(0.5f);
         }
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -207,7 +198,6 @@ public strictfp class FloatMask implements Mask {
             }
         }
     }
-
     // -------------------------------------------
 
     @SneakyThrows
@@ -224,7 +214,6 @@ public strictfp class FloatMask implements Mask {
         out.close();
     }
 
-    @Override
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this);
     }
