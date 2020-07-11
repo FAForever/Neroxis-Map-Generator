@@ -7,20 +7,22 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
-public strictfp class ConcurrentFloatMask implements ConcurrentMask {
+public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     private FloatMask floatMask;
     private String name;
 
-    public ConcurrentFloatMask(int size, long seed, String name) {
-        this.floatMask = new FloatMask(size, seed);
+    public ConcurrentFloatMask(int size, long seed, Symmetry symmetry, String name) {
+        this.floatMask = new FloatMask(size, seed, symmetry);
         this.name = name;
+        this.symmetry = symmetry;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
         this.name = name;
+        this.symmetry = mask.getSymmetry();
 
         if (name.equals("mocked")) {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);

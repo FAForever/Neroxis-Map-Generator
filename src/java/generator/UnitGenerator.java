@@ -21,11 +21,8 @@ public strictfp class UnitGenerator {
         random = new Random(seed);
     }
 
-    private Vector3f placeOnHeightmap(float x, float z, Vector3f v) {
-        v.x = x;
-        v.z = z;
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
-        return v;
+    private Vector3f placeOnHeightmap(Vector2f v) {
+        return placeOnHeightmap(v.x, v.y);
     }
 
     private Vector3f placeOnHeightmap(float x, float z) {
@@ -37,13 +34,15 @@ public strictfp class UnitGenerator {
     public void generateUnits(BinaryMask spawnable, String[] types, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         Vector2f location = spawnableCopy.getRandomPosition();
+        Vector2f symLocation;
         String type = types[random.nextInt(types.length)];
         float rot = random.nextFloat();
         while (location != null) {
-            spawnableCopy.fillCircle(location.x, location.y, separation, false);
-            spawnableCopy.fillCircle(map.getSize() - location.x, map.getSize() - location.y, separation, false);
-            Unit unit1 = new Unit(type, placeOnHeightmap(location.x, location.y), rot);
-            Unit unit2 = new Unit(unit1.getType(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), unit1.getRotation() + 0.5f);
+            symLocation = spawnableCopy.getSymmetryPoint(location);
+            spawnableCopy.fillCircle(location, separation, false);
+            spawnableCopy.fillCircle(symLocation, separation, false);
+            Unit unit1 = new Unit(type, placeOnHeightmap(location), rot * (float) StrictMath.PI);
+            Unit unit2 = new Unit(unit1.getType(), placeOnHeightmap(symLocation), unit1.getRotation() - (float) StrictMath.PI);
             map.addUnit(unit1);
             map.addUnit(unit2);
             location = spawnableCopy.getRandomPosition();

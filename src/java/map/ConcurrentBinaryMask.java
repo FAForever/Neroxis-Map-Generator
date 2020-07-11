@@ -7,13 +7,14 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
-public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
+public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     private BinaryMask binaryMask;
     private String name;
 
-    public ConcurrentBinaryMask(int size, long seed, String name) {
-        this.binaryMask = new BinaryMask(size, seed);
+    public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, String name) {
+        this.binaryMask = new BinaryMask(size, seed, symmetry);
+        this.symmetry = symmetry;
         this.name = name;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
@@ -21,6 +22,7 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, long seed, String name) {
         this.name = name;
+        this.symmetry = mask.getSymmetry();
 
         if (name.equals("mocked")) {
             this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
@@ -110,9 +112,27 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask fillCenter(int extent, boolean value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.fillCenter(extent, value)
+        );
+    }
+
     public ConcurrentBinaryMask fillCircle(float x, float y, float radius, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.fillCircle(x, y, radius, value)
+        );
+    }
+
+    public ConcurrentBinaryMask fillRect(int x, int y, int width, int height, boolean value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.fillRect(x, y, width, height, value)
+        );
+    }
+
+    public ConcurrentBinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.fillParallelogram(x, y, width, height, xSlope, ySlope, value)
         );
     }
 

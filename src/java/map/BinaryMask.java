@@ -1,6 +1,7 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import util.Vector2f;
 
@@ -12,18 +13,29 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Random;
 
-public strictfp class BinaryMask implements Mask {
+@Getter
+public strictfp class BinaryMask extends Mask {
     private final Random random;
-    private final Symmetry symmetry = Symmetry.POINT;
     private boolean[][] mask;
 
-    public BinaryMask(int size, long seed) {
+    public BinaryMask(int size, long seed, Symmetry symmetry) {
+        this.symmetry = symmetry;
         mask = new boolean[size][size];
+        height = size;
+        width = size;
+        for (int y = 0; y < this.getSize(); y++) {
+            for (int x = 0; x < this.getSize(); x++) {
+                this.mask[x][y] = false;
+            }
+        }
         random = new Random(seed);
     }
 
     public BinaryMask(BinaryMask mask, long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
+        this.symmetry = mask.getSymmetry();
+        height = this.mask[0].length;
+        width = this.mask.length;
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
@@ -32,8 +44,11 @@ public strictfp class BinaryMask implements Mask {
         random = new Random(seed);
     }
 
-    public BinaryMask(boolean[][] mask, long seed) {
+    public BinaryMask(boolean[][] mask, long seed, Symmetry symmetry) {
         this.mask = mask;
+        this.symmetry = symmetry;
+        height = this.mask[0].length;
+        width = this.mask.length;
         random = new Random(seed);
     }
 
@@ -43,20 +58,6 @@ public strictfp class BinaryMask implements Mask {
 
     public boolean get(int x, int y) {
         return mask[x][y];
-    }
-
-    private void applySymmetry() {
-        switch (symmetry) {
-            case POINT:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = 0; x < getSize(); x++) {
-                        mask[getSize() - x - 1][getSize() - y - 1] = mask[x][y];
-                    }
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     public BinaryMask randomize(float density) {
@@ -92,6 +93,8 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = largeMask;
+        height = this.getSize();
+        width = this.getSize();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -112,6 +115,8 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = smallMask;
+        height = this.getSize();
+        width = this.getSize();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -220,7 +225,6 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = maskCopy;
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -322,6 +326,27 @@ public strictfp class BinaryMask implements Mask {
         return this;
     }
 
+    public BinaryMask fillCenter(int extent, boolean value) {
+        switch (symmetry) {
+            case POINT:
+                return fillCircle((float) width / 2, (float) height / 2, extent, value);
+            case Y:
+                return fillRect(0, height / 2 - extent, width, extent * 2, value);
+            case X:
+                return fillRect(width / 2 - extent, 0, extent * 2, height, value);
+            case XY:
+                return fillDiagonal(extent, false, value);
+            case YX:
+                return fillDiagonal(extent, true, value);
+            default:
+                return null;
+        }
+    }
+
+    public BinaryMask fillCircle(Vector2f v, float radius, boolean value) {
+        return fillCircle(v.x, v.y, radius, value);
+    }
+
     public BinaryMask fillCircle(float x, float y, float radius, boolean value) {
         int ex = (int) StrictMath.min(getSize(), x + radius);
         int ey = (int) StrictMath.min(getSize(), y + radius);
@@ -336,6 +361,56 @@ public strictfp class BinaryMask implements Mask {
                     mask[cx][cy] = value;
                 }
             }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask fillRect(Vector2f v, int width, int height, boolean value) {
+        return fillRect((int) v.x, (int) v.y, width, height, value);
+    }
+
+    public BinaryMask fillRect(int x, int y, int width, int height, boolean value) {
+        return fillParallelogram(x, y, width, height, 0, 0, value);
+    }
+
+    public BinaryMask fillParallelogram(Vector2f v, int width, int height, int xSlope, int ySlope, boolean value) {
+        return fillParallelogram((int) v.x, (int) v.y, width, height, xSlope, ySlope, value);
+    }
+
+    public BinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
+        int countY = 0;
+        for (int cy = y; cy < height + y; cy++) {
+            int countX = 0;
+            int calcY = cy + countX * ySlope;
+            for (int cx = x; cx < width + x; cx++) {
+                int calcX = cx + countY * xSlope;
+                if (calcX >= 0 && calcX < this.width && calcY >= 0 && calcY < this.height) {
+                    mask[calcX][calcY] = value;
+                }
+                countX++;
+            }
+            countY++;
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
+        int count = 0;
+        for (int y = 0; y < height; y++) {
+            for (int cx = -extent; cx < extent; cx++) {
+                int x;
+                if (inverted) {
+                    x = width - (cx + count);
+                } else {
+                    x = cx + count;
+                }
+                if (x >= 0 && x < width) {
+                    mask[x][y] = value;
+                }
+            }
+            count++;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -377,6 +452,46 @@ public strictfp class BinaryMask implements Mask {
         return null;
     }
 
+    protected void applySymmetry() {
+        switch (symmetry) {
+            case POINT:
+            case Y:
+                for (int y = 0; y < height / 2; y++) {
+                    for (int x = 0; x < width; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case X:
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width / 2; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case XY:
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x <= y; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            case YX:
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y);
+                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     // --------------------------------------------------
 
     @SneakyThrows
@@ -393,7 +508,6 @@ public strictfp class BinaryMask implements Mask {
         out.close();
     }
 
-    @Override
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this);
     }

@@ -39,11 +39,8 @@ public strictfp class PropGenerator {
         random = new Random(seed);
     }
 
-    private Vector3f placeOnHeightmap(float x, float z, Vector3f v) {
-        v.x = x;
-        v.z = z;
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
-        return v;
+    private Vector3f placeOnHeightmap(Vector2f v) {
+        return placeOnHeightmap(v.x, v.y);
     }
 
     private Vector3f placeOnHeightmap(float x, float z) {
@@ -55,11 +52,13 @@ public strictfp class PropGenerator {
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         Vector2f location = spawnableCopy.getRandomPosition();
+        Vector2f symLocation;
         while (location != null) {
-            spawnableCopy.fillCircle(location.x, location.y, separation, false);
-            spawnableCopy.fillCircle(map.getSize() - location.x, map.getSize() - location.y, separation, false);
-            Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location.x, location.y), random.nextFloat() * 3.14159f);
-            Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(map.getSize() - location.x, map.getSize() - location.y), prop1.getRotation() + 3.14159f);
+            symLocation = spawnableCopy.getSymmetryPoint(location);
+            spawnableCopy.fillCircle(location, separation, false);
+            spawnableCopy.fillCircle(symLocation, separation, false);
+            Prop prop1 = new Prop(paths[random.nextInt(paths.length)], placeOnHeightmap(location), random.nextFloat() * (float) StrictMath.PI);
+            Prop prop2 = new Prop(prop1.getPath(), placeOnHeightmap(symLocation), prop1.getRotation() + (float) StrictMath.PI);
             map.addProp(prop1);
             map.addProp(prop2);
             location = spawnableCopy.getRandomPosition();
