@@ -44,6 +44,7 @@ public strictfp class MapGenerator {
     private static Symmetry symmetry;
 
     private SCMap map;
+    private int spawnSeparation;
 
     //masks used in generation
     private ConcurrentBinaryMask land;
@@ -93,8 +94,10 @@ public strictfp class MapGenerator {
         System.out.println("Ramp Density: " + rampDensity);
         System.out.println("Reclaim Density: " + reclaimDensity);
         System.out.println("Mex Count: " + mexCount);
-        System.out.println("Symmetry: " + symmetry);
-        System.out.println("Quad Symmetry: " + generator.spawnsMask.getBinaryMask().getQuadSpawnSymmetry());
+        System.out.println("Terrain Symmetry: " + symmetry);
+        System.out.println("Team Symmetry: " + generator.spawnsMask.getBinaryMask().getSymmetryHierarchy().getTeamSymmetry());
+        System.out.println("Spawn Symmetry: " + generator.spawnsMask.getBinaryMask().getSymmetryHierarchy().getSpawnSymmetry());
+        System.out.println("Spawn Separation: " + generator.spawnSeparation);
         generator.save(folderPath, mapName.replace('/', '^'), map);
         System.out.println("Done");
 
@@ -253,7 +256,12 @@ public strictfp class MapGenerator {
         rampDensity = (float) random.nextInt(127) / 127f * .2f;
         reclaimDensity = (float) random.nextInt(127) / 127f;
         mexCount = 8 + 4 / (spawnCount / 2) + random.nextInt(40 / spawnCount);
-        Symmetry[] symmetries = Symmetry.values();
+        Symmetry[] symmetries;
+        if (spawnCount == 2) {
+            symmetries = new Symmetry[] {Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
+        } else {
+            symmetries = Symmetry.values();
+        }
         int symmetryValue = random.nextInt(symmetries.length);
         symmetry = symmetries[symmetryValue];
     }
@@ -342,8 +350,11 @@ public strictfp class MapGenerator {
         setupWreckPipeline();
         setupPropPipeline();
 
-        int spawnSeparation = random.nextInt(128 - 32) + 32;
-
+        if (spawnCount == 2) {
+            spawnSeparation = 192;
+        } else {
+            spawnSeparation = random.nextInt(128 - 32) + 32;
+        }
         Pipeline.start();
 
         Pipeline.await(heightmapBase);
@@ -446,18 +457,21 @@ public strictfp class MapGenerator {
 
     private void setupMarkerPipeline() {
         spawnsMask = new ConcurrentBinaryMask(513, random.nextLong(), symmetry, "spawns");
-        resourceMask = new ConcurrentBinaryMask(513, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "resource");
-        spawnsMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(18).trimEdge(20);
-        resourceMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(5).trimEdge(20).fillCenter(16, false);
+        if (spawnCount == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
+            spawnsMask.getBinaryMask().getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
+        }
+        resourceMask = new ConcurrentBinaryMask(513, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "resource");
+        spawnsMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(18).trimEdge(32);
+        resourceMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(5).trimEdge(32).fillCenter(16, false);
     }
 
     private void setupWreckPipeline() {
-        t1LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "t1LandWreck");
-        t2LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "t2LandWreck");
-        t3LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "t3LandWreck");
-        t2NavyWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "t2NavyWreck");
-        navyFactoryWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "navyFactoryWreck");
-        allWreckMask = new ConcurrentBinaryMask(513, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "allWreck");
+        t1LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "t1LandWreck");
+        t2LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "t2LandWreck");
+        t3LandWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "t3LandWreck");
+        t2NavyWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "t2NavyWreck");
+        navyFactoryWreckMask = new ConcurrentBinaryMask(64, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "navyFactoryWreck");
+        allWreckMask = new ConcurrentBinaryMask(513, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "allWreck");
         ConcurrentBinaryMask landCopy = new ConcurrentBinaryMask(land, random.nextLong(), "landCopy");
 
         t1LandWreckMask.randomize(reclaimDensity * .015f).intersect(land).deflate(1).trimEdge(20);
@@ -469,10 +483,10 @@ public strictfp class MapGenerator {
     }
 
     private void setupPropPipeline() {
-        treeMask = new ConcurrentBinaryMask(32, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "tree");
-        cliffRockMask = new ConcurrentBinaryMask(32, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "cliffRock");
-        fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "fieldStone");
-        rockFieldMask = new ConcurrentBinaryMask(128, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry(), "rockField");
+        treeMask = new ConcurrentBinaryMask(32, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "tree");
+        cliffRockMask = new ConcurrentBinaryMask(32, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "cliffRock");
+        fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "fieldStone");
+        rockFieldMask = new ConcurrentBinaryMask(128, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "rockField");
 
         cliffRockMask.randomize(.15f).intersect(rock).minus(plateaus).minus(mountains).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(grass);
@@ -484,7 +498,7 @@ public strictfp class MapGenerator {
     }
 
     private void generateExclusionMasks() {
-        noProps = new BinaryMask(256, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry());
+        noProps = new BinaryMask(256, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy());
         noProps.combine(rock.getBinaryMask()).combine(ramps.getBinaryMask());
         for (int i = 0; i < map.getSpawns().length; i++) {
             noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
@@ -497,7 +511,7 @@ public strictfp class MapGenerator {
         }
         noProps.combine(allWreckMask.getBinaryMask());
 
-        noWrecks = new BinaryMask(256, random.nextLong(), symmetry, spawnsMask.getBinaryMask().getQuadSpawnSymmetry());
+        noWrecks = new BinaryMask(256, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy());
         noWrecks.combine(rock.getBinaryMask()).combine(ramps.getBinaryMask());
         for (int i = 0; i < map.getSpawns().length; i++) {
             noWrecks.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, true);
