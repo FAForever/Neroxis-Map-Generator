@@ -35,14 +35,14 @@ public strictfp class MarkerGenerator {
         if (map.getSpawns().length == 2) {
             spawnableCopy.fillCenter((int) separation, false);
         } else {
-            spawnableCopy.fillCenter((int) StrictMath.max(StrictMath.min(spawnable.getSize() / separation * 16, spawnable.getSize() * 3 / 8f), 128), false);
+            spawnableCopy.fillCenter(128, false);
         }
         spawnableCopy.fillHalf(false);
         Vector2f location = spawnableCopy.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             if (location == null) {
-                if (separation - 4 > 32) {
+                if (separation - 16 > 32) {
                     generateSpawns(spawnable, separation - 16);
                 }
                 break;
