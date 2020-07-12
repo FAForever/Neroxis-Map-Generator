@@ -488,11 +488,11 @@ public strictfp class MapGenerator {
         fieldStoneMask = new ConcurrentBinaryMask(128, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "fieldStone");
         rockFieldMask = new ConcurrentBinaryMask(128, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "rockField");
 
-        cliffRockMask.randomize(.15f).intersect(rock).minus(plateaus).minus(mountains).intersect(land);
+        cliffRockMask.randomize(.15f).intersect(rock).minus(plateaus).minus(mountains).intersect(land).inflate(2);
         fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(grass);
         fieldStoneMask.enlarge(513).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
-        treeMask.enlarge(256).intersect(grass);
+        treeMask.enlarge(256).intersect(grass).minus(rock);
         treeMask.enlarge(513).deflate(5).trimEdge(3).fillCircle(256, 256, 96, false);
         rockFieldMask.randomize(reclaimDensity * .005f).trimEdge(48).inflate(3).acid(.5f).intersect(land).minus(mountains);
     }
