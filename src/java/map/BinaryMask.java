@@ -16,35 +16,56 @@ import java.util.Random;
 @Getter
 public strictfp class BinaryMask implements Mask {
     private boolean[][] mask;
-    private final Symmetry symmetry;
-    private final Symmetry quadSpawnSymmetry;
+    private final SymmetryHierarchy symmetryHierarchy;
     private final Random random;
 
-    public BinaryMask(int size, long seed, Symmetry symmetry) {
-        this(size, seed, symmetry, null);
+    public BinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy) {
+        this.mask = new boolean[size][size];
+        this.random = new Random(seed);
+        this.symmetryHierarchy = symmetryHierarchy;
     }
 
-    public BinaryMask(int size, long seed, Symmetry symmetry, Symmetry quadSpawnSymmetry) {
+    public BinaryMask(int size, long seed, Symmetry symmetry) {
         this.mask = new boolean[size][size];
-        this.symmetry = symmetry;
         this.random = new Random(seed);
-        if (quadSpawnSymmetry != null) {
-            this.quadSpawnSymmetry = quadSpawnSymmetry;
-        } else {
-            Symmetry[] possibleSymmetries = new Symmetry[]{Symmetry.X, Symmetry.Y};
-            this.quadSpawnSymmetry = possibleSymmetries[random.nextInt(possibleSymmetries.length)];
+        Symmetry spawnSymmetry;
+        Symmetry teamSymmetry;
+        Symmetry[] teams;
+        Symmetry[] spawns;
+        switch (symmetry) {
+            case POINT:
+                spawnSymmetry = symmetry;
+                teams = new Symmetry[] {Symmetry.X, Symmetry.Y};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+                break;
+            case QUAD:
+                spawns = new Symmetry[] {Symmetry.X, Symmetry.Y, Symmetry.POINT};
+                spawnSymmetry = spawns[random.nextInt(spawns.length)];
+                teams = new Symmetry[] {Symmetry.X, Symmetry.Y};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+                break;
+            case DIAG:
+                spawns = new Symmetry[] {Symmetry.XY, Symmetry.YX, Symmetry.POINT};
+                spawnSymmetry = spawns[random.nextInt(spawns.length)];
+                teams = new Symmetry[] {Symmetry.XY, Symmetry.YX};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+                break;
+            case X:
+            case Y:
+            case XY:
+            case YX:
+            default:
+                spawnSymmetry = symmetry;
+                teamSymmetry = symmetry;
+                break;
         }
-        for (int y = 0; y < this.getSize(); y++) {
-            for (int x = 0; x < this.getSize(); x++) {
-                this.mask[x][y] = false;
-            }
-        }
+        this.symmetryHierarchy = new SymmetryHierarchy(symmetry, teamSymmetry);
+        this.symmetryHierarchy.setSpawnSymmetry(spawnSymmetry);
     }
 
     public BinaryMask(BinaryMask mask, long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
-        this.symmetry = mask.getSymmetry();
-        this.quadSpawnSymmetry = mask.getQuadSpawnSymmetry();
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
         this.random = new Random(seed);
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
@@ -325,7 +346,7 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {
-        return fillCenter(extent, value, symmetry);
+        return fillCenter(extent, value, symmetryHierarchy.getSpawnSymmetry());
     }
 
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
@@ -340,22 +361,17 @@ public strictfp class BinaryMask implements Mask {
                 return fillDiagonal(extent, false, value);
             case YX:
                 return fillDiagonal(extent, true, value);
-            case QUAD:
-                return fillCenter(extent, value, quadSpawnSymmetry);
             default:
                 return null;
         }
     }
 
     public BinaryMask fillHalf(boolean value) {
-        return fillHalf(value, symmetry);
+        return fillHalf(value, symmetryHierarchy.getTeamSymmetry());
     }
 
     public BinaryMask fillHalf(boolean value, Symmetry symmetry) {
         switch (symmetry) {
-            case POINT:
-            case QUAD:
-                return fillHalf(value, quadSpawnSymmetry);
             case Y:
                 return fillRect(0, 0, getSize(), getSize() / 2, value);
             case X:
@@ -483,7 +499,7 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public Vector2f getSymmetryPoint(int x, int y) {
-        return getSymmetryPoint(x, y, symmetry);
+        return getSymmetryPoint(x, y, symmetryHierarchy.getSpawnSymmetry());
     }
 
     public Vector2f getSymmetryPoint(int x, int y, Symmetry symmetry) {
@@ -498,15 +514,13 @@ public strictfp class BinaryMask implements Mask {
                 return new Vector2f(y, x);
             case YX:
                 return new Vector2f(getSize() - y - 1, getSize() - x - 1);
-            case QUAD:
-                return getSymmetryPoint(x, y, quadSpawnSymmetry);
             default:
                 return null;
         }
     }
 
     public void applySymmetry() {
-        switch (symmetry) {
+        switch (symmetryHierarchy.getTerrainSymmetry()) {
             case POINT:
             case Y:
                 for (int y = 0; y < getSize() / 2; y++) {
@@ -534,7 +548,7 @@ public strictfp class BinaryMask implements Mask {
                 break;
             case YX:
                 for (int y = 0; y < getSize(); y++) {
-                    for (int x = 0; x < getSize(); x++) {
+                    for (int x = 0; x < getSize() - y; x++) {
                         Vector2f symPoint = getSymmetryPoint(x, y);
                         mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
                     }
@@ -546,6 +560,18 @@ public strictfp class BinaryMask implements Mask {
                         Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
                         Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
                         Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
+                        mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
+                        mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
+                        mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];
+                    }
+                }
+                break;
+            case DIAG:
+                for (int y = 0; y < getSize() / 2; y++) {
+                    for (int x = y; x < getSize() - y; x++) {
+                        Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.YX);
+                        Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.XY);
+                        Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.XY);
                         mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
                         mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
                         mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];

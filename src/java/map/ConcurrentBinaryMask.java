@@ -12,12 +12,15 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
     private BinaryMask binaryMask;
     private String name;
 
-    public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, String name) {
-        this(size, seed, symmetry, null, name);
+    public ConcurrentBinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
+        this.binaryMask = new BinaryMask(size, seed, symmetryHierarchy);
+        this.name = name;
+
+        Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
-    public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, Symmetry quadSpawnSymmetry, String name) {
-        this.binaryMask = new BinaryMask(size, seed, symmetry, quadSpawnSymmetry);
+    public ConcurrentBinaryMask(int size, long seed, Symmetry symmetry, String name) {
+        this.binaryMask = new BinaryMask(size, seed, symmetry);
         this.name = name;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
