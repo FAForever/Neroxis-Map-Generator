@@ -462,7 +462,7 @@ public strictfp class MapGenerator {
         }
         resourceMask = new ConcurrentBinaryMask(513, random.nextLong(), spawnsMask.getBinaryMask().getSymmetryHierarchy(), "resource");
         spawnsMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(18).trimEdge(32);
-        resourceMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(5).trimEdge(32).fillCenter(16, false);
+        resourceMask.combine(land).combine(plateaus).minus(rock).minus(ramps).deflate(8).trimEdge(32).fillCenter(16, false);
     }
 
     private void setupWreckPipeline() {
