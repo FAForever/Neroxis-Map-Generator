@@ -37,7 +37,6 @@ public strictfp class WreckGenerator {
     public static final String[] T2_Navy = {
             "UES0201",
             "URS0201",
-            "XSS0201",
             "UAS0201"
     };
     public static final String[] Navy_Factory = {
