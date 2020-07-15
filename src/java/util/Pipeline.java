@@ -30,24 +30,34 @@ public strictfp class Pipeline {
     private static void addInternal(ConcurrentMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>, ?> function) {
         int index = pipeline.size();
         boolean addedAfterPipelineStart = Pipeline.isStarted();
+        final String callingLine = Util.getStackTraceLineInClass(MapGenerator.class);
+        final String callingMethod = Util.getStackTraceMethod(executingMask.getClass());
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
         CompletableFuture<?> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
                 .thenApply(res -> {
-                    if (MapGenerator.DEBUG) {
-                        System.out.printf("Start: %s(%d)\n", executingMask.getName(), index);
-                    }
                     if (addedAfterPipelineStart && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
                         System.err.println("Running non deterministic task added after pipeline start!  " + executingMask.getName());
                     }
                     return res;
                 })
-                .thenApplyAsync(function)
-                .thenRun(() -> {
+                .thenApplyAsync(m -> {
+                    long startTime = System.currentTimeMillis();
+                    Object res = function.apply(m);
                     if (MapGenerator.DEBUG) {
-                        System.out.printf("Done: %s(%d)\n", executingMask.getName(), index);
+                        System.out.printf("Done: %4d ms, %s, %s(%d)->%s\n",
+                                System.currentTimeMillis() - startTime,
+                                callingLine,
+                                executingMask.getName(),
+                                index,
+                                callingMethod
+                        );
                         executingMask.writeToFile(Paths.get(".", "debug", index + ".mask"));
                     }
+                    return res;
+                })
+                .thenRun(() -> {
+
                 });
         Entry entry = new Entry(index, executingMask, dependencies, newFuture);
 

@@ -32,28 +32,32 @@ public strictfp class SaveExporter {
             out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getMexes().length; i++) {
-            out.writeBytes("        ['MASS_" + (i + 1) + "'] = {\n");
-            out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
-            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getMexes()[i].x + 0.5f) + ", " + map.getMexes()[i].y + ", " + (map.getMexes()[i].z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
+            if (map.getMexes()[i] != null) {
+                out.writeBytes("        ['MASS_" + (i + 1) + "'] = {\n");
+                out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
+                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getMexes()[i].x + 0.5f) + ", " + map.getMexes()[i].y + ", " + (map.getMexes()[i].z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
+            }
         }
         for (int i = 0; i < map.getHydros().length; i++) {
-            out.writeBytes("        ['Hydrocarbon_" + (i + 1) + "'] = {\n");
-            out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
-            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydros()[i].x + 0.5f) + ", " + map.getHydros()[i].y + ", " + (map.getHydros()[i].z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
+            if (map.getHydros()[i] != null) {
+                out.writeBytes("        ['Hydrocarbon_" + (i + 1) + "'] = {\n");
+                out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
+                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydros()[i].x + 0.5f) + ", " + map.getHydros()[i].y + ", " + (map.getHydros()[i].z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
+            }
         }
         out.writeBytes("      },\n");
         out.writeBytes("    },\n");

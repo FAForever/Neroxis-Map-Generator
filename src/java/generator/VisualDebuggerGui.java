@@ -22,14 +22,14 @@ public class VisualDebuggerGui {
         private final int padding = 10;
 
         private BufferedImage image;
-        private int zoomFactor;
+        private float zoomFactor;
 
-        public void setViewModel(BufferedImage image, int zoomFactor) {
+        public void setViewModel(BufferedImage image, float zoomFactor) {
             this.image = image;
             this.zoomFactor = zoomFactor;
         }
 
-        public int getZoomFactor() {
+        public float getZoomFactor() {
             return zoomFactor;
         }
 
@@ -110,7 +110,7 @@ public class VisualDebuggerGui {
         contentPane.add(listScroller);
     }
 
-    public static void update(String uniqueMaskName, BufferedImage image, int zoomFactor) {
+    public static void update(String uniqueMaskName, BufferedImage image, float zoomFactor) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
             int count = 0;
@@ -143,6 +143,6 @@ public class VisualDebuggerGui {
         canvas.revalidate();
         canvas.repaint();
         frame.pack();
-        frame.setTitle("Mask: " + maskName + ", Zoom: x" + canvas.getZoomFactor());
+        frame.setTitle("Mask: " + maskName + ", Zoom: x" + (StrictMath.round(canvas.getZoomFactor() * 10)) / 10f);
     }
 }

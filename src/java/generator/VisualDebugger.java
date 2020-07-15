@@ -5,6 +5,8 @@ import map.FloatMask;
 import map.Mask;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
@@ -142,30 +144,27 @@ public class VisualDebugger {
 
 
 	private static void visualize(ImageSource imageSource, int size, int maskHash) {
-		int perPixelSize = calculateAutoZoom(size);
-		int imageSize = size * perPixelSize;
-		BufferedImage currentImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
+		float perPixelSize = calculateAutoZoom(size);
+		BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		// iterate source pixels
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				int color = imageSource.get(x, y);
-				// scale source pixel to filled rectangle so its possible to see stuff
-				for (int yInner = 0; yInner < perPixelSize; yInner++) {
-					for (int xInner = 0; xInner < perPixelSize; xInner++) {
-						int drawX = (x * perPixelSize) + xInner;
-						int drawY = (y * perPixelSize) + yInner;
-						currentImage.setRGB(drawX, drawY, color);
-					}
-				}
+                currentImage.setRGB(x, y, color);
 			}
         }
+		BufferedImage scaledImage = new BufferedImage((int) (size * perPixelSize), (int) (size * perPixelSize), BufferedImage.TYPE_INT_RGB);
+        AffineTransform at = new AffineTransform();
+        at.scale(perPixelSize, perPixelSize);
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        scaleOp.filter(currentImage, scaledImage);
         String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
         String function = new Throwable().getStackTrace()[2].getMethodName();
-        VisualDebuggerGui.update(maskName + " " + function, currentImage, perPixelSize);
+        VisualDebuggerGui.update(maskName + " " + function, scaledImage, perPixelSize);
     }
 
-    private static int calculateAutoZoom(int imageSize) {
-        return 513 / imageSize;
+    private static float calculateAutoZoom(int imageSize) {
+        return 512f / imageSize;
     }
 
     @FunctionalInterface

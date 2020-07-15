@@ -4,9 +4,10 @@ import map.BinaryMask;
 import map.SCMap;
 import map.Unit;
 import util.Vector2f;
-import util.Vector3f;
 
 import java.util.Random;
+
+import static util.Placement.placeOnHeightmap;
 
 public strictfp class WreckGenerator {
     public static final String[] T1_Land = {
@@ -54,16 +55,6 @@ public strictfp class WreckGenerator {
         random = new Random(seed);
     }
 
-    private Vector3f placeOnHeightmap(Vector2f v) {
-        return placeOnHeightmap(v.x, v.y);
-    }
-
-    private Vector3f placeOnHeightmap(float x, float z) {
-        Vector3f v = new Vector3f(x, 0, z);
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
-        return v;
-    }
-
     public void generateWrecks(BinaryMask spawnable, String[] types, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         Vector2f location = spawnableCopy.getRandomPosition();
@@ -74,11 +65,17 @@ public strictfp class WreckGenerator {
             symLocation = spawnableCopy.getSymmetryPoint(location);
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
-            Unit wreck1 = new Unit(type, placeOnHeightmap(location), rot);
-            Unit wreck2 = new Unit(wreck1.getType(), placeOnHeightmap(symLocation), wreck1.getRotation() - (float) StrictMath.PI);
+            Unit wreck1 = new Unit(type, location, rot);
+            Unit wreck2 = new Unit(wreck1.getType(), symLocation, wreck1.getRotation() - (float) StrictMath.PI);
             map.addWreck(wreck1);
             map.addWreck(wreck2);
             location = spawnableCopy.getRandomPosition();
+        }
+    }
+
+    public void setWreckHeights() {
+        for (Unit wreck : map.getWrecks()) {
+            wreck.setPosition(placeOnHeightmap(map, wreck.getPosition()));
         }
     }
 }

@@ -222,12 +222,13 @@ public strictfp class BinaryMask implements Mask {
     public BinaryMask acid(float strength) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
-                if (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1]) || (x < getSize() - 1 && !mask[x + 1][y]) || (y < getSize() - 1 && !mask[x][y + 1])) && random.nextFloat() < strength)
-                    maskCopy[x][y] = false;
-                else
-                    maskCopy[x][y] = mask[x][y];
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
+                        || (x < getSize() - 1 && !mask[x + 1][y])
+                        || (y < getSize() - 1 && !mask[x][y + 1]))
+                        && random.nextFloat() < strength);
+                maskCopy[x][y] = mask[x][y] && !value;
             }
         }
         mask = maskCopy;
@@ -475,6 +476,17 @@ public strictfp class BinaryMask implements Mask {
         return this;
     }
 
+    public int getCount() {
+        int cellCount = 0;
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if (mask[x][y])
+                    cellCount++;
+            }
+        }
+        return cellCount;
+    }
+
     public Vector2f getRandomPosition() {
         int cellCount = 0;
         for (int y = 0; y < getSize(); y++) {
@@ -527,67 +539,88 @@ public strictfp class BinaryMask implements Mask {
         }
     }
 
-    public void applySymmetry() {
+    public int getMinXBound() {
+        switch (symmetryHierarchy.getTerrainSymmetry()) {
+            default:
+                return 0;
+        }
+    }
+
+    public int getMaxXBound() {
+        switch (symmetryHierarchy.getTerrainSymmetry()) {
+            case X:
+            case QUAD:
+            case DIAG:
+                return getSize() / 2;
+            default:
+                return getSize();
+        }
+    }
+
+    public int getMinYBound(int x) {
+        switch (symmetryHierarchy.getTerrainSymmetry()) {
+            case DIAG:
+                return x;
+            default:
+                return 0;
+        }
+    }
+
+    public int getMaxYBound(int x) {
+        switch (symmetryHierarchy.getTerrainSymmetry()) {
+            case X:
+                return  getSize();
+            case XY:
+                return x + 1;
+            case YX:
+            case DIAG:
+                return getSize() - x;
+            default:
+                return getSize() / 2;
+        }
+    }
+
+    public Vector2f[] getTerrainSymmetryPoints(int x, int y) {
+        Vector2f[] symmetryPoints;
+        Vector2f symPoint1;
+        Vector2f symPoint2;
+        Vector2f symPoint3;
         switch (symmetryHierarchy.getTerrainSymmetry()) {
             case POINT:
             case Y:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = 0; x < getSize(); x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
             case X:
-                for (int y = 0; y < getSize(); y++) {
-                    for (int x = 0; x < getSize() / 2; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
             case XY:
-                for (int y = 0; y < getSize(); y++) {
-                    for (int x = 0; x <= y; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
-                break;
             case YX:
-                for (int y = 0; y < getSize(); y++) {
-                    for (int x = 0; x < getSize() - y; x++) {
-                        Vector2f symPoint = getSymmetryPoint(x, y);
-                        mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
-                    }
-                }
+                symPoint1 = getSymmetryPoint(x, y);
+                symmetryPoints = new Vector2f[] {symPoint1};
                 break;
             case QUAD:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = 0; x < getSize() / 2; x++) {
-                        Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
-                        Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
-                        Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
-                        mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
-                        mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
-                        mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];
-                    }
-                }
+                symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
+                symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
+                symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
+                symmetryPoints = new Vector2f[] {symPoint1, symPoint2, symPoint3};
                 break;
             case DIAG:
-                for (int y = 0; y < getSize() / 2; y++) {
-                    for (int x = y; x < getSize() - y; x++) {
-                        Vector2f symPoint1 = getSymmetryPoint(x, y, Symmetry.YX);
-                        Vector2f symPoint2 = getSymmetryPoint(x, y, Symmetry.XY);
-                        Vector2f symPoint3 = getSymmetryPoint(symPoint1, Symmetry.XY);
-                        mask[(int) symPoint1.x][(int) symPoint1.y] = mask[x][y];
-                        mask[(int) symPoint2.x][(int) symPoint2.y] = mask[x][y];
-                        mask[(int) symPoint3.x][(int) symPoint3.y] = mask[x][y];
-                    }
-                }
+                symPoint1 = getSymmetryPoint(x, y, Symmetry.YX);
+                symPoint2 = getSymmetryPoint(x, y, Symmetry.XY);
+                symPoint3 = getSymmetryPoint(symPoint1, Symmetry.XY);
+                symmetryPoints = new Vector2f[] {symPoint1, symPoint2, symPoint3};
                 break;
             default:
+                symmetryPoints = null;
                 break;
+        }
+        return symmetryPoints;
+    }
+
+    public void applySymmetry() {
+        for (int x = getMinXBound(); x < getMaxXBound(); x++) {
+            for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
+                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y);
+                for (Vector2f symPoint : symPoints) {
+                    mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                }
+            }
         }
     }
 

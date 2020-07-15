@@ -8,4 +8,9 @@ public strictfp class Vector2f {
         this.x = x;
         this.y = y;
     }
+
+    public Vector2f(Vector3f location) {
+        this.x = location.x;
+        this.y = location.z;
+    }
 }
