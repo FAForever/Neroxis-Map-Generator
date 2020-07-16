@@ -43,8 +43,8 @@ public strictfp class MarkerGenerator {
             if (spawnable.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
                 spawnable.fillCircle(symLocation, separation, false);
             }
-            spawnMask.fillCircle(location, 48, true);
-            spawnMask.fillCircle(symLocation, 48, true);
+            spawnMask.fillCircle(location, map.getSize() / 8f, true);
+            spawnMask.fillCircle(symLocation, map.getSize() / 8f, true);
             map.getSpawns()[i] = new Vector3f(location);
             map.getSpawns()[i + 1] = new Vector3f(symLocation);
             location = spawnable.getRandomPosition();
