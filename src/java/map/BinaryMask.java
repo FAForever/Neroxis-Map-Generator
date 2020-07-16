@@ -220,6 +220,10 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask acid(float strength) {
+        return acid(strength, symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public BinaryMask acid(float strength, Symmetry symmetry) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
@@ -232,7 +236,7 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = maskCopy;
-        applySymmetry();
+        applySymmetry(symmetry);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -539,15 +543,15 @@ public strictfp class BinaryMask implements Mask {
         }
     }
 
-    public int getMinXBound() {
-        switch (symmetryHierarchy.getTerrainSymmetry()) {
+    public int getMinXBound(Symmetry symmetry) {
+        switch (symmetry) {
             default:
                 return 0;
         }
     }
 
-    public int getMaxXBound() {
-        switch (symmetryHierarchy.getTerrainSymmetry()) {
+    public int getMaxXBound(Symmetry symmetry) {
+        switch (symmetry) {
             case X:
             case QUAD:
             case DIAG:
@@ -557,8 +561,8 @@ public strictfp class BinaryMask implements Mask {
         }
     }
 
-    public int getMinYBound(int x) {
-        switch (symmetryHierarchy.getTerrainSymmetry()) {
+    public int getMinYBound(int x, Symmetry symmetry) {
+        switch (symmetry) {
             case DIAG:
                 return x;
             default:
@@ -566,8 +570,8 @@ public strictfp class BinaryMask implements Mask {
         }
     }
 
-    public int getMaxYBound(int x) {
-        switch (symmetryHierarchy.getTerrainSymmetry()) {
+    public int getMaxYBound(int x, Symmetry symmetry) {
+        switch (symmetry) {
             case X:
                 return  getSize();
             case XY:
@@ -580,12 +584,12 @@ public strictfp class BinaryMask implements Mask {
         }
     }
 
-    public Vector2f[] getTerrainSymmetryPoints(int x, int y) {
+    public Vector2f[] getTerrainSymmetryPoints(int x, int y, Symmetry symmetry) {
         Vector2f[] symmetryPoints;
         Vector2f symPoint1;
         Vector2f symPoint2;
         Vector2f symPoint3;
-        switch (symmetryHierarchy.getTerrainSymmetry()) {
+        switch (symmetry) {
             case POINT:
             case Y:
             case X:
@@ -614,9 +618,13 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public void applySymmetry() {
-        for (int x = getMinXBound(); x < getMaxXBound(); x++) {
-            for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
-                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y);
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public void applySymmetry(Symmetry symmetry) {
+        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
                 for (Vector2f symPoint : symPoints) {
                     mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
                 }

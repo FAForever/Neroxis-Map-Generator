@@ -39,6 +39,11 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         }
     }
 
+    public ConcurrentBinaryMask(BinaryMask mask, long seed, String name) {
+        this.name = name;
+        this.binaryMask = new BinaryMask(mask, seed);
+    }
+
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.randomize(density)
@@ -78,6 +83,12 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
     public ConcurrentBinaryMask cutCorners() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.cutCorners()
+        );
+    }
+
+    public ConcurrentBinaryMask acid(float strength, Symmetry symmetry) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.acid(strength, symmetry)
         );
     }
 
