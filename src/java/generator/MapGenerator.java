@@ -6,6 +6,7 @@ import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
 import export.ScriptExporter;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import map.*;
 import util.ArgumentParser;
@@ -25,27 +26,28 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String VERSION = "1.0.6";
 
     //read from cli args
-    private static String folderPath = ".";
-    private static String mapName = "debugMap";
-    private static long seed = new Random().nextLong();
-    private static Random random = new Random(seed);
+    private String folderPath = ".";
+    private String mapName = "debugMap";
+    private long seed = new Random().nextLong();
+    private Random random = new Random(seed);
 
     //read from key value arguments or map name
-    private static int spawnCount = 6;
-    private static float landDensity;
-    private static float plateauDensity;
-    private static float mountainDensity;
-    private static float rampDensity;
-    private static int mapSize = 512;
-    private static float reclaimDensity;
-    private static int mexCount;
-    private static Symmetry symmetry;
+    private int spawnCount = 6;
+    private float landDensity;
+    private float plateauDensity;
+    private float mountainDensity;
+    private float rampDensity;
+    private int mapSize = 512;
+    private float reclaimDensity;
+    private int mexCount;
+    private Symmetry symmetry;
 
     private SCMap map;
     private int spawnSeparation;
@@ -76,7 +78,7 @@ public strictfp class MapGenerator {
     private BinaryMask noProps;
     private BinaryMask noWrecks;
 
-    private static SymmetryHierarchy symmetryHierarchy;
+    private SymmetryHierarchy symmetryHierarchy;
 
     public static void main(String[] args) throws IOException {
 
@@ -87,30 +89,31 @@ public strictfp class MapGenerator {
             Files.createDirectory(debugDir);
         }
 
-        interpretArguments(args);
-
         MapGenerator generator = new MapGenerator();
-        System.out.println("Generating map " + mapName.replace('/', '^'));
+
+        generator.interpretArguments(args);
+
+        System.out.println("Generating map " + generator.mapName.replace('/', '^'));
         SCMap map = generator.generate();
-        System.out.println("Saving map to " + Paths.get(folderPath).toAbsolutePath() + File.separator + mapName.replace('/', '^'));
-        System.out.println("Seed: " + seed);
-        System.out.println("Land Density: " + landDensity);
-        System.out.println("Plateau Density: " + plateauDensity);
-        System.out.println("Mountain Density: " + mountainDensity);
-        System.out.println("Ramp Density: " + rampDensity);
-        System.out.println("Reclaim Density: " + reclaimDensity);
-        System.out.println("Mex Count: " + mexCount);
-        System.out.println("Terrain Symmetry: " + symmetry);
-        System.out.println("Team Symmetry: " + symmetryHierarchy.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + symmetryHierarchy.getSpawnSymmetry());
+        System.out.println("Saving map to " + Paths.get(generator.folderPath).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
+        System.out.println("Seed: " + generator.seed);
+        System.out.println("Land Density: " + generator.landDensity);
+        System.out.println("Plateau Density: " + generator.plateauDensity);
+        System.out.println("Mountain Density: " + generator.mountainDensity);
+        System.out.println("Ramp Density: " + generator.rampDensity);
+        System.out.println("Reclaim Density: " + generator.reclaimDensity);
+        System.out.println("Mex Count: " + generator.mexCount);
+        System.out.println("Terrain Symmetry: " + generator.symmetry);
+        System.out.println("Team Symmetry: " + generator.symmetryHierarchy.getTeamSymmetry());
+        System.out.println("Spawn Symmetry: " + generator.symmetryHierarchy.getSpawnSymmetry());
         System.out.println("Spawn Separation: " + generator.spawnSeparation);
-        generator.save(folderPath, mapName.replace('/', '^'), map);
+        generator.save(generator.folderPath, generator.mapName.replace('/', '^'), map);
         System.out.println("Done");
 
         generator.generateDebugOutput();
     }
 
-    private static void interpretArguments(String[] args) {
+    public void interpretArguments(String[] args) {
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
@@ -143,11 +146,11 @@ public strictfp class MapGenerator {
         }
     }
 
-    private static void interpretArguments(Map<String, String> arguments) {
+    private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
             System.out.println("map-gen usage:\n" +
                     "--help                               produce help message\n" +
-                    "--folder-path arg                    mandatory, set the target folder for the generated map\n" +
+                    "--folder-path arg                    optional, set the target folder for the generated map\n" +
                     "--seed arg                           optional, set the seed for the generated map\n" +
                     "--map-name arg                       optional, set the map name for the generated map\n" +
                     "--spawn-count arg                    optional, set the spawn count for the generated map\n" +
@@ -162,12 +165,9 @@ public strictfp class MapGenerator {
             System.exit(0);
         }
 
-        if (!arguments.containsKey("folder-path")) {
-            System.out.println("Missing necessary argument.");
-            System.exit(-1);
+        if (arguments.containsKey("folder-path")) {
+            folderPath = arguments.get("folder-path");
         }
-
-        folderPath = arguments.get("folder-path");
 
         if (arguments.containsKey("map-name")) {
             mapName = arguments.get("map-name");
@@ -230,7 +230,7 @@ public strictfp class MapGenerator {
         generateMapName();
     }
 
-    private static void parseMapName() {
+    private void parseMapName() {
         mapName = mapName.replace('^', '/');
         if (!mapName.startsWith("neroxis_map_generator")) {
             throw new IllegalArgumentException("Map name is not a generated map");
@@ -264,7 +264,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    private static void randomizeOptions() {
+    private void randomizeOptions() {
         landDensity = random.nextInt(127) / 127f;
         plateauDensity = (float) random.nextInt(127) / 127f * .2f;
         mountainDensity = (float) random.nextInt(127) / 127f * .075f;
@@ -281,7 +281,7 @@ public strictfp class MapGenerator {
         symmetry = symmetries[symmetryValue];
     }
 
-    private static void parseOptions(byte[] optionBytes) {
+    private void parseOptions(byte[] optionBytes) {
         if (optionBytes.length > 0) {
             if (optionBytes[0] <= 16) {
                 spawnCount = optionBytes[0];
@@ -317,14 +317,14 @@ public strictfp class MapGenerator {
 
     }
 
-    private static void generateMapName() {
+    private void generateMapName() {
         String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
         ByteBuffer seedBuffer = ByteBuffer.allocate(8);
         seedBuffer.putLong(seed);
         String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
         byte[] optionArray = {(byte) spawnCount,
                 (byte) (mapSize / 64),
-                (byte) (landDensity * 127f / (512f / mapSize * 512f / mapSize)),
+                (byte) (landDensity * 127f),
                 (byte) (plateauDensity / .2f * 127f),
                 (byte) (mountainDensity / .075f * 127f),
                 (byte) (rampDensity / .2f * 127f),

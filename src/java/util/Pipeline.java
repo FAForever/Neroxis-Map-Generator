@@ -17,6 +17,11 @@ public strictfp class Pipeline {
     public static CompletableFuture<List<ConcurrentMask>> started = new CompletableFuture<>();
     private static final List<Entry> pipeline = new ArrayList<>();
 
+    public static void reset(){
+        started = new CompletableFuture<>();
+        pipeline.clear();
+    }
+
     public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask> dep, Function<List<ConcurrentMask>, ?> function) {
         addInternal(executingMask, dep, function);
         return executingMask;

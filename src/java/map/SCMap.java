@@ -10,6 +10,7 @@ import util.serialized.WaterSettings;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @Getter
 public strictfp class SCMap {
@@ -189,6 +190,52 @@ public strictfp class SCMap {
                 textureMasksLow.getRaster().setPixel(x, y, new int[]{(int) (mask0.get(x, y) * 256f), (int) (mask1.get(x, y) * 256f), (int) (mask2.get(x, y) * 256f), (int) (mask3.get(x, y) * 256f)});
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SCMap other = (SCMap) obj;
+        if (Arrays.equals(mexes, other.mexes))
+            return false;
+        if (Arrays.equals(hydros, other.hydros))
+            return false;
+        if (biome != other.biome)
+            return false;
+        if (size != other.size)
+            return false;
+        if (Arrays.equals(spawns, other.spawns))
+            return false;
+        if (props != other.props)
+            return false;
+        if (units != other.units)
+            return false;
+        if (preview != other.preview)
+            return false;
+        if (heightmap != other.heightmap)
+            return false;
+        if (normalMap != other.normalMap)
+            return false;
+        if (textureMasksLow != other.textureMasksLow)
+            return false;
+        if (textureMasksHigh != other.textureMasksHigh)
+            return false;
+        if (waterMap != other.waterMap)
+            return false;
+        if (waterFoamMask != other.waterFoamMask)
+            return false;
+        if (waterFlatnessMask != other.waterFlatnessMask)
+            return false;
+        if (waterDepthBiasMask != other.waterDepthBiasMask)
+            return false;
+        if (terrainType != other.terrainType)
+            return false;
+        return true;
     }
 
 }
