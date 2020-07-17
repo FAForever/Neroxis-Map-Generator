@@ -124,6 +124,7 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = largeMask;
+        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -144,6 +145,7 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = smallMask;
+        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
     }
