@@ -12,12 +12,11 @@ import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static util.ImageUtils.compareImages;
 
 public class MapGeneratorTest {
 
-    private MapGenerator instance;
     String folderPath = ".";
     String version = MapGenerator.VERSION;
     long seed = 1234;
@@ -53,6 +52,7 @@ public class MapGeneratorTest {
             "--mex-count", Integer.toString(mexCount),
             "--symmetry", symmetry,
             "--map-size", Integer.toString(mapSize)};
+    private MapGenerator instance;
 
     @Before
     public void setup() {
@@ -129,19 +129,101 @@ public class MapGeneratorTest {
     public void TestDeterminism() {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
-        instance.save(folderPath,"map1", map1);
+        instance.save(instance.getFolderPath(), instance.getMapName(), map1);
 
         Pipeline.reset();
 
         instance.interpretArguments(keywordArgs);
         SCMap map2 = instance.generate();
-        instance.save(folderPath,"map2", map2);
+        instance.save(instance.getFolderPath(), instance.getMapName(), map2);
 
-        assertTrue(map1.equals(map2));
+        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
+        assertArrayEquals(map1.getMexes(), map2.getMexes());
+        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getUnits(), map2.getUnits());
+        assertEquals(map1.getWrecks(), map2.getWrecks());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    @Test
+    public void TestEqualityMapNameKeyword() {
+        instance.interpretArguments(keywordArgs);
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+
+        String[] args = {folderPath, b64MapName};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
+        assertArrayEquals(map1.getMexes(), map2.getMexes());
+        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getUnits(), map2.getUnits());
+        assertEquals(map1.getWrecks(), map2.getWrecks());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    @Test
+    public void TestEqualityMapNameNameKeyword() {
+        String[] args;
+        args = new String[] {"--map-name", b64MapName};
+        instance.interpretArguments(args);
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+
+        args = new String[] {folderPath, b64MapName};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
+        assertArrayEquals(map1.getMexes(), map2.getMexes());
+        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getUnits(), map2.getUnits());
+        assertEquals(map1.getWrecks(), map2.getWrecks());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
     @After
     public void cleanup() {
+        Pipeline.reset();
         FileUtils.deleteRecursiveIfExists(Paths.get(instance.getMapName()));
     }
 

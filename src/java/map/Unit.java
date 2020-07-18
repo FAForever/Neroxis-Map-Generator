@@ -1,12 +1,10 @@
 package map;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 
-@Getter
-@Setter
+@Data
 public strictfp class Unit {
     private final String type;
     private final float rotation;
