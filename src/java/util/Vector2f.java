@@ -13,4 +13,14 @@ public strictfp class Vector2f {
         this.x = location.x;
         this.y = location.z;
     }
+
+    public float getDistance(Vector3f location) {
+        return getDistance(new Vector2f(location));
+    }
+
+    public float getDistance(Vector2f location) {
+        float dx = x - location.x;
+        float dy = y - location.y;
+        return (float) StrictMath.sqrt(dx * dx + dy * dy);
+    }
 }

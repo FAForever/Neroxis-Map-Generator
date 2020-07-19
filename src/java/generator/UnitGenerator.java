@@ -47,7 +47,7 @@ public strictfp class UnitGenerator {
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
             Unit unit1 = new Unit(type, location, rot * (float) StrictMath.PI);
-            Unit unit2 = new Unit(unit1.getType(), symLocation, unit1.getRotation() - (float) StrictMath.PI);
+            Unit unit2 = new Unit(unit1.getType(), symLocation, spawnableCopy.getReflectedRotation(unit1.getRotation()));
             map.addUnit(unit1);
             map.addUnit(unit2);
             location = spawnableCopy.getRandomPosition();

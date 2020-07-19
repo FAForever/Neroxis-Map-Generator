@@ -65,7 +65,7 @@ public strictfp class WreckGenerator {
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
             Unit wreck1 = new Unit(type, location, rot);
-            Unit wreck2 = new Unit(wreck1.getType(), symLocation, wreck1.getRotation() - (float) StrictMath.PI);
+            Unit wreck2 = new Unit(wreck1.getType(), symLocation, spawnableCopy.getReflectedRotation(wreck1.getRotation()));
             map.addWreck(wreck1);
             map.addWreck(wreck2);
             location = spawnableCopy.getRandomPosition();

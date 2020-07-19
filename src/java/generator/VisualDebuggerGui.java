@@ -1,6 +1,7 @@
 package generator;
 
 import lombok.Value;
+import util.MaskNameComparator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,6 +57,7 @@ public class VisualDebuggerGui {
 
     public static void update(String uniqueMaskName, BufferedImage image, float zoomFactor) {
         if (!uniqueMaskName.isEmpty()) {
+            MaskNameComparator maskNameComparator = new MaskNameComparator();
             int ind = listModel.getSize();
             int count = 0;
             for (int i = 0; i < listModel.getSize(); i++) {

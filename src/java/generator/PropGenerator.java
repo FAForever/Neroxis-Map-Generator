@@ -49,7 +49,7 @@ public strictfp class PropGenerator {
             symLocation = spawnableCopy.getSymmetryPoint(location);
             spawnableCopy.fillCircle(location, separation, false);
             Prop prop1 = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
-            Prop prop2 = new Prop(prop1.getPath(), symLocation, prop1.getRotation() + (float) StrictMath.PI);
+            Prop prop2 = new Prop(prop1.getPath(), symLocation, spawnableCopy.getReflectedRotation(prop1.getRotation()));
             map.addProp(prop1);
             map.addProp(prop2);
             location = spawnableCopy.getRandomPosition();
