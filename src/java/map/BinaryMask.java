@@ -4,6 +4,7 @@ import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import util.Vector2f;
+import util.Vector3f;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -85,6 +86,14 @@ public strictfp class BinaryMask implements Mask {
 
     public int getSize() {
         return mask[0].length;
+    }
+
+    public boolean get(Vector2f location) {
+        return get((int) location.x, (int) location.y);
+    }
+
+    public boolean get(Vector3f location) {
+        return get((int) location.x, (int) location.z);
     }
 
     public boolean get(int x, int y) {
@@ -226,18 +235,24 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask acid(float strength, Symmetry symmetry) {
+        return acid(strength, symmetry, 1);
+    }
+
+    public BinaryMask acid(float strength, Symmetry symmetry, int count) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
-                        || (x < getSize() - 1 && !mask[x + 1][y])
-                        || (y < getSize() - 1 && !mask[x][y + 1]))
-                        && random.nextFloat() < strength);
-                maskCopy[x][y] = mask[x][y] && !value;
+        for (int i = 0; i < count; i++) {
+            for (int x = 0; x < getSize(); x++) {
+                for (int y = 0; y < getSize(); y++) {
+                    boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
+                            || (x < getSize() - 1 && !mask[x + 1][y])
+                            || (y < getSize() - 1 && !mask[x][y + 1]))
+                            && random.nextFloat() < strength);
+                    maskCopy[x][y] = mask[x][y] && !value;
+                }
             }
+            mask = maskCopy;
         }
-        mask = maskCopy;
         applySymmetry(symmetry);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -369,9 +384,9 @@ public strictfp class BinaryMask implements Mask {
             case POINT:
                 return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent, value);
             case Y:
-                return fillRect(0, getSize() / 2 - extent, getSize(), extent * 2, value);
+                return fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
             case X:
-                return fillRect(getSize() / 2 - extent, 0, extent * 2, getSize(), value);
+                return fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
             case XY:
                 return fillDiagonal(extent, false, value);
             case YX:
@@ -398,6 +413,10 @@ public strictfp class BinaryMask implements Mask {
             default:
                 return null;
         }
+    }
+
+    public BinaryMask fillCircle(Vector3f v, float radius, boolean value) {
+        return fillCircle(new Vector2f(v), radius, value);
     }
 
     public BinaryMask fillCircle(Vector2f v, float radius, boolean value) {
@@ -450,20 +469,18 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
-        int count = 0;
         for (int y = 0; y < getSize(); y++) {
             for (int cx = -extent; cx < extent; cx++) {
                 int x;
                 if (inverted) {
-                    x = getSize() - (cx + count);
+                    x = getSize() - (cx + y);
                 } else {
-                    x = cx + count;
+                    x = cx + y;
                 }
                 if (x >= 0 && x < getSize()) {
                     mask[x][y] = value;
                 }
             }
-            count++;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -516,12 +533,16 @@ public strictfp class BinaryMask implements Mask {
         return null;
     }
 
+    public Vector2f getSymmetryPoint(Vector3f v) {
+        return getSymmetryPoint(new Vector2f(v));
+    }
+
     public Vector2f getSymmetryPoint(Vector2f v) {
-        return getSymmetryPoint((int) v.x, (int) v.y);
+        return getSymmetryPoint(v, symmetryHierarchy.getSpawnSymmetry());
     }
 
     public Vector2f getSymmetryPoint(Vector2f v, Symmetry symmetry) {
-        return getSymmetryPoint((int) v.x, (int) v.y, symmetry);
+        return getSymmetryPoint(StrictMath.round(v.x), StrictMath.round(v.y), symmetry);
     }
 
     public Vector2f getSymmetryPoint(int x, int y) {
@@ -542,6 +563,26 @@ public strictfp class BinaryMask implements Mask {
                 return new Vector2f(getSize() - y - 1, getSize() - x - 1);
             default:
                 return null;
+        }
+    }
+
+    public float getReflectedRotation(float rot) {
+        return getReflectedRotation(rot, symmetryHierarchy.getSpawnSymmetry());
+    }
+
+    public float getReflectedRotation(float rot, Symmetry symmetry) {
+        switch (symmetry) {
+            case POINT:
+                return rot + (float) StrictMath.PI;
+            case X:
+                return (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
+            case Y:
+                return (float) StrictMath.atan2(StrictMath.sin(rot), -StrictMath.cos(rot));
+            case XY:
+            case YX:
+                return (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
+            default:
+                return rot;
         }
     }
 
@@ -632,6 +673,7 @@ public strictfp class BinaryMask implements Mask {
                 }
             }
         }
+        VisualDebugger.visualizeMask(this);
     }
 
     // --------------------------------------------------

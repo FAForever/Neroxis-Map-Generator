@@ -13,7 +13,8 @@ import static util.Placement.placeOnHeightmap;
 public strictfp class MarkerGenerator {
     private final SCMap map;
     private final Random random;
-    private final int mexSpacing = 16;
+    private final int mexSpacing = 24;
+    private final int spawnSize = 32;
 
     public MarkerGenerator(SCMap map, long seed) {
         this.map = map;
@@ -21,65 +22,184 @@ public strictfp class MarkerGenerator {
     }
 
 
-    public BinaryMask generateSpawns(float separation, Symmetry symmetry) {
-        BinaryMask spawnable = new BinaryMask(map.getSize(), random.nextLong(), symmetry);
-        BinaryMask spawnMask = new BinaryMask(map.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+    public BinaryMask[] generateSpawns(float separation, Symmetry symmetry, float plateauDensity) {
+        BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
+        BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
+        BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
 
         if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
-        spawnable.fillHalf(true).fillCenter(map.getSize() / 4, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillCenter(map.getSize() / 2, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             if (location == null) {
-                if (separation - 8 >= 24) {
-                    spawnMask = generateSpawns(separation - 8, symmetry);
+                if (separation - 4 >= 20) {
+                    return generateSpawns(separation - 8, symmetry, plateauDensity);
+                } else {
+                    return null;
                 }
-                break;
             }
             symLocation = spawnable.getSymmetryPoint(location);
             spawnable.fillCircle(location, separation, false);
-            if (spawnable.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
-                spawnable.fillCircle(symLocation, separation, false);
+            spawnable.fillCircle(symLocation, separation, false);
+
+            spawnLandMask.fillCircle(location, spawnSize, true);
+            spawnLandMask.fillCircle(symLocation, spawnSize, true);
+
+            if (random.nextFloat() < plateauDensity) {
+                boolean valid = true;
+                for (int j = 0; j < i; j += 2) {
+                    if (!spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 3) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    spawnPlateauMask.fillCircle(location, spawnSize, true);
+                    spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
+                }
+            } else {
+                boolean valid = false;
+                for (int j = 0; j < i; j += 2) {
+                    if (spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 3) {
+                        valid = true;
+                        break;
+                    }
+                }
+                if (valid) {
+                    spawnPlateauMask.fillCircle(location, spawnSize, true);
+                    spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
+                }
             }
-            spawnMask.fillCircle(location, map.getSize() / 8f, true);
-            spawnMask.fillCircle(symLocation, map.getSize() / 8f, true);
             map.getSpawns()[i] = new Vector3f(location);
             map.getSpawns()[i + 1] = new Vector3f(symLocation);
             location = spawnable.getRandomPosition();
         }
-        return spawnMask;
+        return new BinaryMask[] {spawnLandMask, spawnPlateauMask};
     }
 
-    public void generateMexes(BinaryMask spawnable) {
-        int baseMexCount = map.getSpawns().length * 4;
+    public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
+        BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
+        BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
-        for (int i = 0; i < map.getSpawns().length; i++) {
-            map.getMexes()[i * 4] = new Vector3f(map.getSpawns()[i].x + 10, 0, map.getSpawns()[i].z);
-            map.getMexes()[i * 4 + 1] = new Vector3f(map.getSpawns()[i].x - 10, 0, map.getSpawns()[i].z);
-            map.getMexes()[i * 4 + 2] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z + 10);
-            map.getMexes()[i * 4 + 3] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z - 10);
-            spawnable.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 32, false);
+        for (int i = 0; i < map.getSpawns().length; i += 2) {
+            spawnable.fillCircle(map.getSpawns()[i + 1], 20, false);
+            spawnableNoSpawns.fillCircle(map.getSpawns()[i + 1], spawnSize * 2, false);
         }
+
+        int iMex = 0;
+        for (int i = 0; i < map.getSpawns().length; i += 2) {
+            map.getMexes()[iMex] = new Vector3f(map.getSpawns()[i].x + 10, 0, map.getSpawns()[i].z);
+            map.getMexes()[iMex + 1] = new Vector3f(map.getSpawns()[i].x - 10, 0, map.getSpawns()[i].z);
+            map.getMexes()[iMex + 2] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z + 10);
+            map.getMexes()[iMex + 3] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z - 10);
+            map.getMexes()[iMex + 4] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex]));
+            map.getMexes()[iMex + 5] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 1]));
+            map.getMexes()[iMex + 6] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 2]));
+            map.getMexes()[iMex + 7] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 3]));
+            iMex += 8;
+            BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+            nearMexes.fillCircle(map.getSpawns()[i + 1], spawnSize * 2, true).intersect(spawnable);
+            int numNearMexes = random.nextInt(3) + 1;
+            for (int j = 0; j < numNearMexes; j++) {
+                Vector2f location = nearMexes.getRandomPosition();
+                if (location == null) {
+                    break;
+                }
+                Vector2f symLocation = nearMexes.getSymmetryPoint(location);
+                map.getMexes()[iMex] = new Vector3f(location);
+                map.getMexes()[iMex + 1] = new Vector3f(symLocation);
+                nearMexes.fillCircle(location, mexSpacing, false);
+                spawnable.fillCircle(location, mexSpacing, false);
+                iMex += 2;
+            }
+        }
+        int baseMexCount = iMex;
 
         int possibleExpMexCount = random.nextInt((map.getMexes().length - baseMexCount) / 2) * 2;
         int actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
+        int numMexesLeft = map.getMexes().length - actualExpMexCount - baseMexCount;
 
-        for (int i = baseMexCount + actualExpMexCount; i < map.getMexes().length; i += 2) {
-            Vector2f mexLocation = spawnable.getRandomPosition();
+        spawnableNoSpawns.intersect(spawnable);
+        spawnablePlateau.intersect(spawnableNoSpawns);
+        spawnableLand.intersect(spawnableNoSpawns);
+        spawnableLand.minus(spawnablePlateau);
+
+        float plateauDensity = (float) spawnablePlateau.getCount() / spawnableNoSpawns.getCount();
+        int plateauMexCount = (int) (plateauDensity * numMexesLeft / 2) * 2;
+
+        for (int i = 0; i < plateauMexCount; i += 2) {
+            int ind = i + baseMexCount + actualExpMexCount;
+            Vector2f mexLocation = spawnablePlateau.getRandomPosition();
 
             if (mexLocation == null) {
                 break;
             }
 
+            numMexesLeft -= 2;
+            Vector2f mexSymLocation = spawnablePlateau.getSymmetryPoint(mexLocation);
+
+            map.getMexes()[ind] = new Vector3f(mexLocation);
+            map.getMexes()[ind + 1] = new Vector3f(mexSymLocation);
+
+            spawnablePlateau.fillCircle(mexLocation, mexSpacing, false);
+        }
+
+        int numLandMexes = numMexesLeft;
+        for (int i = 0; i < numLandMexes; i += 2) {
+            int ind = i + map.getMexes().length - numLandMexes;
+            Vector2f mexLocation = spawnableLand.getRandomPosition();
+
+            if (mexLocation == null) {
+                break;
+            }
+            numMexesLeft -= 2;
+
+            Vector2f mexSymLocation = spawnableLand.getSymmetryPoint(mexLocation);
+
+            map.getMexes()[ind] = new Vector3f(mexLocation);
+            map.getMexes()[ind + 1] = new Vector3f(mexSymLocation);
+
+            spawnableLand.fillCircle(mexLocation, mexSpacing, false);
+        }
+        spawnable.intersect(spawnableLand.combine(spawnablePlateau));
+
+        int numNearSpawnMexes = numMexesLeft;
+        for (int i = 0; i < numNearSpawnMexes; i += 2) {
+            int ind = i + map.getMexes().length - numLandMexes;
+            Vector2f mexLocation = spawnable.getRandomPosition();
+
+            if (mexLocation == null) {
+                break;
+            }
+            numMexesLeft -= 2;
+
             Vector2f mexSymLocation = spawnable.getSymmetryPoint(mexLocation);
 
-            map.getMexes()[i] = new Vector3f(mexLocation);
-            map.getMexes()[i + 1] = new Vector3f(mexSymLocation);
+            map.getMexes()[ind] = new Vector3f(mexLocation);
+            map.getMexes()[ind + 1] = new Vector3f(mexSymLocation);
 
             spawnable.fillCircle(mexLocation, mexSpacing, false);
             spawnable.fillCircle(mexSymLocation, mexSpacing, false);
+        }
+
+        for (int i = 0; i < numMexesLeft; i += 2) {
+            int ind = i + map.getMexes().length - numMexesLeft;
+            Vector2f mexLocation = spawnableWater.getRandomPosition();
+
+            if (mexLocation == null) {
+                break;
+            }
+
+            Vector2f mexSymLocation = spawnableWater.getSymmetryPoint(mexLocation);
+
+            map.getMexes()[ind] = new Vector3f(mexLocation);
+            map.getMexes()[ind + 1] = new Vector3f(mexSymLocation);
+
+            spawnableWater.fillCircle(mexLocation, mexSpacing, false);
+            spawnableWater.fillCircle(mexSymLocation, mexSpacing, false);
         }
     }
 
@@ -152,13 +272,13 @@ public strictfp class MarkerGenerator {
         return actualExpMexCount;
     }
 
-    public void generateHydros(BinaryMask spawnable) {
+    public void generateHydros(BinaryMask spawnable, BinaryMask land) {
         int baseHydroCount = map.getSpawns().length;
         int hydroSpacing = 64;
 
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-            baseHydro.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 19, true).outline();
+            baseHydro.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 18, true).fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 12, false);
             baseHydro.trimEdge(16);
             for (int j = 0; j < map.getSpawns().length; j += 2) {
                 baseHydro.fillCircle(map.getSpawns()[j].x, map.getSpawns()[j].z, 16, false);
@@ -167,10 +287,12 @@ public strictfp class MarkerGenerator {
                 baseHydro.fillCircle(map.getHydros()[j].x, map.getHydros()[j].z, 8, false);
             }
             Vector2f location = baseHydro.getRandomPosition();
+            if (location == null) {
+                break;
+            }
             map.getHydros()[i] = new Vector3f(location);
             Vector2f symLocation = spawnable.getSymmetryPoint((int) map.getHydros()[i].x, (int) map.getHydros()[i].z);
             map.getHydros()[i + 1] = new Vector3f(symLocation);
-            spawnable.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, false);
             spawnable.fillCircle(map.getSpawns()[i + 1].x, map.getSpawns()[i + 1].z, 30, false);
         }
 

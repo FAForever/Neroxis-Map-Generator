@@ -12,6 +12,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.Base64;
 
+import static generator.MapGenerator.MOUNTAIN_DENSITY_MAX;
+import static generator.MapGenerator.RAMP_DENSITY_MAX;
 import static org.junit.Assert.*;
 import static util.ImageUtils.compareImages;
 
@@ -23,7 +25,7 @@ public class MapGeneratorTest {
     byte spawnCount = 2;
     float landDensity = StrictMath.round(.1f * 127f) / 127f;
     float plateauDensity = StrictMath.round(.1f * 127f) / 127f;
-    float mountainDensity = StrictMath.round(.05f * 127f) / 127f;
+    float mountainDensity = StrictMath.round(.025f * 127f) / 127f;
     float rampDensity = StrictMath.round(.1f * 127f) / 127f;
     float reclaimDensity = StrictMath.round(.1f * 127f) / 127f;
     int mexCount = 16;
@@ -32,9 +34,9 @@ public class MapGeneratorTest {
     byte[] optionArray = {spawnCount,
             (byte) (mapSize / 64),
             (byte) (landDensity * 127f),
-            (byte) (plateauDensity / .2f * 127f),
-            (byte) (mountainDensity / .075f * 127f),
-            (byte) (rampDensity / .2f * 127f),
+            (byte) (plateauDensity * 127f),
+            (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
+            (byte) (rampDensity / RAMP_DENSITY_MAX * 127f),
             (byte) (reclaimDensity * 127f),
             (byte) (mexCount),
             (byte) (Symmetry.valueOf(symmetry).ordinal())};

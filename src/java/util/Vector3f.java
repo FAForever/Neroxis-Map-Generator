@@ -20,9 +20,19 @@ public strictfp class Vector3f {
         this.z = z;
     }
 
-    public float getAzimuth() {
-        return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
+    public float getXZDistance(Vector2f location) {
+        return getXZDistance(new Vector3f(location));
     }
+
+    public float getXZDistance(Vector3f location) {
+        float dx = x - location.x;
+        float dz = z - location.z;
+        return (float) StrictMath.sqrt(dx * dx + dz * dz);
+    }
+
+	public float getAzimuth() {
+        return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
+	}
 
     public float getElevation() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));

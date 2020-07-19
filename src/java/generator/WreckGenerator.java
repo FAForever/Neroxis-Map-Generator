@@ -37,13 +37,14 @@ public strictfp class WreckGenerator {
     public static final String[] T2_Navy = {
             "UES0201",
             "URS0201",
-            "UAS0201"
+            "UAS0201",
+            "XSS0201"
     };
     public static final String[] Navy_Factory = {
-            "UEB0103",
-            "URB0103",
-            "UAB0103",
-            "XSB0103"
+            "ZAB9503",
+            "ZEB9503",
+            "ZRB9503",
+            "ZSB9503"
     };
 
     private final SCMap map;
@@ -65,7 +66,7 @@ public strictfp class WreckGenerator {
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
             Unit wreck1 = new Unit(type, location, rot);
-            Unit wreck2 = new Unit(wreck1.getType(), symLocation, wreck1.getRotation() - (float) StrictMath.PI);
+            Unit wreck2 = new Unit(wreck1.getType(), symLocation, spawnableCopy.getReflectedRotation(wreck1.getRotation()));
             map.addWreck(wreck1);
             map.addWreck(wreck2);
             location = spawnableCopy.getRandomPosition();
