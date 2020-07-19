@@ -235,18 +235,24 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask acid(float strength, Symmetry symmetry) {
+        return acid(strength, symmetry, 1);
+    }
+
+    public BinaryMask acid(float strength, Symmetry symmetry, int count) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
-                        || (x < getSize() - 1 && !mask[x + 1][y])
-                        || (y < getSize() - 1 && !mask[x][y + 1]))
-                        && random.nextFloat() < strength);
-                maskCopy[x][y] = mask[x][y] && !value;
+        for (int i = 0; i < count; i++) {
+            for (int x = 0; x < getSize(); x++) {
+                for (int y = 0; y < getSize(); y++) {
+                    boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
+                            || (x < getSize() - 1 && !mask[x + 1][y])
+                            || (y < getSize() - 1 && !mask[x][y + 1]))
+                            && random.nextFloat() < strength);
+                    maskCopy[x][y] = mask[x][y] && !value;
+                }
             }
+            mask = maskCopy;
         }
-        mask = maskCopy;
         applySymmetry(symmetry);
         VisualDebugger.visualizeMask(this);
         return this;

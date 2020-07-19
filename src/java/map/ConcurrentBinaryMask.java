@@ -88,6 +88,12 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask acid(float strength, Symmetry symmetry, int count) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.acid(strength, symmetry, count)
+        );
+    }
+
     public ConcurrentBinaryMask acid(float strength, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.acid(strength, symmetry)
