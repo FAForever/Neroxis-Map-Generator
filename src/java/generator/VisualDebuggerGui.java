@@ -11,66 +11,10 @@ import java.util.Map;
 public class VisualDebuggerGui {
 
     public static final boolean AUTO_SELECT_NEW_MASKS = false;
-
-    /**
-     * Panel that shows the given image.
-     * Call {@link JPanel#revalidate()} to resize panel when image size changes.
-     * Call {@link JPanel#repaint()} to update when image content changes.
-     */
-    @SuppressWarnings("serial")
-    public static class ImagePanel extends JPanel {
-        private final int padding = 10;
-
-        private BufferedImage image;
-        private float zoomFactor;
-
-        public void setViewModel(BufferedImage image, float zoomFactor) {
-            this.image = image;
-            this.zoomFactor = zoomFactor;
-        }
-
-        public float getZoomFactor() {
-            return zoomFactor;
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g.create();
-            BufferedImage currentImage = image;
-            int x = (getWidth() - currentImage.getWidth()) / 2;
-            int y = (getHeight() - currentImage.getHeight()) / 2;
-            g2d.drawImage(currentImage, x, y, this);
-            g2d.dispose();
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            BufferedImage currentImage = image;
-            return new Dimension(currentImage.getWidth() + padding, currentImage.getHeight() + padding);
-        }
-
-        @Override
-        public Dimension getMinimumSize() {
-            return getPreferredSize();
-        }
-    }
-
-    @Value
-    public static class MaskListItem {
-        String maskName;
-
-        @Override
-        public String toString() {
-            return "  " + maskName + "  ";
-        }
-    }
-
     private static JFrame frame;
     private static Container contentPane;
     private static JList<MaskListItem> list;
     private static JPanel canvasContainer;
-
     private static DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
     private static Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
 
@@ -144,5 +88,59 @@ public class VisualDebuggerGui {
         canvas.repaint();
         frame.pack();
         frame.setTitle("Mask: " + maskName + ", Zoom: x" + (StrictMath.round(canvas.getZoomFactor() * 10)) / 10f);
+    }
+
+    /**
+     * Panel that shows the given image.
+     * Call {@link JPanel#revalidate()} to resize panel when image size changes.
+     * Call {@link JPanel#repaint()} to update when image content changes.
+     */
+    @SuppressWarnings("serial")
+    public static class ImagePanel extends JPanel {
+        private final int padding = 10;
+
+        private BufferedImage image;
+        private float zoomFactor;
+
+        public void setViewModel(BufferedImage image, float zoomFactor) {
+            this.image = image;
+            this.zoomFactor = zoomFactor;
+        }
+
+        public float getZoomFactor() {
+            return zoomFactor;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            BufferedImage currentImage = image;
+            int x = (getWidth() - currentImage.getWidth()) / 2;
+            int y = (getHeight() - currentImage.getHeight()) / 2;
+            g2d.drawImage(currentImage, x, y, this);
+            g2d.dispose();
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            BufferedImage currentImage = image;
+            return new Dimension(currentImage.getWidth() + padding, currentImage.getHeight() + padding);
+        }
+
+        @Override
+        public Dimension getMinimumSize() {
+            return getPreferredSize();
+        }
+    }
+
+    @Value
+    public static class MaskListItem {
+        String maskName;
+
+        @Override
+        public String toString() {
+            return "  " + maskName + "  ";
+        }
     }
 }

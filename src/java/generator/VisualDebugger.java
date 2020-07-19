@@ -21,30 +21,30 @@ public class VisualDebugger {
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
-	 * If true, all negative values are colored as checkerboard, leaving more color space
-	 * for positive numbers.
-	 */
-	public static boolean ignoreNegativeRange = false;
+     * If true, all negative values are colored as checkerboard, leaving more color space
+     * for positive numbers.
+     */
+    public static boolean ignoreNegativeRange = false;
 
-	private static boolean isDrawAllMasks = false;
-	private static Map<Integer, String> drawMasksWhitelist = null;
+    private static boolean isDrawAllMasks = false;
+    private static Map<Integer, String> drawMasksWhitelist = null;
 
-	public static void whitelistMask(Mask binaryOrFloatMask) {
-		whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
-	}
+    public static void whitelistMask(Mask binaryOrFloatMask) {
+        whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
+    }
 
-	public static void whitelistMask(Mask binaryOrFloatMask, String name) {
-		if (drawMasksWhitelist == null) {
-			drawMasksWhitelist = new HashMap<>();
-		}
-		drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
-		createGUI();
-	}
+    public static void whitelistMask(Mask binaryOrFloatMask, String name) {
+        if (drawMasksWhitelist == null) {
+            drawMasksWhitelist = new HashMap<>();
+        }
+        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
+        createGUI();
+    }
 
-	public static void createGUI(){
-		if (!VisualDebuggerGui.isCreated()) {
-			VisualDebuggerGui.createGui();
-		}
+    public static void createGUI() {
+        if (!VisualDebuggerGui.isCreated()) {
+            VisualDebuggerGui.createGui();
+        }
     }
 
     public static void startRecordAll() {
@@ -143,17 +143,17 @@ public class VisualDebugger {
     }
 
 
-	private static void visualize(ImageSource imageSource, int size, int maskHash) {
-		float perPixelSize = calculateAutoZoom(size);
-		BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-		// iterate source pixels
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size; x++) {
-				int color = imageSource.get(x, y);
+    private static void visualize(ImageSource imageSource, int size, int maskHash) {
+        float perPixelSize = calculateAutoZoom(size);
+        BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        // iterate source pixels
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int color = imageSource.get(x, y);
                 currentImage.setRGB(x, y, color);
-			}
+            }
         }
-		BufferedImage scaledImage = new BufferedImage((int) (size * perPixelSize), (int) (size * perPixelSize), BufferedImage.TYPE_INT_RGB);
+        BufferedImage scaledImage = new BufferedImage((int) (size * perPixelSize), (int) (size * perPixelSize), BufferedImage.TYPE_INT_RGB);
         AffineTransform at = new AffineTransform();
         at.scale(perPixelSize, perPixelSize);
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);

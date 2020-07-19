@@ -1,5 +1,8 @@
 package util;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public strictfp class Vector3f {
     public float x;
     public float y;
@@ -17,11 +20,11 @@ public strictfp class Vector3f {
         this.z = z;
     }
 
-	public float getAzimuth() {
-		return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
-	}
+    public float getAzimuth() {
+        return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
+    }
 
-	public float getElevation() {
-		return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
-	}
+    public float getElevation() {
+        return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
+    }
 }

@@ -1,12 +1,14 @@
 package map;
 
 import generator.VisualDebugger;
+import lombok.Getter;
 import util.Pipeline;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
+@Getter
 public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 
     private BinaryMask binaryMask;

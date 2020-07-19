@@ -1,11 +1,11 @@
 package map;
 
-import lombok.Getter;
+import lombok.Data;
 import util.serialized.MaterialSet;
 
 import java.awt.*;
 
-@Getter
+@Data
 public strictfp class Material {
     private static final String texturePathFormat = "/env/%s/layers/%s_albedo.dds";
     private static final String normalPathFormat = "/env/%s/layers/%s.dds";

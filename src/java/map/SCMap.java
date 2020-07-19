@@ -1,7 +1,7 @@
 package map;
 
 import biomes.Biome;
-import lombok.Getter;
+import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
@@ -11,7 +11,7 @@ import util.serialized.WaterSettings;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-@Getter
+@Data
 public strictfp class SCMap {
 
     public static final int SIGNATURE = 443572557;
@@ -190,5 +190,4 @@ public strictfp class SCMap {
             }
         }
     }
-
 }

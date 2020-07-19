@@ -1,7 +1,10 @@
 package map;
 
+import lombok.Data;
+
 import java.awt.*;
 
+@Data
 public strictfp class TerrainMaterials {
 
     // engine limitations - must stay 9 and 10 always

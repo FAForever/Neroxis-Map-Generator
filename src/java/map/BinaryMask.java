@@ -15,9 +15,9 @@ import java.util.Random;
 
 @Getter
 public strictfp class BinaryMask implements Mask {
-    private boolean[][] mask;
     private final SymmetryHierarchy symmetryHierarchy;
     private final Random random;
+    private boolean[][] mask;
 
     public BinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy) {
         this.mask = new boolean[size][size];
@@ -35,11 +35,11 @@ public strictfp class BinaryMask implements Mask {
         switch (symmetry) {
             case POINT:
                 spawnSymmetry = symmetry;
-                teams = new Symmetry[] {Symmetry.X, Symmetry.Y};
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
                 teamSymmetry = teams[random.nextInt(teams.length)];
                 break;
             case QUAD:
-                spawns = new Symmetry[] {Symmetry.X, Symmetry.Y, Symmetry.POINT};
+                spawns = new Symmetry[]{Symmetry.X, Symmetry.Y, Symmetry.POINT};
                 spawnSymmetry = spawns[random.nextInt(spawns.length)];
                 if (spawnSymmetry == Symmetry.POINT) {
                     teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
@@ -49,7 +49,7 @@ public strictfp class BinaryMask implements Mask {
                 }
                 break;
             case DIAG:
-                spawns = new Symmetry[] {Symmetry.XY, Symmetry.YX, Symmetry.POINT};
+                spawns = new Symmetry[]{Symmetry.XY, Symmetry.YX, Symmetry.POINT};
                 spawnSymmetry = spawns[random.nextInt(spawns.length)];
                 if (spawnSymmetry == Symmetry.POINT) {
                     teams = new Symmetry[]{Symmetry.XY, Symmetry.YX};
@@ -575,7 +575,7 @@ public strictfp class BinaryMask implements Mask {
     public int getMaxYBound(int x, Symmetry symmetry) {
         switch (symmetry) {
             case X:
-                return  getSize();
+                return getSize();
             case XY:
                 return x + 1;
             case YX:
@@ -598,19 +598,19 @@ public strictfp class BinaryMask implements Mask {
             case XY:
             case YX:
                 symPoint1 = getSymmetryPoint(x, y);
-                symmetryPoints = new Vector2f[] {symPoint1};
+                symmetryPoints = new Vector2f[]{symPoint1};
                 break;
             case QUAD:
                 symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
                 symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
                 symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
-                symmetryPoints = new Vector2f[] {symPoint1, symPoint2, symPoint3};
+                symmetryPoints = new Vector2f[]{symPoint1, symPoint2, symPoint3};
                 break;
             case DIAG:
                 symPoint1 = getSymmetryPoint(x, y, Symmetry.YX);
                 symPoint2 = getSymmetryPoint(x, y, Symmetry.XY);
                 symPoint3 = getSymmetryPoint(symPoint1, Symmetry.XY);
-                symmetryPoints = new Vector2f[] {symPoint1, symPoint2, symPoint3};
+                symmetryPoints = new Vector2f[]{symPoint1, symPoint2, symPoint3};
                 break;
             default:
                 symmetryPoints = null;
