@@ -9,7 +9,7 @@ public class ImageUtils {
             return false;
         }
 
-        int width  = imgA.getWidth();
+        int width = imgA.getWidth();
         int height = imgA.getHeight();
 
         for (int y = 0; y < height; y++) {

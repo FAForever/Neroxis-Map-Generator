@@ -14,8 +14,8 @@ import java.util.Random;
 
 @Getter
 public strictfp class FloatMask implements Mask {
-    private float[][] mask;
     private final Random random;
+    private float[][] mask;
 
     public FloatMask(int size, long seed) {
         this.mask = new float[size][size];

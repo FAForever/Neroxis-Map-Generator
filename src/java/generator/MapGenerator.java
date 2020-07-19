@@ -461,7 +461,7 @@ public strictfp class MapGenerator {
     private void setupTerrainPipeline() {
         land = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "land");
         mountains = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "mountains");
-        plateaus = new ConcurrentBinaryMask( 32, random.nextLong(), symmetryHierarchy, "plateaus");
+        plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
 
         land.randomize(landDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);

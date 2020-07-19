@@ -29,18 +29,17 @@ public class DDSHeader {
     final public static int CUBEMAP_POSITIVEZ_FLAG = 0x4000;
     final public static int CUBEMAP_NEGATIVEZ_FLAG = 0x8000;
     final public static int VOLUME_FLAG = 0x200000;
-
-    private ByteBuffer headerBytesBuffer;
     final private String magic = "DDS ";
     final private int size = 124;
+    final private int[] reserved1 = new int[11];
+    final private int pixelFormatSize = 32;
+    private ByteBuffer headerBytesBuffer;
     private int flags;
     private int height;
     private int width;
     private int pitchOrLinearSize;
     private int depth;
     private int mipMapCount;
-    final private int[] reserved1 = new int[11];
-    final private int pixelFormatSize = 32;
     private int pixelFlags;
     private String fourCC;
     private int RGBBitCount;
@@ -116,88 +115,6 @@ public class DDSHeader {
         return (flags & CAPS_FLAG) > 0;
     }
 
-    public boolean getHeightFlag() {
-        return (flags & HEIGHT_FLAG) > 0;
-    }
-
-    public boolean getWidthFlag() {
-        return (flags & WIDTH_FLAG) > 0;
-    }
-
-    public boolean getPitchFlag() {
-        return (flags & PITCH_FLAG) > 0;
-    }
-
-    public boolean getPixelFormatFlag() {
-        return (flags & PIXELFORMAT_FLAG) > 0;
-    }
-
-    public boolean getMipMapCountFlag() {
-        return (flags & MIPMAPCOUNT_FLAG) > 0;
-    }
-
-    public boolean getLinearSizeFlag() {
-        return (flags & LINEARSIZE_FLAG) > 0;
-    }
-
-    public boolean getDepthFlag() {
-        return (flags & DEPTH_FLAG) > 0;
-    }
-
-    public boolean getAlphaPixelsFlag() {
-        return (pixelFlags & ALPHAPIXELS_FLAG) > 0;
-    }
-
-    public boolean getFourCCFlag() {
-        return (pixelFlags & FOURCC_FLAG) > 0;
-    }
-
-    public boolean getRGBFlag() {
-        return (pixelFlags & RGB_FLAG) > 0;
-    }
-
-    public boolean getComplexFlag() {
-        return (caps1 & COMPLEX_FLAG) > 0;
-    }
-
-    public boolean getTextureFlag() {
-        return (caps1 & TEXTURE_FLAG) > 0;
-    }
-
-    public boolean getMipMapFlag() {
-        return (caps1 & MIPMAP_FLAG) > 0;
-    }
-
-    public boolean getCubeMapFlag() {
-        return (caps2 & CUBEMAP_FLAG) > 0;
-    }
-
-    public boolean getCubeMapPositiveXFlag() {
-        return (pixelFlags & CUBEMAP_POSITIVEX_FLAG) > 0;
-    }
-
-    public boolean getCubeMapNegativeXFlag() { return (pixelFlags & CUBEMAP_NEGATIVEX_FLAG) > 0; }
-
-    public boolean getCubeMapPositiveYFlag() {
-        return (pixelFlags & CUBEMAP_POSITIVEY_FLAG) > 0;
-    }
-
-    public boolean getCubeMapNegativeYFlag() {
-        return (pixelFlags & CUBEMAP_NEGATIVEY_FLAG) > 0;
-    }
-
-    public boolean getCubeMapPositiveZFlag() {
-        return (pixelFlags & CUBEMAP_POSITIVEZ_FLAG) > 0;
-    }
-
-    public boolean getCubeMapNegativeZFlag() {
-        return (pixelFlags & CUBEMAP_NEGATIVEZ_FLAG) > 0;
-    }
-
-    public boolean getVolumeFlag() {
-        return (pixelFlags & VOLUME_FLAG) > 0;
-    }
-
     public void setCapsFlag(boolean val) {
         if (val) {
             flags |= CAPS_FLAG;
@@ -205,6 +122,10 @@ public class DDSHeader {
             flags &= ~CAPS_FLAG;
         }
         setFlags(flags);
+    }
+
+    public boolean getHeightFlag() {
+        return (flags & HEIGHT_FLAG) > 0;
     }
 
     public void setHeightFlag(boolean val) {
@@ -216,6 +137,10 @@ public class DDSHeader {
         setFlags(flags);
     }
 
+    public boolean getWidthFlag() {
+        return (flags & WIDTH_FLAG) > 0;
+    }
+
     public void setWidthFlag(boolean val) {
         if (val) {
             flags |= WIDTH_FLAG;
@@ -223,6 +148,10 @@ public class DDSHeader {
             flags &= ~WIDTH_FLAG;
         }
         setFlags(flags);
+    }
+
+    public boolean getPitchFlag() {
+        return (flags & PITCH_FLAG) > 0;
     }
 
     public void setPitchFlag(boolean val) {
@@ -234,6 +163,10 @@ public class DDSHeader {
         setFlags(flags);
     }
 
+    public boolean getPixelFormatFlag() {
+        return (flags & PIXELFORMAT_FLAG) > 0;
+    }
+
     public void setPixelFormatFlag(boolean val) {
         if (val) {
             flags |= PIXELFORMAT_FLAG;
@@ -241,6 +174,10 @@ public class DDSHeader {
             flags &= ~PIXELFORMAT_FLAG;
         }
         setFlags(flags);
+    }
+
+    public boolean getMipMapCountFlag() {
+        return (flags & MIPMAPCOUNT_FLAG) > 0;
     }
 
     public void setMipMapCountFlag(boolean val) {
@@ -252,6 +189,10 @@ public class DDSHeader {
         setFlags(flags);
     }
 
+    public boolean getLinearSizeFlag() {
+        return (flags & LINEARSIZE_FLAG) > 0;
+    }
+
     public void setLinearSizeFlag(boolean val) {
         if (val) {
             flags |= LINEARSIZE_FLAG;
@@ -259,6 +200,10 @@ public class DDSHeader {
             flags &= ~LINEARSIZE_FLAG;
         }
         setFlags(flags);
+    }
+
+    public boolean getDepthFlag() {
+        return (flags & DEPTH_FLAG) > 0;
     }
 
     public void setDepthFlag(boolean val) {
@@ -270,6 +215,10 @@ public class DDSHeader {
         setFlags(flags);
     }
 
+    public boolean getAlphaPixelsFlag() {
+        return (pixelFlags & ALPHAPIXELS_FLAG) > 0;
+    }
+
     public void setAlphaPixelsFlag(boolean val) {
         if (val) {
             pixelFlags |= ALPHAPIXELS_FLAG;
@@ -277,6 +226,10 @@ public class DDSHeader {
             pixelFlags &= ~ALPHAPIXELS_FLAG;
         }
         setPixelFlags(pixelFlags);
+    }
+
+    public boolean getFourCCFlag() {
+        return (pixelFlags & FOURCC_FLAG) > 0;
     }
 
     public void setFourCCFlag(boolean val) {
@@ -288,6 +241,10 @@ public class DDSHeader {
         setPixelFlags(pixelFlags);
     }
 
+    public boolean getRGBFlag() {
+        return (pixelFlags & RGB_FLAG) > 0;
+    }
+
     public void setRGBFlag(boolean val) {
         if (val) {
             pixelFlags |= RGB_FLAG;
@@ -295,6 +252,10 @@ public class DDSHeader {
             pixelFlags &= ~RGB_FLAG;
         }
         setPixelFlags(pixelFlags);
+    }
+
+    public boolean getComplexFlag() {
+        return (caps1 & COMPLEX_FLAG) > 0;
     }
 
     public void setComplexFlag(boolean val) {
@@ -306,6 +267,10 @@ public class DDSHeader {
         setCaps1(caps1);
     }
 
+    public boolean getTextureFlag() {
+        return (caps1 & TEXTURE_FLAG) > 0;
+    }
+
     public void setTextureFlag(boolean val) {
         if (val) {
             caps1 |= TEXTURE_FLAG;
@@ -313,6 +278,10 @@ public class DDSHeader {
             caps1 &= ~TEXTURE_FLAG;
         }
         setCaps1(caps1);
+    }
+
+    public boolean getMipMapFlag() {
+        return (caps1 & MIPMAP_FLAG) > 0;
     }
 
     public void setMipMapFlag(boolean val) {
@@ -324,6 +293,10 @@ public class DDSHeader {
         setCaps1(caps1);
     }
 
+    public boolean getCubeMapFlag() {
+        return (caps2 & CUBEMAP_FLAG) > 0;
+    }
+
     public void setCubeMapFlag(boolean val) {
         if (val) {
             caps2 |= CUBEMAP_FLAG;
@@ -331,6 +304,10 @@ public class DDSHeader {
             caps2 &= ~CUBEMAP_FLAG;
         }
         setCaps2(caps2);
+    }
+
+    public boolean getCubeMapPositiveXFlag() {
+        return (pixelFlags & CUBEMAP_POSITIVEX_FLAG) > 0;
     }
 
     public void setCubeMapPositiveXFlag(boolean val) {
@@ -342,6 +319,10 @@ public class DDSHeader {
         setCaps2(caps2);
     }
 
+    public boolean getCubeMapNegativeXFlag() {
+        return (pixelFlags & CUBEMAP_NEGATIVEX_FLAG) > 0;
+    }
+
     public void setCubeMapNegativeXFlag(boolean val) {
         if (val) {
             caps2 |= CUBEMAP_NEGATIVEX_FLAG;
@@ -349,6 +330,10 @@ public class DDSHeader {
             caps2 &= ~CUBEMAP_NEGATIVEX_FLAG;
         }
         setCaps2(caps2);
+    }
+
+    public boolean getCubeMapPositiveYFlag() {
+        return (pixelFlags & CUBEMAP_POSITIVEY_FLAG) > 0;
     }
 
     public void setCubeMapPositiveYFlag(boolean val) {
@@ -360,6 +345,10 @@ public class DDSHeader {
         setCaps2(caps2);
     }
 
+    public boolean getCubeMapNegativeYFlag() {
+        return (pixelFlags & CUBEMAP_NEGATIVEY_FLAG) > 0;
+    }
+
     public void setCubeMapNegativeYFlag(boolean val) {
         if (val) {
             caps2 |= CUBEMAP_NEGATIVEY_FLAG;
@@ -367,6 +356,10 @@ public class DDSHeader {
             caps2 &= ~CUBEMAP_NEGATIVEY_FLAG;
         }
         setCaps2(caps2);
+    }
+
+    public boolean getCubeMapPositiveZFlag() {
+        return (pixelFlags & CUBEMAP_POSITIVEZ_FLAG) > 0;
     }
 
     public void setCubeMapPositiveZFlag(boolean val) {
@@ -378,6 +371,10 @@ public class DDSHeader {
         setCaps2(caps2);
     }
 
+    public boolean getCubeMapNegativeZFlag() {
+        return (pixelFlags & CUBEMAP_NEGATIVEZ_FLAG) > 0;
+    }
+
     public void setCubeMapNegativeZFlag(boolean val) {
         if (val) {
             caps2 |= CUBEMAP_NEGATIVEZ_FLAG;
@@ -385,6 +382,10 @@ public class DDSHeader {
             caps2 &= ~CUBEMAP_NEGATIVEZ_FLAG;
         }
         setCaps2(caps2);
+    }
+
+    public boolean getVolumeFlag() {
+        return (pixelFlags & VOLUME_FLAG) > 0;
     }
 
     public void setVolumeFlag(boolean val) {

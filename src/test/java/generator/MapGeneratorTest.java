@@ -191,13 +191,13 @@ public class MapGeneratorTest {
     @Test
     public void TestEqualityMapNameNameKeyword() {
         String[] args;
-        args = new String[] {"--map-name", b64MapName};
+        args = new String[]{"--map-name", b64MapName};
         instance.interpretArguments(args);
         SCMap map1 = instance.generate();
 
         Pipeline.reset();
 
-        args = new String[] {folderPath, b64MapName};
+        args = new String[]{folderPath, b64MapName};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 

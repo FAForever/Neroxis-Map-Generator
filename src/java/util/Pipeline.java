@@ -14,10 +14,10 @@ import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
 
-    public static CompletableFuture<List<ConcurrentMask>> started = new CompletableFuture<>();
     private static final List<Entry> pipeline = new ArrayList<>();
+    public static CompletableFuture<List<ConcurrentMask>> started = new CompletableFuture<>();
 
-    public static void reset(){
+    public static void reset() {
         started = new CompletableFuture<>();
         pipeline.clear();
     }
@@ -150,13 +150,12 @@ public strictfp class Pipeline {
     }
 
     public static strictfp class Entry {
-        private int index;
         private final ConcurrentMask executingMask;
         private final Set<Entry> dependencies;
         private final CompletableFuture<?> future;
         private final Set<Entry> dependants = new HashSet<>();
-
         private final List<ConcurrentMask> maskBackups = new ArrayList<>();
+        private int index;
 
         public Entry(int index, ConcurrentMask executingMask, Collection<Entry> dependencies, CompletableFuture<?> future) {
             this.index = index;

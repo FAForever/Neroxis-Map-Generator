@@ -12,7 +12,7 @@ public strictfp class Unit {
 
     public Unit(String type, Vector2f position, float rotation) {
         this.type = type;
-        this.position = new Vector3f(position.x,0, position.y);
+        this.position = new Vector3f(position.x, 0, position.y);
         this.rotation = rotation;
     }
 
