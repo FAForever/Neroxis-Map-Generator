@@ -1,5 +1,6 @@
 package generator;
 
+import com.google.common.io.BaseEncoding;
 import map.SCMap;
 import map.Symmetry;
 import org.junit.After;
@@ -10,7 +11,6 @@ import util.Pipeline;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
-import java.util.Base64;
 
 import static generator.MapGenerator.MOUNTAIN_DENSITY_MAX;
 import static generator.MapGenerator.RAMP_DENSITY_MAX;
@@ -21,6 +21,7 @@ public class MapGeneratorTest {
 
     String folderPath = ".";
     String version = MapGenerator.VERSION;
+    BaseEncoding NameEncoder = BaseEncoding.base32().omitPadding();
     long seed = 1234;
     byte spawnCount = 2;
     float landDensity = StrictMath.round(.1f * 127f) / 127f;
@@ -40,9 +41,16 @@ public class MapGeneratorTest {
             (byte) (reclaimDensity * 127f),
             (byte) (mexCount),
             (byte) (Symmetry.valueOf(symmetry).ordinal())};
+    byte[] clientOptionArray = {spawnCount,
+            (byte) (mapSize / 64),
+            (byte) (landDensity * 127f),
+            (byte) (plateauDensity * 127f),
+            (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
+            (byte) (rampDensity / RAMP_DENSITY_MAX * 127f)};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
-    String b64MapName = String.format("neroxis_map_generator_%s_%s_%s", version, Base64.getEncoder().encodeToString(seedBuffer.array()), Base64.getEncoder().encodeToString(optionArray));
+    String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()),NameEncoder.encode(optionArray));
+    String b32MapNameClient = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()),NameEncoder.encode(clientOptionArray));
     String[] keywordArgs = {"--folder-path", ".",
             "--seed", Long.toString(seed),
             "--spawn-count", Byte.toString(spawnCount),
@@ -92,8 +100,8 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseB64MapName() {
-        String[] args = {folderPath, b64MapName};
+    public void TestParseB32MapName() {
+        String[] args = {folderPath, b32MapName};
 
         instance.interpretArguments(args);
 
@@ -108,6 +116,23 @@ public class MapGeneratorTest {
         assertEquals(instance.getReclaimDensity(), reclaimDensity, .01);
         assertEquals(instance.getMexCount(), mexCount);
         assertEquals(instance.getSymmetry(), Symmetry.valueOf(symmetry));
+        assertEquals(instance.getMapSize(), mapSize);
+    }
+
+    @Test
+    public void TestParseClientB32MapName() {
+        String[] args = {folderPath, b32MapNameClient};
+
+        instance.interpretArguments(args);
+
+        assertEquals(instance.getSeed(), seed);
+        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getSeed(), seed);
+        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getLandDensity(), landDensity, .01);
+        assertEquals(instance.getPlateauDensity(), plateauDensity, .01);
+        assertEquals(instance.getMountainDensity(), mountainDensity, .01);
+        assertEquals(instance.getRampDensity(), rampDensity, .01);
         assertEquals(instance.getMapSize(), mapSize);
     }
 
@@ -166,7 +191,7 @@ public class MapGeneratorTest {
 
         Pipeline.reset();
 
-        String[] args = {folderPath, b64MapName};
+        String[] args = {folderPath, b32MapName};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
@@ -193,13 +218,13 @@ public class MapGeneratorTest {
     @Test
     public void TestEqualityMapNameNameKeyword() {
         String[] args;
-        args = new String[]{"--map-name", b64MapName};
+        args = new String[]{"--map-name", b32MapName};
         instance.interpretArguments(args);
         SCMap map1 = instance.generate();
 
         Pipeline.reset();
 
-        args = new String[]{folderPath, b64MapName};
+        args = new String[]{folderPath, b32MapName};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
