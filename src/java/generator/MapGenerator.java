@@ -2,6 +2,7 @@ package generator;
 
 import biomes.Biome;
 import biomes.Biomes;
+import com.google.common.io.BaseEncoding;
 import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
@@ -31,6 +32,7 @@ public strictfp class MapGenerator {
 
     public static final boolean DEBUG = false;
     public static final String VERSION = "1.0.8";
+    public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding();
 
     public static final float MOUNTAIN_DENSITY_MAX = .075f;
     public static final float RAMP_DENSITY_MAX = .25f;
@@ -252,7 +254,7 @@ public strictfp class MapGenerator {
             try {
                 seed = Long.parseLong(seedString);
             } catch (NumberFormatException nfe) {
-                byte[] seedBytes = Base64.getDecoder().decode(seedString);
+                byte[] seedBytes = NAME_ENCODER.decode(seedString);
                 ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
                 seed = seedWrapper.getLong();
             }
@@ -263,7 +265,7 @@ public strictfp class MapGenerator {
         }
         if (args.length >= 6) {
             String optionString = args[5];
-            byte[] optionBytes = Base64.getDecoder().decode(optionString);
+            byte[] optionBytes = NAME_ENCODER.decode(optionString);
             parseOptions(optionBytes);
         }
     }
@@ -325,7 +327,7 @@ public strictfp class MapGenerator {
         String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
         ByteBuffer seedBuffer = ByteBuffer.allocate(8);
         seedBuffer.putLong(seed);
-        String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+        String seedString = NAME_ENCODER.encode(seedBuffer.array());
         byte[] optionArray = {(byte) spawnCount,
                 (byte) (mapSize / 64),
                 (byte) (landDensity * 127f),
@@ -335,7 +337,7 @@ public strictfp class MapGenerator {
                 (byte) (reclaimDensity * 127f),
                 (byte) (mexCount),
                 (byte) (symmetry.ordinal())};
-        String optionString = Base64.getEncoder().encodeToString(optionArray);
+        String optionString = NAME_ENCODER.encode(optionArray);
         mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
     }
 
