@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
 public strictfp class MapGenerator {
 
     public static final boolean DEBUG = false;
-    public static final String VERSION = "1.0.8";
+    public static final String VERSION = "1.0.9";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding();
 
     public static final float MOUNTAIN_DENSITY_MAX = .075f;
