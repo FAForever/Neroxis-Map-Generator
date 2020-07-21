@@ -32,7 +32,7 @@ public strictfp class MapGenerator {
 
     public static final boolean DEBUG = false;
     public static final String VERSION = "1.0.9";
-    public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding();
+    public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
     public static final float MOUNTAIN_DENSITY_MAX = .075f;
     public static final float RAMP_DENSITY_MAX = .25f;

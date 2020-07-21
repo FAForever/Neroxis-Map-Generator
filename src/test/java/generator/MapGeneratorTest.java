@@ -21,7 +21,7 @@ public class MapGeneratorTest {
 
     String folderPath = ".";
     String version = MapGenerator.VERSION;
-    BaseEncoding NameEncoder = BaseEncoding.base32().omitPadding();
+    BaseEncoding NameEncoder = BaseEncoding.base32().omitPadding().lowerCase();
     long seed = 1234;
     byte spawnCount = 2;
     float landDensity = StrictMath.round(.1f * 127f) / 127f;
