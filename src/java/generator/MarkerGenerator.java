@@ -30,7 +30,7 @@ public strictfp class MarkerGenerator {
         if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
-        spawnable.fillHalf(true).fillCenter(map.getSize() / 2, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillCenter(map.getSize() * 3 / 8, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {

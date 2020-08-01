@@ -76,8 +76,8 @@ public strictfp class BinaryMask implements Mask {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
         this.random = new Random(seed);
-        for (int y = 0; y < mask.getSize(); y++) {
-            for (int x = 0; x < mask.getSize(); x++) {
+        for (int x = 0; x < mask.getSize(); x++) {
+            for (int y = 0; y < mask.getSize(); y++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
@@ -101,8 +101,8 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask randomize(float density) {
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = random.nextFloat() < density;
             }
         }
@@ -112,8 +112,8 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask invert() {
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = !mask[x][y];
             }
         }
@@ -125,10 +125,10 @@ public strictfp class BinaryMask implements Mask {
         boolean[][] largeMask = new boolean[size][size];
         int smallX;
         int smallY;
-        for (int y = 0; y < size; y++) {
-            smallY = StrictMath.min(y / (size / getSize()), getSize() - 1);
-            for (int x = 0; x < size; x++) {
-                smallX = StrictMath.min(x / (size / getSize()), getSize() - 1);
+        for (int x = 0; x < size; x++) {
+            smallX = StrictMath.min(x / (size / getSize()), getSize() - 1);
+            for (int y = 0; y < size; y++) {
+                smallY = StrictMath.min(y / (size / getSize()), getSize() - 1);
                 largeMask[x][y] = mask[smallX][smallY];
             }
         }
@@ -142,14 +142,14 @@ public strictfp class BinaryMask implements Mask {
         boolean[][] smallMask = new boolean[size][size];
         int largeX;
         int largeY;
-        for (int y = 0; y < size; y++) {
-            largeY = (y * getSize()) / size + (getSize() / size / 2);
-            if (largeY >= getSize())
-                largeY = getSize() - 1;
-            for (int x = 0; x < size; x++) {
-                largeX = (x * getSize()) / size + (getSize() / size / 2);
-                if (largeX >= getSize())
-                    largeX = getSize() - 1;
+        for (int x = 0; x < size; x++) {
+            largeX = (x * getSize()) / size + (getSize() / size / 2);
+            if (largeX >= getSize())
+                largeX = getSize() - 1;
+            for (int y = 0; y < size; y++) {
+                largeY = (y * getSize()) / size + (getSize() / size / 2);
+                if (largeY >= getSize())
+                    largeY = getSize() - 1;
                 smallMask[x][y] = mask[largeX][largeY];
             }
         }
@@ -189,12 +189,12 @@ public strictfp class BinaryMask implements Mask {
 
     private void deflateRegion(boolean inverted, float radius, boolean[][] maskCopy, int startY, int endY) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
-        for (int y = startY; y < endY; y++) {
-            for (int x = 0; x < getSize(); x++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = startY; y < endY; y++) {
                 maskCopy[x][y] = !inverted;
                 l:
-                for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
-                    for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
+                for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
+                    for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
                         if (x2 >= 0 && y2 >= 0 && x2 < getSize() && y2 < getSize() && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2 && inverted ^ !mask[x2][y2]) {
                             maskCopy[x][y] = inverted;
                             break l;
@@ -208,8 +208,8 @@ public strictfp class BinaryMask implements Mask {
     public BinaryMask cutCorners() {
         int size = mask[0].length;
         boolean[][] maskCopy = new boolean[size][size];
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 int count = 0;
                 if (x > 0 && !mask[x - 1][y])
                     count++;
@@ -261,8 +261,8 @@ public strictfp class BinaryMask implements Mask {
     public BinaryMask outline() {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 maskCopy[x][y] = ((x > 0 && !mask[x - 1][y])
                         || (y > 0 && !mask[x][y - 1])
                         || (x < getSize() - 1 && !mask[x + 1][y])
@@ -302,12 +302,12 @@ public strictfp class BinaryMask implements Mask {
 
     private void smoothRegion(float radius, boolean[][] maskCopy, int startY, int endY) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
-        for (int y = startY; y < endY; y++) {
-            for (int x = 0; x < getSize(); x++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = startY; y < endY; y++) {
                 int count = 0;
                 int count2 = 0;
-                for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
-                    for (int x2 = (int) (x - radius); x2 <= x + radius; x2++) {
+                for (int x2 = (int) (x - radius); x2 <= x + radius; x2++) {
+                    for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
                         if (x2 > 0 && y2 > 0 && x2 < getSize() && y2 < getSize() && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                             count++;
                             if (mask[x2][y2])
@@ -331,8 +331,8 @@ public strictfp class BinaryMask implements Mask {
             other.enlarge(size);
         }
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 maskCopy[x][y] = get(x, y) || other.get(x, y);
             }
         }
@@ -348,8 +348,8 @@ public strictfp class BinaryMask implements Mask {
         if (other.getSize() != size)
             other.enlarge(size);
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 maskCopy[x][y] = get(x, y) && other.get(x, y);
             }
         }
@@ -365,8 +365,8 @@ public strictfp class BinaryMask implements Mask {
         if (other.getSize() != size)
             other.enlarge(size);
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 maskCopy[x][y] = get(x, y) && !other.get(x, y);
             }
         }
@@ -382,15 +382,15 @@ public strictfp class BinaryMask implements Mask {
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
             case POINT:
-                return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent, value);
+                return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
             case Y:
                 return fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
             case X:
                 return fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
             case XY:
-                return fillDiagonal(extent, false, value);
+                return fillDiagonal(extent * 3 / 4, false, value);
             case YX:
-                return fillDiagonal(extent, true, value);
+                return fillDiagonal(extent * 3 / 4, true, value);
             default:
                 return null;
         }
@@ -429,8 +429,8 @@ public strictfp class BinaryMask implements Mask {
         float dx;
         float dy;
         float radius2 = radius * radius;
-        for (int cy = (int) StrictMath.max(0, y - radius); cy < ey; cy++) {
-            for (int cx = (int) StrictMath.max(0, x - radius); cx < ex; cx++) {
+        for (int cx = (int) StrictMath.max(0, x - radius); cx < ex; cx++) {
+            for (int cy = (int) StrictMath.max(0, y - radius); cy < ey; cy++) {
                 dx = x - cx;
                 dy = y - cy;
                 if (dx * dx + dy * dy <= radius2) {
@@ -455,8 +455,8 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
-        for (int py = 0; py < height; py++) {
-            for (int px = 0; px < width; px++) {
+        for (int px = 0; px < width; px++) {
+            for (int py = 0; py < height; py++) {
                 int calcX = x + px + py * xSlope;
                 int calcY = y + py + px * ySlope;
                 if (calcX >= 0 && calcX < getSize() && calcY >= 0 && calcY < getSize()) {
@@ -469,8 +469,8 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
-        for (int y = 0; y < getSize(); y++) {
-            for (int cx = -extent; cx < extent; cx++) {
+        for (int cx = -extent; cx < extent; cx++) {
+            for (int y = 0; y < getSize(); y++) {
                 int x;
                 if (inverted) {
                     x = getSize() - (cx + y);
@@ -511,13 +511,7 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public Vector2f getRandomPosition() {
-        int cellCount = 0;
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
-                if (mask[x][y])
-                    cellCount++;
-            }
-        }
+        int cellCount = getCount();
         if (cellCount == 0)
             return null;
         int cell = random.nextInt(cellCount) + 1;
