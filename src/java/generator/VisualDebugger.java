@@ -14,10 +14,7 @@ import java.util.Map;
 
 public class VisualDebugger {
 
-    /**
-     * When enabled, mask concurrency is disabled.
-     */
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = MapGenerator.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
