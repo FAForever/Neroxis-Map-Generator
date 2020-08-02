@@ -106,8 +106,8 @@ public strictfp class BinaryMask implements Mask {
                 mask[x][y] = random.nextFloat() < density;
             }
         }
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
+        applySymmetry();
         return this;
     }
 
@@ -133,8 +133,8 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = largeMask;
-        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         VisualDebugger.visualizeMask(this);
+        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         return this;
     }
 
@@ -154,8 +154,8 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         mask = smallMask;
-        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         VisualDebugger.visualizeMask(this);
+        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         return this;
     }
 
@@ -253,8 +253,8 @@ public strictfp class BinaryMask implements Mask {
             }
             mask = maskCopy;
         }
-        applySymmetry(symmetry);
         VisualDebugger.visualizeMask(this);
+        applySymmetry(symmetry);
         return this;
     }
 
