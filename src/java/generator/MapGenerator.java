@@ -34,8 +34,9 @@ public strictfp class MapGenerator {
     public static final String VERSION = "1.0.10";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
-    public static final float MOUNTAIN_DENSITY_MAX = .075f;
+    public static final float MOUNTAIN_DENSITY_MAX = .1f;
     public static final float RAMP_DENSITY_MAX = .25f;
+    private static final float PLATEAU_DENSITY_MAX = .5f;
 
     //read from cli args
     private String folderPath = ".";
@@ -202,18 +203,18 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("plateau-density")) {
-            plateauDensity = Float.parseFloat(arguments.get("plateau-density"));
-            plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f;
+            plateauDensity = StrictMath.min(Float.parseFloat(arguments.get("plateau-density")), PLATEAU_DENSITY_MAX);
+            plateauDensity = (float) StrictMath.round(plateauDensity / PLATEAU_DENSITY_MAX * 127f) / 127f * PLATEAU_DENSITY_MAX;
         }
 
         if (arguments.containsKey("mountain-density")) {
             mountainDensity = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")), MOUNTAIN_DENSITY_MAX);
-            mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f;
+            mountainDensity = (float) StrictMath.round(mountainDensity / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
         }
 
         if (arguments.containsKey("ramp-density")) {
             rampDensity = StrictMath.min(Float.parseFloat(arguments.get("ramp-density")), RAMP_DENSITY_MAX);
-            rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f;
+            rampDensity = (float) StrictMath.round(rampDensity / RAMP_DENSITY_MAX * 127f) / 127f * RAMP_DENSITY_MAX;
         }
 
         if (arguments.containsKey("reclaim-density")) {
@@ -272,7 +273,7 @@ public strictfp class MapGenerator {
 
     private void randomizeOptions() {
         landDensity = (random.nextInt(127 - 32) + 32)/ 127f;
-        plateauDensity = (random.nextInt(127 - 32) + 16)/ 127f;
+        plateauDensity = random.nextInt(127) / 127f * PLATEAU_DENSITY_MAX;
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
         rampDensity = (random.nextInt(127 - 32) + 32) / 127f * RAMP_DENSITY_MAX;
         reclaimDensity = random.nextInt(127) / 127f;
@@ -303,7 +304,7 @@ public strictfp class MapGenerator {
             landDensity = optionBytes[2] / 127f;
         }
         if (optionBytes.length > 3) {
-            plateauDensity = (float) optionBytes[3] / 127f;
+            plateauDensity = (float) optionBytes[3] / 127f * PLATEAU_DENSITY_MAX;
         }
         if (optionBytes.length > 4) {
             mountainDensity = (float) optionBytes[4] / 127f * MOUNTAIN_DENSITY_MAX;
@@ -331,7 +332,7 @@ public strictfp class MapGenerator {
         byte[] optionArray = {(byte) spawnCount,
                 (byte) (mapSize / 64),
                 (byte) (landDensity * 127f),
-                (byte) (plateauDensity * 127f),
+                (byte) (plateauDensity / PLATEAU_DENSITY_MAX * 127f),
                 (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
                 (byte) (rampDensity / RAMP_DENSITY_MAX * 127f),
                 (byte) (reclaimDensity * 127f),
@@ -477,17 +478,16 @@ public strictfp class MapGenerator {
         plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
 
-
-        land.randomize(landDensity).acid(.8f).inflate(1).enlarge(128).smooth(8f).acid(.5f).inflate(1).deflate(1);
-        mountains.randomize(mountainDensity).inflate(1).cutCorners().acid(.5f).enlarge(128).smooth(4).acid(.5f);
-        plateaus.randomize(plateauDensity).acid(.8f).inflate(1).enlarge(128).smooth(8f).acid(.5f).inflate(1).deflate(1);
+        land.randomize(landDensity).acid(.8f).inflate(1).enlarge(128).smooth(4f).acid(.5f);
+        mountains.randomize(mountainDensity).inflate(1).acid(.8f).enlarge(128).smooth(4).acid(.5f);
+        plateaus.randomize(plateauDensity).acid(.8f).inflate(1).enlarge(128).smooth(8f).acid(.5f);
 
         plateaus.intersect(land).minus(mountains);
         land.combine(mountains);
 
-        land.enlarge(mapSize + 1).smooth(8);
-        mountains.enlarge(mapSize + 1).smooth(8);
-        plateaus.enlarge(mapSize + 1).smooth(8);
+        land.enlarge(mapSize + 1).smooth(mapSize / 64f);
+        mountains.enlarge(mapSize + 1).smooth(mapSize / 64f);
+        plateaus.enlarge(mapSize + 1).smooth(mapSize / 64f);
 
         spawnLandMask.shrink(32).inflate(1).cutCorners().acid(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(128).inflate(2).cutCorners();
         spawnLandMask.acid(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).inflate(8);
@@ -495,12 +495,12 @@ public strictfp class MapGenerator {
         spawnPlateauMask.enlarge(128).inflate(2).cutCorners().acid(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).inflate(4).deflate(4);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).inflate(4).deflate(4);
-        mountains.minus(spawnLandMask);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).inflate(4).deflate(4).smooth(mapSize / 128f);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).inflate(4).deflate(4).smooth(mapSize / 128f);
+        mountains.minus(spawnLandMask).smooth(4f);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains).inflate(8);
+        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains).inflate(10);
 
         land.combine(ramps);
         mountains.minus(ramps);
@@ -571,7 +571,7 @@ public strictfp class MapGenerator {
         treeMask.randomize(.15f).inflate(1).cutCorners().acid(.5f).enlarge(mapSize / 4).smooth(4).acid(.5f);
         treeMask.enlarge(mapSize / 2).intersect(grass).minus(rock);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3).fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 8f, false);
-        rockFieldMask.randomize(reclaimDensity * .00075f).trimEdge(mapSize / 32).inflate(3).acid(.5f).intersect(land).minus(mountains);
+        rockFieldMask.randomize(reclaimDensity * .0005f).trimEdge(mapSize / 32).inflate(3).acid(.5f).intersect(land).minus(mountains);
     }
 
     private void setupResourcePipeline() {
