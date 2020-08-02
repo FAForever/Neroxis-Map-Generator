@@ -71,46 +71,6 @@ public class DDSHeader {
         setTextureFlag(true);
     }
 
-    public void parseHeader(byte[] bytes) {
-        headerBytesBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-        byte[] magicBytes = new byte[4];
-        headerBytesBuffer.get(magicBytes);
-        if (!new String(magicBytes).equals(magic)) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        int inSize = headerBytesBuffer.getInt();
-        if (inSize != size) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        flags = headerBytesBuffer.getInt();
-        height = headerBytesBuffer.getInt();
-        width = headerBytesBuffer.getInt();
-        pitchOrLinearSize = headerBytesBuffer.getInt();
-        depth = headerBytesBuffer.getInt();
-        mipMapCount = headerBytesBuffer.getInt();
-        for (int i = 0; i < reserved1.length; i++) {
-            reserved1[i] = headerBytesBuffer.getInt();
-        }
-        int inPixelFormatSize = headerBytesBuffer.getInt();
-        if (inPixelFormatSize != pixelFormatSize) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        pixelFlags = headerBytesBuffer.getInt();
-        byte[] fourCCBytes = new byte[4];
-        headerBytesBuffer.get(fourCCBytes);
-        fourCC = new String(fourCCBytes);
-        RGBBitCount = headerBytesBuffer.getInt();
-        RBitMask = headerBytesBuffer.getInt();
-        GBitMask = headerBytesBuffer.getInt();
-        BBitMask = headerBytesBuffer.getInt();
-        ABitMask = headerBytesBuffer.getInt();
-        caps1 = headerBytesBuffer.getInt();
-        caps2 = headerBytesBuffer.getInt();
-        caps3 = headerBytesBuffer.getInt();
-        caps4 = headerBytesBuffer.getInt();
-        reserved2 = headerBytesBuffer.getInt();
-    }
-
     public boolean getCapsFlag() {
         return (flags & CAPS_FLAG) > 0;
     }
@@ -512,6 +472,48 @@ public class DDSHeader {
 
     public byte[] toBytes() {
         return headerBytesBuffer.array();
+    }
+
+    public static DDSHeader parseHeader(byte[] bytes) {
+        DDSHeader header = new DDSHeader();
+        ByteBuffer headerBytesBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+        byte[] magicBytes = new byte[4];
+        headerBytesBuffer.get(magicBytes);
+        if (!new String(magicBytes).equals(header.magic)) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        int inSize = headerBytesBuffer.getInt();
+        if (inSize != header.size) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        header.flags = headerBytesBuffer.getInt();
+        header.height = headerBytesBuffer.getInt();
+        header.width = headerBytesBuffer.getInt();
+        header.pitchOrLinearSize = headerBytesBuffer.getInt();
+        header.depth = headerBytesBuffer.getInt();
+        header.mipMapCount = headerBytesBuffer.getInt();
+        for (int i = 0; i < header.reserved1.length; i++) {
+            header.reserved1[i] = headerBytesBuffer.getInt();
+        }
+        int inPixelFormatSize = headerBytesBuffer.getInt();
+        if (inPixelFormatSize != header.pixelFormatSize) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        header.pixelFlags = headerBytesBuffer.getInt();
+        byte[] fourCCBytes = new byte[4];
+        headerBytesBuffer.get(fourCCBytes);
+        header.fourCC = new String(fourCCBytes);
+        header.RGBBitCount = headerBytesBuffer.getInt();
+        header.RBitMask = headerBytesBuffer.getInt();
+        header.GBitMask = headerBytesBuffer.getInt();
+        header.BBitMask = headerBytesBuffer.getInt();
+        header.ABitMask = headerBytesBuffer.getInt();
+        header.caps1 = headerBytesBuffer.getInt();
+        header.caps2 = headerBytesBuffer.getInt();
+        header.caps3 = headerBytesBuffer.getInt();
+        header.caps4 = headerBytesBuffer.getInt();
+        header.reserved2 = headerBytesBuffer.getInt();
+        return header;
     }
 
 }

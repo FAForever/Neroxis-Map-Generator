@@ -20,13 +20,9 @@ public class DDSHeaderTest {
 
     @Test
     public void TestDDSHeader() {
-        DDSHeader header1 = new DDSHeader();
-        DDSHeader header2 = new DDSHeader();
-        DDSHeader header3 = new DDSHeader();
-
-        header1.parseHeader(DDS_HEADER_1);
-        header2.parseHeader(DDS_HEADER_2);
-        header3.parseHeader(DDS_HEADER_3);
+        DDSHeader header1 = DDSHeader.parseHeader(DDS_HEADER_1);
+        DDSHeader header2 = DDSHeader.parseHeader(DDS_HEADER_2);
+        DDSHeader header3 = DDSHeader.parseHeader(DDS_HEADER_3);
 
         assertEquals(DDS_HEADER_1, header1.toBytes());
         assertEquals(DDS_HEADER_2, header2.toBytes());
