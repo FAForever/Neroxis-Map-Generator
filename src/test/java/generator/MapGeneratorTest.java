@@ -12,8 +12,7 @@ import util.Pipeline;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 
-import static generator.MapGenerator.MOUNTAIN_DENSITY_MAX;
-import static generator.MapGenerator.RAMP_DENSITY_MAX;
+import static generator.MapGenerator.*;
 import static org.junit.Assert.*;
 import static util.ImageUtils.compareImages;
 
@@ -25,9 +24,9 @@ public class MapGeneratorTest {
     long seed = 1234;
     byte spawnCount = 2;
     float landDensity = StrictMath.round(.1f * 127f) / 127f;
-    float plateauDensity = StrictMath.round(.1f * 127f) / 127f;
-    float mountainDensity = StrictMath.round(.025f * 127f) / 127f;
-    float rampDensity = StrictMath.round(.1f * 127f) / 127f;
+    float plateauDensity = StrictMath.round(.1f / PLATEAU_DENSITY_MAX * 127f) / 127f * PLATEAU_DENSITY_MAX;
+    float mountainDensity = StrictMath.round(.025f / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
+    float rampDensity = StrictMath.round(.1f / RAMP_DENSITY_MAX * 127f) / 127f * RAMP_DENSITY_MAX;
     float reclaimDensity = StrictMath.round(.1f * 127f) / 127f;
     int mexCount = 16;
     String symmetry = "POINT";
@@ -35,7 +34,7 @@ public class MapGeneratorTest {
     byte[] optionArray = {spawnCount,
             (byte) (mapSize / 64),
             (byte) (landDensity * 127f),
-            (byte) (plateauDensity * 127f),
+            (byte) (plateauDensity / PLATEAU_DENSITY_MAX * 127f),
             (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
             (byte) (rampDensity / RAMP_DENSITY_MAX * 127f),
             (byte) (reclaimDensity * 127f),
@@ -44,7 +43,7 @@ public class MapGeneratorTest {
     byte[] clientOptionArray = {spawnCount,
             (byte) (mapSize / 64),
             (byte) (landDensity * 127f),
-            (byte) (plateauDensity * 127f),
+            (byte) (plateauDensity / PLATEAU_DENSITY_MAX * 127f),
             (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
             (byte) (rampDensity / RAMP_DENSITY_MAX * 127f)};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);

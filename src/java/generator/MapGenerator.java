@@ -36,7 +36,7 @@ public strictfp class MapGenerator {
 
     public static final float MOUNTAIN_DENSITY_MAX = .1f;
     public static final float RAMP_DENSITY_MAX = .25f;
-    private static final float PLATEAU_DENSITY_MAX = .5f;
+    public static final float PLATEAU_DENSITY_MAX = .5f;
 
     //read from cli args
     private String folderPath = ".";
