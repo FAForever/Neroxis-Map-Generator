@@ -2,7 +2,7 @@ package util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 public class DDSHeaderTest {
 
@@ -24,9 +24,9 @@ public class DDSHeaderTest {
         DDSHeader header2 = DDSHeader.parseHeader(DDS_HEADER_2);
         DDSHeader header3 = DDSHeader.parseHeader(DDS_HEADER_3);
 
-        assertEquals(DDS_HEADER_1, header1.toBytes());
-        assertEquals(DDS_HEADER_2, header2.toBytes());
-        assertEquals(DDS_HEADER_3, header3.toBytes());
+        assertArrayEquals(DDS_HEADER_1, header1.toBytes());
+        assertArrayEquals(DDS_HEADER_2, header2.toBytes());
+        assertArrayEquals(DDS_HEADER_3, header3.toBytes());
     }
 
 }

@@ -486,12 +486,12 @@ public class DDSHeader {
         if (inSize != header.size) {
             throw new IllegalArgumentException("Not a valid DDS Header");
         }
-        header.flags = headerBytesBuffer.getInt();
-        header.height = headerBytesBuffer.getInt();
-        header.width = headerBytesBuffer.getInt();
-        header.pitchOrLinearSize = headerBytesBuffer.getInt();
-        header.depth = headerBytesBuffer.getInt();
-        header.mipMapCount = headerBytesBuffer.getInt();
+        header.setFlags(headerBytesBuffer.getInt());
+        header.setHeight(headerBytesBuffer.getInt());
+        header.setWidth(headerBytesBuffer.getInt());
+        header.setPitchOrLinearSize(headerBytesBuffer.getInt());
+        header.setDepth(headerBytesBuffer.getInt());
+        header.setMipMapCount(headerBytesBuffer.getInt());
         for (int i = 0; i < header.reserved1.length; i++) {
             header.reserved1[i] = headerBytesBuffer.getInt();
         }
@@ -499,20 +499,20 @@ public class DDSHeader {
         if (inPixelFormatSize != header.pixelFormatSize) {
             throw new IllegalArgumentException("Not a valid DDS Header");
         }
-        header.pixelFlags = headerBytesBuffer.getInt();
+        header.setPixelFlags(headerBytesBuffer.getInt());
         byte[] fourCCBytes = new byte[4];
         headerBytesBuffer.get(fourCCBytes);
-        header.fourCC = new String(fourCCBytes);
-        header.RGBBitCount = headerBytesBuffer.getInt();
-        header.RBitMask = headerBytesBuffer.getInt();
-        header.GBitMask = headerBytesBuffer.getInt();
-        header.BBitMask = headerBytesBuffer.getInt();
-        header.ABitMask = headerBytesBuffer.getInt();
-        header.caps1 = headerBytesBuffer.getInt();
-        header.caps2 = headerBytesBuffer.getInt();
-        header.caps3 = headerBytesBuffer.getInt();
-        header.caps4 = headerBytesBuffer.getInt();
-        header.reserved2 = headerBytesBuffer.getInt();
+        header.setFourCC(new String(fourCCBytes));
+        header.setRGBBitCount(headerBytesBuffer.getInt());
+        header.setRBitMask(headerBytesBuffer.getInt());
+        header.setGBitMask(headerBytesBuffer.getInt());
+        header.setBBitMask(headerBytesBuffer.getInt());
+        header.setABitMask(headerBytesBuffer.getInt());
+        header.setCaps1(headerBytesBuffer.getInt());
+        header.setCaps2(headerBytesBuffer.getInt());
+        header.setCaps3(headerBytesBuffer.getInt());
+        header.setCaps4(headerBytesBuffer.getInt());
+        header.setReserved2(headerBytesBuffer.getInt());
         return header;
     }
 
