@@ -215,7 +215,7 @@ public strictfp class MarkerGenerator {
         int iMex = baseMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
-        int expSpacing = 64;
+        int expSpacing = 32;
 
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
@@ -239,12 +239,12 @@ public strictfp class MarkerGenerator {
                 break;
             }
 
-            spawnableCopy.fillCircle(expLocation, expSpacing, false);
-
             expansion.fillRect((int) expLocation.x - expSize, (int) expLocation.y - expSize, expSize * 2, expSize * 2, true);
             expansion.intersect(spawnable);
 
             expMexCount = StrictMath.min((random.nextInt(3) + 2) * 2, expMexCountLeft);
+
+            spawnableCopy.fillCircle(expLocation, expSpacing * expMexCount, false);
 
             for (int i = iMex; i < iMex + expMexCount; i += 2) {
                 mexLocation = expansion.getRandomPosition();
