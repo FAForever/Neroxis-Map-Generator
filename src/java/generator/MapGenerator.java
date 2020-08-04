@@ -277,7 +277,7 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
         rampDensity = (random.nextInt(127 - 32) + 32) / 127f * RAMP_DENSITY_MAX;
         reclaimDensity = random.nextInt(127) / 127f;
-        mexCount = (int) ((8 + 8 / spawnCount + random.nextInt(40 / spawnCount)) * (.5f + mapSize / 512f * .5f));
+        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(40 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
         if (spawnCount == 2) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
@@ -568,7 +568,7 @@ public strictfp class MapGenerator {
         cliffRockMask.randomize(.35f).intersect(rock).minus(plateaus).minus(mountains).intersect(land).inflate(2);
         fieldStoneMask.randomize(reclaimDensity * .01f).enlarge(256).intersect(grass);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
-        treeMask.randomize(.15f).inflate(1).cutCorners().acid(.5f).enlarge(mapSize / 4).smooth(4).acid(.5f);
+        treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(mapSize / 4).smooth(4).acid(.5f);
         treeMask.enlarge(mapSize / 2).intersect(grass).minus(rock);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3).fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 8f, false);
         rockFieldMask.randomize(reclaimDensity * .0005f).trimEdge(mapSize / 32).inflate(3).acid(.5f).intersect(land).minus(mountains);
