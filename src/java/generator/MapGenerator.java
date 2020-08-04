@@ -272,10 +272,10 @@ public strictfp class MapGenerator {
     }
 
     private void randomizeOptions() {
-        landDensity = (random.nextInt(127 - 32) + 32)/ 127f;
+        landDensity = random.nextInt(127) / 127f;
         plateauDensity = random.nextInt(127) / 127f * PLATEAU_DENSITY_MAX;
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
-        rampDensity = (random.nextInt(127 - 32) + 32) / 127f * RAMP_DENSITY_MAX;
+        rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_MAX;
         reclaimDensity = random.nextInt(127) / 127f;
         mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(40 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
