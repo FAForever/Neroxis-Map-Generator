@@ -35,7 +35,7 @@ public strictfp class WreckGenerator {
             "XSL0303"
     };
     public static final String[] T2_Navy = {
-            "UES0201",
+            // "UES0201", does not display in game for some reason
             "URS0201",
             "UAS0201",
             "XSS0201"
