@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String VERSION = "1.0.11";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
@@ -40,8 +40,8 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = .05f;
     public static final float RAMP_DENSITY_MAX = .35f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .5f;
-    public static final float PLATEAU_DENSITY_MAX = .3f;
+    public static final float PLATEAU_DENSITY_MIN = .3f;
+    public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
 
     //read from cli args
@@ -483,7 +483,6 @@ public strictfp class MapGenerator {
         mountains = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "mountains");
         plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
-        ramps.startVisualDebugger("viz");
 
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).acid(.5f);
         mountains.randomize(mountainDensity).inflate(1).acid(.5f).enlarge(128).smooth(8f, .6f).acid(.5f);
