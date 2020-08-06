@@ -45,9 +45,9 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
         );
     }
 
-    public ConcurrentFloatMask maskToMoutains(float firstSlope, float slope, ConcurrentBinaryMask other) {
+    public ConcurrentFloatMask maskToMoutains(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToMountains(firstSlope, slope, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.floatMask.maskToMountains(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 

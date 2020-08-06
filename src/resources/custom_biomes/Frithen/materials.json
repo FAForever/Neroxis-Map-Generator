@@ -56,7 +56,7 @@
       "texture": {
         "environment": "tundra",
         "name": "tund_ice002",
-        "scale": 4.0
+        "scale": 128.0
       },
       "normal": {
         "environment": "crystalline",
