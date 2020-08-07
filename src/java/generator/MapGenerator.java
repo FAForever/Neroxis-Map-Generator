@@ -40,8 +40,8 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = .05f;
     public static final float RAMP_DENSITY_MAX = .35f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .3f;
-    public static final float PLATEAU_DENSITY_MAX = .5f;
+    public static final float PLATEAU_DENSITY_MIN = .35f;
+    public static final float PLATEAU_DENSITY_MAX = .65f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
 
     //read from cli args
@@ -210,7 +210,7 @@ public strictfp class MapGenerator {
 
         if (arguments.containsKey("plateau-density")) {
             plateauDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("plateau-density")), PLATEAU_DENSITY_MAX), PLATEAU_DENSITY_MIN);
-            plateauDensity = (float) StrictMath.round((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MAX;
+            plateauDensity = (float) StrictMath.round((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
         }
 
         if (arguments.containsKey("mountain-density")) {
@@ -486,7 +486,7 @@ public strictfp class MapGenerator {
 
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).acid(.5f);
         mountains.randomize(mountainDensity).inflate(1).acid(.5f).enlarge(128).smooth(8f, .6f).acid(.5f);
-        plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f).acid(.5f);
+        plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).acid(.5f);
 
         plateaus.intersect(land).minus(mountains);
         land.combine(mountains);
@@ -501,7 +501,7 @@ public strictfp class MapGenerator {
         spawnPlateauMask.enlarge(128).inflate(2).cutCorners().acid(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 256f);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 64f, .25f);
         land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 256f);
         mountains.minus(spawnLandMask).smooth(4f);
 
