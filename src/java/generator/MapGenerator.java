@@ -338,7 +338,7 @@ public strictfp class MapGenerator {
         byte[] optionArray = {(byte) spawnCount,
                 (byte) (mapSize / 64),
                 (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
-                (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE / PLATEAU_DENSITY_MAX * 127f),
+                (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
                 (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
                 (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
                 (byte) (reclaimDensity * 127f),

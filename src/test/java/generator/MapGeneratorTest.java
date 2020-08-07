@@ -23,29 +23,29 @@ public class MapGeneratorTest {
     BaseEncoding NameEncoder = BaseEncoding.base32().omitPadding().lowerCase();
     long seed = 1234;
     byte spawnCount = 2;
-    float landDensity = StrictMath.round(.1f * 127f) / 127f;
-    float plateauDensity = StrictMath.round(.1f / PLATEAU_DENSITY_MAX * 127f) / 127f * PLATEAU_DENSITY_MAX;
-    float mountainDensity = StrictMath.round(.025f / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
-    float rampDensity = StrictMath.round(.1f / RAMP_DENSITY_MAX * 127f) / 127f * RAMP_DENSITY_MAX;
+    float landDensity = StrictMath.round((.7f - LAND_DENSITY_MIN) / (LAND_DENSITY_RANGE) * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
+    float plateauDensity = StrictMath.round((.4f - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
+    float mountainDensity = StrictMath.round(.025 / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
+    float rampDensity = StrictMath.round((.2f - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
     float reclaimDensity = StrictMath.round(.1f * 127f) / 127f;
     int mexCount = 16;
     String symmetry = "POINT";
     int mapSize = 512;
     byte[] optionArray = {spawnCount,
             (byte) (mapSize / 64),
-            (byte) (landDensity * 127f),
-            (byte) (plateauDensity / PLATEAU_DENSITY_MAX * 127f),
+            (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
+            (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
             (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
-            (byte) (rampDensity / RAMP_DENSITY_MAX * 127f),
+            (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
             (byte) (reclaimDensity * 127f),
             (byte) (mexCount),
             (byte) (Symmetry.valueOf(symmetry).ordinal())};
     byte[] clientOptionArray = {spawnCount,
             (byte) (mapSize / 64),
-            (byte) (landDensity * 127f),
-            (byte) (plateauDensity / PLATEAU_DENSITY_MAX * 127f),
+            (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
+            (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
             (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
-            (byte) (rampDensity / RAMP_DENSITY_MAX * 127f)};
+            (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f)};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
     String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()),NameEncoder.encode(optionArray));
