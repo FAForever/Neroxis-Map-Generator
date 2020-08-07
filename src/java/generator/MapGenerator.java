@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final String VERSION = "1.0.12";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
@@ -483,13 +483,14 @@ public strictfp class MapGenerator {
         mountains = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "mountains");
         plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
+        land.startVisualDebugger("land");
 
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).acid(.5f);
         mountains.randomize(mountainDensity).inflate(1).acid(.5f).enlarge(128).smooth(8f, .6f).acid(.5f);
         plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).acid(.5f);
 
         plateaus.intersect(land).minus(mountains);
-        land.combine(mountains);
+        mountains.intersect(land);
 
         land.enlarge(mapSize + 1).smooth(4f, .1f);
         mountains.enlarge(mapSize + 1).smooth(4f);
@@ -502,7 +503,7 @@ public strictfp class MapGenerator {
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 64f, .25f);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 256f);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 32f, .25f);
         mountains.minus(spawnLandMask).smooth(4f);
 
         ramps.randomize(rampDensity);
