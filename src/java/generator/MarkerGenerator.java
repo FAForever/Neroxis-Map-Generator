@@ -13,7 +13,7 @@ import static util.Placement.placeOnHeightmap;
 public strictfp class MarkerGenerator {
     private final SCMap map;
     private final Random random;
-    private final int mexSpacing = 24;
+    private final int mexSpacing = 32;
     private final int spawnSize = 32;
 
     public MarkerGenerator(SCMap map, long seed) {
@@ -30,7 +30,7 @@ public strictfp class MarkerGenerator {
         if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
-        spawnable.fillHalf(true).fillCenter(map.getSize() * 3 / 8, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillCenter(map.getSize() * 7 / 16, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
@@ -102,7 +102,7 @@ public strictfp class MarkerGenerator {
             iMex += 8;
             BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
             nearMexes.fillCircle(map.getSpawns()[i + 1], spawnSize * 2, true).fillCircle(map.getSpawns()[i + 1], 24, false).intersect(spawnable);
-            int numNearMexes = random.nextInt(3) + 1;
+            int numNearMexes = random.nextInt(2) + 1;
             for (int j = 0; j < numNearMexes; j++) {
                 Vector2f location = nearMexes.getRandomPosition();
                 if (location == null) {
@@ -119,10 +119,11 @@ public strictfp class MarkerGenerator {
             }
         }
         int baseMexCount = iMex;
+        int nonBaseMexCount = map.getMexes().length - baseMexCount;
 
-        int possibleExpMexCount = random.nextInt((map.getMexes().length - baseMexCount) / 2) * 2;
+        int possibleExpMexCount = random.nextInt(nonBaseMexCount / 2) * 2;
         int actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
-        int numMexesLeft = map.getMexes().length - actualExpMexCount - baseMexCount;
+        int numMexesLeft = nonBaseMexCount - actualExpMexCount;
 
         spawnableNoSpawns.intersect(spawnable);
         spawnablePlateau.intersect(spawnableNoSpawns);
