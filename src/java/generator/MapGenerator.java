@@ -501,8 +501,8 @@ public strictfp class MapGenerator {
         spawnPlateauMask.enlarge(128).inflate(2).cutCorners().acid(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 64f, .25f);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(mapSize / 32f, .25f);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(8f, .25f);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(16f, .25f);
         mountains.minus(spawnLandMask).smooth(4f);
 
         ramps.randomize(rampDensity);
