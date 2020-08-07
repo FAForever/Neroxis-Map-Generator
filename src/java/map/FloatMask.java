@@ -101,16 +101,19 @@ public strictfp class FloatMask implements Mask {
     }
 
     public FloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, BinaryMask other) {
+        BinaryMask randomMask = new BinaryMask(other, random.nextLong());
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
         int count = 0;
         if (otherCopy.getCount() == otherCopy.getSize() * otherCopy.getSize()) {
             FloatMask layer = new FloatMask(getSize(), 0);
             add(layer.init(otherCopy, 0, slope * otherCopy.getSize()));
+            add(layer.init(randomMask.randomize(.5f), 0, slope * 5).smooth(4));
         } else {
             while (otherCopy.getCount() > 0 && count < maxRepeat) {
                 count++;
                 FloatMask layer = new FloatMask(getSize(), 0);
                 add(layer.init(otherCopy, 0, slope));
+                add(layer.init(randomMask.randomize(.25f), 0, slope));
                 otherCopy.acid(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
             }
         }
