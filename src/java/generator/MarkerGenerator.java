@@ -13,7 +13,7 @@ import static util.Placement.placeOnHeightmap;
 public strictfp class MarkerGenerator {
     private final SCMap map;
     private final Random random;
-    private final int mexSpacing = 16;
+    private final int mexSpacing = 20;
     private final int spawnSize = 32;
 
     public MarkerGenerator(SCMap map, long seed) {
