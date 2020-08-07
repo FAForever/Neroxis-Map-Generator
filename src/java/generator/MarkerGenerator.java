@@ -13,7 +13,7 @@ import static util.Placement.placeOnHeightmap;
 public strictfp class MarkerGenerator {
     private final SCMap map;
     private final Random random;
-    private final int mexSpacing = 32;
+    private final int mexSpacing = 16;
     private final int spawnSize = 32;
 
     public MarkerGenerator(SCMap map, long seed) {
@@ -82,11 +82,13 @@ public strictfp class MarkerGenerator {
 
     public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
         BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
-        BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
+        float spawnDensity = (float) spawnable.getCount() / map.getSize() / map.getSize() * 2;
+        int mexSpawnDistance = (int) StrictMath.max(StrictMath.min(spawnDensity * map.getSize() / 4, spawnSize * 4), spawnSize * 2);
+        BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         for (int i = 0; i < map.getSpawns().length; i += 2) {
-            spawnable.fillCircle(map.getSpawns()[i + 1], 20, false);
-            spawnableNoSpawns.fillCircle(map.getSpawns()[i + 1], spawnSize * 2, false);
+            spawnable.fillCircle(map.getSpawns()[i + 1], 24, false);
+            spawnableNoSpawns.fillCircle(map.getSpawns()[i + 1], mexSpawnDistance, false);
         }
 
         int iMex = 0;
@@ -216,7 +218,7 @@ public strictfp class MarkerGenerator {
         int iMex = baseMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
-        int expSpacing = 32;
+        int expSpacing = 64;
 
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
@@ -224,7 +226,7 @@ public strictfp class MarkerGenerator {
         spawnableCopy.fillCenter(32, false);
 
         for (int i = 0; i < map.getSpawns().length; i++) {
-            spawnableCopy.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, false);
+            spawnableCopy.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, map.getSize() / 4f, false);
         }
 
         while (expMexCountLeft > 0) {
