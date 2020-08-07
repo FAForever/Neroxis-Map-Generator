@@ -101,13 +101,13 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask randomize(float density) {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = getMinXBound(symmetryHierarchy.getTerrainSymmetry()); x < getMaxXBound(symmetryHierarchy.getTerrainSymmetry()); x++) {
+            for (int y = getMinYBound(x, symmetryHierarchy.getTerrainSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getTerrainSymmetry()); y++) {
                 mask[x][y] = random.nextFloat() < density;
             }
         }
-        VisualDebugger.visualizeMask(this);
         applySymmetry();
+        VisualDebugger.visualizeMask(this);
         return this;
     }
 
@@ -242,19 +242,21 @@ public strictfp class BinaryMask implements Mask {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
         for (int i = 0; i < count; i++) {
-            for (int x = 0; x < getSize(); x++) {
-                for (int y = 0; y < getSize(); y++) {
-                    boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
-                            || (x < getSize() - 1 && !mask[x + 1][y])
-                            || (y < getSize() - 1 && !mask[x][y + 1]))
-                            && random.nextFloat() < strength);
-                    maskCopy[x][y] = mask[x][y] && !value;
+            for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
+                for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
+                    if (x >= 0 && y >=0 && x < getSize() && y < getSize()) {
+                        boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
+                                || (x < getSize() - 1 && !mask[x + 1][y])
+                                || (y < getSize() - 1 && !mask[x][y + 1]))
+                                && random.nextFloat() < strength);
+                        maskCopy[x][y] = mask[x][y] && !value;
+                    }
                 }
             }
             mask = maskCopy;
         }
-        VisualDebugger.visualizeMask(this);
         applySymmetry(symmetry);
+        VisualDebugger.visualizeMask(this);
         return this;
     }
 
@@ -279,13 +281,17 @@ public strictfp class BinaryMask implements Mask {
     }
 
     public BinaryMask smooth(float radius) {
+        return smooth(radius, .5f);
+    }
+
+    public BinaryMask smooth(float radius, float density) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
         Thread[] threads = new Thread[4];
-        threads[0] = new Thread(() -> smoothRegion(radius, maskCopy, 0, (getSize() / 4)));
-        threads[1] = new Thread(() -> smoothRegion(radius, maskCopy, (getSize() / 4), (getSize() / 2)));
-        threads[2] = new Thread(() -> smoothRegion(radius, maskCopy, (getSize() / 2), (getSize() / 4) * 3));
-        threads[3] = new Thread(() -> smoothRegion(radius, maskCopy, (getSize() / 4) * 3, getSize()));
+        threads[0] = new Thread(() -> smoothRegion(radius, density, maskCopy, 0, (getSize() / 4)));
+        threads[1] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 4), (getSize() / 2)));
+        threads[2] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 2), (getSize() / 4) * 3));
+        threads[3] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 4) * 3, getSize()));
 
         Arrays.stream(threads).forEach(Thread::start);
         for (Thread f : threads) {
@@ -300,7 +306,7 @@ public strictfp class BinaryMask implements Mask {
         return this;
     }
 
-    private void smoothRegion(float radius, boolean[][] maskCopy, int startY, int endY) {
+    private void smoothRegion(float radius, float density, boolean[][] maskCopy, int startY, int endY) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x = 0; x < getSize(); x++) {
             for (int y = startY; y < endY; y++) {
@@ -315,7 +321,7 @@ public strictfp class BinaryMask implements Mask {
                         }
                     }
                 }
-                if (count2 > count / 2) {
+                if (count2 > count * density) {
                     maskCopy[x][y] = true;
                 }
             }
@@ -667,7 +673,6 @@ public strictfp class BinaryMask implements Mask {
                 }
             }
         }
-        VisualDebugger.visualizeMask(this);
     }
 
     // --------------------------------------------------

@@ -118,6 +118,12 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask smooth(float radius, float density) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.smooth(radius, density)
+        );
+    }
+
     public ConcurrentBinaryMask combine(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.binaryMask.combine(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
