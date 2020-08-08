@@ -557,11 +557,11 @@ public strictfp class MapGenerator {
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "allWreck");
         ConcurrentBinaryMask landCopy = new ConcurrentBinaryMask(land, random.nextLong(), "landCopy");
 
-        t1LandWreckMask.randomize(reclaimDensity * .01f).intersect(land).deflate(mapSize / 512f).trimEdge(20);
-        t2LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
-        t3LandWreckMask.randomize(reclaimDensity * .002f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
+        t1LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).deflate(mapSize / 512f).trimEdge(20);
+        t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
+        t3LandWreckMask.randomize(reclaimDensity * .001f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(landCopy.inflate(8)).trimEdge(20);
-        t2NavyWreckMask.randomize(reclaimDensity * .015f).intersect(landCopy.deflate(9).outline()).trimEdge(20);
+        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(landCopy.deflate(9).outline()).trimEdge(20);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
@@ -571,13 +571,13 @@ public strictfp class MapGenerator {
         fieldStoneMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "fieldStone");
         rockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "rockField");
 
-        cliffRockMask.randomize(.35f).intersect(rock).minus(plateaus).minus(mountains).intersect(land).inflate(2);
-        fieldStoneMask.randomize(reclaimDensity * .01f).enlarge(256).intersect(grass);
+        cliffRockMask.randomize(.25f).intersect(rock).minus(plateaus).minus(mountains).intersect(land).inflate(2);
+        fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(grass);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).cutCorners().acid(.5f).enlarge(mapSize / 4).smooth(4).acid(.5f);
         treeMask.enlarge(mapSize / 2).intersect(grass).minus(rock);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3).fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 8f, false);
-        rockFieldMask.randomize(reclaimDensity * .0005f).trimEdge(mapSize / 32).inflate(3).acid(.5f).intersect(land).minus(mountains);
+        rockFieldMask.randomize(reclaimDensity * .00025f).trimEdge(mapSize / 32).inflate(3).acid(.5f).intersect(land).minus(mountains);
     }
 
     private void setupResourcePipeline() {
