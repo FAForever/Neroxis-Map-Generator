@@ -136,7 +136,21 @@ public strictfp class SCMapExporter {
         writeInt(0); // unknown
 
         // decals
-        writeInt(0); // decal count
+        writeInt(map.getDecalCount());
+        for (int i = 0; i < map.getDecalCount(); i++) {
+            writeInt(i);
+            writeInt(map.getDecal(i).getType());
+            writeInt(2);
+            writeString(map.getDecal(i).getPath());
+            writeString("");
+            writeVector3f(map.getDecal(i).getScale());
+            writeVector3f(map.getDecal(i).getPosition());
+            writeVector3f(new Vector3f(0f, map.getDecal(i).getRotation(), 0f));
+            writeFloat(map.getDecal(i).getCutOffLOD());
+            writeFloat(0);
+            writeInt(-1);
+        }
+
         writeInt(0); // decal group count
         writeInt(map.getSize()); // width
         writeInt(map.getSize()); // height
@@ -250,6 +264,13 @@ public strictfp class SCMapExporter {
             out.writeByte(s.charAt(i));
         }
         out.writeByte(0);
+    }
+
+    private static void writeString(String s) throws IOException {
+        writeInt(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            out.writeByte(s.charAt(i));
+        }
     }
 
     private static void writeVector3f(Vector3f v) throws IOException {

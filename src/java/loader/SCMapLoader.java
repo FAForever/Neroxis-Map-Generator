@@ -1,9 +1,6 @@
 package loader;
 
-import map.Material;
-import map.Prop;
-import map.SCMap;
-import map.TerrainMaterials;
+import map.*;
 import util.DDSHeader;
 import util.Vector2f;
 import util.Vector3f;
@@ -75,22 +72,22 @@ public strictfp class SCMapLoader {
 
         // textures
         if (!readStringNull().equals(SCMap.TERRAIN_SHADER_PATH)) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
+//            throw new UnsupportedEncodingException("File not valid SCMap");
         }
         if (!readStringNull().equals(SCMap.BACKGROUND_PATH)) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
+//            throw new UnsupportedEncodingException("File not valid SCMap");
         }
         if (!readStringNull().equals(SCMap.SKYCUBE_PATH)) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
+//            throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        if (readInt() != 1) {
-            throw new UnsupportedEncodingException("File not valid Generated SCMap");
-        }
-        if (!readStringNull().equals(SCMap.CUBEMAP_NAME)) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
-        if (!readStringNull().equals(SCMap.CUBEMAP_PATH)) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
+        int cubemapCount = readInt();
+        for (int i = 0; i < cubemapCount; i++) {
+            if (!readStringNull().equals(SCMap.CUBEMAP_NAME)) {
+//            throw new UnsupportedEncodingException("File not valid SCMap");
+            }
+            if (!readStringNull().equals(SCMap.CUBEMAP_PATH)) {
+//            throw new UnsupportedEncodingException("File not valid SCMap");
+            }
         }
 
         // lighting
@@ -159,21 +156,43 @@ public strictfp class SCMapLoader {
             mapTerrainMaterials.normalScales[i] = readFloat();
         }
 
-        if (readInt() != 0) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
-        if (readInt() != 0) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
+        int unknown1 = readInt();
+
+        int unknown2 = readInt();
 
         // decals
         // decal count
-        if (readInt() != 0) {
-            throw new UnsupportedEncodingException("File not valid Generated SCMap");
+        int decalCount = readInt();
+        Decal[] decals = new Decal[decalCount];
+        for (int i = 0; i < decalCount; i++) {
+            int id = readInt();
+            int type = readInt();
+            int textureCount = readInt();
+            String[] texturePaths = new String[textureCount];
+            for (int j = 0; j < textureCount; j++) {
+                int stringLength = readInt();
+                texturePaths[j] = readString(stringLength);
+            }
+            Vector3f scale = readVector3f();
+            Vector3f position = readVector3f();
+            Vector3f rotation = readVector3f();
+            float cutOffLOD = readFloat();
+            float nearCutOffLOD = readFloat();
+            int ownerArmy = readInt();
+            float rotationFloat = (float) StrictMath.atan2(rotation.z, rotation.x);
+            decals[i] = new Decal(texturePaths[0], position, rotationFloat, scale, cutOffLOD);
         }
+
         //decal group count
-        if (readInt() != 0) {
-            throw new UnsupportedEncodingException("File not valid Generated SCMap");
+        int groupCount = readInt();
+        for (int i = 0; i < groupCount; i++) {
+            int id = readInt();
+            String name = readStringNull();
+            int length = readInt();
+            int[] data = new int[length];
+            for (int j = 0; j < length; j++) {
+                data[j] = readInt();
+            }
         }
 
         int widthInt2 = readInt();
@@ -324,6 +343,15 @@ public strictfp class SCMapLoader {
         while (read != 0){
             readString.append((char) read);
             read = readByte();
+        }
+        return readString.toString();
+    }
+
+    private static String readString(int length) throws IOException {
+        StringBuilder readString = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            byte read = readByte();
+            readString.append((char) read);
         }
         return readString.toString();
     }
