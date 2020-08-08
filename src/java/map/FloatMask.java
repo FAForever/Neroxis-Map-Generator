@@ -83,11 +83,13 @@ public strictfp class FloatMask implements Mask {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
         BinaryMask randomMask = new BinaryMask(other, random.nextLong());
         randomMask.randomize(random.nextFloat() * .25f).intersect(other);
+        FloatMask mountainBase = new FloatMask(getSize(), 0);
+        add(mountainBase.init(otherCopy, 0, 2f));
         otherCopy.acid(random.nextFloat(), otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
         while (otherCopy.getCount() > 0) {
             FloatMask layer = new FloatMask(getSize(), 0);
-            add(layer.init(otherCopy, 0, random.nextFloat() * .5f));
-            add(layer.init(randomMask, 0, random.nextFloat() * .05f));
+            add(layer.init(otherCopy, 0, random.nextFloat() * .75f));
+            add(layer.init(randomMask, 0, random.nextFloat() * .1f));
             otherCopy.acid(random.nextFloat(), otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
