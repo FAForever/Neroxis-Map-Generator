@@ -10,7 +10,7 @@ import java.util.Random;
 import static util.Placement.placeOnHeightmap;
 
 public strictfp class PropGenerator {
-    public final String[] TREE_GROUPS = {
+    public static final String[] TREE_GROUPS = {
             "/env/evergreen/props/trees/groups/Brch01_Group01_prop.bp",
             "/env/evergreen/props/trees/groups/Brch01_Group02_prop.bp",
             "/env/evergreen/props/trees/groups/Pine06_GroupA_prop.bp",
@@ -18,14 +18,14 @@ public strictfp class PropGenerator {
             "/env/evergreen/props/trees/groups/Pine07_GroupA_prop.bp",
             "/env/evergreen/props/trees/groups/Pine07_GroupB_prop.bp"
     };
-    public final String[] ROCKS = {
+    public static final String[] ROCKS = {
             "/env/evergreen/props/rocks/Rock01_prop.bp",
             "/env/evergreen/props/rocks/Rock02_prop.bp",
             "/env/evergreen/props/rocks/Rock03_prop.bp",
             "/env/evergreen/props/rocks/Rock04_prop.bp",
             "/env/evergreen/props/rocks/Rock05_prop.bp"
     };
-    public final String[] FIELD_STONES = {
+    public static final String[] FIELD_STONES = {
             "/env/evergreen/props/rocks/fieldstone01_prop.bp",
             "/env/evergreen/props/rocks/fieldstone02_prop.bp",
             "/env/evergreen/props/rocks/fieldstone03_prop.bp",

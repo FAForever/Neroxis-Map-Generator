@@ -64,6 +64,7 @@ public strictfp class SCMap {
     private final Vector3f[] spawns;
     private final Vector3f[] mexes;
     private final Vector3f[] hydros;
+    private final ArrayList<Decal> decals;
     private final ArrayList<Prop> props;
     private final ArrayList<Unit> units;
     private final ArrayList<Unit> wrecks;
@@ -85,6 +86,7 @@ public strictfp class SCMap {
         spawns = new Vector3f[spawnCount];
         mexes = new Vector3f[mexCount];
         hydros = new Vector3f[hydroCount];
+        decals = new ArrayList<>();
         props = new ArrayList<>();
         units = new ArrayList<>();
         wrecks = new ArrayList<>();
@@ -137,6 +139,18 @@ public strictfp class SCMap {
 
     public Vector3f[] getHydros() {
         return hydros;
+    }
+
+    public int getDecalCount() {
+        return decals.size();
+    }
+
+    public Decal getDecal(int i) {
+        return decals.get(i);
+    }
+
+    public void addDecal(Decal decal) {
+        decals.add(decal);
     }
 
     public int getPropCount() {
