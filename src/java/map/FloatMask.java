@@ -59,6 +59,10 @@ public strictfp class FloatMask implements Mask {
         return this;
     }
 
+    public FloatMask copy() {
+        return new FloatMask(this, random.nextLong());
+    }
+
     public FloatMask add(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {

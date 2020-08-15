@@ -100,6 +100,10 @@ public strictfp class BinaryMask implements Mask {
         return mask[x][y];
     }
 
+    public BinaryMask copy() {
+        return new BinaryMask(this, random.nextLong());
+    }
+
     public BinaryMask randomize(float density) {
         for (int x = getMinXBound(symmetryHierarchy.getTerrainSymmetry()); x < getMaxXBound(symmetryHierarchy.getTerrainSymmetry()); x++) {
             for (int y = getMinYBound(x, symmetryHierarchy.getTerrainSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getTerrainSymmetry()); y++) {
