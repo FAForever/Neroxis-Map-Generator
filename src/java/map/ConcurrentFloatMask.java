@@ -39,6 +39,10 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
         );
     }
 
+    public ConcurrentFloatMask copy(){
+        return new ConcurrentFloatMask(this, this.floatMask.getRandom().nextLong(), name+"Copy");
+    }
+
     public ConcurrentFloatMask add(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.add(((ConcurrentFloatMask) res.get(1)).getFloatMask())

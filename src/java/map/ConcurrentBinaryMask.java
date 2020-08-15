@@ -46,6 +46,10 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         this.binaryMask = new BinaryMask(mask, seed);
     }
 
+    public ConcurrentBinaryMask copy(){
+        return new ConcurrentBinaryMask(this, this.binaryMask.getRandom().nextLong(), name+"Copy");
+    }
+
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.randomize(density)
