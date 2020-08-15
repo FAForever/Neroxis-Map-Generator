@@ -123,7 +123,6 @@ public strictfp class MapGenerator {
         System.out.println("Terrain Symmetry: " + generator.symmetry);
         System.out.println("Team Symmetry: " + generator.symmetryHierarchy.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + generator.symmetryHierarchy.getSpawnSymmetry());
-        System.out.println("Spawn Separation: " + generator.spawnSeparation);
         generator.save(generator.folderPath, generator.mapName.replace('/', '^'), map);
         System.out.println("Done");
 
@@ -403,7 +402,7 @@ public strictfp class MapGenerator {
             long sTime = System.currentTimeMillis();
             BinaryMask plateauResource = new BinaryMask(resourceMask.getBinaryMask(), random.nextLong());
             plateauResource.intersect(plateaus.getBinaryMask()).trimEdge(16).fillCenter(16, true);
-            BinaryMask waterMex = new BinaryMask(land.getBinaryMask(), random.nextLong());
+            BinaryMask waterMex = land.getBinaryMask().copy();
             waterMex.invert().deflate(48).trimEdge(16).fillCenter(16, false);
             markerGenerator.generateMexes(resourceMask.getBinaryMask(), plateauResource, waterMex);
             BinaryMask hydroSpawn = new BinaryMask(land.getBinaryMask(), random.nextLong());
@@ -527,9 +526,9 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask).smooth(4f);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains).inflate(10).smooth(8f, .25f);
+        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains).inflate(8).smooth(8f, .125f);
 
-        land.combine(ramps);
+        land.combine(ramps.copy().deflate(4));
         mountains.minus(ramps);
     }
 
@@ -557,13 +556,11 @@ public strictfp class MapGenerator {
         intDecal = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "intDecal");
         rockDecal = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "rockDecal");
         ConcurrentBinaryMask lightGrass = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "lightGrass");
-        ConcurrentBinaryMask plateauCopy = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "plateauCopy");
         rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), "rockTexture");
         grassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), "grassTexture");
         lightGrassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), "lightGrassTexture");
 
-        plateauCopy.combine(plateaus).outline().minus(ramps);
-        rock.combine(mountains).combine(plateauCopy).inflate(3).shrink(mapSize / 2);
+        rock.combine(mountains).combine(plateaus.copy().combine(plateaus).outline().minus(ramps)).inflate(3).shrink(mapSize / 2);
         grass.combine(land).deflate(6f).combine(plateaus).shrink(mapSize / 2).inflate(1);
         lightGrass.randomize(.5f).shrink(mapSize / 2);
 
@@ -583,13 +580,12 @@ public strictfp class MapGenerator {
         t2NavyWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "t2NavyWreck");
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "allWreck");
-        ConcurrentBinaryMask landCopy = new ConcurrentBinaryMask(land, random.nextLong(), "landCopy");
 
         t1LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).deflate(mapSize / 512f).trimEdge(20);
         t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
         t3LandWreckMask.randomize(reclaimDensity * .001f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
-        navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(landCopy.inflate(8)).trimEdge(20);
-        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(landCopy.deflate(9).outline()).trimEdge(20);
+        navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(land.copy().inflate(8)).trimEdge(20);
+        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().deflate(9).outline()).trimEdge(20);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
