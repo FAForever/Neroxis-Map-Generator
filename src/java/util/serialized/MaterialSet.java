@@ -1,30 +1,37 @@
 package util.serialized;
 
+import lombok.Data;
+
 import java.util.List;
 
 /**
  * Used in disk operations to be converted into a material later
  */
+
+@Data
 public strictfp class MaterialSet {
-    public String name;
-    public List<Material> materials;
-    public MaterialElement macroTexture;
+    private String name;
+    private List<Material> materials;
+    private MaterialElement macroTexture;
 
-    public strictfp class Material {
-        public MaterialElement texture;
-        public MaterialElement normal;
-        public PreviewColor previewColor;
+    @Data
+    public static strictfp class Material {
+        private MaterialElement texture;
+        private MaterialElement normal;
+        private PreviewColor previewColor;
     }
 
-    public strictfp class MaterialElement {
-        public String environment;
-        public String name;
-        public float scale;
+    @Data
+    public static strictfp class MaterialElement {
+        private String environment;
+        private String name;
+        private float scale;
     }
 
-    public strictfp class PreviewColor {
-        public int red;
-        public int green;
-        public int blue;
+    @Data
+    public static strictfp class PreviewColor {
+        private int red;
+        private int green;
+        private int blue;
     }
 }

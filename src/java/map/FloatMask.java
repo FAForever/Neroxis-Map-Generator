@@ -96,7 +96,7 @@ public strictfp class FloatMask extends Mask {
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, random.nextFloat() * .75f));
 //            add(layer.init(other.copy().acid(.1f, 2f), 0, random.nextFloat() * .15f));
-            otherCopy.erode(random.nextFloat());
+            otherCopy.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -189,7 +189,7 @@ public strictfp class FloatMask extends Mask {
                 FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
                 add(layer.init(otherCopy, 0, slope));
                 add(layer.init(randomMask.randomize(.25f), 0, slope));
-                otherCopy.erode(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
+                otherCopy.erode(0.5f, symmetryHierarchy.getSpawnSymmetry());
             }
         }
         otherCopy = new BinaryMask(other, random.nextLong());
@@ -199,7 +199,7 @@ public strictfp class FloatMask extends Mask {
             count++;
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, -underWaterSlope));
-            otherCopy.erode(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
+            otherCopy.erode(0.5f, symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;

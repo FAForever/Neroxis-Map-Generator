@@ -1,20 +1,14 @@
 package biomes;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import map.TerrainMaterials;
 import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
-@AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public strictfp class Biome {
-    String name;
-    TerrainMaterials terrainMaterials;
-    WaterSettings waterSettings;
-    LightingSettings lightingSettings;
+    final String name;
+    final TerrainMaterials terrainMaterials;
+    final WaterSettings waterSettings;
+    final LightingSettings lightingSettings;
 }

@@ -25,11 +25,11 @@ public strictfp class Preview {
     public static void generate(BufferedImage image, SCMap map) {
         Graphics2D graphics = image.createGraphics();
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
-        for (int i = 0; i < materials.texturePaths.length - 1; i++) {
-            if (!materials.texturePaths[i].isEmpty()) {
+        for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+            if (!materials.getTexturePaths()[i].isEmpty()) {
                 BufferedImage layer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
-                layerGraphics.setColor(materials.previewColors[i]);
+                layerGraphics.setColor(materials.getPreviewColors()[i]);
                 layerGraphics.fillRect(0, 0, 256, 256);
                 BufferedImage shadedLayer = getShadedImage(layer, map, i);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
@@ -92,8 +92,8 @@ public strictfp class Preview {
         float landDiffuseCoefficient = .9f;
         float landSpecularCoefficient = .75f;
         float landShininess = 1f;
-        float azimuth = lightingSettings.SunDirection.getAzimuth() - 90f;
-        float elevation = lightingSettings.SunDirection.getElevation();
+        float azimuth = lightingSettings.getSunDirection().getAzimuth() - 90f;
+        float elevation = lightingSettings.getSunDirection().getElevation();
         int imageHeight = heightMapScaled.getHeight();
         int imageWidth = heightMapScaled.getWidth();
         int xOffset = (int) StrictMath.round(StrictMath.sin(StrictMath.toRadians(azimuth)));
@@ -132,9 +132,9 @@ public strictfp class Preview {
                     float diffuseTerm = (float) (StrictMath.max(StrictMath.cos(StrictMath.toRadians(normalAngle - elevation)) * landDiffuseCoefficient, 0));
                     float specularTerm = (float) (StrictMath.max(StrictMath.pow(StrictMath.cos(StrictMath.toRadians(90 - reflectedAngle)), landShininess) * landSpecularCoefficient, 0));
 
-                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.SunColor.x * (diffuseTerm + specularTerm)) + lightingSettings.SunAmbience.x);
-                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.SunColor.y * (diffuseTerm + specularTerm)) + lightingSettings.SunAmbience.y);
-                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.SunColor.z * (diffuseTerm + specularTerm)) + lightingSettings.SunAmbience.z);
+                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().x * (diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().x);
+                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().y * (diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().y);
+                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().z * (diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().z);
                 } else {
                     newRGBA = origRGBA.clone();
                 }
@@ -162,8 +162,8 @@ public strictfp class Preview {
         BufferedImage waterLayer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D waterLayerGraphics = waterLayer.createGraphics();
 
-        float elevation = lightingSettings.SunDirection.getElevation();
-        float[] mapElevations = {map.getBiome().getWaterSettings().Elevation, map.getBiome().getWaterSettings().ElevationAbyss};
+        float elevation = lightingSettings.getSunDirection().getElevation();
+        float[] mapElevations = {map.getBiome().getWaterSettings().getElevation(), map.getBiome().getWaterSettings().getElevationAbyss()};
         float waterDiffuseCoefficient = 1f;
         float waterSpecularCoefficient = 1f;
         float waterShininess = 1f;
@@ -183,9 +183,9 @@ public strictfp class Preview {
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
                 newRGBA[2] = (int) (shallowColor.getBlue() * (1 - weight) + abyssColor.getBlue() * weight);
-                newRGBA[0] *= (lightingSettings.SunColor.x + waterSettings.SurfaceColor.x) * (diffuseTerm + specularTerm);
-                newRGBA[1] *= (lightingSettings.SunColor.y + waterSettings.SurfaceColor.y) * (diffuseTerm + specularTerm);
-                newRGBA[2] *= (lightingSettings.SunColor.z + waterSettings.SurfaceColor.z) * (diffuseTerm + specularTerm);
+                newRGBA[0] *= (lightingSettings.getSunColor().x + waterSettings.getSurfaceColor().x) * (diffuseTerm + specularTerm);
+                newRGBA[1] *= (lightingSettings.getSunColor().y + waterSettings.getSurfaceColor().y) * (diffuseTerm + specularTerm);
+                newRGBA[2] *= (lightingSettings.getSunColor().z + waterSettings.getSurfaceColor().z) * (diffuseTerm + specularTerm);
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);

@@ -72,47 +72,47 @@ public strictfp class SCMapExporter {
 
         // lighting
         LightingSettings mapLightingSettings = map.biome.getLightingSettings();
-        writeFloat(mapLightingSettings.LightingMultiplier);
-        writeVector3f(mapLightingSettings.SunDirection);
-        writeVector3f(mapLightingSettings.SunAmbience);
-        writeVector3f(mapLightingSettings.SunColor);
-        writeVector3f(mapLightingSettings.ShadowFillColor);
-        writeVector4f(mapLightingSettings.SpecularColor);
-        writeFloat(mapLightingSettings.Bloom);
-        writeVector3f(mapLightingSettings.FogColor);
-        writeFloat(mapLightingSettings.FogStart);
-        writeFloat(mapLightingSettings.FogEnd);
+        writeFloat(mapLightingSettings.getLightingMultiplier());
+        writeVector3f(mapLightingSettings.getSunDirection());
+        writeVector3f(mapLightingSettings.getSunAmbience());
+        writeVector3f(mapLightingSettings.getSunColor());
+        writeVector3f(mapLightingSettings.getShadowFillColor());
+        writeVector4f(mapLightingSettings.getSpecularColor());
+        writeFloat(mapLightingSettings.getBloom());
+        writeVector3f(mapLightingSettings.getFogColor());
+        writeFloat(mapLightingSettings.getFogStart());
+        writeFloat(mapLightingSettings.getFogEnd());
 
         // water
         WaterSettings mapWaterSettings = map.biome.getWaterSettings();
-        writeByte((byte) (mapWaterSettings.HasWater ? 1 : 0));
-        writeFloat(mapWaterSettings.Elevation);
-        writeFloat(mapWaterSettings.ElevationDeep);
-        writeFloat(mapWaterSettings.ElevationAbyss);
-        writeVector3f(mapWaterSettings.SurfaceColor);
-        writeVector2f(mapWaterSettings.ColorLerp);
-        writeFloat(mapWaterSettings.RefractionScale);
-        writeFloat(mapWaterSettings.FresnelBias);
-        writeFloat(mapWaterSettings.FresnelPower);
-        writeFloat(mapWaterSettings.UnitReflection);
-        writeFloat(mapWaterSettings.SkyReflection);
-        writeFloat(mapWaterSettings.SunShininess);
-        writeFloat(mapWaterSettings.SunStrength);
-        writeVector3f(mapWaterSettings.SunDirection);
-        writeVector3f(mapWaterSettings.SunColor);
-        writeFloat(mapWaterSettings.SunReflection);
-        writeFloat(mapWaterSettings.SunGlow);
-        writeStringNull(mapWaterSettings.TexPathCubemap);
-        writeStringNull(mapWaterSettings.TexPathWaterRamp);
+        writeByte((byte) (mapWaterSettings.isWaterPresent() ? 1 : 0));
+        writeFloat(mapWaterSettings.getElevation());
+        writeFloat(mapWaterSettings.getElevationDeep());
+        writeFloat(mapWaterSettings.getElevationAbyss());
+        writeVector3f(mapWaterSettings.getSurfaceColor());
+        writeVector2f(mapWaterSettings.getColorLerp());
+        writeFloat(mapWaterSettings.getRefractionScale());
+        writeFloat(mapWaterSettings.getFresnelBias());
+        writeFloat(mapWaterSettings.getFresnelPower());
+        writeFloat(mapWaterSettings.getUnitReflection());
+        writeFloat(mapWaterSettings.getSkyReflection());
+        writeFloat(mapWaterSettings.getSunShininess());
+        writeFloat(mapWaterSettings.getSunStrength());
+        writeVector3f(mapWaterSettings.getSunDirection());
+        writeVector3f(mapWaterSettings.getSunColor());
+        writeFloat(mapWaterSettings.getSunReflection());
+        writeFloat(mapWaterSettings.getSunGlow());
+        writeStringNull(mapWaterSettings.getTexPathCubemap());
+        writeStringNull(mapWaterSettings.getTexPathWaterRamp());
 
         // waves
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            writeFloat(mapWaterSettings.WaveTextures[i].NormalRepeat);
+            writeFloat(mapWaterSettings.getWaveTextures()[i].getNormalRepeat());
         }
 
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            writeVector2f(mapWaterSettings.WaveTextures[i].NormalMovement);
-            writeStringNull(mapWaterSettings.WaveTextures[i].TexPath);
+            writeVector2f(mapWaterSettings.getWaveTextures()[i].getNormalMovement());
+            writeStringNull(mapWaterSettings.getWaveTextures()[i].getTexPath());
         }
 
         // wave generators
@@ -124,12 +124,12 @@ public strictfp class SCMapExporter {
             writeByte((byte) 0); // unknown
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            writeStringNull(mapTerrainMaterials.texturePaths[i]);
-            writeFloat(mapTerrainMaterials.textureScales[i]);
+            writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
+            writeFloat(mapTerrainMaterials.getTextureScales()[i]);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
-            writeStringNull(mapTerrainMaterials.normalPaths[i]);
-            writeFloat(mapTerrainMaterials.normalScales[i]);
+            writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
+            writeFloat(mapTerrainMaterials.getNormalScales()[i]);
         }
 
         writeInt(0); // unknown

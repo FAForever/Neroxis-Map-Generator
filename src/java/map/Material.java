@@ -17,15 +17,7 @@ public strictfp class Material {
     private final Color previewColor;
 
     public Material(String environment, String name, float scale) {
-        this(environment, name, name, scale, null);
-    }
-
-    public Material(String environment, String texture, String normal, float scale, MaterialSet.PreviewColor previewColor) {
-        this(environment, texture, normal, scale, scale, previewColor);
-    }
-
-    public Material(String environment, String texture, String normal, float textureScale, float normalScale, MaterialSet.PreviewColor previewColor) {
-        this(environment, environment, texture, normal, textureScale, normalScale, previewColor);
+        this(environment, environment, name, name, scale, scale, null);
     }
 
     public Material(String texEnv, String normalEnv, String texture, String normal, float textureScale, float normalScale, MaterialSet.PreviewColor previewColor) {
@@ -34,7 +26,7 @@ public strictfp class Material {
         this.textureScale = textureScale;
         this.normalScale = normalScale;
         if (previewColor != null) {
-            this.previewColor = new Color(previewColor.red, previewColor.green, previewColor.blue);
+            this.previewColor = new Color(previewColor.getRed(), previewColor.getGreen(), previewColor.getBlue());
         } else {
             this.previewColor = new Color(127, 127, 127);
         }

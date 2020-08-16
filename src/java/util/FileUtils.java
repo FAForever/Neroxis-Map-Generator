@@ -53,6 +53,7 @@ public class FileUtils {
             }
 
             InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream(path + file);
+            assert inputStream != null;
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -74,10 +75,18 @@ public class FileUtils {
      * @param file the file to be read, either as path if to be read from the file system or as String if to be read from inside the currently running jar
      * @return the deserialized object
      */
-    public static <T> T deserialize(Object path, String file, Class clazz) throws IOException {
+    public static <T> T deserialize(Object path, String file, Class<?> clazz) throws IOException {
         String content = new String(readFully(path, file));
 
         return (T) gson.fromJson(content, clazz);
+    }
+
+    public static <T> void serialize(String filename, T obj, Class<?> clazz) throws IOException {
+        FileWriter file = new FileWriter(filename);
+        file.write(gson.toJson(obj, clazz));
+        file.flush();
+        file.close();
+
     }
 
     public static List<String> listFilesInZipDirectory(String dir, File zipFile) throws IOException {

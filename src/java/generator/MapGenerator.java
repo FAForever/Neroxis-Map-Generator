@@ -569,7 +569,7 @@ public strictfp class MapGenerator {
         lightRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightRockTexture");
 
         rock.combine(mountains).combine(plateaus.copy().outline().minus(ramps)).inflate(4).shrink(mapSize / 2);
-        grass.combine(land.copy().deflate(2)).minus(rock.copy().deflate(1)).acid(.001f, 2f).smooth(4, .75f).shrink(mapSize / 2);
+        grass.combine(land).acid(.001f, 2f).minus(rock.copy().deflate(1)).erode(.25f).erode(.25f).shrink(mapSize / 2);
         lightGrass.combine(land.copy().deflate(1)).minus(rock).acid(.01f, 4f).smooth(4, .4f).shrink(mapSize / 2);
         lightRock.combine(mountains).acid(.025f, 4f).shrink(mapSize / 2);
 
@@ -578,7 +578,7 @@ public strictfp class MapGenerator {
         rockDecal.combine(mountains).deflate(16);
 
         rockTexture.init(rock, 0, .999f).smooth(2);
-        grassTexture.init(grass, 0, .999f).smooth(4);
+        grassTexture.init(grass, 0, .999f).smooth(8);
         lightGrassTexture.init(lightGrass, 0, .999f).smooth(16);
         lightRockTexture.init(lightRock, 0, .999f).smooth(3);
     }
