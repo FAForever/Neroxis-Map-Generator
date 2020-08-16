@@ -3,6 +3,7 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import util.Vector2f;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -13,28 +14,32 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Getter
-public strictfp class FloatMask implements Mask {
+public strictfp class FloatMask extends Mask {
     private final Random random;
     private float[][] mask;
 
-    public FloatMask(int size, long seed) {
+    public FloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy) {
         this.mask = new float[size][size];
         this.random = new Random(seed);
+        this.symmetryHierarchy = symmetryHierarchy;
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 this.mask[x][y] = 0f;
             }
         }
+        VisualDebugger.visualizeMask(this);
     }
 
     public FloatMask(FloatMask mask, long seed) {
         this.mask = new float[mask.getSize()][mask.getSize()];
         this.random = new Random(seed);
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
+        VisualDebugger.visualizeMask(this);
     }
 
     public int getSize() {
@@ -84,18 +89,88 @@ public strictfp class FloatMask implements Mask {
     }
 
     public FloatMask maskToMountains(BinaryMask other) {
-        BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
-        BinaryMask randomMask = new BinaryMask(other, random.nextLong());
-        randomMask.randomize(random.nextFloat() * .25f).intersect(other);
-        FloatMask mountainBase = new FloatMask(getSize(), 0);
+        BinaryMask otherCopy = other.copy();
+        FloatMask mountainBase = new FloatMask(getSize(), 0, symmetryHierarchy);
         add(mountainBase.init(otherCopy, 0, 2f));
-        otherCopy.acid(random.nextFloat(), otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
         while (otherCopy.getCount() > 0) {
-            FloatMask layer = new FloatMask(getSize(), 0);
+            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, random.nextFloat() * .75f));
-            add(layer.init(randomMask, 0, random.nextFloat() * .1f));
-            otherCopy.acid(random.nextFloat(), otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
+//            add(layer.init(other.copy().acid(.1f, 2f), 0, random.nextFloat() * .15f));
+            otherCopy.erode(random.nextFloat());
         }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask erodeMountains(BinaryMask other) {
+        BinaryMask otherCopy = other.copy().fillHalf(false);
+        BinaryMask otherEdge = other.copy().inflate(10);
+        float velocity = 1f;
+        float inertia = .75f;
+        float capacity = 5f;
+        float deposition = .25f;
+        float erosion = .25f;
+        float gravity = 1f;
+        float evaporation = .05f;
+        for (int i = 0; i < 1; i++) {
+            Vector2f pos = otherCopy.getRandomPosition();
+            float x = 227;
+            float y = 133;
+            float dx = 0;
+            float dy = 0;
+            int radius = 1;
+            float sediment = 0;
+            float water = 1f;
+            float[][] maskCopy = this.copy().mask;
+            for (int j = 0; j < 100; j++){
+                int roundX = StrictMath.round(x);
+                int roundY = StrictMath.round(y);
+                if (roundX < 2 || roundX > getSize() - 2 || roundY < 2 || roundY > getSize() - 2 || !otherEdge.get(roundX, roundY)) {
+                    break;
+                }
+                float gx = get(roundX - 1, roundY) - get(roundX + 1, roundY);
+                float gy = get(roundX, roundY - 1) - get(roundX, roundY + 1);
+                float mag = (float) StrictMath.sqrt(gx * gx + gy * gy);
+                float height = get(roundX, roundY);
+                if (mag > 0) {
+                    gx = gx / mag;
+                    gy = gy / mag;
+                    dx = dx * inertia + gx * (1 - inertia);
+                    dy = dy * inertia + gy * (1 - inertia);
+                }
+                float xNew = x + dx;
+                float yNew = y + dy;
+                int roundXNew = StrictMath.round(xNew);
+                int roundYNew = StrictMath.round(yNew);
+                float heightNew = get(roundXNew, roundYNew);
+                float heightDif = heightNew - height;
+                if (heightDif < 0) {
+                    float carry = -heightDif * velocity * water * capacity;
+                    if (sediment < carry) {
+                        float change = StrictMath.min((carry - sediment) * erosion, -heightDif);
+                        maskCopy[roundX][roundY] -= change;
+                        sediment += change;
+                    } else {
+                        float change = StrictMath.min((sediment - carry) * deposition, -heightDif);
+                        maskCopy[roundX][roundY] += change;
+                        sediment -= change;
+                    }
+                } else {
+                    float change = StrictMath.min(sediment, heightDif);
+                    sediment -= change;
+                    maskCopy[roundX][roundY] += change;
+                }
+                velocity = (float) StrictMath.sqrt(StrictMath.max(velocity * velocity - heightDif * gravity, 0));
+                if (velocity == 0) {
+                    break;
+                }
+                water *= (1 - evaporation);
+                x = xNew;
+                y = yNew;
+            }
+            mask = maskCopy;
+        }
+//        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -105,16 +180,16 @@ public strictfp class FloatMask implements Mask {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
         int count = 0;
         if (otherCopy.getCount() == otherCopy.getSize() * otherCopy.getSize()) {
-            FloatMask layer = new FloatMask(getSize(), 0);
+            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, slope * otherCopy.getSize()));
             add(layer.init(randomMask.randomize(.5f), 0, slope * 5).smooth(4));
         } else {
             while (otherCopy.getCount() > 0 && count < maxRepeat) {
                 count++;
-                FloatMask layer = new FloatMask(getSize(), 0);
+                FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
                 add(layer.init(otherCopy, 0, slope));
                 add(layer.init(randomMask.randomize(.25f), 0, slope));
-                otherCopy.acid(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
+                otherCopy.erode(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
             }
         }
         otherCopy = new BinaryMask(other, random.nextLong());
@@ -122,9 +197,9 @@ public strictfp class FloatMask implements Mask {
         count = 0;
         while (otherCopy.getCount() > 0 && count < maxRepeat) {
             count++;
-            FloatMask layer = new FloatMask(getSize(), 0);
+            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, -underWaterSlope));
-            otherCopy.acid(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
+            otherCopy.erode(0.5f, otherCopy.getSymmetryHierarchy().getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -213,6 +288,21 @@ public strictfp class FloatMask implements Mask {
                     maskCopy[x][y] = avg / count;
                 } else {
                     maskCopy[x][y] = mask[x][y];
+                }
+            }
+        }
+    }
+
+    public void applySymmetry() {
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public void applySymmetry(Symmetry symmetry) {
+        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
+                for (Vector2f symPoint : symPoints) {
+                    mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
                 }
             }
         }

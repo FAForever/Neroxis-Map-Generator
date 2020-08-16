@@ -15,8 +15,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Getter
-public strictfp class BinaryMask implements Mask {
-    private final SymmetryHierarchy symmetryHierarchy;
+public strictfp class BinaryMask extends Mask {
     private final Random random;
     private boolean[][] mask;
 
@@ -24,6 +23,7 @@ public strictfp class BinaryMask implements Mask {
         this.mask = new boolean[size][size];
         this.random = new Random(seed);
         this.symmetryHierarchy = symmetryHierarchy;
+        VisualDebugger.visualizeMask(this);
     }
 
     public BinaryMask(int size, long seed, Symmetry symmetry) {
@@ -70,6 +70,7 @@ public strictfp class BinaryMask implements Mask {
         }
         this.symmetryHierarchy = new SymmetryHierarchy(symmetry, teamSymmetry);
         this.symmetryHierarchy.setSpawnSymmetry(spawnSymmetry);
+        VisualDebugger.visualizeMask(this);
     }
 
     public BinaryMask(BinaryMask mask, long seed) {
@@ -81,7 +82,7 @@ public strictfp class BinaryMask implements Mask {
                 this.mask[x][y] = mask.get(x, y);
             }
         }
-
+        VisualDebugger.visualizeMask(this);
     }
 
     public int getSize() {
@@ -234,15 +235,25 @@ public strictfp class BinaryMask implements Mask {
         return this;
     }
 
-    public BinaryMask acid(float strength) {
-        return acid(strength, symmetryHierarchy.getTerrainSymmetry());
+    public BinaryMask acid(float strength, float size) {
+        BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), getSymmetryHierarchy());
+        holes.randomize(strength).inflate(size);
+        BinaryMask maskCopy = this.copy();
+        maskCopy.minus(holes);
+        mask = maskCopy.getMask();
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
-    public BinaryMask acid(float strength, Symmetry symmetry) {
-        return acid(strength, symmetry, 1);
+    public BinaryMask erode(float strength) {
+        return erode(strength, symmetryHierarchy.getTerrainSymmetry());
     }
 
-    public BinaryMask acid(float strength, Symmetry symmetry, int count) {
+    public BinaryMask erode(float strength, Symmetry symmetry) {
+        return erode(strength, symmetry, 1);
+    }
+
+    public BinaryMask erode(float strength, Symmetry symmetry, int count) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
         for (int i = 0; i < count; i++) {
@@ -535,133 +546,6 @@ public strictfp class BinaryMask implements Mask {
             }
         }
         return null;
-    }
-
-    public Vector2f getSymmetryPoint(Vector3f v) {
-        return getSymmetryPoint(new Vector2f(v));
-    }
-
-    public Vector2f getSymmetryPoint(Vector2f v) {
-        return getSymmetryPoint(v, symmetryHierarchy.getSpawnSymmetry());
-    }
-
-    public Vector2f getSymmetryPoint(Vector2f v, Symmetry symmetry) {
-        return getSymmetryPoint(StrictMath.round(v.x), StrictMath.round(v.y), symmetry);
-    }
-
-    public Vector2f getSymmetryPoint(int x, int y) {
-        return getSymmetryPoint(x, y, symmetryHierarchy.getSpawnSymmetry());
-    }
-
-    public Vector2f getSymmetryPoint(int x, int y, Symmetry symmetry) {
-        switch (symmetry) {
-            case POINT:
-                return new Vector2f(getSize() - x - 1, getSize() - y - 1);
-            case X:
-                return new Vector2f(getSize() - x - 1, y);
-            case Y:
-                return new Vector2f(x, getSize() - y - 1);
-            case XY:
-                return new Vector2f(y, x);
-            case YX:
-                return new Vector2f(getSize() - y - 1, getSize() - x - 1);
-            default:
-                return null;
-        }
-    }
-
-    public float getReflectedRotation(float rot) {
-        return getReflectedRotation(rot, symmetryHierarchy.getSpawnSymmetry());
-    }
-
-    public float getReflectedRotation(float rot, Symmetry symmetry) {
-        switch (symmetry) {
-            case POINT:
-                return rot + (float) StrictMath.PI;
-            case X:
-                return (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
-            case Y:
-                return (float) StrictMath.atan2(StrictMath.sin(rot), -StrictMath.cos(rot));
-            case XY:
-            case YX:
-                return (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
-            default:
-                return rot;
-        }
-    }
-
-    public int getMinXBound(Symmetry symmetry) {
-        switch (symmetry) {
-            default:
-                return 0;
-        }
-    }
-
-    public int getMaxXBound(Symmetry symmetry) {
-        switch (symmetry) {
-            case X:
-            case QUAD:
-            case DIAG:
-                return getSize() / 2;
-            default:
-                return getSize();
-        }
-    }
-
-    public int getMinYBound(int x, Symmetry symmetry) {
-        switch (symmetry) {
-            case DIAG:
-                return x;
-            default:
-                return 0;
-        }
-    }
-
-    public int getMaxYBound(int x, Symmetry symmetry) {
-        switch (symmetry) {
-            case X:
-                return getSize();
-            case XY:
-                return x + 1;
-            case YX:
-            case DIAG:
-                return getSize() - x;
-            default:
-                return getSize() / 2;
-        }
-    }
-
-    public Vector2f[] getTerrainSymmetryPoints(int x, int y, Symmetry symmetry) {
-        Vector2f[] symmetryPoints;
-        Vector2f symPoint1;
-        Vector2f symPoint2;
-        Vector2f symPoint3;
-        switch (symmetry) {
-            case POINT:
-            case Y:
-            case X:
-            case XY:
-            case YX:
-                symPoint1 = getSymmetryPoint(x, y);
-                symmetryPoints = new Vector2f[]{symPoint1};
-                break;
-            case QUAD:
-                symPoint1 = getSymmetryPoint(x, y, Symmetry.Y);
-                symPoint2 = getSymmetryPoint(x, y, Symmetry.X);
-                symPoint3 = getSymmetryPoint(symPoint1, Symmetry.X);
-                symmetryPoints = new Vector2f[]{symPoint1, symPoint2, symPoint3};
-                break;
-            case DIAG:
-                symPoint1 = getSymmetryPoint(x, y, Symmetry.YX);
-                symPoint2 = getSymmetryPoint(x, y, Symmetry.XY);
-                symPoint3 = getSymmetryPoint(symPoint1, Symmetry.XY);
-                symmetryPoints = new Vector2f[]{symPoint1, symPoint2, symPoint3};
-                break;
-            default:
-                symmetryPoints = null;
-                break;
-        }
-        return symmetryPoints;
     }
 
     public void applySymmetry() {
