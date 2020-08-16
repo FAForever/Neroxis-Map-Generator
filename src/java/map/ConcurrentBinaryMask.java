@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Getter
-public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
+public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     private BinaryMask binaryMask;
     private String name;
@@ -92,21 +92,27 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
         );
     }
 
-    public ConcurrentBinaryMask acid(float strength, Symmetry symmetry, int count) {
+    public ConcurrentBinaryMask erode(float strength, Symmetry symmetry, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.acid(strength, symmetry, count)
+                this.binaryMask.erode(strength, symmetry, count)
         );
     }
 
-    public ConcurrentBinaryMask acid(float strength, Symmetry symmetry) {
+    public ConcurrentBinaryMask erode(float strength, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.acid(strength, symmetry)
+                this.binaryMask.erode(strength, symmetry)
         );
     }
 
-    public ConcurrentBinaryMask acid(float strength) {
+    public ConcurrentBinaryMask acid(float strength, float size) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.acid(strength)
+                this.binaryMask.acid(strength, size)
+        );
+    }
+
+    public ConcurrentBinaryMask erode(float strength) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.erode(strength)
         );
     }
 
@@ -198,6 +204,11 @@ public strictfp class ConcurrentBinaryMask implements ConcurrentMask {
 
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this.binaryMask);
+    }
+
+    @Override
+    int getSize() {
+        return binaryMask.getSize();
     }
 
     public void startVisualDebugger(String maskName) {

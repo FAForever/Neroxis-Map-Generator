@@ -1,5 +1,6 @@
 package loader;
 
+import biomes.Biome;
 import map.*;
 import util.DDSHeader;
 import util.Vector2f;
@@ -248,7 +249,7 @@ public strictfp class SCMapLoader {
 
         in.close();
 
-        SCMap map = new SCMap(widthInt,0,0,0);
+        SCMap map = new SCMap(widthInt,0,0,0, new Biome("loaded", mapTerrainMaterials, mapWaterSettings, mapLightingSettings));
         DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);

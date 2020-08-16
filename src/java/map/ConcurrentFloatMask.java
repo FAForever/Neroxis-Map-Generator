@@ -9,13 +9,13 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Getter
-public strictfp class ConcurrentFloatMask implements ConcurrentMask {
+public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     private FloatMask floatMask;
     private String name;
 
-    public ConcurrentFloatMask(int size, long seed, String name) {
-        this.floatMask = new FloatMask(size, seed);
+    public ConcurrentFloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
+        this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
         this.name = name;
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
@@ -46,6 +46,12 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
     public ConcurrentFloatMask add(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.add(((ConcurrentFloatMask) res.get(1)).getFloatMask())
+        );
+    }
+
+    public ConcurrentFloatMask erodeMountains(ConcurrentBinaryMask other) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.floatMask.erodeMountains(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
@@ -90,6 +96,11 @@ public strictfp class ConcurrentFloatMask implements ConcurrentMask {
 
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this.floatMask);
+    }
+
+    @Override
+    int getSize() {
+        return floatMask.getSize();
     }
 
     public void startVisualDebugger(String maskName) {

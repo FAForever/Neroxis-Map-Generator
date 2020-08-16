@@ -22,12 +22,12 @@
       "texture": {
         "environment": "evergreen2",
         "name": "eg_gravel2",
-        "scale": 6.0
+        "scale": 2.0
       },
       "normal": {
         "environment": "evergreen2",
         "name": "eg_gravel2_normal",
-        "scale": 6.0
+        "scale": 24.0
       },
       "previewColor": {
         "red": 82,

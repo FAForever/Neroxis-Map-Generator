@@ -5,8 +5,6 @@ import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
-import util.serialized.LightingSettings;
-import util.serialized.WaterSettings;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -81,8 +79,9 @@ public strictfp class SCMap {
     private final BufferedImage waterDepthBiasMask;
     private final BufferedImage terrainType;
 
-    public SCMap(int size, int spawnCount, int mexCount, int hydroCount) {
+    public SCMap(int size, int spawnCount, int mexCount, int hydroCount, Biome biome) {
         this.size = size;
+        this.biome = biome;
         spawns = new Vector3f[spawnCount];
         mexes = new Vector3f[mexCount];
         hydros = new Vector3f[hydroCount];
@@ -107,22 +106,6 @@ public strictfp class SCMap {
         }
         waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
-
-        biome = new Biome(
-                "Default",
-                new TerrainMaterials(
-                        new Material[]{
-                                new Material(DEFAULT_ENVIRONMENT, "SandLight", 4f),
-                                new Material(DEFAULT_ENVIRONMENT, "grass001", 4f),
-                                new Material(DEFAULT_ENVIRONMENT, "Dirt001", 4f),
-                                new Material(DEFAULT_ENVIRONMENT, "RockMed", 4f),
-                                new Material(DEFAULT_ENVIRONMENT, "snow001", 4f)
-                        },
-                        new Material(DEFAULT_ENVIRONMENT, "macrotexture000", 128f)
-                ),
-                new WaterSettings(),
-                new LightingSettings()
-        );
     }
 
     public int getSize() {

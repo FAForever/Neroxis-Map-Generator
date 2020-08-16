@@ -2,11 +2,11 @@ package map;
 
 import java.nio.file.Path;
 
-public strictfp interface ConcurrentMask extends Mask {
+public strictfp abstract class ConcurrentMask extends Mask {
 
-    ConcurrentMask mockClone();
+    abstract public ConcurrentMask mockClone();
 
-    String getName();
+    abstract public String getName();
 
-    void writeToFile(Path path);
+    abstract public void writeToFile(Path path);
 }
