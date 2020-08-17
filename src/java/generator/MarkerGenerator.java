@@ -128,8 +128,8 @@ public strictfp class MarkerGenerator {
         int baseMexCount = iMex;
         int nonBaseMexCount = totalMexCount - baseMexCount;
 
-        if (nonBaseMexCount / 2 > 12) {
-            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / 2 / 2) + nonBaseMexCount / 2 / 4) * 2;
+        if (nonBaseMexCount / 2 > 10) {
+            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / 2 / 2) + nonBaseMexCount / 2 / 2) * 2;
             actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
             numMexesLeft = nonBaseMexCount - actualExpMexCount;
         } else {
