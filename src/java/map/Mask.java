@@ -109,7 +109,7 @@ public strictfp abstract class Mask {
             case X:
             case QUAD:
             case DIAG:
-                return getSize() / 2;
+                return getSize() / 2 + 1;
             default:
                 return getSize();
         }
@@ -134,7 +134,7 @@ public strictfp abstract class Mask {
             case DIAG:
                 return getSize() - x;
             default:
-                return getSize() / 2;
+                return getSize() / 2 + 1;
         }
     }
 }
