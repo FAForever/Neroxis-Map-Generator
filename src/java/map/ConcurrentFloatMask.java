@@ -17,6 +17,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     public ConcurrentFloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
         this.name = name;
+        this.symmetryHierarchy = this.floatMask.getSymmetryHierarchy();
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
@@ -32,6 +33,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
                 return Collections.singletonList(this.floatMask);
             });
         }
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
 
     public ConcurrentFloatMask init(ConcurrentBinaryMask other, float low, float high) {

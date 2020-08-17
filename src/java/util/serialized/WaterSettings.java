@@ -1,6 +1,7 @@
 package util.serialized;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -14,33 +15,33 @@ import static map.SCMap.*;
  * Compliant with ozonex's WaterSettings format
  */
 
+@Data
 public strictfp class WaterSettings {
-    public boolean HasWater = true;
-    public float Elevation = WATER_HEIGHT;
-    public float ElevationDeep = WATER_DEEP_HEIGHT;
-    public float ElevationAbyss = WATER_ABYSS_HEIGHT;
+    private boolean waterPresent = true;
+    private float elevation = WATER_HEIGHT;
+    private float elevationDeep = WATER_DEEP_HEIGHT;
+    private float elevationAbyss = WATER_ABYSS_HEIGHT;
 
+    private Vector3f surfaceColor = WATER_SURFACE_COLOR;
+    private Vector2f colorLerp = WATER_COLOR_LERP;
+    private float refractionScale = WATER_REFRACTION;
+    private float fresnelBias = WATER_FRESNEL_BIAS;
+    private float fresnelPower = WATER_FRESNEL_POWER;
 
-    public Vector3f SurfaceColor = WATER_SURFACE_COLOR;
-    public Vector2f ColorLerp = WATER_COLOR_LERP;
-    public float RefractionScale = WATER_REFRACTION;
-    public float FresnelBias = WATER_FRESNEL_BIAS;
-    public float FresnelPower = WATER_FRESNEL_POWER;
+    private float unitReflection = WATER_UNIT_REFLECTION;
+    private float skyReflection = WATER_SKY_REFLECTION;
 
-    public float UnitReflection = WATER_UNIT_REFLECTION;
-    public float SkyReflection = WATER_SKY_REFLECTION;
+    private float sunShininess = WATER_SUN_SHININESS;
+    private float sunStrength = WATER_SUN_STRENGH;
+    private Vector3f sunDirection = WATER_SUN_DIRECTION;
+    private Vector3f sunColor = WATER_SUN_COLOR;
+    private float sunReflection = WATER_SUN_REFLECTION;
+    private float sunGlow = WATER_SUN_GLOW;
 
-    public float SunShininess = WATER_SUN_SHININESS;
-    public float SunStrength = WATER_SUN_STRENGH;
-    public Vector3f SunDirection = WATER_SUN_DIRECTION;
-    public Vector3f SunColor = WATER_SUN_COLOR;
-    public float SunReflection = WATER_SUN_REFLECTION;
-    public float SunGlow = WATER_SUN_GLOW;
+    private String texPathCubemap = WATER_CUBEMAP_PATH;
+    private String texPathWaterRamp = WATER_RAMP_PATH;
 
-    public String TexPathCubemap = WATER_CUBEMAP_PATH;
-    public String TexPathWaterRamp = WATER_RAMP_PATH;
-
-    public WaveTexture[] WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
+    private WaveTexture[] waveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
 
     private static WaveTexture[] makeWaveTextures(
             String[] waveTexturePaths,
@@ -53,10 +54,11 @@ public strictfp class WaterSettings {
         return texs.toArray(new WaveTexture[0]);
     }
 
+    @Data
     @AllArgsConstructor
     public static strictfp class WaveTexture {
-        public String TexPath;
-        public Vector2f NormalMovement;
-        public float NormalRepeat;
+        private String TexPath;
+        private Vector2f NormalMovement;
+        private float NormalRepeat;
     }
 }
