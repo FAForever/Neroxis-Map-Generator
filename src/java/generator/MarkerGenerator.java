@@ -27,7 +27,7 @@ public strictfp class MarkerGenerator {
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
 
-        if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
+        if (map.getSpawns().length <= 4 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
         spawnable.fillHalf(true).fillCenter(map.getSize() * 7 / 16, false).trimEdge(map.getSize() / 16);

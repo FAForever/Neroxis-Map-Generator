@@ -296,7 +296,7 @@ public strictfp class MapGenerator {
         reclaimDensity = random.nextInt(127) / 127f;
         mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(40 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
-        if (spawnCount == 2) {
+        if (spawnCount <= 4) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
         } else {
             symmetries = Symmetry.values();
