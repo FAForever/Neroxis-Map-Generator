@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final String VERSION = "1.0.14";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
@@ -415,8 +415,8 @@ public strictfp class MapGenerator {
             long sTime = System.currentTimeMillis();
             BinaryMask plateauResource = new BinaryMask(resourceMask.getBinaryMask(), random.nextLong());
             plateauResource.intersect(plateaus.getBinaryMask()).trimEdge(16).fillCenter(16, true);
-            BinaryMask waterMex = land.getBinaryMask().copy();
-            waterMex.invert().deflate(48).trimEdge(16).fillCenter(16, false);
+            BinaryMask waterMex = land.getBinaryMask().copy().invert();
+            waterMex.deflate(48).trimEdge(16).fillCenter(16, false);
             markerGenerator.generateMexes(resourceMask.getBinaryMask(), plateauResource, waterMex);
             BinaryMask hydroSpawn = new BinaryMask(land.getBinaryMask(), random.nextLong());
             hydroSpawn.minus(ramps.getBinaryMask()).minus(rock.getBinaryMask()).deflate(6);
@@ -510,6 +510,8 @@ public strictfp class MapGenerator {
         plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
 
+        land.startVisualDebugger("l");
+
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).erode(.5f);
         mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(128).smooth(8f, .6f).erode(.5f);
         plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).erode(.5f);
@@ -568,8 +570,10 @@ public strictfp class MapGenerator {
         lightGrassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightGrassTexture");
         lightRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightRockTexture");
 
+        grass.startVisualDebugger("res");
+
         rock.combine(mountains).combine(plateaus.copy().outline().minus(ramps)).inflate(4).shrink(mapSize / 2);
-        grass.combine(land).acid(.001f, 2f).minus(rock.copy().deflate(1)).erode(.25f).erode(.25f).shrink(mapSize / 2);
+        grass.combine(land).acid(.001f, 2f).minus(rock.copy().deflate(1)).erode(.25f, symmetryHierarchy.getSpawnSymmetry()).erode(.25f, symmetryHierarchy.getSpawnSymmetry()).shrink(mapSize / 2);
         lightGrass.combine(land.copy().deflate(1)).minus(rock).acid(.01f, 4f).smooth(4, .4f).shrink(mapSize / 2);
         lightRock.combine(mountains).acid(.025f, 4f).shrink(mapSize / 2);
 
@@ -608,16 +612,16 @@ public strictfp class MapGenerator {
         cliffRockMask.randomize(.25f).intersect(rock).minus(plateaus).minus(mountains).intersect(land).inflate(2);
         fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(grass);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
-        treeMask.randomize(.1f).inflate(1).cutCorners().erode(.5f).enlarge(mapSize / 4).smooth(4).erode(.5f);
+        treeMask.randomize(.1f).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         treeMask.enlarge(mapSize / 2).intersect(grass).minus(rock);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3).fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 8f, false);
-        rockFieldMask.randomize(reclaimDensity * .00025f).trimEdge(mapSize / 32).inflate(3).erode(.5f).intersect(land).minus(mountains);
+        rockFieldMask.randomize(reclaimDensity * .00025f).trimEdge(mapSize / 32).inflate(3).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).minus(mountains);
     }
 
     private void setupResourcePipeline() {
         resourceMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "resource");
 
-        resourceMask.combine(grass).minus(rock).minus(ramps).deflate(4);
+        resourceMask.combine(land).minus(rock).minus(ramps).deflate(4);
         resourceMask.trimEdge(16).fillCenter(16, false);
     }
 
