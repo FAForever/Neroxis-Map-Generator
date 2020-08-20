@@ -14,7 +14,7 @@ public strictfp class ScenarioExporter {
         out.writeBytes("version = 3\n");
         out.writeBytes("ScenarioInfo = {\n");
         out.writeBytes("  name = '" + mapname + "',\n");
-        out.writeBytes("  description = '<LOC Empty_Description>',\n");
+        out.writeBytes("  description = 'Your Quantum Gateway malfunctioned and deposited you on this random planet. It looks like you will have to fight your way out',\n");
         out.writeBytes("  type = 'skirmish',\n");
         out.writeBytes("  starts = true,\n");
         out.writeBytes("  preview = '',\n");
