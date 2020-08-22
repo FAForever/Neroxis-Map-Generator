@@ -84,7 +84,7 @@ public strictfp class MarkerGenerator {
         BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
         float spawnDensity = (float) spawnable.getCount() / map.getSize() / map.getSize() * 2;
-        int mexSpawnDistance = (int) StrictMath.max(StrictMath.min(spawnDensity * map.getSize() / 4, spawnSize * 3), spawnSize * 2);
+        int mexSpawnDistance = (int) StrictMath.max(StrictMath.min(spawnDensity * map.getSize() / 6, spawnSize * 2.5), spawnSize);
         BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             spawnable.fillCircle(map.getSpawns()[i + 1], 24, false);
