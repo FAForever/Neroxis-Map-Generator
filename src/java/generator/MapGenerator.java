@@ -467,7 +467,6 @@ public strictfp class MapGenerator {
 
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
             long sTime = System.currentTimeMillis();
-            decalGenerator.generateDecals(erosion.getBinaryMask().minus(noDecals), DecalGenerator.EROSION, 48f, 32f);
             decalGenerator.generateDecals(intDecal.getBinaryMask().minus(noDecals), DecalGenerator.INT, 96f, 64f);
             decalGenerator.generateDecals(rockDecal.getBinaryMask().minus(noDecals), DecalGenerator.ROCKS, 8f, 16f);
             if (DEBUG) {
@@ -582,7 +581,6 @@ public strictfp class MapGenerator {
         grass = new ConcurrentBinaryMask(land, random.nextLong(),"grass");
         rock = new ConcurrentBinaryMask(unpassable, random.nextLong(), "rock");
         ConcurrentBinaryMask lightRock = new ConcurrentBinaryMask(mountains, random.nextLong(), "lightRock");
-        erosion = new ConcurrentBinaryMask(land, random.nextLong(), "erosion");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
         rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
         ConcurrentBinaryMask lightGrass = new ConcurrentBinaryMask(land, random.nextLong(), "lightGrass");
@@ -596,8 +594,7 @@ public strictfp class MapGenerator {
         lightGrass.combine(land.copy().deflate(1)).minus(rock).acid(.01f, 4f).smooth(4, .4f).shrink(mapSize / 2);
         lightRock.combine(mountains).acid(.025f, 4f).shrink(mapSize / 2);
 
-        erosion.combine(grass).minus(rock).enlarge(mapSize + 1).deflate(16);
-        intDecal.combine(grass).minus(rock).enlarge(mapSize + 1).deflate(32);
+        intDecal.combine(grass).minus(rock).minus(ramps).enlarge(mapSize + 1).deflate(32);
         rockDecal.combine(mountains).deflate(16);
 
         rockTexture.init(rock, 0, 1f).smooth(2);
