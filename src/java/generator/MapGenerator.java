@@ -640,7 +640,7 @@ public strictfp class MapGenerator {
     private void setupResourcePipeline() {
         resourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "resource");
 
-        resourceMask.minus(unpassable).minus(ramps).deflate(4);
+        resourceMask.minus(unpassable).minus(ramps).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
     }
 
