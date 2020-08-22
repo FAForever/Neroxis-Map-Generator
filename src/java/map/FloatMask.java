@@ -175,26 +175,10 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
-    public FloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, BinaryMask other) {
-        BinaryMask randomMask = new BinaryMask(other, random.nextLong());
+    public FloatMask maskToHeightmap(float underWaterSlope, int maxRepeat, BinaryMask other) {
         BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
-        int count = 0;
-        if (otherCopy.getCount() == otherCopy.getSize() * otherCopy.getSize()) {
-            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-            add(layer.init(otherCopy, 0, slope * otherCopy.getSize()));
-            add(layer.init(randomMask.randomize(.5f), 0, slope * 5).smooth(4));
-        } else {
-            while (otherCopy.getCount() > 0 && count < maxRepeat) {
-                count++;
-                FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-                add(layer.init(otherCopy, 0, slope));
-                add(layer.init(randomMask.randomize(.25f), 0, slope));
-                otherCopy.erode(0.5f, symmetryHierarchy.getSpawnSymmetry());
-            }
-        }
-        otherCopy = new BinaryMask(other, random.nextLong());
         otherCopy.invert();
-        count = 0;
+        int count = 0;
         while (otherCopy.getCount() > 0 && count < maxRepeat) {
             count++;
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
@@ -291,6 +275,25 @@ public strictfp class FloatMask extends Mask {
                 }
             }
         }
+    }
+
+    public FloatMask gradient() {
+        float[][] maskCopy = new float[getSize()][getSize()];
+        for (int x = getMinXBound(); x < getMaxXBound(); x++) {
+            for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
+                int xNeg = StrictMath.max(0,x - 1);
+                int xPos = StrictMath.min(getSize() - 1, x + 1);
+                int yNeg = StrictMath.max(0,y - 1);
+                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                float xSlope = get(xPos, y) - get(xNeg, y);
+                float ySlope = get(x, yPos) - get(x, yNeg);
+                maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
+            }
+        }
+        mask = maskCopy;
+        applySymmetry();
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
     public void applySymmetry() {

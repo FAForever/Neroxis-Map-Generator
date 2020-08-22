@@ -85,6 +85,18 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
+    public BinaryMask(FloatMask mask, float threshold, long seed) {
+        this.mask = new boolean[mask.getSize()][mask.getSize()];
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
+        this.random = new Random(seed);
+        for (int x = 0; x < mask.getSize(); x++) {
+            for (int y = 0; y < mask.getSize(); y++) {
+                this.mask[x][y] = mask.get(x, y) > threshold;
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+    }
+
     public int getSize() {
         return mask[0].length;
     }
@@ -106,9 +118,38 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask randomize(float density) {
-        for (int x = getMinXBound(symmetryHierarchy.getTerrainSymmetry()); x < getMaxXBound(symmetryHierarchy.getTerrainSymmetry()); x++) {
-            for (int y = getMinYBound(x, symmetryHierarchy.getTerrainSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getTerrainSymmetry()); y++) {
+        for (int x = getMinXBound(); x < getMaxXBound(); x++) {
+            for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
                 mask[x][y] = random.nextFloat() < density;
+            }
+        }
+        applySymmetry();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask randomWalk(int numWalkers, int numSteps) {
+        for (int i = 0; i < numWalkers; i++) {
+            int x = random.nextInt(getMaxXBound() - getMinXBound()) + getMinXBound();
+            int y = random.nextInt(getMaxYBound(x) - getMinYBound(x) + 1) + getMinYBound(x);
+            for (int j = 0; j < numSteps; j++) {
+                if (x >= 0 && x < getSize() && y >= 0 && y < getSize())
+                mask[x][y] = true;
+                int dir = random.nextInt(4);
+                switch (dir){
+                    case 0:
+                        x++;
+                        break;
+                    case 1:
+                        x--;
+                        break;
+                    case 2:
+                        y++;
+                        break;
+                    case 3:
+                        y--;
+                        break;
+                }
             }
         }
         applySymmetry();
@@ -245,6 +286,35 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask grow(float strength) {
+        return grow(strength, symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public BinaryMask grow(float strength, Symmetry symmetry) {
+        return grow(strength, symmetry, 1);
+    }
+
+    public BinaryMask grow(float strength, Symmetry symmetry, int count) {
+        for (int i = 0; i < count; i++) {
+            boolean[][] maskCopy = new boolean[getSize()][getSize()];
+            for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
+                for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
+                    if (x >= 0 && y >=0 && x < getSize() && y < getSize()) {
+                        boolean value = (((x > 0 && mask[x - 1][y]) || (y > 0 && mask[x][y - 1])
+                                || (x < getSize() - 1 && mask[x + 1][y])
+                                || (y < getSize() - 1 && mask[x][y + 1]))
+                                && random.nextFloat() < strength);
+                        maskCopy[x][y] = mask[x][y] || value;
+                    }
+                }
+            }
+            mask = maskCopy;
+        }
+        applySymmetry(symmetry);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask erode(float strength) {
         return erode(strength, symmetryHierarchy.getTerrainSymmetry());
     }
@@ -254,9 +324,8 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask erode(float strength, Symmetry symmetry, int count) {
-        boolean[][] maskCopy = new boolean[getSize()][getSize()];
-
         for (int i = 0; i < count; i++) {
+            boolean[][] maskCopy = new boolean[getSize()][getSize()];
             for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
                 for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
                     if (x >= 0 && y >=0 && x < getSize() && y < getSize()) {

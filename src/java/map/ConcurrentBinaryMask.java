@@ -32,14 +32,13 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, long seed, String name) {
         this.name = name;
+        this.binaryMask = new BinaryMask(1, seed, mask.getSymmetryHierarchy());
 
         if (name.equals("mocked")) {
             this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
-            Pipeline.add(this, Collections.singletonList(mask), res -> {
-                this.binaryMask = new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed);
-                return Collections.singletonList(this.binaryMask);
-            });
+            Pipeline.add(this, Collections.singletonList(mask), res ->
+                this.binaryMask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
@@ -47,7 +46,26 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     public ConcurrentBinaryMask(BinaryMask mask, long seed, String name) {
         this.name = name;
         this.binaryMask = new BinaryMask(mask, seed);
-        this.symmetryHierarchy = this.binaryMask.getSymmetryHierarchy();
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
+    }
+
+    public ConcurrentBinaryMask(FloatMask mask, float threshold, long seed, String name) {
+        this.name = name;
+        this.binaryMask = new BinaryMask(mask, threshold, seed);
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
+    }
+
+    public ConcurrentBinaryMask(ConcurrentFloatMask mask, float threshold, long seed, String name) {
+        this.name = name;
+        this.binaryMask = new BinaryMask(1, seed, mask.getSymmetryHierarchy());
+
+        if (name.equals("mocked")) {
+            this.binaryMask = new BinaryMask(mask.getFloatMask(), threshold, seed);
+        } else {
+            Pipeline.add(this, Collections.singletonList(mask), res ->
+                    this.binaryMask.combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
+        }
+        this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
 
     public ConcurrentBinaryMask copy(){
@@ -57,6 +75,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.randomize(density)
+        );
+    }
+
+    public ConcurrentBinaryMask randomWalk(int numWalkers, int numSteps) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.randomWalk(numWalkers, numSteps)
         );
     }
 
@@ -93,6 +117,18 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     public ConcurrentBinaryMask cutCorners() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.cutCorners()
+        );
+    }
+
+    public ConcurrentBinaryMask grow(float strength, Symmetry symmetry, int count) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.grow(strength, symmetry, count)
+        );
+    }
+
+    public ConcurrentBinaryMask grow(float strength, Symmetry symmetry) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.grow(strength, symmetry)
         );
     }
 

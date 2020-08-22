@@ -1,7 +1,6 @@
 package generator;
 
 import lombok.Value;
-import util.MaskNameComparator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +15,8 @@ public class VisualDebuggerGui {
     private static Container contentPane;
     private static JList<MaskListItem> list;
     private static JPanel canvasContainer;
-    private static DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
-    private static Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
+    private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
+    private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
 
     public static boolean isCreated() {
         return frame != null;
@@ -55,9 +54,8 @@ public class VisualDebuggerGui {
         contentPane.add(listScroller);
     }
 
-    public static void update(String uniqueMaskName, BufferedImage image, float zoomFactor) {
+    public synchronized static void update(String uniqueMaskName, BufferedImage image, float zoomFactor) {
         if (!uniqueMaskName.isEmpty()) {
-            MaskNameComparator maskNameComparator = new MaskNameComparator();
             int ind = listModel.getSize();
             int count = 0;
             for (int i = 0; i < listModel.getSize(); i++) {
@@ -71,6 +69,8 @@ public class VisualDebuggerGui {
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
             canvas.setViewModel(image, zoomFactor);
+            list.setSelectedIndex(0);
+            list.ensureIndexIsVisible(0);
         }
     }
 
