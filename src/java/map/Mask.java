@@ -97,11 +97,19 @@ public strictfp abstract class Mask {
         }
     }
 
+    public int getMinXBound() {
+        return getMinXBound(symmetryHierarchy.getTerrainSymmetry());
+    }
+
     public int getMinXBound(Symmetry symmetry) {
         switch (symmetry) {
             default:
                 return 0;
         }
+    }
+
+    public int getMaxXBound() {
+        return getMaxXBound(symmetryHierarchy.getTerrainSymmetry());
     }
 
     public int getMaxXBound(Symmetry symmetry) {
@@ -115,6 +123,10 @@ public strictfp abstract class Mask {
         }
     }
 
+    public int getMinYBound(int x) {
+        return getMinYBound(x, symmetryHierarchy.getTerrainSymmetry());
+    }
+
     public int getMinYBound(int x, Symmetry symmetry) {
         switch (symmetry) {
             case DIAG:
@@ -122,6 +134,10 @@ public strictfp abstract class Mask {
             default:
                 return 0;
         }
+    }
+
+    public int getMaxYBound(int x) {
+        return getMaxYBound(x, symmetryHierarchy.getTerrainSymmetry());
     }
 
     public int getMaxYBound(int x, Symmetry symmetry) {

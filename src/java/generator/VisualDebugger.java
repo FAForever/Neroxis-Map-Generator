@@ -38,7 +38,7 @@ public class VisualDebugger {
         createGUI();
     }
 
-    public static void createGUI() {
+    public synchronized static void createGUI() {
         if (!VisualDebuggerGui.isCreated()) {
             VisualDebuggerGui.createGui();
         }

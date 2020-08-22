@@ -24,14 +24,13 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
         this.name = name;
+        this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetryHierarchy());
 
         if (name.equals("mocked")) {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);
         } else {
-            Pipeline.add(this, Collections.singletonList(mask), res -> {
-                this.floatMask = new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), seed);
-                return Collections.singletonList(this.floatMask);
-            });
+            Pipeline.add(this, Collections.singletonList(mask), res ->
+                    this.floatMask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), seed)));
         }
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
@@ -63,9 +62,9 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentFloatMask maskToHeightmap(float slope, float underWaterSlope, int maxRepeat, ConcurrentBinaryMask other) {
+    public ConcurrentFloatMask maskToHeightmap(float underWaterSlope, int maxRepeat, ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToHeightmap(slope, underWaterSlope, maxRepeat, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.floatMask.maskToHeightmap(underWaterSlope, maxRepeat, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
@@ -78,6 +77,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     public ConcurrentFloatMask smooth(float radius, ConcurrentBinaryMask limiter) {
         return Pipeline.add(this, Arrays.asList(this, limiter), res ->
                 this.floatMask.smooth(radius, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
+    public ConcurrentFloatMask gradient() {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.gradient()
         );
     }
 
