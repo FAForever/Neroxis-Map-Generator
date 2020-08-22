@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final String VERSION = "1.0.14";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
@@ -510,8 +510,6 @@ public strictfp class MapGenerator {
         plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
 
-        land.startVisualDebugger("l");
-
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).erode(.5f);
         mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(128).smooth(8f, .6f).erode(.5f);
         plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).erode(.5f);
@@ -569,8 +567,6 @@ public strictfp class MapGenerator {
         grassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "grassTexture");
         lightGrassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightGrassTexture");
         lightRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightRockTexture");
-
-        grass.startVisualDebugger("res");
 
         rock.combine(mountains).combine(plateaus.copy().outline().minus(ramps)).inflate(4).shrink(mapSize / 2);
         grass.combine(land).acid(.001f, 2f).minus(rock.copy().deflate(1)).erode(.25f, symmetryHierarchy.getSpawnSymmetry()).erode(.25f, symmetryHierarchy.getSpawnSymmetry()).shrink(mapSize / 2);
