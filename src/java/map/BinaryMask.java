@@ -130,7 +130,7 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask randomWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
-            int x = random.nextInt(getMaxXBound() - getMinXBound() + 1) + getMinXBound();
+            int x = random.nextInt(getMaxXBound() - getMinXBound()) + getMinXBound();
             int y = random.nextInt(getMaxYBound(x) - getMinYBound(x) + 1) + getMinYBound(x);
             for (int j = 0; j < numSteps; j++) {
                 if (x >= 0 && x < getSize() && y >= 0 && y < getSize())
