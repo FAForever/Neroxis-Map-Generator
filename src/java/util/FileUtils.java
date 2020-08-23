@@ -1,7 +1,10 @@
 package util;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.SneakyThrows;
+import map.TerrainMaterials;
+import util.serialized.TerrainMaterialsAdapter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -18,7 +21,7 @@ import java.util.zip.ZipInputStream;
 public class FileUtils {
 
     private static final String DIRECTORY_PATTERN = "%s/[^/]+/";
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).create();
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {

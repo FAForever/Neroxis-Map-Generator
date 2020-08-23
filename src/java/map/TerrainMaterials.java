@@ -18,6 +18,7 @@ public strictfp class TerrainMaterials {
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
     private Color[] previewColors = new Color[TERRAIN_NORMAL_COUNT];
 
+    public TerrainMaterials() {}
 
     public TerrainMaterials(Material[] materials, Material macroTexture) {
         for (int i = 0; i < TERRAIN_TEXTURE_COUNT; i++) {
