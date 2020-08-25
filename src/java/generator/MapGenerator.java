@@ -24,7 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 @Getter
@@ -80,7 +83,6 @@ public strictfp class MapGenerator {
     private ConcurrentFloatMask grassTexture;
     private ConcurrentBinaryMask rock;
     private ConcurrentFloatMask rockTexture;
-    private ConcurrentBinaryMask erosion;
     private ConcurrentBinaryMask rockDecal;
     private ConcurrentBinaryMask intDecal;
     private ConcurrentBinaryMask allWreckMask;
@@ -414,9 +416,19 @@ public strictfp class MapGenerator {
 
         Pipeline.start();
 
-        Pipeline.await(resourceMask, plateaus, land, unpassable);
+        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(grassTexture, lightGrassTexture, rockTexture, lightRockTexture);
+            long sTime = System.currentTimeMillis();
+            map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture.getFloatMask(), rockTexture.getFloatMask(), lightRockTexture.getFloatMask());
+            if (DEBUG) {
+                System.out.printf("Done: %4d ms, %s, generateTextures\n",
+                        System.currentTimeMillis() - sTime,
+                        Util.getStackTraceLineInClass(MapGenerator.class));
+            }
+        });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable);
             long sTime = System.currentTimeMillis();
             BinaryMask plateauResource = new BinaryMask(resourceMask.getBinaryMask(), random.nextLong());
             plateauResource.intersect(plateaus.getBinaryMask()).trimEdge(16).fillCenter(16, true);
@@ -437,6 +449,7 @@ public strictfp class MapGenerator {
         resourcesFuture.join();
 
         CompletableFuture<Void> wrecksFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
             long sTime = System.currentTimeMillis();
             wreckGenerator.generateWrecks(t1LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T1_Land, 3f);
             wreckGenerator.generateWrecks(t2LandWreckMask.getBinaryMask().minus(noWrecks), WreckGenerator.T2_Land, 30f);
@@ -451,6 +464,7 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(treeMask, cliffRockMask, rockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
             propGenerator.generateProps(treeMask.getBinaryMask().minus(noProps), PropGenerator.TREE_GROUPS, 3f);
             propGenerator.generateProps(cliffRockMask.getBinaryMask().minus(noProps), PropGenerator.ROCKS, 2f);
@@ -463,9 +477,8 @@ public strictfp class MapGenerator {
             }
         });
 
-        Pipeline.await(erosion, intDecal, rockDecal);
-
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(intDecal, rockDecal);
             long sTime = System.currentTimeMillis();
             decalGenerator.generateDecals(intDecal.getBinaryMask().minus(noDecals), DecalGenerator.INT, 96f, 64f);
             decalGenerator.generateDecals(rockDecal.getBinaryMask().minus(noDecals), DecalGenerator.ROCKS, 8f, 16f);
@@ -476,19 +489,12 @@ public strictfp class MapGenerator {
             }
         });
 
-        Pipeline.await(heightmapBase);
-        wrecksFuture.join();
-        propsFuture.join();
-        decalsFuture.join();
-
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(heightmapBase);
             long sTime = System.currentTimeMillis();
             map.setHeightmap(heightmapBase.getFloatMask());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
-            markerGenerator.setMarkerHeights();
-            propGenerator.setPropHeights();
-            wreckGenerator.setWreckHeights();
-            decalGenerator.setDecalHeights();
+            Preview.generate(map.getPreview(), map);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, setHeightmap\n",
                         System.currentTimeMillis() - sTime,
@@ -496,12 +502,27 @@ public strictfp class MapGenerator {
             }
         });
 
+        wrecksFuture.join();
+        propsFuture.join();
+        decalsFuture.join();
         heightMapFuture.join();
+
+        CompletableFuture<Void> placementFuture = CompletableFuture.runAsync(() -> {
+            long sTime = System.currentTimeMillis();
+            markerGenerator.setMarkerHeights();
+            propGenerator.setPropHeights();
+            wreckGenerator.setWreckHeights();
+            decalGenerator.setDecalHeights();
+            if (DEBUG) {
+                System.out.printf("Done: %4d ms, %s, setPlacements\n",
+                        System.currentTimeMillis() - sTime,
+                        Util.getStackTraceLineInClass(MapGenerator.class));
+            }
+        });
+
+        textureFuture.join();
+        placementFuture.join();
         Pipeline.stop();
-
-        map.setTextureMaskLow(grassTexture.getFloatMask(), lightGrassTexture.getFloatMask(), rockTexture.getFloatMask(), lightRockTexture.getFloatMask());
-
-        Preview.generate(map.getPreview(), map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
