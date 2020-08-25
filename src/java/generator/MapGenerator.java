@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static final boolean DEBUG = false;
+    public static boolean DEBUG = false;
     public static final String VERSION = "1.0.15";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
 
@@ -188,8 +188,13 @@ public strictfp class MapGenerator {
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
                     "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Y, XY, YX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
-                    "--biome arg		    optional, set the biome");
+                    "--biome arg		    optional, set the biome\n" +
+                    "--debug                optional, turn on debugging options");
             System.exit(0);
+        }
+
+        if (arguments.containsKey("debug")) {
+            DEBUG = true;
         }
 
         if (arguments.containsKey("folder-path")) {
