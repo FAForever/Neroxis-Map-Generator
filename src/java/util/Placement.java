@@ -2,7 +2,7 @@ package util;
 
 import map.SCMap;
 
-public class Placement {
+public strictfp class Placement {
 
     public static Vector3f placeOnHeightmap(SCMap map, Vector2f v) {
         return placeOnHeightmap(map, v.x, v.y);
