@@ -5,6 +5,7 @@ import lombok.Getter;
 import util.Pipeline;
 
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -30,7 +31,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.floatMask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), seed)));
+                    this.floatMask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.floatMask.getRandom().nextLong())));
         }
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
@@ -89,6 +90,11 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     @Override
     public void writeToFile(Path path) {
         floatMask.writeToFile(path);
+    }
+
+    @Override
+    public String toHash() throws NoSuchAlgorithmException {
+        return floatMask.toHash();
     }
 
     public FloatMask getFloatMask() {

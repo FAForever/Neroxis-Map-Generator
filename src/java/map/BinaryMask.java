@@ -9,8 +9,11 @@ import util.Vector3f;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -636,6 +639,7 @@ public strictfp class BinaryMask extends Mask {
 
     @SneakyThrows
     public void writeToFile(Path path) {
+        Files.deleteIfExists(path);
         Files.createFile(path);
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
 
@@ -646,6 +650,22 @@ public strictfp class BinaryMask extends Mask {
         }
 
         out.close();
+    }
+
+    public String toHash() throws NoSuchAlgorithmException {
+        ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize());
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                byte b = mask[x][y] ? (byte) 1 : 0;
+                bytes.put(b);
+            }
+        }
+        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte datum : data) {
+            stringBuilder.append(String.format("%02x", datum));
+        }
+        return stringBuilder.toString();
     }
 
     public void startVisualDebugger() {

@@ -8,7 +8,6 @@ import export.SaveExporter;
 import export.ScenarioExporter;
 import export.ScriptExporter;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import map.*;
 import util.ArgumentParser;
 import util.FileUtils;
@@ -16,15 +15,12 @@ import util.Pipeline;
 import util.Util;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -121,6 +117,7 @@ public strictfp class MapGenerator {
 
         System.out.println("Generating map " + generator.mapName.replace('/', '^'));
         SCMap map = generator.generate();
+        generator.save(generator.folderPath, generator.mapName.replace('/', '^'), map);
         System.out.println("Saving map to " + Paths.get(generator.folderPath).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
         System.out.println("Seed: " + generator.seed);
         System.out.println("Biome: " + generator.biome.getName());
@@ -133,10 +130,7 @@ public strictfp class MapGenerator {
         System.out.println("Terrain Symmetry: " + generator.symmetry);
         System.out.println("Team Symmetry: " + generator.symmetryHierarchy.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + generator.symmetryHierarchy.getSpawnSymmetry());
-        generator.save(generator.folderPath, generator.mapName.replace('/', '^'), map);
         System.out.println("Done");
-
-        generator.generateDebugOutput();
     }
 
     public void interpretArguments(String[] args) {
@@ -382,11 +376,21 @@ public strictfp class MapGenerator {
 
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
 
+            long startTime = System.currentTimeMillis();
             Files.createDirectory(folderPath.resolve(mapName));
             SCMapExporter.exportSCMAP(folderPath, mapName, map);
+            SCMapExporter.exportPreview(folderPath, mapName, map);
             SaveExporter.exportSave(folderPath, mapName, map);
             ScenarioExporter.exportScenario(folderPath, mapName, map);
             ScriptExporter.exportScript(folderPath, mapName, map);
+            System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
+
+            startTime = System.currentTimeMillis();
+            Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
+            SCMapExporter.exportSCMapString(folderPath, mapName, map);
+            Pipeline.toFile(folderPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+            toFile(folderPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
+            System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -706,45 +710,25 @@ public strictfp class MapGenerator {
         }
     }
 
-    @SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
-    private void generateDebugOutput() {
-        if (!DEBUG) {
-            return;
-        }
+    public void toFile(Path path) throws IOException {
 
-        FileWriter writer = new FileWriter(Paths.get(".", "debug", "summary.txt").toFile());
-        Path masksDir = Paths.get(".", "debug");
-
-        for (int i = 0; i < Pipeline.getPipelineSize(); i++) {
-            Path maskFile = masksDir.resolve(i + ".mask");
-            writer.write(String.format("%d:\t%s\n", i, hashFiles(maskFile)));
-        }
-
-        String mapHash = hashFiles(SCMapExporter.file.toPath(), SaveExporter.file.toPath());
-        System.out.println("Map hash: " + mapHash);
-        writer.write(String.format("Map hash:\t%s", mapHash));
-        writer.flush();
-        writer.close();
-    }
-
-    public String hashFiles(Path... files) throws NoSuchAlgorithmException {
-        StringBuilder sb = new StringBuilder();
-        Arrays.stream(files).map(this::hashFile).forEach(sb::append);
-        byte[] hash = MessageDigest.getInstance("SHA-256").digest(sb.toString().getBytes());
-        return toHex(hash);
-    }
-
-    @SneakyThrows({IOException.class, NoSuchAlgorithmException.class})
-    private String hashFile(Path file) {
-        byte[] hash = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file));
-        return toHex(hash);
-    }
-
-    private String toHex(byte[] data) {
-        StringBuilder sb = new StringBuilder();
-        for (byte datum : data) {
-            sb.append(String.format("%02x", datum));
-        }
-        return sb.toString();
+        Files.deleteIfExists(path);
+        File outFile = path.toFile();
+        boolean status = outFile.createNewFile();
+        FileOutputStream out = new FileOutputStream(outFile);
+        String summaryString = "Seed: " + seed +
+                "\nBiome: " + biome.getName() +
+                "\nLand Density: " + landDensity +
+                "\nPlateau Density: " + plateauDensity +
+                "\nMountain Density: " + mountainDensity +
+                "\nRamp Density: " + rampDensity +
+                "\nReclaim Density: " + reclaimDensity +
+                "\nMex Count: " + mexCount +
+                "\nTerrain Symmetry: " + symmetry +
+                "\nTeam Symmetry: " + symmetryHierarchy.getTeamSymmetry() +
+                "\nSpawn Symmetry: " + symmetryHierarchy.getSpawnSymmetry();
+        out.write(summaryString.getBytes());
+        out.flush();
+        out.close();
     }
 }

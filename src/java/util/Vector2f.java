@@ -23,4 +23,9 @@ public strictfp class Vector2f {
         float dy = y - location.y;
         return (float) StrictMath.sqrt(dx * dx + dy * dy);
     }
+
+    @Override
+    public String toString(){
+        return String.format("(%f, %f)", x, y);
+    }
 }

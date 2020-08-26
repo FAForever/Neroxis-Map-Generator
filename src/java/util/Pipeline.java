@@ -5,7 +5,12 @@ import map.ConcurrentBinaryMask;
 import map.ConcurrentFloatMask;
 import map.ConcurrentMask;
 
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -16,6 +21,7 @@ public strictfp class Pipeline {
 
     private static final List<Entry> pipeline = new ArrayList<>();
     public static CompletableFuture<List<ConcurrentMask>> started = new CompletableFuture<>();
+    public static String[] hashArray;
 
     public static void reset() {
         started = new CompletableFuture<>();
@@ -49,15 +55,23 @@ public strictfp class Pipeline {
                 .thenApplyAsync(m -> {
                     long startTime = System.currentTimeMillis();
                     Object res = function.apply(m);
+                    long functionTime = System.currentTimeMillis() - startTime;
+                    startTime = System.currentTimeMillis();
+                    try {
+                        hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod);
+                    } catch (NoSuchAlgorithmException e) {
+                        System.err.println("Cannot hash mask");
+                    }
+                    long hashTime = System.currentTimeMillis() - startTime;
                     if (MapGenerator.DEBUG) {
-                        System.out.printf("Done: %4d ms, %s, %s(%d)->%s\n",
-                                System.currentTimeMillis() - startTime,
+                        System.out.printf("Done: function time %4d ms, hash time %4d ms, %s, %s(%d)->%s\n",
+                                functionTime,
+                                hashTime,
                                 callingLine,
                                 executingMask.getName(),
                                 index,
                                 callingMethod
                         );
-                        executingMask.writeToFile(Paths.get(".", "debug", index + ".mask"));
                     }
                     return res;
                 })
@@ -83,6 +97,7 @@ public strictfp class Pipeline {
 
     public static void start() {
         System.out.println("Starting pipeline");
+        hashArray = new String[getPipelineSize()];
         started.complete(null);
     }
 
@@ -112,11 +127,6 @@ public strictfp class Pipeline {
                 }
             }
         }
-
-//		if(requiredMasks.size() != res.size()) {
-//			throw new RuntimeException("Unmet dependency!");
-//		}
-
         return res;
     }
 
@@ -205,6 +215,17 @@ public strictfp class Pipeline {
         public int getIndex() {
             return index;
         }
+    }
 
+    public static void toFile(Path path) throws IOException {
+        Files.deleteIfExists(path);
+        File outFile = path.toFile();
+        boolean status = outFile.createNewFile();
+        FileOutputStream out = new FileOutputStream(outFile);
+        for (String s : hashArray) {
+            out.write(s.getBytes());
+        }
+        out.flush();
+        out.close();
     }
 }

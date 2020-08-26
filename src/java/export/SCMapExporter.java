@@ -216,7 +216,13 @@ public strictfp class SCMapExporter {
 
         out.flush();
         out.close();
+    }
 
+    public static void exportSCMapString(Path folderPath, String mapname, SCMap map) throws IOException {
+        map.writeToFile(folderPath.resolve(mapname).resolve("debug").resolve(mapname + ".txt"));
+    }
+
+    public static void exportPreview(Path folderPath, String mapname, SCMap map) throws IOException {
         final String fileFormat = "png";
         File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
         RenderedImage renderedImage = Preview.addMarkers(map.getPreview(), map);

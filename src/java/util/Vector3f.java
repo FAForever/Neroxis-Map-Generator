@@ -37,4 +37,9 @@ public strictfp class Vector3f {
     public float getElevation() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
     }
+
+    @Override
+    public String toString(){
+        return String.format("(%f, %f, %f)", x, y, z);
+    }
 }

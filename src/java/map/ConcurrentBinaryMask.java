@@ -5,6 +5,7 @@ import lombok.Getter;
 import util.Pipeline;
 
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -226,6 +227,11 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     @Override
     public void writeToFile(Path path) {
         binaryMask.writeToFile(path);
+    }
+
+    @Override
+    public String toHash() throws NoSuchAlgorithmException {
+        return binaryMask.toHash();
     }
 
     public BinaryMask getBinaryMask() {

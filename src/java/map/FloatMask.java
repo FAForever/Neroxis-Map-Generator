@@ -8,8 +8,11 @@ import util.Vector2f;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -122,7 +125,7 @@ public strictfp class FloatMask extends Mask {
             float sediment = 0;
             float water = 1f;
             float[][] maskCopy = this.copy().mask;
-            for (int j = 0; j < 100; j++){
+            for (int j = 0; j < 100; j++) {
                 int roundX = StrictMath.round(x);
                 int roundY = StrictMath.round(y);
                 if (roundX < 2 || roundX > getSize() - 2 || roundY < 2 || roundY > getSize() - 2 || !otherEdge.get(roundX, roundY)) {
@@ -281,9 +284,9 @@ public strictfp class FloatMask extends Mask {
         float[][] maskCopy = new float[getSize()][getSize()];
         for (int x = getMinXBound(); x < getMaxXBound(); x++) {
             for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
-                int xNeg = StrictMath.max(0,x - 1);
+                int xNeg = StrictMath.max(0, x - 1);
                 int xPos = StrictMath.min(getSize() - 1, x + 1);
-                int yNeg = StrictMath.max(0,y - 1);
+                int yNeg = StrictMath.max(0, y - 1);
                 int yPos = StrictMath.min(getSize() - 1, y + 1);
                 float xSlope = get(xPos, y) - get(xNeg, y);
                 float ySlope = get(x, yPos) - get(x, yNeg);
@@ -326,6 +329,21 @@ public strictfp class FloatMask extends Mask {
         }
 
         out.close();
+    }
+
+    public String toHash() throws NoSuchAlgorithmException {
+        ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                bytes.putFloat(mask[x][y]);
+            }
+        }
+        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte datum : data) {
+            stringBuilder.append(String.format("%02x", datum));
+        }
+        return stringBuilder.toString();
     }
 
     public void startVisualDebugger() {

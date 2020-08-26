@@ -2,11 +2,16 @@ package map;
 
 import biomes.Biome;
 import lombok.Data;
+import lombok.SneakyThrows;
 import util.Vector2f;
 import util.Vector3f;
 import util.Vector4f;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 @Data
@@ -186,5 +191,35 @@ public strictfp class SCMap {
                 textureMasksLow.getRaster().setPixel(x, y, new int[]{(int) (StrictMath.min(1f, mask0.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask1.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask2.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask3.get(x, y)) * 255f)});
             }
         }
+    }
+
+    @SneakyThrows
+    public void writeToFile(Path path) {
+        Files.deleteIfExists(path);
+        File outFile = path.toFile();
+        boolean status = outFile.createNewFile();
+        FileOutputStream out = new FileOutputStream(outFile);
+        out.write(toString().getBytes());
+        out.flush();
+        out.close();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(String.format("SCMap%n"));
+        stringBuilder.append(String.format("Biome: %s%n", biome.getName()));
+        stringBuilder.append(String.format("%s%n", biome.getLightingSettings().toString()));
+        stringBuilder.append(String.format("%s%n", biome.getWaterSettings().toString()));
+        stringBuilder.append(String.format("Terrain Materials: %s%n", biome.getTerrainMaterials().toString()));
+        stringBuilder.append(String.format("Size: %d%n", size));
+        for (int i = 0; i < decals.size(); i++) {
+            stringBuilder.append(String.format("Decal %d: %s%n", i, decals.get(i).toString()));
+        }
+        for (int i = 0; i < props.size(); i++) {
+            stringBuilder.append(String.format("Prop %d: %s%n", i, props.get(i).toString()));
+        }
+
+        return stringBuilder.toString();
     }
 }
