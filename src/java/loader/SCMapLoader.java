@@ -13,7 +13,6 @@ import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static util.Swapper.swap;
 
@@ -24,7 +23,13 @@ public strictfp class SCMapLoader {
     private static DataInputStream in;
 
     public static void main(String[] args) throws IOException {
-        SCMap map = loadSCMAP(Paths.get(args[0]));
+        File dir = new File(args[0]);
+        File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
+        assert mapFiles != null;
+        if (mapFiles.length == 0) {
+            System.out.println("No scmap file in map folder");
+        }
+        SCMap map = loadSCMAP(mapFiles[0].toPath());
     }
 
     public static SCMap loadSCMAP(Path filePath) throws IOException {
