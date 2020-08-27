@@ -594,9 +594,9 @@ public strictfp class MapGenerator {
         randomHeight.randomize(.5f);
         heightmapBase.init(land, 26f, 26f);
         heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
-        heightmapHills.init(hills,0,1f).smooth(12f);
-        heightmapValleys.init(valleys,0,-1f).smooth(12f);
-        heightmapLand.init(randomHeight,0, 1f).smooth(8f);
+        heightmapHills.init(hills,0,1f).smooth(24f);
+        heightmapValleys.init(valleys,0,-1f).smooth(24f);
+        heightmapLand.init(randomHeight,0, 1f).smooth(12f);
         heightmapLand.maskToHeightmap(0.25f, 48, land).smooth(2);
         heightmapLand.add(heightmapHills);
         heightmapLand.add(heightmapValleys);
