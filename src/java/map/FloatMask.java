@@ -333,8 +333,8 @@ public strictfp class FloatMask extends Mask {
 
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = getMinXBound(symmetryHierarchy.getSpawnSymmetry()); x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry()); x++) {
+            for (int y = getMinYBound(x, symmetryHierarchy.getSpawnSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getSpawnSymmetry()); y++) {
                 bytes.putFloat(mask[x][y]);
             }
         }

@@ -654,8 +654,8 @@ public strictfp class BinaryMask extends Mask {
 
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize());
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = getMinXBound(symmetryHierarchy.getSpawnSymmetry()); x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry()); x++) {
+            for (int y = getMinYBound(x, symmetryHierarchy.getSpawnSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getSpawnSymmetry()); y++) {
                 byte b = mask[x][y] ? (byte) 1 : 0;
                 bytes.put(b);
             }
