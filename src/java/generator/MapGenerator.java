@@ -437,7 +437,7 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable);
+            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask);
             long sTime = System.currentTimeMillis();
             BinaryMask plateauResource = new BinaryMask(resourceMask.getBinaryMask(), random.nextLong());
             plateauResource.intersect(plateaus.getBinaryMask()).trimEdge(16).fillCenter(16, true);
