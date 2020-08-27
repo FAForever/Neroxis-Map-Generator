@@ -415,7 +415,7 @@ public strictfp class MapGenerator {
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
         spawnPlateauMask = new ConcurrentBinaryMask(spawnMasks[1], random.nextLong(), "spawnsPlateau");
 
-        symmetryHierarchy = spawnLandMask.getBinaryMask().getSymmetryHierarchy();
+        symmetryHierarchy = spawnLandMask.getSymmetryHierarchy();
         setupTerrainPipeline();
         setupHeightmapPipeline();
         setupTexturePipeline();
