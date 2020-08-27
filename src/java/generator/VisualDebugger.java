@@ -3,6 +3,7 @@ package generator;
 import map.BinaryMask;
 import map.FloatMask;
 import map.Mask;
+import util.Util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -56,7 +57,7 @@ public class VisualDebugger {
         if (!shouldRecord(mask)) {
             return;
         }
-        visualize((x, y) -> mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode());
+        visualize((x, y) -> mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask.getClass());
     }
 
     public static void visualizeMask(FloatMask mask) {
@@ -106,7 +107,7 @@ public class VisualDebugger {
             } else {
                 return 0xFF_00_00_00;
             }
-        }, mask.getSize(), mask.hashCode());
+        }, mask.getSize(), mask.hashCode(), mask.getClass());
     }
 
     private static boolean shouldRecord(Mask mask) {
@@ -140,7 +141,7 @@ public class VisualDebugger {
     }
 
 
-    private static void visualize(ImageSource imageSource, int size, int maskHash) {
+    private static void visualize(ImageSource imageSource, int size, int maskHash, Class<? extends Mask> clazz) {
         float perPixelSize = calculateAutoZoom(size);
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels
@@ -156,7 +157,7 @@ public class VisualDebugger {
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         scaleOp.filter(currentImage, scaledImage);
         String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
-        String function = new Throwable().getStackTrace()[2].getMethodName();
+        String function = Util.getStackTraceMethod(clazz);
         VisualDebuggerGui.update(maskName + " " + function, scaledImage, perPixelSize);
     }
 
