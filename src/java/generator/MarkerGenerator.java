@@ -320,6 +320,8 @@ public strictfp class MarkerGenerator {
                 Vector2f symLocation = spawnable.getSymmetryPoint(map.getHydros()[iHydro]);
                 map.getHydros()[iHydro + 1] = new Vector3f(symLocation);
                 spawnable.fillCircle(map.getSpawns()[i + 1], 30, false);
+                spawnable.fillCircle(location, hydroSpacing, false);
+                spawnable.fillCircle(symLocation, hydroSpacing, false);
                 iHydro += 2;
             }
         }
