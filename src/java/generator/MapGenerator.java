@@ -95,7 +95,8 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask treeMask;
     private ConcurrentBinaryMask cliffRockMask;
     private ConcurrentBinaryMask fieldStoneMask;
-    private ConcurrentBinaryMask rockFieldMask;
+    private ConcurrentBinaryMask largeRockFieldMask;
+    private ConcurrentBinaryMask smallRockFieldMask;
     private BinaryMask noProps;
     private BinaryMask noWrecks;
     private BinaryMask noDecals;
@@ -473,11 +474,12 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(treeMask, cliffRockMask, rockFieldMask, fieldStoneMask);
+            Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
             propGenerator.generateProps(treeMask.getBinaryMask().minus(noProps), PropGenerator.TREE_GROUPS, 3f);
             propGenerator.generateProps(cliffRockMask.getBinaryMask().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(rockFieldMask.getBinaryMask().minus(noProps), PropGenerator.ROCKS, 2f);
+            propGenerator.generateProps(largeRockFieldMask.getBinaryMask().minus(noProps), PropGenerator.ROCKS, 2f);
+            propGenerator.generateProps(smallRockFieldMask.getBinaryMask().minus(noProps), PropGenerator.ROCKS, 2f);
             propGenerator.generateProps(fieldStoneMask.getBinaryMask().minus(noProps), PropGenerator.FIELD_STONES, 60f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateProps\n",
@@ -653,15 +655,17 @@ public strictfp class MapGenerator {
         treeMask = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "tree");
         cliffRockMask = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "cliffRock");
         fieldStoneMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "fieldStone");
-        rockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "rockField");
+        largeRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "largeRockField");
+        smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
-        cliffRockMask.randomize(.25f).intersect(land).intersect(unpassable).inflate(1).minus(plateaus).minus(mountains).inflate(2);
-        fieldStoneMask.randomize(reclaimDensity * .005f).enlarge(256).intersect(land).minus(unpassable);
+        cliffRockMask.randomize(.4f).intersect(unpassable).inflate(1).minus(plateaus).minus(mountains).inflate(2);
+        fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(unpassable);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         treeMask.enlarge(mapSize / 2).intersect(land).minus(unpassable);
-        treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3).fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 8f, false);
-        rockFieldMask.randomize(reclaimDensity * .00025f).trimEdge(mapSize / 32).inflate(3).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).minus(mountains);
+        treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3);
+        largeRockFieldMask.randomize(reclaimDensity * .002f).trimEdge(mapSize / 16).inflate(2).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).minus(unpassable);
+        smallRockFieldMask.randomize(reclaimDensity * .005f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(2).minus(unpassable);
     }
 
     private void setupResourcePipeline() {
