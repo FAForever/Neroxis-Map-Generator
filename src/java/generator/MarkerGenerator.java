@@ -77,7 +77,7 @@ public strictfp class MarkerGenerator {
             map.getSpawns()[i + 1] = new Vector3f(symLocation);
             location = spawnable.getRandomPosition();
         }
-        return new BinaryMask[] {spawnLandMask, spawnPlateauMask};
+        return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
     }
 
     public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
@@ -86,27 +86,30 @@ public strictfp class MarkerGenerator {
         float spawnDensity = (float) spawnable.getCount() / map.getSize() / map.getSize() * 2;
         int mexSpawnDistance = (int) StrictMath.max(StrictMath.min(spawnDensity * map.getSize() / 6, spawnSize * 2.5), spawnSize);
         BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
-        for (int i = 0; i < map.getSpawns().length; i += 2) {
-            spawnable.fillCircle(map.getSpawns()[i + 1], 24, false);
-            spawnableNoSpawns.fillCircle(map.getSpawns()[i + 1], mexSpawnDistance, false);
-        }
         int spawnCount = map.getSpawns().length;
         int totalMexCount = map.getMexes().length;
         int spawnMexCount = 4 * spawnCount;
         int nonSpawnMexCount = totalMexCount - spawnMexCount;
         int iMex = 0;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
-            map.getMexes()[iMex] = new Vector3f(map.getSpawns()[i].x + 10, 0, map.getSpawns()[i].z);
-            map.getMexes()[iMex + 1] = new Vector3f(map.getSpawns()[i].x - 10, 0, map.getSpawns()[i].z);
-            map.getMexes()[iMex + 2] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z + 10);
-            map.getMexes()[iMex + 3] = new Vector3f(map.getSpawns()[i].x, 0, map.getSpawns()[i].z - 10);
-            map.getMexes()[iMex + 4] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex]));
-            map.getMexes()[iMex + 5] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 1]));
-            map.getMexes()[iMex + 6] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 2]));
-            map.getMexes()[iMex + 7] = new Vector3f(spawnable.getSymmetryPoint(map.getMexes()[iMex + 3]));
-            iMex += 8;
+            int numBaseMexes = (random.nextInt(2) + 3) * 2;
+            BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+            baseMexes.fillCircle(map.getSpawns()[i + 1], 20, true).fillCircle(map.getSpawns()[i + 1], 10, false).intersect(spawnable);
+            for (int j = 0; j < numBaseMexes; j += 2) {
+                Vector2f location = baseMexes.getRandomPosition();
+                if (location == null) {
+                    break;
+                }
+                Vector2f symLocation = baseMexes.getSymmetryPoint(location);
+                map.getMexes()[iMex] = new Vector3f(location);
+                map.getMexes()[iMex + 1] = new Vector3f(symLocation);
+                baseMexes.fillCircle(location, 10, false);
+                spawnable.fillCircle(location, mexSpacing, false);
+                spawnable.fillCircle(symLocation, mexSpacing, false);
+                iMex += 2;
+            }
             BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-            nearMexes.fillCircle(map.getSpawns()[i + 1], spawnSize * 3, true).fillCircle(map.getSpawns()[i + 1], spawnSize, false).intersect(spawnable);
+            nearMexes.fillCircle(map.getSpawns()[i + 1], spawnSize * 5, true).fillCircle(map.getSpawns()[i + 1], spawnSize * 2, false).intersect(spawnable);
             int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
             for (int j = 0; j < numNearMexes; j += 2) {
                 Vector2f location = nearMexes.getRandomPosition();
@@ -122,6 +125,10 @@ public strictfp class MarkerGenerator {
                 spawnable.fillCircle(symLocation, mexSpacing, false);
                 iMex += 2;
             }
+        }
+        for (int i = 0; i < map.getSpawns().length; i += 2) {
+            spawnable.fillCircle(map.getSpawns()[i + 1], 24, false);
+            spawnableNoSpawns.fillCircle(map.getSpawns()[i + 1], mexSpawnDistance, false);
         }
         int numMexesLeft;
         int actualExpMexCount;
@@ -228,7 +235,7 @@ public strictfp class MarkerGenerator {
         int iMex = baseMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
-        int expSpacing = 64;
+        int expSpacing = 96;
 
         BinaryMask spawnableCopy = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
@@ -285,29 +292,39 @@ public strictfp class MarkerGenerator {
         return actualExpMexCount;
     }
 
-    public void generateHydros(BinaryMask spawnable, BinaryMask land) {
-        int baseHydroCount = map.getSpawns().length;
+    public void generateHydros(BinaryMask spawnable) {
         int hydroSpacing = 64;
+        int iHydro = 0;
+
+        for (int i = 0; i < map.getMexes().length; i++) {
+            if (map.getMexes()[i] != null) {
+                spawnable.fillCircle(map.getMexes()[i].x, map.getMexes()[i].z, 10, false);
+            }
+        }
 
         for (int i = 0; i < map.getSpawns().length; i += 2) {
-            BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-            baseHydro.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 18, true);
-            baseHydro.trimEdge(16);
-            for (int j = 0; j < map.getSpawns().length; j += 2) {
-                baseHydro.fillCircle(map.getSpawns()[j].x, map.getSpawns()[j].z, 16, false);
+            if (random.nextBoolean()) {
+                BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+                baseHydro.fillCircle(map.getSpawns()[i + 1], spawnSize * 1.5f, true).fillCircle(map.getSpawns()[i + 1], 20, false).intersect(spawnable);
+                for (int j = 0; j < map.getSpawns().length; j += 2) {
+                    baseHydro.fillCircle(map.getSpawns()[j], 16, false);
+                }
+                for (int j = 0; j < iHydro; j += 2) {
+                    baseHydro.fillCircle(map.getHydros()[j], 16, false);
+                }
+                Vector2f location = baseHydro.getRandomPosition();
+                if (location == null) {
+                    break;
+                }
+                map.getHydros()[iHydro] = new Vector3f(location);
+                Vector2f symLocation = spawnable.getSymmetryPoint(map.getHydros()[iHydro]);
+                map.getHydros()[iHydro + 1] = new Vector3f(symLocation);
+                spawnable.fillCircle(map.getSpawns()[i + 1], 30, false);
+                iHydro += 2;
             }
-            for (int j = 0; j < i; j += 2) {
-                baseHydro.fillCircle(map.getHydros()[j].x, map.getHydros()[j].z, 8, false);
-            }
-            Vector2f location = baseHydro.getRandomPosition();
-            if (location == null) {
-                break;
-            }
-            map.getHydros()[i] = new Vector3f(location);
-            Vector2f symLocation = spawnable.getSymmetryPoint((int) map.getHydros()[i].x, (int) map.getHydros()[i].z);
-            map.getHydros()[i + 1] = new Vector3f(symLocation);
-            spawnable.fillCircle(map.getSpawns()[i + 1].x, map.getSpawns()[i + 1].z, 30, false);
         }
+
+        int baseHydroCount = iHydro;
 
         for (int i = baseHydroCount; i < map.getHydros().length; i += 2) {
             Vector2f hydroLocation = spawnable.getRandomPosition();

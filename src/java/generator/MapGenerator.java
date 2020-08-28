@@ -300,7 +300,7 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
         rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         reclaimDensity = random.nextInt(127) / 127f;
-        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(40 / spawnCount)) * (.5f + mapSize / 512f * .5f));
+        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(32 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
         if (spawnCount <= 4) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
@@ -443,10 +443,10 @@ public strictfp class MapGenerator {
             plateauResource.intersect(plateaus.getBinaryMask()).trimEdge(16).fillCenter(16, true);
             BinaryMask waterMex = land.getBinaryMask().copy().invert();
             waterMex.deflate(48).trimEdge(16).fillCenter(16, false);
-            markerGenerator.generateMexes(resourceMask.getBinaryMask(), plateauResource, waterMex);
+            markerGenerator.generateMexes(resourceMask.getBinaryMask().copy(), plateauResource, waterMex);
             BinaryMask hydroSpawn = new BinaryMask(land.getBinaryMask(), random.nextLong());
             hydroSpawn.minus(ramps.getBinaryMask()).minus(unpassable.getBinaryMask()).deflate(6);
-            markerGenerator.generateHydros(resourceMask.getBinaryMask().deflate(6), hydroSpawn);
+            markerGenerator.generateHydros(resourceMask.getBinaryMask().copy().deflate(6));
             generateExclusionMasks();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateResources\n",
