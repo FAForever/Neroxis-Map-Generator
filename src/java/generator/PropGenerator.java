@@ -5,6 +5,7 @@ import map.Prop;
 import map.SCMap;
 import util.Vector2f;
 
+import java.util.LinkedHashSet;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -43,17 +44,14 @@ public strictfp class PropGenerator {
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         spawnableCopy.fillHalf(false);
-        Vector2f location = spawnableCopy.getRandomPosition();
-        Vector2f symLocation;
-        while (location != null) {
-            symLocation = spawnableCopy.getSymmetryPoint(location);
-            spawnableCopy.fillCircle(location, separation, false);
+        LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        coordinates.forEach((location) -> {
+            Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
             Prop prop1 = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
             Prop prop2 = new Prop(prop1.getPath(), symLocation, spawnableCopy.getReflectedRotation(prop1.getRotation()));
             map.addProp(prop1);
             map.addProp(prop2);
-            location = spawnableCopy.getRandomPosition();
-        }
+        });
     }
 
     public void setPropHeights() {

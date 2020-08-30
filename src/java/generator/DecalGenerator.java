@@ -5,6 +5,7 @@ import map.Decal;
 import map.SCMap;
 import util.Vector2f;
 
+import java.util.LinkedHashSet;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -70,17 +71,14 @@ public strictfp class DecalGenerator {
     public void generateDecals(BinaryMask spawnable, String[] paths, float separation, float scale) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         spawnableCopy.fillHalf(false);
-        Vector2f location = spawnableCopy.getRandomPosition();
-        Vector2f symLocation;
-        while (location != null) {
-            symLocation = spawnableCopy.getSymmetryPoint(location);
-            spawnableCopy.fillCircle(location, separation, false);
+        LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        coordinates.forEach((location) -> {
+            Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
             Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI, scale, 2400);
             Decal decal2 = new Decal(decal1.getPath(), symLocation, spawnableCopy.getReflectedRotation(decal1.getRotation()), scale, 2400);
             map.addDecal(decal1);
             map.addDecal(decal2);
-            location = spawnableCopy.getRandomPosition();
-        }
+        });
     }
 
     public void setDecalHeights() {

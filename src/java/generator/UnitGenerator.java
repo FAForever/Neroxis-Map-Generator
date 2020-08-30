@@ -6,6 +6,7 @@ import map.Unit;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.util.LinkedHashSet;
 import java.util.Random;
 
 public strictfp class UnitGenerator {
@@ -38,20 +39,15 @@ public strictfp class UnitGenerator {
 
     public void generateUnits(BinaryMask spawnable, String[] types, float separation) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
-        Vector2f location = spawnableCopy.getRandomPosition();
-        Vector2f symLocation;
-        String type = types[random.nextInt(types.length)];
-        float rot = random.nextFloat();
-        while (location != null) {
-            symLocation = spawnableCopy.getSymmetryPoint(location);
-            spawnableCopy.fillCircle(location, separation, false);
-            spawnableCopy.fillCircle(symLocation, separation, false);
-            Unit unit1 = new Unit(type, location, rot * (float) StrictMath.PI);
+        spawnableCopy.fillHalf(false);
+        LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        coordinates.forEach((location) -> {
+            Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
+            Unit unit1 = new Unit(types[random.nextInt(types.length)], location, random.nextFloat() * (float) StrictMath.PI);
             Unit unit2 = new Unit(unit1.getType(), symLocation, spawnableCopy.getReflectedRotation(unit1.getRotation()));
             map.addUnit(unit1);
             map.addUnit(unit2);
-            location = spawnableCopy.getRandomPosition();
-        }
+        });
     }
 
     public void setUnitHeights() {

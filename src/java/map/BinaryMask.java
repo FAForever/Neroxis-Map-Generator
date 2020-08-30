@@ -623,9 +623,9 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillShape(Vector2f location) {
-        HashSet<Vector2f> area = new HashSet<>();
-        HashSet<Vector2f> edge = new HashSet<>();
-        HashSet<Vector2f> queueHash = new HashSet<>();
+        LinkedHashSet<Vector2f> area = new LinkedHashSet<>();
+        LinkedHashSet<Vector2f> edge = new LinkedHashSet<>();
+        LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
         ArrayList<Vector2f> queue = new ArrayList<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
         boolean value = mask[(int) location.x][(int) location.y];
@@ -655,9 +655,9 @@ public strictfp class BinaryMask extends Mask {
 
     public List<Vector2f> getShapeCoordinates(Vector2f location) {
         ArrayList<Vector2f> area = new ArrayList<>();
-        HashSet<Vector2f> areaHash = new HashSet<>();
-        HashSet<Vector2f> edge = new HashSet<>();
-        HashSet<Vector2f> queueHash = new HashSet<>();
+        LinkedHashSet<Vector2f> areaHash = new LinkedHashSet<>();
+        LinkedHashSet<Vector2f> edge = new LinkedHashSet<>();
+        LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
         ArrayList<Vector2f> queue = new ArrayList<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
         boolean value = mask[(int) location.x][(int) location.y];
@@ -731,8 +731,8 @@ public strictfp class BinaryMask extends Mask {
         return cellCount;
     }
 
-    public HashSet<Vector2f> getAllCoordinates() {
-        HashSet<Vector2f> coordinates = new HashSet<>();
+    public LinkedHashSet<Vector2f> getAllCoordinates() {
+        LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>();
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (mask[x][y])
@@ -742,8 +742,21 @@ public strictfp class BinaryMask extends Mask {
         return coordinates;
     }
 
+    public LinkedHashSet<Vector2f> getRandomCoordinates(float minSpacing) {
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinates();
+        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
+        while (coordinates.size() > 0) {
+            Vector2f location = coordinateArray[random.nextInt(coordinates.size())];
+           chosenCoordinates.add(location);
+            coordinates.removeIf((loc) -> location.getDistance(loc) < minSpacing);
+            coordinateArray = coordinates.toArray(new Vector2f[0]);
+        }
+        return chosenCoordinates;
+    }
+
     public Vector2f getRandomPosition() {
-        HashSet<Vector2f> coordinates = getAllCoordinates();
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinates();
         if (coordinates.size() == 0)
             return null;
         int cell = random.nextInt(coordinates.size());
