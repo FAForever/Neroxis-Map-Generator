@@ -26,16 +26,15 @@ public strictfp class MarkerGenerator {
         BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
-
-        if (map.getSpawns().length <= 4 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
+        if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
-        spawnable.fillHalf(true).fillCenter(map.getSize() * 7 / 16, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawns().length * 3 / 2, false).fillCenter(map.getSize() * 5 / 8, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             if (location == null) {
-                if (separation - 4 >= 20) {
+                if (separation - 4 >= 10) {
                     return generateSpawns(separation - 8, symmetry, plateauDensity);
                 } else {
                     return null;
@@ -44,6 +43,10 @@ public strictfp class MarkerGenerator {
             symLocation = spawnable.getSymmetryPoint(location);
             spawnable.fillCircle(location, separation, false);
             spawnable.fillCircle(symLocation, separation, false);
+
+            if (spawnable.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
+                spawnable.fillCircle(symLocation, map.getSize() * 5 / 8f, false);
+            }
 
             spawnLandMask.fillCircle(location, spawnSize, true);
             spawnLandMask.fillCircle(symLocation, spawnSize, true);

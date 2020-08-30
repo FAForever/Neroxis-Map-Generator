@@ -38,7 +38,7 @@ public strictfp class BinaryMask extends Mask {
         switch (symmetry) {
             case POINT:
                 spawnSymmetry = symmetry;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Y, Symmetry.XY, Symmetry.YX};
                 teamSymmetry = teams[random.nextInt(teams.length)];
                 break;
             case QUAD:
@@ -148,9 +148,9 @@ public strictfp class BinaryMask extends Mask {
             int y = random.nextInt(getMaxYBound(x) - getMinYBound(x) + 1) + getMinYBound(x);
             for (int j = 0; j < numSteps; j++) {
                 if (x >= 0 && x < getSize() && y >= 0 && y < getSize())
-                mask[x][y] = true;
+                    mask[x][y] = true;
                 int dir = random.nextInt(4);
-                switch (dir){
+                switch (dir) {
                     case 0:
                         x++;
                         break;
@@ -313,7 +313,7 @@ public strictfp class BinaryMask extends Mask {
             boolean[][] maskCopy = new boolean[getSize()][getSize()];
             for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
                 for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
-                    if (x >= 0 && y >=0 && x < getSize() && y < getSize()) {
+                    if (x >= 0 && y >= 0 && x < getSize() && y < getSize()) {
                         boolean value = (((x > 0 && mask[x - 1][y]) || (y > 0 && mask[x][y - 1])
                                 || (x < getSize() - 1 && mask[x + 1][y])
                                 || (y < getSize() - 1 && mask[x][y + 1]))
@@ -342,7 +342,7 @@ public strictfp class BinaryMask extends Mask {
             boolean[][] maskCopy = new boolean[getSize()][getSize()];
             for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
                 for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
-                    if (x >= 0 && y >=0 && x < getSize() && y < getSize()) {
+                    if (x >= 0 && y >= 0 && x < getSize() && y < getSize()) {
                         boolean value = (((x > 0 && !mask[x - 1][y]) || (y > 0 && !mask[x][y - 1])
                                 || (x < getSize() - 1 && !mask[x + 1][y])
                                 || (y < getSize() - 1 && !mask[x][y + 1]))
@@ -477,6 +477,25 @@ public strictfp class BinaryMask extends Mask {
         mask = maskCopy;
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    public BinaryMask fillSides(int extent, boolean value) {
+        return fillSides(extent, value, symmetryHierarchy.getSpawnSymmetry());
+    }
+
+    public BinaryMask fillSides(int extent, boolean value, Symmetry symmetry) {
+        switch (symmetry) {
+            case Y:
+                return fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
+            case X:
+                return fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
+            case XY:
+                return fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
+            case YX:
+                return fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
+            default:
+                return this;
+        }
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {

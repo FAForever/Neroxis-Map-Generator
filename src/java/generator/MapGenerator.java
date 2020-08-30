@@ -128,6 +128,7 @@ public strictfp class MapGenerator {
         System.out.println("Terrain Symmetry: " + generator.symmetry);
         System.out.println("Team Symmetry: " + generator.symmetryHierarchy.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + generator.symmetryHierarchy.getSpawnSymmetry());
+        System.out.println("Spawn Separation: " + generator.spawnSeparation);
         System.out.println("Done");
     }
 
