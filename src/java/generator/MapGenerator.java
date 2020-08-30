@@ -299,7 +299,7 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
         rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         reclaimDensity = random.nextInt(127) / 127f;
-        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(32 / spawnCount)) * (.5f + mapSize / 512f * .5f));
+        mexCount = (int) ((6 + 8 / spawnCount + random.nextInt(32 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
         if (spawnCount <= 4) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
