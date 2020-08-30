@@ -544,9 +544,9 @@ public strictfp class MapGenerator {
         plateaus = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "plateaus");
         ramps = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "ramps");
 
-        land.randomize(landDensity).smooth(2f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
+        land.randomize(landDensity).smooth(mapSize / 256f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
         mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(mapSize / 4).smooth(4f, .6f).erode(.5f);
-        plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(mapSize / 4).smooth(2f, .25f).erode(.5f);
+        plateaus.randomize(plateauDensity).smooth(mapSize / 256f).cutCorners().enlarge(mapSize / 4).smooth(2f, .25f).erode(.5f);
 
         plateaus.intersect(land).minus(mountains);
         mountains.intersect(land);
@@ -563,13 +563,13 @@ public strictfp class MapGenerator {
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
-        mountains.minus(spawnLandMask).filterShapes(512);
-        plateaus.combine(mountains).filterShapes(1024);
+        mountains.minus(spawnLandMask).filterShapes(1024);
+        plateaus.combine(mountains).filterShapes(2048);
 
         ramps.randomize(rampDensity);
         ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
 
-        land.combine(ramps.copy().deflate(8)).filterShapes(1024);
+        land.combine(ramps.copy().deflate(8)).filterShapes(2048);
         mountains.minus(ramps);
 
         unpassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
