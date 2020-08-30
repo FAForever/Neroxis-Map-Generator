@@ -9,10 +9,7 @@ import export.ScenarioExporter;
 import export.ScriptExporter;
 import lombok.Getter;
 import map.*;
-import util.ArgumentParser;
-import util.FileUtils;
-import util.Pipeline;
-import util.Util;
+import util.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -547,7 +544,7 @@ public strictfp class MapGenerator {
         ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
 
         land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).erode(.5f);
-        mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(128).smooth(8f, .6f).erode(.5f);
+        mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(128).smooth(4f, .6f).erode(.5f);
         plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).erode(.5f);
 
         plateaus.intersect(land).minus(mountains);
@@ -563,14 +560,15 @@ public strictfp class MapGenerator {
         spawnPlateauMask.enlarge(128).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(8f, .25f);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).smooth(16f, .25f);
-        mountains.minus(spawnLandMask).smooth(4f);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+        land.combine(spawnLandMask).combine(spawnPlateauMask);
+        mountains.minus(spawnLandMask).filterShapes(512);
+        plateaus.combine(mountains).filterShapes(1024);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains).inflate(8).smooth(8f, .125f);
+        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
 
-        land.combine(ramps.copy().deflate(4));
+        land.combine(ramps.copy().deflate(8)).filterShapes(1024);
         mountains.minus(ramps);
 
         unpassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
@@ -590,8 +588,6 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapHills");
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapValleys");
         ConcurrentBinaryMask randomHeight = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "randomHeight");
-
-        plateaus.combine(mountains);
 
         randomHeight.randomize(.5f);
         heightmapBase.init(land, 25.5f, 25.5f);
@@ -658,7 +654,7 @@ public strictfp class MapGenerator {
         largeRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "largeRockField");
         smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
-        cliffRockMask.randomize(.4f).intersect(unpassable).inflate(1).minus(plateaus).minus(mountains).inflate(2);
+        cliffRockMask.randomize(.4f).intersect(unpassable).inflate(1).minus(plateaus).inflate(2);
         fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(unpassable);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());

@@ -14,8 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
@@ -73,6 +72,18 @@ public strictfp class BinaryMask extends Mask {
         }
         this.symmetryHierarchy = new SymmetryHierarchy(symmetry, teamSymmetry);
         this.symmetryHierarchy.setSpawnSymmetry(spawnSymmetry);
+        VisualDebugger.visualizeMask(this);
+    }
+
+    public BinaryMask(boolean[][] mask, long seed, SymmetryHierarchy symmetryHierarchy) {
+        this.mask = new boolean[mask.length][mask[0].length];
+        this.symmetryHierarchy = symmetryHierarchy;
+        this.random = new Random(seed);
+        for (int x = 0; x < this.mask.length; x++) {
+            for (int y = 0; y < this.mask.length; y++) {
+                this.mask[x][y] = mask[x][y];
+            }
+        }
         VisualDebugger.visualizeMask(this);
     }
 
@@ -588,6 +599,104 @@ public strictfp class BinaryMask extends Mask {
                 mask[getSize() - 1 - b][a] = false;
             }
         }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask fillShape(Vector2f location) {
+        HashSet<Vector2f> area = new HashSet<>();
+        HashSet<Vector2f> edge = new HashSet<>();
+        HashSet<Vector2f> queueHash = new HashSet<>();
+        ArrayList<Vector2f> queue = new ArrayList<>();
+        List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
+        boolean value = mask[(int) location.x][(int) location.y];
+        queue.add(location);
+        queueHash.add(location);
+        while (queue.size() > 0) {
+            Vector2f next = queue.get(0);
+            queue.remove(next);
+            queueHash.remove(next);
+            if (mask[(int) next.x][(int) next.y] == value && !area.contains(next)) {
+                mask[(int) next.x][(int) next.y] = !value;
+                area.add(next);
+                edges.forEach((e) -> {
+                    Vector2f newLocation = new Vector2f(next.x + e[0], next.y + e[1]);
+                    if (!queueHash.contains(newLocation) && !area.contains(newLocation) && !edge.contains(newLocation) && newLocation.x >= 0 && newLocation.x < getSize() && newLocation.y >= 0 && newLocation.y < getSize()) {
+                        queue.add(newLocation);
+                        queueHash.add(newLocation);
+                    }
+                });
+            } else if (mask[(int) next.x][(int) next.y] != value) {
+                edge.add(next);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public List<Vector2f> getShapeCoordinates(Vector2f location) {
+        ArrayList<Vector2f> area = new ArrayList<>();
+        HashSet<Vector2f> areaHash = new HashSet<>();
+        HashSet<Vector2f> edge = new HashSet<>();
+        HashSet<Vector2f> queueHash = new HashSet<>();
+        ArrayList<Vector2f> queue = new ArrayList<>();
+        List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
+        boolean value = mask[(int) location.x][(int) location.y];
+        queue.add(location);
+        queueHash.add(location);
+        while (queue.size() > 0) {
+            Vector2f next = queue.get(0);
+            queue.remove(next);
+            queueHash.remove(next);
+            if (mask[(int) next.x][(int) next.y] == value && !areaHash.contains(next)) {
+                mask[(int) next.x][(int) next.y] = !value;
+                areaHash.add(next);
+                area.add(next);
+                edges.forEach((e) -> {
+                    Vector2f newLocation = new Vector2f(next.x + e[0], next.y + e[1]);
+                    if (!queueHash.contains(newLocation) && !areaHash.contains(newLocation) && !edge.contains(newLocation) && newLocation.x >= 0 && newLocation.x < getSize() && newLocation.y >= 0 && newLocation.y < getSize()) {
+                        queue.add(newLocation);
+                        queueHash.add(newLocation);
+                    }
+                });
+            } else if (mask[(int) next.x][(int) next.y] != value) {
+                edge.add(next);
+            }
+        }
+        return area;
+    }
+
+    public BinaryMask fillCoordinates(List<Vector2f> coordinates, boolean value) {
+        coordinates.forEach((location) -> mask[(int) location.x][(int) location.y] = value);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask filterShapes(int minArea) {
+        BinaryMask maskCopy = copy();
+        BinaryMask maskCopy2 = copy();
+        Vector2f location = maskCopy.getRandomPosition();
+        while (location != null) {
+            List<Vector2f> coordinates = getShapeCoordinates(location);
+            maskCopy.fillCoordinates(coordinates, false);
+            if (coordinates.size() < minArea) {
+                maskCopy2.fillCoordinates(coordinates, false);
+            }
+            location = maskCopy.getRandomPosition();
+        }
+        mask = maskCopy2.mask;
+        maskCopy = copy().invert();
+        maskCopy2 = copy().invert();
+        location = maskCopy.getRandomPosition();
+        while (location != null) {
+            List<Vector2f> coordinates = getShapeCoordinates(location);
+            maskCopy.fillCoordinates(coordinates, false);
+            if (coordinates.size() < minArea) {
+                maskCopy2.fillCoordinates(coordinates, false);
+            }
+            location = maskCopy.getRandomPosition();
+        }
+        mask = maskCopy2.invert().mask;
         VisualDebugger.visualizeMask(this);
         return this;
     }

@@ -223,6 +223,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask filterShapes(int minArea) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.filterShapes(minArea)
+        );
+    }
+
 
     @Override
     public void writeToFile(Path path) {

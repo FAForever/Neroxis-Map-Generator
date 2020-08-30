@@ -1,5 +1,8 @@
 package util;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public strictfp class Vector4f {
     public float x;
     public float y;
