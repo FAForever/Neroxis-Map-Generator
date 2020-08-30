@@ -88,11 +88,12 @@ public strictfp class MarkerGenerator {
         BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         int spawnCount = map.getSpawns().length;
         int totalMexCount = map.getMexes().length;
-        int spawnMexCount = 4 * spawnCount;
+        int numBaseMexes = (random.nextInt(2) + 3) * 2;
+        int spawnMexCount = numBaseMexes * spawnCount;
         int nonSpawnMexCount = totalMexCount - spawnMexCount;
+        int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
         int iMex = 0;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
-            int numBaseMexes = (random.nextInt(2) + 3) * 2;
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
             baseMexes.fillCircle(map.getSpawns()[i + 1], 20, true).fillCircle(map.getSpawns()[i + 1], 10, false).intersect(spawnable);
             for (int j = 0; j < numBaseMexes; j += 2) {
@@ -112,7 +113,6 @@ public strictfp class MarkerGenerator {
             for (int j = 0; j < map.getSpawns().length; j += 2) {
                 nearMexes.fillCircle(map.getSpawns()[j + 1], spawnSize, false);
             }
-            int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
             for (int j = 0; j < numNearMexes; j += 2) {
                 Vector2f location = nearMexes.getRandomPosition();
                 if (location == null) {
@@ -304,8 +304,9 @@ public strictfp class MarkerGenerator {
             }
         }
 
+        boolean spawnHydro = random.nextBoolean();
         for (int i = 0; i < map.getSpawns().length; i += 2) {
-            if (random.nextBoolean()) {
+            if (spawnHydro) {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
                 baseHydro.fillCircle(map.getSpawns()[i + 1], spawnSize * 1.5f, true).fillCircle(map.getSpawns()[i + 1], 20, false).intersect(spawnable);
                 for (int j = 0; j < map.getSpawns().length; j += 2) {
