@@ -712,21 +712,23 @@ public strictfp class BinaryMask extends Mask {
         return cellCount;
     }
 
-    public Vector2f getRandomPosition() {
-        int cellCount = getCount();
-        if (cellCount == 0)
-            return null;
-        int cell = random.nextInt(cellCount) + 1;
-        cellCount = 0;
+    public HashSet<Vector2f> getAllCoordinates() {
+        HashSet<Vector2f> coordinates = new HashSet<>();
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (mask[x][y])
-                    cellCount++;
-                if (cellCount == cell)
-                    return new Vector2f(x, y);
+                    coordinates.add(new Vector2f(x, y));
             }
         }
-        return null;
+        return coordinates;
+    }
+
+    public Vector2f getRandomPosition() {
+        HashSet<Vector2f> coordinates = getAllCoordinates();
+        if (coordinates.size() == 0)
+            return null;
+        int cell = random.nextInt(coordinates.size());
+        return (Vector2f) coordinates.toArray()[cell];
     }
 
     public void applySymmetry() {
