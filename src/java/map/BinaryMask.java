@@ -748,7 +748,7 @@ public strictfp class BinaryMask extends Mask {
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinates.size() > 0) {
             Vector2f location = coordinateArray[random.nextInt(coordinates.size())];
-           chosenCoordinates.add(location);
+            chosenCoordinates.add(location);
             coordinates.removeIf((loc) -> location.getDistance(loc) < minSpacing);
             coordinateArray = coordinates.toArray(new Vector2f[0]);
         }
