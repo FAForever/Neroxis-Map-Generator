@@ -539,14 +539,14 @@ public strictfp class MapGenerator {
     }
 
     private void setupTerrainPipeline() {
-        land = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "land");
-        mountains = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "mountains");
-        plateaus = new ConcurrentBinaryMask(32, random.nextLong(), symmetryHierarchy, "plateaus");
-        ramps = new ConcurrentBinaryMask(64, random.nextLong(), symmetryHierarchy, "ramps");
+        land = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "land");
+        mountains = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "mountains");
+        plateaus = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "plateaus");
+        ramps = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "ramps");
 
-        land.randomize(landDensity).smooth(2f, .75f).enlarge(128).smooth(2f).erode(.5f);
-        mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(128).smooth(4f, .6f).erode(.5f);
-        plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(128).smooth(2f, .25f).erode(.5f);
+        land.randomize(landDensity).smooth(2f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
+        mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(mapSize / 4).smooth(4f, .6f).erode(.5f);
+        plateaus.randomize(plateauDensity).smooth(2f).cutCorners().enlarge(mapSize / 4).smooth(2f, .25f).erode(.5f);
 
         plateaus.intersect(land).minus(mountains);
         mountains.intersect(land);
@@ -555,10 +555,10 @@ public strictfp class MapGenerator {
         mountains.enlarge(mapSize + 1).smooth(4f);
         plateaus.enlarge(mapSize + 1).smooth(8f, .25f);
 
-        spawnLandMask.shrink(32).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(128).inflate(2).cutCorners();
+        spawnLandMask.shrink(mapSize / 16).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).inflate(2).cutCorners();
         spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).inflate(8);
-        spawnPlateauMask.shrink(32).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
-        spawnPlateauMask.enlarge(128).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
+        spawnPlateauMask.shrink(mapSize / 16).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+        spawnPlateauMask.enlarge(mapSize / 4).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
