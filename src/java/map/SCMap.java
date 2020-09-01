@@ -71,6 +71,16 @@ public strictfp class SCMap {
     private final ArrayList<Prop> props;
     private final ArrayList<Unit> units;
     private final ArrayList<Unit> wrecks;
+    private final ArrayList<AIMarker> landAIMarkers;
+    private final ArrayList<AIMarker> amphibiousAIMarkers;
+    private final ArrayList<AIMarker> navyAIMarkers;
+    private final ArrayList<AIMarker> airAIMarkers;
+    private final ArrayList<AIMarker> rallyMarkers;
+    private final ArrayList<AIMarker> expansionAIMarkers;
+    private final ArrayList<AIMarker> largeExpansionAIMarkers;
+    private final ArrayList<AIMarker> navalAreaAIMarkers;
+    private final ArrayList<AIMarker> navalRallyMarkers;
+
 
     private final BufferedImage preview;
     private final BufferedImage heightmap;
@@ -94,6 +104,16 @@ public strictfp class SCMap {
         props = new ArrayList<>();
         units = new ArrayList<>();
         wrecks = new ArrayList<>();
+        landAIMarkers = new ArrayList<>();
+        amphibiousAIMarkers = new ArrayList<>();
+        navyAIMarkers = new ArrayList<>();
+        airAIMarkers = new ArrayList<>();
+        rallyMarkers = new ArrayList<>();
+        expansionAIMarkers = new ArrayList<>();
+        largeExpansionAIMarkers = new ArrayList<>();
+        navalAreaAIMarkers = new ArrayList<>();
+        navalRallyMarkers = new ArrayList<>();
+
 
         preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
@@ -175,6 +195,112 @@ public strictfp class SCMap {
 
     public void addWreck(Unit wreck) {
         wrecks.add(wreck);
+    }
+
+    public int getLandMarkerCount() {
+        return landAIMarkers.size();
+    }
+
+    public AIMarker getLandMarker(int i) {
+        return landAIMarkers.get(i);
+    }
+
+    public void addLandMarker(AIMarker aiMarker) {
+        landAIMarkers.add(aiMarker);
+    }
+
+    public int getAmphibiousMarkerCount() {
+        return amphibiousAIMarkers.size();
+    }
+
+    public AIMarker getAmphibiousMarker(int i) {
+        return amphibiousAIMarkers.get(i);
+    }
+
+    public void addAmphibiousMarker(AIMarker aiMarker) {
+        amphibiousAIMarkers.add(aiMarker);
+    }
+
+    public int getNavyMarkerCount() {
+        return navyAIMarkers.size();
+    }
+
+    public AIMarker getNavyMarker(int i) {
+        return navyAIMarkers.get(i);
+    }
+
+    public void addNavyMarker(AIMarker aiMarker) {
+        navyAIMarkers.add(aiMarker);
+    }
+
+    public int getAirMarkerCount() {
+        return airAIMarkers.size();
+    }
+
+    public AIMarker getAirMarker(int i) {
+        return airAIMarkers.get(i);
+    }
+
+    public void addAirMarker(AIMarker aiMarker) { airAIMarkers.add(aiMarker); }
+
+    public int getRallyMarkerCount() {
+        return rallyMarkers.size();
+    }
+
+    public AIMarker getRallyMarker(int i) {
+        return rallyMarkers.get(i);
+    }
+
+    public void addRallyMarker(AIMarker aiMarker) {
+        rallyMarkers.add(aiMarker);
+    }
+
+    public int getExpansionMarkerCount() {
+        return expansionAIMarkers.size();
+    }
+
+    public AIMarker getExpansionMarker(int i) {
+        return expansionAIMarkers.get(i);
+    }
+
+    public void addExpansionMarker(AIMarker aiMarker) {
+        expansionAIMarkers.add(aiMarker);
+    }
+
+    public int getLargeExpansionMarkerCount() {
+        return largeExpansionAIMarkers.size();
+    }
+
+    public AIMarker getLargeExpansionMarker(int i) {
+        return largeExpansionAIMarkers.get(i);
+    }
+
+    public void addLargeExpansionMarker(AIMarker aiMarker) {
+        largeExpansionAIMarkers.add(aiMarker);
+    }
+
+    public int getNavalAreaMarkerCount() {
+        return navalAreaAIMarkers.size();
+    }
+
+    public AIMarker getNavalAreaMarker(int i) {
+        return navalAreaAIMarkers.get(i);
+    }
+
+    public void addNavalAreaMarker(AIMarker aiMarker) {
+        navalAreaAIMarkers.add(aiMarker);
+    }
+
+    public int getNavyRallyMarkerCount() {
+        return navalRallyMarkers.size();
+    }
+
+    public AIMarker getNavyRallyMarker(int i) {
+        return navalRallyMarkers.get(i);
+    }
+
+    public void addNavyRallyMarker(AIMarker aiMarker) {
+        navalRallyMarkers.add(aiMarker);
     }
 
     public void setHeightmap(FloatMask heightmap) {

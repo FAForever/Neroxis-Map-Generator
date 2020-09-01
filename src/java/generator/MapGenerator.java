@@ -425,6 +425,18 @@ public strictfp class MapGenerator {
 
         Pipeline.start();
 
+        CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(land, unpassable);
+            long sTime = System.currentTimeMillis();
+            markerGenerator.generateAIMarkers(land.getFinalMask(), unpassable.getFinalMask());
+            if (DEBUG) {
+                System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
+                        System.currentTimeMillis() - sTime,
+                        Util.getStackTraceLineInClass(MapGenerator.class));
+            }
+        });
+
+
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(grassTexture, lightGrassTexture, rockTexture, lightRockTexture);
             long sTime = System.currentTimeMillis();
@@ -515,6 +527,7 @@ public strictfp class MapGenerator {
         wrecksFuture.join();
         propsFuture.join();
         decalsFuture.join();
+        aiMarkerFuture.join();
         heightMapFuture.join();
 
         CompletableFuture<Void> placementFuture = CompletableFuture.runAsync(() -> {

@@ -1,12 +1,17 @@
 package generator;
 
+import map.AIMarker;
 import map.BinaryMask;
 import map.SCMap;
 import map.Symmetry;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static util.Placement.placeOnHeightmap;
 
@@ -23,6 +28,7 @@ public strictfp class MarkerGenerator {
 
 
     public BinaryMask[] generateSpawns(float separation, Symmetry symmetry, float plateauDensity) {
+        map.getLargeExpansionAIMarkers().clear();
         BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
@@ -78,6 +84,8 @@ public strictfp class MarkerGenerator {
             }
             map.getSpawns()[i] = new Vector3f(location);
             map.getSpawns()[i + 1] = new Vector3f(symLocation);
+            map.addLargeExpansionMarker(new AIMarker(location, null));
+            map.addLargeExpansionMarker(new AIMarker(symLocation, null));
             location = spawnable.getRandomPosition();
         }
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
@@ -266,6 +274,13 @@ public strictfp class MarkerGenerator {
             expansion.intersect(spawnable);
 
             expMexCount = StrictMath.min((random.nextInt(3) + 2) * 2, expMexCountLeft);
+            if (expMexCount >= 6) {
+                map.addLargeExpansionMarker(new AIMarker(expLocation, null));
+                map.addLargeExpansionMarker(new AIMarker(spawnableCopy.getSymmetryPoint(expLocation), null));
+            } else {
+                map.addExpansionMarker(new AIMarker(expLocation, null));
+                map.addExpansionMarker(new AIMarker(spawnableCopy.getSymmetryPoint(expLocation), null));
+            }
 
             spawnableCopy.fillCircle(expLocation, expSpacing, false);
             spawnableCopy.fillCircle(spawnableCopy.getSymmetryPoint(expLocation), expSpacing, false);
@@ -380,6 +395,64 @@ public strictfp class MarkerGenerator {
         return valid;
     }
 
+    public void generateAIMarkers(BinaryMask land, BinaryMask unpassable) {
+        BinaryMask symmetryRegion = new BinaryMask(land.getSize(), random.nextLong(), land.getSymmetryHierarchy());
+        symmetryRegion.fillHalf(true);
+        BinaryMask passableLand = land.copy().deflate(map.getSize() / 128f).minus(unpassable.copy().inflate(map.getSize() / 64f)).trimEdge(8).intersect(symmetryRegion);
+        BinaryMask water = land.copy().invert().deflate(map.getSize() / 32f).trimEdge(8).intersect(symmetryRegion);
+        BinaryMask amphibious = unpassable.copy().invert().deflate(map.getSize() / 64f).trimEdge(8).intersect(symmetryRegion);
+
+        float airMarkerSpacing = map.getSize() / 8f;
+        LinkedHashSet<Vector2f> airCoordinates = passableLand.getSpacedCoordinates(airMarkerSpacing);
+        Vector2f[] airCoordinatesArray = airCoordinates.toArray(new Vector2f[0]);
+        airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(location, new ArrayList<>())));
+        float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
+        map.getAirAIMarkers().forEach(aiMarker -> aiMarker.getNeighbors().addAll(IntStream.range(0, airCoordinatesArray.length)
+                .filter((ind) -> aiMarker.getPosition().getXZDistance(airCoordinatesArray[ind]) < airMarkerConnectionDistance)
+                .boxed().collect(Collectors.toList()))
+        );
+
+        float amphibiousMarkerSpacing = map.getSize() / 32f;
+        LinkedHashSet<Vector2f> amphibiousCoordinates = amphibious.getSpacedCoordinatesEqualTo(true, amphibiousMarkerSpacing);
+        LinkedHashSet<Vector2f> symAmphibiousCoordinates = new LinkedHashSet<>();
+        amphibiousCoordinates.forEach((location) -> symAmphibiousCoordinates.add(land.getSymmetryPoint(location)));
+        amphibiousCoordinates.addAll(symAmphibiousCoordinates);
+        Vector2f[] amphibiousCoordinatesArray = amphibiousCoordinates.toArray(new Vector2f[0]);
+        amphibiousCoordinates.forEach((location) -> map.addAmphibiousMarker(new AIMarker(location, new ArrayList<>())));
+        float amphibiousMarkerConnectionDistance = (float) StrictMath.sqrt(amphibiousMarkerSpacing * amphibiousMarkerSpacing * 2) + 1;
+        map.getAmphibiousAIMarkers().forEach(aiMarker -> aiMarker.getNeighbors().addAll(IntStream.range(0, amphibiousCoordinatesArray.length)
+                .filter((ind) -> aiMarker.getPosition().getXZDistance(amphibiousCoordinatesArray[ind]) < amphibiousMarkerConnectionDistance)
+                .boxed().collect(Collectors.toList()))
+        );
+
+        float landMarkerSpacing = map.getSize() / 32f;
+        LinkedHashSet<Vector2f> landCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
+        landCoordinates.removeIf((location) -> !passableLand.get(location));
+        LinkedHashSet<Vector2f> symLandCoordinates = new LinkedHashSet<>();
+        landCoordinates.forEach((location) -> symLandCoordinates.add(land.getSymmetryPoint(location)));
+        landCoordinates.addAll(symLandCoordinates);
+        Vector2f[] landCoordinatesArray = landCoordinates.toArray(new Vector2f[0]);
+        landCoordinates.forEach((location) -> map.addLandMarker(new AIMarker(location, new ArrayList<>())));
+        float landMarkerConnectionDistance = (float) StrictMath.sqrt(landMarkerSpacing * landMarkerSpacing * 2) + 1;
+        map.getLandAIMarkers().forEach(aiMarker -> aiMarker.getNeighbors().addAll(IntStream.range(0, landCoordinatesArray.length)
+                .filter((ind) -> aiMarker.getPosition().getXZDistance(landCoordinatesArray[ind]) < landMarkerConnectionDistance)
+                .boxed().collect(Collectors.toList()))
+        );
+
+        float navyMarkerSpacing = map.getSize() / 16f;
+        LinkedHashSet<Vector2f> navyCoordinates = water.getSpacedCoordinatesEqualTo(true, navyMarkerSpacing);
+        LinkedHashSet<Vector2f> symNavyCoordinates = new LinkedHashSet<>();
+        navyCoordinates.forEach((location) -> symNavyCoordinates.add(land.getSymmetryPoint(location)));
+        navyCoordinates.addAll(symNavyCoordinates);
+        Vector2f[] navyCoordinatesArray = navyCoordinates.toArray(new Vector2f[0]);
+        navyCoordinates.forEach((location) -> map.addNavyMarker(new AIMarker(location, new ArrayList<>())));
+        float navyMarkerConnectionDistance = (float) StrictMath.sqrt(navyMarkerSpacing * navyMarkerSpacing * 2) + 1;
+        map.getNavyAIMarkers().forEach(aiMarker -> aiMarker.getNeighbors().addAll(IntStream.range(0, navyCoordinatesArray.length)
+                .filter((ind) -> aiMarker.getPosition().getXZDistance(navyCoordinatesArray[ind]) < navyMarkerConnectionDistance)
+                .boxed().collect(Collectors.toList()))
+        );
+    }
+
     public void setMarkerHeights() {
         for (int i = 0; i < map.getSpawns().length; i++) {
             map.getSpawns()[i] = placeOnHeightmap(map, map.getSpawns()[i]);
@@ -393,6 +466,24 @@ public strictfp class MarkerGenerator {
             if (map.getHydros()[i] != null) {
                 map.getHydros()[i] = placeOnHeightmap(map, map.getHydros()[i]);
             }
+        }
+        for (int i = 0; i < map.getAirMarkerCount(); i++) {
+            map.getAirMarker(i).setPosition(placeOnHeightmap(map, map.getAirMarker(i).getPosition()));
+        }
+        for (int i = 0; i < map.getLandMarkerCount(); i++) {
+            map.getLandMarker(i).setPosition(placeOnHeightmap(map, map.getLandMarker(i).getPosition()));
+        }
+        for (int i = 0; i < map.getAmphibiousMarkerCount(); i++) {
+            map.getAmphibiousMarker(i).setPosition(placeOnHeightmap(map, map.getAmphibiousMarker(i).getPosition()));
+        }
+        for (int i = 0; i < map.getNavyMarkerCount(); i++) {
+            map.getNavyMarker(i).setPosition(placeOnHeightmap(map, map.getNavyMarker(i).getPosition()));
+        }
+        for (int i = 0; i < map.getLargeExpansionMarkerCount(); i++) {
+            map.getLargeExpansionMarker(i).setPosition(placeOnHeightmap(map, map.getLargeExpansionMarker(i).getPosition()));
+        }
+        for (int i = 0; i < map.getExpansionMarkerCount(); i++) {
+            map.getExpansionMarker(i).setPosition(placeOnHeightmap(map, map.getExpansionMarker(i).getPosition()));
         }
     }
 }

@@ -59,6 +59,98 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
+        for (int i = 0; i < map.getAirMarkerCount(); i ++) {
+            out.writeBytes("        ['AirPN" + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
+            out.writeBytes("          ['adjacentTo'] = STRING( '");
+            for (int j = 0; j < map.getAirMarker(i).getNeighbors().size(); j++) {
+                if (map.getAirMarker(i).getNeighbors().get(j) != i) {
+                    out.writeBytes(" AirPN" + map.getAirMarker(i).getNeighbors().get(j));
+                }
+            }
+            out.writeBytes(" '),\n");
+            out.writeBytes("          ['color'] = STRING( 'ffffffff' ),\n");
+            out.writeBytes("          ['graph'] = STRING( 'DefaultAir' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getAirMarker(i).getPosition().x + 0.5f) + ", " + map.getAirMarker(i).getPosition().y + ", " + (map.getAirMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
+        for (int i = 0; i < map.getLandMarkerCount(); i ++) {
+            out.writeBytes("        ['LandPN" + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
+            out.writeBytes("          ['adjacentTo'] = STRING( '");
+            for (int j = 0; j < map.getLandMarker(i).getNeighbors().size(); j++) {
+                if (map.getLandMarker(i).getNeighbors().get(j) != i) {
+                    out.writeBytes(" LandPN" + map.getLandMarker(i).getNeighbors().get(j));
+                }
+            }
+            out.writeBytes(" '),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff00ff00' ),\n");
+            out.writeBytes("          ['graph'] = STRING( 'DefaultLand' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getLandMarker(i).getPosition().x + 0.5f) + ", " + map.getLandMarker(i).getPosition().y + ", " + (map.getLandMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
+        for (int i = 0; i < map.getAmphibiousMarkerCount(); i ++) {
+            out.writeBytes("        ['AmphPN" + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
+            out.writeBytes("          ['adjacentTo'] = STRING( '");
+            for (int j = 0; j < map.getAmphibiousMarker(i).getNeighbors().size(); j++) {
+                if (map.getAmphibiousMarker(i).getNeighbors().get(j) != i) {
+                    out.writeBytes(" AmphPN" + map.getAmphibiousMarker(i).getNeighbors().get(j));
+                }
+            }
+            out.writeBytes(" '),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff00ffff' ),\n");
+            out.writeBytes("          ['graph'] = STRING( 'DefaultAmphibious' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getAmphibiousMarker(i).getPosition().x + 0.5f) + ", " + map.getAmphibiousMarker(i).getPosition().y + ", " + (map.getAmphibiousMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
+        for (int i = 0; i < map.getNavyMarkerCount(); i ++) {
+            out.writeBytes("        ['WaterPN" + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
+            out.writeBytes("          ['adjacentTo'] = STRING( '");
+            for (int j = 0; j < map.getNavyMarker(i).getNeighbors().size(); j++) {
+                if (map.getNavyMarker(i).getNeighbors().get(j) != i) {
+                    out.writeBytes(" WaterPN" + map.getNavyMarker(i).getNeighbors().get(j));
+                }
+            }
+            out.writeBytes(" '),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff0000ff' ),\n");
+            out.writeBytes("          ['graph'] = STRING( 'DefaultWater' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getNavyMarker(i).getPosition().x + 0.5f) + ", " + map.getNavyMarker(i).getPosition().y + ", " + (map.getNavyMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
+        for (int i = 0; i < map.getLargeExpansionMarkerCount(); i ++) {
+            out.writeBytes("        ['Large Expansion Area " + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['color'] = STRING( 'ffff0080' ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Large Expansion Area' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Expansion_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getLargeExpansionMarker(i).getPosition().x + 0.5f) + ", " + map.getLargeExpansionMarker(i).getPosition().y + ", " + (map.getLargeExpansionMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
+        for (int i = 0; i < map.getExpansionMarkerCount(); i ++) {
+            out.writeBytes("        ['Expansion Area " + i + "'] = {\n");
+            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff008080' ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Expansion Area' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Expansion_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getExpansionMarker(i).getPosition().x + 0.5f) + ", " + map.getExpansionMarker(i).getPosition().y + ", " + (map.getExpansionMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
+        }
         out.writeBytes("      },\n");
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");

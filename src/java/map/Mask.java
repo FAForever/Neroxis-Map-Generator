@@ -44,6 +44,14 @@ public strictfp abstract class Mask {
         }
     }
 
+    public Vector2f[] getTerrainSymmetryPoints(Vector2f location) {
+        return getTerrainSymmetryPoints((int) location.x, (int) location.y, symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public Vector2f[] getTerrainSymmetryPoints(Vector2f location, Symmetry symmetry) {
+        return getTerrainSymmetryPoints((int) location.x, (int) location.y, symmetry);
+    }
+
     public Vector2f[] getTerrainSymmetryPoints(int x, int y, Symmetry symmetry) {
         Vector2f[] symmetryPoints;
         Vector2f symPoint1;
