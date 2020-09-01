@@ -326,7 +326,7 @@ public strictfp class MarkerGenerator {
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             if (spawnHydro) {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-                baseHydro.fillCircle(map.getSpawns()[i + 1], spawnSize * 1.5f, true).fillCircle(map.getSpawns()[i + 1], 20, false).intersect(spawnable);
+                baseHydro.fillCircle(map.getSpawns()[i + 1], spawnSize * 1.5f, true).fillCircle(map.getSpawns()[i + 1], 10, false).intersect(spawnable);
                 for (int j = 0; j < map.getSpawns().length; j += 2) {
                     baseHydro.fillCircle(map.getSpawns()[j], 16, false);
                 }
