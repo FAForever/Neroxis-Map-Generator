@@ -142,6 +142,23 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask flipValues(float density) {
+        return flipValues(density, symmetryHierarchy.getTerrainSymmetry());
+    }
+
+    public BinaryMask flipValues(float density, Symmetry symmetry) {
+        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                if (mask[x][y]) {
+                    mask[x][y] = random.nextFloat() < density;
+                }
+            }
+        }
+        applySymmetry(symmetry);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask randomWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
             int x = random.nextInt(getMaxXBound() - getMinXBound()) + getMinXBound();

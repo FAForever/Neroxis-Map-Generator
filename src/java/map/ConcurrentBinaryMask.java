@@ -79,6 +79,18 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask flipValues(float density) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.flipValues(density)
+        );
+    }
+
+    public ConcurrentBinaryMask flipValues(float density, Symmetry symmetry) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.flipValues(density, symmetry)
+        );
+    }
+
     public ConcurrentBinaryMask randomWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.randomWalk(numWalkers, numSteps)

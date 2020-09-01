@@ -9,7 +9,10 @@ import export.ScenarioExporter;
 import export.ScriptExporter;
 import lombok.Getter;
 import map.*;
-import util.*;
+import util.ArgumentParser;
+import util.FileUtils;
+import util.Pipeline;
+import util.Util;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,20 +29,18 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public strictfp class MapGenerator {
 
-    public static boolean DEBUG = false;
     public static final String VERSION = "1.0.18";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
-
     public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
-    public static final float MOUNTAIN_DENSITY_MAX = .1f;
-    public static final float RAMP_DENSITY_MIN = .05f;
-    public static final float RAMP_DENSITY_MAX = .35f;
+    public static final float MOUNTAIN_DENSITY_MAX = 1f;
+    public static final float RAMP_DENSITY_MIN = .01f;
+    public static final float RAMP_DENSITY_MAX = .02f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .65f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-
+    public static boolean DEBUG = false;
     //read from cli args
     private String folderPath = ".";
     private String mapName = "debugMap";
@@ -175,7 +176,7 @@ public strictfp class MapGenerator {
                     "--spawn-count arg      optional, set the spawn count for the generated map\n" +
                     "--land-density arg     optional, set the land density for the generated map\n" +
                     "--plateau-density arg  optional, set the plateau density for the generated map\n" +
-      String.format("--mountain-density arg optional, set the mountain density for the generated map (max %.2f)\n", MOUNTAIN_DENSITY_MAX) +
+                    String.format("--mountain-density arg optional, set the mountain density for the generated map (max %.2f)\n", MOUNTAIN_DENSITY_MAX) +
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
@@ -542,14 +543,13 @@ public strictfp class MapGenerator {
         land = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "land");
         mountains = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "mountains");
         plateaus = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "plateaus");
-        ramps = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "ramps");
+        ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "ramps");
 
         land.randomize(landDensity).smooth(mapSize / 256f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
-        mountains.randomize(mountainDensity).inflate(1).erode(.5f).enlarge(mapSize / 4).smooth(4f, .6f).erode(.5f);
+        mountains.randomWalk((int) (mountainDensity * mapSize / 64), (int) (mountainDensity * mapSize / 32)).enlarge(mapSize / 4).smooth(4f).erode(.5f);
         plateaus.randomize(plateauDensity).smooth(mapSize / 256f).cutCorners().enlarge(mapSize / 4).smooth(2f, .25f).erode(.5f);
 
-        plateaus.intersect(land).minus(mountains);
-        mountains.intersect(land);
+        plateaus.intersect(land);
 
         land.enlarge(mapSize + 1).smooth(4f, .1f);
         mountains.enlarge(mapSize + 1).smooth(4f);
@@ -563,14 +563,15 @@ public strictfp class MapGenerator {
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
-        mountains.minus(spawnLandMask).filterShapes(1024);
-        plateaus.combine(mountains).filterShapes(2048);
+        mountains.minus(spawnLandMask);
+        plateaus.filterShapes(2048);
 
-        ramps.randomize(rampDensity);
-        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
+        ramps.combine(plateaus).outline().minus(mountains).flipValues(rampDensity, symmetryHierarchy.getSpawnSymmetry())
+                .inflate(12).smooth(2f, .1f);
 
         land.combine(ramps.copy().deflate(8)).filterShapes(2048);
-        mountains.minus(ramps);
+        mountains.intersect(land);
+        plateaus.combine(mountains);
 
         unpassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "hills");
@@ -593,9 +594,9 @@ public strictfp class MapGenerator {
         randomHeight.randomize(.5f);
         heightmapBase.init(land, 25.5f, 25.5f);
         heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
-        heightmapHills.init(hills,0,.5f).smooth(12f);
-        heightmapValleys.init(valleys,0,-.5f).smooth(12f);
-        heightmapLand.init(randomHeight,0, .5f).smooth(12f);
+        heightmapHills.init(hills, 0, .5f).smooth(12f);
+        heightmapValleys.init(valleys, 0, -.5f).smooth(12f);
+        heightmapLand.init(randomHeight, 0, .5f).smooth(12f);
         heightmapLand.maskToHeightmap(0.25f, 48, land).smooth(2);
         heightmapLand.add(heightmapHills);
         heightmapLand.add(heightmapValleys);
@@ -607,7 +608,7 @@ public strictfp class MapGenerator {
     }
 
     private void setupTexturePipeline() {
-        grass = new ConcurrentBinaryMask(land, random.nextLong(),"grass");
+        grass = new ConcurrentBinaryMask(land, random.nextLong(), "grass");
         rock = new ConcurrentBinaryMask(unpassable, random.nextLong(), "rock");
         ConcurrentBinaryMask lightRock = new ConcurrentBinaryMask(mountains, random.nextLong(), "lightRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
