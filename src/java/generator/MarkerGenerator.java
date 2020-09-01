@@ -106,7 +106,7 @@ public strictfp class MarkerGenerator {
         int iMex = 0;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-            baseMexes.fillCircle(map.getSpawns()[i + 1], 20, true).fillCircle(map.getSpawns()[i + 1], 10, false).intersect(spawnable);
+            baseMexes.fillCircle(map.getSpawns()[i + 1], 20, true).fillCircle(map.getSpawns()[i + 1], 5, false).intersect(spawnable);
             for (int j = 0; j < numBaseMexes; j += 2) {
                 Vector2f location = baseMexes.getRandomPosition();
                 if (location == null) {
