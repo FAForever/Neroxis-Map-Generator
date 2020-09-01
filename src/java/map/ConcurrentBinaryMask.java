@@ -13,7 +13,7 @@ import java.util.Collections;
 public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     private BinaryMask binaryMask;
-    private String name;
+    private final String name;
 
     public ConcurrentBinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.binaryMask = new BinaryMask(size, seed, symmetryHierarchy);
@@ -240,18 +240,14 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         return binaryMask.toHash();
     }
 
-    public BinaryMask getBinaryMask() {
+    public BinaryMask getFinalMask() {
+        Pipeline.await(this);
         return binaryMask;
     }
 
     @Override
     public ConcurrentBinaryMask mockClone() {
         return new ConcurrentBinaryMask(this, 0, "mocked");
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     public void startVisualDebugger() {

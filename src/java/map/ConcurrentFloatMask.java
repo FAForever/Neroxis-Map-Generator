@@ -13,7 +13,7 @@ import java.util.Collections;
 public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     private FloatMask floatMask;
-    private String name;
+    private final String name;
 
     public ConcurrentFloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
@@ -97,7 +97,8 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         return floatMask.toHash();
     }
 
-    public FloatMask getFloatMask() {
+    public FloatMask getFinalMask() {
+        Pipeline.await(this);
         return floatMask;
     }
 
