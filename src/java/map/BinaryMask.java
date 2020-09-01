@@ -541,18 +541,12 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillHalf(boolean value, Symmetry symmetry) {
-        switch (symmetry) {
-            case Y:
-                return fillRect(0, 0, getSize(), getSize() / 2, value);
-            case X:
-                return fillRect(0, 0, getSize() / 2, getSize(), value);
-            case XY:
-                return fillParallelogram(0, 0, getSize(), getSize(), 0, 1, value);
-            case YX:
-                return fillParallelogram(0, 0, getSize(), getSize(), 0, -1, value);
-            default:
-                return null;
+        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                mask[x][y] = value;
+            }
         }
+        return this;
     }
 
     public BinaryMask fillCircle(Vector3f v, float radius, boolean value) {
