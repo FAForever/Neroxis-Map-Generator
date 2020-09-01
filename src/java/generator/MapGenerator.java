@@ -34,8 +34,8 @@ public strictfp class MapGenerator {
     public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
-    public static final float RAMP_DENSITY_MIN = .01f;
-    public static final float RAMP_DENSITY_MAX = .02f;
+    public static final float RAMP_DENSITY_MIN = .025f;
+    public static final float RAMP_DENSITY_MAX = .25f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .65f;
@@ -543,7 +543,7 @@ public strictfp class MapGenerator {
         land = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "land");
         mountains = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "mountains");
         plateaus = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "plateaus");
-        ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "ramps");
+        ramps = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "ramps");
 
         land.randomize(landDensity).smooth(mapSize / 256f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
         mountains.randomWalk((int) (mountainDensity * mapSize / 64), (int) (mountainDensity * mapSize / 32)).enlarge(mapSize / 4).smooth(4f).erode(.5f);
@@ -556,18 +556,17 @@ public strictfp class MapGenerator {
         plateaus.enlarge(mapSize + 1).smooth(8f, .25f);
 
         spawnLandMask.shrink(mapSize / 16).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).inflate(2).cutCorners();
-        spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).inflate(8);
+        spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
         spawnPlateauMask.shrink(mapSize / 16).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         spawnPlateauMask.enlarge(mapSize / 4).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
-        spawnPlateauMask.deflate(8).intersect(spawnLandMask);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).combine(plateaus);
         mountains.minus(spawnLandMask);
         plateaus.filterShapes(2048);
 
-        ramps.combine(plateaus).outline().minus(mountains).flipValues(rampDensity, symmetryHierarchy.getSpawnSymmetry())
-                .inflate(12).smooth(2f, .1f);
+        ramps.randomize(rampDensity);
+        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
 
         land.combine(ramps.copy().deflate(8)).filterShapes(2048);
         mountains.intersect(land);
