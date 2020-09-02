@@ -34,7 +34,7 @@ public strictfp class MapGenerator {
     public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
-    public static final float RAMP_DENSITY_MIN = .025f;
+    public static final float RAMP_DENSITY_MIN = .15f;
     public static final float RAMP_DENSITY_MAX = .25f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
