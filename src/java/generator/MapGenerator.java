@@ -72,6 +72,9 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask plateaus;
     private ConcurrentBinaryMask ramps;
     private ConcurrentBinaryMask unpassable;
+    private ConcurrentBinaryMask passable;
+    private ConcurrentBinaryMask passableLand;
+    private ConcurrentBinaryMask passableWater;
     private ConcurrentFloatMask heightmapBase;
     private ConcurrentBinaryMask grass;
     private ConcurrentFloatMask grassTexture;
@@ -83,6 +86,8 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask spawnLandMask;
     private ConcurrentBinaryMask spawnPlateauMask;
     private ConcurrentBinaryMask resourceMask;
+    private ConcurrentBinaryMask plateauResourceMask;
+    private ConcurrentBinaryMask waterResourceMask;
     private ConcurrentFloatMask lightGrassTexture;
     private ConcurrentFloatMask lightRockTexture;
     private ConcurrentBinaryMask t1LandWreckMask;
@@ -426,9 +431,9 @@ public strictfp class MapGenerator {
         Pipeline.start();
 
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(land, unpassable);
+            Pipeline.await(passable, passableLand, passableWater);
             long sTime = System.currentTimeMillis();
-            markerGenerator.generateAIMarkers(land.getFinalMask(), unpassable.getFinalMask());
+            markerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
                         System.currentTimeMillis() - sTime,
@@ -449,15 +454,9 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask);
+            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
-            BinaryMask plateauResource = new BinaryMask(resourceMask.getFinalMask(), random.nextLong());
-            plateauResource.intersect(plateaus.getFinalMask()).trimEdge(16).fillCenter(16, true);
-            BinaryMask waterMex = land.getFinalMask().copy().invert();
-            waterMex.deflate(48).trimEdge(16).fillCenter(16, false);
-            markerGenerator.generateMexes(resourceMask.getFinalMask().copy(), plateauResource, waterMex);
-            BinaryMask hydroSpawn = new BinaryMask(land.getFinalMask(), random.nextLong());
-            hydroSpawn.minus(ramps.getFinalMask()).minus(unpassable.getFinalMask()).deflate(6);
+            markerGenerator.generateMexes(resourceMask.getFinalMask().copy(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             markerGenerator.generateHydros(resourceMask.getFinalMask().copy().deflate(6));
             generateExclusionMasks();
             if (DEBUG) {
@@ -592,6 +591,14 @@ public strictfp class MapGenerator {
         unpassable.inflate(3).combine(plateaus.copy().outline().inflate(3).minus(ramps));
         hills.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
         valleys.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
+
+        passable = new ConcurrentBinaryMask(mountains, random.nextLong(),"passable").invert();
+        passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
+        passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
+
+        passable.deflate(4).minus(plateaus.copy().outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
+        passableLand.deflate(4).intersect(passable);
+        passableWater.deflate(16).trimEdge(8);
     }
 
     private void setupHeightmapPipeline() {
@@ -680,9 +687,13 @@ public strictfp class MapGenerator {
 
     private void setupResourcePipeline() {
         resourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "resource");
+        waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
+        plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
         resourceMask.minus(unpassable).minus(ramps).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
+        waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
+        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
     }
 
     private void generateExclusionMasks() {

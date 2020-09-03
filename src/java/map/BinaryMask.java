@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
@@ -144,7 +143,7 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask flipValues(float density) {
-        return flipValues(density, symmetryHierarchy.getTerrainSymmetry());
+        return flipValues(density, symmetryHierarchy.getSpawnSymmetry());
     }
 
     public BinaryMask flipValues(float density, Symmetry symmetry) {
@@ -743,10 +742,10 @@ public strictfp class BinaryMask extends Mask {
         return cellCount;
     }
 
-    public LinkedHashSet<Vector2f> getAllCoordinates() {
+    public LinkedHashSet<Vector2f> getAllCoordinates(int spacing) {
         LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>();
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = 0; x < getSize(); x+=spacing) {
+            for (int y = 0; y < getSize(); y+=spacing) {
                 Vector2f location = new Vector2f(x, y);
                 coordinates.add(location);
             }
@@ -754,10 +753,10 @@ public strictfp class BinaryMask extends Mask {
         return coordinates;
     }
 
-    public LinkedHashSet<Vector2f> getAllCoordinatesEqualTo(boolean value) {
+    public LinkedHashSet<Vector2f> getAllCoordinatesEqualTo(boolean value, int spacing) {
         LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>();
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = 0; x < getSize(); x+=spacing) {
+            for (int y = 0; y < getSize(); y+=spacing) {
                 if (mask[x][y] == value) {
                     Vector2f location = new Vector2f(x, y);
                     coordinates.add(location);
@@ -767,36 +766,34 @@ public strictfp class BinaryMask extends Mask {
         return coordinates;
     }
 
-    public LinkedHashSet<Vector2f> getSpacedCoordinates(float minSpacing) {
-        LinkedHashSet<Vector2f> coordinates = getAllCoordinates();
-        LinkedHashSet<Vector2f> tooCloseCoordinates = new LinkedHashSet<>();
-        coordinates.forEach((location) -> {
-            if (!tooCloseCoordinates.contains(location)) {
-                Set<Vector2f> closeCoordinates = coordinates.stream().filter((loc) -> location.getDistance(loc) < minSpacing).collect(Collectors.toSet());
-                tooCloseCoordinates.addAll(closeCoordinates);
-                tooCloseCoordinates.remove(location);
-            }
-        });
-        coordinates.removeAll(tooCloseCoordinates);
-        return coordinates;
+    public LinkedHashSet<Vector2f> getSpacedCoordinates(float radius, int spacing) {
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinates(spacing);
+        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
+        while (coordinates.size() > 0) {
+            Vector2f location = coordinateArray[0];
+            chosenCoordinates.add(location);
+            coordinates.removeIf((loc) -> location.getDistance(loc) < radius);
+            coordinateArray = coordinates.toArray(new Vector2f[0]);
+        }
+        return chosenCoordinates;
     }
 
-    public LinkedHashSet<Vector2f> getSpacedCoordinatesEqualTo(boolean value, float minSpacing) {
-        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true);
-        LinkedHashSet<Vector2f> tooCloseCoordinates = new LinkedHashSet<>();
-        coordinates.forEach((location) -> {
-            if (get(location) == value && !tooCloseCoordinates.contains(location)) {
-                Set<Vector2f> closeCoordinates = coordinates.stream().filter((loc) -> location.getDistance(loc) < minSpacing).collect(Collectors.toSet());
-                tooCloseCoordinates.addAll(closeCoordinates);
-                tooCloseCoordinates.remove(location);
-            }
-        });
-        coordinates.removeAll(tooCloseCoordinates);
-        return coordinates;
+    public LinkedHashSet<Vector2f> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(value, spacing);
+        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
+        while (coordinates.size() > 0) {
+            Vector2f location = coordinateArray[0];
+            chosenCoordinates.add(location);
+            coordinates.removeIf((loc) -> location.getDistance(loc) < radius);
+            coordinateArray = coordinates.toArray(new Vector2f[0]);
+        }
+        return chosenCoordinates;
     }
 
     public LinkedHashSet<Vector2f> getRandomCoordinates(float minSpacing) {
-        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true);
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true, 1);
         Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinates.size() > 0) {
@@ -809,7 +806,7 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public Vector2f getRandomPosition() {
-        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true);
+        LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true, 1);
         if (coordinates.size() == 0)
             return null;
         int cell = random.nextInt(coordinates.size());

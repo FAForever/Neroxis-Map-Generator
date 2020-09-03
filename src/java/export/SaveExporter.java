@@ -64,9 +64,9 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
             out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getAirMarker(i).getNeighbors().size(); j++) {
-                if (map.getAirMarker(i).getNeighbors().get(j) != i) {
-                    out.writeBytes(" AirPN" + map.getAirMarker(i).getNeighbors().get(j));
+            for (int j = 0; j < map.getAirMarker(i).getNeighbors().length; j++) {
+                if (map.getAirMarker(i).getNeighbors()[j] != i) {
+                    out.writeBytes(" AirPN" + map.getAirMarker(i).getNeighbors()[j]);
                 }
             }
             out.writeBytes(" '),\n");
@@ -82,9 +82,9 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
             out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getLandMarker(i).getNeighbors().size(); j++) {
-                if (map.getLandMarker(i).getNeighbors().get(j) != i) {
-                    out.writeBytes(" LandPN" + map.getLandMarker(i).getNeighbors().get(j));
+            for (int j = 0; j < map.getLandMarker(i).getNeighbors().length; j++) {
+                if (map.getLandMarker(i).getNeighbors()[j] != i) {
+                    out.writeBytes(" LandPN" + map.getLandMarker(i).getNeighbors()[j]);
                 }
             }
             out.writeBytes(" '),\n");
@@ -100,9 +100,9 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
             out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getAmphibiousMarker(i).getNeighbors().size(); j++) {
-                if (map.getAmphibiousMarker(i).getNeighbors().get(j) != i) {
-                    out.writeBytes(" AmphPN" + map.getAmphibiousMarker(i).getNeighbors().get(j));
+            for (int j = 0; j < map.getAmphibiousMarker(i).getNeighbors().length; j++) {
+                if (map.getAmphibiousMarker(i).getNeighbors()[j] != i) {
+                    out.writeBytes(" AmphPN" + map.getAmphibiousMarker(i).getNeighbors()[j]);
                 }
             }
             out.writeBytes(" '),\n");
@@ -118,9 +118,9 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
             out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getNavyMarker(i).getNeighbors().size(); j++) {
-                if (map.getNavyMarker(i).getNeighbors().get(j) != i) {
-                    out.writeBytes(" WaterPN" + map.getNavyMarker(i).getNeighbors().get(j));
+            for (int j = 0; j < map.getNavyMarker(i).getNeighbors().length; j++) {
+                if (map.getNavyMarker(i).getNeighbors()[j] != i) {
+                    out.writeBytes(" WaterPN" + map.getNavyMarker(i).getNeighbors()[j]);
                 }
             }
             out.writeBytes(" '),\n");

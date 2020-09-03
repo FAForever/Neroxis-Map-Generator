@@ -4,18 +4,18 @@ import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 
-import java.util.ArrayList;
-
 @Data
 public strictfp class AIMarker {
+    private int id;
     private Vector3f position;
-    private ArrayList<Integer> neighbors;
+    private int[] neighbors;
 
-    public AIMarker(Vector2f position, ArrayList<Integer> neighbors) {
-        this(new Vector3f(position), neighbors);
+    public AIMarker(int id, Vector2f position, int[] neighbors) {
+        this(id, new Vector3f(position), neighbors);
     }
 
-    public AIMarker(Vector3f position, ArrayList<Integer> neighbors) {
+    public AIMarker(int id, Vector3f position, int[] neighbors) {
+        this.id = id;
         this.position = position;
         this.neighbors = neighbors;
     }
