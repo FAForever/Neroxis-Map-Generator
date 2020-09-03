@@ -99,7 +99,7 @@ public strictfp class MarkerGenerator {
         int spawnCount = map.getSpawns().length;
         int totalMexCount = map.getMexes().length;
         int numBaseMexes = (random.nextInt(2) + 3) * 2;
-        int spawnMexCount = numBaseMexes * spawnCount;
+        int spawnMexCount = numBaseMexes / 2 * spawnCount;
         int nonSpawnMexCount = totalMexCount - spawnMexCount;
         int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
         int iMex = 0;
