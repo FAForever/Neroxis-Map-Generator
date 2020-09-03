@@ -252,6 +252,10 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         return binaryMask.toHash();
     }
 
+    protected BinaryMask getBinaryMask() {
+        return binaryMask;
+    }
+
     public BinaryMask getFinalMask() {
         Pipeline.await(this);
         return binaryMask;

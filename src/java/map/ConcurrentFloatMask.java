@@ -97,6 +97,10 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         return floatMask.toHash();
     }
 
+    protected FloatMask getFloatMask() {
+        return floatMask;
+    }
+
     public FloatMask getFinalMask() {
         Pipeline.await(this);
         return floatMask;
