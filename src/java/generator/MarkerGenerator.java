@@ -18,7 +18,7 @@ public strictfp class MarkerGenerator {
     private final SCMap map;
     private final Random random;
     private final int mexSpacing = 32;
-    private final int spawnSize = 32;
+    private final int spawnSize = 24;
 
     public MarkerGenerator(SCMap map, long seed) {
         this.map = map;
@@ -34,7 +34,7 @@ public strictfp class MarkerGenerator {
         if (map.getSpawns().length == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
             spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
         }
-        spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawns().length * 3 / 2, false).fillCenter(map.getSize() * 5 / 8, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawns().length * 3 / 2, false).fillCenter(map.getSize() * 4 / 8, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawns().length; i += 2) {
@@ -50,7 +50,7 @@ public strictfp class MarkerGenerator {
             spawnable.fillCircle(symLocation, separation, false);
 
             if (spawnable.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
-                spawnable.fillCircle(symLocation, map.getSize() * 5 / 8f, false);
+                spawnable.fillCircle(symLocation, map.getSize() * 4 / 8f, false);
             }
 
             spawnLandMask.fillCircle(location, spawnSize, true);
