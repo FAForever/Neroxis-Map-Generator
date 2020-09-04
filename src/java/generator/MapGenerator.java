@@ -705,7 +705,7 @@ public strictfp class MapGenerator {
     }
 
     private void generateExclusionMasks() {
-        noProps = new BinaryMask(unpassable.getFinalMask(), random.nextLong());
+        noProps = new BinaryMask(unpassable.getFinalMask(), 0);
         noProps.combine(ramps.getFinalMask());
         for (int i = 0; i < map.getSpawns().length; i++) {
             noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
@@ -722,7 +722,7 @@ public strictfp class MapGenerator {
         }
         noProps.combine(allWreckMask.getFinalMask());
 
-        noWrecks = new BinaryMask(unpassable.getFinalMask(), random.nextLong());
+        noWrecks = new BinaryMask(unpassable.getFinalMask(), 0);
         for (int i = 0; i < map.getSpawns().length; i++) {
             noWrecks.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, true);
         }
@@ -737,7 +737,7 @@ public strictfp class MapGenerator {
             }
         }
 
-        noDecals = new BinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy);
+        noDecals = new BinaryMask(mapSize + 1, 0, symmetryHierarchy);
         for (int i = 0; i < map.getSpawns().length; i++) {
             noDecals.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 24, true);
         }
