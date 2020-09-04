@@ -38,13 +38,12 @@ public strictfp class UnitGenerator {
     }
 
     public void generateUnits(BinaryMask spawnable, String[] types, float separation) {
-        BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
-        spawnableCopy.fillHalf(false);
-        LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        spawnable.fillHalf(false);
+        LinkedHashSet<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
-            Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
+            Vector2f symLocation = spawnable.getSymmetryPoint(location);
             Unit unit1 = new Unit(types[random.nextInt(types.length)], location, random.nextFloat() * (float) StrictMath.PI);
-            Unit unit2 = new Unit(unit1.getType(), symLocation, spawnableCopy.getReflectedRotation(unit1.getRotation()));
+            Unit unit2 = new Unit(unit1.getType(), symLocation, spawnable.getReflectedRotation(unit1.getRotation()));
             map.addUnit(unit1);
             map.addUnit(unit2);
         });

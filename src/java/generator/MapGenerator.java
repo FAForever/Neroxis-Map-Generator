@@ -406,10 +406,14 @@ public strictfp class MapGenerator {
     public SCMap generate() {
         long startTime = System.currentTimeMillis();
 
+        final int spawnSize = 24;
+        final int mexSpacing = 32;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
 
-        MarkerGenerator markerGenerator = new MarkerGenerator(map, random.nextLong());
+        SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(),  spawnSize);
+        MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), spawnSize, mexSpacing);
+        HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), spawnSize);
         WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
@@ -417,7 +421,7 @@ public strictfp class MapGenerator {
 
         spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
 
-        BinaryMask[] spawnMasks = markerGenerator.generateSpawns(spawnSeparation, symmetry, plateauDensity);
+        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetry, plateauDensity);
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
         spawnPlateauMask = new ConcurrentBinaryMask(spawnMasks[1], random.nextLong(), "spawnsPlateau");
 
@@ -457,8 +461,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
-            markerGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            markerGenerator.generateHydros(resourceMask.getFinalMask().deflate(6));
+            mexGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
+            hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(6));
             generateExclusionMasks();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateResources\n",
@@ -532,7 +536,9 @@ public strictfp class MapGenerator {
 
         CompletableFuture<Void> placementFuture = CompletableFuture.runAsync(() -> {
             long sTime = System.currentTimeMillis();
-            markerGenerator.setMarkerHeights();
+            spawnGenerator.setMarkerHeights();
+            mexGenerator.setMarkerHeights();
+            hydroGenerator.setMarkerHeights();
             propGenerator.setPropHeights();
             wreckGenerator.setWreckHeights();
             decalGenerator.setDecalHeights();
@@ -598,7 +604,7 @@ public strictfp class MapGenerator {
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.deflate(4).minus(plateaus.outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
+        passable.deflate(4).minus(plateaus.copy().outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
         passableLand.deflate(4).intersect(passable);
         passableWater.deflate(16).trimEdge(8);
     }
