@@ -258,7 +258,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
     public BinaryMask getFinalMask() {
         Pipeline.await(this);
-        return binaryMask;
+        return binaryMask.copy();
     }
 
     @Override

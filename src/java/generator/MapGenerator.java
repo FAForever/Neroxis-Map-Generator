@@ -434,7 +434,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(passable, passableLand, passableWater);
             long sTime = System.currentTimeMillis();
-            aiMarkerGenerator.generateAIMarkers(passable.getFinalMask().copy(), passableLand.getFinalMask().copy(), passableWater.getFinalMask().copy());
+            aiMarkerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
                         System.currentTimeMillis() - sTime,
@@ -446,7 +446,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(grassTexture, lightGrassTexture, rockTexture, lightRockTexture);
             long sTime = System.currentTimeMillis();
-            map.setTextureMaskLow(grassTexture.getFinalMask().copy(), lightGrassTexture.getFinalMask().copy(), rockTexture.getFinalMask().copy(), lightRockTexture.getFinalMask().copy());
+            map.setTextureMaskLow(grassTexture.getFinalMask(), lightGrassTexture.getFinalMask(), rockTexture.getFinalMask(), lightRockTexture.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateTextures\n",
                         System.currentTimeMillis() - sTime,
@@ -457,8 +457,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
-            markerGenerator.generateMexes(resourceMask.getFinalMask().copy(), plateauResourceMask.getFinalMask().copy(), waterResourceMask.getFinalMask().copy());
-            markerGenerator.generateHydros(resourceMask.getFinalMask().copy().deflate(6));
+            markerGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
+            markerGenerator.generateHydros(resourceMask.getFinalMask().deflate(6));
             generateExclusionMasks();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateResources\n",
@@ -472,11 +472,11 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> wrecksFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
             long sTime = System.currentTimeMillis();
-            wreckGenerator.generateWrecks(t1LandWreckMask.getFinalMask().copy().minus(noWrecks), WreckGenerator.T1_Land, 3f);
-            wreckGenerator.generateWrecks(t2LandWreckMask.getFinalMask().copy().minus(noWrecks), WreckGenerator.T2_Land, 30f);
-            wreckGenerator.generateWrecks(t3LandWreckMask.getFinalMask().copy().minus(noWrecks), WreckGenerator.T3_Land, 60f);
-            wreckGenerator.generateWrecks(t2NavyWreckMask.getFinalMask().copy().minus(noWrecks), WreckGenerator.T2_Navy, 96f);
-            wreckGenerator.generateWrecks(navyFactoryWreckMask.getFinalMask().copy().minus(noWrecks), WreckGenerator.Navy_Factory, 256f);
+            wreckGenerator.generateWrecks(t1LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T1_Land, 3f);
+            wreckGenerator.generateWrecks(t2LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Land, 30f);
+            wreckGenerator.generateWrecks(t3LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T3_Land, 60f);
+            wreckGenerator.generateWrecks(t2NavyWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Navy, 96f);
+            wreckGenerator.generateWrecks(navyFactoryWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.Navy_Factory, 256f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateWrecks\n",
                         System.currentTimeMillis() - sTime,
@@ -487,11 +487,11 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
-            propGenerator.generateProps(treeMask.getFinalMask().copy().minus(noProps), PropGenerator.TREE_GROUPS, 3f);
-            propGenerator.generateProps(cliffRockMask.getFinalMask().copy().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(largeRockFieldMask.getFinalMask().copy().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(smallRockFieldMask.getFinalMask().copy().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(fieldStoneMask.getFinalMask().copy().minus(noProps), PropGenerator.FIELD_STONES, 60f);
+            propGenerator.generateProps(treeMask.getFinalMask().minus(noProps), PropGenerator.TREE_GROUPS, 3f);
+            propGenerator.generateProps(cliffRockMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
+            propGenerator.generateProps(largeRockFieldMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
+            propGenerator.generateProps(smallRockFieldMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
+            propGenerator.generateProps(fieldStoneMask.getFinalMask().minus(noProps), PropGenerator.FIELD_STONES, 60f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateProps\n",
                         System.currentTimeMillis() - sTime,
@@ -502,8 +502,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(intDecal, rockDecal);
             long sTime = System.currentTimeMillis();
-            decalGenerator.generateDecals(intDecal.getFinalMask().copy().minus(noDecals), DecalGenerator.INT, 96f, 64f);
-            decalGenerator.generateDecals(rockDecal.getFinalMask().copy().minus(noDecals), DecalGenerator.ROCKS, 8f, 16f);
+            decalGenerator.generateDecals(intDecal.getFinalMask().minus(noDecals), DecalGenerator.INT, 96f, 64f);
+            decalGenerator.generateDecals(rockDecal.getFinalMask().minus(noDecals), DecalGenerator.ROCKS, 8f, 16f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateDecals\n",
                         System.currentTimeMillis() - sTime,
@@ -514,7 +514,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(heightmapBase);
             long sTime = System.currentTimeMillis();
-            map.setHeightmap(heightmapBase.getFinalMask().copy());
+            map.setHeightmap(heightmapBase.getFinalMask());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
             Preview.generate(map.getPreview(), map);
             if (DEBUG) {
@@ -598,7 +598,7 @@ public strictfp class MapGenerator {
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.deflate(4).minus(plateaus.copy().outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
+        passable.deflate(4).minus(plateaus.outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
         passableLand.deflate(4).intersect(passable);
         passableWater.deflate(16).trimEdge(8);
     }

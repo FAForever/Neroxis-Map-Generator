@@ -103,7 +103,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     public FloatMask getFinalMask() {
         Pipeline.await(this);
-        return floatMask;
+        return floatMask.copy();
     }
 
     @Override
