@@ -413,6 +413,7 @@ public strictfp class MapGenerator {
         WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
+        AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, random.nextLong());
 
         spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
 
@@ -433,7 +434,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(passable, passableLand, passableWater);
             long sTime = System.currentTimeMillis();
-            markerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask());
+            aiMarkerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
                         System.currentTimeMillis() - sTime,
@@ -535,6 +536,7 @@ public strictfp class MapGenerator {
             propGenerator.setPropHeights();
             wreckGenerator.setWreckHeights();
             decalGenerator.setDecalHeights();
+            aiMarkerGenerator.setMarkerHeights();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, setPlacements\n",
                         System.currentTimeMillis() - sTime,
