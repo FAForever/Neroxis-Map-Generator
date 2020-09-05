@@ -71,7 +71,7 @@ public strictfp class MapGenerator {
     private ConcurrentFloatMask heightmapMountains;
     private ConcurrentBinaryMask plateaus;
     private ConcurrentBinaryMask ramps;
-    private ConcurrentBinaryMask unpassable;
+    private ConcurrentBinaryMask impassable;
     private ConcurrentBinaryMask passable;
     private ConcurrentBinaryMask passableLand;
     private ConcurrentBinaryMask passableWater;
@@ -459,10 +459,10 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(resourceMask, plateaus, land, ramps, unpassable, allWreckMask, plateauResourceMask, waterResourceMask);
+            Pipeline.await(resourceMask, plateaus, land, ramps, impassable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
             mexGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(6));
+            hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(4));
             generateExclusionMasks();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateResources\n",
@@ -592,11 +592,11 @@ public strictfp class MapGenerator {
         mountains.intersect(land);
         plateaus.combine(mountains);
 
-        unpassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
+        impassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "valleys");
 
-        unpassable.inflate(3).combine(plateaus.copy().outline().inflate(3).minus(ramps));
+        impassable.inflate(3).combine(plateaus.copy().outline().inflate(3).minus(ramps));
         hills.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
         valleys.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
 
@@ -636,7 +636,7 @@ public strictfp class MapGenerator {
 
     private void setupTexturePipeline() {
         grass = new ConcurrentBinaryMask(land, random.nextLong(), "grass");
-        rock = new ConcurrentBinaryMask(unpassable, random.nextLong(), "rock");
+        rock = new ConcurrentBinaryMask(impassable, random.nextLong(), "rock");
         ConcurrentBinaryMask lightRock = new ConcurrentBinaryMask(mountains, random.nextLong(), "lightRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
         rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
@@ -683,14 +683,14 @@ public strictfp class MapGenerator {
         largeRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "largeRockField");
         smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
-        cliffRockMask.randomize(.4f).intersect(unpassable).inflate(1).minus(plateaus).inflate(2).intersect(land);
-        fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(unpassable);
+        cliffRockMask.randomize(.4f).intersect(impassable).inflate(1).minus(plateaus).inflate(2).intersect(land);
+        fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(impassable);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
-        treeMask.enlarge(mapSize / 2).intersect(land).minus(unpassable);
+        treeMask.enlarge(mapSize / 2).intersect(land).minus(impassable);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3);
-        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(8).minus(unpassable);
-        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(2).minus(unpassable);
+        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(8).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(2).minus(impassable);
     }
 
     private void setupResourcePipeline() {
@@ -698,14 +698,14 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(unpassable).minus(ramps).deflate(8);
+        resourceMask.minus(impassable).minus(ramps.copy().deflate(8)).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
     }
 
     private void generateExclusionMasks() {
-        noProps = new BinaryMask(unpassable.getFinalMask(), 0);
+        noProps = new BinaryMask(impassable.getFinalMask(), 0);
         noProps.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
@@ -720,7 +720,7 @@ public strictfp class MapGenerator {
 
         noProps.combine(allWreckMask.getFinalMask());
 
-        noWrecks = new BinaryMask(unpassable.getFinalMask(), 0);
+        noWrecks = new BinaryMask(impassable.getFinalMask(), 0);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noWrecks.fillCircle(map.getSpawn(i), 96, true);
