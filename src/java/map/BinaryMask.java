@@ -861,11 +861,17 @@ public strictfp class BinaryMask extends Mask {
         return stringBuilder.toString();
     }
 
+    public void show() {
+        VisualDebugger.visualizeMask(this);
+    }
+
     public void startVisualDebugger() {
         VisualDebugger.whitelistMask(this);
+        show();
     }
 
     public void startVisualDebugger(String maskName) {
         VisualDebugger.whitelistMask(this, maskName);
+        show();
     }
 }
