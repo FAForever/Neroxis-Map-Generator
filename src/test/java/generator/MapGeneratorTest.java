@@ -75,7 +75,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
     }
 
     @Test
@@ -105,9 +105,9 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
         assertEquals(instance.getLandDensity(), landDensity, .01);
         assertEquals(instance.getPlateauDensity(), plateauDensity, .01);
         assertEquals(instance.getMountainDensity(), mountainDensity, .01);
@@ -125,9 +125,9 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
         assertEquals(instance.getLandDensity(), landDensity, .01);
         assertEquals(instance.getPlateauDensity(), plateauDensity, .01);
         assertEquals(instance.getMountainDensity(), mountainDensity, .01);
@@ -140,7 +140,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(keywordArgs);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getFolderPath(), folderPath);
+        assertEquals(instance.getPathToFolder(), folderPath);
         assertEquals(instance.getLandDensity(), landDensity, .01);
         assertEquals(instance.getPlateauDensity(), plateauDensity, .01);
         assertEquals(instance.getMountainDensity(), mountainDensity, .01);
@@ -155,13 +155,13 @@ public class MapGeneratorTest {
     public void TestDeterminism() {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
-        instance.save(instance.getFolderPath(), instance.getMapName(), map1);
+        instance.save();
 
         Pipeline.reset();
 
         instance.interpretArguments(keywordArgs);
         SCMap map2 = instance.generate();
-        instance.save(instance.getFolderPath(), instance.getMapName(), map2);
+        instance.save();
 
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());

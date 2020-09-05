@@ -42,7 +42,7 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static boolean DEBUG = false;
     //read from cli args
-    private String folderPath = ".";
+    private String pathToFolder = ".";
     private String mapName = "debugMap";
     private long seed = new Random().nextLong();
     private Random random = new Random(seed);
@@ -120,9 +120,9 @@ public strictfp class MapGenerator {
         generator.interpretArguments(args);
 
         System.out.println("Generating map " + generator.mapName.replace('/', '^'));
-        SCMap map = generator.generate();
-        generator.save(generator.folderPath, generator.mapName.replace('/', '^'), map);
-        System.out.println("Saving map to " + Paths.get(generator.folderPath).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
+        generator.generate();
+        generator.save();
+        System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
         System.out.println("Seed: " + generator.seed);
         System.out.println("Biome: " + generator.biome.getName());
         System.out.println("Land Density: " + generator.landDensity);
@@ -142,12 +142,12 @@ public strictfp class MapGenerator {
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
-            folderPath = args[0];
+            pathToFolder = args[0];
             mapName = args[1];
             parseMapName();
         } else {
             try {
-                folderPath = args[0];
+                pathToFolder = args[0];
                 try {
                     seed = Long.parseLong(args[1]);
                     random = new Random(seed);
@@ -197,7 +197,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("folder-path")) {
-            folderPath = arguments.get("folder-path");
+            pathToFolder = arguments.get("folder-path");
         }
 
         if (arguments.containsKey("map-name")) {
@@ -375,9 +375,9 @@ public strictfp class MapGenerator {
         mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
     }
 
-    public void save(String folderName, String mapName, SCMap map) {
+    public void save() {
         try {
-            Path folderPath = Paths.get(folderName);
+            Path folderPath = Paths.get(pathToFolder);
 
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
 
