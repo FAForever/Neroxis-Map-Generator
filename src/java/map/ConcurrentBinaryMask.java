@@ -275,7 +275,11 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         return binaryMask.getSize();
     }
 
+    public void show() {
+        this.binaryMask.show();
+    }
+
     public void startVisualDebugger(String maskName) {
-        VisualDebugger.whitelistMask(this.binaryMask, maskName);
+        this.binaryMask.startVisualDebugger(maskName);
     }
 }

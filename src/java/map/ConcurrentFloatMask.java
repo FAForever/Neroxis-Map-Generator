@@ -121,7 +121,11 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         return floatMask.getSize();
     }
 
+    public void show() {
+        this.floatMask.show();
+    }
+
     public void startVisualDebugger(String maskName) {
-        VisualDebugger.whitelistMask(this.floatMask, maskName);
+       this.floatMask.startVisualDebugger(maskName);
     }
 }
