@@ -55,7 +55,7 @@ public strictfp class SpawnGenerator {
             if (random.nextFloat() < plateauDensity) {
                 boolean valid = true;
                 for (int j = 0; j < i; j += 2) {
-                    if (!spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 4) {
+                    if (!spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 6) {
                         valid = false;
                         break;
                     }
@@ -67,7 +67,7 @@ public strictfp class SpawnGenerator {
             } else {
                 boolean valid = false;
                 for (int j = 0; j < i; j += 2) {
-                    if (spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 4) {
+                    if (spawnPlateauMask.get(map.getSpawns()[j]) && map.getSpawns()[j].getXZDistance(location) < spawnSize * 6) {
                         valid = true;
                         break;
                     }

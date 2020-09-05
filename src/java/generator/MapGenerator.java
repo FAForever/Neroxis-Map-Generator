@@ -577,7 +577,7 @@ public strictfp class MapGenerator {
 
         spawnLandMask.shrink(mapSize / 16).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).inflate(2).cutCorners();
         spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
-        spawnPlateauMask.shrink(mapSize / 16).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+        spawnPlateauMask.shrink(mapSize / 16).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         spawnPlateauMask.enlarge(mapSize / 4).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
