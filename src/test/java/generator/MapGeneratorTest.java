@@ -163,9 +163,9 @@ public class MapGeneratorTest {
         SCMap map2 = instance.generate();
         instance.save(instance.getFolderPath(), instance.getMapName(), map2);
 
-        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
-        assertArrayEquals(map1.getMexes(), map2.getMexes());
-        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
         assertEquals(map1.getUnits(), map2.getUnits());
         assertEquals(map1.getWrecks(), map2.getWrecks());
         assertEquals(map1.getProps(), map2.getProps());
@@ -195,9 +195,9 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
-        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
-        assertArrayEquals(map1.getMexes(), map2.getMexes());
-        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
         assertEquals(map1.getUnits(), map2.getUnits());
         assertEquals(map1.getWrecks(), map2.getWrecks());
         assertEquals(map1.getProps(), map2.getProps());
@@ -228,9 +228,9 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
-        assertArrayEquals(map1.getSpawns(), map2.getSpawns());
-        assertArrayEquals(map1.getMexes(), map2.getMexes());
-        assertArrayEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
         assertEquals(map1.getUnits(), map2.getUnits());
         assertEquals(map1.getWrecks(), map2.getWrecks());
         assertEquals(map1.getProps(), map2.getProps());

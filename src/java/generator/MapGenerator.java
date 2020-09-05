@@ -707,39 +707,35 @@ public strictfp class MapGenerator {
     private void generateExclusionMasks() {
         noProps = new BinaryMask(unpassable.getFinalMask(), 0);
         noProps.combine(ramps.getFinalMask());
-        for (int i = 0; i < map.getSpawns().length; i++) {
-            noProps.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 30, true);
+
+        for (int i = 0; i < map.getSpawnCount(); i++) {
+            noProps.fillCircle(map.getSpawn(i), 30, true);
         }
-        for (int i = 0; i < map.getMexes().length; i++) {
-            if (map.getMexes()[i] != null) {
-                noProps.fillCircle(map.getMexes()[i].x, map.getMexes()[i].z, 5, true);
-            }
+        for (int i = 0; i < map.getMexCount(); i++) {
+            noProps.fillCircle(map.getMex(i), 5, true);
         }
-        for (int i = 0; i < map.getHydros().length; i++) {
-            if (map.getHydros()[i] != null) {
-                noProps.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 7, true);
-            }
+        for (int i = 0; i < map.getHydroCount(); i++) {
+            noProps.fillCircle(map.getHydro(i), 7, true);
         }
+
         noProps.combine(allWreckMask.getFinalMask());
 
         noWrecks = new BinaryMask(unpassable.getFinalMask(), 0);
-        for (int i = 0; i < map.getSpawns().length; i++) {
-            noWrecks.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 96, true);
+
+        for (int i = 0; i < map.getSpawnCount(); i++) {
+            noWrecks.fillCircle(map.getSpawn(i), 96, true);
         }
-        for (int i = 0; i < map.getMexes().length; i++) {
-            if (map.getMexes()[i] != null) {
-                noWrecks.fillCircle(map.getMexes()[i].x, map.getMexes()[i].z, 10, true);
-            }
+        for (int i = 0; i < map.getMexCount(); i++) {
+            noWrecks.fillCircle(map.getMex(i), 10, true);
         }
-        for (int i = 0; i < map.getHydros().length; i++) {
-            if (map.getHydros()[i] != null) {
-                noWrecks.fillCircle(map.getHydros()[i].x, map.getHydros()[i].z, 15, true);
-            }
+        for (int i = 0; i < map.getHydroCount(); i++) {
+            noWrecks.fillCircle(map.getHydro(i), 15, true);
         }
 
         noDecals = new BinaryMask(mapSize + 1, 0, symmetryHierarchy);
-        for (int i = 0; i < map.getSpawns().length; i++) {
-            noDecals.fillCircle(map.getSpawns()[i].x, map.getSpawns()[i].z, 24, true);
+
+        for (int i = 0; i < map.getSpawnCount(); i++) {
+            noDecals.fillCircle(map.getSpawn(i), 24, true);
         }
     }
 

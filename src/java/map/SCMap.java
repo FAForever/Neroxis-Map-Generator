@@ -64,9 +64,12 @@ public strictfp class SCMap {
     private static final String DEFAULT_ENVIRONMENT = "evergreen";
     public final Biome biome;
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
-    private final Vector3f[] spawns;
-    private final Vector3f[] mexes;
-    private final Vector3f[] hydros;
+    private final int spawnCountInit;
+    private final int mexCountInit;
+    private final int hydroCountInit;
+    private final ArrayList<Vector3f> spawns;
+    private final ArrayList<Vector3f> mexes;
+    private final ArrayList<Vector3f> hydros;
     private final ArrayList<Decal> decals;
     private final ArrayList<Prop> props;
     private final ArrayList<Unit> units;
@@ -97,9 +100,12 @@ public strictfp class SCMap {
     public SCMap(int size, int spawnCount, int mexCount, int hydroCount, Biome biome) {
         this.size = size;
         this.biome = biome;
-        spawns = new Vector3f[spawnCount];
-        mexes = new Vector3f[mexCount];
-        hydros = new Vector3f[hydroCount];
+        this.spawnCountInit = spawnCount;
+        this.mexCountInit = mexCount;
+        this.hydroCountInit = hydroCount;
+        spawns = new ArrayList<>();
+        mexes = new ArrayList<>();
+        hydros = new ArrayList<>();
         decals = new ArrayList<>();
         props = new ArrayList<>();
         units = new ArrayList<>();
@@ -133,20 +139,40 @@ public strictfp class SCMap {
         terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
     }
 
-    public int getSize() {
-        return size;
+    public int getSpawnCount() {
+        return spawns.size();
     }
 
-    public Vector3f[] getSpawns() {
-        return spawns;
+    public Vector3f getSpawn(int i) {
+        return spawns.get(i);
     }
 
-    public Vector3f[] getMexes() {
-        return mexes;
+    public void addSpawn(Vector3f spawn) {
+        spawns.add(spawn);
     }
 
-    public Vector3f[] getHydros() {
-        return hydros;
+    public int getMexCount() {
+        return mexes.size();
+    }
+
+    public Vector3f getMex(int i) {
+        return mexes.get(i);
+    }
+
+    public void addMex(Vector3f mex) {
+        mexes.add(mex);
+    }
+
+    public int getHydroCount() {
+        return hydros.size();
+    }
+
+    public Vector3f getHydro(int i) {
+        return hydros.get(i);
+    }
+
+    public void addHydro(Vector3f hydro) {
+        hydros.add(hydro);
     }
 
     public int getDecalCount() {

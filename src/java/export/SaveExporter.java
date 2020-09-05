@@ -22,42 +22,38 @@ public strictfp class SaveExporter {
         out.writeBytes("  MasterChain = {\n");
         out.writeBytes("    ['_MASTERCHAIN_'] = {\n");
         out.writeBytes("      Markers = {\n");
-        for (int i = 0; i < map.getSpawns().length; i++) {
+        for (int i = 0; i <   map.getSpawnCount(); i++) {
             out.writeBytes("        ['ARMY_" + (i + 1) + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawns()[i].x + 0.5f) + ", " + map.getSpawns()[i].y + ", " + (map.getSpawns()[i].z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).x + 0.5f) + ", " + map.getSpawn(i).y + ", " + (map.getSpawn(i).z + 0.5f) + " ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
             out.writeBytes("        },\n");
         }
-        for (int i = 0; i < map.getMexes().length; i++) {
-            if (map.getMexes()[i] != null) {
-                out.writeBytes("        ['MASS_" + (i + 1) + "'] = {\n");
-                out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
-                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-                out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
-                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
-                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getMexes()[i].x + 0.5f) + ", " + map.getMexes()[i].y + ", " + (map.getMexes()[i].z + 0.5f) + " ),\n");
-                out.writeBytes("        },\n");
-            }
+        for (int i = 0; i <   map.getMexCount(); i++) {
+            out.writeBytes("        ['MASS_" + (i + 1) + "'] = {\n");
+            out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
+            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getMex(i).x + 0.5f) + ", " + map.getMex(i).y + ", " + (map.getMex(i).z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
         }
-        for (int i = 0; i < map.getHydros().length; i++) {
-            if (map.getHydros()[i] != null) {
-                out.writeBytes("        ['Hydrocarbon_" + (i + 1) + "'] = {\n");
-                out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
-                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-                out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
-                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
-                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydros()[i].x + 0.5f) + ", " + map.getHydros()[i].y + ", " + (map.getHydros()[i].z + 0.5f) + " ),\n");
-                out.writeBytes("        },\n");
-            }
+        for (int i = 0; i < map.getHydroCount(); i++) {
+            out.writeBytes("        ['Hydrocarbon_" + (i + 1) + "'] = {\n");
+            out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
+            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+            out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
+            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
+            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydro(i).x + 0.5f) + ", " + map.getHydro(i).y + ", " + (map.getHydro(i).z + 0.5f) + " ),\n");
+            out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getAirMarkerCount(); i ++) {
             out.writeBytes("        ['AirPN" + i + "'] = {\n");
@@ -163,7 +159,7 @@ public strictfp class SaveExporter {
         out.writeBytes("  next_group_id = '1',\n");
         out.writeBytes("  next_unit_id = '1',\n");
         out.writeBytes("  Armies = {\n");
-        for (int i = 0; i < map.getSpawns().length; i++) {
+        for (int i = 0; i <   map.getSpawnCount(); i++) {
             saveArmy("ARMY_" + (i + 1), map);
         }
         saveArmy("ARMY_17", map);
@@ -224,14 +220,14 @@ public strictfp class SaveExporter {
     }
 
     private static void saveUnit(map.Unit unit, int i) throws IOException {
-        out.writeBytes(String.format("['UNIT_%d'] = {\n", i));
-        out.writeBytes(String.format("	type = '%s',\n", unit.getType()));
-        out.writeBytes("			orders = '',\n");
-        out.writeBytes("			platoon = '',\n");
+        out.writeBytes(String.format("              ['UNIT_%d'] = {\n", i));
+        out.writeBytes(String.format("	              type = '%s',\n", unit.getType()));
+        out.writeBytes("			              orders = '',\n");
+        out.writeBytes("			              platoon = '',\n");
         Vector3f v = unit.getPosition();
-        out.writeBytes(String.format("			Position = { %f, %f, %f },\n", v.x, v.y, v.z));
+        out.writeBytes(String.format("			              Position = { %f, %f, %f },\n", v.x, v.y, v.z));
         float rot = unit.getRotation();
-        out.writeBytes(String.format("			Orientation = { 0, %f, 0 },\n", rot));
-        out.writeBytes("},\n");
+        out.writeBytes(String.format("			              Orientation = { 0, %f, 0 },\n", rot));
+        out.writeBytes("              },\n");
     }
 }
