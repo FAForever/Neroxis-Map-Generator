@@ -644,9 +644,9 @@ public strictfp class BinaryMask extends Mask {
         LinkedHashSet<Vector2f> area = new LinkedHashSet<>();
         LinkedHashSet<Vector2f> edge = new LinkedHashSet<>();
         LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
-        ArrayList<Vector2f> queue = new ArrayList<>();
+        LinkedList<Vector2f> queue = new LinkedList<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
-        boolean value = mask[(int) location.x][(int) location.y];
+        boolean value = get(location);
         queue.add(location);
         queueHash.add(location);
         while (queue.size() > 0) {
@@ -672,67 +672,62 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public List<Vector2f> getShapeCoordinates(Vector2f location) {
-        ArrayList<Vector2f> area = new ArrayList<>();
+        LinkedList<Vector2f> area = new LinkedList<>();
         LinkedHashSet<Vector2f> areaHash = new LinkedHashSet<>();
-        LinkedHashSet<Vector2f> edge = new LinkedHashSet<>();
+        LinkedHashSet<Vector2f> edgeHash = new LinkedHashSet<>();
+        LinkedList<Vector2f> queue = new LinkedList<>();
         LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
-        ArrayList<Vector2f> queue = new ArrayList<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
         boolean value = get(location);
         queue.add(location);
         queueHash.add(location);
         while (queue.size() > 0) {
-            Vector2f next = queue.get(0);
-            queue.remove(next);
+            Vector2f next = queue.remove();
             queueHash.remove(next);
             if (get(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
                 area.add(next);
                 edges.forEach((e) -> {
                     Vector2f newLocation = new Vector2f(next.x + e[0], next.y + e[1]);
-                    if (!queueHash.contains(newLocation) && !areaHash.contains(newLocation) && !edge.contains(newLocation) && inBounds(newLocation)) {
+                    if (!queueHash.contains(newLocation) && !areaHash.contains(newLocation) && !edgeHash.contains(newLocation) && inBounds(newLocation)) {
                         queue.add(newLocation);
                         queueHash.add(newLocation);
                     }
                 });
             } else if (get(next) != value) {
-                edge.add(next);
+                edgeHash.add(next);
             }
         }
         return area;
     }
 
     public BinaryMask fillCoordinates(List<Vector2f> coordinates, boolean value) {
-        coordinates.forEach((location) -> set(location, value));
+        coordinates.forEach(location -> set(location, value));
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask filterShapes(int minArea) {
         BinaryMask maskCopy = copy();
-        BinaryMask maskCopy2 = copy();
         Vector2f location = maskCopy.getRandomPosition();
         while (location != null) {
             List<Vector2f> coordinates = getShapeCoordinates(location);
             maskCopy.fillCoordinates(coordinates, false);
             if (coordinates.size() < minArea) {
-                maskCopy2.fillCoordinates(coordinates, false);
+                fillCoordinates(coordinates, false);
             }
             location = maskCopy.getRandomPosition();
         }
-        mask = maskCopy2.mask;
         maskCopy = copy().invert();
-        maskCopy2 = copy().invert();
         location = maskCopy.getRandomPosition();
         while (location != null) {
             List<Vector2f> coordinates = getShapeCoordinates(location);
             maskCopy.fillCoordinates(coordinates, false);
             if (coordinates.size() < minArea) {
-                maskCopy2.fillCoordinates(coordinates, false);
+                fillCoordinates(coordinates, true);
             }
             location = maskCopy.getRandomPosition();
         }
-        mask = maskCopy2.invert().mask;
         VisualDebugger.visualizeMask(this);
         return this;
     }
