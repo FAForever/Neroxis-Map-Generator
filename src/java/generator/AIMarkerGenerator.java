@@ -7,7 +7,9 @@ import util.Vector2f;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static util.Placement.placeOnHeightmap;
@@ -35,14 +37,12 @@ public strictfp class AIMarkerGenerator {
         }
 
         float airMarkerSpacing = 64f;
-        LinkedHashSet<Vector2f> airCoordinates = passableLand.getSpacedCoordinates(airMarkerSpacing, 8);
-        Vector2f[] airCoordinatesArray = airCoordinates.toArray(new Vector2f[0]);
-        airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(map.getAirMarkerCount(), location, new int[0])));
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
-        map.getAirAIMarkers().forEach(aiMarker -> aiMarker.setNeighbors(IntStream.range(0, airCoordinatesArray.length)
-                .filter((ind) -> aiMarker.getPosition().getXZDistance(airCoordinatesArray[ind]) < airMarkerConnectionDistance)
-                .toArray())
-        );
+        LinkedHashSet<Vector2f> airCoordinates = passableLand.getSpacedCoordinates(airMarkerSpacing, 8);
+        ArrayList<Vector2f> airCoordinatesArray = new ArrayList<>(airCoordinates);
+        airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(airCoordinatesArray.indexOf(location), location, IntStream.range(0, airCoordinatesArray.size())
+                .filter((ind) -> location.getDistance(airCoordinatesArray.get(ind)) < airMarkerConnectionDistance && ind != airCoordinatesArray.indexOf(location))
+                .boxed().collect(Collectors.toList()))));
 
         float markerConnectionDistance = (float) StrictMath.sqrt(markerSpacing * markerSpacing * 2) + 1;
         LinkedHashSet<Vector2f> amphibiousCoordinates = passable.getSpacedCoordinatesEqualTo(true, markerSpacing, 4);
@@ -53,8 +53,8 @@ public strictfp class AIMarkerGenerator {
         }
         ArrayList<Vector2f> amphibiousCoordinatesArray = new ArrayList<>(amphibiousCoordinates);
         amphibiousCoordinates.forEach((location) -> map.addAmphibiousMarker(new AIMarker(amphibiousCoordinatesArray.indexOf(location), location, IntStream.range(0, amphibiousCoordinatesArray.size())
-                .filter((ind) -> location.getDistance(amphibiousCoordinatesArray.get(ind)) < markerConnectionDistance)
-                .toArray())));
+                .filter((ind) -> location.getDistance(amphibiousCoordinatesArray.get(ind)) < markerConnectionDistance && ind != amphibiousCoordinatesArray.indexOf(location))
+                .boxed().collect(Collectors.toList()))));
 
         LinkedHashSet<Vector2f> landCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
         landCoordinates.removeIf((location) -> !passableLand.get(location));
@@ -65,8 +65,8 @@ public strictfp class AIMarkerGenerator {
         }
         ArrayList<Vector2f> landCoordinatesArray = new ArrayList<>(landCoordinates);
         landCoordinates.forEach((location) -> map.addLandMarker(new AIMarker(landCoordinatesArray.indexOf(location), location, IntStream.range(0, landCoordinatesArray.size())
-                .filter((ind) -> location.getDistance(landCoordinatesArray.get(ind)) < markerConnectionDistance)
-                .toArray()))
+                .filter((ind) -> location.getDistance(landCoordinatesArray.get(ind)) < markerConnectionDistance && ind != landCoordinatesArray.indexOf(location))
+                .boxed().collect(Collectors.toList())))
         );
 
         LinkedHashSet<Vector2f> navyCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
@@ -78,9 +78,29 @@ public strictfp class AIMarkerGenerator {
         }
         ArrayList<Vector2f> navyCoordinatesArray = new ArrayList<>(navyCoordinates);
         navyCoordinates.forEach((location) -> map.addNavyMarker(new AIMarker(navyCoordinatesArray.indexOf(location), location, IntStream.range(0, navyCoordinatesArray.size())
-                .filter((ind) -> location.getDistance(navyCoordinatesArray.get(ind)) < markerConnectionDistance)
-                .toArray()))
+                .filter((ind) -> location.getDistance(navyCoordinatesArray.get(ind)) < markerConnectionDistance && ind != navyCoordinatesArray.indexOf(location))
+                .boxed().collect(Collectors.toList())))
         );
+    }
+
+    public void pruneMarkerNeighbors(AIMarker aiMarker, List<AIMarker> aiMarkers, float spacing) {
+        LinkedHashSet<Integer> prune = new LinkedHashSet<>();
+        LinkedHashSet<Integer> grow = new LinkedHashSet<>();
+        aiMarker.getNeighbors().forEach(id -> {
+            AIMarker neighbor = aiMarkers.get(id);
+            if (aiMarker.getPosition().getXZDistance(neighbor.getPosition()) < spacing) {
+                prune.add(id);
+                neighbor.getNeighbors().forEach(nid -> {
+                    AIMarker neighborNeighbor = aiMarkers.get(nid);
+                    if (aiMarker.getPosition().getXZDistance(neighborNeighbor.getPosition()) > spacing) {
+                        grow.add(nid);
+                    }
+                });
+                neighbor.getNeighbors().clear();
+            }
+        });
+        aiMarker.getNeighbors().removeAll(prune);
+        aiMarker.getNeighbors().addAll(grow);
     }
 
     public void setMarkerHeights() {

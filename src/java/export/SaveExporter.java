@@ -1,5 +1,6 @@
 package export;
 
+import map.AIMarker;
 import map.SCMap;
 import util.Vector3f;
 
@@ -56,76 +57,80 @@ public strictfp class SaveExporter {
             out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getAirMarkerCount(); i ++) {
-            out.writeBytes("        ['AirPN" + i + "'] = {\n");
-            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
-            out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getAirMarker(i).getNeighbors().length; j++) {
-                if (map.getAirMarker(i).getNeighbors()[j] != i) {
-                    out.writeBytes(" AirPN" + map.getAirMarker(i).getNeighbors()[j]);
+            if (map.getAirMarker(i).getNeighborCount() > 0) {
+                out.writeBytes("        ['AirPN" + map.getAirMarker(i).getId() + "'] = {\n");
+                out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
+                out.writeBytes("          ['adjacentTo'] = STRING( '");
+                for (int j = 0; j < map.getAirMarker(i).getNeighborCount(); j++) {
+                    AIMarker neighbor = map.getAirMarker(map.getAirMarker(i).getNeighbor(j));
+                    out.writeBytes(" AirPN" + neighbor.getId());
                 }
+                out.writeBytes(" '),\n");
+                out.writeBytes("          ['color'] = STRING( 'ffffffff' ),\n");
+                out.writeBytes("          ['graph'] = STRING( 'DefaultAir' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAirMarker(i).getPosition().x + 0.5f) + ", " + map.getAirMarker(i).getPosition().y + ", " + (map.getAirMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
             }
-            out.writeBytes(" '),\n");
-            out.writeBytes("          ['color'] = STRING( 'ffffffff' ),\n");
-            out.writeBytes("          ['graph'] = STRING( 'DefaultAir' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getAirMarker(i).getPosition().x + 0.5f) + ", " + map.getAirMarker(i).getPosition().y + ", " + (map.getAirMarker(i).getPosition().z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getLandMarkerCount(); i ++) {
-            out.writeBytes("        ['LandPN" + i + "'] = {\n");
-            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
-            out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getLandMarker(i).getNeighbors().length; j++) {
-                if (map.getLandMarker(i).getNeighbors()[j] != i) {
-                    out.writeBytes(" LandPN" + map.getLandMarker(i).getNeighbors()[j]);
+            if (map.getLandMarker(i).getNeighborCount() > 0) {
+                out.writeBytes("        ['LandPN" + map.getLandMarker(i).getId() + "'] = {\n");
+                out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
+                out.writeBytes("          ['adjacentTo'] = STRING( '");
+                for (int j = 0; j < map.getLandMarker(i).getNeighborCount(); j++) {
+                    AIMarker neighbor = map.getLandMarker(map.getLandMarker(i).getNeighbor(j));
+                    out.writeBytes(" LandPN" + neighbor.getId());
                 }
+                out.writeBytes(" '),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff00ff00' ),\n");
+                out.writeBytes("          ['graph'] = STRING( 'DefaultLand' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getLandMarker(i).getPosition().x + 0.5f) + ", " + map.getLandMarker(i).getPosition().y + ", " + (map.getLandMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
             }
-            out.writeBytes(" '),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff00ff00' ),\n");
-            out.writeBytes("          ['graph'] = STRING( 'DefaultLand' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getLandMarker(i).getPosition().x + 0.5f) + ", " + map.getLandMarker(i).getPosition().y + ", " + (map.getLandMarker(i).getPosition().z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getAmphibiousMarkerCount(); i ++) {
-            out.writeBytes("        ['AmphPN" + i + "'] = {\n");
-            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
-            out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getAmphibiousMarker(i).getNeighbors().length; j++) {
-                if (map.getAmphibiousMarker(i).getNeighbors()[j] != i) {
-                    out.writeBytes(" AmphPN" + map.getAmphibiousMarker(i).getNeighbors()[j]);
+            if (map.getAmphibiousMarker(i).getNeighborCount() > 0) {
+                out.writeBytes("        ['AmphPN" + map.getAmphibiousMarker(i).getId() + "'] = {\n");
+                out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
+                out.writeBytes("          ['adjacentTo'] = STRING( '");
+                for (int j = 0; j < map.getAmphibiousMarker(i).getNeighborCount(); j++) {
+                    AIMarker neighbor = map.getAmphibiousMarker(map.getAmphibiousMarker(i).getNeighbor(j));
+                    out.writeBytes(" AmphPN" + neighbor.getId());
                 }
+                out.writeBytes(" '),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff00ffff' ),\n");
+                out.writeBytes("          ['graph'] = STRING( 'DefaultAmphibious' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAmphibiousMarker(i).getPosition().x + 0.5f) + ", " + map.getAmphibiousMarker(i).getPosition().y + ", " + (map.getAmphibiousMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
             }
-            out.writeBytes(" '),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff00ffff' ),\n");
-            out.writeBytes("          ['graph'] = STRING( 'DefaultAmphibious' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getAmphibiousMarker(i).getPosition().x + 0.5f) + ", " + map.getAmphibiousMarker(i).getPosition().y + ", " + (map.getAmphibiousMarker(i).getPosition().z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getNavyMarkerCount(); i ++) {
-            out.writeBytes("        ['WaterPN" + i + "'] = {\n");
-            out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
-            out.writeBytes("          ['adjacentTo'] = STRING( '");
-            for (int j = 0; j < map.getNavyMarker(i).getNeighbors().length; j++) {
-                if (map.getNavyMarker(i).getNeighbors()[j] != i) {
-                    out.writeBytes(" WaterPN" + map.getNavyMarker(i).getNeighbors()[j]);
+            if (map.getNavyMarker(i).getNeighborCount() > 0) {
+                out.writeBytes("        ['WaterPN" + map.getNavyMarker(i).getId() + "'] = {\n");
+                out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
+                out.writeBytes("          ['adjacentTo'] = STRING( '");
+                for (int j = 0; j < map.getNavyMarker(i).getNeighborCount(); j++) {
+                    AIMarker neighbor = map.getNavyMarker(map.getNavyMarker(i).getNeighbor(j));
+                    out.writeBytes(" WaterPN" + neighbor.getId());
                 }
+                out.writeBytes(" '),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff0000ff' ),\n");
+                out.writeBytes("          ['graph'] = STRING( 'DefaultWater' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getNavyMarker(i).getPosition().x + 0.5f) + ", " + map.getNavyMarker(i).getPosition().y + ", " + (map.getNavyMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("        },\n");
             }
-            out.writeBytes(" '),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff0000ff' ),\n");
-            out.writeBytes("          ['graph'] = STRING( 'DefaultWater' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getNavyMarker(i).getPosition().x + 0.5f) + ", " + map.getNavyMarker(i).getPosition().y + ", " + (map.getNavyMarker(i).getPosition().z + 0.5f) + " ),\n");
-            out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getLargeExpansionMarkerCount(); i ++) {
             out.writeBytes("        ['Large Expansion Area " + i + "'] = {\n");
