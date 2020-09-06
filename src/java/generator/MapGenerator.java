@@ -602,11 +602,11 @@ public strictfp class MapGenerator {
         hills.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
         valleys.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
 
-        passable = new ConcurrentBinaryMask(mountains, random.nextLong(),"passable").invert();
+        passable = new ConcurrentBinaryMask(impassable, random.nextLong(),"passable").invert();
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.deflate(4).minus(plateaus.copy().outline().inflate(4).minus(ramps)).deflate(8).trimEdge(8);
+        passable.deflate(8).trimEdge(8);
         passableLand.deflate(4).intersect(passable);
         passableWater.deflate(16).trimEdge(8);
     }
