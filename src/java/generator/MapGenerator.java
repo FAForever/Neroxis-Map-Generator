@@ -588,7 +588,7 @@ public strictfp class MapGenerator {
         plateaus.filterShapes(2048);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus).outline().minus(plateaus).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
 
         land.combine(ramps.copy().deflate(8)).filterShapes(2048);
         mountains.intersect(land);
