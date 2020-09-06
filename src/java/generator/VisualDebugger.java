@@ -12,6 +12,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 public class VisualDebugger {
@@ -26,17 +27,13 @@ public class VisualDebugger {
     public static boolean ignoreNegativeRange = false;
 
     private static boolean isDrawAllMasks = false;
-    private static Map<Integer, String> drawMasksWhitelist = null;
+    private static Map<Integer, String[]> drawMasksWhitelist = null;
 
-    public static void whitelistMask(Mask binaryOrFloatMask) {
-        whitelistMask(binaryOrFloatMask, "" + binaryOrFloatMask.hashCode());
-    }
-
-    public static void whitelistMask(Mask binaryOrFloatMask, String name) {
+    public static void whitelistMask(Mask binaryOrFloatMask, String name, String parentClass) {
         if (drawMasksWhitelist == null) {
             drawMasksWhitelist = new HashMap<>();
         }
-        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), name);
+        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), new String[] {name, parentClass});
         createGUI();
     }
 
@@ -143,6 +140,20 @@ public class VisualDebugger {
 
 
     private static void visualize(ImageSource imageSource, int size, int maskHash, Class<? extends Mask> clazz) {
+        String[] maskDetails = drawMasksWhitelist.get(maskHash);
+        String maskName = maskDetails[0];
+        String parentClass = maskDetails[1];
+        LinkedHashSet<String> methods  = Util.getStackTraceMethods(clazz);
+        String function;
+        if (clazz.getCanonicalName().equals(parentClass)) {
+            function = methods.iterator().next();
+        } else if (methods.size() == 1) {
+            function = methods.iterator().next();
+        } else if (methods.contains("inflate")) {
+            function = "inflate";
+        } else {
+            return;
+        }
         float perPixelSize = calculateAutoZoom(size);
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels
@@ -157,8 +168,6 @@ public class VisualDebugger {
         at.scale(perPixelSize, perPixelSize);
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         scaleOp.filter(currentImage, scaledImage);
-        String maskName = drawMasksWhitelist.getOrDefault(maskHash, String.valueOf(maskHash));
-        String function = Util.getStackTraceMethod(clazz);
         VisualDebuggerGui.update(maskName + " " + function, scaledImage, perPixelSize);
     }
 

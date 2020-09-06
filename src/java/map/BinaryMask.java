@@ -3,6 +3,7 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import util.Util;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -866,13 +867,12 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public void startVisualDebugger() {
-        VisualDebugger.whitelistMask(this);
-        show();
+    public void startVisualDebugger(String maskName) {
+        startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 
-    public void startVisualDebugger(String maskName) {
-        VisualDebugger.whitelistMask(this, maskName);
+    public void startVisualDebugger(String maskName, String parentClass) {
+        VisualDebugger.whitelistMask(this, maskName, parentClass);
         show();
     }
 }

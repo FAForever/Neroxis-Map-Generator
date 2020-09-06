@@ -8,7 +8,7 @@ import util.Vector3f;
 public strictfp abstract class Mask {
     protected SymmetryHierarchy symmetryHierarchy;
 
-    abstract void startVisualDebugger();
+    abstract void startVisualDebugger(String maskName);
 
     abstract int getSize();
 

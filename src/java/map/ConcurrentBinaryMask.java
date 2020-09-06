@@ -1,8 +1,8 @@
 package map;
 
-import generator.VisualDebugger;
 import lombok.Getter;
 import util.Pipeline;
+import util.Util;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -266,10 +266,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         return new ConcurrentBinaryMask(this, 0, "mocked");
     }
 
-    public void startVisualDebugger() {
-        VisualDebugger.whitelistMask(this.binaryMask);
-    }
-
     @Override
     int getSize() {
         return binaryMask.getSize();
@@ -280,6 +276,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     }
 
     public void startVisualDebugger(String maskName) {
-        this.binaryMask.startVisualDebugger(maskName);
+        this.binaryMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 }
