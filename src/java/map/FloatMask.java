@@ -4,6 +4,7 @@ import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import util.Vector2f;
+import util.Vector3f;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -53,13 +54,30 @@ public strictfp class FloatMask extends Mask {
         return mask[x][y];
     }
 
+
+    public void set(Vector2f location, float value) {
+        set((int) location.x, (int) location.y, value);
+    }
+
+    public void set(Vector3f location, float value) {
+        set((int) location.x, (int) location.z, value);
+    }
+
+    public void set(int x, int y, float value) {
+        mask[x][y] = value;
+    }
+
+    public void add(int x, int y, float value) {
+        mask[x][y] += value;
+    }
+
     public FloatMask init(BinaryMask other, float low, float high) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (other.get(x, y)) {
-                    mask[x][y] = high;
+                    set(x, y, high);
                 } else {
-                    mask[x][y] = low;
+                    set(x, y, low);
                 }
             }
         }
@@ -74,7 +92,7 @@ public strictfp class FloatMask extends Mask {
     public FloatMask add(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                mask[x][y] += other.get(x, y);
+                add(x, y, other.get(x, y));
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -84,7 +102,7 @@ public strictfp class FloatMask extends Mask {
     public FloatMask max(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                mask[x][y] = StrictMath.max(mask[x][y], other.get(x, y));
+                set(x, y, StrictMath.max(get(x, y), other.get(x, y)));
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -98,7 +116,6 @@ public strictfp class FloatMask extends Mask {
         while (otherCopy.getCount() > 0) {
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, random.nextFloat() * .75f));
-//            add(layer.init(other.copy().acid(.1f, 2f), 0, random.nextFloat() * .15f));
             otherCopy.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
@@ -223,9 +240,9 @@ public strictfp class FloatMask extends Mask {
                 float avg = 0;
                 for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
                     for (int x2 = (int) (x - radius); x2 <= x + radius; x2++) {
-                        if (x2 > 0 && y2 > 0 && x2 < getSize() && y2 < getSize() && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                        if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                             count++;
-                            avg += mask[x2][y2];
+                            avg += get(x2, y2);
                         }
                     }
                 }
@@ -266,15 +283,15 @@ public strictfp class FloatMask extends Mask {
                     float avg = 0;
                     for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
                         for (int x2 = (int) (x - radius); x2 <= x + radius; x2++) {
-                            if (x2 > 0 && y2 > 0 && x2 < getSize() && y2 < getSize() && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                            if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                                 count++;
-                                avg += mask[x2][y2];
+                                avg += get(x2, y2);
                             }
                         }
                     }
                     maskCopy[x][y] = avg / count;
                 } else {
-                    maskCopy[x][y] = mask[x][y];
+                    maskCopy[x][y] = get(x, y);
                 }
             }
         }
@@ -307,7 +324,7 @@ public strictfp class FloatMask extends Mask {
             for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
                 Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
                 for (Vector2f symPoint : symPoints) {
-                    mask[(int) symPoint.x][(int) symPoint.y] = mask[x][y];
+                    set(symPoint, get(x, y));
                 }
             }
         }
@@ -323,7 +340,7 @@ public strictfp class FloatMask extends Mask {
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
-                out.writeFloat(mask[x][y]);
+                out.writeFloat(get(x, y));
             }
         }
 
@@ -334,7 +351,7 @@ public strictfp class FloatMask extends Mask {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
         for (int x = getMinXBound(symmetryHierarchy.getSpawnSymmetry()); x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry()); x++) {
             for (int y = getMinYBound(x, symmetryHierarchy.getSpawnSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getSpawnSymmetry()); y++) {
-                bytes.putFloat(mask[x][y]);
+                bytes.putFloat(get(x, y));
             }
         }
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());

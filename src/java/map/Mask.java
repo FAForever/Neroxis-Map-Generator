@@ -6,10 +6,19 @@ import util.Vector3f;
 
 @Getter
 public strictfp abstract class Mask {
+    protected SymmetryHierarchy symmetryHierarchy;
+
     abstract void startVisualDebugger();
+
     abstract int getSize();
 
-    protected SymmetryHierarchy symmetryHierarchy;
+    public boolean inBounds(Vector2f location) {
+        return inBounds((int) location.x, (int) location.y);
+    }
+
+    public boolean inBounds(int x, int y) {
+        return x >= 0 && x < getSize() && y >= 0 && y < getSize();
+    }
 
     public Vector2f getSymmetryPoint(Vector3f v) {
         return getSymmetryPoint(new Vector2f(v));
