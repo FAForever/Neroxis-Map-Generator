@@ -5,10 +5,7 @@ import map.BinaryMask;
 import map.SCMap;
 import util.Vector2f;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,8 +25,9 @@ public strictfp class AIMarkerGenerator {
     }
 
     public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing, boolean symmetric) {
+        BinaryMask symmetryRegion;
         if (symmetric) {
-            BinaryMask symmetryRegion = new BinaryMask(passable.getSize(), random.nextLong(), passable.getSymmetryHierarchy());
+            symmetryRegion = new BinaryMask(passable.getSize(), random.nextLong(), passable.getSymmetryHierarchy());
             symmetryRegion.fillHalf(true);
             passable.intersect(symmetryRegion);
             passableLand.intersect(symmetryRegion);
@@ -55,6 +53,7 @@ public strictfp class AIMarkerGenerator {
         amphibiousCoordinates.forEach((location) -> map.addAmphibiousMarker(new AIMarker(amphibiousCoordinatesArray.indexOf(location), location, IntStream.range(0, amphibiousCoordinatesArray.size())
                 .filter((ind) -> location.getDistance(amphibiousCoordinatesArray.get(ind)) < markerConnectionDistance && ind != amphibiousCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList()))));
+        map.getAmphibiousAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getAmphibiousAIMarkers(), markerConnectionDistance * .75f));
 
         LinkedHashSet<Vector2f> landCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
         landCoordinates.removeIf((location) -> !passableLand.get(location));
@@ -68,6 +67,7 @@ public strictfp class AIMarkerGenerator {
                 .filter((ind) -> location.getDistance(landCoordinatesArray.get(ind)) < markerConnectionDistance && ind != landCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList())))
         );
+        map.getLandAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getLandAIMarkers(), markerConnectionDistance * .75f));
 
         LinkedHashSet<Vector2f> navyCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
         navyCoordinates.removeIf((location) -> !passableWater.get(location));
@@ -81,26 +81,31 @@ public strictfp class AIMarkerGenerator {
                 .filter((ind) -> location.getDistance(navyCoordinatesArray.get(ind)) < markerConnectionDistance && ind != navyCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList())))
         );
+        map.getNavyAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getNavyAIMarkers(), markerConnectionDistance * .75f));
     }
 
     public void pruneMarkerNeighbors(AIMarker aiMarker, List<AIMarker> aiMarkers, float spacing) {
-        LinkedHashSet<Integer> prune = new LinkedHashSet<>();
-        LinkedHashSet<Integer> grow = new LinkedHashSet<>();
-        aiMarker.getNeighbors().forEach(id -> {
-            AIMarker neighbor = aiMarkers.get(id);
-            if (aiMarker.getPosition().getXZDistance(neighbor.getPosition()) < spacing) {
-                prune.add(id);
-                neighbor.getNeighbors().forEach(nid -> {
-                    AIMarker neighborNeighbor = aiMarkers.get(nid);
-                    if (aiMarker.getPosition().getXZDistance(neighborNeighbor.getPosition()) > spacing) {
-                        grow.add(nid);
-                    }
-                });
-                neighbor.getNeighbors().clear();
+        LinkedHashSet<Integer> validNeighbors = getFarNeighbors(aiMarker, aiMarker, aiMarkers, new LinkedHashSet<>(), spacing);
+        aiMarker.getNeighbors().removeIf(id -> !validNeighbors.contains(id));
+        aiMarker.getNeighbors().addAll(validNeighbors);
+    }
+
+    public LinkedHashSet<Integer> getFarNeighbors(AIMarker origMarker, AIMarker neighbor, List<AIMarker> aiMarkers, LinkedHashSet<Integer> seenIDs, float spacing) {
+        LinkedHashSet<Integer> farNeighbors = new LinkedHashSet<>();
+        neighbor.getNeighbors().forEach(id -> {
+            seenIDs.add(id);
+            AIMarker neighborNeighbor = aiMarkers.get(id);
+            if (neighborNeighbor.getNeighborCount() > 0) {
+                if (origMarker.getPosition().getXZDistance(neighborNeighbor.getPosition()) > spacing) {
+                    farNeighbors.add(id);
+                } else if (origMarker.equals(neighbor) || !seenIDs.contains(id)) {
+                    neighborNeighbor.getNeighbors().removeIf(nid -> nid == neighbor.getId());
+                    farNeighbors.addAll(getFarNeighbors(origMarker, neighborNeighbor, aiMarkers, seenIDs, spacing));
+                    neighborNeighbor.getNeighbors().clear();
+                }
             }
         });
-        aiMarker.getNeighbors().removeAll(prune);
-        aiMarker.getNeighbors().addAll(grow);
+        return farNeighbors;
     }
 
     public void setMarkerHeights() {
