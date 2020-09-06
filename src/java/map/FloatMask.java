@@ -282,8 +282,8 @@ public strictfp class FloatMask extends Mask {
 
     public FloatMask gradient() {
         float[][] maskCopy = new float[getSize()][getSize()];
-        for (int x = getMinXBound(); x < getMaxXBound(); x++) {
-            for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 int xNeg = StrictMath.max(0, x - 1);
                 int xPos = StrictMath.min(getSize() - 1, x + 1);
                 int yNeg = StrictMath.max(0, y - 1);
@@ -294,7 +294,6 @@ public strictfp class FloatMask extends Mask {
             }
         }
         mask = maskCopy;
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
