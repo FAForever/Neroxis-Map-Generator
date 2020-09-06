@@ -1,7 +1,7 @@
 package generator;
 
 import export.BiomeExporter;
-import loader.SCMapLoader;
+import importer.SCMapImporter;
 import map.SCMap;
 import util.ArgumentParser;
 
@@ -34,7 +34,7 @@ public class BiomeGenerator {
         if (mapFiles.length == 0) {
             System.out.println("No scmap file in map folder");
         }
-        SCMap map = SCMapLoader.loadSCMAP(mapFiles[0].toPath());
+        SCMap map = SCMapImporter.loadSCMAP(mapFiles[0].toPath());
         System.out.println("Saving biome to " + Paths.get(generator.folderPath).toAbsolutePath() + File.separator + generator.biomeName);
         BiomeExporter.exportBiome(Paths.get(generator.envPath), Paths.get(generator.folderPath), generator.biomeName, map.getBiome());
         System.out.println("Done");

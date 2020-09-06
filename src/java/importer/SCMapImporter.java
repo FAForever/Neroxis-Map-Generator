@@ -1,4 +1,4 @@
-package loader;
+package importer;
 
 import biomes.Biome;
 import map.*;
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 import static util.Swapper.swap;
 
-public strictfp class SCMapLoader {
+public strictfp class SCMapImporter {
 
     public static File file;
 
@@ -376,6 +376,9 @@ public strictfp class SCMapLoader {
         }
         for (Prop prop : props) {
             map.addProp(prop);
+        }
+        for (Decal decal : decals) {
+            map.addDecal(decal);
         }
         return map;
     }
