@@ -27,7 +27,7 @@ public class MapGeneratorTest {
     float plateauDensity = StrictMath.round((.4f - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
     float mountainDensity = StrictMath.round(.025 / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
     float rampDensity = StrictMath.round((.2f - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
-    float reclaimDensity = StrictMath.round(.1f * 127f) / 127f;
+    float reclaimDensity = StrictMath.round(.75f * 127f) / 127f;
     int mexCount = 16;
     String symmetry = "POINT";
     int mapSize = 512;
@@ -155,33 +155,37 @@ public class MapGeneratorTest {
     public void TestDeterminism() {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
-        instance.save();
+        String[] hashArray1 = Pipeline.hashArray.clone();
 
-        Pipeline.reset();
+        for (int i = 0; i < 10; i++) {
+            Pipeline.reset();
 
-        instance.interpretArguments(keywordArgs);
-        SCMap map2 = instance.generate();
-        instance.save();
+            instance.interpretArguments(keywordArgs);
+            SCMap map2 = instance.generate();
+            String[] hashArray2 = Pipeline.hashArray.clone();
 
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getUnits(), map2.getUnits());
-        assertEquals(map1.getWrecks(), map2.getWrecks());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getDecals(), map2.getDecals());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+            assertArrayEquals(hashArray1, hashArray2);
+            assertEquals(map1.toString(), map2.toString());
+            assertEquals(map1.getSpawns(), map2.getSpawns());
+            assertEquals(map1.getMexes(), map2.getMexes());
+            assertEquals(map1.getHydros(), map2.getHydros());
+            assertEquals(map1.getUnits(), map2.getUnits());
+            assertEquals(map1.getWrecks(), map2.getWrecks());
+            assertEquals(map1.getProps(), map2.getProps());
+            assertEquals(map1.getDecals(), map2.getDecals());
+            assertEquals(map1.getBiome(), map2.getBiome());
+            assertEquals(map1.getSize(), map2.getSize());
+            assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+            assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+            assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+            assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+            assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+            assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+            assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+            assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+            assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+            assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+        }
     }
 
     @Test

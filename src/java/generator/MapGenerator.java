@@ -522,7 +522,6 @@ public strictfp class MapGenerator {
             long sTime = System.currentTimeMillis();
             map.setHeightmap(heightmapBase.getFinalMask());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
-            Preview.generate(map.getPreview(), map);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, setHeightmap\n",
                         System.currentTimeMillis() - sTime,
@@ -555,6 +554,13 @@ public strictfp class MapGenerator {
         textureFuture.join();
         placementFuture.join();
         Pipeline.stop();
+        long sTime = System.currentTimeMillis();
+        Preview.generate(map.getPreview(), map);
+        if (DEBUG) {
+            System.out.printf("Done: %4d ms, %s, generatePreview\n",
+                    System.currentTimeMillis() - sTime,
+                    Util.getStackTraceLineInClass(MapGenerator.class));
+        }
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
