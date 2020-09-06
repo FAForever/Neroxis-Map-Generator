@@ -3,6 +3,7 @@ package generator;
 import map.BinaryMask;
 import map.FloatMask;
 import map.Mask;
+import transformer.MapTransformer;
 import util.Util;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ import java.util.Map;
 
 public class VisualDebugger {
 
-    public static final boolean ENABLED = MapGenerator.DEBUG;
+    public static final boolean ENABLED = MapGenerator.DEBUG || MapTransformer.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.

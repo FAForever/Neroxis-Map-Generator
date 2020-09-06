@@ -337,6 +337,16 @@ public strictfp class SCMap {
         }
     }
 
+    public FloatMask getHeightMask(SymmetryHierarchy symmetryHierarchy){
+        FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), 0, symmetryHierarchy);
+        for (int y = 0; y < size + 1; y++) {
+            for (int x = 0; x < size + 1; x++) {
+                heightMask.getMask()[x][y] = this.heightmap.getRaster().getPixel(x, y, new int[1])[0] * HEIGHTMAP_SCALE;
+            }
+        }
+        return heightMask;
+    }
+
     public void setTextureMaskLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
