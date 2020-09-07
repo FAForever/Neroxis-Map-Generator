@@ -166,7 +166,7 @@ public strictfp class MapTransformer {
         passableWater.deflate(16).trimEdge(8);
 
         AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, 0);
-        aiMarkerGenerator.generateAIMarkers(passable, passableLand, passableWater, 8, false);
+        aiMarkerGenerator.generateAIMarkers(passable, passableLand, passableWater, 8, 16,false);
 
         aiMarkerGenerator.setMarkerHeights();
     }

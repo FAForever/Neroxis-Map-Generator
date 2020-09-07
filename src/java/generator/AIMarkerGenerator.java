@@ -20,11 +20,11 @@ public strictfp class AIMarkerGenerator {
         random = new Random(seed);
     }
 
-    public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing) {
-        generateAIMarkers(passable, passableLand, passableWater, markerSpacing, true);
+    public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing, float pruneSpacing) {
+        generateAIMarkers(passable, passableLand, passableWater, markerSpacing, pruneSpacing, true);
     }
 
-    public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing, boolean symmetric) {
+    public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing, float pruneSpacing, boolean symmetric) {
         BinaryMask symmetryRegion;
         if (symmetric) {
             symmetryRegion = new BinaryMask(passable.getSize(), random.nextLong(), passable.getSymmetryHierarchy());
@@ -53,7 +53,7 @@ public strictfp class AIMarkerGenerator {
         amphibiousCoordinates.forEach((location) -> map.addAmphibiousMarker(new AIMarker(amphibiousCoordinatesArray.indexOf(location), location, IntStream.range(0, amphibiousCoordinatesArray.size())
                 .filter((ind) -> location.getDistance(amphibiousCoordinatesArray.get(ind)) < markerConnectionDistance && ind != amphibiousCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList()))));
-        map.getAmphibiousAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getAmphibiousAIMarkers(), markerConnectionDistance * .75f));
+        map.getAmphibiousAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getAmphibiousAIMarkers(), pruneSpacing));
 
         LinkedHashSet<Vector2f> landCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
         landCoordinates.removeIf((location) -> !passableLand.get(location));
@@ -67,7 +67,7 @@ public strictfp class AIMarkerGenerator {
                 .filter((ind) -> location.getDistance(landCoordinatesArray.get(ind)) < markerConnectionDistance && ind != landCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList())))
         );
-        map.getLandAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getLandAIMarkers(), markerConnectionDistance * .75f));
+        map.getLandAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getLandAIMarkers(), pruneSpacing));
 
         LinkedHashSet<Vector2f> navyCoordinates = new LinkedHashSet<>(amphibiousCoordinates);
         navyCoordinates.removeIf((location) -> !passableWater.get(location));
@@ -81,7 +81,7 @@ public strictfp class AIMarkerGenerator {
                 .filter((ind) -> location.getDistance(navyCoordinatesArray.get(ind)) < markerConnectionDistance && ind != navyCoordinatesArray.indexOf(location))
                 .boxed().collect(Collectors.toList())))
         );
-        map.getNavyAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getNavyAIMarkers(), markerConnectionDistance * .75f));
+        map.getNavyAIMarkers().forEach(aiMarker -> pruneMarkerNeighbors(aiMarker, map.getNavyAIMarkers(), pruneSpacing));
     }
 
     public void pruneMarkerNeighbors(AIMarker aiMarker, List<AIMarker> aiMarkers, float spacing) {
