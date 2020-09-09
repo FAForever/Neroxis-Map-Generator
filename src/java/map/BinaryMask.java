@@ -43,24 +43,14 @@ public strictfp class BinaryMask extends Mask {
                 teamSymmetry = teams[random.nextInt(teams.length)];
                 break;
             case QUAD:
-                spawns = new Symmetry[]{Symmetry.X, Symmetry.Y, Symmetry.POINT};
-                spawnSymmetry = spawns[random.nextInt(spawns.length)];
-                if (spawnSymmetry == Symmetry.POINT) {
-                    teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
-                    teamSymmetry = teams[random.nextInt(teams.length)];
-                } else {
-                    teamSymmetry = spawnSymmetry;
-                }
+                spawnSymmetry = Symmetry.POINT;
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
+                teamSymmetry = teams[random.nextInt(teams.length)];
                 break;
             case DIAG:
-                spawns = new Symmetry[]{Symmetry.XY, Symmetry.YX, Symmetry.POINT};
-                spawnSymmetry = spawns[random.nextInt(spawns.length)];
-                if (spawnSymmetry == Symmetry.POINT) {
-                    teams = new Symmetry[]{Symmetry.XY, Symmetry.YX};
-                    teamSymmetry = teams[random.nextInt(teams.length)];
-                } else {
-                    teamSymmetry = spawnSymmetry;
-                }
+                spawnSymmetry = Symmetry.POINT;
+                teams = new Symmetry[]{Symmetry.XY, Symmetry.YX};
+                teamSymmetry = teams[random.nextInt(teams.length)];
                 break;
             case X:
             case Y:
