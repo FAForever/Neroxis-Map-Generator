@@ -36,11 +36,11 @@ public strictfp class MapGenerator {
     public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
-    public static final float RAMP_DENSITY_MIN = .15f;
-    public static final float RAMP_DENSITY_MAX = .25f;
+    public static final float RAMP_DENSITY_MIN = .05f;
+    public static final float RAMP_DENSITY_MAX = .15f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
-    public static final float PLATEAU_DENSITY_MAX = .65f;
+    public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static boolean DEBUG = false;
     //read from cli args
@@ -408,7 +408,7 @@ public strictfp class MapGenerator {
     public SCMap generate() {
         long startTime = System.currentTimeMillis();
 
-        final int spawnSize = 24;
+        final int spawnSize = 48;
         final int mexSpacing = 32;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
@@ -574,8 +574,14 @@ public strictfp class MapGenerator {
         ramps = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "ramps");
 
         land.randomize(landDensity).smooth(mapSize / 256f, .75f).enlarge(mapSize / 4).smooth(2f).erode(.5f);
-        mountains.randomWalk((int) (mountainDensity * mapSize / 64), (int) (mountainDensity * mapSize / 32)).enlarge(mapSize / 4).smooth(4f).erode(.5f);
-        plateaus.randomize(plateauDensity).smooth(mapSize / 256f).cutCorners().enlarge(mapSize / 4).smooth(2f, .25f).erode(.5f);
+
+        if (random.nextBoolean()) {
+            mountains.progressiveWalk(mapSize / 32, (int) (mountainDensity * mapSize / 128)).grow(.5f);
+        } else {
+            mountains.randomWalk((int) (mountainDensity * mapSize / 64), (int) (mountainDensity * mapSize / 32));
+        }
+        mountains.enlarge(mapSize / 4).smooth(2f).erode(.5f);
+        plateaus.randomize(plateauDensity).smooth(mapSize / 256f).enlarge(mapSize / 4).smooth(2f, .25f);
 
         plateaus.intersect(land);
 
@@ -591,14 +597,13 @@ public strictfp class MapGenerator {
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask).combine(plateaus);
         mountains.minus(spawnLandMask);
-        plateaus.filterShapes(2048);
 
         ramps.randomize(rampDensity);
         ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
 
         land.combine(ramps.copy().deflate(8)).filterShapes(2048);
         mountains.intersect(land);
-        plateaus.combine(mountains);
+        plateaus.combine(mountains).filterShapes(4096);
 
         impassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
 
