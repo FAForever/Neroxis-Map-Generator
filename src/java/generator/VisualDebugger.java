@@ -151,6 +151,8 @@ public class VisualDebugger {
             function = methods.iterator().next();
         } else if (methods.contains("inflate")) {
             function = "inflate";
+        } else if (methods.contains("show")) {
+            function = "show";
         } else {
             return;
         }
