@@ -463,7 +463,7 @@ public strictfp class BinaryMask extends Mask {
                     for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
                         if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                             count++;
-                            if (mask[x2][y2])
+                            if (get(x2, y2))
                                 count2++;
                         }
                     }
@@ -535,16 +535,22 @@ public strictfp class BinaryMask extends Mask {
     public BinaryMask fillSides(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
             case Y:
-                return fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
+                fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
+                break;
             case X:
-                return fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
+                fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
+                break;
             case XY:
-                return fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
+                fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
+                break;
             case YX:
-                return fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
+                fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
+                break;
             default:
                 return this;
         }
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {
@@ -554,18 +560,23 @@ public strictfp class BinaryMask extends Mask {
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
             case POINT:
-                return fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+                fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+                break;
             case Y:
-                return fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
+                fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
+                break;
             case X:
-                return fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
+                fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
+                break;
             case XY:
-                return fillDiagonal(extent * 3 / 4, false, value);
+                fillDiagonal(extent * 3 / 4, false, value);
+                break;
             case YX:
-                return fillDiagonal(extent * 3 / 4, true, value);
-            default:
-                return null;
+                fillDiagonal(extent * 3 / 4, true, value);
+                break;
         }
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
     public BinaryMask fillHalf(boolean value) {
@@ -578,6 +589,7 @@ public strictfp class BinaryMask extends Mask {
                 set(x, y, value);
             }
         }
+        VisualDebugger.visualizeMask(this);
         return this;
     }
 
