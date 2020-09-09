@@ -100,7 +100,6 @@ public strictfp class MexGenerator {
         int plateauMexCount = (int) (plateauDensity * numMexesLeft / 2) * 2;
 
         for (int i = 0; i < plateauMexCount; i += 2) {
-            int ind = i + baseMexCount + actualExpMexCount;
             Vector2f mexLocation = spawnablePlateau.getRandomPosition();
 
             if (mexLocation == null) {
@@ -118,7 +117,6 @@ public strictfp class MexGenerator {
 
         int numLandMexes = numMexesLeft;
         for (int i = 0; i < numLandMexes; i += 2) {
-            int ind = i +   map.getMexCountInit() - numLandMexes;
             Vector2f mexLocation = spawnableLand.getRandomPosition();
 
             if (mexLocation == null) {
@@ -137,7 +135,6 @@ public strictfp class MexGenerator {
 
         int numNearSpawnMexes = numMexesLeft;
         for (int i = 0; i < numNearSpawnMexes; i += 2) {
-            int ind = i +   map.getMexCountInit() - numLandMexes;
             Vector2f mexLocation = spawnable.getRandomPosition();
 
             if (mexLocation == null) {
@@ -155,7 +152,6 @@ public strictfp class MexGenerator {
         }
 
         for (int i = 0; i < numMexesLeft; i += 2) {
-            int ind = i +   map.getMexCountInit() - numMexesLeft;
             Vector2f mexLocation = spawnableWater.getRandomPosition();
 
             if (mexLocation == null) {
