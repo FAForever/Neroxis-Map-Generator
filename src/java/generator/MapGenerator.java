@@ -601,12 +601,8 @@ public strictfp class MapGenerator {
         plateaus.combine(mountains);
 
         impassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
-        hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "hills");
-        valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "valleys");
 
         impassable.inflate(3).combine(plateaus.copy().outline().inflate(3).minus(ramps));
-        hills.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
-        valleys.randomWalk(random.nextInt(5) + 5, random.nextInt(700) + 500).enlarge(mapSize + 1).smooth(10f, .25f).intersect(land);
 
         passable = new ConcurrentBinaryMask(impassable, random.nextLong(),"passable").invert();
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
@@ -622,19 +618,13 @@ public strictfp class MapGenerator {
         heightmapLand = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapLand");
         heightmapMountains = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapMountains");
         ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapPlateaus");
-        ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapHills");
-        ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapValleys");
         ConcurrentBinaryMask randomHeight = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "randomHeight");
 
         randomHeight.randomize(.5f);
-        heightmapBase.init(land, 25.5f, 25.5f);
+        heightmapBase.init(land, 25f, 25f);
         heightmapPlateaus.init(plateaus, 0, 3f).smooth(5f, ramps);
-        heightmapHills.init(hills, 0, .5f).smooth(12f);
-        heightmapValleys.init(valleys, 0, -.5f).smooth(12f);
         heightmapLand.init(randomHeight, 0, .5f).smooth(12f);
         heightmapLand.maskToHeightmap(0.25f, 48, land).smooth(2);
-        heightmapLand.add(heightmapHills);
-        heightmapLand.add(heightmapValleys);
         heightmapMountains.maskToMoutains(mountains);
         heightmapMountains.add(heightmapPlateaus).smooth(1);
 
