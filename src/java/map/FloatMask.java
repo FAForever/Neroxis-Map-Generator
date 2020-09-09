@@ -204,7 +204,7 @@ public strictfp class FloatMask extends Mask {
             count++;
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
             add(layer.init(otherCopy, 0, -underWaterSlope));
-            otherCopy.erode(0.5f, symmetryHierarchy.getSpawnSymmetry());
+            otherCopy.erode(0.75f, symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;
