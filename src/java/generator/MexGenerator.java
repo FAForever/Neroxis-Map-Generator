@@ -26,8 +26,7 @@ public strictfp class MexGenerator {
     public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
         BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
-        float spawnDensity = (float) spawnable.getCount() / map.getSize() / map.getSize() * 2;
-        int mexSpawnDistance = (int) StrictMath.max(StrictMath.min(spawnDensity * map.getSize() / 6, spawnSize * 2.5), spawnSize);
+        int mexSpawnDistance = 32;
         BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
         int spawnCount =   map.getSpawnCount();
         int totalMexCount =   map.getMexCountInit();
@@ -52,7 +51,7 @@ public strictfp class MexGenerator {
                 iMex += 2;
             }
             BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-            nearMexes.fillCircle(map.getSpawn(i + 1), spawnSize * 5, true).fillCircle(map.getSpawn(i + 1), spawnSize * 2, false).intersect(spawnable);
+            nearMexes.fillCircle(map.getSpawn(i + 1), spawnSize * 3, true).fillCircle(map.getSpawn(i + 1), spawnSize, false).intersect(spawnable);
             for (int j = 0; j <   map.getSpawnCount(); j += 2) {
                 nearMexes.fillCircle(map.getSpawn(j + 1), spawnSize, false);
             }
