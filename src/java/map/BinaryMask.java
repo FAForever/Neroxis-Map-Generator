@@ -185,9 +185,43 @@ public strictfp class BinaryMask extends Mask {
             int x = random.nextInt(getMaxXBound() - getMinXBound()) + getMinXBound();
             int y = random.nextInt(getMaxYBound(x) - getMinYBound(x) + 1) + getMinYBound(x);
             for (int j = 0; j < numSteps; j++) {
-                if (inBounds(x, y))
+                if (inBounds(x, y)) {
                     set(x, y, true);
+                }
                 int dir = random.nextInt(4);
+                switch (dir) {
+                    case 0:
+                        x++;
+                        break;
+                    case 1:
+                        x--;
+                        break;
+                    case 2:
+                        y++;
+                        break;
+                    case 3:
+                        y--;
+                        break;
+                }
+            }
+        }
+        applySymmetry();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask progressiveWalk(int numWalkers, int numSteps) {
+        for (int i = 0; i < numWalkers; i++) {
+            int x = random.nextInt(getMaxXBound() - getMinXBound()) + getMinXBound();
+            int y = random.nextInt(getMaxYBound(x) - getMinYBound(x) + 1) + getMinYBound(x);
+            List<Integer> directions = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
+            int regressiveDir = random.nextInt(directions.size());
+            directions.remove(regressiveDir);
+            for (int j = 0; j < numSteps; j++) {
+                if (inBounds(x, y)) {
+                    set(x, y, true);
+                }
+                int dir = directions.get(random.nextInt(directions.size()));
                 switch (dir) {
                     case 0:
                         x++;

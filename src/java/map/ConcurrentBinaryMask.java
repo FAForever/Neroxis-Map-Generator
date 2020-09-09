@@ -97,6 +97,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask progressiveWalk(int numWalkers, int numSteps) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.progressiveWalk(numWalkers, numSteps)
+        );
+    }
+
     public ConcurrentBinaryMask invert() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.invert()
@@ -142,6 +148,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     public ConcurrentBinaryMask grow(float strength, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.grow(strength, symmetry)
+        );
+    }
+
+    public ConcurrentBinaryMask grow(float strength) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.grow(strength)
         );
     }
 
