@@ -183,7 +183,7 @@ public strictfp class MexGenerator {
         BinaryMask expansionSpawnable = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
 
-        expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(64, false).intersect(spawnable);
+        expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(96, false).intersect(spawnable);
 
         for (int i = 0; i <   map.getSpawnCount(); i++) {
             expansionSpawnable.fillCircle(map.getSpawn(i), map.getSize() / 4f, false);
