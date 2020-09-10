@@ -415,7 +415,7 @@ public strictfp class MapGenerator {
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
 
-        SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(),  spawnSize);
+        SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), spawnSize);
         MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), spawnSize, mexSpacing);
         HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), spawnSize);
         WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
@@ -612,7 +612,7 @@ public strictfp class MapGenerator {
 
         impassable.inflate(3).combine(plateaus.copy().outline().inflate(3).minus(ramps));
 
-        passable = new ConcurrentBinaryMask(impassable, random.nextLong(),"passable").invert();
+        passable = new ConcurrentBinaryMask(impassable, random.nextLong(), "passable").invert();
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 

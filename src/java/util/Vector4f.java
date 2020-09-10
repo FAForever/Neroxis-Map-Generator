@@ -17,7 +17,7 @@ public strictfp class Vector4f {
     }
 
     @Override
-    public String toString(){
-        return String.format("(%f, %f, %f, %f)", x, y, z ,w);
+    public String toString() {
+        return String.format("(%f, %f, %f, %f)", x, y, z, w);
     }
 }

@@ -55,7 +55,7 @@ public strictfp class HydroGenerator {
             }
         }
 
-        for (int i = 0; i <   map.getSpawnCount(); i += 2) {
+        for (int i = 0; i < map.getSpawnCount(); i += 2) {
             spawnable.fillCircle(map.getSpawn(i + 1), spawnSize, false);
         }
 

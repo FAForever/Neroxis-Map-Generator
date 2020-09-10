@@ -33,7 +33,7 @@ public class VisualDebugger {
         if (drawMasksWhitelist == null) {
             drawMasksWhitelist = new HashMap<>();
         }
-        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), new String[] {name, parentClass});
+        drawMasksWhitelist.put(binaryOrFloatMask.hashCode(), new String[]{name, parentClass});
         createGUI();
     }
 
@@ -143,7 +143,7 @@ public class VisualDebugger {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);
         String maskName = maskDetails[0];
         String parentClass = maskDetails[1];
-        LinkedHashSet<String> methods  = Util.getStackTraceMethods(clazz);
+        LinkedHashSet<String> methods = Util.getStackTraceMethods(clazz);
         String function;
         if (clazz.getCanonicalName().equals(parentClass)) {
             function = methods.iterator().next();

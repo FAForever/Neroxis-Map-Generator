@@ -613,6 +613,7 @@ public final class DDSReader {
         public int greenShift;
         public int blueShift;
         public int alphaShift;
+
         Order(int redShift, int greenShift, int blueShift, int alphaShift) {
             this.redShift = redShift;
             this.greenShift = greenShift;

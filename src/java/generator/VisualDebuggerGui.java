@@ -11,12 +11,12 @@ import java.util.Map;
 public class VisualDebuggerGui {
 
     public static final boolean AUTO_SELECT_NEW_MASKS = false;
+    private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
+    private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
     private static JFrame frame;
     private static Container contentPane;
     private static JList<MaskListItem> list;
     private static JPanel canvasContainer;
-    private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
-    private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
 
     public static boolean isCreated() {
         return frame != null;

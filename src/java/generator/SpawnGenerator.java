@@ -21,7 +21,7 @@ public strictfp class SpawnGenerator {
         this.spawnSize = spawnSize;
         random = new Random(seed);
     }
-    
+
     public BinaryMask[] generateSpawns(float separation, Symmetry symmetry, float plateauDensity) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
@@ -86,9 +86,9 @@ public strictfp class SpawnGenerator {
         }
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
     }
-    
+
     public void setMarkerHeights() {
-        for (int i = 0; i <   map.getSpawnCount(); i++) {
+        for (int i = 0; i < map.getSpawnCount(); i++) {
             map.getSpawns().set(i, placeOnHeightmap(map, map.getSpawn(i)));
         }
     }

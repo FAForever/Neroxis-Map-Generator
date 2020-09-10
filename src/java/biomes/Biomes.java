@@ -57,7 +57,7 @@ public strictfp class Biomes {
         TerrainMaterials terrainMaterials = null;
 
         try {
-            terrainMaterials = FileUtils.deserialize(path, "materials.json",TerrainMaterials.class);
+            terrainMaterials = FileUtils.deserialize(path, "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.printf("An error occured while loading biome %s\n", path);

@@ -1,1 +1,75 @@
-{"name":"Syrtis","texturePaths":["/env/red barrens/layers/rb_sand_albedo.dds","/env/red barrens/layers/rb_redmud_albedo.dds","/env/red barrens/layers/rb_cracked_albedo.dds","/env/red barrens/layers/rb_rock07_albedo.dds","/env/red barrens/layers/rb_rock06_albedo.dds","","","","","/env/red barrens/layers/macrotexture001_albedo.dds"],"textureScales":[4.0,6.0,6.0,8.0,16.0,4.0,4.0,4.0,4.0,128.0],"normalPaths":["/env/red barrens/layers/rb_rock06_normal.dds","/env/red barrens/layers/rb_redmud_normal.dds","/env/red barrens/layers/rb_cracked_normal.dds","/env/red barrens/layers/rb_rock09_normal.dds","/env/red barrens/layers/rb_rock_normal.dds","","","",""],"normalScales":[4.0,6.0,6.0,4.0,4.0,4.0,4.0,4.0,4.0],"previewColors":[{"value":-9752037,"falpha":0.0},{"value":-10869730,"falpha":0.0},{"value":-11066864,"falpha":0.0},{"value":-13232886,"falpha":0.0},{"value":-12117744,"falpha":0.0},null,null,null,null]}
+{
+  "name": "Syrtis",
+  "texturePaths": [
+    "/env/red barrens/layers/rb_sand_albedo.dds",
+    "/env/red barrens/layers/rb_redmud_albedo.dds",
+    "/env/red barrens/layers/rb_cracked_albedo.dds",
+    "/env/red barrens/layers/rb_rock07_albedo.dds",
+    "/env/red barrens/layers/rb_rock06_albedo.dds",
+    "",
+    "",
+    "",
+    "",
+    "/env/red barrens/layers/macrotexture001_albedo.dds"
+  ],
+  "textureScales": [
+    4.0,
+    6.0,
+    6.0,
+    8.0,
+    16.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    128.0
+  ],
+  "normalPaths": [
+    "/env/red barrens/layers/rb_rock06_normal.dds",
+    "/env/red barrens/layers/rb_redmud_normal.dds",
+    "/env/red barrens/layers/rb_cracked_normal.dds",
+    "/env/red barrens/layers/rb_rock09_normal.dds",
+    "/env/red barrens/layers/rb_rock_normal.dds",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "normalScales": [
+    4.0,
+    6.0,
+    6.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0
+  ],
+  "previewColors": [
+    {
+      "value": -9752037,
+      "falpha": 0.0
+    },
+    {
+      "value": -10869730,
+      "falpha": 0.0
+    },
+    {
+      "value": -11066864,
+      "falpha": 0.0
+    },
+    {
+      "value": -13232886,
+      "falpha": 0.0
+    },
+    {
+      "value": -12117744,
+      "falpha": 0.0
+    },
+    null,
+    null,
+    null,
+    null
+  ]
+}

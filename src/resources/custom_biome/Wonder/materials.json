@@ -1,1 +1,78 @@
-{"name":"Wonder","texturePaths":["/env/evergreen2/layers/eg_gravel_albedo.dds","/env/evergreen2/layers/evgrass009_albedo.dds","/env/evergreen2/layers/evgrass003_albedo.dds","/env/evergreen2/layers/evrock007_albedo.dds","/env/evergreen2/layers/evrock006_albedo.dds","/env/paradise/layers/ice001_albedo.dds","","","","/env/evergreen/layers/macrotexture000_albedo.dds"],"textureScales":[8.0,4.0,6.75,17.25,13.0,4.0,4.0,4.0,4.0,128.0],"normalPaths":["/env/evergreen2/layers/evrock007_normal.dds","/env/evergreen2/layers/evrock007_normal.dds","/env/evergreen2/layers/evrock007_normal.dds","/env/evergreen2/layers/eg_none_normal.dds","/env/tundra/layers/tund_none_normal.dds","/env/crystalline/layers/cr_08_01_normal.dds","","",""],"normalScales":[44.75,21.5,6.0,4.0,4.0,4.0,4.0,4.0,4.0],"previewColors":[{"value":-11379366,"falpha":0.0},{"value":-14274544,"falpha":0.0},{"value":-13024477,"falpha":0.0},{"value":-12829639,"falpha":0.0},{"value":-11250865,"falpha":0.0},{"value":-5260066,"falpha":0.0},null,null,null]}
+{
+  "name": "Wonder",
+  "texturePaths": [
+    "/env/evergreen2/layers/eg_gravel_albedo.dds",
+    "/env/evergreen2/layers/evgrass009_albedo.dds",
+    "/env/evergreen2/layers/evgrass003_albedo.dds",
+    "/env/evergreen2/layers/evrock007_albedo.dds",
+    "/env/evergreen2/layers/evrock006_albedo.dds",
+    "/env/paradise/layers/ice001_albedo.dds",
+    "",
+    "",
+    "",
+    "/env/evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "textureScales": [
+    8.0,
+    4.0,
+    6.75,
+    17.25,
+    13.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    128.0
+  ],
+  "normalPaths": [
+    "/env/evergreen2/layers/evrock007_normal.dds",
+    "/env/evergreen2/layers/evrock007_normal.dds",
+    "/env/evergreen2/layers/evrock007_normal.dds",
+    "/env/evergreen2/layers/eg_none_normal.dds",
+    "/env/tundra/layers/tund_none_normal.dds",
+    "/env/crystalline/layers/cr_08_01_normal.dds",
+    "",
+    "",
+    ""
+  ],
+  "normalScales": [
+    44.75,
+    21.5,
+    6.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0
+  ],
+  "previewColors": [
+    {
+      "value": -11379366,
+      "falpha": 0.0
+    },
+    {
+      "value": -14274544,
+      "falpha": 0.0
+    },
+    {
+      "value": -13024477,
+      "falpha": 0.0
+    },
+    {
+      "value": -12829639,
+      "falpha": 0.0
+    },
+    {
+      "value": -11250865,
+      "falpha": 0.0
+    },
+    {
+      "value": -5260066,
+      "falpha": 0.0
+    },
+    null,
+    null,
+    null
+  ]
+}

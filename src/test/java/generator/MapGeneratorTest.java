@@ -48,8 +48,8 @@ public class MapGeneratorTest {
             (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f)};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
-    String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()),NameEncoder.encode(optionArray));
-    String b32MapNameClient = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()),NameEncoder.encode(clientOptionArray));
+    String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(optionArray));
+    String b32MapNameClient = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(clientOptionArray));
     String[] keywordArgs = {"--folder-path", ".",
             "--seed", Long.toString(seed),
             "--spawn-count", Byte.toString(spawnCount),

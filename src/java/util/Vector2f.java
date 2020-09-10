@@ -28,7 +28,7 @@ public strictfp class Vector2f {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("(%f, %f)", x, y);
     }
 }

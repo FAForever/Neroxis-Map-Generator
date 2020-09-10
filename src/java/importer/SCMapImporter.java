@@ -281,8 +281,7 @@ public strictfp class SCMapImporter {
             // Array of Planets/Stars
             int length = readInt();
 //            Planet[] planets = new Planet[length];
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
 //                planets[i] = new Planet();
                 Vector3f pPosition = readVector3f();
                 float rotation = readFloat();
@@ -301,11 +300,10 @@ public strictfp class SCMapImporter {
 
             int cirrusLayerCount = readInt();
 //            Cirrus[] cirrusLayers = new Cirrus[cirrusLayerCount];
-            for (int i = 0; i < cirrusLayerCount; i++)
-            {
+            for (int i = 0; i < cirrusLayerCount; i++) {
                 Vector2f frequency = readVector2f();
                 float speed = readFloat();
-               Vector2f direction = readVector2f();
+                Vector2f direction = readVector2f();
             }
             float clouds7 = readFloat();
         }
@@ -322,14 +320,14 @@ public strictfp class SCMapImporter {
             Vector3f scale = readVector3f();
             float rotation = (float) StrictMath.atan2(rotation1.z, rotation1.x);
             if ((rotation - StrictMath.atan2(-rotation2.x, rotation2.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
-                System.out.println(String.format("Prop %d: Rotation inconsistent\n",  i));
+                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
             }
             props[i] = new Prop(path, position, rotation);
         }
 
         in.close();
 
-        SCMap map = new SCMap(widthInt,0,0,0, new Biome("loaded", mapTerrainMaterials, mapWaterSettings, mapLightingSettings));
+        SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, mapWaterSettings, mapLightingSettings));
         DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);
@@ -401,7 +399,7 @@ public strictfp class SCMapImporter {
 
     private static byte[] readBytes(int numBytes) throws IOException {
         byte[] readBytes = new byte[numBytes];
-        for (int i = 0; i < numBytes; i ++) {
+        for (int i = 0; i < numBytes; i++) {
             readBytes[i] = readByte();
         }
         return readBytes;
@@ -409,7 +407,7 @@ public strictfp class SCMapImporter {
 
     private static short[] readShorts(int numShorts) throws IOException {
         short[] readShorts = new short[numShorts];
-        for (int i = 0; i < numShorts; i ++) {
+        for (int i = 0; i < numShorts; i++) {
             readShorts[i] = readShort();
         }
         return readShorts;
@@ -417,7 +415,7 @@ public strictfp class SCMapImporter {
 
     private static int[] readInts(int numInts) throws IOException {
         int[] readInts = new int[numInts];
-        for (int i = 0; i < numInts; i ++) {
+        for (int i = 0; i < numInts; i++) {
             readInts[i] = readInt();
         }
         return readInts;
@@ -426,7 +424,7 @@ public strictfp class SCMapImporter {
     private static String readStringNull() throws IOException {
         StringBuilder readString = new StringBuilder();
         byte read = readByte();
-        while (read != 0){
+        while (read != 0) {
             readString.append((char) read);
             read = readByte();
         }

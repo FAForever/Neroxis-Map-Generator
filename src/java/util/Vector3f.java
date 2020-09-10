@@ -30,16 +30,16 @@ public strictfp class Vector3f {
         return (float) StrictMath.sqrt(dx * dx + dz * dz);
     }
 
-	public float getAzimuth() {
+    public float getAzimuth() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(z, x));
-	}
+    }
 
     public float getElevation() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("(%f, %f, %f)", x, y, z);
     }
 }

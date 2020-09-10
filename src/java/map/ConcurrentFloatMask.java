@@ -12,8 +12,8 @@ import java.util.Collections;
 @Getter
 public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
-    private FloatMask floatMask;
     private final String name;
+    private FloatMask floatMask;
 
     public ConcurrentFloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
@@ -41,8 +41,8 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentFloatMask copy(){
-        return new ConcurrentFloatMask(this, this.floatMask.getRandom().nextLong(), name+"Copy");
+    public ConcurrentFloatMask copy() {
+        return new ConcurrentFloatMask(this, this.floatMask.getRandom().nextLong(), name + "Copy");
     }
 
     public ConcurrentFloatMask add(ConcurrentFloatMask other) {
@@ -121,6 +121,6 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     }
 
     public void startVisualDebugger(String maskName) {
-       this.floatMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
+        this.floatMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 }

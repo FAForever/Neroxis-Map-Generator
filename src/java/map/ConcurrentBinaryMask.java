@@ -12,8 +12,8 @@ import java.util.Collections;
 @Getter
 public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
 
-    private BinaryMask binaryMask;
     private final String name;
+    private BinaryMask binaryMask;
 
     public ConcurrentBinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.binaryMask = new BinaryMask(size, seed, symmetryHierarchy);
@@ -39,7 +39,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
             this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                this.binaryMask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
+                    this.binaryMask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
@@ -69,8 +69,8 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
     }
 
-    public ConcurrentBinaryMask copy(){
-        return new ConcurrentBinaryMask(this, this.binaryMask.getRandom().nextLong(), name+"Copy");
+    public ConcurrentBinaryMask copy() {
+        return new ConcurrentBinaryMask(this, this.binaryMask.getRandom().nextLong(), name + "Copy");
     }
 
     public ConcurrentBinaryMask randomize(float density) {

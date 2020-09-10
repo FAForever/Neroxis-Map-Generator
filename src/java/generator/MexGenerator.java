@@ -28,14 +28,14 @@ public strictfp class MexGenerator {
         spawnable.fillHalf(false);
         int mexSpawnDistance = 32;
         BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
-        int spawnCount =   map.getSpawnCount();
-        int totalMexCount =   map.getMexCountInit();
+        int spawnCount = map.getSpawnCount();
+        int totalMexCount = map.getMexCountInit();
         int numBaseMexes = (random.nextInt(2) + 3) * 2;
         int spawnMexCount = numBaseMexes / 2 * spawnCount;
         int nonSpawnMexCount = totalMexCount - spawnMexCount;
         int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
         int iMex = 0;
-        for (int i = 0; i <   map.getSpawnCount(); i += 2) {
+        for (int i = 0; i < map.getSpawnCount(); i += 2) {
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
             baseMexes.fillCircle(map.getSpawn(i + 1), 15, true).fillCircle(map.getSpawn(i + 1), 5, false).intersect(spawnable);
             for (int j = 0; j < numBaseMexes; j += 2) {
@@ -52,7 +52,7 @@ public strictfp class MexGenerator {
             }
             BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
             nearMexes.fillCircle(map.getSpawn(i + 1), spawnSize * 3, true).fillCircle(map.getSpawn(i + 1), spawnSize, false).intersect(spawnable);
-            for (int j = 0; j <   map.getSpawnCount(); j += 2) {
+            for (int j = 0; j < map.getSpawnCount(); j += 2) {
                 nearMexes.fillCircle(map.getSpawn(j + 1), spawnSize, false);
             }
             for (int j = 0; j < numNearMexes; j += 2) {
@@ -68,7 +68,7 @@ public strictfp class MexGenerator {
                 iMex += 2;
             }
         }
-        for (int i = 0; i <   map.getSpawnCount(); i += 2) {
+        for (int i = 0; i < map.getSpawnCount(); i += 2) {
             spawnable.fillCircle(map.getSpawn(i + 1), 24, false);
             spawnableNoSpawns.fillCircle(map.getSpawn(i + 1), mexSpawnDistance, false);
         }
@@ -185,7 +185,7 @@ public strictfp class MexGenerator {
 
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(96, false).intersect(spawnable);
 
-        for (int i = 0; i <   map.getSpawnCount(); i++) {
+        for (int i = 0; i < map.getSpawnCount(); i++) {
             expansionSpawnable.fillCircle(map.getSpawn(i), map.getSize() / 4f, false);
         }
 
@@ -269,7 +269,7 @@ public strictfp class MexGenerator {
     }
 
     public void setMarkerHeights() {
-        for (int i = 0; i <   map.getMexCount(); i++) {
+        for (int i = 0; i < map.getMexCount(); i++) {
             map.getMexes().set(i, placeOnHeightmap(map, map.getMex(i)));
         }
     }

@@ -71,6 +71,48 @@ public class DDSHeader {
         setTextureFlag(true);
     }
 
+    public static DDSHeader parseHeader(byte[] bytes) {
+        DDSHeader header = new DDSHeader();
+        ByteBuffer headerBytesBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+        byte[] magicBytes = new byte[4];
+        headerBytesBuffer.get(magicBytes);
+        if (!new String(magicBytes).equals(header.magic)) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        int inSize = headerBytesBuffer.getInt();
+        if (inSize != header.size) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        header.setFlags(headerBytesBuffer.getInt());
+        header.setHeight(headerBytesBuffer.getInt());
+        header.setWidth(headerBytesBuffer.getInt());
+        header.setPitchOrLinearSize(headerBytesBuffer.getInt());
+        header.setDepth(headerBytesBuffer.getInt());
+        header.setMipMapCount(headerBytesBuffer.getInt());
+        for (int i = 0; i < header.reserved1.length; i++) {
+            header.reserved1[i] = headerBytesBuffer.getInt();
+        }
+        int inPixelFormatSize = headerBytesBuffer.getInt();
+        if (inPixelFormatSize != header.pixelFormatSize) {
+            throw new IllegalArgumentException("Not a valid DDS Header");
+        }
+        header.setPixelFlags(headerBytesBuffer.getInt());
+        byte[] fourCCBytes = new byte[4];
+        headerBytesBuffer.get(fourCCBytes);
+        header.setFourCC(new String(fourCCBytes));
+        header.setRGBBitCount(headerBytesBuffer.getInt());
+        header.setRBitMask(headerBytesBuffer.getInt());
+        header.setGBitMask(headerBytesBuffer.getInt());
+        header.setBBitMask(headerBytesBuffer.getInt());
+        header.setABitMask(headerBytesBuffer.getInt());
+        header.setCaps1(headerBytesBuffer.getInt());
+        header.setCaps2(headerBytesBuffer.getInt());
+        header.setCaps3(headerBytesBuffer.getInt());
+        header.setCaps4(headerBytesBuffer.getInt());
+        header.setReserved2(headerBytesBuffer.getInt());
+        return header;
+    }
+
     public boolean getCapsFlag() {
         return (flags & CAPS_FLAG) > 0;
     }
@@ -472,48 +514,6 @@ public class DDSHeader {
 
     public byte[] toBytes() {
         return headerBytesBuffer.array();
-    }
-
-    public static DDSHeader parseHeader(byte[] bytes) {
-        DDSHeader header = new DDSHeader();
-        ByteBuffer headerBytesBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-        byte[] magicBytes = new byte[4];
-        headerBytesBuffer.get(magicBytes);
-        if (!new String(magicBytes).equals(header.magic)) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        int inSize = headerBytesBuffer.getInt();
-        if (inSize != header.size) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        header.setFlags(headerBytesBuffer.getInt());
-        header.setHeight(headerBytesBuffer.getInt());
-        header.setWidth(headerBytesBuffer.getInt());
-        header.setPitchOrLinearSize(headerBytesBuffer.getInt());
-        header.setDepth(headerBytesBuffer.getInt());
-        header.setMipMapCount(headerBytesBuffer.getInt());
-        for (int i = 0; i < header.reserved1.length; i++) {
-            header.reserved1[i] = headerBytesBuffer.getInt();
-        }
-        int inPixelFormatSize = headerBytesBuffer.getInt();
-        if (inPixelFormatSize != header.pixelFormatSize) {
-            throw new IllegalArgumentException("Not a valid DDS Header");
-        }
-        header.setPixelFlags(headerBytesBuffer.getInt());
-        byte[] fourCCBytes = new byte[4];
-        headerBytesBuffer.get(fourCCBytes);
-        header.setFourCC(new String(fourCCBytes));
-        header.setRGBBitCount(headerBytesBuffer.getInt());
-        header.setRBitMask(headerBytesBuffer.getInt());
-        header.setGBitMask(headerBytesBuffer.getInt());
-        header.setBBitMask(headerBytesBuffer.getInt());
-        header.setABitMask(headerBytesBuffer.getInt());
-        header.setCaps1(headerBytesBuffer.getInt());
-        header.setCaps2(headerBytesBuffer.getInt());
-        header.setCaps3(headerBytesBuffer.getInt());
-        header.setCaps4(headerBytesBuffer.getInt());
-        header.setReserved2(headerBytesBuffer.getInt());
-        return header;
     }
 
 }

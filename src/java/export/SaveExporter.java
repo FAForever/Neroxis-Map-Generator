@@ -23,7 +23,7 @@ public strictfp class SaveExporter {
         out.writeBytes("  MasterChain = {\n");
         out.writeBytes("    ['_MASTERCHAIN_'] = {\n");
         out.writeBytes("      Markers = {\n");
-        for (int i = 0; i <   map.getSpawnCount(); i++) {
+        for (int i = 0; i < map.getSpawnCount(); i++) {
             out.writeBytes("        ['ARMY_" + (i + 1) + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
             out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).x + 0.5f) + ", " + map.getSpawn(i).y + ", " + (map.getSpawn(i).z + 0.5f) + " ),\n");
@@ -32,7 +32,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
             out.writeBytes("        },\n");
         }
-        for (int i = 0; i <   map.getMexCount(); i++) {
+        for (int i = 0; i < map.getMexCount(); i++) {
             out.writeBytes("        ['MASS_" + (i + 1) + "'] = {\n");
             out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
             out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
@@ -56,7 +56,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydro(i).x + 0.5f) + ", " + map.getHydro(i).y + ", " + (map.getHydro(i).z + 0.5f) + " ),\n");
             out.writeBytes("        },\n");
         }
-        for (int i = 0; i < map.getAirMarkerCount(); i ++) {
+        for (int i = 0; i < map.getAirMarkerCount(); i++) {
             if (map.getAirMarker(i).getNeighborCount() > 0) {
                 out.writeBytes("        ['AirPN" + map.getAirMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
@@ -75,7 +75,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
-        for (int i = 0; i < map.getLandMarkerCount(); i ++) {
+        for (int i = 0; i < map.getLandMarkerCount(); i++) {
             if (map.getLandMarker(i).getNeighborCount() > 0) {
                 out.writeBytes("        ['LandPN" + map.getLandMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
@@ -94,7 +94,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
-        for (int i = 0; i < map.getAmphibiousMarkerCount(); i ++) {
+        for (int i = 0; i < map.getAmphibiousMarkerCount(); i++) {
             if (map.getAmphibiousMarker(i).getNeighborCount() > 0) {
                 out.writeBytes("        ['AmphPN" + map.getAmphibiousMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
@@ -113,7 +113,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
-        for (int i = 0; i < map.getNavyMarkerCount(); i ++) {
+        for (int i = 0; i < map.getNavyMarkerCount(); i++) {
             if (map.getNavyMarker(i).getNeighborCount() > 0) {
                 out.writeBytes("        ['WaterPN" + map.getNavyMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
@@ -132,7 +132,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
-        for (int i = 0; i < map.getLargeExpansionMarkerCount(); i ++) {
+        for (int i = 0; i < map.getLargeExpansionMarkerCount(); i++) {
             out.writeBytes("        ['Large Expansion Area " + i + "'] = {\n");
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['color'] = STRING( 'ffff0080' ),\n");
@@ -142,7 +142,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['position'] = VECTOR3( " + (map.getLargeExpansionMarker(i).getPosition().x + 0.5f) + ", " + map.getLargeExpansionMarker(i).getPosition().y + ", " + (map.getLargeExpansionMarker(i).getPosition().z + 0.5f) + " ),\n");
             out.writeBytes("        },\n");
         }
-        for (int i = 0; i < map.getExpansionMarkerCount(); i ++) {
+        for (int i = 0; i < map.getExpansionMarkerCount(); i++) {
             out.writeBytes("        ['Expansion Area " + i + "'] = {\n");
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff008080' ),\n");
@@ -164,7 +164,7 @@ public strictfp class SaveExporter {
         out.writeBytes("  next_group_id = '1',\n");
         out.writeBytes("  next_unit_id = '1',\n");
         out.writeBytes("  Armies = {\n");
-        for (int i = 0; i <   map.getSpawnCount(); i++) {
+        for (int i = 0; i < map.getSpawnCount(); i++) {
             saveArmy("ARMY_" + (i + 1), map);
         }
         saveArmy("ARMY_17", map);

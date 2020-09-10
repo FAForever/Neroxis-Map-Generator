@@ -267,7 +267,9 @@ public strictfp class SCMap {
         return airAIMarkers.get(i);
     }
 
-    public void addAirMarker(AIMarker aiMarker) { airAIMarkers.add(aiMarker); }
+    public void addAirMarker(AIMarker aiMarker) {
+        airAIMarkers.add(aiMarker);
+    }
 
     public int getRallyMarkerCount() {
         return rallyMarkers.size();
@@ -337,7 +339,7 @@ public strictfp class SCMap {
         }
     }
 
-    public FloatMask getHeightMask(SymmetryHierarchy symmetryHierarchy){
+    public FloatMask getHeightMask(SymmetryHierarchy symmetryHierarchy) {
         FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), 0, symmetryHierarchy);
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {

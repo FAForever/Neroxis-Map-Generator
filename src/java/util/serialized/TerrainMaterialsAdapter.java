@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import map.TerrainMaterials;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 
 public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMaterials> {
@@ -30,7 +30,7 @@ public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMateria
                 }
             }
 
-            if("texturePaths".equals(fieldname)) {
+            if ("texturePaths".equals(fieldname)) {
                 token = reader.peek();
                 if (token.equals(JsonToken.BEGIN_ARRAY)) {
                     reader.beginArray();
@@ -46,7 +46,7 @@ public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMateria
                 }
             }
 
-            if("textureScales".equals(fieldname)) {
+            if ("textureScales".equals(fieldname)) {
                 token = reader.peek();
                 if (token.equals(JsonToken.BEGIN_ARRAY)) {
                     reader.beginArray();
@@ -62,7 +62,7 @@ public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMateria
                 }
             }
 
-            if("normalPaths".equals(fieldname)) {
+            if ("normalPaths".equals(fieldname)) {
                 token = reader.peek();
                 if (token.equals(JsonToken.BEGIN_ARRAY)) {
                     reader.beginArray();
@@ -78,7 +78,7 @@ public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMateria
                 }
             }
 
-            if("normalScales".equals(fieldname)) {
+            if ("normalScales".equals(fieldname)) {
                 token = reader.peek();
                 if (token.equals(JsonToken.BEGIN_ARRAY)) {
                     reader.beginArray();
@@ -94,7 +94,7 @@ public strictfp class TerrainMaterialsAdapter extends TypeAdapter<TerrainMateria
                 }
             }
 
-            if("previewColors".equals(fieldname)) {
+            if ("previewColors".equals(fieldname)) {
                 token = reader.peek();
                 if (token.equals(JsonToken.BEGIN_ARRAY)) {
                     reader.beginArray();

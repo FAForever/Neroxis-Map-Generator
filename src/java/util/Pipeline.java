@@ -159,6 +159,18 @@ public strictfp class Pipeline {
         return pipeline.size();
     }
 
+    public static void toFile(Path path) throws IOException {
+        Files.deleteIfExists(path);
+        File outFile = path.toFile();
+        boolean status = outFile.createNewFile();
+        FileOutputStream out = new FileOutputStream(outFile);
+        for (String s : hashArray) {
+            out.write(s.getBytes());
+        }
+        out.flush();
+        out.close();
+    }
+
     public static strictfp class Entry {
         private final ConcurrentMask executingMask;
         private final Set<Entry> dependencies;
@@ -215,17 +227,5 @@ public strictfp class Pipeline {
         public int getIndex() {
             return index;
         }
-    }
-
-    public static void toFile(Path path) throws IOException {
-        Files.deleteIfExists(path);
-        File outFile = path.toFile();
-        boolean status = outFile.createNewFile();
-        FileOutputStream out = new FileOutputStream(outFile);
-        for (String s : hashArray) {
-            out.write(s.getBytes());
-        }
-        out.flush();
-        out.close();
     }
 }
