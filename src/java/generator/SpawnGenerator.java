@@ -24,6 +24,7 @@ public strictfp class SpawnGenerator {
     
     public BinaryMask[] generateSpawns(float separation, Symmetry symmetry, float plateauDensity) {
         map.getLargeExpansionAIMarkers().clear();
+        map.getSpawns().clear();
         BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
@@ -55,7 +56,7 @@ public strictfp class SpawnGenerator {
             if (random.nextFloat() < plateauDensity) {
                 boolean valid = true;
                 for (int j = 0; j < i; j += 2) {
-                    if (!spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 6) {
+                    if (!spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 8) {
                         valid = false;
                         break;
                     }
@@ -67,7 +68,7 @@ public strictfp class SpawnGenerator {
             } else {
                 boolean valid = false;
                 for (int j = 0; j < i; j += 2) {
-                    if (spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 6) {
+                    if (spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 8) {
                         valid = true;
                         break;
                     }
