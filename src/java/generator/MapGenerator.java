@@ -35,9 +35,11 @@ public strictfp class MapGenerator {
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
+    public static final float MOUNTAIN_DENSITY_MIN = .125f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
-    public static final float RAMP_DENSITY_MIN = .05f;
-    public static final float RAMP_DENSITY_MAX = .15f;
+    public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
+    public static final float RAMP_DENSITY_MIN = .025f;
+    public static final float RAMP_DENSITY_MAX = .10f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
@@ -235,7 +237,7 @@ public strictfp class MapGenerator {
 
         if (arguments.containsKey("mountain-density")) {
             mountainDensity = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")), MOUNTAIN_DENSITY_MAX);
-            mountainDensity = (float) StrictMath.round(mountainDensity / MOUNTAIN_DENSITY_MAX * 127f) / 127f * MOUNTAIN_DENSITY_MAX;
+            mountainDensity = (float) StrictMath.round((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         }
 
         if (arguments.containsKey("ramp-density")) {
@@ -304,7 +306,7 @@ public strictfp class MapGenerator {
     private void randomizeOptions() {
         landDensity = random.nextInt(127) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
         plateauDensity = random.nextInt(127) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
-        mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_MAX;
+        mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         reclaimDensity = random.nextInt(127) / 127f;
         mexCount = (int) ((6 + 8 / spawnCount + random.nextInt(32 / spawnCount)) * (.5f + mapSize / 512f * .5f));
@@ -338,7 +340,7 @@ public strictfp class MapGenerator {
             plateauDensity = (float) optionBytes[3] / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
         }
         if (optionBytes.length > 4) {
-            mountainDensity = (float) optionBytes[4] / 127f * MOUNTAIN_DENSITY_MAX;
+            mountainDensity = (float) optionBytes[4] / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         }
         if (optionBytes.length > 5) {
             rampDensity = (float) optionBytes[5] / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
@@ -367,7 +369,7 @@ public strictfp class MapGenerator {
                 (byte) (mapSize / 64),
                 (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
                 (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
-                (byte) (mountainDensity / MOUNTAIN_DENSITY_MAX * 127f),
+                (byte) ((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f),
                 (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
                 (byte) (reclaimDensity * 127f),
                 (byte) (mexCount),
@@ -576,14 +578,15 @@ public strictfp class MapGenerator {
         land.randomize(landDensity).smooth(mapSize / 256f, .75f);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk(mapSize / 32, (int) (mountainDensity * mapSize / 128)).grow(.5f);
+            mountains.progressiveWalk(mapSize / 48, (int) (mountainDensity * mapSize / 128)).grow(.5f);
         } else {
-            mountains.randomWalk((int) (mountainDensity * mapSize / 64), (int) (mountainDensity * mapSize / 32));
+            mountains.randomWalk((int) (mountainDensity * mapSize / 64), mapSize / 48).erode(.25f);
         }
         mountains.enlarge(mapSize / 4).smooth(2f).erode(.5f);
-        plateaus.randomize(plateauDensity).smooth(mapSize / 256f);
+        plateaus.randomize(plateauDensity).smooth(mapSize / 128f);
 
-        plateaus.intersect(land);
+        land.enlarge(mapSize / 4).smooth(mapSize / 128f, .25f);
+        plateaus.intersect(land).enlarge(mapSize / 4).smooth(mapSize / 128f, .25f);
 
         land.enlarge(mapSize + 1);
         mountains.enlarge(mapSize + 1).smooth(4f);
@@ -599,7 +602,7 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(2)).inflate(8).smooth(8f, .125f);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(14).smooth(8f, .125f);
 
         land.combine(ramps.copy().deflate(8)).filterShapes(1024);
         mountains.intersect(land);
@@ -649,7 +652,7 @@ public strictfp class MapGenerator {
         lightGrassTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightGrassTexture");
         lightRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "lightRockTexture");
 
-        rock.inflate(2).shrink(mapSize / 2);
+        rock.shrink(mapSize / 2);
         grass.acid(.001f, 2f).erode(.25f, symmetryHierarchy.getSpawnSymmetry(), 2).shrink(mapSize / 2);
         lightGrass.combine(land.copy().deflate(1)).minus(rock).acid(.01f, 4f).smooth(4, .4f).shrink(mapSize / 2);
         lightRock.combine(mountains).acid(.025f, 4f).shrink(mapSize / 2);
