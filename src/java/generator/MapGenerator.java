@@ -34,7 +34,8 @@ public strictfp class MapGenerator {
     public static final String VERSION = "1.0.21";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     public static final float LAND_DENSITY_MIN = .65f;
-    public static final float LAND_DENSITY_RANGE = 1f - LAND_DENSITY_MIN;
+    public static final float LAND_DENSITY_MAX = .9f;
+    public static final float LAND_DENSITY_RANGE = LAND_DENSITY_MAX - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MIN = .125f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
     public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
@@ -226,7 +227,7 @@ public strictfp class MapGenerator {
         randomizeOptions();
 
         if (arguments.containsKey("land-density")) {
-            landDensity = StrictMath.max(Float.parseFloat(arguments.get("land-density")), LAND_DENSITY_MIN);
+            landDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("land-density")), LAND_DENSITY_MAX), LAND_DENSITY_MIN);
             landDensity = (float) StrictMath.round((landDensity - LAND_DENSITY_MIN) / (LAND_DENSITY_RANGE) * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
         }
 
@@ -586,7 +587,7 @@ public strictfp class MapGenerator {
         plateaus.randomize(plateauDensity).smooth(mapSize / 128f);
 
         land.enlarge(mapSize / 4).smooth(mapSize / 128f, .25f);
-        plateaus.intersect(land).enlarge(mapSize / 4).smooth(mapSize / 128f, .25f);
+        plateaus.intersect(land).smooth(mapSize / 128f, .25f);
 
         land.enlarge(mapSize + 1);
         mountains.enlarge(mapSize + 1).smooth(4f);
@@ -597,8 +598,8 @@ public strictfp class MapGenerator {
         spawnPlateauMask.shrink(mapSize / 16).inflate(1).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         spawnPlateauMask.enlarge(mapSize / 4).inflate(2).cutCorners().erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(16f, .25f);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).combine(plateaus).smooth(16f, .25f);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).smooth(8f, .25f);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).combine(plateaus).smooth(8f, .25f);
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity);
@@ -606,7 +607,7 @@ public strictfp class MapGenerator {
 
         land.combine(ramps.copy().deflate(8)).filterShapes(1024);
         mountains.intersect(land);
-        plateaus.combine(mountains).filterShapes(1024);
+        plateaus.combine(mountains).intersect(land).filterShapes(1024);
 
         impassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "unpassable");
 
@@ -689,7 +690,7 @@ public strictfp class MapGenerator {
         largeRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "largeRockField");
         smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
-        cliffRockMask.randomize(.4f).intersect(impassable).inflate(1).minus(plateaus.minus(mountains.copy().inflate(4))).inflate(2).intersect(land);
+        cliffRockMask.randomize(.4f).intersect(impassable).inflate(1).minus(plateaus.copy().minus(mountains.copy().inflate(4))).inflate(2).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(impassable);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.1f).inflate(1).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
