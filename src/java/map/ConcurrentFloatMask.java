@@ -69,6 +69,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentFloatMask max(ConcurrentFloatMask other) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.floatMask.max(((ConcurrentFloatMask) res.get(1)).getFloatMask())
+        );
+    }
+
     public ConcurrentFloatMask smooth(float radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.smooth(radius)
