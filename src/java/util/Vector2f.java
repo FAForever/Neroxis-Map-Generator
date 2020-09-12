@@ -1,6 +1,7 @@
 package util;
 
 import lombok.EqualsAndHashCode;
+import map.Symmetry;
 
 import java.util.LinkedHashSet;
 
@@ -48,6 +49,27 @@ public strictfp class Vector2f {
             currentPoint = new Vector2f(StrictMath.round(currentPoint.x + StrictMath.cos(angle)), StrictMath.round(currentPoint.y + StrictMath.sin(angle)));
         }
         return line;
+    }
+
+    public Vector2f add(Vector2f vector) {
+        return new Vector2f(x + vector.x, y + vector.y);
+    }
+
+    public void flip(Vector2f center, Symmetry symmetry) {
+        switch (symmetry) {
+            case X:
+                x = 2 * center.x - x;
+                break;
+            case Y:
+                y = 2 * center.y - y;
+                break;
+            case XY:
+            case YX:
+            case POINT:
+                x = 2 * center.x - x;
+                y = 2 * center.y - y;
+                break;
+        }
     }
 
     @Override

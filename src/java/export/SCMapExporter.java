@@ -1,6 +1,6 @@
 package export;
 
-import generator.Preview;
+import generator.PreviewGenerator;
 import map.SCMap;
 import map.TerrainMaterials;
 import util.DDSHeader;
@@ -225,7 +225,7 @@ public strictfp class SCMapExporter {
     public static void exportPreview(Path folderPath, String mapname, SCMap map) throws IOException {
         final String fileFormat = "png";
         File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
-        RenderedImage renderedImage = Preview.addMarkers(map.getPreview(), map);
+        RenderedImage renderedImage = PreviewGenerator.addMarkers(map.getPreview(), map);
         try {
             ImageIO.write(renderedImage, fileFormat, previewFile);
         } catch (IOException e) {

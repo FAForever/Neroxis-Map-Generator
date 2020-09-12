@@ -73,6 +73,7 @@ public strictfp class SCMap {
     private final ArrayList<Decal> decals;
     private final ArrayList<Prop> props;
     private final ArrayList<Unit> units;
+    private final ArrayList<Unit> civs;
     private final ArrayList<Unit> wrecks;
     private final ArrayList<AIMarker> landAIMarkers;
     private final ArrayList<AIMarker> amphibiousAIMarkers;
@@ -109,6 +110,7 @@ public strictfp class SCMap {
         decals = new ArrayList<>();
         props = new ArrayList<>();
         units = new ArrayList<>();
+        civs = new ArrayList<>();
         wrecks = new ArrayList<>();
         landAIMarkers = new ArrayList<>();
         amphibiousAIMarkers = new ArrayList<>();
@@ -209,6 +211,18 @@ public strictfp class SCMap {
 
     public void addUnit(Unit unit) {
         units.add(unit);
+    }
+
+    public int getCivCount() {
+        return civs.size();
+    }
+
+    public Unit getCiv(int i) {
+        return civs.get(i);
+    }
+
+    public void addCiv(Unit unit) {
+        civs.add(unit);
     }
 
     public int getWreckCount() {

@@ -15,9 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-public strictfp class Preview {
+public strictfp class PreviewGenerator {
 
-    private static final double RESOURCE_ICON_RATIO = 20 / 1024d;
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";
     private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
@@ -202,7 +201,7 @@ public strictfp class Preview {
     }
 
     static BufferedImage readImage(String resource) throws IOException {
-        try (InputStream inputStream = Preview.class.getResourceAsStream(resource)) {
+        try (InputStream inputStream = PreviewGenerator.class.getResourceAsStream(resource)) {
             return ImageIO.read(inputStream);
         }
     }

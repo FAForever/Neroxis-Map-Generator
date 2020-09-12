@@ -218,12 +218,24 @@ public strictfp class SaveExporter {
             }
             out.writeBytes("            },\n");
             out.writeBytes("          },\n");
+        } else if (name.equals("NEUTRAL_CIVILIAN")) {
+            out.writeBytes("        Units = {\n");
+            out.writeBytes("          ['INITIAL'] = GROUP {\n");
+            out.writeBytes("            orders = '',\n");
+            out.writeBytes("            platoon = '',\n");
+            out.writeBytes("            Units = {\n");
+            for (int i = 0; i < map.getCivCount(); i++) {
+                saveUnit(map.getCiv(i), i);
+            }
+            out.writeBytes("            },\n");
+            out.writeBytes("          },\n");
         } else {
             out.writeBytes("        Units = {\n");
             out.writeBytes("          ['INITIAL'] = GROUP {\n");
             out.writeBytes("            orders = '',\n");
             out.writeBytes("            platoon = '',\n");
-            out.writeBytes("            Units = {},\n");
+            out.writeBytes("            Units = {\n");
+            out.writeBytes("            },\n");
             out.writeBytes("          },\n");
         }
         out.writeBytes("        },\n");
@@ -241,7 +253,7 @@ public strictfp class SaveExporter {
         out.writeBytes("			              orders = '',\n");
         out.writeBytes("			              platoon = '',\n");
         Vector3f v = unit.getPosition();
-        out.writeBytes(String.format("			              Position = { %f, %f, %f },\n", v.x, v.y, v.z));
+        out.writeBytes(String.format("			              Position = { %f, %f, %f },\n", v.x + 0.5f, v.y, v.z + 0.5f));
         float rot = unit.getRotation();
         out.writeBytes(String.format("			              Orientation = { 0, %f, 0 },\n", rot));
         out.writeBytes("              },\n");
