@@ -31,9 +31,7 @@ public strictfp class MexGenerator {
         int spawnCount = map.getSpawnCount();
         int totalMexCount = map.getMexCountInit();
         int numBaseMexes = (random.nextInt(2) + 3) * 2;
-        int spawnMexCount = numBaseMexes / 2 * spawnCount;
-        int nonSpawnMexCount = totalMexCount - spawnMexCount;
-        int numNearMexes = random.nextInt(nonSpawnMexCount / 24 + 1) * 2;
+        int numNearMexes = (random.nextInt(2) + 5 - numBaseMexes / 2) * 2;
         int iMex = 0;
         for (int i = 0; i < map.getSpawnCount(); i += 2) {
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
