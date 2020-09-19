@@ -419,8 +419,8 @@ public strictfp class BinaryMask extends Mask {
                 }
             }
             mask = maskCopy;
+            applySymmetry(symmetry);
         }
-        applySymmetry(symmetry);
         VisualDebugger.visualizeMask(this);
         return this;
     }
