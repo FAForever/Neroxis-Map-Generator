@@ -21,7 +21,7 @@ import java.util.zip.ZipInputStream;
 public class FileUtils {
 
     private static final String DIRECTORY_PATTERN = "%s/[^/]+/";
-    private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).create();
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).setPrettyPrinting().create();
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {
