@@ -22,7 +22,7 @@ public strictfp class SCMap {
     public static final int VERSION_MINOR = 56;
 
     public static final float HEIGHTMAP_SCALE = 1f / 128f;
-    public static final String TERRAIN_SHADER_PATH = "TTerrain";
+    public static final String TERRAIN_SHADER_PATH = "TTerrainXP";
     public static final String BACKGROUND_PATH = "/textures/environment/defaultbackground.dds";
     public static final String SKYCUBE_PATH = "/textures/environment/defaultskycube.dds";
     public static final String CUBEMAP_NAME = "<default>";
@@ -349,10 +349,18 @@ public strictfp class SCMap {
         return heightMask;
     }
 
-    public void setTextureMaskLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+    public void setTextureMasksLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
                 textureMasksLow.getRaster().setPixel(x, y, new int[]{(int) (StrictMath.min(1f, mask0.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask1.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask2.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask3.get(x, y)) * 255f)});
+            }
+        }
+    }
+
+    public void setTextureMasksHigh(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        for (int y = 0; y < size / 2; y++) {
+            for (int x = 0; x < size / 2; x++) {
+                textureMasksHigh.getRaster().setPixel(x, y, new int[]{(int) (StrictMath.min(1f, mask0.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask1.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask2.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask3.get(x, y)) * 255f)});
             }
         }
     }

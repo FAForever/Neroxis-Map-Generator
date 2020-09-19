@@ -73,6 +73,12 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (other.get(x, y)) {
@@ -111,100 +117,38 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToMountains(BinaryMask other) {
-        BinaryMask otherCopy = other.copy();
+        other = other.copy();
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         FloatMask mountainBase = new FloatMask(getSize(), 0, symmetryHierarchy);
-        add(mountainBase.init(otherCopy, 0, 2f));
-        while (otherCopy.getCount() > 0) {
+        add(mountainBase.init(other, 0, 2f));
+        while (other.getCount() > 0) {
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-            add(layer.init(otherCopy, 0, random.nextFloat() * .75f));
-            otherCopy.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
+            add(layer.init(other, 0, random.nextFloat() * .75f));
+            other.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
         }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask erodeMountains(BinaryMask other) {
-        BinaryMask otherCopy = other.copy().fillHalf(false);
-        BinaryMask otherEdge = other.copy().inflate(10);
-        float velocity = 1f;
-        float inertia = .75f;
-        float capacity = 5f;
-        float deposition = .25f;
-        float erosion = .25f;
-        float gravity = 1f;
-        float evaporation = .05f;
-        for (int i = 0; i < 1; i++) {
-            Vector2f pos = otherCopy.getRandomPosition();
-            float x = 227;
-            float y = 133;
-            float dx = 0;
-            float dy = 0;
-            int radius = 1;
-            float sediment = 0;
-            float water = 1f;
-            float[][] maskCopy = this.copy().mask;
-            for (int j = 0; j < 100; j++) {
-                int roundX = StrictMath.round(x);
-                int roundY = StrictMath.round(y);
-                if (roundX < 2 || roundX > getSize() - 2 || roundY < 2 || roundY > getSize() - 2 || !otherEdge.get(roundX, roundY)) {
-                    break;
-                }
-                float gx = get(roundX - 1, roundY) - get(roundX + 1, roundY);
-                float gy = get(roundX, roundY - 1) - get(roundX, roundY + 1);
-                float mag = (float) StrictMath.sqrt(gx * gx + gy * gy);
-                float height = get(roundX, roundY);
-                if (mag > 0) {
-                    gx = gx / mag;
-                    gy = gy / mag;
-                    dx = dx * inertia + gx * (1 - inertia);
-                    dy = dy * inertia + gy * (1 - inertia);
-                }
-                float xNew = x + dx;
-                float yNew = y + dy;
-                int roundXNew = StrictMath.round(xNew);
-                int roundYNew = StrictMath.round(yNew);
-                float heightNew = get(roundXNew, roundYNew);
-                float heightDif = heightNew - height;
-                if (heightDif < 0) {
-                    float carry = -heightDif * velocity * water * capacity;
-                    if (sediment < carry) {
-                        float change = StrictMath.min((carry - sediment) * erosion, -heightDif);
-                        maskCopy[roundX][roundY] -= change;
-                        sediment += change;
-                    } else {
-                        float change = StrictMath.min((sediment - carry) * deposition, -heightDif);
-                        maskCopy[roundX][roundY] += change;
-                        sediment -= change;
-                    }
-                } else {
-                    float change = StrictMath.min(sediment, heightDif);
-                    sediment -= change;
-                    maskCopy[roundX][roundY] += change;
-                }
-                velocity = (float) StrictMath.sqrt(StrictMath.max(velocity * velocity - heightDif * gravity, 0));
-                if (velocity == 0) {
-                    break;
-                }
-                water *= (1 - evaporation);
-                x = xNew;
-                y = yNew;
-            }
-            mask = maskCopy;
-        }
-//        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public FloatMask maskToHeightmap(float underWaterSlope, int maxRepeat, BinaryMask other) {
-        BinaryMask otherCopy = new BinaryMask(other, random.nextLong());
-        otherCopy.invert();
+        other = other.copy().invert();
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         int count = 0;
-        while (otherCopy.getCount() > 0 && count < maxRepeat) {
+        while (other.getCount() > 0 && count < maxRepeat) {
             count++;
             FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-            add(layer.init(otherCopy, 0, -underWaterSlope));
-            otherCopy.erode(0.75f, symmetryHierarchy.getSpawnSymmetry());
+            add(layer.init(other, 0, -underWaterSlope));
+            other.erode(0.75f, symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;

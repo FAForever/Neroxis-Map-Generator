@@ -142,6 +142,17 @@ public strictfp class BinaryMask extends Mask {
         return new BinaryMask(this, random.nextLong());
     }
 
+    public BinaryMask clear() {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                set(x, y, false);
+            }
+        }
+        applySymmetry();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask randomize(float density) {
         for (int x = getMinXBound(); x < getMaxXBound(); x++) {
             for (int y = getMinYBound(x); y < getMaxYBound(x); y++) {
@@ -480,8 +491,7 @@ public strictfp class BinaryMask extends Mask {
         if (getSize() != size)
             enlarge(size);
         if (other.getSize() != size) {
-            other = new BinaryMask(other, 0);
-            other.enlarge(size);
+            other = other.copy().enlarge(size);
         }
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < size; x++) {
@@ -499,7 +509,7 @@ public strictfp class BinaryMask extends Mask {
         if (getSize() != size)
             enlarge(size);
         if (other.getSize() != size)
-            other.enlarge(size);
+            other = other.copy().enlarge(size);
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -516,7 +526,7 @@ public strictfp class BinaryMask extends Mask {
         if (getSize() != size)
             enlarge(size);
         if (other.getSize() != size)
-            other.enlarge(size);
+            other = other.copy().enlarge(size);
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {

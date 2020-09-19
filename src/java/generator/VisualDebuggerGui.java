@@ -69,7 +69,6 @@ public class VisualDebuggerGui {
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
             canvas.setViewModel(image, zoomFactor);
-            list.ensureIndexIsVisible(0);
         }
     }
 
