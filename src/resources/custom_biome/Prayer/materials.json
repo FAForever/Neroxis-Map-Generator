@@ -2,49 +2,49 @@
   "name": "Prayer",
   "texturePaths": [
     "/env/paradise/layers/sand000_albedo.dds",
-    "/env/evergreen2/layers/evgrass005_albedo.dds",
-    "/env/evergreen/layers/rocklight_albedo.dds",
-    "/env/evergreen2/layers/evrock006_albedo.dds",
-    "/env/evergreen2/layers/evgrass005_albedo.dds",
-    "",
-    "",
-    "",
-    "",
-    "/env/evergreen/layers/macrotexture000_albedo.dds"
+    "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
+    "/env/Evergreen/layers/grass000_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+    "/env/Evergreen2/Layers/EG_Grass002b_albedo.dds",
+    "/env/Evergreen2/Layers/EG_Gravel_albedo.DDS",
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006b_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock008_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    16.0,
-    4.0,
+    32.0,
+    0.0,
     8.0,
-    19.5,
-    3.5,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
+    24.0,
+    8.0,
+    16.0,
+    24.0,
+    32.0,
+    128.0,
     128.0
   ],
   "normalPaths": [
-    "/env/red barrens/layers/rb_sandwet_normal.dds",
-    "/env/evergreen2/layers/eg_grass002_normal.dds",
-    "/env/desert/layers/des_rock03a_normal.dds",
-    "/env/desert/layers/des_rock03a_normal.dds",
-    "/env/evergreen2/layers/evtrans01_normals.dds",
-    "",
-    "",
-    "",
-    ""
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    "/env/Evergreen2/Layers/EvTrans01_normals.dds",
+    "/env/Evergreen2/Layers/EvTrans02_normals.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock003_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock_normal.dds"
   ],
   "normalScales": [
     24.0,
-    4.0,
-    6.0,
-    18.8,
-    11.5,
-    4.0,
-    4.0,
-    4.0,
-    4.0
+    64.0,
+    12.0,
+    16.0,
+    16.0,
+    8.0,
+    32.0,
+    32.0,
+    64.0
   ],
   "previewColors": [
     {
@@ -52,11 +52,23 @@
       "falpha": 0.0
     },
     {
-      "value": -14077671,
+      "value": -13549296,
       "falpha": 0.0
     },
     {
-      "value": -11582668,
+      "value": -11844594,
+      "falpha": 0.0
+    },
+    {
+      "value": -8680828,
+      "falpha": 0.0
+    },
+    {
+      "value": -13747947,
+      "falpha": 0.0
+    },
+    {
+      "value": -11379366,
       "falpha": 0.0
     },
     {
@@ -64,12 +76,12 @@
       "falpha": 0.0
     },
     {
-      "value": -14077671,
+      "value": -12501964,
       "falpha": 0.0
     },
-    null,
-    null,
-    null,
-    null
+    {
+      "value": -13026503,
+      "falpha": 0.0
+    }
   ]
 }

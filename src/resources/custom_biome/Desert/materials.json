@@ -4,24 +4,24 @@
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark02_albedo.dds",
-    "/env/paradise/layers/sand000_albedo.dds",
-    "",
-    "",
-    "",
-    "",
+    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
+    "/env/Desert/Layers/Des_SandMed_albedo.dds",
+    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
+    "/env/Desert/Layers/Des_Rock02_albedo.dds",
+    "/env/Desert/Layers/Des_Rock02_albedo.dds",
+    "/env/Desert/Layers/Des_Rock02_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    10.61,
+    10.609999656677246,
     4.0,
     8.0,
     8.0,
     8.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
+    32.0,
+    16.0,
+    16.0,
+    32.0,
     128.0
   ],
   "normalPaths": [
@@ -60,16 +60,28 @@
       "falpha": 0.0
     },
     {
-      "value": -10335951,
+      "value": -6515093,
       "falpha": 0.0
     },
     {
-      "value": -9545412,
+      "value": -6515093,
       "falpha": 0.0
     },
-    null,
-    null,
-    null,
-    null
+    {
+      "value": -6515093,
+      "falpha": 0.0
+    },
+    {
+      "value": -8890572,
+      "falpha": 0.0
+    },
+    {
+      "value": -8890572,
+      "falpha": 0.0
+    },
+    {
+      "value": -8890572,
+      "falpha": 0.0
+    }
   ]
 }

@@ -1,39 +1,39 @@
 {
   "name": "Cadmium",
   "texturePaths": [
-    "/env/evergreen/layers/macrotexture000_albedo.dds",
-    "/env/evergreen2/layers/evgrass009_albedo.dds",
-    "/env/tropical/layers/trop_rock_albedo.dds",
-    "/env/tropical/layers/trrock006_albedo.dds",
-    "/env/evergreen2/layers/eg_gravel002_albedo.dds",
-    "",
-    "",
-    "",
-    "",
-    "/env/evergreen/layers/macrotexture000_albedo.dds"
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
+    "/env/Tropical/Layers/TrRock002_albedo.dds",
+    "/env/Tropical/Layers/Trop_Rock_albedo.DDS",
+    "/env/Evergreen2/Layers/EG_Gravel002_albedo.DDS",
+    "/env/Tropical/Layers/Trop_Dirt_albedo.DDS",
+    "/env/Tropical/Layers/TrRock003_albedo.dds",
+    "/env/Tropical/Layers/TrRock005_albedo.dds",
+    "/env/Tropical/Layers/Tr_GrassHills_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     10.0,
     10.0,
-    17.3,
+    16.0,
     8.0,
     8.0,
+    16.0,
     4.0,
-    4.0,
-    4.0,
-    4.0,
+    16.0,
+    16.0,
     128.0
   ],
   "normalPaths": [
-    "/env/evergreen/layers/SandLight_normals.dds",
-    "/env/tropical/layers/trtrans002_normal.dds",
-    "/env/tropical/layers/trop_rock_normal.dds",
-    "/env/tropical/layers/trrock006_normal.dds",
-    "/env/evergreen/layers/sandlight_normals.dds",
-    "",
-    "",
-    "",
-    ""
+    "/env/Evergreen/layers/SandLight_normals.dds",
+    "/env/Tropical/Layers/TrTrans002_Normal.dds",
+    "/env/Tropical/Layers/Trop_Rock_Normal.DDS",
+    "/env/Tropical/Layers/TrRock006_normal.dds",
+    "/env/Evergreen/layers/SandLight_normals.dds",
+    "/env/Tropical/Layers/TrBush_moss_Normal.dds",
+    "/env/Tropical/Layers/Trop_Rock_Normal.DDS",
+    "/env/Tropical/Layers/TrRock006_normal.dds",
+    "/env/Tropical/Layers/Tr_GrassHills_normal.dds"
   ],
   "normalScales": [
     4.0,
@@ -41,10 +41,10 @@
     23.75,
     16.0,
     8.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0
+    8.0,
+    32.0,
+    48.0,
+    32.0
   ],
   "previewColors": [
     {
@@ -56,20 +56,32 @@
       "falpha": 0.0
     },
     {
-      "value": -16249848,
+      "value": -15129567,
       "falpha": 0.0
     },
     {
-      "value": -14078941,
+      "value": -16249848,
       "falpha": 0.0
     },
     {
       "value": -12957366,
       "falpha": 0.0
     },
-    null,
-    null,
-    null,
-    null
+    {
+      "value": -13686762,
+      "falpha": 0.0
+    },
+    {
+      "value": -14076623,
+      "falpha": 0.0
+    },
+    {
+      "value": -15722471,
+      "falpha": 0.0
+    },
+    {
+      "value": -15525112,
+      "falpha": 0.0
+    }
   ]
 }

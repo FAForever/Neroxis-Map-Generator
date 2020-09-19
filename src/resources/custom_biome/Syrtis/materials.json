@@ -1,52 +1,64 @@
 {
   "name": "Syrtis",
   "texturePaths": [
-    "/env/red barrens/layers/rb_sand_albedo.dds",
-    "/env/red barrens/layers/rb_redmud_albedo.dds",
-    "/env/red barrens/layers/rb_cracked_albedo.dds",
-    "/env/red barrens/layers/rb_rock07_albedo.dds",
-    "/env/red barrens/layers/rb_rock06_albedo.dds",
-    "",
-    "",
-    "",
-    "",
-    "/env/red barrens/layers/macrotexture001_albedo.dds"
+    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock03_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock09_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock_albedo.DDS",
+    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
+    "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
   ],
   "textureScales": [
     4.0,
+    2.0,
     6.0,
-    6.0,
-    8.0,
+    32.0,
+    32.0,
     16.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
+    8.0,
+    32.0,
+    64.0,
     128.0
   ],
   "normalPaths": [
-    "/env/red barrens/layers/rb_rock06_normal.dds",
-    "/env/red barrens/layers/rb_redmud_normal.dds",
-    "/env/red barrens/layers/rb_cracked_normal.dds",
-    "/env/red barrens/layers/rb_rock09_normal.dds",
-    "/env/red barrens/layers/rb_rock_normal.dds",
-    "",
-    "",
-    "",
-    ""
+    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
   ],
   "normalScales": [
     4.0,
+    8.0,
     6.0,
-    6.0,
+    32.0,
+    16.0,
+    16.0,
+    32.0,
     4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0
+    64.0
   ],
   "previewColors": [
+    {
+      "value": -9752037,
+      "falpha": 0.0
+    },
+    {
+      "value": -9816015,
+      "falpha": 0.0
+    },
+    {
+      "value": -12643062,
+      "falpha": 0.0
+    },
     {
       "value": -9752037,
       "falpha": 0.0
@@ -56,20 +68,20 @@
       "falpha": 0.0
     },
     {
-      "value": -11066864,
+      "value": -13037046,
       "falpha": 0.0
     },
     {
-      "value": -13232886,
+      "value": -13562880,
       "falpha": 0.0
     },
     {
       "value": -12117744,
       "falpha": 0.0
     },
-    null,
-    null,
-    null,
-    null
+    {
+      "value": -10210012,
+      "falpha": 0.0
+    }
   ]
 }

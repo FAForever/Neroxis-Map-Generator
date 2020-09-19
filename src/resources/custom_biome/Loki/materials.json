@@ -1,27 +1,27 @@
 {
   "name": "Loki",
   "texturePaths": [
-    "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
+    "/env/Evergreen2/Layers/EV_Reef_Coral_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass003_albedo.dds",
     "/env/Evergreen2/Layers/EG_Gravel2_albedo.dds",
     "/env/Evergreen/layers/SandLight002_albedo.dds",
-    "",
-    "",
-    "",
+    "/env/Evergreen2/Layers/EvRock004_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006c_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    4.0,
-    4.0,
+    2.0,
+    2.0,
     4.0,
     12.0,
     4.0,
     4.0,
-    4.0,
-    4.0,
-    4.0,
+    8.0,
+    16.0,
+    32.0,
     77.5
   ],
   "normalPaths": [
@@ -37,7 +37,7 @@
   ],
   "normalScales": [
     8.0,
-    1.0,
+    4.0,
     16.0,
     20.0,
     16.0,
@@ -48,7 +48,7 @@
   ],
   "previewColors": [
     {
-      "value": -13549296,
+      "value": -11383486,
       "falpha": 0.0
     },
     {
@@ -71,8 +71,17 @@
       "value": -8159893,
       "falpha": 0.0
     },
-    null,
-    null,
-    null
+    {
+      "value": -10857117,
+      "falpha": 0.0
+    },
+    {
+      "value": -10465463,
+      "falpha": 0.0
+    },
+    {
+      "value": -11250865,
+      "falpha": 0.0
+    }
   ]
 }
