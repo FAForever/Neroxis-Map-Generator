@@ -79,13 +79,16 @@ public strictfp class SCMapImporter {
         }
 
         // textures
-        if (!readStringNull().equals(SCMap.TERRAIN_SHADER_PATH)) {
+        String shaderPath = readStringNull();
+        if (!shaderPath.equals(SCMap.TERRAIN_SHADER_PATH)) {
 //            throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        if (!readStringNull().equals(SCMap.BACKGROUND_PATH)) {
+        String backgroundPath = readStringNull();
+        if (!backgroundPath.equals(SCMap.BACKGROUND_PATH)) {
 //            throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        if (!readStringNull().equals(SCMap.SKYCUBE_PATH)) {
+        String skyCubePath = readStringNull();
+        if (!skyCubePath.equals(SCMap.SKYCUBE_PATH)) {
 //            throw new UnsupportedEncodingException("File not valid SCMap");
         }
         int cubemapCount = readInt();
