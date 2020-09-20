@@ -721,8 +721,7 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
-    public List<Vector2f> getShapeCoordinates(Vector2f location) {
-        LinkedList<Vector2f> area = new LinkedList<>();
+    public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location) {
         LinkedHashSet<Vector2f> areaHash = new LinkedHashSet<>();
         LinkedHashSet<Vector2f> edgeHash = new LinkedHashSet<>();
         LinkedList<Vector2f> queue = new LinkedList<>();
@@ -736,7 +735,6 @@ public strictfp class BinaryMask extends Mask {
             queueHash.remove(next);
             if (get(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
-                area.add(next);
                 edges.forEach((e) -> {
                     Vector2f newLocation = new Vector2f(next.x + e[0], next.y + e[1]);
                     if (!queueHash.contains(newLocation) && !areaHash.contains(newLocation) && !edgeHash.contains(newLocation) && inBounds(newLocation)) {
@@ -748,10 +746,10 @@ public strictfp class BinaryMask extends Mask {
                 edgeHash.add(next);
             }
         }
-        return area;
+        return areaHash;
     }
 
-    public BinaryMask fillCoordinates(List<Vector2f> coordinates, boolean value) {
+    public BinaryMask fillCoordinates(Collection<Vector2f> coordinates, boolean value) {
         coordinates.forEach(location -> set(location, value));
         VisualDebugger.visualizeMask(this);
         return this;
@@ -759,24 +757,28 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask filterShapes(int minArea) {
         BinaryMask maskCopy = copy();
-        Vector2f location = maskCopy.getRandomPosition();
-        while (location != null) {
-            List<Vector2f> coordinates = getShapeCoordinates(location);
+        LinkedHashSet<Vector2f> locHash = getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
+        while (locList.size() > 0) {
+            Vector2f location = locList.removeFirst();
+            Set<Vector2f> coordinates = getShapeCoordinates(location);
             maskCopy.fillCoordinates(coordinates, false);
             if (coordinates.size() < minArea) {
                 fillCoordinates(coordinates, false);
             }
-            location = maskCopy.getRandomPosition();
+            locList.removeAll(coordinates);
         }
         maskCopy = copy().invert();
-        location = maskCopy.getRandomPosition();
-        while (location != null) {
-            List<Vector2f> coordinates = getShapeCoordinates(location);
+        locHash = getAllCoordinatesEqualTo(false, 1);
+        locList = new LinkedList<>(locHash);
+        while (locList.size() > 0) {
+            Vector2f location = locList.removeFirst();
+            Set<Vector2f> coordinates = getShapeCoordinates(location);
             maskCopy.fillCoordinates(coordinates, false);
             if (coordinates.size() < minArea) {
                 fillCoordinates(coordinates, true);
             }
-            location = maskCopy.getRandomPosition();
+            locList.removeAll(coordinates);
         }
         VisualDebugger.visualizeMask(this);
         return this;
