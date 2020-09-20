@@ -754,7 +754,7 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(impassable).minus(ramps.copy().deflate(8)).deflate(4);
+        resourceMask.minus(impassable).minus(ramps.copy().deflate(6)).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
