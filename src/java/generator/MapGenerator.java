@@ -45,7 +45,7 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 3f;
+    public static final float PLATEAU_HEIGHT = 4f;
     public static final float VALLEY_HEIGHT = -.5f;
     public static final float HILL_HEIGHT = .5f;
     public static boolean DEBUG = false;
@@ -671,7 +671,7 @@ public strictfp class MapGenerator {
         heightmapCliffs.maskToMoutains(cliffs);
         heightmapShore.maskToMoutains(shore);
         heightmapMountains.maskToMoutains(mountains).smooth(1, mountains);
-        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).add(heightmapPlateaus).smooth(1);
+        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
 
         heightmapBase.add(heightmapMountains);
     }
