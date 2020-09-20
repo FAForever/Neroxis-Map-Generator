@@ -33,7 +33,7 @@ public strictfp class MapGenerator {
 
     public static final String VERSION = "1.0.24";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
-    public static final float LAND_DENSITY_MIN = .6f;
+    public static final float LAND_DENSITY_MIN = .65f;
     public static final float LAND_DENSITY_MAX = .9f;
     public static final float LAND_DENSITY_RANGE = LAND_DENSITY_MAX - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MIN = 0f;
