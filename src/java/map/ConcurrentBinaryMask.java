@@ -187,13 +187,13 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentBinaryMask smooth(float radius) {
+    public ConcurrentBinaryMask smooth(int radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.smooth(radius)
         );
     }
 
-    public ConcurrentBinaryMask smooth(float radius, float density) {
+    public ConcurrentBinaryMask smooth(int radius, float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.smooth(radius, density)
         );

@@ -452,52 +452,41 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
-    public BinaryMask smooth(float radius) {
+    public BinaryMask smooth(int radius) {
         return smooth(radius, .5f);
     }
 
-    public BinaryMask smooth(float radius, float density) {
-        boolean[][] maskCopy = new boolean[getSize()][getSize()];
+    public BinaryMask smooth(int radius, float density) {
+        int[][] innerCount = new int[getSize()][getSize()];
 
-        Thread[] threads = new Thread[4];
-        threads[0] = new Thread(() -> smoothRegion(radius, density, maskCopy, 0, (getSize() / 4)));
-        threads[1] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 4), (getSize() / 2)));
-        threads[2] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 2), (getSize() / 4) * 3));
-        threads[3] = new Thread(() -> smoothRegion(radius, density, maskCopy, (getSize() / 4) * 3, getSize()));
-
-        Arrays.stream(threads).forEach(Thread::start);
-        for (Thread f : threads) {
-            try {
-                f.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                int val = get(x, y) ? 1 : 0;
+                innerCount[x][y] = val;
+                innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
+                innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
+                innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
             }
         }
-        mask = maskCopy;
+
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                int xLeft = StrictMath.max(0, x - radius);
+                int xRight = StrictMath.min(getSize() - 1, x + radius);
+                int yUp = StrictMath.max(0, y - radius);
+                int yDown = StrictMath.min(getSize() - 1, y + radius);
+                int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
+                int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
+                int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
+                int countD = innerCount[xRight][yDown];
+                int count = countD + countA - countB - countC;
+                int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
+                set(x, y, count >= area * density);
+            }
+        }
+
         VisualDebugger.visualizeMask(this);
         return this;
-    }
-
-    private void smoothRegion(float radius, float density, boolean[][] maskCopy, int startY, int endY) {
-        float radius2 = (radius + 0.5f) * (radius + 0.5f);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = startY; y < endY; y++) {
-                int count = 0;
-                int count2 = 0;
-                for (int x2 = (int) (x - radius); x2 <= x + radius; x2++) {
-                    for (int y2 = (int) (y - radius); y2 <= y + radius; y2++) {
-                        if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                            count++;
-                            if (get(x2, y2))
-                                count2++;
-                        }
-                    }
-                }
-                if (count2 > count * density) {
-                    maskCopy[x][y] = true;
-                }
-            }
-        }
     }
 
     public BinaryMask combine(BinaryMask other) {

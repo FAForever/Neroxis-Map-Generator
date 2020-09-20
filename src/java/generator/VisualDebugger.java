@@ -149,8 +149,8 @@ public class VisualDebugger {
             function = methods.iterator().next();
         } else if (methods.size() == 1) {
             function = methods.iterator().next();
-        } else if (methods.contains("inflate")) {
-            function = "inflate";
+        } else if (methods.contains("fillParallelogram")) {
+            function = methods.iterator().next();
         } else if (methods.contains("show")) {
             function = "show";
         } else {
