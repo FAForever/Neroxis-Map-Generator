@@ -293,49 +293,63 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask inflate(float radius) {
-        return deflate(-radius);
-    }
-
-    public BinaryMask deflate(float radius) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
-        boolean inverted = radius <= 0;
-
-        Thread[] threads = new Thread[4];
-        threads[0] = new Thread(() -> deflateRegion(inverted, StrictMath.abs(radius), maskCopy, 0, (getSize() / 4)));
-        threads[1] = new Thread(() -> deflateRegion(inverted, StrictMath.abs(radius), maskCopy, (getSize() / 4), (getSize() / 2)));
-        threads[2] = new Thread(() -> deflateRegion(inverted, StrictMath.abs(radius), maskCopy, (getSize() / 2), (getSize() / 4) * 3));
-        threads[3] = new Thread(() -> deflateRegion(inverted, StrictMath.abs(radius), maskCopy, (getSize() / 4) * 3, getSize()));
-        Arrays.stream(threads).forEach(Thread::start);
-
-        for (Thread f : threads) {
-            try {
-                f.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        mask = maskCopy;
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    private void deflateRegion(boolean inverted, float radius, boolean[][] maskCopy, int startY, int endY) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x = 0; x < getSize(); x++) {
-            for (int y = startY; y < endY; y++) {
-                maskCopy[x][y] = !inverted;
-                l:
-                for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
-                    for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
-                        if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2 && inverted ^ !get(x2, y2)) {
-                            maskCopy[x][y] = inverted;
-                            break l;
+            for (int y = 0; y < getSize(); y++) {
+                if (isEdge(x, y) && get(x, y)) {
+                    for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
+                        for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
+                            if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                                maskCopy[x2][y2] = true;
+                            }
                         }
                     }
                 }
             }
         }
+
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (maskCopy[x][y]) {
+                    set(x, y, true);
+                }
+            }
+        }
+
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask deflate(float radius) {
+        boolean[][] maskCopy = new boolean[getSize()][getSize()];
+
+        float radius2 = (radius + 0.5f) * (radius + 0.5f);
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (isEdge(x, y) && !get(x, y)) {
+                    for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
+                        for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
+                            if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                                maskCopy[x2][y2] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (maskCopy[x][y]) {
+                    set(x, y, false);
+                }
+            }
+        }
+
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
     public BinaryMask cutCorners() {
