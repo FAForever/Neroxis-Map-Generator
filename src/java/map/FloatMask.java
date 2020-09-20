@@ -105,6 +105,18 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask add(BinaryMask other, float value) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if (other.get(x, y)) {
+                    add(x, y, value);
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask max(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -126,8 +138,7 @@ public strictfp class FloatMask extends Mask {
         FloatMask mountainBase = new FloatMask(getSize(), 0, symmetryHierarchy);
         add(mountainBase.init(other, 0, 2f));
         while (other.getCount() > 0) {
-            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-            add(layer.init(other, 0, random.nextFloat() * .75f));
+            add(other, random.nextFloat() * .75f);
             other.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
@@ -145,8 +156,7 @@ public strictfp class FloatMask extends Mask {
         int count = 0;
         while (other.getCount() > 0 && count < maxRepeat) {
             count++;
-            FloatMask layer = new FloatMask(getSize(), 0, symmetryHierarchy);
-            add(layer.init(other, 0, -underWaterSlope));
+            add(other, -underWaterSlope);
             other.erode(0.75f, symmetryHierarchy.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
@@ -154,12 +164,12 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask smooth(int radius) {
-        float[][] innerCount = new float[getSize()][getSize()];
+        int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 float val = get(x, y);
-                innerCount[x][y] = val;
+                innerCount[x][y] = StrictMath.round(val * 1000);
                 innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
                 innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
                 innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
@@ -172,13 +182,13 @@ public strictfp class FloatMask extends Mask {
                 int xRight = StrictMath.min(getSize() - 1, x + radius);
                 int yUp = StrictMath.max(0, y - radius);
                 int yDown = StrictMath.min(getSize() - 1, y + radius);
-                float countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                float countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                float countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                float countD = innerCount[xRight][yDown];
-                float count = countD + countA - countB - countC;
+                int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
+                int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
+                int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
+                int countD = innerCount[xRight][yDown];
+                int count = countD + countA - countB - countC;
                 int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                set(x, y, count / area);
+                set(x, y, count / 1000f / area);
             }
         }
 
@@ -187,12 +197,12 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask smooth(int radius, BinaryMask limiter) {
-        float[][] innerCount = new float[getSize()][getSize()];
+        int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 float val = get(x, y);
-                innerCount[x][y] = val;
+                innerCount[x][y] = StrictMath.round(val * 1000);
                 innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
                 innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
                 innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
@@ -206,13 +216,13 @@ public strictfp class FloatMask extends Mask {
                     int xRight = StrictMath.min(getSize() - 1, x + radius);
                     int yUp = StrictMath.max(0, y - radius);
                     int yDown = StrictMath.min(getSize() - 1, y + radius);
-                    float countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                    float countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                    float countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                    float countD = innerCount[xRight][yDown];
-                    float count = countD + countA - countB - countC;
+                    int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
+                    int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
+                    int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
+                    int countD = innerCount[xRight][yDown];
+                    int count = countD + countA - countB - countC;
                     int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                    set(x, y, count / area);
+                    set(x, y, count / 1000f / area);
                 }
             }
         }
