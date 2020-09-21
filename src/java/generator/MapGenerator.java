@@ -664,14 +664,14 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapValleys");
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
-        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(12, ramps);
+        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(12, ramps).smooth(1);
         heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(8, land.copy().minus(plateaus));
         heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(8, plateaus);
         heightmapLand.maskToHeightmap(0.25f, 48, land).add(heightmapHills).add(heightmapValleys).smooth(2);
         heightmapCliffs.maskToMoutains(cliffs);
         heightmapShore.maskToMoutains(shore);
-        heightmapMountains.maskToMoutains(mountains).smooth(1, mountains);
-        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
+        heightmapMountains.init(mountains, 0, 2f).maskToMoutains(mountains);
+        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus);
 
         heightmapBase.add(heightmapMountains);
     }
