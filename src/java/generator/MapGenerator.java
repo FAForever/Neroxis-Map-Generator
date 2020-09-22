@@ -593,7 +593,7 @@ public strictfp class MapGenerator {
         } else {
             mountains.randomWalk((int) (mountainDensity * mapSize / 16), mapSize / 8);
         }
-        mountains.enlarge(mapSize / 4).erode(.5f, symmetryHierarchy.getTerrainSymmetry(), 2).grow(.5f, symmetryHierarchy.getTerrainSymmetry(), 4);
+        mountains.enlarge(mapSize / 4).erode(.5f, symmetryHierarchy.getTerrainSymmetry(), 2).grow(.5f, symmetryHierarchy.getTerrainSymmetry(), 2);
         plateaus.randomize(plateauDensity).smooth(mapSize / 128);
 
         land.enlarge(mapSize / 4).erode(.5f, symmetryHierarchy.getTerrainSymmetry(), mapSize / 256).grow(.5f, symmetryHierarchy.getTerrainSymmetry(), mapSize / 256);
