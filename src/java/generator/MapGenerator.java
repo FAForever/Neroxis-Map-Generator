@@ -418,7 +418,8 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        final int mexSpacing = 32;
+        int totalMexCount = mexCount * spawnCount;
+        final int mexSpacing = StrictMath.max(StrictMath.min(64, 1600 / totalMexCount), 32);
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
