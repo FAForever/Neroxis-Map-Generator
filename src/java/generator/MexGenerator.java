@@ -149,7 +149,7 @@ public strictfp class MexGenerator {
             spawnable.fillCircle(mexSymLocation, mexSpacing, false);
         }
 
-        for (int i = 0; i < numMexesLeft; i += 2) {
+        for (int i = 0; i < StrictMath.min(numMexesLeft, 12); i += 2) {
             Vector2f mexLocation = spawnableWater.getRandomPosition();
 
             if (mexLocation == null) {
