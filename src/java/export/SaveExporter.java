@@ -1,6 +1,5 @@
 package export;
 
-import map.AIMarker;
 import map.SCMap;
 import util.Vector3f;
 
@@ -62,10 +61,13 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
                 out.writeBytes("          ['adjacentTo'] = STRING( '");
-                for (int j = 0; j < map.getAirMarker(i).getNeighborCount(); j++) {
-                    AIMarker neighbor = map.getAirMarker(map.getAirMarker(i).getNeighbor(j));
-                    out.writeBytes(" AirPN" + neighbor.getId());
-                }
+                map.getAirMarker(i).getNeighbors().forEach(id -> {
+                    try {
+                        out.writeBytes(" AirPN" + id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 out.writeBytes(" '),\n");
                 out.writeBytes("          ['color'] = STRING( 'ffffffff' ),\n");
                 out.writeBytes("          ['graph'] = STRING( 'DefaultAir' ),\n");
@@ -81,10 +83,13 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
                 out.writeBytes("          ['adjacentTo'] = STRING( '");
-                for (int j = 0; j < map.getLandMarker(i).getNeighborCount(); j++) {
-                    AIMarker neighbor = map.getLandMarker(map.getLandMarker(i).getNeighbor(j));
-                    out.writeBytes(" LandPN" + neighbor.getId());
-                }
+                map.getLandMarker(i).getNeighbors().forEach(id -> {
+                    try {
+                        out.writeBytes(" LandPN" + id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 out.writeBytes(" '),\n");
                 out.writeBytes("          ['color'] = STRING( 'ff00ff00' ),\n");
                 out.writeBytes("          ['graph'] = STRING( 'DefaultLand' ),\n");
@@ -100,10 +105,13 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
                 out.writeBytes("          ['adjacentTo'] = STRING( '");
-                for (int j = 0; j < map.getAmphibiousMarker(i).getNeighborCount(); j++) {
-                    AIMarker neighbor = map.getAmphibiousMarker(map.getAmphibiousMarker(i).getNeighbor(j));
-                    out.writeBytes(" AmphPN" + neighbor.getId());
-                }
+                map.getAmphibiousMarker(i).getNeighbors().forEach(id -> {
+                    try {
+                        out.writeBytes(" AmphPN" + id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 out.writeBytes(" '),\n");
                 out.writeBytes("          ['color'] = STRING( 'ff00ffff' ),\n");
                 out.writeBytes("          ['graph'] = STRING( 'DefaultAmphibious' ),\n");
@@ -119,10 +127,13 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
                 out.writeBytes("          ['adjacentTo'] = STRING( '");
-                for (int j = 0; j < map.getNavyMarker(i).getNeighborCount(); j++) {
-                    AIMarker neighbor = map.getNavyMarker(map.getNavyMarker(i).getNeighbor(j));
-                    out.writeBytes(" WaterPN" + neighbor.getId());
-                }
+                map.getNavyMarker(i).getNeighbors().forEach(id -> {
+                    try {
+                        out.writeBytes(" WaterPN" + id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 out.writeBytes(" '),\n");
                 out.writeBytes("          ['color'] = STRING( 'ff0000ff' ),\n");
                 out.writeBytes("          ['graph'] = STRING( 'DefaultWater' ),\n");

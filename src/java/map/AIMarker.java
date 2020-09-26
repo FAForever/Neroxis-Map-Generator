@@ -4,19 +4,20 @@ import lombok.Data;
 import util.Vector2f;
 import util.Vector3f;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 @Data
 public strictfp class AIMarker {
     private int id;
     private Vector3f position;
-    private List<Integer> neighbors;
+    private LinkedHashSet<Integer> neighbors;
 
-    public AIMarker(int id, Vector2f position, List<Integer> neighbors) {
+    public AIMarker(int id, Vector2f position, LinkedHashSet<Integer> neighbors) {
         this(id, new Vector3f(position), neighbors);
     }
 
-    public AIMarker(int id, Vector3f position, List<Integer> neighbors) {
+    public AIMarker(int id, Vector3f position, LinkedHashSet<Integer> neighbors) {
         this.id = id;
         this.position = position;
         this.neighbors = neighbors;
@@ -26,12 +27,12 @@ public strictfp class AIMarker {
         return neighbors.size();
     }
 
-    public int getNeighbor(int i) {
-        return neighbors.get(i);
-    }
-
     public void addNeighbor(int i) {
         neighbors.add(i);
+    }
+
+    public void addNeighbors(Collection<? extends Integer> ids) {
+        neighbors.addAll(ids);
     }
 
 }
