@@ -23,6 +23,7 @@ public strictfp class HydroGenerator {
     }
 
     public void generateHydros(BinaryMask spawnable) {
+        map.getHydros().clear();
         int hydroSpacing = 64;
         int iHydro = 0;
 

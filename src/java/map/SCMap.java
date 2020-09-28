@@ -62,11 +62,11 @@ public strictfp class SCMap {
     public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
     private static final String DEFAULT_ENVIRONMENT = "evergreen";
-    public final Biome biome;
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
-    private final int spawnCountInit;
-    private final int mexCountInit;
-    private final int hydroCountInit;
+    public Biome biome;
+    private int spawnCountInit;
+    private int mexCountInit;
+    private int hydroCountInit;
     private final ArrayList<Vector3f> spawns;
     private final ArrayList<Vector3f> mexes;
     private final ArrayList<Vector3f> hydros;

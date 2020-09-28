@@ -87,6 +87,37 @@ public strictfp class SpawnGenerator {
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
     }
 
+    public void generateSpawns(BinaryMask spawnable, float separation) {
+        map.getLargeExpansionAIMarkers().clear();
+        map.getSpawns().clear();
+        BinaryMask spawnableCopy = spawnable.copy();
+        spawnableCopy.fillHalf(false).fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 3 / 8, false).trimEdge(map.getSize() / 32);
+        Vector2f location = spawnableCopy.getRandomPosition();
+        Vector2f symLocation;
+        for (int i = 0; i < map.getSpawnCountInit(); i += 2) {
+            if (location == null) {
+                if (separation - 4 >= 10) {
+                    generateSpawns(spawnable, separation - 8);
+                    break;
+                } else {
+                    return;
+                }
+            }
+            symLocation = spawnableCopy.getSymmetryPoint(location);
+            spawnableCopy.fillCircle(location, separation, false);
+            spawnableCopy.fillCircle(symLocation, separation, false);
+
+            if (spawnableCopy.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
+                spawnableCopy.fillCircle(symLocation, map.getSize() * 3 / 8f, false);
+            }
+            map.addSpawn(new Vector3f(symLocation));
+            map.addSpawn(new Vector3f(location));
+            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), location, null));
+            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), symLocation, null));
+            location = spawnableCopy.getRandomPosition();
+        }
+    }
+
     public void setMarkerHeights() {
         for (int i = 0; i < map.getSpawnCount(); i++) {
             map.getSpawns().set(i, placeOnHeightmap(map, map.getSpawn(i)));

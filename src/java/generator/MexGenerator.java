@@ -26,6 +26,7 @@ public strictfp class MexGenerator {
     }
 
     public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
+        map.getMexes().clear();
         BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
         int mexSpawnDistance = 32;

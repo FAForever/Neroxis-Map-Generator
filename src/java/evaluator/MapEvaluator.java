@@ -1,4 +1,4 @@
-package transformer;
+package evaluator;
 
 import export.SCMapExporter;
 import export.SaveExporter;
@@ -9,6 +9,7 @@ import map.*;
 import util.ArgumentParser;
 import util.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,12 +17,12 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 
-public strictfp class MapTransformer {
+public strictfp class MapEvaluator {
 
     public static boolean DEBUG = false;
 
-    private String inMapPath;
-    private String outFolderPath;
+    private Path inMapPath;
+    private Path outFolderPath;
     private String mapName;
     private SCMap map;
 
@@ -53,7 +54,7 @@ public strictfp class MapTransformer {
             Files.createDirectory(debugDir);
         }
 
-        MapTransformer transformer = new MapTransformer();
+        MapEvaluator transformer = new MapEvaluator();
 
         transformer.interpretArguments(args);
 
@@ -61,7 +62,7 @@ public strictfp class MapTransformer {
         transformer.importMap();
         transformer.transform();
         transformer.exportMap();
-        System.out.println("Saving map to " + Paths.get(transformer.outFolderPath).toAbsolutePath());
+        System.out.println("Saving map to " + transformer.outFolderPath.toAbsolutePath());
         System.out.println("Terrain Symmetry: " + transformer.symmetryHierarchy.getTerrainSymmetry());
         System.out.println("Team Symmetry: " + transformer.symmetryHierarchy.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + transformer.symmetryHierarchy.getSpawnSymmetry());
@@ -104,19 +105,26 @@ public strictfp class MapTransformer {
             System.exit(3);
         }
 
-        inMapPath = arguments.get("in-folder-path");
-        outFolderPath = arguments.get("out-folder-path");
+        inMapPath = Paths.get(arguments.get("in-folder-path"));
+        outFolderPath = Paths.get(arguments.get("out-folder-path"));
         symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("terrain-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")));
         symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("spawn-symmetry")));
     }
 
     public void importMap() {
         try {
-            Path srcFolderPath = Paths.get(inMapPath);
+            File dir = inMapPath.toFile();
 
-            mapName = srcFolderPath.getFileName().toString();
-            map = SCMapImporter.loadSCMAP(srcFolderPath.resolve(mapName + ".scmap"));
-            SaveImporter.importSave(srcFolderPath, mapName, map);
+            File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
+            if (mapFiles == null || mapFiles.length == 0) {
+                System.out.println("No scmap file in map folder");
+                return;
+            }
+            File scmapFile = mapFiles[0];
+            mapName = scmapFile.getName().replace(".scmap", "");
+
+            map = SCMapImporter.loadSCMAP(inMapPath);
+            SaveImporter.importSave(inMapPath, map);
 
 
         } catch (IOException e) {
@@ -127,17 +135,14 @@ public strictfp class MapTransformer {
 
     public void exportMap() {
         try {
-            Path srcFolderPath = Paths.get(inMapPath);
-            Path destFolderPath = Paths.get(outFolderPath);
-
-            FileUtils.deleteRecursiveIfExists(destFolderPath.resolve(mapName));
+            FileUtils.deleteRecursiveIfExists(outFolderPath.resolve(mapName));
 
             long startTime = System.currentTimeMillis();
-            Files.createDirectory(destFolderPath.resolve(mapName));
-            Files.copy(srcFolderPath.resolve(mapName + "_scenario.lua"), destFolderPath.resolve(mapName).resolve(mapName + "_scenario.lua"));
-            Files.copy(srcFolderPath.resolve(mapName + "_script.lua"), destFolderPath.resolve(mapName).resolve(mapName + "_script.lua"));
-            SCMapExporter.exportSCMAP(destFolderPath, mapName, map);
-            SaveExporter.exportSave(destFolderPath, mapName, map);
+            Files.createDirectories(outFolderPath.resolve(mapName));
+//            Files.copy(inMapPath.resolve(mapName + "_scenario.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_scenario.lua"));
+//            Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_script.lua"));
+            SCMapExporter.exportSCMAP(outFolderPath, mapName, map);
+            SaveExporter.exportSave(outFolderPath, mapName, map);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
