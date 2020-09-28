@@ -253,9 +253,15 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentBinaryMask filterGaps(int minDistance) {
+    public ConcurrentBinaryMask fillGaps(int minDistance) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.filterGaps(minDistance)
+                this.binaryMask.fillGaps(minDistance)
+        );
+    }
+
+    public ConcurrentBinaryMask widenGaps(int minDistance) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.widenGaps(minDistance)
         );
     }
 

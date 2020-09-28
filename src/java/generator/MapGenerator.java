@@ -608,8 +608,24 @@ public strictfp class MapGenerator {
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
         spawnPlateauMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(4);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterGaps(64).minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).filterGaps(64).filterShapes(mapSize * mapSize / 256);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterShapes(512);
+        land.combine(spawnLandMask).combine(spawnPlateauMask);
+
+        if (random.nextBoolean()) {
+            land.fillGaps(64).widenGaps(32);
+        } else {
+            land.widenGaps(64);
+        }
+
+        if (random.nextBoolean()) {
+            plateaus.fillGaps(64);
+        } else {
+            plateaus.widenGaps(64);
+        }
+
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).filterShapes(mapSize * mapSize / 256);
+
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity);
@@ -617,9 +633,9 @@ public strictfp class MapGenerator {
 
         spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).flipValues(.005f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 20);
 
-        ramps.combine(spawnRamps).smooth(8, .125f).filterGaps(16);
+        ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(16);
 
-        mountains.minus(plateaus.copy().outline().inflate(48)).minus(land.copy().outline().inflate(48)).smooth(8).intersect(land).filterShapes(256);
+        mountains.minus(plateaus.copy().outline().inflate(48)).minus(land.copy().outline().inflate(48)).smooth(8).intersect(land).filterShapes(256).widenGaps(24).filterShapes(64);
         plateaus.combine(mountains).filterShapes(mapSize * mapSize / 256);
         land.combine(plateaus);
 

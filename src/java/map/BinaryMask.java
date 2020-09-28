@@ -756,7 +756,7 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
-    public BinaryMask filterGaps(int minDist) {
+    public BinaryMask fillGaps(int minDist) {
         BinaryMask maskCopy = copy().outline();
         BinaryMask filledGaps = new BinaryMask(getSize(), 0, symmetryHierarchy);
         LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
@@ -795,12 +795,20 @@ public strictfp class BinaryMask extends Mask {
             locHash.removeAll(connected);
         }
         filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
+        filledGaps.erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 8);
+        filledGaps.smooth(4);
         combine(filledGaps);
-        toFill.clear();
-        filledGaps.clear();
-        maskCopy = copy().invert();
-        locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
-        locList = new LinkedList<>(locHash);
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask widenGaps(int minDist) {
+        BinaryMask maskCopy = copy().invert().outline();
+        BinaryMask filledGaps = new BinaryMask(getSize(), 0, symmetryHierarchy);
+        LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
+        LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
         while (locList.size() > 0) {
             Vector2f location = locList.removeFirst();
             Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
@@ -834,6 +842,8 @@ public strictfp class BinaryMask extends Mask {
             locHash.removeAll(connected);
         }
         filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
+        filledGaps.erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 8);
+        filledGaps.smooth(4);
         minus(filledGaps);
         applySymmetry(symmetryHierarchy.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
