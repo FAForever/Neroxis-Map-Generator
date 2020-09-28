@@ -656,7 +656,7 @@ public strictfp class MapGenerator {
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "valleys");
 
-        impassable.inflate(3).combine(plateauOutline.copy().inflate(6)).combine(cliffs.copy().inflate(2)).combine(shore.copy().inflate(2));
+        impassable.inflate(3).combine(plateauOutline.copy().inflate(6)).combine(cliffs.copy().inflate(3)).combine(shore.copy().inflate(3));
         hills.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).enlarge(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus);
         valleys.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).enlarge(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(4));
 
