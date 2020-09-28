@@ -608,8 +608,8 @@ public strictfp class MapGenerator {
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
         spawnPlateauMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(4);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterGaps(32);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).filterGaps(32).filterShapes(mapSize * mapSize / 256);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterGaps(64).minus(spawnLandMask).combine(spawnPlateauMask);
+        land.combine(spawnLandMask).combine(spawnPlateauMask).filterGaps(64).filterShapes(mapSize * mapSize / 256);
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity);
@@ -617,7 +617,7 @@ public strictfp class MapGenerator {
 
         spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).flipValues(.005f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 20);
 
-        ramps.combine(spawnRamps).filterGaps(32).smooth(8, .125f);
+        ramps.combine(spawnRamps).filterGaps(16).smooth(8, .125f);
 
         mountains.minus(plateaus.copy().outline().inflate(48)).minus(land.copy().outline().inflate(48)).smooth(8).intersect(land).filterShapes(256);
         plateaus.combine(mountains).filterShapes(mapSize * mapSize / 256);
@@ -755,7 +755,7 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(impassable).minus(ramps.copy().deflate(6)).deflate(10);
+        resourceMask.minus(impassable).deflate(8).minus(ramps).deflate(4);
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
