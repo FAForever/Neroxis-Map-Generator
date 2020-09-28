@@ -761,7 +761,7 @@ public strictfp class MapGenerator {
         treeMask.randomize(.1f).inflate(1).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
         treeMask.enlarge(mapSize / 2).intersect(land).minus(impassable);
         treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3);
-        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(8).minus(impassable);
+        largeRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(8).minus(impassable);
         smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(2).minus(impassable);
     }
 
