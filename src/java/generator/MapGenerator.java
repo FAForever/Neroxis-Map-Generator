@@ -684,7 +684,7 @@ public strictfp class MapGenerator {
         heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(8, land.copy().minus(plateaus));
         heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(8, plateaus);
         heightmapLand.maskToHeightmap(0.25f, 48, land).add(heightmapHills).add(heightmapValleys).smooth(2);
-        heightmapCliffs.init(cliffs, 0, 1.5f).maskToMoutains(cliffs);
+        heightmapCliffs.init(cliffs, 0, 1f).maskToMoutains(cliffs);
         heightmapShore.init(shore, 0, 1.5f).maskToMoutains(shore);
         heightmapMountains.init(mountains, 0, 2f).maskToMoutains(mountains);
         heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus);
