@@ -5,6 +5,8 @@ import map.SCMap;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -61,20 +63,17 @@ public strictfp class HydroGenerator {
 
         int baseHydroCount = iHydro;
 
+        List<Vector2f> hydroLocations = new ArrayList<>(spawnable.getRandomCoordinates(hydroSpacing));
         for (int i = baseHydroCount; i < map.getHydroCountInit(); i += 2) {
-            Vector2f location = spawnable.getRandomPosition();
-
-            if (location == null) {
+            if (hydroLocations.size() == 0) {
                 break;
             }
 
+            Vector2f location = hydroLocations.remove(random.nextInt(hydroLocations.size()));
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
 
             map.addHydro(new Vector3f(location));
             map.addHydro(new Vector3f(symLocation));
-
-            spawnable.fillCircle(location, hydroSpacing, false);
-            spawnable.fillCircle(symLocation, hydroSpacing, false);
         }
     }
 
