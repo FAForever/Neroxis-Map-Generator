@@ -316,7 +316,7 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         reclaimDensity = random.nextInt(127) / 127f;
-        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(36 / spawnCount)) * (.5f + mapSize / 512f * .5f));
+        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(30 / spawnCount)) * (.5f + mapSize / 512f * .5f));
         Symmetry[] symmetries;
         if (spawnCount == 2) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
@@ -418,8 +418,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        int totalMexCount = mexCount * spawnCount;
-        final int mexSpacing = StrictMath.max(StrictMath.min(64, 1600 / totalMexCount), 32);
+        final int mexSpacing = mapSize / 8;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
@@ -771,7 +770,7 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(impassable).deflate(8).minus(ramps).deflate(4);
+        resourceMask.minus(impassable).deflate(8).minus(ramps);
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
@@ -785,10 +784,10 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getSpawn(i), 30, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noProps.fillCircle(map.getMex(i), 5, true);
+            noProps.fillCircle(map.getMex(i), 10, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noProps.fillCircle(map.getHydro(i), 7, true);
+            noProps.fillCircle(map.getHydro(i), 16, true);
         }
 
         noProps.combine(allWreckMask.getFinalMask());
@@ -799,10 +798,10 @@ public strictfp class MapGenerator {
             noWrecks.fillCircle(map.getSpawn(i), 96, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noWrecks.fillCircle(map.getMex(i), 10, true);
+            noWrecks.fillCircle(map.getMex(i), 16, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noWrecks.fillCircle(map.getHydro(i), 15, true);
+            noWrecks.fillCircle(map.getHydro(i), 32, true);
         }
 
         noDecals = new BinaryMask(mapSize + 1, 0, symmetryHierarchy);
