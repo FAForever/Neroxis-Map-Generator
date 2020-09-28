@@ -758,7 +758,7 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask fillGaps(int minDist) {
         BinaryMask maskCopy = copy().outline();
-        BinaryMask filledGaps = new BinaryMask(getSize(), 0, symmetryHierarchy);
+        BinaryMask filledGaps = new BinaryMask(getSize(), random.nextLong(), symmetryHierarchy);
         LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
         LinkedList<Vector2f> locList = new LinkedList<>(locHash);
         LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
@@ -805,7 +805,7 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask widenGaps(int minDist) {
         BinaryMask maskCopy = copy().invert().outline();
-        BinaryMask filledGaps = new BinaryMask(getSize(), 0, symmetryHierarchy);
+        BinaryMask filledGaps = new BinaryMask(getSize(), random.nextLong(), symmetryHierarchy);
         LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
         LinkedList<Vector2f> locList = new LinkedList<>(locHash);
         LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
