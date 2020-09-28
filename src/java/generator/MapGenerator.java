@@ -617,7 +617,7 @@ public strictfp class MapGenerator {
 
         spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).flipValues(.005f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 20);
 
-        ramps.combine(spawnRamps).filterGaps(16).smooth(8, .125f);
+        ramps.combine(spawnRamps).smooth(8, .125f).filterGaps(16);
 
         mountains.minus(plateaus.copy().outline().inflate(48)).minus(land.copy().outline().inflate(48)).smooth(8).intersect(land).filterShapes(256);
         plateaus.combine(mountains).filterShapes(mapSize * mapSize / 256);
