@@ -22,9 +22,13 @@ public strictfp class FloatMask extends Mask {
     private final Random random;
     private float[][] mask;
 
-    public FloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy) {
+    public FloatMask(int size, Long seed, SymmetryHierarchy symmetryHierarchy) {
         this.mask = new float[size][size];
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         this.symmetryHierarchy = symmetryHierarchy;
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
@@ -34,9 +38,13 @@ public strictfp class FloatMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public FloatMask(FloatMask mask, long seed) {
+    public FloatMask(FloatMask mask, Long seed) {
         this.mask = new float[mask.getSize()][mask.getSize()];
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
@@ -92,7 +100,11 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask copy() {
-        return new FloatMask(this, random.nextLong());
+        if (random != null) {
+            return new FloatMask(this, random.nextLong());
+        } else {
+            return new FloatMask(this, null);
+        }
     }
 
     public FloatMask add(FloatMask other) {
@@ -135,7 +147,7 @@ public strictfp class FloatMask extends Mask {
         if (other.getSize() > size) {
             other = other.copy().shrink(size);
         }
-        FloatMask mountainBase = new FloatMask(getSize(), 0, symmetryHierarchy);
+        FloatMask mountainBase = new FloatMask(getSize(), null, symmetryHierarchy);
         add(mountainBase.init(other, 0, 2f));
         while (other.getCount() > 0) {
             add(other, random.nextFloat() * .75f);

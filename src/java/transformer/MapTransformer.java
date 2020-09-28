@@ -155,11 +155,11 @@ public strictfp class MapTransformer {
             waterHeight = 0;
         }
         heightmapBase = map.getHeightMask(symmetryHierarchy);
-        land = new BinaryMask(heightmapBase, waterHeight, 0);
+        land = new BinaryMask(heightmapBase, waterHeight, null);
         FloatMask slope = heightmapBase.copy().gradient();
-        passable = new BinaryMask(slope, .75f, 0).invert();
-        passableLand = new BinaryMask(land, 0);
-        passableWater = new BinaryMask(land, 0).invert();
+        passable = new BinaryMask(slope, .75f, null).invert();
+        passableLand = new BinaryMask(land, null);
+        passableWater = new BinaryMask(land, null).invert();
 
         passable.deflate(6).trimEdge(8);
         passableLand.deflate(4).intersect(passable);

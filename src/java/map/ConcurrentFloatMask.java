@@ -15,7 +15,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     private final String name;
     private FloatMask floatMask;
 
-    public ConcurrentFloatMask(int size, long seed, SymmetryHierarchy symmetryHierarchy, String name) {
+    public ConcurrentFloatMask(int size, Long seed, SymmetryHierarchy symmetryHierarchy, String name) {
         this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
         this.name = name;
         this.symmetryHierarchy = this.floatMask.getSymmetryHierarchy();
@@ -23,7 +23,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
-    public ConcurrentFloatMask(ConcurrentFloatMask mask, long seed, String name) {
+    public ConcurrentFloatMask(ConcurrentFloatMask mask, Long seed, String name) {
         this.name = name;
         this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetryHierarchy());
 
@@ -108,7 +108,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     @Override
     public ConcurrentFloatMask mockClone() {
-        return new ConcurrentFloatMask(this, 0, "mocked");
+        return new ConcurrentFloatMask(this, 0L, "mocked");
     }
 
     @Override

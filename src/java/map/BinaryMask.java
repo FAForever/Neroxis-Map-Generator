@@ -23,16 +23,24 @@ public strictfp class BinaryMask extends Mask {
     private final Random random;
     private boolean[][] mask;
 
-    public BinaryMask(int size, long seed, SymmetryHierarchy symmetryHierarchy) {
+    public BinaryMask(int size, Long seed, SymmetryHierarchy symmetryHierarchy) {
         this.mask = new boolean[size][size];
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         this.symmetryHierarchy = symmetryHierarchy;
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(int size, long seed, Symmetry symmetry) {
+    public BinaryMask(int size, Long seed, Symmetry symmetry) {
         this.mask = new boolean[size][size];
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
         Symmetry[] teams;
@@ -67,22 +75,14 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(boolean[][] mask, long seed, SymmetryHierarchy symmetryHierarchy) {
-        this.mask = new boolean[mask.length][mask[0].length];
-        this.symmetryHierarchy = symmetryHierarchy;
-        this.random = new Random(seed);
-        for (int x = 0; x < this.mask.length; x++) {
-            for (int y = 0; y < this.mask.length; y++) {
-                this.mask[x][y] = mask[x][y];
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-    }
-
-    public BinaryMask(BinaryMask mask, long seed) {
+    public BinaryMask(BinaryMask mask, Long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         for (int x = 0; x < mask.getSize(); x++) {
             for (int y = 0; y < mask.getSize(); y++) {
                 this.mask[x][y] = mask.get(x, y);
@@ -91,10 +91,14 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(FloatMask mask, float threshold, long seed) {
+    public BinaryMask(FloatMask mask, float threshold, Long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
         this.symmetryHierarchy = mask.getSymmetryHierarchy();
-        this.random = new Random(seed);
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
         for (int x = 0; x < mask.getSize(); x++) {
             for (int y = 0; y < mask.getSize(); y++) {
                 set(x, y, mask.get(x, y) > threshold);
@@ -140,7 +144,11 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask copy() {
-        return new BinaryMask(this, random.nextLong());
+        if (random != null) {
+            return new BinaryMask(this, random.nextLong());
+        } else {
+            return new BinaryMask(this, null);
+        }
     }
 
     public BinaryMask clear() {
@@ -765,7 +773,7 @@ public strictfp class BinaryMask extends Mask {
         while (locList.size() > 0) {
             Vector2f location = locList.removeFirst();
             Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
-            BinaryMask otherEdgesMask = new BinaryMask(getSize(), 0, symmetryHierarchy);
+            BinaryMask otherEdgesMask = new BinaryMask(getSize(), null, symmetryHierarchy);
             otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
             Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
             otherEdges.removeAll(connected);
@@ -812,7 +820,7 @@ public strictfp class BinaryMask extends Mask {
         while (locList.size() > 0) {
             Vector2f location = locList.removeFirst();
             Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
-            BinaryMask otherEdgesMask = new BinaryMask(getSize(), 0, symmetryHierarchy);
+            BinaryMask otherEdgesMask = new BinaryMask(getSize(), null, symmetryHierarchy);
             otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
             Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
             otherEdges.removeAll(connected);
