@@ -2,6 +2,8 @@ package util;
 
 import lombok.EqualsAndHashCode;
 
+import java.util.LinkedHashSet;
+
 @EqualsAndHashCode
 public strictfp class Vector2f {
     public float x;
@@ -25,6 +27,27 @@ public strictfp class Vector2f {
         float dx = x - location.x;
         float dy = y - location.y;
         return (float) StrictMath.sqrt(dx * dx + dy * dy);
+    }
+
+    public float getAngle(Vector3f location) {
+        return getAngle(new Vector2f(location));
+    }
+
+    public float getAngle(Vector2f location) {
+        float dx = location.x - x;
+        float dy = location.y - y;
+        return (float) StrictMath.atan2(dy, dx);
+    }
+
+    public LinkedHashSet<Vector2f> getLine(Vector2f location) {
+        LinkedHashSet<Vector2f> line = new LinkedHashSet<>();
+        Vector2f currentPoint = this;
+        while (currentPoint.getDistance(location) > .1) {
+            line.add(currentPoint);
+            float angle = currentPoint.getAngle(location);
+            currentPoint = new Vector2f(StrictMath.round(currentPoint.x + StrictMath.cos(angle)), StrictMath.round(currentPoint.y + StrictMath.sin(angle)));
+        }
+        return line;
     }
 
     @Override

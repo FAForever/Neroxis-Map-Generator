@@ -253,6 +253,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask filterGaps(int minDistance) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.filterGaps(minDistance)
+        );
+    }
+
 
     @Override
     public void writeToFile(Path path) {

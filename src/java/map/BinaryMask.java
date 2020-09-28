@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
@@ -755,6 +756,90 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask filterGaps(int minDist) {
+        BinaryMask maskCopy = copy().outline();
+        BinaryMask filledGaps = new BinaryMask(getSize(), 0, symmetryHierarchy);
+        LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
+        LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
+        while (locList.size() > 0) {
+            Vector2f location = locList.removeFirst();
+            Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
+            BinaryMask otherEdgesMask = new BinaryMask(getSize(), 0, symmetryHierarchy);
+            otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
+            Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
+            otherEdges.removeAll(connected);
+            List<Vector2f> connectedList = new LinkedList<>(connected);
+            List<Vector2f> otherEdgesList = new LinkedList<>(otherEdges);
+            connectedList.forEach(loc -> {
+                if (loc.x > getMinXBound(symmetryHierarchy.getSpawnSymmetry()) && loc.x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry())
+                        && loc.y > getMinYBound((int) loc.x, symmetryHierarchy.getSpawnSymmetry()) && loc.y < getMaxYBound((int) loc.x, symmetryHierarchy.getSpawnSymmetry())) {
+                    AtomicReference<Float> smallestDist = new AtomicReference<>((float) getSize());
+                    AtomicReference<Vector2f> closest = new AtomicReference<>();
+                    otherEdgesList.forEach(otherLoc -> {
+                        if (get(otherLoc)) {
+                            float dist = loc.getDistance(otherLoc);
+                            if (dist < smallestDist.get()) {
+                                closest.set(otherLoc);
+                                smallestDist.set(dist);
+                            }
+                        }
+                    });
+                    if (smallestDist.get() < minDist) {
+                        toFill.addAll(loc.getLine(closest.get()));
+                        otherEdgesList.remove(closest.get());
+                    }
+                }
+            });
+            locList.removeAll(connected);
+            locHash.removeAll(connected);
+        }
+        filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
+        combine(filledGaps);
+        toFill.clear();
+        filledGaps.clear();
+        maskCopy = copy().invert();
+        locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
+        locList = new LinkedList<>(locHash);
+        while (locList.size() > 0) {
+            Vector2f location = locList.removeFirst();
+            Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
+            BinaryMask otherEdgesMask = new BinaryMask(getSize(), 0, symmetryHierarchy);
+            otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
+            Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
+            otherEdges.removeAll(connected);
+            List<Vector2f> connectedList = new LinkedList<>(connected);
+            List<Vector2f> otherEdgesList = new LinkedList<>(otherEdges);
+            connectedList.forEach(loc -> {
+                if (loc.x > getMinXBound(symmetryHierarchy.getSpawnSymmetry()) && loc.x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry())
+                        && loc.y > getMinYBound((int) loc.x, symmetryHierarchy.getSpawnSymmetry()) && loc.y < getMaxYBound((int) loc.x, symmetryHierarchy.getSpawnSymmetry())) {
+                    AtomicReference<Float> smallestDist = new AtomicReference<>((float) getSize());
+                    AtomicReference<Vector2f> closest = new AtomicReference<>();
+                    otherEdgesList.forEach(otherLoc -> {
+                        if (get(otherLoc)) {
+                            float dist = loc.getDistance(otherLoc);
+                            if (dist < smallestDist.get()) {
+                                closest.set(otherLoc);
+                                smallestDist.set(dist);
+                            }
+                        }
+                    });
+                    if (smallestDist.get() < minDist) {
+                        toFill.addAll(loc.getLine(closest.get()));
+                        otherEdgesList.remove(closest.get());
+                    }
+                }
+            });
+            locList.removeAll(connected);
+            locHash.removeAll(connected);
+        }
+        filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
+        minus(filledGaps);
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask filterShapes(int minArea) {
         BinaryMask maskCopy = copy();
         LinkedHashSet<Vector2f> locHash = getAllCoordinatesEqualTo(true, 1);
@@ -780,6 +865,7 @@ public strictfp class BinaryMask extends Mask {
             }
             locList.removeAll(coordinates);
         }
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
     }
