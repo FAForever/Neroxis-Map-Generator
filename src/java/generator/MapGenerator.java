@@ -431,7 +431,7 @@ public strictfp class MapGenerator {
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
         AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, random.nextLong());
 
-        spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
+        spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 24);
 
         BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetry, (plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE);
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
@@ -770,10 +770,10 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(impassable).deflate(8).minus(ramps);
+        resourceMask.minus(impassable).deflate(8).minus(ramps.copy().inflate(4));
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
-        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
+        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, false);
     }
 
     private void generateExclusionMasks() {
