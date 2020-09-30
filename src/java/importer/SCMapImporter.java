@@ -174,7 +174,7 @@ public strictfp class SCMapImporter {
         }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = new TerrainMaterials(new Material[0], new Material("", "", 0));
+        TerrainMaterials mapTerrainMaterials = new TerrainMaterials();
         int miniMapContourInterval = readInt();
         int miniMapDeepWaterColor = readInt();
         int miniMapContourColor = readInt();
@@ -333,7 +333,7 @@ public strictfp class SCMapImporter {
 
         in.close();
 
-        SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, mapWaterSettings, mapLightingSettings));
+        SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), mapWaterSettings, mapLightingSettings));
         DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);

@@ -2,12 +2,11 @@ package biomes;
 
 import com.google.gson.JsonParseException;
 import lombok.Data;
-import map.Material;
+import map.PropMaterials;
 import map.TerrainMaterials;
 import util.FileUtils;
 import util.PlatformUtils;
 import util.serialized.LightingSettings;
-import util.serialized.MaterialSet;
 import util.serialized.WaterSettings;
 
 import java.io.IOException;
@@ -68,47 +67,10 @@ public strictfp class Biomes {
             System.exit(1);
         }
 
-        // Water parameters
-        WaterSettings waterSettings = null;
-        try {
-            waterSettings = FileUtils.deserialize(path, "WaterSettings.scmwtr", WaterSettings.class);
-        } catch (IOException e) {
-            System.out.printf("Did not find water settings for biome: %s, falling back to default\n", path);
-            waterSettings = new WaterSettings();
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occured while parsing the following biome: %s\n", path);
-            System.exit(1);
-        }
-
-        // We always set elevation and other settings back to the original value
-        // because the map generator does not expect to have a varying water height
-        waterSettings.setWaterPresent(true);
-        waterSettings.setElevation(WATER_HEIGHT);
-        waterSettings.setElevationDeep(WATER_DEEP_HEIGHT);
-        waterSettings.setElevationAbyss(WATER_ABYSS_HEIGHT);
-
-        // Lighting settings
-        LightingSettings lightingSettings = null;
-        try {
-            lightingSettings = FileUtils.deserialize(path, "Light.scmlighting", LightingSettings.class);
-        } catch (IOException e) {
-            System.out.printf("Did not find light settings for biome: %s, falling back to default\n", path);
-            lightingSettings = new LightingSettings();
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occured while parsing the following biome: %s\n", path);
-            System.exit(1);
-        }
-
-        return new Biome(terrainMaterials.getName(), terrainMaterials, waterSettings, lightingSettings);
-    }
-
-    public static Biome loadBiome(Object path) {
-        MaterialSet newMatSet = null;
+        PropMaterials propMaterials = null;
 
         try {
-            newMatSet = FileUtils.deserialize(path, "materials.json", MaterialSet.class);
+            propMaterials = FileUtils.deserialize(path, "props.json", PropMaterials.class);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.printf("An error occured while loading biome %s\n", path);
@@ -119,30 +81,6 @@ public strictfp class Biomes {
             System.exit(1);
         }
 
-        Material[] materials = new Material[newMatSet.getMaterials().size()];
-
-        for (int i = 0; i < materials.length; i++) {
-            MaterialSet.Material biomeMaterial = newMatSet.getMaterials().get(i);
-            materials[i] = new Material(
-                    biomeMaterial.getTexture().getEnvironment(),
-                    biomeMaterial.getNormal().getEnvironment(),
-                    biomeMaterial.getTexture().getName(),
-                    biomeMaterial.getNormal().getName(),
-                    biomeMaterial.getTexture().getScale(),
-                    biomeMaterial.getNormal().getScale(),
-                    biomeMaterial.getPreviewColor()
-            );
-        }
-
-        TerrainMaterials terrainMaterials = new TerrainMaterials(
-                materials,
-                new Material(
-                        newMatSet.getMacroTexture().getEnvironment(),
-                        newMatSet.getMacroTexture().getName(),
-                        newMatSet.getMacroTexture().getScale()
-                )
-        );
-
         // Water parameters
         WaterSettings waterSettings = null;
         try {
@@ -176,8 +114,7 @@ public strictfp class Biomes {
             System.exit(1);
         }
 
-
-        return new Biome(newMatSet.getName(), terrainMaterials, waterSettings, lightingSettings);
+        return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, waterSettings, lightingSettings);
     }
 
 

@@ -504,11 +504,11 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
-            propGenerator.generateProps(treeMask.getFinalMask().minus(noProps), PropGenerator.TREE_GROUPS, 3f);
-            propGenerator.generateProps(cliffRockMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(largeRockFieldMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(smallRockFieldMask.getFinalMask().minus(noProps), PropGenerator.ROCKS, 2f);
-            propGenerator.generateProps(fieldStoneMask.getFinalMask().minus(noProps), PropGenerator.FIELD_STONES, 60f);
+            propGenerator.generateProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f);
+            propGenerator.generateProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 2f);
+            propGenerator.generateProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 2f);
+            propGenerator.generateProps(smallRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 2f);
+            propGenerator.generateProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 60f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateProps\n",
                         System.currentTimeMillis() - sTime,

@@ -1,6 +1,7 @@
 package biomes;
 
 import lombok.Data;
+import map.PropMaterials;
 import map.TerrainMaterials;
 import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
@@ -9,6 +10,7 @@ import util.serialized.WaterSettings;
 public strictfp class Biome {
     final String name;
     final TerrainMaterials terrainMaterials;
+    final PropMaterials propMaterials;
     final WaterSettings waterSettings;
     final LightingSettings lightingSettings;
 }

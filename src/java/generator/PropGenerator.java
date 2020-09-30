@@ -26,7 +26,7 @@ public strictfp class PropGenerator {
             "/env/evergreen/props/rocks/Rock04_prop.bp",
             "/env/evergreen/props/rocks/Rock05_prop.bp"
     };
-    public static final String[] FIELD_STONES = {
+    public static final String[] BOULDERS = {
             "/env/evergreen/props/rocks/fieldstone01_prop.bp",
             "/env/evergreen/props/rocks/fieldstone02_prop.bp",
             "/env/evergreen/props/rocks/fieldstone03_prop.bp",

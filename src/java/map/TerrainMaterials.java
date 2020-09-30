@@ -18,22 +18,4 @@ public strictfp class TerrainMaterials {
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
     private Color[] previewColors = new Color[TERRAIN_NORMAL_COUNT];
 
-    public TerrainMaterials() {
-    }
-
-    public TerrainMaterials(Material[] materials, Material macroTexture) {
-        for (int i = 0; i < TERRAIN_TEXTURE_COUNT; i++) {
-            boolean isEmpty = i >= materials.length;
-            if (i < TERRAIN_NORMAL_COUNT) {
-                texturePaths[i] = isEmpty ? "" : materials[i].getTexturePath();
-                textureScales[i] = isEmpty ? 4f : materials[i].getTextureScale();
-                normalPaths[i] = isEmpty ? "" : materials[i].getNormalPath();
-                normalScales[i] = isEmpty ? 4f : materials[i].getNormalScale();
-                previewColors[i] = isEmpty ? null : materials[i].getPreviewColor();
-            } else {
-                texturePaths[i] = macroTexture.getTexturePath();
-                textureScales[i] = macroTexture.getTextureScale();
-            }
-        }
-    }
 }
