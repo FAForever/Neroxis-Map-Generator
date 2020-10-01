@@ -33,8 +33,8 @@ public strictfp class MapGenerator {
 
     public static final String VERSION = "1.0.30";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
-    public static final float LAND_DENSITY_MIN = .65f;
-    public static final float LAND_DENSITY_MAX = 1f;
+    public static final float LAND_DENSITY_MIN = .8f;
+    public static final float LAND_DENSITY_MAX = .95f;
     public static final float LAND_DENSITY_RANGE = LAND_DENSITY_MAX - LAND_DENSITY_MIN;
     public static final float MOUNTAIN_DENSITY_MIN = 0f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
@@ -43,7 +43,7 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MAX = .10f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
-    public static final float PLATEAU_DENSITY_MAX = .5f;
+    public static final float PLATEAU_DENSITY_MAX = .45f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 4f;
     public static final float VALLEY_HEIGHT = -.5f;
@@ -636,7 +636,9 @@ public strictfp class MapGenerator {
 
         mountains.minus(plateaus.copy().outline().inflate(48)).minus(land.copy().outline().inflate(48)).smooth(8).intersect(land).filterShapes(256).widenGaps(24).filterShapes(64);
         plateaus.combine(mountains).filterShapes(mapSize * mapSize / 256);
-        land.combine(plateaus);
+        land.combine(plateaus).widenGaps(32);
+
+        plateaus.intersect(land);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
         ConcurrentBinaryMask landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));
@@ -645,7 +647,7 @@ public strictfp class MapGenerator {
         shore = landOutline.copy();
 
         cliffs.shrink(mapSize / 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 2).enlarge(mapSize + 1).erode(.25f, symmetryHierarchy.getSpawnSymmetry(), 2);
-        cliffs.combine(plateauOutline.copy().flipValues(.01f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 16)).minus(ramps).smooth(2, .75f);
+        cliffs.combine(plateauOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 16)).minus(ramps).smooth(2, .75f);
 
         shore.shrink(mapSize / 4).flipValues(random.nextFloat() * .15f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).enlarge(mapSize + 1).intersect(landOutline.copy().inflate(6));
         shore.minus(ramps).smooth(2, .75f);
