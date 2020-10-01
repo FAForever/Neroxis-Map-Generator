@@ -418,7 +418,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        final int mexSpacing = mapSize / 8;
+        final int mexSpacing = mapSize / 12;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
@@ -445,6 +445,7 @@ public strictfp class MapGenerator {
         setupPropPipeline();
         setupResourcePipeline();
 
+        random = null;
         Pipeline.start();
 
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
