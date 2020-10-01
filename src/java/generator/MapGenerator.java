@@ -612,7 +612,7 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         if (random.nextBoolean()) {
-            land.fillGaps(64).widenGaps(32);
+            land.fillGaps(64);
         } else {
             land.widenGaps(64);
         }
