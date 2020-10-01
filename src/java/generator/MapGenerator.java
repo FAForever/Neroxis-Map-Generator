@@ -761,9 +761,8 @@ public strictfp class MapGenerator {
         cliffRockMask.randomize(.4f).intersect(impassable).inflate(1).minus(plateaus.copy().outline().inflate(2)).inflate(2).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(impassable);
         fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
-        treeMask.randomize(.1f).inflate(1).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize / 4).smooth(4).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
-        treeMask.enlarge(mapSize / 2).intersect(land).minus(impassable);
-        treeMask.enlarge(mapSize + 1).deflate(5).trimEdge(3);
+        treeMask.randomize(.2f).enlarge(mapSize / 4).inflate(2).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+        treeMask.enlarge(mapSize + 1).intersect(land).minus(impassable).deflate(2).trimEdge(3).smooth(4, .25f);
         largeRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(8).minus(impassable);
         smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).inflate(2).minus(impassable);
     }
