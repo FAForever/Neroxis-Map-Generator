@@ -957,6 +957,7 @@ public strictfp class BinaryMask extends Mask {
             Vector2f location = coordinateArray[random.nextInt(coordinates.size())];
             chosenCoordinates.add(location);
             coordinates.removeIf((loc) -> location.getDistance(loc) < minSpacing);
+            coordinates.removeIf((loc) -> getSymmetryPoint(location).getDistance(loc) < minSpacing);
             coordinateArray = coordinates.toArray(new Vector2f[0]);
         }
         return chosenCoordinates;
