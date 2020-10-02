@@ -39,7 +39,7 @@ public strictfp class Biomes {
             if (PlatformUtils.isRunningFromJAR()) {
                 List<String> files = FileUtils.listFilesInZipDirectory(CUSTOM_BIOMES_DIR, PlatformUtils.getRunnableJarFile());
 
-                files.stream().map(Biomes::loadBiomeSerial).forEach(list::add);
+                files.stream().map(Biomes::loadBiomeSerial).forEachOrdered(list::add);
             } else {
                 Path biomePath = Paths.get(Objects.requireNonNull(Biome.class.getClassLoader().getResource(CUSTOM_BIOMES_DIR)).toURI());
 

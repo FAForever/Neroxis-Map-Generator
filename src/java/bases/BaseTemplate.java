@@ -29,7 +29,7 @@ public class BaseTemplate {
         loadUnits();
     }
 
-    protected void loadUnits() throws IOException, URISyntaxException {
+    protected void loadUnits() throws IOException {
         LuaValue lua = LuaLoader.load(BaseTemplate.class.getResourceAsStream(luaFile));
         LuaTable units = lua.get("Units").checktable();
         LuaValue key = LuaValue.NIL;
@@ -38,7 +38,7 @@ public class BaseTemplate {
             LuaValue unit = units.get(key);
             String type = unit.get("type").checkstring().toString();
             LuaTable posTable = unit.get("Position").checktable();
-            Vector2f position = new Vector2f(posTable.get(1).tofloat(),posTable.get(3).tofloat());
+            Vector2f position = new Vector2f(posTable.get(1).tofloat(), posTable.get(3).tofloat());
             if (structures.containsKey(type)) {
                 structures.get(type).add(position);
             } else {
