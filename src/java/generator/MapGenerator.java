@@ -114,6 +114,7 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask smallRockFieldMask;
     private ConcurrentBinaryMask baseMask;
     private ConcurrentBinaryMask civReclaimMask;
+    private ConcurrentBinaryMask allBaseMask;
     private BinaryMask noProps;
     private BinaryMask noWrecks;
     private BinaryMask noDecals;
@@ -773,6 +774,7 @@ public strictfp class MapGenerator {
     private void setupPropPipeline() {
         baseMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "base");
         civReclaimMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "civReclaim");
+        allBaseMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "allBase");
         treeMask = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "tree");
         cliffRockMask = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetryHierarchy, "cliffRock");
         fieldStoneMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "fieldStone");
@@ -780,20 +782,21 @@ public strictfp class MapGenerator {
         smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
         if (hasCivilians) {
-            civReclaimMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(32)).fillCenter(32, false).trimEdge(64);
+            civReclaimMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
             if (enemyCivilians) {
-                baseMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(32)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
+                baseMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
                 civReclaimMask.clear();
             }
         }
+        allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
 
-        cliffRockMask.randomize(.4f).intersect(impassable).inflate(1).minus(plateaus.copy().outline().inflate(2)).inflate(2).intersect(land).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
+        cliffRockMask.randomize(.4f).intersect(impassable).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).enlarge(256).intersect(land).minus(impassable);
-        fieldStoneMask.enlarge(mapSize + 1).trimEdge(10).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
+        fieldStoneMask.enlarge(mapSize + 1).trimEdge(10);
         treeMask.randomize(.2f).enlarge(mapSize / 4).inflate(2).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
-        treeMask.enlarge(mapSize + 1).intersect(land).minus(impassable).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24)).deflate(2).trimEdge(3).smooth(4, .25f);
-        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).inflate(4).intersect(land).minus(impassable).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
-        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).inflate(2).intersect(land).minus(impassable).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
+        treeMask.enlarge(mapSize + 1).intersect(land).minus(impassable).deflate(2).trimEdge(3).smooth(4, .25f);
+        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).grow(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).minus(impassable);
     }
 
     private void setupWreckPipeline() {
@@ -804,11 +807,11 @@ public strictfp class MapGenerator {
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetryHierarchy, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "allWreck");
 
-        t1LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).deflate(mapSize / 512f).trimEdge(20).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
-        t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
-        t3LandWreckMask.randomize(reclaimDensity * .0005f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
-        navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(land.copy().inflate(16)).trimEdge(20).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
-        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().inflate(1).outline()).trimEdge(20).minus(baseMask.copy().inflate(24)).minus(civReclaimMask.copy().inflate(24));
+        t1LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).deflate(mapSize / 512f).trimEdge(20);
+        t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
+        t3LandWreckMask.randomize(reclaimDensity * .0005f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
+        navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(land.copy().inflate(16)).trimEdge(20);
+        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().inflate(1).outline()).trimEdge(20);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
@@ -826,7 +829,7 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getHydro(i), 16, true);
         }
 
-        noProps.combine(allWreckMask.getFinalMask());
+        noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
 
         noBases = new BinaryMask(impassable.getFinalMask(), null);
         noBases.combine(ramps.getFinalMask());
@@ -856,6 +859,8 @@ public strictfp class MapGenerator {
 
         noWrecks = new BinaryMask(impassable.getFinalMask(), null);
 
+        noWrecks.combine(allBaseMask.getFinalMask());
+
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noWrecks.fillCircle(map.getSpawn(i), 128, true);
         }
@@ -878,20 +883,22 @@ public strictfp class MapGenerator {
         Files.deleteIfExists(path);
         File outFile = path.toFile();
         boolean status = outFile.createNewFile();
-        FileOutputStream out = new FileOutputStream(outFile);
-        String summaryString = "Seed: " + seed +
-                "\nBiome: " + biome.getName() +
-                "\nLand Density: " + landDensity +
-                "\nPlateau Density: " + plateauDensity +
-                "\nMountain Density: " + mountainDensity +
-                "\nRamp Density: " + rampDensity +
-                "\nReclaim Density: " + reclaimDensity +
-                "\nMex Count: " + mexCount +
-                "\nTerrain Symmetry: " + symmetry +
-                "\nTeam Symmetry: " + symmetryHierarchy.getTeamSymmetry() +
-                "\nSpawn Symmetry: " + symmetryHierarchy.getSpawnSymmetry();
-        out.write(summaryString.getBytes());
-        out.flush();
-        out.close();
+        if (status) {
+            FileOutputStream out = new FileOutputStream(outFile);
+            String summaryString = "Seed: " + seed +
+                    "\nBiome: " + biome.getName() +
+                    "\nLand Density: " + landDensity +
+                    "\nPlateau Density: " + plateauDensity +
+                    "\nMountain Density: " + mountainDensity +
+                    "\nRamp Density: " + rampDensity +
+                    "\nReclaim Density: " + reclaimDensity +
+                    "\nMex Count: " + mexCount +
+                    "\nTerrain Symmetry: " + symmetry +
+                    "\nTeam Symmetry: " + symmetryHierarchy.getTeamSymmetry() +
+                    "\nSpawn Symmetry: " + symmetryHierarchy.getSpawnSymmetry();
+            out.write(summaryString.getBytes());
+            out.flush();
+            out.close();
+        }
     }
 }
