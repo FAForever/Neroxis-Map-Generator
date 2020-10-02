@@ -73,6 +73,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         return new ConcurrentBinaryMask(this, this.binaryMask.getRandom().nextLong(), name + "Copy");
     }
 
+    public ConcurrentBinaryMask clear() {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.clear()
+        );
+    }
+
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.randomize(density)
