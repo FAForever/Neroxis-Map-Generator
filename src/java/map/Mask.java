@@ -159,15 +159,16 @@ public strictfp abstract class Mask {
 
     public int getMaxYBound(int x, Symmetry symmetry) {
         switch (symmetry) {
-            case X:
-                return getSize();
             case XY:
                 return x + 1;
             case YX:
             case DIAG:
                 return getSize() - x;
-            default:
+            case Y:
                 return getSize() / 2 + 1;
+            case X:
+            default:
+                return getSize();
         }
     }
 }
