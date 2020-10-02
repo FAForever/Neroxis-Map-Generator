@@ -780,10 +780,10 @@ public strictfp class MapGenerator {
         smallRockFieldMask = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "smallRockField");
 
         if (hasCivilians) {
-            civReclaimMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
-            if (enemyCivilians) {
+            if (!enemyCivilians) {
+                civReclaimMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
+            } else {
                 baseMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
-                civReclaimMask.clear();
             }
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
