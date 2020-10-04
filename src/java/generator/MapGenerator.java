@@ -809,7 +809,7 @@ public strictfp class MapGenerator {
         t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
         t3LandWreckMask.randomize(reclaimDensity * .0005f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(land.copy().inflate(16)).trimEdge(20);
-        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().deflate(4).outline()).trimEdge(20);
+        t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().inflate(4).outline()).trimEdge(20);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
