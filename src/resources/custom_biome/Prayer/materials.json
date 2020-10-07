@@ -3,48 +3,48 @@
   "texturePaths": [
     "/env/paradise/layers/sand000_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
-    "/env/Evergreen/layers/grass000_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Evergreen2/Layers/EG_Grass002b_albedo.dds",
-    "/env/Evergreen2/Layers/EG_Gravel_albedo.DDS",
+    "/env/Evergreen2/Layers/EvHostas001_albedo.dds",
+    "/env/Evergreen2/Layers/EvTrans02_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel004_albedo.dds",
+    "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006b_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock008_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock005_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     32.0,
     0.0,
     8.0,
+    4.0,
+    16.0,
+    1.0,
     24.0,
     8.0,
     16.0,
-    24.0,
-    32.0,
-    128.0,
     128.0
   ],
   "normalPaths": [
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+    "/env/Evergreen/layers/SandLight002_normals.dds",
     "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
-    "/env/Evergreen2/Layers/EvTrans01_normals.dds",
-    "/env/Evergreen2/Layers/EvTrans02_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
     "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EvTrans01_normals.dds",
     "/env/Evergreen2/Layers/EG_Rock003_normal.dds",
     "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock_normal.dds"
+    "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
   ],
   "normalScales": [
     24.0,
     64.0,
+    32.0,
+    32.0,
+    64.0,
+    64.0,
     12.0,
-    16.0,
-    16.0,
-    8.0,
     32.0,
-    32.0,
-    64.0
+    16.0
   ],
   "previewColors": [
     {
@@ -56,19 +56,19 @@
       "falpha": 0.0
     },
     {
-      "value": -11844594,
+      "value": -16248824,
       "falpha": 0.0
     },
     {
-      "value": -8680828,
+      "value": -13547248,
       "falpha": 0.0
     },
     {
-      "value": -13747947,
+      "value": -5915979,
       "falpha": 0.0
     },
     {
-      "value": -11379366,
+      "value": -13549296,
       "falpha": 0.0
     },
     {
@@ -80,7 +80,7 @@
       "falpha": 0.0
     },
     {
-      "value": -13026503,
+      "value": -12830654,
       "falpha": 0.0
     }
   ]
