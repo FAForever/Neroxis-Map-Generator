@@ -1,13 +1,14 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 group 'net.neroxis'
-version '1.0-SNAPSHOT'
+version 'SNAPSHOT'
 
-sourceCompatibility = 1.8
-
+sourceCompatibility = 1.10
 
 sourceSets {
     main {
@@ -27,12 +28,12 @@ repositories {
 }
 
 dependencies {
-    compile("com.github.FAForever:faf-java-commons:0b83fa48a039cea085a7d462cc937fb5a035c186") {
+    implementation("com.github.FAForever:faf-java-commons:0b83fa48a039cea085a7d462cc937fb5a035c186") {
         exclude module: 'guava'
         exclude module: 'faf-commons-api'
     }
-    compile("org.luaj:luaj-jse:3.0.1")
-    compile("com.google.guava:guava:28.0-jre")
+    implementation("org.luaj:luaj-jse:3.0.1")
+    implementation("com.google.guava:guava:28.0-jre")
     compileOnly('org.projectlombok:lombok:1.18.8')
     annotationProcessor('org.projectlombok:lombok:1.18.8')
     implementation('com.google.code.gson:gson:2.8.5')
@@ -40,8 +41,41 @@ dependencies {
     testCompile('junit:junit:4.11')
 }
 
-jar {
+shadowJar {
     manifest {
         attributes 'Main-Class': 'generator.MapGenerator'
     }
+}
+
+task populatorJar(type: ShadowJar) {
+    archiveBaseName = 'MapPopulator'
+    from(sourceSets.main.output) {
+        manifest {
+            attributes 'Main-Class': 'populator.MapPopulator'
+        }
+    }
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+}
+
+task evaluatorJar(type: ShadowJar) {
+    archiveBaseName = 'MapEvaluator'
+    from(sourceSets.main.output) {
+        manifest {
+            attributes 'Main-Class': 'evaluator.MapEvaluator'
+        }
+    }
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+}
+
+task transformerJar(type: ShadowJar) {
+    archiveBaseName = 'MapTransformer'
+    from(sourceSets.main.output) {
+        manifest {
+            attributes 'Main-Class': 'Transformer.MapTransformer'
+        }
+    }
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
 }
