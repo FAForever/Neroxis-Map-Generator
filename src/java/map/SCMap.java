@@ -19,7 +19,6 @@ public strictfp class SCMap {
 
     public static final int SIGNATURE = 443572557;
     public static final int VERSION_MAJOR = 2;
-    public static final int VERSION_MINOR = 56;
 
     public static final float HEIGHTMAP_SCALE = 1f / 128f;
     public static final String TERRAIN_SHADER_PATH = "TTerrainXP";
@@ -61,8 +60,8 @@ public strictfp class SCMap {
     public static final float[] WAVE_NORMAL_REPEATS = {0.0009f, 0.009f, 0.05f, 0.5f};
     public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
-    private static final String DEFAULT_ENVIRONMENT = "evergreen";
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
+    private int minorVersion = 56;
     public Biome biome;
     private int spawnCountInit;
     private int mexCountInit;

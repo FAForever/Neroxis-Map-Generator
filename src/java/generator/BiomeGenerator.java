@@ -7,6 +7,7 @@ import util.ArgumentParser;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
@@ -14,10 +15,10 @@ import java.util.MissingFormatArgumentException;
 
 public class BiomeGenerator {
 
-    String folderPath = ".";
+    Path folderPath = Paths.get(".");
+    Path mapPath;
+    Path envPath;
     String biomeName;
-    String mapPath;
-    String envPath;
 
     public static void main(String[] args) throws IOException {
 
@@ -27,16 +28,20 @@ public class BiomeGenerator {
 
         generator.interpretArguments(ArgumentParser.parse(args));
 
-        System.out.println("Generating biome " + generator.biomeName + " from " + Paths.get(generator.mapPath).toAbsolutePath());
-        File dir = new File(generator.mapPath);
+        System.out.println("Generating biome " + generator.biomeName + " from " + generator.mapPath);
+
+        File dir = generator.mapPath.toFile();
+
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-        assert mapFiles != null;
-        if (mapFiles.length == 0) {
+        if (mapFiles == null || mapFiles.length == 0) {
             System.out.println("No scmap file in map folder");
+            return;
         }
-        SCMap map = SCMapImporter.loadSCMAP(mapFiles[0].toPath());
-        System.out.println("Saving biome to " + Paths.get(generator.folderPath).toAbsolutePath() + File.separator + generator.biomeName);
-        BiomeExporter.exportBiome(Paths.get(generator.envPath), Paths.get(generator.folderPath), generator.biomeName, map.getBiome());
+        File scmapFile = mapFiles[0];
+        SCMap map = SCMapImporter.loadSCMAP(generator.mapPath);
+
+        System.out.println("Saving biome to " + generator.folderPath + File.separator + generator.biomeName);
+        BiomeExporter.exportBiome(generator.envPath, generator.folderPath, generator.biomeName, map.getBiome());
         System.out.println("Done");
     }
 
@@ -61,16 +66,16 @@ public class BiomeGenerator {
             System.out.println("Map path not supplied");
             throw new MissingFormatArgumentException("Map Path Missing");
         }
-        mapPath = arguments.get("map-path");
+        mapPath = Paths.get(arguments.get("map-path"));
 
         if (!arguments.containsKey("env-path")) {
             System.out.println("Env path not supplied");
             throw new MissingFormatArgumentException("Env Path Missing");
         }
-        envPath = arguments.get("env-path");
+        envPath = Paths.get(arguments.get("env-path"));
 
         if (arguments.containsKey("folder-path")) {
-            folderPath = arguments.get("folder-path");
+            folderPath = Paths.get(arguments.get("folder-path"));
         }
     }
 }

@@ -65,7 +65,7 @@ public strictfp class SCMapImporter {
         DDSHeader previewHeader = DDSHeader.parseHeader(readBytes(128));
         int[] previewImageData = readInts(previewImageSize / 4);
         int version = readInt();
-        if (version != SCMap.VERSION_MINOR && version != 60) {
+        if (version != 56 && version != 60) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
 
@@ -261,9 +261,10 @@ public strictfp class SCMapImporter {
         int waterMapByteCount = readInt() - 128;
         DDSHeader waterMapDDSHeader = DDSHeader.parseHeader(readBytes(128));
         byte[] waterMapData = readBytes(waterMapByteCount);
-        byte[] waterFoamMaskData = readBytes(waterMapByteCount);
-        byte[] waterFlatnessData = readBytes(waterMapByteCount);
-        byte[] waterDepthBiasMaskData = readBytes(waterMapByteCount);
+        int halfSize = (heightInt / 2) * (widthInt / 2);
+        byte[] waterFoamMaskData = readBytes(halfSize);
+        byte[] waterFlatnessData = readBytes(halfSize);
+        byte[] waterDepthBiasMaskData = readBytes(halfSize);
 
         // terrain type
         int[] terrainTypeData = readInts(widthInt * heightInt / 4);
@@ -334,6 +335,7 @@ public strictfp class SCMapImporter {
         in.close();
 
         SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), mapWaterSettings, mapLightingSettings));
+        map.setMinorVersion(version);
         DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);

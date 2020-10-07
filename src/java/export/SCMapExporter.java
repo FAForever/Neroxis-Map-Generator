@@ -27,7 +27,7 @@ public strictfp class SCMapExporter {
     private static DataOutputStream out;
 
     public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
-        file = folderPath.resolve(mapname).resolve(mapname + ".scmap").toFile();
+        file = folderPath.resolve(mapname + ".scmap").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 
@@ -53,7 +53,7 @@ public strictfp class SCMapExporter {
         writeInt(previewHeaderBytes.length + map.getPreview().getWidth() * map.getPreview().getHeight() * 4); // preview image byte count
         writeBytes(previewHeaderBytes);
         writeInts(((DataBufferInt) map.getPreview().getData().getDataBuffer()).getData()); // preview image data
-        writeInt(SCMap.VERSION_MINOR);
+        writeInt(map.getMinorVersion());
 
         // heightmap
         writeInt(map.getSize()); // width
@@ -121,7 +121,10 @@ public strictfp class SCMapExporter {
         // terrain textures
         TerrainMaterials mapTerrainMaterials = map.biome.getTerrainMaterials();
         for (int i = 0; i < 24; i++) {
-            writeByte((byte) 0); // unknown
+            writeByte((byte) 0); // minimap Info
+        }
+        if (map.getMinorVersion() > 56) {
+            writeFloat(0);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
@@ -224,7 +227,7 @@ public strictfp class SCMapExporter {
 
     public static void exportPreview(Path folderPath, String mapname, SCMap map) throws IOException {
         final String fileFormat = "png";
-        File previewFile = folderPath.resolve(mapname).resolve(mapname + "_preview." + fileFormat).toFile();
+        File previewFile = folderPath.resolve(mapname + "_preview." + fileFormat).toFile();
         RenderedImage renderedImage = PreviewGenerator.addMarkers(map.getPreview(), map);
         try {
             ImageIO.write(renderedImage, fileFormat, previewFile);

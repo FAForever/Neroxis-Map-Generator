@@ -12,7 +12,7 @@ public strictfp class SaveExporter {
     private static DataOutputStream out;
 
     public static void exportSave(Path folderPath, String mapname, SCMap map) throws IOException {
-        file = folderPath.resolve(mapname).resolve(mapname + "_save.lua").toFile();
+        file = folderPath.resolve(mapname + "_save.lua").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("Scenario = {\n");

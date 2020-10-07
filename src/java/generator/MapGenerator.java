@@ -402,11 +402,11 @@ public strictfp class MapGenerator {
 
             long startTime = System.currentTimeMillis();
             Files.createDirectory(folderPath.resolve(mapName));
-            SCMapExporter.exportSCMAP(folderPath, mapName, map);
-            SCMapExporter.exportPreview(folderPath, mapName, map);
-            SaveExporter.exportSave(folderPath, mapName, map);
-            ScenarioExporter.exportScenario(folderPath, mapName, map);
-            ScriptExporter.exportScript(folderPath, mapName, map);
+            SCMapExporter.exportSCMAP(folderPath.resolve(mapName), mapName, map);
+            SCMapExporter.exportPreview(folderPath.resolve(mapName), mapName, map);
+            SaveExporter.exportSave(folderPath.resolve(mapName), mapName, map);
+            ScenarioExporter.exportScenario(folderPath.resolve(mapName), mapName, map);
+            ScriptExporter.exportScript(folderPath.resolve(mapName), mapName, map);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             startTime = System.currentTimeMillis();
