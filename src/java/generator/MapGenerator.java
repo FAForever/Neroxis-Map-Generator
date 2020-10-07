@@ -47,8 +47,8 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 4f;
-    public static final float VALLEY_HEIGHT = -.5f;
-    public static final float HILL_HEIGHT = .5f;
+    public static final float VALLEY_HEIGHT = -3f;
+    public static final float HILL_HEIGHT = 3f;
     public static boolean DEBUG = false;
     //read from cli args
     private String pathToFolder = ".";
@@ -86,14 +86,14 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask passableLand;
     private ConcurrentBinaryMask passableWater;
     private ConcurrentFloatMask heightmapBase;
-    private ConcurrentFloatMask highlightGroundTexture;
-    private ConcurrentFloatMask groundTexture;
     private ConcurrentFloatMask accentGroundTexture;
-    private ConcurrentFloatMask plateauTexture;
+    private ConcurrentFloatMask groundTexture;
+    private ConcurrentFloatMask accentSlopesTexture;
     private ConcurrentFloatMask accentPlateauTexture;
+    private ConcurrentFloatMask slopesTexture;
+    private ConcurrentFloatMask rockBaseTexture;
     private ConcurrentFloatMask rockTexture;
     private ConcurrentFloatMask accentRockTexture;
-    private ConcurrentFloatMask highAltitudeTexture;
     private ConcurrentBinaryMask rockDecal;
     private ConcurrentBinaryMask intDecal;
     private ConcurrentBinaryMask allWreckMask;
@@ -472,10 +472,10 @@ public strictfp class MapGenerator {
 
 
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(groundTexture, accentGroundTexture, highlightGroundTexture, plateauTexture, accentPlateauTexture, rockTexture, accentRockTexture, highAltitudeTexture);
+            Pipeline.await(groundTexture, accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, rockBaseTexture, rockTexture, accentRockTexture);
             long sTime = System.currentTimeMillis();
-            map.setTextureMasksLow(groundTexture.getFinalMask(), accentGroundTexture.getFinalMask(), highlightGroundTexture.getFinalMask(), plateauTexture.getFinalMask());
-            map.setTextureMasksHigh(accentPlateauTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask(), highAltitudeTexture.getFinalMask());
+            map.setTextureMasksLow(groundTexture.getFinalMask(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask());
+            map.setTextureMasksHigh(accentSlopesTexture.getFinalMask(), rockBaseTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateTextures\n",
                         System.currentTimeMillis() - sTime,
@@ -636,7 +636,7 @@ public strictfp class MapGenerator {
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterShapes(512);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
-        if (random.nextBoolean()) {
+        if (random.nextBoolean() && mapSize < 1024) {
             land.fillGaps(64);
         } else {
             land.widenGaps(64);
@@ -654,9 +654,9 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity);
-        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 20);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(16);
 
-        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).flipValues(.005f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 20);
+        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).flipValues(.005f).inflate(16);
 
         ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(16);
 
@@ -670,8 +670,8 @@ public strictfp class MapGenerator {
         cliffs = plateauOutline.copy();
         shore = landOutline.copy();
 
-        cliffs.shrink(mapSize / 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 2).enlarge(mapSize + 1).erode(.25f, symmetryHierarchy.getSpawnSymmetry(), 2);
-        cliffs.combine(plateauOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 16)).minus(ramps).smooth(2, .75f);
+        cliffs.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 2).enlarge(mapSize + 1).erode(.25f, symmetryHierarchy.getSpawnSymmetry(), 2);
+        cliffs.combine(plateauOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 12)).minus(ramps).smooth(2, .75f);
 
         shore.shrink(mapSize / 4).flipValues(random.nextFloat() * .15f).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).enlarge(mapSize + 1).intersect(landOutline.copy().inflate(6));
         shore.minus(ramps).smooth(2, .75f);
@@ -717,9 +717,9 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "heightmapValleys");
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
-        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(6, ramps).smooth(1);
-        heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(8, land.copy().minus(plateaus));
-        heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(8, plateaus);
+        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(8, ramps).smooth(1);
+        heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
+        heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(16, plateaus);
         heightmapLand.maskToHeightmap(0.25f, 48, land).add(heightmapHills).add(heightmapValleys).smooth(2);
         heightmapCliffs.init(cliffs, 0, 1f).maskToMoutains(cliffs);
         heightmapShore.init(shore, 0, 1.5f).maskToMoutains(shore);
@@ -732,40 +732,43 @@ public strictfp class MapGenerator {
     private void setupTexturePipeline() {
         ConcurrentFloatMask slope = heightmapBase.copy().gradient();
 
+        ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "flat").invert();
         ConcurrentBinaryMask ground = new ConcurrentBinaryMask(land, random.nextLong(), "ground");
-        ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(hills, random.nextLong(), "accentGround");
-        ConcurrentBinaryMask highlightGround = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetryHierarchy, "highlightGround");
-        ConcurrentBinaryMask plateau = new ConcurrentBinaryMask(plateaus, random.nextLong(), "plateau");
-        ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(valleys, random.nextLong(), "accentPlateau");
-        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(impassable, random.nextLong(), "rock");
-        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentRock");
-        ConcurrentBinaryMask highAltitude = new ConcurrentBinaryMask(heightmapBase, waterHeight + 10f, random.nextLong(), "highAltitude");
+        ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(land, random.nextLong(), "accentGround");
+        ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(plateaus, random.nextLong(), "accentPlateau");
+        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "slopes");
+        ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentSlopes").invert();
+        ConcurrentBinaryMask rockBase = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rockBase");
+        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "rock");
+        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(rock, random.nextLong(), "accentRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
         rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
         groundTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "groundTexture");
         accentGroundTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentGroundTexture");
-        highlightGroundTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "highlightGroundTexture");
-        plateauTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "plateauTexture");
         accentPlateauTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentPlateauTexture");
+        slopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "slopesTexture");
+        accentSlopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentSlopesTexture");
+        rockBaseTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "rockBaseTexture");
         rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentRockTexture");
-        highAltitudeTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "highAltitudeTexture");
 
-        ground.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 6).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4);
-        ground.combine(plateaus).combine(shore.copy().inflate(16)).intersect(land).smooth(2, .25f).filterShapes(32);
-        accentGround.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-        highlightGround.combine(ground).minus(plateaus.copy().outline()).deflate(8).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-        plateau.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-        accentPlateau.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
+        ground.shrink(mapSize / 4).erode(.75f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.2f, symmetryHierarchy.getSpawnSymmetry(), 8);
+        ground.combine(plateaus).combine(shore).intersect(land).smooth(2, .25f).filterShapes(32);
+        accentGround.minus(slopes).minus(plateaus).deflate(4).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
+        accentPlateau.minus(slopes).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
+        slopes.intersect(land).flipValues(.75f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+        accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
+        rockBase.intersect(land);
+        accentRock.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .25f).intersect(rock);
 
-        groundTexture.init(ground, 0, 1).smooth(8);
+        groundTexture.init(ground, 0, 1).smooth(4);
         accentGroundTexture.init(accentGround, 0, 1).smooth(8);
-        highlightGroundTexture.init(highlightGround, 0, 1).smooth(8);
-        plateauTexture.init(plateau, 0, 1).smooth(8);
         accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8);
-        rockTexture.init(rock, 0, 1).smooth(2);
-        accentRockTexture.init(accentRock, 0, 1).smooth(4);
-        highAltitudeTexture.init(highAltitude, 0, 1).smooth(16);
+        slopesTexture.init(slopes, 0, 1).smooth(4);
+        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8);
+        rockBaseTexture.init(rockBase, 0, 1).smooth(2);
+        rockTexture.init(rock, 0, 1).smooth(2).add(rock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(rock.copy().shrink(map.getSize() / 2), .25f);
+        accentRockTexture.init(accentRock, 0, 1).smooth(2);
 
     }
 

@@ -62,6 +62,35 @@ public strictfp class FloatMask extends Mask {
         return mask[x][y];
     }
 
+    public float getMin() {
+        float val = Float.MAX_VALUE;
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                val = StrictMath.min(val, get(x, y));
+            }
+        }
+        return val;
+    }
+
+    public float getMax() {
+        float val = 0;
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                val = StrictMath.max(val, get(x, y));
+            }
+        }
+        return val;
+    }
+
+    public float getAvg() {
+        float val = 0;
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                val += get(x, y);
+            }
+        }
+        return val / getSize() / getSize();
+    }
 
     public void set(Vector2f location, float value) {
         set((int) location.x, (int) location.y, value);
@@ -77,6 +106,10 @@ public strictfp class FloatMask extends Mask {
 
     public void add(int x, int y, float value) {
         mask[x][y] += value;
+    }
+
+    public void multiply(int x, int y, float value) {
+        mask[x][y] *= value;
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
@@ -107,6 +140,26 @@ public strictfp class FloatMask extends Mask {
         }
     }
 
+    public FloatMask multiply(FloatMask other) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                multiply(x, y, other.get(x, y));
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask multiply(float val) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                multiply(x, y, val);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask add(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -129,10 +182,40 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask min(FloatMask other) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                set(x, y, StrictMath.min(get(x, y), other.get(x, y)));
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask clampMin(float val) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                set(x, y, StrictMath.max(get(x, y), val));
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask max(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 set(x, y, StrictMath.max(get(x, y), other.get(x, y)));
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask clampMax(float val) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                set(x, y, StrictMath.min(get(x, y), val));
             }
         }
         VisualDebugger.visualizeMask(this);

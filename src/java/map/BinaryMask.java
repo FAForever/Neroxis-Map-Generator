@@ -101,7 +101,7 @@ public strictfp class BinaryMask extends Mask {
         }
         for (int x = 0; x < mask.getSize(); x++) {
             for (int y = 0; y < mask.getSize(); y++) {
-                set(x, y, mask.get(x, y) > threshold);
+                set(x, y, mask.get(x, y) >= threshold);
             }
         }
         VisualDebugger.visualizeMask(this);

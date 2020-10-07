@@ -1,7 +1,5 @@
 package populator;
 
-import biomes.Biome;
-import biomes.Biomes;
 import export.SCMapExporter;
 import export.SaveExporter;
 import export.ScenarioExporter;
@@ -15,7 +13,6 @@ import importer.SaveImporter;
 import map.*;
 import util.ArgumentParser;
 import util.FileUtils;
-import util.serialized.WaterSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +29,7 @@ public strictfp class MapPopulator {
 
     private Path inMapPath;
     private Path outFolderPath;
+    private String mapFolder;
     private String mapName;
     private SCMap map;
     private Random random;
@@ -44,7 +42,6 @@ public strictfp class MapPopulator {
     private int mexCountPerPlayer;
     private int hydroCountPerPlayer;
     private boolean populateTextures;
-    private Biome biome;
 
     //masks used in transformation
     private BinaryMask land;
@@ -96,16 +93,16 @@ public strictfp class MapPopulator {
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the transformed map\n" +
-                    "--team-symmetry arg    optional, set the symmetry for the teams(X, Y, XY, YX)\n" +
-                    "--spawn-symmetry arg   optional, set the symmetry for the spawns(Point, X, Y, XY, YX)\n" +
-                    "--spawns arg           optional, populate spawns" +
-                    "--mexes arg            optional, populate mexes" +
-                    "--hydros arg           optional, populate hydros" +
-                    "--props                optional, populate props" +
-                    "--wrecks               optional, populate wrecks" +
-                    "--textures biome       optional, populate textures with biome" +
-                    "--ai                   optional, populate ai markers" +
-                    "--debug                optional, turn on debugging options");
+                    "--team-symmetry arg    required, set the symmetry for the teams(X, Y, XY, YX)\n" +
+                    "--spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Y, XY, YX)\n" +
+                    "--spawns arg           optional, populate arg spawns\n" +
+                    "--mexes arg            optional, populate arg mexes per player\n" +
+                    "--hydros arg           optional, populate arg hydros per player\n" +
+                    "--props                optional, populate props\n" +
+                    "--wrecks               optional, populate wrecks\n" +
+                    "--textures             optional, populate texture masks\n" +
+                    "--ai                   optional, populate ai markers\n" +
+                    "--debug                optional, turn on debugging options\n");
             System.exit(0);
         }
 
@@ -146,9 +143,6 @@ public strictfp class MapPopulator {
         }
         populateProps = arguments.containsKey("props");
         populateTextures = arguments.containsKey("textures");
-        if (populateTextures) {
-            biome = Biomes.getBiomeByName(arguments.get("textures"));
-        }
     }
 
     public void importMap() {
@@ -161,9 +155,14 @@ public strictfp class MapPopulator {
                 return;
             }
             File scmapFile = mapFiles[0];
+            mapFolder = inMapPath.getFileName().toString();
             mapName = scmapFile.getName().replace(".scmap", "");
             map = SCMapImporter.loadSCMAP(inMapPath);
             SaveImporter.importSave(inMapPath, map);
+            if (map.getMinorVersion() != 56) {
+                System.out.println("Can only populate version 56 maps");
+                System.exit(-1);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while saving the map.");
@@ -172,14 +171,12 @@ public strictfp class MapPopulator {
 
     public void exportMap() {
         try {
-            FileUtils.deleteRecursiveIfExists(outFolderPath.resolve(mapName));
-
             long startTime = System.currentTimeMillis();
-            Files.createDirectories(outFolderPath.resolve(mapName));
-            SCMapExporter.exportSCMAP(outFolderPath, mapName, map);
-            SaveExporter.exportSave(outFolderPath, mapName, map);
-            ScenarioExporter.exportScenario(outFolderPath, mapName, map);
-            ScriptExporter.exportScript(outFolderPath, mapName, map);
+            Files.createDirectories(outFolderPath.resolve(mapFolder));
+            SCMapExporter.exportSCMAP(outFolderPath.resolve(mapFolder), mapName, map);
+            SaveExporter.exportSave(outFolderPath.resolve(mapFolder), mapName, map);
+            ScenarioExporter.exportScenario(outFolderPath.resolve(mapFolder), mapName, map);
+            ScriptExporter.exportScript(outFolderPath.resolve(mapFolder), mapName, map);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
@@ -191,32 +188,36 @@ public strictfp class MapPopulator {
     public void populate() {
         random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
+        heightmapBase = map.getHeightMask(symmetryHierarchy);
+        heightmapBase.applySymmetry();
+        map.setHeightmap(heightmapBase);
         float waterHeight;
         if (waterPresent) {
             waterHeight = map.getBiome().getWaterSettings().getElevation();
         } else {
-            waterHeight = 0;
+            waterHeight = heightmapBase.getMin();
         }
-        heightmapBase = map.getHeightMask(symmetryHierarchy);
-        heightmapBase.applySymmetry();
-        map.setHeightmap(heightmapBase);
         land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
         plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
-        impassable = new BinaryMask(slope, 1f, random.nextLong());
+        impassable = new BinaryMask(slope, .9f, random.nextLong());
         ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
         passable = impassable.copy().invert();
         passableLand = new BinaryMask(land, null);
         passableWater = new BinaryMask(land, null).invert();
 
         if (populateSpawns) {
-            map.setSpawnCountInit(spawnCount);
-            SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), 48);
-            float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
-            BinaryMask spawns = land.copy();
-            spawns.intersect(passable).minus(ramps).deflate(16);
-            spawnGenerator.generateSpawns(spawns, spawnSeparation);
-            spawnGenerator.setMarkerHeights();
+            if (spawnCount > 0) {
+                map.setSpawnCountInit(spawnCount);
+                SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), 48);
+                float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
+                BinaryMask spawns = land.copy();
+                spawns.intersect(passable).minus(ramps).deflate(16);
+                spawnGenerator.generateSpawns(spawns, spawnSeparation);
+                spawnGenerator.setMarkerHeights();
+            } else {
+                map.getSpawns().clear();
+            }
         }
 
         if (populateMexes || populateHydros) {
@@ -231,38 +232,40 @@ public strictfp class MapPopulator {
         }
 
         if (populateMexes) {
-            map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
-            MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), 48, map.getSize() / 8);
+            if (mexCountPerPlayer > 0) {
+                map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
+                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), 48, map.getSize() / 8);
 
-            mexGenerator.generateMexes(resourceMask, plateauResourceMask, waterResourceMask);
-            mexGenerator.setMarkerHeights();
+                mexGenerator.generateMexes(resourceMask, plateauResourceMask, waterResourceMask);
+                mexGenerator.setMarkerHeights();
+            } else {
+                map.getMexes().clear();
+            }
         }
 
         if (populateHydros) {
-            map.setMexCountInit(hydroCountPerPlayer * map.getSpawnCount());
-            HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), 48);
+            if (hydroCountPerPlayer > 0) {
+                map.setMexCountInit(hydroCountPerPlayer * map.getSpawnCount());
+                HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), 48);
 
-            hydroGenerator.generateHydros(resourceMask.deflate(4));
-            hydroGenerator.setMarkerHeights();
+                hydroGenerator.generateHydros(resourceMask.deflate(4));
+                hydroGenerator.setMarkerHeights();
+            } else {
+                map.getHydros().clear();
+            }
         }
 
         if (populateTextures) {
-            WaterSettings mapWaterSettings = map.getBiome().getWaterSettings();
-            WaterSettings biomeWaterSettings = biome.getWaterSettings();
-            biomeWaterSettings.setWaterPresent(mapWaterSettings.isWaterPresent());
-            biomeWaterSettings.setElevation(mapWaterSettings.getElevation());
-            biomeWaterSettings.setElevationAbyss(mapWaterSettings.getElevationAbyss());
-            biomeWaterSettings.setElevationDeep(mapWaterSettings.getElevationDeep());
             map.getDecals().clear();
-            map.setBiome(biome);
 
+            BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask ground = new BinaryMask(land, random.nextLong());
-//            BinaryMask accentGround = new BinaryMask(hills, random.nextLong());
+            BinaryMask accentGround = new BinaryMask(slope, .75f, random.nextLong()).invert();
             BinaryMask highlightGround = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetryHierarchy);
             BinaryMask plateau = new BinaryMask(plateaus, random.nextLong());
-//            BinaryMask accentPlateau = new BinaryMask(valleys, random.nextLong());
-            BinaryMask rock = new BinaryMask(impassable, random.nextLong()).inflate(4);
-            BinaryMask accentRock = new BinaryMask(slope, .75f, random.nextLong());
+            BinaryMask accentPlateau = new BinaryMask(slope, .5f, random.nextLong());
+            BinaryMask rock = new BinaryMask(slope, .35f, random.nextLong());
+            BinaryMask accentRock = new BinaryMask(slope, 1f, random.nextLong());
             BinaryMask highAltitude = new BinaryMask(heightmapBase, waterHeight + 25f, random.nextLong());
             FloatMask groundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask accentGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
@@ -273,21 +276,21 @@ public strictfp class MapPopulator {
             FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask highAltitudeTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
 
-            ground.shrink(map.getSize() / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 6).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4);
+            ground.shrink(map.getSize() / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.2f, symmetryHierarchy.getSpawnSymmetry(), 8);
             ground.combine(plateaus).intersect(land).smooth(2, .25f).filterShapes(32);
-//            accentGround.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
+            accentGround.minus(flat).intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
             highlightGround.combine(ground).minus(plateaus.copy().outline()).deflate(8).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
             plateau.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-//            accentPlateau.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
+            accentPlateau.intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
 
-            groundTexture.init(ground, 0, 1).smooth(8);
-//            accentGroundTexture.init(accentGround, 0, 1).smooth(8);
+            groundTexture.init(ground, 0, 1).smooth(4);
+            accentGroundTexture.init(accentGround, 0, 1).smooth(4);
             highlightGroundTexture.init(highlightGround, 0, 1).smooth(8);
-            plateauTexture.init(plateau, 0, 1).smooth(8);
-//            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8);
-            rockTexture.init(rock, 0, 1).smooth(2);
-            accentRockTexture.init(accentRock, 0, 1).smooth(4);
-            highAltitudeTexture.init(highAltitude, 0, 1).smooth(16);
+            plateauTexture.init(plateau, 0, 1).smooth(4);
+            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(4);
+            rockTexture.init(rock, 0, 1).smooth(4);
+            accentRockTexture.init(accentRock, 0, 1).smooth(2).add(accentRock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(accentRock.copy().shrink(map.getSize() / 2), .25f);
+            highAltitudeTexture.init(highAltitude, 0, 1).smooth(4);
 
             map.setTextureMasksLow(groundTexture, accentGroundTexture, highlightGroundTexture, plateauTexture);
             map.setTextureMasksHigh(accentPlateauTexture, rockTexture, accentRockTexture, highAltitudeTexture);

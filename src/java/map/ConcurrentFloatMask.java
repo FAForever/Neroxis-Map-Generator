@@ -51,6 +51,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentFloatMask add(ConcurrentBinaryMask other, float value) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.floatMask.add(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+        );
+    }
+
     public ConcurrentFloatMask maskToMoutains(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.maskToMountains(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())

@@ -365,7 +365,11 @@ public strictfp class SCMap {
     public void setTextureMasksLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                textureMasksLow.getRaster().setPixel(x, y, new int[]{(int) (StrictMath.min(1f, mask0.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask1.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask2.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask3.get(x, y)) * 255f)});
+                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
+                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
+                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
+                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 127 + 128) : 0;
+                textureMasksLow.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
     }
@@ -373,7 +377,11 @@ public strictfp class SCMap {
     public void setTextureMasksHigh(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                textureMasksHigh.getRaster().setPixel(x, y, new int[]{(int) (StrictMath.min(1f, mask0.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask1.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask2.get(x, y)) * 255f), (int) (StrictMath.min(1f, mask3.get(x, y)) * 255f)});
+                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
+                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
+                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
+                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 127 + 128) : 0;
+                textureMasksHigh.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
     }
