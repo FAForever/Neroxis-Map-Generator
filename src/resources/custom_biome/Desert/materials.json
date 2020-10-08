@@ -1,15 +1,15 @@
 {
   "name": "Desert",
   "texturePaths": [
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandMed01_albedo.dds",
+    "/env/Desert/Layers/Des_SandDark_albedo.dds",
+    "/env/Desert/Layers/Des_SandDark02_albedo.dds",
+    "/env/Desert/Layers/Des_SandMed02_albedo.dds",
     "/env/Desert/Layers/Des_SandMed_albedo.dds",
-    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
-    "/env/Desert/Layers/Des_Rock02_albedo.dds",
-    "/env/Desert/Layers/Des_Rock02_albedo.dds",
-    "/env/Desert/Layers/Des_Rock02_albedo.dds",
+    "/env/Desert/Layers/Des_Gravel_albedo.dds",
+    "/env/Desert/Layers/Des_Rock04_albedo.dds",
+    "/env/Desert/Layers/Des_Rock06_albedo.dds",
+    "/env/Desert/Layers/Des_Rock_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
@@ -18,22 +18,22 @@
     8.0,
     8.0,
     8.0,
-    32.0,
     16.0,
     16.0,
-    32.0,
+    8.0,
+    16.0,
     128.0
   ],
   "normalPaths": [
     "/env/paradise/layers/sand000_normals.dds",
+    "/env/Desert/Layers/Des_SandDark_normal.dds",
+    "/env/Desert/Layers/Des_Gravel_normal.dds",
+    "/env/Desert/Layers/Des_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Desert/Layers/Des_Gravel_normal.dds",
     "/env/Desert/Layers/Des_Rock03a_normal.dds",
-    "/env/Crystalline/layers/Cr_07_01_normal.dds",
-    "/env/Lava/Layers/LAV_Rock04_normals.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds"
+    "/env/Desert/Layers/Des_Rock01_normal.dds"
   ],
   "normalScales": [
     20.0,
@@ -48,39 +48,39 @@
   ],
   "previewColors": [
     {
-      "value": -7378623,
+      "value": -6518683,
       "falpha": 0.0
     },
     {
-      "value": -7378623,
+      "value": -7376820,
       "falpha": 0.0
     },
     {
-      "value": -7378623,
+      "value": -9940934,
       "falpha": 0.0
     },
     {
-      "value": -6515093,
+      "value": -8293798,
       "falpha": 0.0
     },
     {
-      "value": -6515093,
+      "value": -6518683,
       "falpha": 0.0
     },
     {
-      "value": -6515093,
+      "value": -10069694,
       "falpha": 0.0
     },
     {
-      "value": -8890572,
+      "value": -8163752,
       "falpha": 0.0
     },
     {
-      "value": -8890572,
+      "value": -11845328,
       "falpha": 0.0
     },
     {
-      "value": -8890572,
+      "value": -9549004,
       "falpha": 0.0
     }
   ]

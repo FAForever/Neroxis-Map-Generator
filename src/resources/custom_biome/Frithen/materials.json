@@ -2,26 +2,26 @@
   "name": "Frithen",
   "texturePaths": [
     "/env/Tundra/Layers/Tund_melt001_albedo.dds",
+    "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
+    "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
     "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
     "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
-    "/env/Tundra/Layers/MacroIce_albedo.dds",
-    "/env/Tundra/Layers/Tund_ice005_albedo.dds",
+    "/env/Tundra/Layers/Tund_melt001_albedo.dds",
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
-    "/env/Tundra/Layers/Tund_Ice003_albedo.DDS",
-    "/env/Tundra/Layers/Tund_Ice003_albedo.DDS",
-    "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
+    "/env/Tundra/Layers/Tund_melt001_albedo.dds",
+    "/env/Tundra/Layers/Tund_Rock_albedo.DDS",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     1.0,
-    8.0,
-    8.0,
-    128.0,
-    6.0,
+    2.0,
+    0.0,
     16.0,
-    32.0,
-    32.0,
-    64.0,
+    6.0,
+    8.0,
+    16.0,
+    16.0,
+    16.0,
     128.0
   ],
   "normalPaths": [
@@ -48,39 +48,39 @@
   ],
   "previewColors": [
     {
-      "value": -13881290,
+      "value": -11709347,
       "falpha": 0.0
     },
     {
-      "value": -6904148,
+      "value": -10065039,
       "falpha": 0.0
     },
     {
-      "value": -5590342,
+      "value": -7102299,
       "falpha": 0.0
     },
     {
-      "value": -7036251,
+      "value": -7364699,
       "falpha": 0.0
     },
     {
-      "value": -8286823,
+      "value": -7102299,
       "falpha": 0.0
     },
     {
-      "value": -7041396,
+      "value": -11709347,
       "falpha": 0.0
     },
     {
-      "value": -8088940,
+      "value": -10065039,
       "falpha": 0.0
     },
     {
-      "value": -8088940,
+      "value": -11709347,
       "falpha": 0.0
     },
     {
-      "value": -5590342,
+      "value": -14408152,
       "falpha": 0.0
     }
   ]

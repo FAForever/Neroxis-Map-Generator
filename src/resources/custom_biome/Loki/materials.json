@@ -8,7 +8,7 @@
     "/env/Evergreen2/Layers/EG_Gravel2_albedo.dds",
     "/env/Evergreen/layers/SandLight002_albedo.dds",
     "/env/Evergreen2/Layers/EvRock004_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock006c_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock004_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
@@ -20,7 +20,7 @@
     4.0,
     4.0,
     8.0,
-    16.0,
+    8.0,
     32.0,
     77.5
   ],
@@ -38,9 +38,9 @@
   "normalScales": [
     8.0,
     4.0,
-    16.0,
-    20.0,
-    16.0,
+    8.0,
+    10.0,
+    8.0,
     4.0,
     4.0,
     4.0,
@@ -48,39 +48,39 @@
   ],
   "previewColors": [
     {
-      "value": -11383486,
+      "value": -11774650,
       "falpha": 0.0
     },
     {
-      "value": -13549296,
+      "value": -12826087,
       "falpha": 0.0
     },
     {
-      "value": -14076656,
+      "value": -14801654,
       "falpha": 0.0
     },
     {
-      "value": -13024477,
+      "value": -13615330,
       "falpha": 0.0
     },
     {
-      "value": -11379366,
+      "value": -12961746,
       "falpha": 0.0
     },
     {
-      "value": -8159893,
+      "value": -8094093,
       "falpha": 0.0
     },
     {
-      "value": -10857117,
+      "value": -12764345,
       "falpha": 0.0
     },
     {
-      "value": -10465463,
+      "value": -12764345,
       "falpha": 0.0
     },
     {
-      "value": -11250865,
+      "value": -12698052,
       "falpha": 0.0
     }
   ]

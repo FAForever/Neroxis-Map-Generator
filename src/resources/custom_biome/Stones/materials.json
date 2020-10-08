@@ -1,26 +1,26 @@
 {
   "name": "Stones",
   "texturePaths": [
+    "/env/paradise/layers/dirt000_albedo.dds",
     "/env/paradise/layers/grass001_albedo.dds",
-    "/env/paradise/layers/grass000_albedo.dds",
     "/env/paradise/layers/Rock001_albedo.dds",
     "/env/paradise/layers/dirt000_albedo.dds",
-    "/env/paradise/layers/dirt000_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock005_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
+    "/env/Geothermal/layers/Geo_LavaMd_02_albedo.dds",
+    "/env/Geothermal/layers/Geo_Rock001_albedo.DDS",
     "/env/paradise/layers/LavaRock_albedo.dds",
-    "/env/paradise/layers/LavaRock_albedo.dds",
-    "/env/paradise/layers/Ice002_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     0.0,
     0.0,
     7.0,
-    16.0,
-    32.0,
+    0.0,
+    12.0,
     16.0,
     14.0,
-    24.0,
+    8.0,
     24.0,
     128.0
   ],
@@ -32,55 +32,55 @@
     "/env/paradise/layers/Rock001_normals.dds",
     "/env/paradise/layers/SandMed_normals.dds",
     "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/Ice002_normals.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds"
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds"
   ],
   "normalScales": [
     4.0,
     24.0,
     16.0,
-    32.0,
-    32.0,
+    16.0,
+    16.0,
     64.0,
     32.0,
-    64.0,
+    16.0,
     4.0
   ],
   "previewColors": [
     {
-      "value": -11584477,
+      "value": -10465488,
       "falpha": 0.0
     },
     {
-      "value": -12831475,
+      "value": -12767974,
       "falpha": 0.0
     },
     {
-      "value": -11582668,
+      "value": -11845324,
       "falpha": 0.0
     },
     {
-      "value": -9543876,
+      "value": -10465488,
       "falpha": 0.0
     },
     {
-      "value": -9543876,
+      "value": -12566712,
       "falpha": 0.0
     },
     {
-      "value": -9545412,
+      "value": -8755895,
       "falpha": 0.0
     },
     {
-      "value": -14604255,
+      "value": -13484218,
       "falpha": 0.0
     },
     {
-      "value": -14604255,
+      "value": -11972515,
       "falpha": 0.0
     },
     {
-      "value": -8679496,
+      "value": -13947607,
       "falpha": 0.0
     }
   ]
