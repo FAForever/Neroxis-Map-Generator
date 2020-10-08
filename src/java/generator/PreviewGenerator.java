@@ -88,6 +88,7 @@ public strictfp class PreviewGenerator {
         BufferedImage textureHighMap = map.getTextureMasksHigh();
         BufferedImage textureHighScaled = scale(textureHighMap, 256, 256);
 
+        float ambientCoefficient = .5f;
         float landDiffuseCoefficient = .5f;
         float landSpecularCoefficient = .5f;
         float landShininess = 1f;
@@ -131,9 +132,9 @@ public strictfp class PreviewGenerator {
                     float diffuseTerm = (float) (StrictMath.max(StrictMath.cos(StrictMath.toRadians(normalAngle - elevation)) * landDiffuseCoefficient, 0));
                     float specularTerm = (float) (StrictMath.max(StrictMath.pow(StrictMath.cos(StrictMath.toRadians(90 - reflectedAngle)), landShininess) * landSpecularCoefficient, 0));
 
-                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().x * (1 + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().x);
-                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().y * (1 + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().y);
-                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().z * (1 + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().z);
+                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().x * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().x);
+                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().y * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().y);
+                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().z * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().z);
                 } else {
                     newRGBA = origRGBA.clone();
                 }
@@ -163,6 +164,7 @@ public strictfp class PreviewGenerator {
 
         float elevation = lightingSettings.getSunDirection().getElevation();
         float[] mapElevations = {map.getBiome().getWaterSettings().getElevation(), map.getBiome().getWaterSettings().getElevationAbyss()};
+        float ambientCoefficient = .5f;
         float waterDiffuseCoefficient = .25f;
         float waterSpecularCoefficient = .25f;
         float waterShininess = 1f;
@@ -182,9 +184,9 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
                 newRGBA[2] = (int) (shallowColor.getBlue() * (1 - weight) + abyssColor.getBlue() * weight);
-                newRGBA[0] *= (lightingSettings.getSunColor().x + waterSettings.getSurfaceColor().x) * (1 + diffuseTerm + specularTerm);
-                newRGBA[1] *= (lightingSettings.getSunColor().y + waterSettings.getSurfaceColor().y) * (1 + diffuseTerm + specularTerm);
-                newRGBA[2] *= (lightingSettings.getSunColor().z + waterSettings.getSurfaceColor().z) * (1 + diffuseTerm + specularTerm);
+                newRGBA[0] *= (lightingSettings.getSunColor().x + waterSettings.getSurfaceColor().x) * (ambientCoefficient + diffuseTerm + specularTerm);
+                newRGBA[1] *= (lightingSettings.getSunColor().y + waterSettings.getSurfaceColor().y) * (ambientCoefficient + diffuseTerm + specularTerm);
+                newRGBA[2] *= (lightingSettings.getSunColor().z + waterSettings.getSurfaceColor().z) * (ambientCoefficient + diffuseTerm + specularTerm);
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);
