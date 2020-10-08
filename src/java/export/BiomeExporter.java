@@ -8,9 +8,6 @@ import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,15 +44,18 @@ public strictfp class BiomeExporter {
         byte[] buffer = new byte[inputStream.available()];
         inputStream.read(buffer);
         int[] pixels = DDSReader.read(buffer, DDSReader.ARGB, 0);
-        int width = (int) StrictMath.sqrt(pixels.length);
-        int height = width;
-        BufferedImage unscaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        unscaled.setRGB(0, 0, width, height, pixels, 0, width);
-        BufferedImage scaled = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        AffineTransform at = new AffineTransform();
-        at.scale(width, height);
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        scaled = scaleOp.filter(unscaled, scaled);
-        return new Color(scaled.getRGB(0, 0));
+        float avgR = 0;
+        float avgB = 0;
+        float avgG = 0;
+        if (pixels != null) {
+            for (int pix : pixels) {
+                Color pixColor = new Color(pix);
+                avgR += pixColor.getRed();
+                avgB += pixColor.getBlue();
+                avgG += pixColor.getGreen();
+            }
+            return new Color((int) avgR / pixels.length, (int) avgG / pixels.length, (int) avgB / pixels.length);
+        }
+        return null;
     }
 }
