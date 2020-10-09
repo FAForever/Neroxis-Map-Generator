@@ -1,6 +1,11 @@
 package util;
 
+import javax.imageio.ImageIO;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ImageUtils {
 
@@ -21,6 +26,23 @@ public class ImageUtils {
         }
 
         return true;
+    }
+
+    public static BufferedImage readImage(String resource) throws IOException {
+        InputStream inputStream = ImageUtils.class.getResourceAsStream(resource);
+        return ImageIO.read(inputStream);
+    }
+
+    public static BufferedImage scaleImage(BufferedImage image, int width, int height) {
+        width = StrictMath.max(width, 1);
+        height = StrictMath.max(height, 1);
+        BufferedImage imageScaled = new BufferedImage(width, height, image.getType());
+        AffineTransform at = new AffineTransform();
+        at.scale((double) width / image.getWidth(), (double) height / image.getHeight());
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        imageScaled = scaleOp.filter(image, imageScaled);
+
+        return imageScaled;
     }
 
 }

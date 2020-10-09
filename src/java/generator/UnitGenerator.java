@@ -6,12 +6,13 @@ import map.BinaryMask;
 import map.SCMap;
 import map.Unit;
 import util.Vector2f;
-import util.Vector3f;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
 import java.util.Random;
+
+import static util.Placement.placeOnHeightmap;
 
 public strictfp class UnitGenerator {
     public static final String[] MEDIUM_ENEMY = {
@@ -30,21 +31,6 @@ public strictfp class UnitGenerator {
     public UnitGenerator(SCMap map, long seed) {
         this.map = map;
         random = new Random(seed);
-    }
-
-    private Vector3f placeOnHeightmap(Vector2f v) {
-        return placeOnHeightmap(v.x, v.y);
-    }
-
-    private Vector3f placeOnHeightmap(Vector3f v) {
-        return placeOnHeightmap(v.x, v.z);
-    }
-
-
-    private Vector3f placeOnHeightmap(float x, float z) {
-        Vector3f v = new Vector3f(x, 0, z);
-        v.y = map.getHeightmap().getRaster().getPixel((int) v.x, (int) v.z, new int[]{0})[0] * (SCMap.HEIGHTMAP_SCALE);
-        return v;
     }
 
     public void generateBases(BinaryMask spawnable, String[] templates, Army army, float separation) {
@@ -81,7 +67,7 @@ public strictfp class UnitGenerator {
 
     public void setUnitHeights() {
         for (Unit unit : map.getUnits()) {
-            unit.setPosition(placeOnHeightmap(unit.getPosition()));
+            unit.setPosition(placeOnHeightmap(map, unit.getPosition()));
         }
     }
 }

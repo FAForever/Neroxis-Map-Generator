@@ -1,8 +1,7 @@
 package export;
 
 import generator.PreviewGenerator;
-import map.SCMap;
-import map.TerrainMaterials;
+import map.*;
 import util.DDSHeader;
 import util.Vector2f;
 import util.Vector3f;
@@ -58,20 +57,22 @@ public strictfp class SCMapExporter {
         // heightmap
         writeInt(map.getSize()); // width
         writeInt(map.getSize()); // height
-        writeFloat(SCMap.HEIGHTMAP_SCALE);
+        writeFloat(map.getHeightMapScale());
         writeShorts(((DataBufferUShort) map.getHeightmap().getData().getDataBuffer()).getData()); // heightmap data
         writeByte((byte) 0); // unknown
 
         // textures
-        writeStringNull(SCMap.TERRAIN_SHADER_PATH);
-        writeStringNull(SCMap.BACKGROUND_PATH);
-        writeStringNull(SCMap.SKYCUBE_PATH);
-        writeInt(1); // cubemap count
-        writeStringNull(SCMap.CUBEMAP_NAME);
-        writeStringNull(SCMap.CUBEMAP_PATH);
+        writeStringNull(map.getTerrainShaderPath());
+        writeStringNull(map.getBackgroundPath());
+        writeStringNull(map.getSkyCubePath());
+        writeInt(map.getCubeMapCount());
+        for (CubeMap cubeMap : map.getCubeMaps()) {
+            writeStringNull(cubeMap.getName());
+            writeStringNull(cubeMap.getPath());
+        }
 
         // lighting
-        LightingSettings mapLightingSettings = map.biome.getLightingSettings();
+        LightingSettings mapLightingSettings = map.getBiome().getLightingSettings();
         writeFloat(mapLightingSettings.getLightingMultiplier());
         writeVector3f(mapLightingSettings.getSunDirection());
         writeVector3f(mapLightingSettings.getSunAmbience());
@@ -84,7 +85,7 @@ public strictfp class SCMapExporter {
         writeFloat(mapLightingSettings.getFogEnd());
 
         // water
-        WaterSettings mapWaterSettings = map.biome.getWaterSettings();
+        WaterSettings mapWaterSettings = map.getBiome().getWaterSettings();
         writeByte((byte) (mapWaterSettings.isWaterPresent() ? 1 : 0));
         writeFloat(mapWaterSettings.getElevation());
         writeFloat(mapWaterSettings.getElevationDeep());
@@ -106,23 +107,44 @@ public strictfp class SCMapExporter {
         writeStringNull(mapWaterSettings.getTexPathWaterRamp());
 
         // waves
-        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            writeFloat(mapWaterSettings.getWaveTextures()[i].getNormalRepeat());
+        for (WaterSettings.WaveTexture waveTexture : mapWaterSettings.getWaveTextures()) {
+            writeFloat(waveTexture.getNormalRepeat());
         }
 
-        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            writeVector2f(mapWaterSettings.getWaveTextures()[i].getNormalMovement());
-            writeStringNull(mapWaterSettings.getWaveTextures()[i].getTexPath());
+        for (WaterSettings.WaveTexture waveTexture : mapWaterSettings.getWaveTextures()) {
+            writeVector2f(waveTexture.getNormalMovement());
+            writeStringNull(waveTexture.getTexPath());
         }
 
         // wave generators
-        writeInt(0); // wave generator count
+        writeInt(map.getWaveGeneratorCount());
+        for (WaveGenerator waveGenerator : map.getWaveGenerators()) {
+            writeStringNull(waveGenerator.getTextureName());
+            writeStringNull(waveGenerator.getRampName());
+            writeVector3f(waveGenerator.getPosition());
+            writeFloat(waveGenerator.getRotation());
+            writeVector3f(waveGenerator.getVelocity());
+            writeFloat(waveGenerator.getLifeTimeFirst());
+            writeFloat(waveGenerator.getLifeTimeSecond());
+            writeFloat(waveGenerator.getPeriodFirst());
+            writeFloat(waveGenerator.getPeriodSecond());
+            writeFloat(waveGenerator.getScaleFirst());
+            writeFloat(waveGenerator.getScaleSecond());
+            writeFloat(waveGenerator.getFrameCount());
+            writeFloat(waveGenerator.getFrameRateFirst());
+            writeFloat(waveGenerator.getFrameRateSecond());
+            writeFloat(waveGenerator.getStripCount());
+        }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = map.biome.getTerrainMaterials();
-        for (int i = 0; i < 24; i++) {
-            writeByte((byte) 0); // minimap Info
-        }
+        TerrainMaterials mapTerrainMaterials = map.getBiome().getTerrainMaterials();
+        writeInt(map.getMiniMapContourInterval());
+        writeInt(map.getMiniMapDeepWaterColor());
+        writeInt(map.getMiniMapContourColor());
+        writeInt(map.getMiniMapShoreColor());
+        writeInt(map.getMiniMapLandStartColor());
+        writeInt(map.getMiniMapLandEndColor());
+
         if (map.getMinorVersion() > 56) {
             writeFloat(0);
         }
@@ -141,20 +163,31 @@ public strictfp class SCMapExporter {
         // decals
         writeInt(map.getDecalCount());
         for (int i = 0; i < map.getDecalCount(); i++) {
+            Decal decal = map.getDecal(i);
             writeInt(i);
-            writeInt(map.getDecal(i).getType());
+            writeInt(decal.getType());
             writeInt(2);
-            writeString(map.getDecal(i).getPath());
+            writeString(decal.getPath());
             writeString("");
-            writeVector3f(map.getDecal(i).getScale());
-            writeVector3f(map.getDecal(i).getPosition());
-            writeVector3f(new Vector3f(0f, map.getDecal(i).getRotation(), 0f));
-            writeFloat(map.getDecal(i).getCutOffLOD());
+            writeVector3f(decal.getScale());
+            writeVector3f(decal.getPosition());
+            writeVector3f(new Vector3f(0f, decal.getRotation(), 0f));
+            writeFloat(decal.getCutOffLOD());
             writeFloat(0);
             writeInt(-1);
         }
 
-        writeInt(0); // decal group count
+        writeInt(map.getDecalGroupCount());
+        for (int i = 0; i < map.getDecalGroupCount(); i++) {
+            DecalGroup decalGroup = map.getDecalGroup(i);
+            writeInt(i);
+            writeStringNull(decalGroup.getName());
+            writeInt(decalGroup.getData().length);
+            for (int j = 0; j < decalGroup.getData().length; j++) {
+                writeInt(decalGroup.getData()[j]);
+            }
+        }
+
         writeInt(map.getSize()); // width
         writeInt(map.getSize()); // height
 
@@ -206,14 +239,59 @@ public strictfp class SCMapExporter {
         // terrain type
         writeInts(((DataBufferInt) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
 
+        // additional skybox
+        if (map.getMinorVersion() >= 60) {
+            SkyBox skyBox = map.getSkyBox();
+            writeVector3f(skyBox.getPosition());
+            writeFloat(skyBox.getHorizonHeight());
+            writeFloat(skyBox.getScale());
+            writeFloat(skyBox.getSubHeight());
+            writeInt(skyBox.getSubDivAx());
+            writeInt(skyBox.getSubDivHeight());
+            writeFloat(skyBox.getZenithHeight());
+            writeVector3f(skyBox.getHorizonColor());
+            writeVector3f(skyBox.getZenithColor());
+            writeFloat(skyBox.getDecalGlowMultiplier());
+
+            writeStringNull(skyBox.getAlbedo());
+            writeStringNull(skyBox.getGlow());
+
+            // Array of Planets/Stars
+            writeInt(skyBox.getPlanets().length);
+            for (SkyBox.Planet planet : skyBox.getPlanets()) {
+                writeVector3f(planet.getPosition());
+                writeFloat(planet.getRotation());
+                writeVector2f(planet.getScale());
+                writeVector4f(planet.getUv());
+            }
+
+            // Mid
+            writeByte((byte) skyBox.getMidRgbColor().getRed());
+            writeByte((byte) skyBox.getMidRgbColor().getBlue());
+            writeByte((byte) skyBox.getMidRgbColor().getGreen());
+
+            // Cirrus
+            writeFloat(skyBox.getCirrusMultiplier());
+            writeVector3f(skyBox.getCirrusColor());
+            writeStringNull(skyBox.getCirrusTexture());
+
+            writeInt(skyBox.getCirrusLayers().length);
+            for (SkyBox.Cirrus cirrus : skyBox.getCirrusLayers()) {
+                writeVector2f(cirrus.getFrequency());
+                writeFloat(cirrus.getSpeed());
+                writeVector2f(cirrus.getDirection());
+            }
+            writeFloat(skyBox.getClouds7());
+        }
+
         // props
         writeInt(map.getPropCount());
-        for (int i = 0; i < map.getPropCount(); i++) {
-            writeStringNull(map.getProp(i).getPath());
-            writeVector3f(map.getProp(i).getPosition());
-            writeVector3f(new Vector3f((float) StrictMath.sin(map.getProp(i).getRotation()), 0f, (float) StrictMath.cos(map.getProp(i).getRotation())));
+        for (Prop prop : map.getProps()) {
+            writeStringNull(prop.getPath());
+            writeVector3f(prop.getPosition());
+            writeVector3f(new Vector3f((float) StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
             writeVector3f(new Vector3f(0f, 1f, 0f));
-            writeVector3f(new Vector3f((float) -StrictMath.cos(map.getProp(i).getRotation()), 0f, (float) StrictMath.sin(map.getProp(i).getRotation())));
+            writeVector3f(new Vector3f((float) -StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
             writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
         }
 
@@ -221,7 +299,7 @@ public strictfp class SCMapExporter {
         out.close();
     }
 
-    public static void exportSCMapString(Path folderPath, String mapname, SCMap map) throws IOException {
+    public static void exportSCMapString(Path folderPath, String mapname, SCMap map) {
         map.writeToFile(folderPath.resolve(mapname).resolve("debug").resolve(mapname + ".txt"));
     }
 

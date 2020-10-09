@@ -10,4 +10,16 @@ public strictfp class WaveGenerator {
     private final Vector3f position;
     private final float rotation;
     private final Vector3f velocity;
+
+    private float lifeTimeFirst;
+    private float lifeTimeSecond;
+    private float periodFirst;
+    private float periodSecond;
+    private float scaleFirst;
+    private float scaleSecond;
+
+    private float frameCount;
+    private float frameRateFirst;
+    private float frameRateSecond;
+    private float stripCount;
 }

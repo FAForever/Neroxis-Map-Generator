@@ -9,6 +9,7 @@ import util.serialized.TerrainMaterialsAdapter;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,23 @@ public class FileUtils {
         }
 
         Files.delete(path);
+    }
+
+    @SneakyThrows
+    public static void copyRecursiveIfExists(Path source, Path dest) {
+        if (!Files.exists(source)) {
+            return;
+        }
+
+        if (Files.isDirectory(source)) {
+            Files.createDirectories(dest.resolve(source.getFileName()));
+            Stream<Path> files = Files.list(source);
+            files.forEach(file -> copyRecursiveIfExists(file, dest.resolve(source.getFileName())));
+            files.close();
+        } else {
+            Files.copy(source, dest.resolve(source.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+        }
+
     }
 
     /**

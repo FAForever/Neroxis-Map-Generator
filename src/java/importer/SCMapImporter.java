@@ -13,7 +13,6 @@ import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static util.Swapper.swap;
 
@@ -22,10 +21,6 @@ public strictfp class SCMapImporter {
     public static File file;
 
     private static DataInputStream in;
-
-    public static void main(String[] args) throws IOException {
-        SCMap map = loadSCMAP(Paths.get(args[0]));
-    }
 
     public static SCMap loadSCMAP(Path folderPath) throws IOException {
         File dir = folderPath.toFile();
@@ -72,36 +67,22 @@ public strictfp class SCMapImporter {
         // heightmap
         int widthInt = readInt();
         int heightInt = readInt();
-        if (readFloat() != SCMap.HEIGHTMAP_SCALE) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
+        float heightMapScale = readFloat();
         short[] heightMapData = readShorts((widthInt + 1) * (heightInt + 1));
-
         if (readByte() != 0) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
 
         // textures
         String shaderPath = readStringNull();
-        if (!shaderPath.equals(SCMap.TERRAIN_SHADER_PATH)) {
-//            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
         String backgroundPath = readStringNull();
-        if (!backgroundPath.equals(SCMap.BACKGROUND_PATH)) {
-//            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
         String skyCubePath = readStringNull();
-        if (!skyCubePath.equals(SCMap.SKYCUBE_PATH)) {
-//            throw new UnsupportedEncodingException("File not valid SCMap");
-        }
-        int cubemapCount = readInt();
-        for (int i = 0; i < cubemapCount; i++) {
-            if (!readStringNull().equals(SCMap.CUBEMAP_NAME)) {
-//            throw new UnsupportedEncodingException("File not valid SCMap");
-            }
-            if (!readStringNull().equals(SCMap.CUBEMAP_PATH)) {
-//            throw new UnsupportedEncodingException("File not valid SCMap");
-            }
+        int cubeMapCount = readInt();
+        CubeMap[] cubeMaps = new CubeMap[cubeMapCount];
+        for (int i = 0; i < cubeMapCount; i++) {
+            String name = readStringNull();
+            String path = readStringNull();
+            cubeMaps[i] = new CubeMap(name, path);
         }
 
         // lighting
@@ -158,19 +139,19 @@ public strictfp class SCMapImporter {
             Vector3f position = readVector3f();
             float rotation = readFloat();
             Vector3f velocity = readVector3f();
-            float lifetimeFirst = readFloat();
-            float lifetimeSecond = readFloat();
-            float periodFirst = readFloat();
-            float periodSecond = readFloat();
-            float scaleFirst = readFloat();
-            float scaleSecond = readFloat();
-
-            float frameCount = readFloat();
-            float frameRateFirst = readFloat();
-            float frameRateSecond = readFloat();
-            float stripCount = readFloat();
 
             waveGenerators[i] = new WaveGenerator(textureName, rampName, position, rotation, velocity);
+
+            waveGenerators[i].setLifeTimeFirst(readFloat());
+            waveGenerators[i].setLifeTimeSecond(readFloat());
+            waveGenerators[i].setPeriodFirst(readFloat());
+            waveGenerators[i].setPeriodSecond(readFloat());
+            waveGenerators[i].setScaleFirst(readFloat());
+            waveGenerators[i].setScaleSecond(readFloat());
+            waveGenerators[i].setFrameCount(readFloat());
+            waveGenerators[i].setFrameRateFirst(readFloat());
+            waveGenerators[i].setFrameRateSecond(readFloat());
+            waveGenerators[i].setStripCount(readFloat());
         }
 
         // terrain textures
@@ -196,11 +177,9 @@ public strictfp class SCMapImporter {
         }
 
         int unknown1 = readInt();
-
         int unknown2 = readInt();
 
         // decals
-        // decal count
         int decalCount = readInt();
         Decal[] decals = new Decal[decalCount];
         for (int i = 0; i < decalCount; i++) {
@@ -224,6 +203,7 @@ public strictfp class SCMapImporter {
 
         //decal group count
         int groupCount = readInt();
+        DecalGroup[] decalGroups = new DecalGroup[groupCount];
         for (int i = 0; i < groupCount; i++) {
             int id = readInt();
             String name = readStringNull();
@@ -232,6 +212,7 @@ public strictfp class SCMapImporter {
             for (int j = 0; j < length; j++) {
                 data[j] = readInt();
             }
+            decalGroups[i] = new DecalGroup(name, data);
         }
 
         int widthInt2 = readInt();
@@ -240,7 +221,7 @@ public strictfp class SCMapImporter {
         // normal maps
         // normal map count
         if (readInt() != 1) {
-            throw new UnsupportedEncodingException("File not valid Generated SCMap");
+            throw new UnsupportedEncodingException("File not valid SCMap");
         }
         int normalMapByteCount = readInt() - 128;
         DDSHeader normalDDSHeader = DDSHeader.parseHeader(readBytes(128));
@@ -256,7 +237,7 @@ public strictfp class SCMapImporter {
 
         // water maps
         if (readInt() != 1) {
-            throw new UnsupportedEncodingException("File not valid Generated SCMap");
+            throw new UnsupportedEncodingException("File not valid SCMap");
         }
         int waterMapByteCount = readInt() - 128;
         DDSHeader waterMapDDSHeader = DDSHeader.parseHeader(readBytes(128));
@@ -270,49 +251,53 @@ public strictfp class SCMapImporter {
         int[] terrainTypeData = readInts(widthInt * heightInt / 4);
 
         // Additional Skybox
+        SkyBox skyBox = new SkyBox();
         if (version >= 60) {
-            Vector3f position = readVector3f();
-            float horizonHeight = readFloat();
-            float scale = readFloat();
-            float subHeight = readFloat();
-            int subDivAx = readInt();
-            int subDivHeight = readInt();
-            float zenithHeight = readFloat();
-            Vector3f horizonColor = readVector3f();
-            Vector3f zenithColor = readVector3f();
-            float decalGlowMultiplier = readFloat();
+            skyBox.setPosition(readVector3f());
+            skyBox.setHorizonHeight(readFloat());
+            skyBox.setScale(readFloat());
+            skyBox.setSubHeight(readFloat());
+            skyBox.setSubDivAx(readInt());
+            skyBox.setSubDivHeight(readInt());
+            skyBox.setZenithHeight(readFloat());
+            skyBox.setHorizonColor(readVector3f());
+            skyBox.setZenithColor(readVector3f());
+            skyBox.setDecalGlowMultiplier(readFloat());
 
-            String albedo = readStringNull();
-            String glow = readStringNull();
+            skyBox.setAlbedo(readStringNull());
+            skyBox.setGlow(readStringNull());
 
             // Array of Planets/Stars
             int length = readInt();
-//            Planet[] planets = new Planet[length];
+            SkyBox.Planet[] planets = new SkyBox.Planet[length];
             for (int i = 0; i < length; i++) {
-//                planets[i] = new Planet();
-                Vector3f pPosition = readVector3f();
-                float rotation = readFloat();
-                Vector2f pScale = readVector2f();
-                Vector4f uv = readVector4f();
+                planets[i] = new SkyBox.Planet();
+                planets[i].setPosition(readVector3f());
+                planets[i].setRotation(readFloat());
+                planets[i].setScale(readVector2f());
+                planets[i].setUv(readVector4f());
             }
+            skyBox.setPlanets(planets);
 
             // Mid
-            Color midRgbColor = new Color(readByte(), readByte(), readByte(), 0);
+            skyBox.setMidRgbColor(new Color(readByte(), readByte(), readByte(), 0));
 
             // Cirrus
-            float cirrusMultiplier = readFloat();
-            Vector3f cirrusColor = readVector3f();
+            skyBox.setCirrusMultiplier(readFloat());
+            skyBox.setCirrusColor(readVector3f());
 
-            String cirrusTexture = readStringNull();
+            skyBox.setCirrusTexture(readStringNull());
 
             int cirrusLayerCount = readInt();
-//            Cirrus[] cirrusLayers = new Cirrus[cirrusLayerCount];
+            SkyBox.Cirrus[] cirrusLayers = new SkyBox.Cirrus[cirrusLayerCount];
             for (int i = 0; i < cirrusLayerCount; i++) {
-                Vector2f frequency = readVector2f();
-                float speed = readFloat();
-                Vector2f direction = readVector2f();
+                cirrusLayers[i] = new SkyBox.Cirrus();
+                cirrusLayers[i].setFrequency(readVector2f());
+                cirrusLayers[i].setSpeed(readFloat());
+                cirrusLayers[i].setDirection(readVector2f());
             }
-            float clouds7 = readFloat();
+            skyBox.setCirrusLayers(cirrusLayers);
+            skyBox.setClouds7(readFloat());
         }
 
         // props
@@ -336,6 +321,17 @@ public strictfp class SCMapImporter {
 
         SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), mapWaterSettings, mapLightingSettings));
         map.setMinorVersion(version);
+        map.setTerrainShaderPath(shaderPath);
+        map.setBackgroundPath(backgroundPath);
+        map.setSkyCubePath(skyCubePath);
+        map.setHeightMapScale(heightMapScale);
+        map.setSkyBox(skyBox);
+        map.setMiniMapContourInterval(miniMapContourInterval);
+        map.setMiniMapDeepWaterColor(miniMapDeepWaterColor);
+        map.setMiniMapContourColor(miniMapContourColor);
+        map.setMiniMapShoreColor(miniMapShoreColor);
+        map.setMiniMapLandStartColor(miniMapLandStartColor);
+        map.setMiniMapLandEndColor(miniMapLandEndColor);
         DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);
@@ -385,6 +381,13 @@ public strictfp class SCMapImporter {
         }
         for (Decal decal : decals) {
             map.addDecal(decal);
+        }
+        for (DecalGroup decalGroup : decalGroups) {
+            map.addDecalGroup(decalGroup);
+        }
+        map.getCubeMaps().clear();
+        for (CubeMap cubeMap : cubeMaps) {
+            map.addCubeMap(cubeMap);
         }
         return map;
     }

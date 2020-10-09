@@ -159,10 +159,6 @@ public strictfp class MapPopulator {
             mapName = scmapFile.getName().replace(".scmap", "");
             map = SCMapImporter.loadSCMAP(inMapPath);
             SaveImporter.importSave(inMapPath, map);
-            if (map.getMinorVersion() != 56) {
-                System.out.println("Can only populate version 56 maps");
-                System.exit(-1);
-            }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while saving the map.");
@@ -172,7 +168,7 @@ public strictfp class MapPopulator {
     public void exportMap() {
         try {
             long startTime = System.currentTimeMillis();
-            Files.createDirectories(outFolderPath.resolve(mapFolder));
+            FileUtils.copyRecursiveIfExists(inMapPath, outFolderPath);
             SCMapExporter.exportSCMAP(outFolderPath.resolve(mapFolder), mapName, map);
             SaveExporter.exportSave(outFolderPath.resolve(mapFolder), mapName, map);
             ScenarioExporter.exportScenario(outFolderPath.resolve(mapFolder), mapName, map);
@@ -200,6 +196,7 @@ public strictfp class MapPopulator {
         land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
         plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
+        slope.startVisualDebugger("s");
         impassable = new BinaryMask(slope, .9f, random.nextLong());
         ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
         passable = impassable.copy().invert();
@@ -260,40 +257,42 @@ public strictfp class MapPopulator {
 
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask ground = new BinaryMask(land, random.nextLong());
-            BinaryMask accentGround = new BinaryMask(slope, .75f, random.nextLong()).invert();
-            BinaryMask highlightGround = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetryHierarchy);
-            BinaryMask plateau = new BinaryMask(plateaus, random.nextLong());
-            BinaryMask accentPlateau = new BinaryMask(slope, .5f, random.nextLong());
-            BinaryMask rock = new BinaryMask(slope, .35f, random.nextLong());
-            BinaryMask accentRock = new BinaryMask(slope, 1f, random.nextLong());
-            BinaryMask highAltitude = new BinaryMask(heightmapBase, waterHeight + 25f, random.nextLong());
+            BinaryMask accentGround = new BinaryMask(land, random.nextLong());
+            BinaryMask accentPlateau = new BinaryMask(plateaus, random.nextLong());
+            BinaryMask slopes = new BinaryMask(slope, .1f, random.nextLong());
+            BinaryMask accentSlopes = new BinaryMask(slope, .75f, random.nextLong()).invert();
+            BinaryMask rockBase = new BinaryMask(slope, .75f, random.nextLong());
+            BinaryMask rock = new BinaryMask(slope, 1.25f, random.nextLong());
+            BinaryMask accentRock = new BinaryMask(rock, random.nextLong());
             FloatMask groundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask accentGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask highlightGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask plateauTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask accentPlateauTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
+            FloatMask slopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
+            FloatMask accentSlopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
+            FloatMask rockBaseTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask rockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask highAltitudeTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
 
-            ground.shrink(map.getSize() / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.2f, symmetryHierarchy.getSpawnSymmetry(), 8);
+            ground.shrink(map.getSize() / 4).erode(.75f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.2f, symmetryHierarchy.getSpawnSymmetry(), 8);
             ground.combine(plateaus).intersect(land).smooth(2, .25f).filterShapes(32);
-            accentGround.minus(flat).intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
-            highlightGround.combine(ground).minus(plateaus.copy().outline()).deflate(8).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-            plateau.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
-            accentPlateau.intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+            accentGround.minus(slopes).minus(plateaus).deflate(4).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
+            accentPlateau.minus(slopes).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
+            slopes.intersect(land).flipValues(.75f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .75f);
+            rockBase.intersect(land);
+            accentRock.acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(8, .25f).intersect(rock);
 
             groundTexture.init(ground, 0, 1).smooth(4);
-            accentGroundTexture.init(accentGround, 0, 1).smooth(4);
-            highlightGroundTexture.init(highlightGround, 0, 1).smooth(8);
-            plateauTexture.init(plateau, 0, 1).smooth(4);
-            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(4);
-            rockTexture.init(rock, 0, 1).smooth(4);
-            accentRockTexture.init(accentRock, 0, 1).smooth(2).add(accentRock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(accentRock.copy().shrink(map.getSize() / 2), .25f);
-            highAltitudeTexture.init(highAltitude, 0, 1).smooth(4);
+            accentGroundTexture.init(accentGround, 0, 1).smooth(8);
+            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8);
+            slopesTexture.init(slopes, 0, 1).smooth(4);
+            accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8);
+            rockBaseTexture.init(rockBase, 0, 1).smooth(2);
+            rockTexture.init(rock, 0, 1).smooth(2).add(rock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(rock.copy().shrink(map.getSize() / 2), .5f);
+            accentRockTexture.init(accentRock, 0, 1).smooth(2);
 
-            map.setTextureMasksLow(groundTexture, accentGroundTexture, highlightGroundTexture, plateauTexture);
-            map.setTextureMasksHigh(accentPlateauTexture, rockTexture, accentRockTexture, highAltitudeTexture);
+            map.setTextureMasksLow(groundTexture, accentGroundTexture, accentPlateauTexture, slopesTexture);
+            map.setTextureMasksHigh(accentSlopesTexture, rockBaseTexture, rockTexture, accentRockTexture);
         }
 
         if (populateAI) {

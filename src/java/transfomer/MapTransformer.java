@@ -72,7 +72,7 @@ public strictfp class MapTransformer {
                     "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the transformed map\n" +
                     "--symmetry arg         required, set the symmetry for the map(X, Y, XY, YX, POINT)\n" +
-                    "--base arg             required, set which half to use as base for forced symmetry (TOP, BOTTOM, LEFT, RIGHT)\n" +
+                    "--base arg             required, set which half to use as base for forced symmetry (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
                     "--spawns               optional, force spawn symmetry\n" +
                     "--resources            optional, force mex symmetry\n" +
                     "--props                optional, force prop symmetry\n" +
@@ -132,10 +132,8 @@ public strictfp class MapTransformer {
 
     public void exportMap() {
         try {
-            FileUtils.deleteRecursiveIfExists(outFolderPath.resolve(mapName));
-
             long startTime = System.currentTimeMillis();
-            Files.createDirectories(outFolderPath.resolve(mapName));
+            FileUtils.copyRecursiveIfExists(inMapPath, outFolderPath);
             Files.copy(inMapPath.resolve(mapName + "_scenario.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_scenario.lua"));
             Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_script.lua"));
             SCMapExporter.exportSCMAP(outFolderPath, mapName, map);
@@ -149,13 +147,7 @@ public strictfp class MapTransformer {
     }
 
     public void transform() {
-        boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
-        float waterHeight;
-        if (waterPresent) {
-            waterHeight = map.getBiome().getWaterSettings().getElevation();
-        } else {
-            waterHeight = 0;
-        }
+
         heightmapBase = map.getHeightMask(symmetryHierarchy);
 
     }

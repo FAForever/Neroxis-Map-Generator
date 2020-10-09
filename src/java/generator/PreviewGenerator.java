@@ -6,14 +6,13 @@ import util.Vector3f;
 import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
+
+import static util.ImageUtils.readImage;
+import static util.ImageUtils.scaleImage;
 
 public strictfp class PreviewGenerator {
 
@@ -44,9 +43,9 @@ public strictfp class PreviewGenerator {
 
     public static BufferedImage addMarkers(BufferedImage image, SCMap map) throws IOException {
         int resourceImageSize = 5;
-        BufferedImage massImage = scale(readImage(MASS_IMAGE), resourceImageSize, resourceImageSize);
-        BufferedImage hydroImage = scale(readImage(HYDRO_IMAGE), resourceImageSize, resourceImageSize);
-        BufferedImage armyImage = scale(readImage(ARMY_IMAGE), resourceImageSize, resourceImageSize);
+        BufferedImage massImage = scaleImage(readImage(MASS_IMAGE), resourceImageSize, resourceImageSize);
+        BufferedImage hydroImage = scaleImage(readImage(HYDRO_IMAGE), resourceImageSize, resourceImageSize);
+        BufferedImage armyImage = scaleImage(readImage(ARMY_IMAGE), resourceImageSize, resourceImageSize);
         for (Vector3f mex : map.getMexes()) {
             if (mex != null) {
                 int x = (int) (mex.x / map.getSize() * 256 - massImage.getWidth(null) / 2);
@@ -80,13 +79,13 @@ public strictfp class PreviewGenerator {
     static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         BufferedImage heightMap = map.getHeightmap();
-        BufferedImage heightMapScaled = scale(heightMap, 256, 256);
+        BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
 
         BufferedImage textureLowMap = map.getTextureMasksLow();
-        BufferedImage textureLowScaled = scale(textureLowMap, 256, 256);
+        BufferedImage textureLowScaled = scaleImage(textureLowMap, 256, 256);
 
         BufferedImage textureHighMap = map.getTextureMasksHigh();
-        BufferedImage textureHighScaled = scale(textureHighMap, 256, 256);
+        BufferedImage textureHighScaled = scaleImage(textureHighMap, 256, 256);
 
         float ambientCoefficient = .5f;
         float landDiffuseCoefficient = .5f;
@@ -125,7 +124,7 @@ public strictfp class PreviewGenerator {
                     heightMapScaled.getRaster().getPixel(x, y, heightArray1);
                     heightMapScaled.getRaster().getPixel(x - xOffset, y - yOffset, heightArray2);
 
-                    float slope = (heightArray1[0] - heightArray2[0]) * SCMap.HEIGHTMAP_SCALE;
+                    float slope = (heightArray1[0] - heightArray2[0]) * map.getHeightMapScale();
                     float slopeAngle = (float) (180f - StrictMath.toDegrees(StrictMath.atan2(slope, StrictMath.sqrt(xOffset * xOffset + yOffset * yOffset))));
                     float normalAngle = slopeAngle - 90;
                     float reflectedAngle = normalAngle * 2 - elevation;
@@ -157,7 +156,7 @@ public strictfp class PreviewGenerator {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         WaterSettings waterSettings = map.getBiome().getWaterSettings();
         BufferedImage heightMap = map.getHeightmap();
-        BufferedImage heightMapScaled = scale(heightMap, 256, 256);
+        BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
 
         BufferedImage waterLayer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D waterLayerGraphics = waterLayer.createGraphics();
@@ -176,7 +175,7 @@ public strictfp class PreviewGenerator {
             for (int x = 0; x < waterLayer.getWidth(); x++) {
                 heightMapScaled.getRaster().getPixel(x, y, heightArray);
 
-                float mapElevation = heightArray[0] * SCMap.HEIGHTMAP_SCALE;
+                float mapElevation = heightArray[0] * map.getHeightMapScale();
                 float weight = StrictMath.min(StrictMath.max((mapElevations[0] - mapElevation) / (mapElevations[0] - mapElevations[1]), 0), 1);
                 float diffuseTerm = (float) (StrictMath.max(StrictMath.cos(StrictMath.toRadians(elevation)) * waterDiffuseCoefficient, 0));
                 float specularTerm = (float) (StrictMath.max(StrictMath.pow(StrictMath.cos(StrictMath.toRadians(180 - elevation)), waterShininess) * waterSpecularCoefficient, 0));
@@ -200,23 +199,5 @@ public strictfp class PreviewGenerator {
         waterLayerGraphics.setPaint(layerPaint);
         waterLayerGraphics.fillRect(0, 0, 256, 256);
         return waterLayer;
-    }
-
-    static BufferedImage readImage(String resource) throws IOException {
-        try (InputStream inputStream = PreviewGenerator.class.getResourceAsStream(resource)) {
-            return ImageIO.read(inputStream);
-        }
-    }
-
-    static BufferedImage scale(BufferedImage image, int width, int height) {
-        width = StrictMath.max(width, 1);
-        height = StrictMath.max(height, 1);
-        BufferedImage imageScaled = new BufferedImage(width, height, image.getType());
-        AffineTransform at = new AffineTransform();
-        at.scale((double) width / image.getWidth(), (double) height / image.getHeight());
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        imageScaled = scaleOp.filter(image, imageScaled);
-
-        return imageScaled;
     }
 }

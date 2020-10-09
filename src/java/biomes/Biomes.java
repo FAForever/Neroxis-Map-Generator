@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static map.SCMap.*;
-
 @Data
 public strictfp class Biomes {
 
@@ -93,13 +91,6 @@ public strictfp class Biomes {
             System.out.printf("An error occured while parsing the following biome: %s\n", path);
             System.exit(1);
         }
-
-        // We always set elevation and other settings back to the original value
-        // because the map generator does not expect to have a varying water height
-        waterSettings.setWaterPresent(true);
-        waterSettings.setElevation(WATER_HEIGHT);
-        waterSettings.setElevationDeep(WATER_DEEP_HEIGHT);
-        waterSettings.setElevationAbyss(WATER_ABYSS_HEIGHT);
 
         // Lighting settings
         LightingSettings lightingSettings = null;
