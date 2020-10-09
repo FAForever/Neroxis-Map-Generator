@@ -733,7 +733,7 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 2f, null, "mountainsPresent");
 
         heightmapMountains.add(mountainsPresent, 2f);
-        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).add(heightmapPlateaus).smooth(1);
+        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
 
         heightmapBase.add(heightmapMountains);
         slope = heightmapBase.copy().gradient();
