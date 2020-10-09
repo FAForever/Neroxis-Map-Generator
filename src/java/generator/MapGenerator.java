@@ -43,10 +43,10 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = .025f;
     public static final float RAMP_DENSITY_MAX = .075f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .35f;
-    public static final float PLATEAU_DENSITY_MAX = .5f;
+    public static final float PLATEAU_DENSITY_MIN = .45f;
+    public static final float PLATEAU_DENSITY_MAX = .55f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 4f;
+    public static final float PLATEAU_HEIGHT = 5f;
     public static final float VALLEY_HEIGHT = -3f;
     public static final float HILL_HEIGHT = 3f;
     public static boolean DEBUG = false;
@@ -685,11 +685,9 @@ public strictfp class MapGenerator {
 
         plateaus.combine(cliffs);
 
-        impassable = new ConcurrentBinaryMask(mountains, random.nextLong(), "impassable");
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetryHierarchy, "valleys");
 
-        impassable.inflate(3).combine(plateauOutline.copy().inflate(6)).combine(cliffs.copy().inflate(3)).combine(shore.copy().inflate(3));
         hills.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).enlarge(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus);
         valleys.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).enlarge(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(4));
     }
@@ -781,7 +779,7 @@ public strictfp class MapGenerator {
         slopesTexture.init(slopes, 0, 1).smooth(4);
         accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8);
         rockBaseTexture.init(rockBase, 0, 1).smooth(2);
-        rockTexture.init(rock, 0, 1).smooth(2).add(rock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(rock.copy().shrink(map.getSize() / 2), .25f);
+        rockTexture.init(rock, 0, 1).smooth(2).add(rock.copy().shrink(map.getSize() / 2), .75f).smooth(1).add(rock.copy().shrink(map.getSize() / 2), .5f);
         accentRockTexture.init(accentRock, 0, 1).smooth(2);
 
     }
