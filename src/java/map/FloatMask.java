@@ -1,5 +1,6 @@
 package map;
 
+import brushes.Brushes;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -7,6 +8,8 @@ import util.Util;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -15,7 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static brushes.Brushes.loadBrush;
 
 @Getter
 public strictfp class FloatMask extends Mask {
@@ -33,6 +41,25 @@ public strictfp class FloatMask extends Mask {
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 this.mask[x][y] = 0f;
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+    }
+
+    public FloatMask(BufferedImage image, Long seed, SymmetryHierarchy symmetryHierarchy) {
+        this.mask = new float[image.getWidth()][image.getHeight()];
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
+        Raster imageData = image.getData();
+        this.symmetryHierarchy = symmetryHierarchy;
+        for (int y = 0; y < this.getSize(); y++) {
+            for (int x = 0; x < this.getSize(); x++) {
+                int[] vals = new int[1];
+                imageData.getPixel(x, y, vals);
+                this.mask[x][y] = vals[0] / 255f;
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -170,6 +197,24 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask add(FloatMask other, Vector2f loc) {
+        return add(other, (int) loc.x, (int) loc.y);
+    }
+
+    public FloatMask add(FloatMask other, int offsetX, int offsetY) {
+        for (int y = 0; y < other.getSize(); y++) {
+            for (int x = 0; x < other.getSize(); x++) {
+                int shiftX = x - other.getSize() / 2 + offsetX;
+                int shiftY = y - other.getSize() / 2 + offsetY;
+                if (inBounds(shiftX, shiftY)) {
+                    add(shiftX, shiftY, other.get(x, y));
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask add(BinaryMask other, float value) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -222,19 +267,63 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
-    public FloatMask maskToMountains(BinaryMask other) {
-        other = other.copy();
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
+    public FloatMask shrink(int size) {
+        float[][] smallMask = new float[size][size];
+        int largeX;
+        int largeY;
+        for (int x = 0; x < size; x++) {
+            largeX = (x * getSize()) / size + (getSize() / size / 2);
+            if (largeX >= getSize())
+                largeX = getSize() - 1;
+            for (int y = 0; y < size; y++) {
+                largeY = (y * getSize()) / size + (getSize() / size / 2);
+                if (largeY >= getSize())
+                    largeY = getSize() - 1;
+                smallMask[x][y] = get(largeX, largeY);
+            }
         }
-        FloatMask mountainBase = new FloatMask(getSize(), null, symmetryHierarchy);
-        add(mountainBase.init(other, 0, 2f));
-        while (other.getCount() > 0) {
-            add(other, random.nextFloat() * .75f);
-            other.erode(random.nextFloat(), symmetryHierarchy.getSpawnSymmetry());
+        mask = smallMask;
+        VisualDebugger.visualizeMask(this);
+        applySymmetry(symmetryHierarchy.getTeamSymmetry());
+        return this;
+    }
+
+    public FloatMask maskToHills(BinaryMask other) {
+        FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetryHierarchy);
+        BinaryMask otherCopy = other.copy().fillHalf(false);
+        LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2f> coordinates = new LinkedList<>(otherCopy.getRandomCoordinates(4));
+        while (coordinates.size() > 0) {
+            Vector2f loc = coordinates.removeFirst();
+            AtomicReference<Float> distance = new AtomicReference<>(Float.MAX_VALUE);
+            extents.forEach(eloc -> distance.set(StrictMath.min(distance.get(), loc.getDistance(eloc))));
+            if (distance.get() > 1) {
+                FloatMask useBrush = brush.copy().shrink(distance.get().intValue() * 4).multiply(distance.get() / 2);
+                add(useBrush, loc);
+                add(useBrush, getSymmetryPoint(loc));
+                coordinates.removeIf(cloc -> loc.getDistance(cloc) < distance.get());
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask maskToMountains(BinaryMask other) {
+        FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetryHierarchy);
+        brush.multiply(1 / brush.getMax());
+        BinaryMask otherCopy = other.copy().fillHalf(false);
+        LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2f> coordinates = new LinkedList<>(otherCopy.getRandomCoordinates(4));
+        while (coordinates.size() > 0) {
+            Vector2f loc = coordinates.removeFirst();
+            AtomicReference<Float> distance = new AtomicReference<>(Float.MAX_VALUE);
+            extents.forEach(eloc -> distance.set(StrictMath.min(distance.get(), loc.getDistance(eloc))));
+            if (distance.get() > 1) {
+                FloatMask useBrush = brush.copy().shrink(distance.get().intValue() * 4).multiply(distance.get());
+                add(useBrush, loc);
+                add(useBrush, getSymmetryPoint(loc));
+                coordinates.removeIf(cloc -> loc.getDistance(cloc) < distance.get());
+            }
         }
         VisualDebugger.visualizeMask(this);
         return this;
