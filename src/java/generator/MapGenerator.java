@@ -125,6 +125,7 @@ public strictfp class MapGenerator {
     private SymmetryHierarchy symmetryHierarchy;
     private boolean hasCivilians;
     private boolean enemyCivilians;
+    private float mexMultiplier = 1f;
 
     public static void main(String[] args) throws IOException {
 
@@ -325,7 +326,12 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         rampDensity = random.nextInt(127) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         reclaimDensity = random.nextInt(127) / 127f;
-        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(30 / spawnCount)) * (.5f + mapSize / 512f * .5f));
+        if (mapSize < 512) {
+            mexMultiplier = .75f;
+        } else if (mapSize > 512) {
+            mexMultiplier = 2.5f;
+        }
+        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(30 / spawnCount)) * mexMultiplier);
         Symmetry[] symmetries;
         if (spawnCount == 2) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
@@ -429,6 +435,11 @@ public strictfp class MapGenerator {
         final int spawnSize = 48;
         final int mexSpacing = mapSize / 12;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
+        if (mapSize > 512) {
+            landDensity = StrictMath.max(landDensity - .125f, .675f);
+            mountainDensity = mountainDensity * .4f;
+            plateauDensity = plateauDensity - .05f;
+        }
         hasCivilians = random.nextBoolean();
         enemyCivilians = random.nextBoolean();
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
@@ -629,15 +640,23 @@ public strictfp class MapGenerator {
         mountains.enlarge(mapSize + 1);
         plateaus.enlarge(mapSize + 1).intersect(land).smooth(12, .1f);
 
-        spawnLandMask.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
-        spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(4);
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
         spawnPlateauMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(4);
+
+        if (mapSize <= 512) {
+            spawnLandMask.shrink(mapSize / 4).erode(.25f, symmetryHierarchy.getSpawnSymmetry(), 4).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
+            spawnLandMask.erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(4);
+        } else {
+            spawnLandMask.shrink(mapSize / 16).erode(.5f, symmetryHierarchy.getSpawnSymmetry(), 2).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 6);
+            spawnLandMask.enlarge(mapSize / 4).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).enlarge(mapSize + 1).smooth(8);
+            spawnPlateauMask.clear();
+        }
+
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterShapes(512);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
-        if (random.nextBoolean() && mapSize < 1024) {
+        if (random.nextBoolean() || mapSize > 512) {
             land.fillGaps(64);
         } else {
             land.widenGaps(64);
@@ -711,7 +730,7 @@ public strictfp class MapGenerator {
         heightmapShore.init(shore, 0, 1.5f).maskToMountains(shore);
         heightmapMountains.maskToMountains(mountains).smooth(2);
 
-        ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, .5f, null, "mountainsPresent");
+        ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 2f, null, "mountainsPresent");
 
         heightmapMountains.add(mountainsPresent, 2f);
         heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).add(heightmapPlateaus).smooth(1);

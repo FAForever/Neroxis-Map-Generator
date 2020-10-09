@@ -148,7 +148,7 @@ public strictfp class MexGenerator {
         }
 
         List<Vector2f> waterLocations = new ArrayList<>(spawnableWater.getRandomCoordinates(mexSpacing));
-        for (int i = 0; i < numMexesLeft; i += 2) {
+        for (int i = 0; i < StrictMath.min(numMexesLeft, 20); i += 2) {
             if (waterLocations.size() == 0) {
                 break;
             }
