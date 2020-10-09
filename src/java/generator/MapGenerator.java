@@ -544,8 +544,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> baseFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(baseMask);
             long sTime = System.currentTimeMillis();
-            unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, Army.ENEMY, 256f);
-            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, Army.CIVILIAN, 128f);
+            unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, Army.ENEMY, 512f);
+            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, Army.CIVILIAN, 172f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateBases\n",
                         System.currentTimeMillis() - sTime,
