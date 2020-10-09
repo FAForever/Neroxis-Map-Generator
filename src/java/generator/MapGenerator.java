@@ -515,7 +515,7 @@ public strictfp class MapGenerator {
             long sTime = System.currentTimeMillis();
             wreckGenerator.generateWrecks(t1LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T1_Land, 3f);
             wreckGenerator.generateWrecks(t2LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Land, 30f);
-            wreckGenerator.generateWrecks(t3LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T3_Land, 60f);
+            wreckGenerator.generateWrecks(t3LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T3_Land, 128f);
             wreckGenerator.generateWrecks(t2NavyWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Navy, 128f);
             wreckGenerator.generateWrecks(navyFactoryWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.Navy_Factory, 256f);
             if (DEBUG) {
@@ -841,7 +841,7 @@ public strictfp class MapGenerator {
 
         t1LandWreckMask.randomize(reclaimDensity * .005f).intersect(land).deflate(mapSize / 512f).trimEdge(20);
         t2LandWreckMask.randomize(reclaimDensity * .0025f).intersect(land).minus(t1LandWreckMask).trimEdge(64);
-        t3LandWreckMask.randomize(reclaimDensity * .0005f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
+        t3LandWreckMask.randomize(reclaimDensity * .00025f).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).minus(land.copy().inflate(16)).trimEdge(20);
         t2NavyWreckMask.randomize(reclaimDensity * .005f).intersect(land.copy().inflate(4).outline()).trimEdge(20);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
