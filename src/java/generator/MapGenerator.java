@@ -556,7 +556,7 @@ public strictfp class MapGenerator {
             Pipeline.await(baseMask);
             long sTime = System.currentTimeMillis();
             unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, Army.ENEMY, 512f);
-            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, Army.CIVILIAN, 172f);
+            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, Army.CIVILIAN, 256f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateBases\n",
                         System.currentTimeMillis() - sTime,
