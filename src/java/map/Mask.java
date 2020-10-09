@@ -131,6 +131,8 @@ public strictfp abstract class Mask {
 
     public int getMaxXBound(Symmetry symmetry) {
         switch (symmetry) {
+            case POINT:
+                return getMaxXBound(symmetryHierarchy.getTeamSymmetry());
             case X:
             case QUAD:
             case DIAG:
@@ -159,6 +161,8 @@ public strictfp abstract class Mask {
 
     public int getMaxYBound(int x, Symmetry symmetry) {
         switch (symmetry) {
+            case POINT:
+                return getMaxYBound(x, symmetryHierarchy.getTeamSymmetry());
             case XY:
                 return x + 1;
             case YX:
