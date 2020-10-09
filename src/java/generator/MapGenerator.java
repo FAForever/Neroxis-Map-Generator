@@ -815,9 +815,9 @@ public strictfp class MapGenerator {
 
         if (hasCivilians) {
             if (!enemyCivilians) {
-                civReclaimMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
+                civReclaimMask.randomize(.005f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
             } else {
-                baseMask.randomize(.01f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
+                baseMask.randomize(.005f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
             }
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
