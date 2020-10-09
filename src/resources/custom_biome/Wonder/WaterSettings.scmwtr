@@ -1,39 +1,39 @@
 {
-  "waterPresent": true,
-  "elevation": 25.0,
-  "elevationDeep": 20.0,
-  "elevationAbyss": 10.0,
-  "surfaceColor": {
+  "WaterPresent": true,
+  "Elevation": 25.0,
+  "ElevationDeep": 20.0,
+  "ElevationAbyss": 10.0,
+  "SurfaceColor": {
     "x": 0.0,
     "y": 0.7,
     "z": 1.5
   },
-  "colorLerp": {
+  "ColorLerp": {
     "x": 0.064,
     "y": 0.119
   },
-  "refractionScale": 0.375,
-  "fresnelBias": 0.15,
-  "fresnelPower": 1.5,
-  "unitReflection": 0.5,
-  "skyReflection": 1.5,
-  "sunShininess": 50.0,
-  "sunStrength": 10.0,
-  "sunDirection": {
+  "RefractionScale": 0.375,
+  "FresnelBias": 0.15,
+  "FresnelPower": 1.5,
+  "UnitReflection": 0.5,
+  "SkyReflection": 1.5,
+  "SunShininess": 50.0,
+  "SunStrength": 10.0,
+  "SunDirection": {
     "x": 0.09954818,
     "y": -0.9626309,
     "z": 0.2518569
   },
-  "sunColor": {
+  "SunColor": {
     "x": 0.81274265,
     "y": 0.47409984,
     "z": 0.33864275
   },
-  "sunReflection": 5.0,
-  "sunGlow": 0.1,
-  "texPathCubemap": "/textures/engine/waterCubemap.dds",
-  "texPathWaterRamp": "/textures/engine/waterramp.dds",
-  "waveTextures": [
+  "SunReflection": 5.0,
+  "SunGlow": 0.1,
+  "TexPathCubemap": "/textures/engine/waterCubemap.dds",
+  "TexPathWaterRamp": "/textures/engine/waterramp.dds",
+  "WaveTextures": [
     {
       "TexPath": "/textures/engine/waves.dds",
       "NormalMovement": {
