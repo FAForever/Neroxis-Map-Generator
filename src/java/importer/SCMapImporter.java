@@ -197,8 +197,7 @@ public strictfp class SCMapImporter {
             float cutOffLOD = readFloat();
             float nearCutOffLOD = readFloat();
             int ownerArmy = readInt();
-            float rotationFloat = (float) StrictMath.atan2(rotation.z, rotation.x);
-            decals[i] = new Decal(texturePaths[0], position, rotationFloat, scale, cutOffLOD);
+            decals[i] = new Decal(texturePaths[0], position, rotation, scale, cutOffLOD);
         }
 
         //decal group count
@@ -306,12 +305,12 @@ public strictfp class SCMapImporter {
         for (int i = 0; i < propCount; i++) {
             String path = readStringNull();
             Vector3f position = readVector3f();
-            Vector3f rotation1 = readVector3f();
-            Vector3f unknown = readVector3f();
-            Vector3f rotation2 = readVector3f();
+            Vector3f rotationX = readVector3f();
+            Vector3f rotationY = readVector3f();
+            Vector3f rotationZ = readVector3f();
             Vector3f scale = readVector3f();
-            float rotation = (float) StrictMath.atan2(rotation1.z, rotation1.x);
-            if ((rotation - StrictMath.atan2(-rotation2.x, rotation2.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
+            float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
+            if ((rotation - StrictMath.atan2(-rotationZ.x, rotationZ.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
                 System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
             }
             props[i] = new Prop(path, position, rotation);

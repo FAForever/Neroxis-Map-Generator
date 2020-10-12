@@ -4,6 +4,7 @@ import map.BinaryMask;
 import map.Decal;
 import map.SCMap;
 import util.Vector2f;
+import util.Vector3f;
 
 import java.util.LinkedHashSet;
 import java.util.Random;
@@ -72,10 +73,33 @@ public strictfp class DecalGenerator {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         spawnableCopy.fillHalf(false);
         LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        boolean flipX;
+        boolean flipZ;
+        switch (spawnable.getSymmetryHierarchy().getTeamSymmetry()) {
+            case XZ, ZX -> {
+                flipX = true;
+                flipZ = true;
+            }
+            case X -> {
+                flipZ = true;
+                flipX = false;
+            }
+            case Z -> {
+                flipZ = false;
+                flipX = true;
+            }
+            default -> {
+                flipZ = false;
+                flipX = false;
+            }
+        }
         coordinates.forEach((location) -> {
             Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
-            Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI, scale, 2400);
-            Decal decal2 = new Decal(decal1.getPath(), symLocation, spawnableCopy.getReflectedRotation(decal1.getRotation()), scale, 2400);
+            Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
+            Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
+            float rot = spawnableCopy.getReflectedRotation(decal1.getRotation().y);
+            Vector3f symRotation = new Vector3f(decal1.getRotation().x + (flipX ? (float) StrictMath.PI : 0f), rot, decal1.getRotation().z + (flipZ ? (float) StrictMath.PI : 0f));
+            Decal decal2 = new Decal(decal1.getPath(), symLocation, symRotation, scale, 2400);
             map.addDecal(decal1);
             map.addDecal(decal2);
         });

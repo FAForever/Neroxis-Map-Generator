@@ -171,7 +171,7 @@ public strictfp class SCMapExporter {
             writeString("");
             writeVector3f(decal.getScale());
             writeVector3f(decal.getPosition());
-            writeVector3f(new Vector3f(0f, decal.getRotation(), 0f));
+            writeVector3f(decal.getRotation());
             writeFloat(decal.getCutOffLOD());
             writeFloat(0);
             writeInt(-1);
@@ -289,9 +289,9 @@ public strictfp class SCMapExporter {
         for (Prop prop : map.getProps()) {
             writeStringNull(prop.getPath());
             writeVector3f(prop.getPosition());
-            writeVector3f(new Vector3f((float) StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
+            writeVector3f(new Vector3f((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
             writeVector3f(new Vector3f(0f, 1f, 0f));
-            writeVector3f(new Vector3f((float) -StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
+            writeVector3f(new Vector3f((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
             writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
         }
 
