@@ -85,6 +85,10 @@ public strictfp class FloatMask extends Mask {
         return mask[0].length;
     }
 
+    public float get(Vector2f pos) {
+        return mask[(int) pos.x][(int) pos.y];
+    }
+
     public float get(int x, int y) {
         return mask[x][y];
     }
@@ -140,6 +144,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
+        other = other.copy();
         int size = getSize();
         if (other.getSize() < size)
             other = other.copy().enlarge(size);
@@ -216,6 +221,12 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask add(BinaryMask other, float value) {
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (other.get(x, y)) {
@@ -289,6 +300,13 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToHills(BinaryMask other) {
+        other = other.copy();
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetryHierarchy);
         BinaryMask otherCopy = other.copy().fillHalf(false);
         LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
@@ -309,6 +327,13 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToMountains(BinaryMask other) {
+        other = other.copy();
+        int size = getSize();
+        if (other.getSize() < size)
+            other = other.copy().enlarge(size);
+        if (other.getSize() > size) {
+            other = other.copy().shrink(size);
+        }
         FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetryHierarchy);
         brush.multiply(1 / brush.getMax());
         BinaryMask otherCopy = other.copy().fillHalf(false);
@@ -381,6 +406,13 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask smooth(int radius, BinaryMask limiter) {
+        limiter = limiter.copy();
+        int size = getSize();
+        if (limiter.getSize() < size)
+            limiter = limiter.copy().enlarge(size);
+        if (limiter.getSize() > size) {
+            limiter = limiter.copy().shrink(size);
+        }
         int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
@@ -438,11 +470,35 @@ public strictfp class FloatMask extends Mask {
     }
 
     public void applySymmetry(Symmetry symmetry) {
-        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
-            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
-                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
-                for (Vector2f symPoint : symPoints) {
-                    set(symPoint, get(x, y));
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), false);
+    }
+
+    public void applySymmetry(boolean reverse) {
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), reverse);
+    }
+
+    public void applySymmetry(Symmetry symmetry, boolean reverse) {
+        switch (symmetry) {
+            case QUAD, DIAG -> {
+                for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                    for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                        Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
+                        for (Vector2f symPoint : symPoints) {
+                            set(symPoint, get(x, y));
+                        }
+                    }
+                }
+            }
+            default -> {
+                for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                    for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y, symmetry);
+                        if (reverse) {
+                            set(x, y, get(symPoint));
+                        } else {
+                            set(symPoint, get(x, y));
+                        }
+                    }
                 }
             }
         }

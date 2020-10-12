@@ -932,11 +932,35 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public void applySymmetry(Symmetry symmetry) {
-        for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
-            for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
-                Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
-                for (Vector2f symPoint : symPoints) {
-                    set(symPoint, get(x, y));
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), false);
+    }
+
+    public void applySymmetry(boolean reverse) {
+        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), reverse);
+    }
+
+    public void applySymmetry(Symmetry symmetry, boolean reverse) {
+        switch (symmetry) {
+            case QUAD, DIAG -> {
+                for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                    for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                        Vector2f[] symPoints = getTerrainSymmetryPoints(x, y, symmetry);
+                        for (Vector2f symPoint : symPoints) {
+                            set(symPoint, get(x, y));
+                        }
+                    }
+                }
+            }
+            default -> {
+                for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                    for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
+                        Vector2f symPoint = getSymmetryPoint(x, y, symmetry);
+                        if (reverse) {
+                            set(x, y, get(symPoint));
+                        } else {
+                            set(symPoint, get(x, y));
+                        }
+                    }
                 }
             }
         }
