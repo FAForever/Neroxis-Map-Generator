@@ -82,6 +82,7 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask shore;
     private ConcurrentBinaryMask ramps;
     private ConcurrentBinaryMask impassable;
+    private ConcurrentBinaryMask unbuildable;
     private ConcurrentBinaryMask passable;
     private ConcurrentBinaryMask passableLand;
     private ConcurrentBinaryMask passableWater;
@@ -206,7 +207,7 @@ public strictfp class MapGenerator {
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
-                    "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Y, XY, YX)\n" +
+                    "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Z, XZ, ZX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
                     "--debug                optional, turn on debugging options");
@@ -496,7 +497,7 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(resourceMask, plateaus, land, ramps, impassable, allWreckMask, plateauResourceMask, waterResourceMask);
+            Pipeline.await(resourceMask, plateaus, land, ramps, impassable, unbuildable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
             mexGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(4));
@@ -739,6 +740,7 @@ public strictfp class MapGenerator {
         slope = heightmapBase.copy().gradient();
 
         impassable = new ConcurrentBinaryMask(slope, 1f, random.nextLong(), "impassable");
+        unbuildable = new ConcurrentBinaryMask(slope, .5f, random.nextLong(), "unbuildable");
 
         impassable.inflate(2);
 
@@ -756,7 +758,7 @@ public strictfp class MapGenerator {
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
-        resourceMask.minus(impassable).deflate(8).minus(ramps.copy().inflate(4));
+        resourceMask.minus(unbuildable).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
         waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, false);
@@ -783,7 +785,7 @@ public strictfp class MapGenerator {
         rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentRockTexture");
 
-        ground.shrink(mapSize / 4).erode(.75f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.2f, symmetryHierarchy.getSpawnSymmetry(), 8);
+        ground.shrink(mapSize / 4).erode(.75f, symmetryHierarchy.getSpawnSymmetry(), 8).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4);
         ground.combine(plateaus).combine(shore).intersect(land).smooth(2, .25f).filterShapes(32);
         accentGround.minus(slopes).minus(plateaus).deflate(4).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
         accentPlateau.minus(slopes).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(16, .75f);
@@ -815,9 +817,9 @@ public strictfp class MapGenerator {
 
         if (hasCivilians) {
             if (!enemyCivilians) {
-                civReclaimMask.randomize(.005f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
+                civReclaimMask.randomize(.005f).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
             } else {
-                baseMask.randomize(.005f).intersect(land.copy().minus(impassable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
+                baseMask.randomize(.005f).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
             }
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
@@ -863,7 +865,7 @@ public strictfp class MapGenerator {
 
         noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
 
-        noBases = new BinaryMask(impassable.getFinalMask(), null);
+        noBases = new BinaryMask(unbuildable.getFinalMask(), null);
         noBases.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
@@ -876,7 +878,7 @@ public strictfp class MapGenerator {
             noBases.fillCircle(map.getHydro(i), 32, true);
         }
 
-        noCivs = new BinaryMask(impassable.getFinalMask(), null);
+        noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
         noCivs.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
