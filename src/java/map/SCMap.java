@@ -394,13 +394,41 @@ public strictfp class SCMap {
     public void setTextureMasksHigh(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 130 + 125) : 0;
-                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 130 + 125) : 0;
-                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 130 + 125) : 0;
-                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 130 + 125) : 0;
+                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
+                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
+                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
+                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 127 + 128) : 0;
                 textureMasksHigh.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
+    }
+
+    public FloatMask[] getTextureMasks(SymmetryHierarchy symmetryHierarchy) {
+        FloatMask mask0 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
+        FloatMask mask1 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
+        FloatMask mask2 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
+        FloatMask mask3 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
+        FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask5 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask6 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask7 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        for (int y = 0; y < size / 2; y++) {
+            for (int x = 0; x < size / 2; x++) {
+                int[] valsLow = new int[4];
+                int[] valsHigh = new int[4];
+                textureMasksLow.getRaster().getPixel(x, y, valsLow);
+                textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
+                mask0.set(x, y, valsLow[0] > 0 ? (valsLow[0] - 128) / 127f : 0f);
+                mask1.set(x, y, valsLow[1] > 0 ? (valsLow[1] - 128) / 127f : 0f);
+                mask2.set(x, y, valsLow[2] > 0 ? (valsLow[2] - 128) / 127f : 0f);
+                mask3.set(x, y, valsLow[3] > 0 ? (valsLow[3] - 128) / 127f : 0f);
+                mask4.set(x, y, valsHigh[0] > 0 ? (valsHigh[0] - 128) / 127f : 0f);
+                mask5.set(x, y, valsHigh[1] > 0 ? (valsHigh[1] - 128) / 127f : 0f);
+                mask6.set(x, y, valsHigh[2] > 0 ? (valsHigh[2] - 128) / 127f : 0f);
+                mask7.set(x, y, valsHigh[3] > 0 ? (valsHigh[3] - 128) / 127f : 0f);
+            }
+        }
+        return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
     }
 
     @SneakyThrows
