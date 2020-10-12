@@ -8,7 +8,7 @@ plugins {
 group 'net.neroxis'
 version 'SNAPSHOT'
 
-sourceCompatibility = 1.10
+sourceCompatibility = 1.14
 
 sourceSets {
     main {
@@ -34,8 +34,8 @@ dependencies {
     }
     implementation("org.luaj:luaj-jse:3.0.1")
     implementation("com.google.guava:guava:28.0-jre")
-    compileOnly('org.projectlombok:lombok:1.18.8')
-    annotationProcessor('org.projectlombok:lombok:1.18.8')
+    compileOnly('org.projectlombok:lombok:1.18.14')
+    annotationProcessor('org.projectlombok:lombok:1.18.14')
     implementation('com.google.code.gson:gson:2.8.5')
 
     testCompile('junit:junit:4.11')
@@ -73,7 +73,7 @@ task transformerJar(type: ShadowJar) {
     archiveBaseName = 'MapTransformer'
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'Transformer.MapTransformer'
+            attributes 'Main-Class': 'transformer.MapTransformer'
         }
     }
     project.configurations.implementation.canBeResolved = true

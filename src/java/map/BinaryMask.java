@@ -36,39 +36,31 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask(int size, Long seed, Symmetry symmetry) {
         this.mask = new boolean[size][size];
-        if (seed != null) {
-            this.random = new Random(seed);
-        } else {
-            this.random = null;
-        }
+        this.random = new Random(seed);
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
         Symmetry[] teams;
         Symmetry[] spawns;
         switch (symmetry) {
-            case POINT:
+            case POINT -> {
                 spawnSymmetry = symmetry;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Y, Symmetry.XY, Symmetry.YX};
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX};
                 teamSymmetry = teams[random.nextInt(teams.length)];
-                break;
-            case QUAD:
+            }
+            case QUAD -> {
                 spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Y};
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Z};
                 teamSymmetry = teams[random.nextInt(teams.length)];
-                break;
-            case DIAG:
+            }
+            case DIAG -> {
                 spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.XY, Symmetry.YX};
+                teams = new Symmetry[]{Symmetry.XZ, Symmetry.ZX};
                 teamSymmetry = teams[random.nextInt(teams.length)];
-                break;
-            case X:
-            case Y:
-            case XY:
-            case YX:
-            default:
+            }
+            default -> {
                 spawnSymmetry = symmetry;
                 teamSymmetry = symmetry;
-                break;
+            }
         }
         this.symmetryHierarchy = new SymmetryHierarchy(symmetry, teamSymmetry);
         this.symmetryHierarchy.setSpawnSymmetry(spawnSymmetry);
@@ -200,18 +192,10 @@ public strictfp class BinaryMask extends Mask {
                 }
                 int dir = random.nextInt(4);
                 switch (dir) {
-                    case 0:
-                        x++;
-                        break;
-                    case 1:
-                        x--;
-                        break;
-                    case 2:
-                        y++;
-                        break;
-                    case 3:
-                        y--;
-                        break;
+                    case 0 -> x++;
+                    case 1 -> x--;
+                    case 2 -> y++;
+                    case 3 -> y--;
                 }
             }
         }
@@ -233,18 +217,10 @@ public strictfp class BinaryMask extends Mask {
                 }
                 int dir = directions.get(random.nextInt(directions.size()));
                 switch (dir) {
-                    case 0:
-                        x++;
-                        break;
-                    case 1:
-                        x--;
-                        break;
-                    case 2:
-                        y++;
-                        break;
-                    case 3:
-                        y--;
-                        break;
+                    case 0 -> x++;
+                    case 1 -> x--;
+                    case 2 -> y++;
+                    case 3 -> y--;
                 }
             }
         }
@@ -556,20 +532,10 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask fillSides(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
-            case Y:
-                fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
-                break;
-            case X:
-                fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
-                break;
-            case XY:
-                fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
-                break;
-            case YX:
-                fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
-                break;
-            default:
-                return this;
+            case Z -> fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
+            case X -> fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
+            case XZ -> fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
+            case ZX -> fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -581,21 +547,11 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
-            case POINT:
-                fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
-                break;
-            case Y:
-                fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
-                break;
-            case X:
-                fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
-                break;
-            case XY:
-                fillDiagonal(extent * 3 / 4, false, value);
-                break;
-            case YX:
-                fillDiagonal(extent * 3 / 4, true, value);
-                break;
+            case POINT -> fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+            case Z -> fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
+            case X -> fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
+            case XZ -> fillDiagonal(extent * 3 / 4, false, value);
+            case ZX -> fillDiagonal(extent * 3 / 4, true, value);
         }
         VisualDebugger.visualizeMask(this);
         return this;

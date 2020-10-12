@@ -41,21 +41,21 @@ public strictfp class SaveImporter {
         LuaTable locTable;
         Vector3f location;
         switch (type.toString()) {
-            case "Mass":
+            case "Mass" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addMex(location);
-                break;
-            case "Hydrocarbon":
+            }
+            case "Hydrocarbon" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addHydro(location);
-                break;
-            case "Blank Marker":
+            }
+            case "Blank Marker" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addSpawn(location);
-                break;
+            }
         }
     }
 }

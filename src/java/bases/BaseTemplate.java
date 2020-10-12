@@ -52,15 +52,9 @@ public class BaseTemplate {
             positions.forEach(position -> {
                 Unit unit = new Unit(name, position.add(center), 0);
                 switch (army) {
-                    case CIVILIAN:
-                        map.addCiv(unit);
-                        break;
-                    case ENEMY:
-                        map.addUnit(unit);
-                        break;
-                    case WRECK:
-                        map.addWreck(unit);
-                        break;
+                    case CIVILIAN -> map.addCiv(unit);
+                    case ENEMY -> map.addUnit(unit);
+                    case WRECK -> map.addWreck(unit);
                 }
             });
         });

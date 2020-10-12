@@ -57,18 +57,12 @@ public strictfp class Vector2f {
 
     public void flip(Vector2f center, Symmetry symmetry) {
         switch (symmetry) {
-            case X:
-                x = 2 * center.x - x;
-                break;
-            case Y:
-                y = 2 * center.y - y;
-                break;
-            case XY:
-            case YX:
-            case POINT:
+            case X -> x = 2 * center.x - x;
+            case Z -> y = 2 * center.y - y;
+            case XZ, ZX, POINT -> {
                 x = 2 * center.x - x;
                 y = 2 * center.y - y;
-                break;
+            }
         }
     }
 
