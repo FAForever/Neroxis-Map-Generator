@@ -98,7 +98,7 @@ public strictfp class DecalGenerator {
             Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
             Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
             float rot = spawnableCopy.getReflectedRotation(decal1.getRotation().y);
-            Vector3f symRotation = new Vector3f(decal1.getRotation().x + (flipX ? (float) StrictMath.PI : 0f), rot, decal1.getRotation().z + (flipZ ? (float) StrictMath.PI : 0f));
+            Vector3f symRotation = new Vector3f(decal1.getRotation().x, rot, decal1.getRotation().z);
             Decal decal2 = new Decal(decal1.getPath(), symLocation, symRotation, scale, 2400);
             map.addDecal(decal1);
             map.addDecal(decal2);
