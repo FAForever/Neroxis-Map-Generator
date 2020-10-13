@@ -113,14 +113,18 @@ public strictfp class FloatMask extends Mask {
         return val;
     }
 
-    public float getAvg() {
+    public float getSum() {
         float val = 0;
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 val += get(x, y);
             }
         }
-        return val / getSize() / getSize();
+        return val;
+    }
+
+    public float getAvg() {
+        return getSum() / getSize() / getSize();
     }
 
     public void set(Vector2f location, float value) {
@@ -202,8 +206,18 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask subtract(FloatMask other) {
+        add(other.copy().multiply(-1));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask add(FloatMask other, Vector2f loc) {
         return add(other, (int) loc.x, (int) loc.y);
+    }
+
+    public FloatMask subtract(FloatMask other, Vector2f loc) {
+        return add(other.copy().multiply(-1f), loc);
     }
 
     public FloatMask add(FloatMask other, int offsetX, int offsetY) {
@@ -220,20 +234,22 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask subtract(FloatMask other, int offsetX, int offsetY) {
+        return add(other.copy().multiply(-1f), offsetX, offsetY);
+    }
+
     public FloatMask add(BinaryMask other, float value) {
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
-        }
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
-                if (other.get(x, y)) {
-                    add(x, y, value);
-                }
-            }
-        }
+        FloatMask otherFloat = new FloatMask(getSize(), null, symmetryHierarchy);
+        otherFloat.init(other, 0, value);
+        add(otherFloat);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask subtract(BinaryMask other, float value) {
+        FloatMask otherFloat = new FloatMask(getSize(), null, symmetryHierarchy);
+        otherFloat.init(other, 0, -value);
+        add(otherFloat);
         VisualDebugger.visualizeMask(this);
         return this;
     }
