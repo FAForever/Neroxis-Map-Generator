@@ -766,7 +766,7 @@ public strictfp class MapGenerator {
 
     private void setupTexturePipeline() {
         ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "flat").invert();
-        ConcurrentBinaryMask inland = new ConcurrentBinaryMask(land, random.nextLong(), "inland");
+        ConcurrentBinaryMask inland = new ConcurrentBinaryMask(land, random.nextLong(), "inland").invert();
         ConcurrentBinaryMask highGround = new ConcurrentBinaryMask(heightmapBase, waterHeight+3f, random.nextLong(), "highGround");
         ConcurrentBinaryMask aboveBeach = new ConcurrentBinaryMask(heightmapBase, waterHeight+1.5f, random.nextLong(), "aboveBeach");
         ConcurrentBinaryMask aboveBeachEdge = new ConcurrentBinaryMask(heightmapBase, waterHeight+3f, random.nextLong(), "aboveBeachEdge");
@@ -792,11 +792,11 @@ public strictfp class MapGenerator {
         rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetryHierarchy, "accentRockTexture");
 
-        inland.deflate(2);
+        inland.erode(1f, symmetryHierarchy.getSpawnSymmetry()).erode(1f, symmetryHierarchy.getSpawnSymmetry());
         flatAboveCoast.intersect(flat);
         higherFlatAboveCoast.intersect(flat);
-        lowWaterBeach.invert().inflate(6).minus(aboveBeach);
-        waterBeach.invert().minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
+        lowWaterBeach.invert().grow(1f).grow(1f).grow(1f).grow(1f).grow(1f).grow(1f).minus(aboveBeach);
+        waterBeach.invert().minus(flatAboveCoast).minus(inland).grow(1f).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
         accentGround.minus(highGround).acid(.1f, 0).erode(.4f, symmetryHierarchy.getSpawnSymmetry()).smooth(3, .75f);
         accentPlateau.acid(.05f, 0).erode(.85f, symmetryHierarchy.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
         slopes.intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetryHierarchy.getSpawnSymmetry());
@@ -804,10 +804,7 @@ public strictfp class MapGenerator {
         rockBase.acid(.3f, 0).erode(.2f, symmetryHierarchy.getSpawnSymmetry());
         accentRock.acid(.2f, 0).erode(.3f, symmetryHierarchy.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
-        waterBeachTexture.init(waterBeach,0,1).subtract(rock, 1f).subtract(aboveBeachEdge,1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-        waterBeachTexture.subtract(aboveBeachEdge,.9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge,.8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
-        waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge,0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
-        waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
+        waterBeachTexture.init(waterBeach,0,1).subtract(rock, 1f).subtract(aboveBeachEdge,1f).clampMin(0).smooth(2).add(waterBeach, 1f).subtract(rock, 1f).subtract(aboveBeachEdge,.9f).clampMin(0).smooth(2).subtract(rock, 1f).subtract(aboveBeachEdge,.8f).clampMin(0).add(waterBeach, .65f).smooth(2).subtract(rock, 1f).subtract(aboveBeachEdge,0.7f).clampMin(0).add(waterBeach, .5f).smooth(2).smooth(2).subtract(rock, 1f).clampMin(0).smooth(2).smooth(2).subtract(rock, 1f).clampMin(0).smooth(2).smooth(1).smooth(1).clampMax(1f);
         accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f);
         accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f);
         slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
@@ -870,10 +867,10 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getSpawn(i), 30, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noProps.fillCircle(map.getMex(i), 1, true);
+            noProps.fillCircle(map.getMex(i), 10, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noProps.fillCircle(map.getHydro(i), 8, true);
+            noProps.fillCircle(map.getHydro(i), 16, true);
         }
 
         noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
@@ -912,7 +909,7 @@ public strictfp class MapGenerator {
             noWrecks.fillCircle(map.getSpawn(i), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noWrecks.fillCircle(map.getMex(i), 8, true);
+            noWrecks.fillCircle(map.getMex(i), 16, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
             noWrecks.fillCircle(map.getHydro(i), 32, true);
