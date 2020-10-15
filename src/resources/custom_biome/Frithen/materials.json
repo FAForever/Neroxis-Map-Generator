@@ -2,8 +2,8 @@
   "name": "Frithen",
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
-    "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
     "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
+    "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
     "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
     "/env/Tundra/Layers/Tund_melt001_albedo.dds",
     "/env/Tundra/Layers/Tund_melt001_albedo.dds",
@@ -14,8 +14,8 @@
   ],
   "textureScales": [
     2.0,
-    16.0,
     0.0,
+    16.0,
     6.0,
     8.0,
     1.0,
@@ -37,7 +37,7 @@
   ],
   "normalScales": [
     4.0,
-    2.0,
+    4.0,
     4.0,
     4.0,
     4.0,
@@ -52,11 +52,11 @@
       "falpha": 0.0
     },
     {
-      "value": -7364699,
+      "value": -7102299,
       "falpha": 0.0
     },
     {
-      "value": -7102299,
+      "value": -7364699,
       "falpha": 0.0
     },
     {

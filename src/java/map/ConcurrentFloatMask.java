@@ -1,6 +1,5 @@
 package map;
 
-import generator.VisualDebugger;
 import lombok.Getter;
 import util.Pipeline;
 import util.Util;
@@ -60,14 +59,14 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
 
     public ConcurrentFloatMask subtract(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.add(((ConcurrentFloatMask) res.get(1)).getFloatMask())
-        ).multiply(-1);
+                this.floatMask.subtract(((ConcurrentFloatMask) res.get(1)).getFloatMask())
+        );
     }
 
     public ConcurrentFloatMask subtract(ConcurrentBinaryMask other, float value) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.add(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
-        ).multiply(-1);
+                this.floatMask.subtract(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+        );
     }
 
     public ConcurrentFloatMask multiply(float value) {

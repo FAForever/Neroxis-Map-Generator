@@ -1,21 +1,21 @@
 {
   "name": "Loki",
   "texturePaths": [
-    "/env/Evergreen2/Layers/EvGrass007_albedo.dds",
+    "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel01_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel01_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel01_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass003_albedo.dds",
+    "/env/Evergreen2/Layers/EG_Gravel2_albedo.dds",
+    "/env/Evergreen/layers/SandLight002_albedo.dds",
+    "/env/Evergreen2/Layers/EV_Reef_Coral_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock004_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock004_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock007c_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     2.0,
-    2.0,
-    2.0,
+    4.0,
+    12.0,
     4.0,
     4.0,
     2.0,
@@ -25,30 +25,30 @@
     77.5
   ],
   "normalPaths": [
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
+    "/env/Swamp/layers/Sw_Grass_03_normals.dds",
+    "/env/Evergreen/layers/grass001_normals.dds",
+    "/env/Evergreen/layers/grass000_normals.dds",
     "/env/Evergreen2/Layers/EvRock006_normal.dds",
     "/env/Evergreen/layers/SandLight_normals.dds",
-    "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EvRock007_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
+    "/env/Evergreen2/Layers/EvTrans01_normals.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds"
   ],
   "normalScales": [
-    6.0,
-    6.0,
-    6.0,
-    6.0,
-    16.0,
-    12.0,
+    0.0,
+    8.0,
+    10.0,
+    8.0,
     4.0,
-    6.0,
-    6.0
+    8.0,
+    4.0,
+    4.0,
+    4.0
   ],
   "previewColors": [
     {
-      "value": -12893661,
+      "value": -12826087,
       "falpha": 0.0
     },
     {
@@ -56,7 +56,7 @@
       "falpha": 0.0
     },
     {
-      "value": -14802163,
+      "value": -13615330,
       "falpha": 0.0
     },
     {
@@ -64,23 +64,23 @@
       "falpha": 0.0
     },
     {
-      "value": -11251391,
+      "value": -8094093,
       "falpha": 0.0
     },
     {
-      "value": -12961746,
+      "value": -11774650,
       "falpha": 0.0
     },
     {
-      "value": -12961746,
+      "value": -12764345,
+      "falpha": 0.0
+    },
+    {
+      "value": -12764345,
       "falpha": 0.0
     },
     {
       "value": -12698052,
-      "falpha": 0.0
-    },
-    {
-      "value": -12568527,
       "falpha": 0.0
     }
   ]

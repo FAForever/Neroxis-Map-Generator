@@ -1,13 +1,13 @@
 {
   "name": "Wonder",
   "texturePaths": [
-    "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass005_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",
     "/env/Evergreen2/Layers/EvRock002b_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006c_albedo.dds",
     "/env/Evergreen2/Layers/EvRock007_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
@@ -15,19 +15,19 @@
   "textureScales": [
     6.0,
     8.0,
-    2.0,
+    14.0,
     16.0,
-    6.0,
+    12.0,
     10.0,
-    6.0,
+    13.0,
     32.0,
     16.0,
     128.0
   ],
   "normalPaths": [
-    "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
     "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
+    "/env/Evergreen2/Layers/EvTrans01_normals.dds",
     "/env/Evergreen2/Layers/EvTrans01_normals.dds",
     "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
     "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
@@ -38,9 +38,9 @@
   "normalScales": [
     12.0,
     6.0,
-    8.0,
+    16.0,
     4.0,
-    8.0,
+    16.0,
     16.0,
     16.0,
     20.0,
@@ -48,11 +48,11 @@
   ],
   "previewColors": [
     {
-      "value": -13160666,
+      "value": -14406639,
       "falpha": 0.0
     },
     {
-      "value": -14406639,
+      "value": -13160666,
       "falpha": 0.0
     },
     {
@@ -72,7 +72,7 @@
       "falpha": 0.0
     },
     {
-      "value": -13160666,
+      "value": -12698052,
       "falpha": 0.0
     },
     {

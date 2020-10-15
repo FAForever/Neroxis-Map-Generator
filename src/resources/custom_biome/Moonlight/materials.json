@@ -1,54 +1,62 @@
 {
   "name": "Moonlight",
   "texturePaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_albedo.DDS",
-    "/env/Red Barrens/Layers/RB_Cracked02_albedo.DDS",
-    "/env/Red Barrens/Layers/RB_gravel01_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock08_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock04_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Cracked02_albedo.DDS",
+    "/env/Red Barrens/Layers/RB_Rock03_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
+    "/env/Geothermal/layers/Geo_Dirt_01_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
     "/env/Geothermal/layers/Geo_Dirt_01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    8.0,
-    12.0,
-    16.0,
-    0.0,
-    12.0,
+    7.25,
+    26.5,
+    32.0,
+    6.0,
+    32.0,
+    19.5,
     16.0,
     32.0,
-    16.0,
     32.0,
     128.0
   ],
   "normalPaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
     "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds"
   ],
   "normalScales": [
-    6.0,
+    32.0,
     16.0,
     32.0,
-    12.0,
+    32.0,
     64.0,
     64.0,
-    4.0,
+    32.0,
     4.0,
     4.0
   ],
   "previewColors": [
     {
-      "value": -9490404,
+      "value": -8707325,
+      "falpha": 0.0
+    },
+    {
+      "value": -12774645,
+      "falpha": 0.0
+    },
+    {
+      "value": -11326943,
       "falpha": 0.0
     },
     {
@@ -56,15 +64,7 @@
       "falpha": 0.0
     },
     {
-      "value": -8707325,
-      "falpha": 0.0
-    },
-    {
-      "value": -10802148,
-      "falpha": 0.0
-    },
-    {
-      "value": -11721450,
+      "value": -9421518,
       "falpha": 0.0
     },
     {
@@ -72,7 +72,7 @@
       "falpha": 0.0
     },
     {
-      "value": -12774645,
+      "value": -11250332,
       "falpha": 0.0
     },
     {
