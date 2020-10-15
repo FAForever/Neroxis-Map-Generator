@@ -1,12 +1,12 @@
 {
   "name": "Cadmium",
   "texturePaths": [
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
     "/env/Tropical/Layers/TrRock002_albedo.dds",
     "/env/Tropical/Layers/Trop_Grass_albedo.dds",
     "/env/Tropical/Layers/Trop_Rock_albedo.DDS",
     "/env/Tropical/Layers/Trop_Dirt_albedo.DDS",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
     "/env/Tropical/Layers/TrRock003_albedo.dds",
     "/env/Tropical/Layers/TrRock005_albedo.dds",
     "/env/Tropical/Layers/Tr_GrassHills_albedo.dds",
@@ -14,44 +14,40 @@
   ],
   "textureScales": [
     10.0,
-    10.0,
     2.0,
     8.0,
     8.0,
     16.0,
+    10.0,
     4.0,
     16.0,
     16.0,
     128.0
   ],
   "normalPaths": [
-    "/env/Evergreen/layers/SandLight_normals.dds",
     "/env/Tropical/Layers/TrTrans002_Normal.dds",
     "/env/Tropical/Layers/Trop_Rock_Normal.DDS",
     "/env/Tropical/Layers/TrRock006_normal.dds",
     "/env/Evergreen/layers/RockMed_normals.dds",
     "/env/Tropical/Layers/TrBush_moss_Normal.dds",
+    "/env/Evergreen/layers/SandLight_normals.dds",
     "/env/Tropical/Layers/Trop_Rock_Normal.DDS",
     "/env/Tropical/Layers/TrRock006_normal.dds",
     "/env/Tropical/Layers/Tr_GrassHills_normal.dds"
   ],
   "normalScales": [
-    4.0,
     8.0,
     16.0,
     8.0,
     8.0,
     8.0,
+    4.0,
     16.0,
     16.0,
     16.0
   ],
   "previewColors": [
-    {
-      "value": -13289948,
-      "falpha": 0.0
-    },
-    {
+   {
       "value": -14406639,
       "falpha": 0.0
     },
@@ -69,6 +65,10 @@
     },
     {
       "value": -14081264,
+      "falpha": 0.0
+    },
+    {
+      "value": -13289948,
       "falpha": 0.0
     },
     {

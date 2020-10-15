@@ -1,56 +1,52 @@
 {
   "name": "Desert",
   "texturePaths": [
-    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_SandMed02_albedo.dds",
     "/env/Desert/Layers/Des_SandMed_albedo.dds",
     "/env/Desert/Layers/Des_Gravel_albedo.dds",
+    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
     "/env/Desert/Layers/Des_Rock04_albedo.dds",
     "/env/Desert/Layers/Des_Rock06_albedo.dds",
     "/env/Desert/Layers/Des_Rock_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    10.609999656677246,
     4.0,
     8.0,
     8.0,
     8.0,
     16.0,
+    10.609999656677246,
     16.0,
     8.0,
     16.0,
     128.0
   ],
   "normalPaths": [
-    "/env/paradise/layers/sand000_normals.dds",
     "/env/Desert/Layers/Des_SandDark_normal.dds",
     "/env/Desert/Layers/Des_Gravel_normal.dds",
     "/env/Desert/Layers/Des_sandLight_normal.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Desert/Layers/Des_Gravel_normal.dds",
+    "/env/paradise/layers/sand000_normals.dds",
     "/env/Desert/Layers/Des_Rock03a_normal.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Desert/Layers/Des_Rock01_normal.dds"
   ],
   "normalScales": [
+    4.0,
+    8.0,
+    8.0,
+    8.0,
+    4.0,
     20.0,
-    4.0,
-    8.0,
-    8.0,
-    8.0,
-    4.0,
     4.0,
     4.0,
     4.0
   ],
   "previewColors": [
-    {
-      "value": -6518683,
-      "falpha": 0.0
-    },
     {
       "value": -7376820,
       "falpha": 0.0
@@ -69,6 +65,10 @@
     },
     {
       "value": -10069694,
+      "falpha": 0.0
+    },
+    {
+      "value": -6518683,
       "falpha": 0.0
     },
     {
