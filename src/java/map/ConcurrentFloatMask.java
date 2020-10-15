@@ -57,6 +57,18 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentFloatMask subtract(ConcurrentFloatMask other) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.floatMask.subtract(((ConcurrentFloatMask) res.get(1)).getFloatMask())
+        );
+    }
+
+    public ConcurrentFloatMask subtract(ConcurrentBinaryMask other, float value) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.floatMask.subtract(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+        );
+    }
+
     public ConcurrentFloatMask multiply(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.multiply(value)

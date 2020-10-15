@@ -1,56 +1,52 @@
 {
   "name": "Mars",
   "texturePaths": [
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Desert/Layers/Des_Gravel_albedo.dds",
     "/env/Desert/Layers/Des_Rock_albedo.dds",
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_Rock06_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Sandwet01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    7.0,
     1.0,
     0.0,
     20.0,
     10.0,
     10.0,
+    7.0,
     32.0,
     32.0,
     32.0,
     128.0
   ],
   "normalPaths": [
-    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
     "/env/Desert/Layers/Des_Gravel_normal.dds",
     "/env/Desert/Layers/Des_sandLight_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
     "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
+    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
     "/env/Desert/Layers/Des_Rock02_normal.dds",
     "/env/Red Barrens/Layers/RB_Sand_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS"
   ],
   "normalScales": [
-    7.0,
     5.0,
     10.0,
     16.0,
     16.0,
     10.0,
+    7.0,
     4.0,
     7.0,
     7.0
   ],
   "previewColors": [
-    {
-      "value": -11722475,
-      "falpha": 0.0
-    },
     {
       "value": -10069694,
       "falpha": 0.0
@@ -69,6 +65,10 @@
     },
     {
       "value": -11845328,
+      "falpha": 0.0
+    },
+    {
+      "value": -11722475,
       "falpha": 0.0
     },
     {
