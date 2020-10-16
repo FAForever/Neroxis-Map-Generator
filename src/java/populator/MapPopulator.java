@@ -1,8 +1,8 @@
 package populator;
 
-import export.SCMapExporter;
-import export.SaveExporter;
-import export.ScenarioExporter;
+import exporter.SCMapExporter;
+import exporter.SaveExporter;
+import exporter.ScenarioExporter;
 import generator.*;
 import importer.SCMapImporter;
 import importer.SaveImporter;
@@ -10,6 +10,7 @@ import map.*;
 import util.ArgumentParser;
 import util.FileUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -180,7 +181,7 @@ public strictfp class MapPopulator {
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
         heightmapBase.applySymmetry();
-        map.setHeightmap(heightmapBase);
+        map.setHeightImage(heightmapBase);
         float waterHeight;
         if (waterPresent) {
             waterHeight = map.getBiome().getWaterSettings().getElevation();
@@ -247,17 +248,18 @@ public strictfp class MapPopulator {
         }
 
         if (populateTextures) {
-            map.getDecals().clear();
+            map.setTextureMasksLow(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
+            map.setTextureMasksHigh(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
 
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
-            BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight+3f, random.nextLong());
-            BinaryMask aboveBeach = new BinaryMask(heightmapBase, waterHeight+1.5f, random.nextLong());
-            BinaryMask aboveBeachEdge = new BinaryMask(heightmapBase, waterHeight+3f, random.nextLong());
-            BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight+0.29f, random.nextLong());
-            BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight+1.2f, random.nextLong());
+            BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BinaryMask aboveBeach = new BinaryMask(heightmapBase, waterHeight + 1.5f, random.nextLong());
+            BinaryMask aboveBeachEdge = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 0.29f, random.nextLong());
+            BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 1.2f, random.nextLong());
             BinaryMask lowWaterBeach = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-            BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight+1f, random.nextLong());
+            BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight + 1f, random.nextLong());
             BinaryMask accentGround = new BinaryMask(land, random.nextLong());
             BinaryMask accentPlateau = new BinaryMask(plateaus, random.nextLong());
             BinaryMask slopes = new BinaryMask(slope, .1f, random.nextLong());
@@ -274,12 +276,12 @@ public strictfp class MapPopulator {
             FloatMask rockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
             FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
 
-            inland.erode(1f, symmetryHierarchy.getSpawnSymmetry()).erode(1f, symmetryHierarchy.getSpawnSymmetry());
+            inland.deflate(2);
             flatAboveCoast.intersect(flat);
             higherFlatAboveCoast.intersect(flat);
-            lowWaterBeach.invert().grow(1f).grow(1f).grow(1f).grow(1f).grow(1f).grow(1f).minus(aboveBeach);
+            lowWaterBeach.invert().inflate(6).minus(aboveBeach);
             if (waterPresent) {
-                waterBeach.invert().minus(flatAboveCoast).minus(inland).grow(1f).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
+                waterBeach.invert().minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
             } else {
                 waterBeach.clear();
             }
@@ -290,7 +292,10 @@ public strictfp class MapPopulator {
             rockBase.acid(.3f, 0).erode(.2f, symmetryHierarchy.getSpawnSymmetry());
             accentRock.acid(.2f, 0).erode(.3f, symmetryHierarchy.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
-            waterBeachTexture.init(waterBeach,0,1).subtract(rock, 1f).subtract(aboveBeachEdge,1f).clampMin(0).smooth(2).add(waterBeach, 1f).subtract(rock, 1f).subtract(aboveBeachEdge,.9f).clampMin(0).smooth(2).subtract(rock, 1f).subtract(aboveBeachEdge,.8f).clampMin(0).add(waterBeach, .65f).smooth(2).subtract(rock, 1f).subtract(aboveBeachEdge,0.7f).clampMin(0).add(waterBeach, .5f).smooth(2).smooth(2).subtract(rock, 1f).clampMin(0).smooth(2).smooth(2).subtract(rock, 1f).clampMin(0).smooth(2).smooth(1).smooth(1).clampMax(1f);
+            waterBeachTexture.init(waterBeach,0,1).subtract(rock, 1f).subtract(aboveBeachEdge,1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
+            waterBeachTexture.subtract(aboveBeachEdge,.9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge,.8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
+            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge,0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
+            waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
             accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f);
             accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f);
             slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
