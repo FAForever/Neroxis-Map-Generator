@@ -870,10 +870,10 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getSpawn(i), 30, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noProps.fillCircle(map.getMex(i), 10, true);
+            noProps.fillCircle(map.getMex(i), 1, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noProps.fillCircle(map.getHydro(i), 16, true);
+            noProps.fillCircle(map.getHydro(i), 8, true);
         }
 
         noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
@@ -912,7 +912,7 @@ public strictfp class MapGenerator {
             noWrecks.fillCircle(map.getSpawn(i), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noWrecks.fillCircle(map.getMex(i), 16, true);
+            noWrecks.fillCircle(map.getMex(i), 8, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
             noWrecks.fillCircle(map.getHydro(i), 32, true);
