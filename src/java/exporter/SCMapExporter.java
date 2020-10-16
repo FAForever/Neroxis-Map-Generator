@@ -1,4 +1,4 @@
-package export;
+package exporter;
 
 import generator.PreviewGenerator;
 import map.*;
@@ -203,22 +203,33 @@ public strictfp class SCMapExporter {
         writeBytes(normalHeaderBytes); // dds header
         writeInts(((DataBufferInt) map.getNormalMap().getData().getDataBuffer()).getData()); // normalmap data
 
-        DDSHeader textureMaskDDSHeader = new DDSHeader();
-        textureMaskDDSHeader.setWidth(map.getTextureMasksLow().getWidth());
-        textureMaskDDSHeader.setHeight(map.getTextureMasksLow().getHeight());
-        textureMaskDDSHeader.setRGBBitCount(32);
-        textureMaskDDSHeader.setRBitMask(0x00FF0000);
-        textureMaskDDSHeader.setGBitMask(0x0000FF00);
-        textureMaskDDSHeader.setBBitMask(0x000000FF);
-        textureMaskDDSHeader.setABitMask(0xFF000000);
-        byte[] textureHeaderBytes = textureMaskDDSHeader.toBytes();
+        DDSHeader textureMaskLowDDSHeader = new DDSHeader();
+        textureMaskLowDDSHeader.setWidth(map.getTextureMasksLow().getWidth());
+        textureMaskLowDDSHeader.setHeight(map.getTextureMasksLow().getHeight());
+        textureMaskLowDDSHeader.setRGBBitCount(32);
+        textureMaskLowDDSHeader.setRBitMask(0x00FF0000);
+        textureMaskLowDDSHeader.setGBitMask(0x0000FF00);
+        textureMaskLowDDSHeader.setBBitMask(0x000000FF);
+        textureMaskLowDDSHeader.setABitMask(0xFF000000);
+        byte[] textureLowHeaderBytes = textureMaskLowDDSHeader.toBytes();
 
         // texture maps
-        writeInt(textureHeaderBytes.length + map.getTextureMasksLow().getWidth() * map.getTextureMasksLow().getHeight() * 4); // texture masks low byte count
-        writeBytes(textureHeaderBytes); // dds header
+        writeInt(textureLowHeaderBytes.length + map.getTextureMasksLow().getWidth() * map.getTextureMasksLow().getHeight() * 4); // texture masks low byte count
+        writeBytes(textureLowHeaderBytes); // dds header
         writeInts(((DataBufferInt) map.getTextureMasksLow().getData().getDataBuffer()).getData()); // texture masks low data
-        writeInt(textureHeaderBytes.length + map.getTextureMasksHigh().getWidth() * map.getTextureMasksHigh().getHeight() * 4); // texture maks high byte count
-        writeBytes(textureHeaderBytes); // dds header
+
+        DDSHeader textureMaskHighDDSHeader = new DDSHeader();
+        textureMaskHighDDSHeader.setWidth(map.getTextureMasksHigh().getWidth());
+        textureMaskHighDDSHeader.setHeight(map.getTextureMasksHigh().getHeight());
+        textureMaskHighDDSHeader.setRGBBitCount(32);
+        textureMaskHighDDSHeader.setRBitMask(0x00FF0000);
+        textureMaskHighDDSHeader.setGBitMask(0x0000FF00);
+        textureMaskHighDDSHeader.setBBitMask(0x000000FF);
+        textureMaskHighDDSHeader.setABitMask(0xFF000000);
+        byte[] textureHighHeaderBytes = textureMaskHighDDSHeader.toBytes();
+
+        writeInt(textureHighHeaderBytes.length + map.getTextureMasksHigh().getWidth() * map.getTextureMasksHigh().getHeight() * 4); // texture maks high byte count
+        writeBytes(textureHighHeaderBytes); // dds header
         writeInts(((DataBufferInt) map.getTextureMasksHigh().getData().getDataBuffer()).getData()); // texture masks high data
 
         DDSHeader waterDDSHeader = new DDSHeader();

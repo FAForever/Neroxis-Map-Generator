@@ -1,8 +1,8 @@
 package populator;
 
-import export.SCMapExporter;
-import export.SaveExporter;
-import export.ScenarioExporter;
+import exporter.SCMapExporter;
+import exporter.SaveExporter;
+import exporter.ScenarioExporter;
 import generator.*;
 import importer.SCMapImporter;
 import importer.SaveImporter;
@@ -10,6 +10,7 @@ import map.*;
 import util.ArgumentParser;
 import util.FileUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -191,7 +192,7 @@ public strictfp class MapPopulator {
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         heightmapBase = map.getHeightMask(symmetryHierarchy);
         heightmapBase.applySymmetry();
-        map.setHeightmap(heightmapBase);
+        map.setHeightImage(heightmapBase);
         float waterHeight;
         if (waterPresent) {
             waterHeight = map.getBiome().getWaterSettings().getElevation();
@@ -257,17 +258,18 @@ public strictfp class MapPopulator {
         }
 
         if (populateTextures) {
-            map.getDecals().clear();
+            map.setTextureMasksLow(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
+            map.setTextureMasksHigh(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
 
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
-            BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight+3f, random.nextLong());
-            BinaryMask aboveBeach = new BinaryMask(heightmapBase, waterHeight+1.5f, random.nextLong());
-            BinaryMask aboveBeachEdge = new BinaryMask(heightmapBase, waterHeight+3f, random.nextLong());
-            BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight+0.29f, random.nextLong());
-            BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight+1.2f, random.nextLong());
+            BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BinaryMask aboveBeach = new BinaryMask(heightmapBase, waterHeight + 1.5f, random.nextLong());
+            BinaryMask aboveBeachEdge = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 0.29f, random.nextLong());
+            BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 1.2f, random.nextLong());
             BinaryMask lowWaterBeach = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-            BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight+1f, random.nextLong());
+            BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight + 1f, random.nextLong());
             BinaryMask accentGround = new BinaryMask(land, random.nextLong());
             BinaryMask accentPlateau = new BinaryMask(plateaus, random.nextLong());
             BinaryMask slopes = new BinaryMask(slope, .1f, random.nextLong());

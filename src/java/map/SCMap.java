@@ -24,15 +24,13 @@ public strictfp class SCMap {
     public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
 
-    private final ArrayList<DecalGroup> decalGroups;
-    private final ArrayList<WaveGenerator> waveGenerators;
-    private final ArrayList<CubeMap> cubeMaps;
     private float heightMapScale = 1f / 128f;
 
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
     private String terrainShaderPath = "TTerrainXP";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
+    private final ArrayList<DecalGroup> decalGroups;
     private int spawnCountInit;
     private int mexCountInit;
     private int hydroCountInit;
@@ -40,7 +38,7 @@ public strictfp class SCMap {
     private final ArrayList<Vector3f> mexes;
     private final ArrayList<Vector3f> hydros;
     private final ArrayList<Decal> decals;
-    private String skyCubePath = "/textures/environment/defaultskycube.dds";
+    private final ArrayList<WaveGenerator> waveGenerators;
     private final ArrayList<Prop> props;
     private final ArrayList<Unit> units;
     private final ArrayList<Unit> civs;
@@ -54,20 +52,22 @@ public strictfp class SCMap {
     private final ArrayList<AIMarker> largeExpansionAIMarkers;
     private final ArrayList<AIMarker> navalAreaAIMarkers;
     private final ArrayList<AIMarker> navalRallyMarkers;
+    private final ArrayList<CubeMap> cubeMaps;
+    private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
     private SkyBox skyBox;
+    private BufferedImage preview;
+    private BufferedImage heightmap;
+    private BufferedImage normalMap;
+    private BufferedImage textureMasksLow;
+    private BufferedImage textureMasksHigh;
 
-    private final BufferedImage preview;
-    private final BufferedImage heightmap;
-    private final BufferedImage normalMap;
-    private final BufferedImage textureMasksLow;
-    private final BufferedImage textureMasksHigh;
+    private BufferedImage waterMap;
+    private BufferedImage waterFoamMask;
+    private BufferedImage waterFlatnessMask;
+    private BufferedImage waterDepthBiasMask;
+    private BufferedImage terrainType;
 
-    private final BufferedImage waterMap;
-    private final BufferedImage waterFoamMask;
-    private final BufferedImage waterFlatnessMask;
-    private final BufferedImage waterDepthBiasMask;
-    private final BufferedImage terrainType;
     private int miniMapContourInterval = 0;
     private int miniMapDeepWaterColor = 0;
     private int miniMapContourColor = 0;
@@ -361,7 +361,7 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void setHeightmap(FloatMask heightmap) {
+    public void setHeightImage(FloatMask heightmap) {
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
                 this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.get(x, y) / heightMapScale)});
@@ -379,9 +379,27 @@ public strictfp class SCMap {
         return heightMask;
     }
 
+    public void setPreviewImage(FloatMask previewMask) {
+        for (int y = 0; y < previewMask.getSize(); y++) {
+            for (int x = 0; x < previewMask.getSize(); x++) {
+                this.preview.setRGB(x, y, (int) previewMask.get(x, y));
+            }
+        }
+    }
+
+    public FloatMask getPreviewMask(SymmetryHierarchy symmetryHierarchy) {
+        FloatMask previewMask = new FloatMask(this.preview.getHeight(), null, symmetryHierarchy);
+        for (int y = 0; y < previewMask.getSize(); y++) {
+            for (int x = 0; x < previewMask.getSize(); x++) {
+                previewMask.set(x, y, this.preview.getRGB(x, y));
+            }
+        }
+        return previewMask;
+    }
+
     public void setTextureMasksLow(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
-        for (int y = 0; y < size / 2; y++) {
-            for (int x = 0; x < size / 2; x++) {
+        for (int y = 0; y < textureMasksLow.getHeight(); y++) {
+            for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
                 int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
                 int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
@@ -392,8 +410,8 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksHigh(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
-        for (int y = 0; y < size / 2; y++) {
-            for (int x = 0; x < size / 2; x++) {
+        for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
+            for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
                 int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
                 int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
@@ -408,20 +426,24 @@ public strictfp class SCMap {
         FloatMask mask1 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
         FloatMask mask2 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
         FloatMask mask3 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetryHierarchy);
-        FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
-        FloatMask mask5 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
-        FloatMask mask6 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
-        FloatMask mask7 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
-        for (int y = 0; y < size / 2; y++) {
-            for (int x = 0; x < size / 2; x++) {
+        for (int y = 0; y < textureMasksLow.getHeight(); y++) {
+            for (int x = 0; x < textureMasksLow.getHeight(); x++) {
                 int[] valsLow = new int[4];
-                int[] valsHigh = new int[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
                 mask0.set(x, y, valsLow[0] > 0 ? (valsLow[0] - 128) / 127f : 0f);
                 mask1.set(x, y, valsLow[1] > 0 ? (valsLow[1] - 128) / 127f : 0f);
                 mask2.set(x, y, valsLow[2] > 0 ? (valsLow[2] - 128) / 127f : 0f);
                 mask3.set(x, y, valsLow[3] > 0 ? (valsLow[3] - 128) / 127f : 0f);
+            }
+        }
+        FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask5 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask6 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        FloatMask mask7 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetryHierarchy);
+        for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
+            for (int x = 0; x < textureMasksHigh.getHeight(); x++) {
+                int[] valsHigh = new int[4];
+                textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
                 mask4.set(x, y, valsHigh[0] > 0 ? (valsHigh[0] - 128) / 127f : 0f);
                 mask5.set(x, y, valsHigh[1] > 0 ? (valsHigh[1] - 128) / 127f : 0f);
                 mask6.set(x, y, valsHigh[2] > 0 ? (valsHigh[2] - 128) / 127f : 0f);

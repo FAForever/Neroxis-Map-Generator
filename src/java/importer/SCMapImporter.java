@@ -10,6 +10,7 @@ import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.*;
 import java.nio.file.Path;
@@ -311,7 +312,7 @@ public strictfp class SCMapImporter {
             Vector3f scale = readVector3f();
             float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
             if ((rotation - StrictMath.atan2(-rotationZ.x, rotationZ.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
-                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
+//                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
             }
             props[i] = new Prop(path, position, rotation);
         }
@@ -331,50 +332,88 @@ public strictfp class SCMapImporter {
         map.setMiniMapShoreColor(miniMapShoreColor);
         map.setMiniMapLandStartColor(miniMapLandStartColor);
         map.setMiniMapLandEndColor(miniMapLandEndColor);
-        DataBuffer previewDataBuffer = map.getPreview().getRaster().getDataBuffer();
+
+        int previewSize = (int) StrictMath.sqrt(previewImageData.length);
+        BufferedImage preview = new BufferedImage(previewSize, previewSize, BufferedImage.TYPE_INT_ARGB);
+        DataBuffer previewDataBuffer = preview.getRaster().getDataBuffer();
         for (int i = 0; i < previewDataBuffer.getSize(); i++) {
             previewDataBuffer.setElem(i, previewImageData[i]);
         }
-        DataBuffer heightmapDataBuffer = map.getHeightmap().getRaster().getDataBuffer();
+        map.setPreview(preview);
+
+        int heightmapSize = (int) StrictMath.sqrt(heightMapData.length);
+        BufferedImage heightmap = new BufferedImage(heightmapSize, heightmapSize, BufferedImage.TYPE_USHORT_GRAY);
+        DataBuffer heightmapDataBuffer = heightmap.getRaster().getDataBuffer();
         for (int i = 0; i < heightmapDataBuffer.getSize(); i++) {
             heightmapDataBuffer.setElem(i, heightMapData[i]);
         }
-        DataBuffer normalmapDataBuffer = map.getNormalMap().getRaster().getDataBuffer();
-        for (int i = 0; i < normalmapDataBuffer.getSize(); i++) {
-            try {
-                normalmapDataBuffer.setElem(i, normalMapData[i]);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                break;
-            }
+        map.setHeightmap(heightmap);
+
+
+        int normalMapSize = (int) StrictMath.sqrt(normalMapData.length);
+        BufferedImage normalMap = new BufferedImage(normalMapSize, normalMapSize, BufferedImage.TYPE_INT_ARGB);
+        DataBuffer normalMapDataBuffer = normalMap.getRaster().getDataBuffer();
+        for (int i = 0; i < normalMapDataBuffer.getSize(); i++) {
+            normalMapDataBuffer.setElem(i, normalMapData[i]);
         }
-        DataBuffer textureMasksLowDataBuffer = map.getTextureMasksLow().getRaster().getDataBuffer();
+        map.setNormalMap(normalMap);
+
+        int textureLowSize = (int) StrictMath.sqrt(textureMaskLowData.length);
+        BufferedImage textureMasksLow = new BufferedImage(textureLowSize, textureLowSize, BufferedImage.TYPE_INT_ARGB);
+        DataBuffer textureMasksLowDataBuffer = textureMasksLow.getRaster().getDataBuffer();
         for (int i = 0; i < textureMasksLowDataBuffer.getSize(); i++) {
             textureMasksLowDataBuffer.setElem(i, textureMaskLowData[i]);
         }
-        DataBuffer textureMasksHighDataBuffer = map.getTextureMasksHigh().getRaster().getDataBuffer();
+        map.setTextureMasksLow(textureMasksLow);
+
+        int textureHighSize = (int) StrictMath.sqrt(textureMaskHighData.length);
+        BufferedImage textureMasksHigh = new BufferedImage(textureHighSize, textureHighSize, BufferedImage.TYPE_INT_ARGB);
+        DataBuffer textureMasksHighDataBuffer = textureMasksHigh.getRaster().getDataBuffer();
         for (int i = 0; i < textureMasksHighDataBuffer.getSize(); i++) {
             textureMasksHighDataBuffer.setElem(i, textureMaskHighData[i]);
         }
-        DataBuffer waterMapDataBuffer = map.getWaterMap().getRaster().getDataBuffer();
+        map.setTextureMasksHigh(textureMasksHigh);
+
+        int waterMapSize = (int) StrictMath.sqrt(waterMapData.length);
+        BufferedImage waterMap = new BufferedImage(waterMapSize, waterMapSize, BufferedImage.TYPE_BYTE_GRAY);
+        DataBuffer waterMapDataBuffer = waterMap.getRaster().getDataBuffer();
         for (int i = 0; i < waterMapDataBuffer.getSize(); i++) {
             waterMapDataBuffer.setElem(i, waterMapData[i]);
         }
-        DataBuffer waterFoamMaskDataBuffer = map.getWaterFoamMask().getRaster().getDataBuffer();
+        map.setWaterMap(waterMap);
+
+        int waterFoamSize = (int) StrictMath.sqrt(waterFoamMaskData.length);
+        BufferedImage waterFoamMask = new BufferedImage(waterFoamSize, waterFoamSize, BufferedImage.TYPE_BYTE_GRAY);
+        DataBuffer waterFoamMaskDataBuffer = waterFoamMask.getRaster().getDataBuffer();
         for (int i = 0; i < waterFoamMaskDataBuffer.getSize(); i++) {
             waterFoamMaskDataBuffer.setElem(i, waterFoamMaskData[i]);
         }
-        DataBuffer waterFlatnessMaskDataBuffer = map.getWaterFlatnessMask().getRaster().getDataBuffer();
+        map.setWaterFoamMask(waterFoamMask);
+
+        int waterFlatSize = (int) StrictMath.sqrt(waterFoamMaskData.length);
+        BufferedImage waterFlatnessMask = new BufferedImage(waterFlatSize, waterFlatSize, BufferedImage.TYPE_BYTE_GRAY);
+        DataBuffer waterFlatnessMaskDataBuffer = waterFlatnessMask.getRaster().getDataBuffer();
         for (int i = 0; i < waterFlatnessMaskDataBuffer.getSize(); i++) {
             waterFlatnessMaskDataBuffer.setElem(i, waterFlatnessData[i]);
         }
-        DataBuffer waterDepthBiasMaskDataBuffer = map.getWaterDepthBiasMask().getRaster().getDataBuffer();
+        map.setWaterFlatnessMask(waterFlatnessMask);
+
+        int waterDepthSize = (int) StrictMath.sqrt(waterDepthBiasMaskData.length);
+        BufferedImage waterDepthBiasMask = new BufferedImage(waterDepthSize, waterDepthSize, BufferedImage.TYPE_BYTE_GRAY);
+        DataBuffer waterDepthBiasMaskDataBuffer = waterDepthBiasMask.getRaster().getDataBuffer();
         for (int i = 0; i < waterDepthBiasMaskDataBuffer.getSize(); i++) {
             waterDepthBiasMaskDataBuffer.setElem(i, waterDepthBiasMaskData[i]);
         }
-        DataBuffer terrainTypeMaskDataBuffer = map.getTerrainType().getRaster().getDataBuffer();
+
+        int terrainTypeSize = (int) StrictMath.sqrt(terrainTypeData.length);
+        BufferedImage terrainType = new BufferedImage(terrainTypeSize, terrainTypeSize, BufferedImage.TYPE_INT_ARGB);
+        DataBuffer terrainTypeMaskDataBuffer = terrainType.getRaster().getDataBuffer();
         for (int i = 0; i < terrainTypeMaskDataBuffer.getSize(); i++) {
             terrainTypeMaskDataBuffer.setElem(i, terrainTypeData[i]);
         }
+        map.setTerrainType(terrainType);
+
+
         for (Prop prop : props) {
             map.addProp(prop);
         }
@@ -460,6 +499,16 @@ public strictfp class SCMapImporter {
 
     private static Vector2f readVector2f() throws IOException {
         return new Vector2f(readFloat(), readFloat());
+    }
+
+    private static <T> BufferedImage getBufferedImageFromData(int bufferedImageType, T[] imageData) {
+        int imageSize = (int) StrictMath.sqrt(imageData.length);
+        BufferedImage image = new BufferedImage(imageSize, imageSize, bufferedImageType);
+        DataBuffer imageDataBuffer = image.getRaster().getDataBuffer();
+        for (int i = 0; i < imageDataBuffer.getSize(); i++) {
+            imageDataBuffer.setElem(i, (Integer) imageData[i]);
+        }
+        return image;
     }
 
 }

@@ -1,4 +1,4 @@
-package export;
+package exporter;
 
 import map.SCMap;
 import util.Vector3f;
