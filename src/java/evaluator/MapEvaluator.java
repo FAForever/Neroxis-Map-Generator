@@ -1,8 +1,5 @@
 package evaluator;
 
-import export.SCMapExporter;
-import export.SaveExporter;
-import generator.AIMarkerGenerator;
 import importer.SCMapImporter;
 import importer.SaveImporter;
 import map.*;
@@ -24,26 +21,16 @@ public strictfp class MapEvaluator {
     private Path inMapPath;
     private Path outFolderPath;
     private String mapName;
+    private String mapFolder;
     private SCMap map;
 
-    //masks used in transformation
-    private BinaryMask land;
-    private BinaryMask mountains;
-    private BinaryMask plateaus;
-    private BinaryMask ramps;
-    private BinaryMask impassable;
-    private BinaryMask passable;
-    private BinaryMask passableLand;
-    private BinaryMask passableWater;
-    private FloatMask heightmapBase;
-    private BinaryMask grass;
-    private FloatMask grassTexture;
-    private BinaryMask rock;
-    private FloatMask rockTexture;
-    private FloatMask lightGrassTexture;
-    private FloatMask lightRockTexture;
-
     private SymmetryHierarchy symmetryHierarchy;
+    private boolean reverseSide;
+    private float textureScore;
+    private float terrainScore;
+    private float mexScore;
+    private float hydroScore;
+    private float wreckScore;
 
     public static void main(String[] args) throws IOException {
 
@@ -54,18 +41,15 @@ public strictfp class MapEvaluator {
             Files.createDirectory(debugDir);
         }
 
-        MapEvaluator transformer = new MapEvaluator();
+        MapEvaluator evaluator = new MapEvaluator();
 
-        transformer.interpretArguments(args);
+        evaluator.interpretArguments(args);
 
-        System.out.println("Transforming map " + transformer.inMapPath);
-        transformer.importMap();
-        transformer.transform();
-        transformer.exportMap();
-        System.out.println("Saving map to " + transformer.outFolderPath.toAbsolutePath());
-        System.out.println("Terrain Symmetry: " + transformer.symmetryHierarchy.getTerrainSymmetry());
-        System.out.println("Team Symmetry: " + transformer.symmetryHierarchy.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + transformer.symmetryHierarchy.getSpawnSymmetry());
+        System.out.println("Evaluating map " + evaluator.inMapPath);
+        evaluator.importMap();
+        evaluator.evaluate();
+//        evaluator.saveReport();
+        System.out.println("Saving report to " + evaluator.outFolderPath.toAbsolutePath());
         System.out.println("Done");
     }
 
@@ -78,11 +62,10 @@ public strictfp class MapEvaluator {
             System.out.println("map-transformer usage:\n" +
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the map\n" +
-                    "--out-folder-path arg  required, set the output folder for the transformed map\n" +
-                    "--terrain-symmetry arg optional, set the symmetry for the map terrain(Point, X, Y, XY, YX, QUAD, DIAG)\n" +
-                    "--team-symmetry arg    optional, set the symmetry for the teams(X, Y, XY, YX)\n" +
-                    "--spawn-symmetry arg   optional, set the symmetry for the spawns(Point, X, Y, XY, YX)\n" +
-                    "--debug                optional, turn on debugging options");
+                    "--out-folder-path arg  required, set the output folder for the symmetry report\n" +
+                    "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
+                    "--source arg           required, set which half to use as reference for evaluation (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
+                    "--debug                optional, turn on debugging options\n");
             System.exit(0);
         }
 
@@ -100,15 +83,59 @@ public strictfp class MapEvaluator {
             System.exit(2);
         }
 
-        if (!arguments.containsKey("terrain-symmetry") || !arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry")) {
-            System.out.println("Symmetries not Specified");
+        if (!arguments.containsKey("symmetry")) {
+            System.out.println("Symmetry not Specified");
             System.exit(3);
+        }
+
+        if (!arguments.containsKey("source")) {
+            System.out.println("Source not Specified");
+            System.exit(4);
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("terrain-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")));
-        symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("spawn-symmetry")));
+        Symmetry teamSymmetry;
+        switch (SymmetrySource.valueOf(arguments.get("source"))) {
+            case TOP -> {
+                teamSymmetry = Symmetry.Z;
+                reverseSide = false;
+            }
+            case BOTTOM -> {
+                teamSymmetry = Symmetry.Z;
+                reverseSide = true;
+            }
+            case LEFT -> {
+                teamSymmetry = Symmetry.X;
+                reverseSide = false;
+            }
+            case RIGHT -> {
+                teamSymmetry = Symmetry.X;
+                reverseSide = true;
+            }
+            case TOP_LEFT -> {
+                teamSymmetry = Symmetry.ZX;
+                reverseSide = false;
+            }
+            case TOP_RIGHT -> {
+                teamSymmetry = Symmetry.XZ;
+                reverseSide = false;
+            }
+            case BOTTOM_LEFT -> {
+                teamSymmetry = Symmetry.XZ;
+                reverseSide = true;
+            }
+            case BOTTOM_RIGHT -> {
+                teamSymmetry = Symmetry.ZX;
+                reverseSide = true;
+            }
+            default -> {
+                teamSymmetry = Symmetry.NONE;
+                reverseSide = false;
+            }
+        }
+        symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
+        symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
     }
 
     public void importMap() {
@@ -121,58 +148,44 @@ public strictfp class MapEvaluator {
                 return;
             }
             File scmapFile = mapFiles[0];
+            mapFolder = inMapPath.getFileName().toString();
             mapName = scmapFile.getName().replace(".scmap", "");
-
             map = SCMapImporter.loadSCMAP(inMapPath);
             SaveImporter.importSave(inMapPath, map);
-
-
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while saving the map.");
         }
     }
 
-    public void exportMap() {
-        try {
-            FileUtils.deleteRecursiveIfExists(outFolderPath.resolve(mapName));
+//    public void saveReport() {
+//        try {
+//            long startTime = System.currentTimeMillis();
+//
+//            System.out.printf("Report write done: %d ms\n", System.currentTimeMillis() - startTime);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.err.println("Error while saving the map.");
+//        }
+//    }
 
-            long startTime = System.currentTimeMillis();
-            Files.createDirectories(outFolderPath.resolve(mapName));
-//            Files.copy(inMapPath.resolve(mapName + "_scenario.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_scenario.lua"));
-//            Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapName).resolve(mapName + "_script.lua"));
-            SCMapExporter.exportSCMAP(outFolderPath, mapName, map);
-            SaveExporter.exportSave(outFolderPath, mapName, map);
-            System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
+    public void evaluate() {
+        //masks used in evaluation
+        FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
+        float terrainScore = getFloatMaskScore(heightmapBase);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error while saving the map.");
+        FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
+        float textureScore = 0;
+        for (FloatMask textureMask : texturesMasks) {
+            textureScore += getFloatMaskScore(textureMask);
         }
+
     }
 
-    public void transform() {
-        boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
-        float waterHeight;
-        if (waterPresent) {
-            waterHeight = map.getBiome().getWaterSettings().getElevation();
-        } else {
-            waterHeight = 0;
-        }
-        heightmapBase = map.getHeightMask(symmetryHierarchy);
-        land = new BinaryMask(heightmapBase, waterHeight, null);
-        FloatMask slope = heightmapBase.copy().gradient();
-        passable = new BinaryMask(slope, .75f, null).invert();
-        passableLand = new BinaryMask(land, null);
-        passableWater = new BinaryMask(land, null).invert();
-
-        passable.deflate(6).trimEdge(8);
-        passableLand.deflate(4).intersect(passable);
-        passableWater.deflate(16).trimEdge(8);
-
-        AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, 0);
-        aiMarkerGenerator.generateAIMarkers(passable, passableLand, passableWater, 8, 16, false);
-
-        aiMarkerGenerator.setMarkerHeights();
+    public float getFloatMaskScore(FloatMask mask) {
+        FloatMask difference = mask.copy();
+        difference.applySymmetry(reverseSide);
+        return (float) StrictMath.sqrt(difference.subtract(mask).multiply(difference).getSum());
     }
 }
