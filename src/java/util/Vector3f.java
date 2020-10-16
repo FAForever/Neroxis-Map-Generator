@@ -38,6 +38,10 @@ public strictfp class Vector3f {
         return (float) StrictMath.toDegrees(StrictMath.atan2(y, StrictMath.sqrt(x * x + z * z)));
     }
 
+    public Vector3f add(Vector3f vector) {
+        return new Vector3f(x + vector.x, y + vector.y, z + vector.z);
+    }
+
     @Override
     public String toString() {
         return String.format("(%f, %f, %f)", x, y, z);
