@@ -339,7 +339,7 @@ public strictfp class MapGenerator {
         } else {
             symmetries = Symmetry.values();
         }
-        int symmetryValue = random.nextInt(symmetries.length);
+        int symmetryValue = random.nextInt(symmetries.length - 1);
         symmetry = symmetries[symmetryValue];
         biome = Biomes.getRandomBiome(random);
     }
@@ -568,7 +568,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(heightmapBase);
             long sTime = System.currentTimeMillis();
-            map.setHeightmap(heightmapBase.getFinalMask());
+            map.setHeightImage(heightmapBase.getFinalMask());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, setHeightmap\n",
