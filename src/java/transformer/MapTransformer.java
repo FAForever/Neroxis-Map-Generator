@@ -18,8 +18,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public strictfp class MapTransformer {
 
@@ -33,14 +35,6 @@ public strictfp class MapTransformer {
 
     //masks used in transformation
     private FloatMask heightmapBase;
-    private FloatMask texture1;
-    private FloatMask texture2;
-    private FloatMask texture3;
-    private FloatMask texture4;
-    private FloatMask texture5;
-    private FloatMask texture6;
-    private FloatMask texture7;
-    private FloatMask texture8;
 
     private boolean transformResources;
     private boolean transformProps;
@@ -48,7 +42,9 @@ public strictfp class MapTransformer {
     private boolean transformDecals;
     private boolean transformCivilians;
     private boolean transformTerrain;
+    private boolean useAngle;
     private boolean reverseSide;
+    private float angle;
     private SymmetryHierarchy symmetryHierarchy;
 
     public static void main(String[] args) throws IOException {
@@ -86,9 +82,8 @@ public strictfp class MapTransformer {
                     "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the transformed map\n" +
                     "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
-                    "--source arg           required, set which half to use as base for forced symmetry (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
-                    "--spawns               optional, force spawn symmetry\n" +
-                    "--resources            optional, force mex symmetry\n" +
+                    "--source arg           required, set which half to use as base for forced symmetry (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, ALL, {ANGLE})\n" +
+                    "--marker               optional, force spawn, mex, hydro, and ai marker symmetry\n" +
                     "--props                optional, force prop symmetry\n" +
                     "--decals               optional, force decal symmetry\n" +
                     "--wrecks               optional, force wreck symmetry\n" +
@@ -125,39 +120,51 @@ public strictfp class MapTransformer {
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        Symmetry teamSymmetry = null;
-        switch (SymmetryHalf.valueOf(arguments.get("source"))) {
-            case TOP -> {
-                teamSymmetry = Symmetry.Z;
-                reverseSide = false;
-            }
-            case BOTTOM -> {
-                teamSymmetry = Symmetry.Z;
-                reverseSide = true;
-            }
-            case LEFT -> {
-                teamSymmetry = Symmetry.X;
-                reverseSide = false;
-            }
-            case RIGHT -> {
-                teamSymmetry = Symmetry.X;
-                reverseSide = true;
-            }
-            case TOP_LEFT -> {
-                teamSymmetry = Symmetry.ZX;
-                reverseSide = false;
-            }
-            case TOP_RIGHT -> {
-                teamSymmetry = Symmetry.XZ;
-                reverseSide = false;
-            }
-            case BOTTOM_LEFT -> {
-                teamSymmetry = Symmetry.XZ;
-                reverseSide = true;
-            }
-            case BOTTOM_RIGHT -> {
-                teamSymmetry = Symmetry.ZX;
-                reverseSide = true;
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+        Symmetry teamSymmetry;
+        if (pattern.matcher(arguments.get("source")).matches()) {
+            teamSymmetry = null;
+            angle = (360f - Float.parseFloat(arguments.get("source"))) % 360f;
+            useAngle = true;
+        } else {
+            useAngle = false;
+            switch (SymmetrySource.valueOf(arguments.get("source"))) {
+                case TOP -> {
+                    teamSymmetry = Symmetry.Z;
+                    reverseSide = false;
+                }
+                case BOTTOM -> {
+                    teamSymmetry = Symmetry.Z;
+                    reverseSide = true;
+                }
+                case LEFT -> {
+                    teamSymmetry = Symmetry.X;
+                    reverseSide = false;
+                }
+                case RIGHT -> {
+                    teamSymmetry = Symmetry.X;
+                    reverseSide = true;
+                }
+                case TOP_LEFT -> {
+                    teamSymmetry = Symmetry.ZX;
+                    reverseSide = false;
+                }
+                case TOP_RIGHT -> {
+                    teamSymmetry = Symmetry.XZ;
+                    reverseSide = false;
+                }
+                case BOTTOM_LEFT -> {
+                    teamSymmetry = Symmetry.XZ;
+                    reverseSide = true;
+                }
+                case BOTTOM_RIGHT -> {
+                    teamSymmetry = Symmetry.ZX;
+                    reverseSide = true;
+                }
+                default -> {
+                    teamSymmetry = Symmetry.NONE;
+                    reverseSide = false;
+                }
             }
         }
         symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
@@ -168,6 +175,10 @@ public strictfp class MapTransformer {
         transformWrecks = arguments.containsKey("wrecks") || arguments.containsKey("all");
         transformCivilians = arguments.containsKey("civilians") || arguments.containsKey("all");
         transformTerrain = arguments.containsKey("terrain") || arguments.containsKey("all");
+
+        if (transformDecals && !symmetryHierarchy.getSpawnSymmetry().equals(Symmetry.POINT)) {
+            System.out.println("This tool does not yet mirror decals");
+        }
     }
 
     public void importMap() {
@@ -194,10 +205,12 @@ public strictfp class MapTransformer {
         try {
             long startTime = System.currentTimeMillis();
             FileUtils.copyRecursiveIfExists(inMapPath, outFolderPath);
-            Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapFolder).resolve(mapName + "_script.lua"), StandardCopyOption.REPLACE_EXISTING);
             SCMapExporter.exportSCMAP(outFolderPath.resolve(mapFolder), mapName, map);
             SaveExporter.exportSave(outFolderPath.resolve(mapFolder), mapName, map);
             ScenarioExporter.exportScenario(outFolderPath.resolve(mapFolder), mapName, map);
+            if (Files.exists(inMapPath.resolve(mapName + "_script.lua"))) {
+                Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapFolder).resolve(mapName + "_script.lua"), StandardCopyOption.REPLACE_EXISTING);
+            }
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
@@ -211,27 +224,71 @@ public strictfp class MapTransformer {
         heightmapBase = map.getHeightMask(symmetryHierarchy);
 
         if (transformTerrain) {
+            FloatMask previewMask = map.getPreviewMask(symmetryHierarchy);
             FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
-            texture1 = texturesMasks[0];
-            texture2 = texturesMasks[1];
-            texture3 = texturesMasks[2];
-            texture4 = texturesMasks[3];
-            texture5 = texturesMasks[4];
-            texture6 = texturesMasks[5];
-            texture7 = texturesMasks[6];
-            texture8 = texturesMasks[7];
+            FloatMask texture1 = texturesMasks[0];
+            FloatMask texture2 = texturesMasks[1];
+            FloatMask texture3 = texturesMasks[2];
+            FloatMask texture4 = texturesMasks[3];
+            FloatMask texture5 = texturesMasks[4];
+            FloatMask texture6 = texturesMasks[5];
+            FloatMask texture7 = texturesMasks[6];
+            FloatMask texture8 = texturesMasks[7];
 
-            heightmapBase.applySymmetry(reverseSide);
-            texture1.applySymmetry(reverseSide);
-            texture2.applySymmetry(reverseSide);
-            texture3.applySymmetry(reverseSide);
-            texture4.applySymmetry(reverseSide);
-            texture5.applySymmetry(reverseSide);
-            texture6.applySymmetry(reverseSide);
-            texture7.applySymmetry(reverseSide);
-            texture8.applySymmetry(reverseSide);
+            if (!useAngle) {
+                previewMask.applySymmetry(reverseSide);
+                heightmapBase.applySymmetry(reverseSide);
+                texture1.applySymmetry(reverseSide);
+                texture2.applySymmetry(reverseSide);
+                texture3.applySymmetry(reverseSide);
+                texture4.applySymmetry(reverseSide);
+                texture5.applySymmetry(reverseSide);
+                texture6.applySymmetry(reverseSide);
+                texture7.applySymmetry(reverseSide);
+                texture8.applySymmetry(reverseSide);
+            } else {
+                previewMask.applySymmetry(angle);
+                heightmapBase.applySymmetry(angle);
+                texture1.applySymmetry(angle);
+                texture2.applySymmetry(angle);
+                texture3.applySymmetry(angle);
+                texture4.applySymmetry(angle);
+                texture5.applySymmetry(angle);
+                texture6.applySymmetry(angle);
+                texture7.applySymmetry(angle);
+                texture8.applySymmetry(angle);
+            }
 
-            map.setHeightmap(heightmapBase);
+            ArrayList<AIMarker> aiMarkers = new ArrayList<>(map.getAirAIMarkers());
+            map.getAirAIMarkers().clear();
+            map.getAirAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getLandAIMarkers());
+            map.getLandAIMarkers().clear();
+            map.getLandAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getNavyAIMarkers());
+            map.getNavyAIMarkers().clear();
+            map.getNavyAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getAmphibiousAIMarkers());
+            map.getAmphibiousAIMarkers().clear();
+            map.getAmphibiousAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getRallyMarkers());
+            map.getRallyMarkers().clear();
+            map.getRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getExpansionAIMarkers());
+            map.getExpansionAIMarkers().clear();
+            map.getExpansionAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getLargeExpansionAIMarkers());
+            map.getLargeExpansionAIMarkers().clear();
+            map.getLargeExpansionAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getNavalAreaAIMarkers());
+            map.getNavalAreaAIMarkers().clear();
+            map.getNavalAreaAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getNavalRallyMarkers());
+            map.getNavalRallyMarkers().clear();
+            map.getNavalRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+
+            map.setPreviewImage(previewMask);
+            map.setHeightImage(heightmapBase);
             map.setTextureMasksLow(texture1, texture2, texture3, texture4);
             map.setTextureMasksHigh(texture5, texture6, texture7, texture8);
         }
@@ -254,10 +311,10 @@ public strictfp class MapTransformer {
         }
 
         if (transformCivilians) {
-            ArrayList<Unit> civlians = new ArrayList<>(map.getCivs());
+            ArrayList<Unit> civilians = new ArrayList<>(map.getCivs());
             ArrayList<Unit> units = new ArrayList<>(map.getUnits());
             map.getCivs().clear();
-            map.getCivs().addAll(getTransformedUnits(civlians));
+            map.getCivs().addAll(getTransformedUnits(civilians));
             map.getUnits().clear();
             map.getUnits().addAll(getTransformedUnits(units));
         }
@@ -268,7 +325,7 @@ public strictfp class MapTransformer {
             map.getProps().addAll(getTransformedProps(props));
         }
 
-        if (transformDecals) {
+        if (transformDecals && symmetryHierarchy.getSpawnSymmetry().equals(Symmetry.POINT)) {
             ArrayList<Decal> decals = new ArrayList<>(map.getDecals());
             map.getDecals().clear();
             map.getDecals().addAll(getTransformedDecals(decals));
@@ -278,7 +335,7 @@ public strictfp class MapTransformer {
     public ArrayList<Vector3f> getTransformedVector3fs(ArrayList<Vector3f> vectors) {
         ArrayList<Vector3f> transformedVectors = new ArrayList<>();
         vectors.forEach(loc -> {
-            if (heightmapBase.inHalf(loc, reverseSide)) {
+            if ((!useAngle && heightmapBase.inHalf(loc, reverseSide)) || (useAngle && heightmapBase.inHalf(loc, angle))) {
                 transformedVectors.add(Placement.placeOnHeightmap(map, loc));
                 transformedVectors.add(Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(loc)));
             }
@@ -286,10 +343,21 @@ public strictfp class MapTransformer {
         return transformedVectors;
     }
 
+    public ArrayList<AIMarker> getTransformedAIMarkers(ArrayList<AIMarker> aiMarkers) {
+        ArrayList<AIMarker> transformedAImarkers = new ArrayList<>();
+        aiMarkers.forEach(aiMarker -> {
+            if ((!useAngle && heightmapBase.inHalf(aiMarker.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(aiMarker.getPosition(), angle))) {
+                transformedAImarkers.add(new AIMarker(aiMarker.getId(), Placement.placeOnHeightmap(map, aiMarker.getPosition()), new LinkedHashSet<>()));
+                transformedAImarkers.add(new AIMarker(aiMarker.getId() + aiMarkers.size(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(aiMarker.getPosition())), new LinkedHashSet<>()));
+            }
+        });
+        return transformedAImarkers;
+    }
+
     public ArrayList<Unit> getTransformedUnits(ArrayList<Unit> units) {
         ArrayList<Unit> transformedUnits = new ArrayList<>();
         units.forEach(unit -> {
-            if (heightmapBase.inHalf(unit.getPosition(), reverseSide)) {
+            if ((!useAngle && heightmapBase.inHalf(unit.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(unit.getPosition(), angle))) {
                 transformedUnits.add(new Unit(unit.getType(), Placement.placeOnHeightmap(map, unit.getPosition()), unit.getRotation()));
                 transformedUnits.add(new Unit(unit.getType(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(unit.getPosition())), heightmapBase.getReflectedRotation(unit.getRotation())));
             }
@@ -300,7 +368,7 @@ public strictfp class MapTransformer {
     public ArrayList<Prop> getTransformedProps(ArrayList<Prop> props) {
         ArrayList<Prop> transformedProps = new ArrayList<>();
         props.forEach(prop -> {
-            if (heightmapBase.inHalf(prop.getPosition(), reverseSide)) {
+            if ((!useAngle && heightmapBase.inHalf(prop.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(prop.getPosition(), angle))) {
                 transformedProps.add(new Prop(prop.getPath(), Placement.placeOnHeightmap(map, prop.getPosition()), prop.getRotation()));
                 transformedProps.add(new Prop(prop.getPath(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(prop.getPosition())), heightmapBase.getReflectedRotation(prop.getRotation())));
             }
@@ -310,31 +378,10 @@ public strictfp class MapTransformer {
 
     public ArrayList<Decal> getTransformedDecals(ArrayList<Decal> decals) {
         ArrayList<Decal> transformedDecals = new ArrayList<>();
-        boolean flipX;
-        boolean flipZ;
-        if (heightmapBase.getSymmetryHierarchy().getSpawnSymmetry() != Symmetry.POINT) {
-            switch (heightmapBase.getSymmetryHierarchy().getTeamSymmetry()) {
-                case Z, ZX -> {
-                    flipZ = false;
-                    flipX = true;
-                }
-                case X, XZ -> {
-                    flipZ = true;
-                    flipX = false;
-                }
-                default -> {
-                    flipZ = false;
-                    flipX = false;
-                }
-            }
-        } else {
-            flipX = false;
-            flipZ = false;
-        }
         decals.forEach(decal -> {
-            if (heightmapBase.inHalf(decal.getPosition(), reverseSide)) {
+            if ((!useAngle && heightmapBase.inHalf(decal.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(decal.getPosition(), angle))) {
                 float rot = heightmapBase.getReflectedRotation(decal.getRotation().y);
-                Vector3f newRotation = new Vector3f(decal.getRotation().x + (flipX ? (float) StrictMath.PI : 0f), rot, decal.getRotation().z + (flipZ ? (float) StrictMath.PI : 0f));
+                Vector3f newRotation = new Vector3f(decal.getRotation().x, rot, decal.getRotation().z);
                 transformedDecals.add(new Decal(decal.getPath(), Placement.placeOnHeightmap(map, decal.getPosition()), decal.getRotation(), decal.getScale(), decal.getCutOffLOD()));
                 transformedDecals.add(new Decal(decal.getPath(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(decal.getPosition())), newRotation, decal.getScale(), decal.getCutOffLOD()));
             }
