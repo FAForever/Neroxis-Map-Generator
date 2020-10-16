@@ -176,24 +176,6 @@ public strictfp class FloatMask extends Mask {
         }
     }
 
-    public FloatMask clear() {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                set(x, y, 0);
-            }
-        }
-        applySymmetry();
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask replaceWith(FloatMask other) {
-        clear();
-        add(other);
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
     public FloatMask multiply(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
