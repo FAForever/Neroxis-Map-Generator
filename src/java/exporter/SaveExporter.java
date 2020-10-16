@@ -25,7 +25,7 @@ public strictfp class SaveExporter {
         for (int i = 0; i < map.getSpawnCount(); i++) {
             out.writeBytes("        ['ARMY_" + (i + 1) + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).x + 0.5f) + ", " + map.getSpawn(i).y + ", " + (map.getSpawn(i).z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).x) + ", " + map.getSpawn(i).y + ", " + (map.getSpawn(i).z) + " ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
@@ -40,7 +40,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getMex(i).x + 0.5f) + ", " + map.getMex(i).y + ", " + (map.getMex(i).z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getMex(i).x) + ", " + map.getMex(i).y + ", " + (map.getMex(i).z) + " ),\n");
             out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
@@ -52,11 +52,11 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydro(i).x + 0.5f) + ", " + map.getHydro(i).y + ", " + (map.getHydro(i).z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getHydro(i).x) + ", " + map.getHydro(i).y + ", " + (map.getHydro(i).z) + " ),\n");
             out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getAirMarkerCount(); i++) {
-            if (map.getAirMarker(i).getNeighborCount() > 0) {
+            if (map.getAirMarker(i).getNeighborCount() >= 0) {
                 out.writeBytes("        ['AirPN" + map.getAirMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Air Path Node' ),\n");
@@ -73,12 +73,12 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['graph'] = STRING( 'DefaultAir' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAirMarker(i).getPosition().x + 0.5f) + ", " + map.getAirMarker(i).getPosition().y + ", " + (map.getAirMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAirMarker(i).getPosition().x) + ", " + map.getAirMarker(i).getPosition().y + ", " + (map.getAirMarker(i).getPosition().z) + " ),\n");
                 out.writeBytes("        },\n");
             }
         }
         for (int i = 0; i < map.getLandMarkerCount(); i++) {
-            if (map.getLandMarker(i).getNeighborCount() > 0) {
+            if (map.getLandMarker(i).getNeighborCount() >= 0) {
                 out.writeBytes("        ['LandPN" + map.getLandMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Land Path Node' ),\n");
@@ -95,12 +95,12 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['graph'] = STRING( 'DefaultLand' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getLandMarker(i).getPosition().x + 0.5f) + ", " + map.getLandMarker(i).getPosition().y + ", " + (map.getLandMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getLandMarker(i).getPosition().x) + ", " + map.getLandMarker(i).getPosition().y + ", " + (map.getLandMarker(i).getPosition().z) + " ),\n");
                 out.writeBytes("        },\n");
             }
         }
         for (int i = 0; i < map.getAmphibiousMarkerCount(); i++) {
-            if (map.getAmphibiousMarker(i).getNeighborCount() > 0) {
+            if (map.getAmphibiousMarker(i).getNeighborCount() >= 0) {
                 out.writeBytes("        ['AmphPN" + map.getAmphibiousMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Amphibious Path Node' ),\n");
@@ -117,12 +117,12 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['graph'] = STRING( 'DefaultAmphibious' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAmphibiousMarker(i).getPosition().x + 0.5f) + ", " + map.getAmphibiousMarker(i).getPosition().y + ", " + (map.getAmphibiousMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getAmphibiousMarker(i).getPosition().x) + ", " + map.getAmphibiousMarker(i).getPosition().y + ", " + (map.getAmphibiousMarker(i).getPosition().z) + " ),\n");
                 out.writeBytes("        },\n");
             }
         }
         for (int i = 0; i < map.getNavyMarkerCount(); i++) {
-            if (map.getNavyMarker(i).getNeighborCount() > 0) {
+            if (map.getNavyMarker(i).getNeighborCount() >= 0) {
                 out.writeBytes("        ['WaterPN" + map.getNavyMarker(i).getId() + "'] = {\n");
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes("          ['type'] = STRING( 'Water Path Node' ),\n");
@@ -139,7 +139,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['graph'] = STRING( 'DefaultWater' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                out.writeBytes("          ['position'] = VECTOR3( " + (map.getNavyMarker(i).getPosition().x + 0.5f) + ", " + map.getNavyMarker(i).getPosition().y + ", " + (map.getNavyMarker(i).getPosition().z + 0.5f) + " ),\n");
+                out.writeBytes("          ['position'] = VECTOR3( " + (map.getNavyMarker(i).getPosition().x) + ", " + map.getNavyMarker(i).getPosition().y + ", " + (map.getNavyMarker(i).getPosition().z) + " ),\n");
                 out.writeBytes("        },\n");
             }
         }
@@ -150,7 +150,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['type'] = STRING( 'Large Expansion Area' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Expansion_prop.bp' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getLargeExpansionMarker(i).getPosition().x + 0.5f) + ", " + map.getLargeExpansionMarker(i).getPosition().y + ", " + (map.getLargeExpansionMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getLargeExpansionMarker(i).getPosition().x) + ", " + map.getLargeExpansionMarker(i).getPosition().y + ", " + (map.getLargeExpansionMarker(i).getPosition().z) + " ),\n");
             out.writeBytes("        },\n");
         }
         for (int i = 0; i < map.getExpansionMarkerCount(); i++) {
@@ -160,7 +160,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['type'] = STRING( 'Expansion Area' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Expansion_prop.bp' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getExpansionMarker(i).getPosition().x + 0.5f) + ", " + map.getExpansionMarker(i).getPosition().y + ", " + (map.getExpansionMarker(i).getPosition().z + 0.5f) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getExpansionMarker(i).getPosition().x) + ", " + map.getExpansionMarker(i).getPosition().y + ", " + (map.getExpansionMarker(i).getPosition().z) + " ),\n");
             out.writeBytes("        },\n");
         }
         out.writeBytes("      },\n");
@@ -253,7 +253,7 @@ public strictfp class SaveExporter {
         out.writeBytes("			              orders = '',\n");
         out.writeBytes("			              platoon = '',\n");
         Vector3f v = unit.getPosition();
-        out.writeBytes(String.format("			              Position = { %f, %f, %f },\n", v.x + 0.5f, v.y, v.z + 0.5f));
+        out.writeBytes(String.format("			              Position = { %f, %f, %f },\n", v.x, v.y, v.z));
         float rot = unit.getRotation();
         out.writeBytes(String.format("			              Orientation = { 0, %f, 0 },\n", rot));
         out.writeBytes("              },\n");
