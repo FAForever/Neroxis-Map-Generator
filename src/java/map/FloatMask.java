@@ -519,6 +519,17 @@ public strictfp class FloatMask extends Mask {
             }
         }
     }
+
+    public void applySymmetry(float angle) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (inHalf(x, y, angle)) {
+                    Vector2f symPoint = getSymmetryPoint(x, y, Symmetry.POINT);
+                    set(symPoint, get(x, y));
+                }
+            }
+        }
+    }
     // -------------------------------------------
 
     @SneakyThrows

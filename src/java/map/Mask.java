@@ -158,4 +158,17 @@ public strictfp abstract class Mask {
     public boolean inHalf(int x, int y, boolean reverse) {
         return (x >= getMinXBound() && x < getMaxXBound() && y >= getMinYBound(x) && y < getMaxYBound(x)) ^ reverse && inBounds(x, y);
     }
+
+    public boolean inHalf(Vector3f pos, float angle) {
+        return inHalf(new Vector2f(pos), angle);
+    }
+
+    public boolean inHalf(int x, int y, float angle) {
+        return inHalf(new Vector2f(x, y), angle);
+    }
+
+    public boolean inHalf(Vector2f pos, float angle) {
+        float vectorAngle = (float) ((new Vector2f(getSize() / 2f, getSize() / 2f).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        return (vectorAngle >= angle || vectorAngle < (angle + 180f) % 360f) && inBounds(pos);
+    }
 }
