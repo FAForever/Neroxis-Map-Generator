@@ -1,6 +1,6 @@
 package generator;
 
-import export.BiomeExporter;
+import exporter.BiomeExporter;
 import importer.SCMapImporter;
 import map.SCMap;
 import util.ArgumentParser;
