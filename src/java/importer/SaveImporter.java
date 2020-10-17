@@ -68,63 +68,63 @@ public strictfp class SaveImporter {
             case "Air Path Node" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getAirMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Amphibious Path Node" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getAmphibiousMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Water Path Node" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getNavyMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Naval Area" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getNavalAreaMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavalAreaMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Expansion Area" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getExpansionMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Large Expansion Area" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getLargeExpansionMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLargeExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Land Path Node" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getLandMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Rally Point" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getRallyMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
             case "Naval Rally Point" -> {
                 locTable = marker.get("position").checktable();
                 String stringID = key.checkjstring();
-                int id = Integer.parseInt(stringID.substring(stringID.length() - 2));
+                int id = map.getNavyRallyMarkerCount();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
             }
