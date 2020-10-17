@@ -272,8 +272,8 @@ public strictfp class BinaryMask extends Mask {
             }
         }
         mask = smallMask;
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
-        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         return this;
     }
 
@@ -383,8 +383,8 @@ public strictfp class BinaryMask extends Mask {
     public BinaryMask grow(float strength, Symmetry symmetry, int count) {
         for (int i = 0; i < count; i++) {
             boolean[][] maskCopy = new boolean[getSize()][getSize()];
-            for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
-                for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
+            for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
                     if (inBounds(x, y)) {
                         boolean value = isEdge(x, y) && random.nextFloat() < strength;
                         maskCopy[x][y] = get(x, y) || value;
@@ -409,8 +409,8 @@ public strictfp class BinaryMask extends Mask {
     public BinaryMask erode(float strength, Symmetry symmetry, int count) {
         for (int i = 0; i < count; i++) {
             boolean[][] maskCopy = new boolean[getSize()][getSize()];
-            for (int x = getMinXBound(symmetry) - 1; x < getMaxXBound(symmetry) + 1; x++) {
-                for (int y = getMinYBound(x, symmetry) - 1; y < getMaxYBound(x, symmetry) + 1; y++) {
+            for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
+                for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
                     if (inBounds(x, y)) {
                         boolean value = isEdge(x, y) && random.nextFloat() < strength;
                         maskCopy[x][y] = mask[x][y] && !value;
@@ -932,7 +932,7 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public void applySymmetry(Symmetry symmetry) {
-        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), false);
+        applySymmetry(symmetry, false);
     }
 
     public void applySymmetry(boolean reverse) {

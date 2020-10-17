@@ -2,26 +2,26 @@
   "name": "Syrtis",
   "texturePaths": [
     "/env/Red Barrens/Layers/RB_Rock03_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet.dds",
+    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
+    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock09_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
     "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
   ],
   "textureScales": [
     2.0,
-    6.0,
+    0.0,
     0.0,
     32.0,
-    16.0,
-    4.0,
+    0.0,
     8.0,
-    16.0,
-    16.0,
+    0.0,
+    12.0,
+    8.0,
     128.0
   ],
   "normalPaths": [
@@ -31,7 +31,7 @@
     "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
   ],
@@ -42,7 +42,7 @@
     16.0,
     8.0,
     4.0,
-    16.0,
+    12.0,
     4.0,
     16.0
   ],
@@ -52,7 +52,19 @@
       "falpha": 0.0
     },
     {
-      "value": -12774645,
+      "value": -11329514,
+      "falpha": 0.0
+    },
+    {
+      "value": -10080227,
+      "falpha": 0.0
+    },
+    {
+      "value": -11722475,
+      "falpha": 0.0
+    },
+    {
+      "value": -12970227,
       "falpha": 0.0
     },
     {
@@ -61,18 +73,6 @@
     },
     {
       "value": -9490404,
-      "falpha": 0.0
-    },
-    {
-      "value": -13100527,
-      "falpha": 0.0
-    },
-    {
-      "value": -10080227,
-      "falpha": 0.0
-    },
-    {
-      "value": -13627131,
       "falpha": 0.0
     },
     {

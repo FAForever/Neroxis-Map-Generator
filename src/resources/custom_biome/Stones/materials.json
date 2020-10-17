@@ -4,24 +4,24 @@
     "/env/paradise/layers/grass001_albedo.dds",
     "/env/paradise/layers/Rock001_albedo.dds",
     "/env/paradise/layers/dirt000_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock005_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
     "/env/paradise/layers/dirt000_albedo.dds",
-    "/env/Geothermal/layers/Geo_LavaMd_02_albedo.dds",
-    "/env/Geothermal/layers/Geo_Rock001_albedo.DDS",
-    "/env/paradise/layers/LavaRock_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+    "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
+    "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     0.0,
     0.0,
     0.0,
-    12.0,
+    0.0,
     16.0,
     0.0,
-    14.0,
     8.0,
-    24.0,
+    16.0,
+    8.0,
     128.0
   ],
   "normalPaths": [
@@ -31,19 +31,19 @@
     "/env/paradise/layers/Rock001_normals.dds",
     "/env/paradise/layers/SandMed_normals.dds",
     "/env/paradise/layers/grass000_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
     "/env/paradise/layers/Rock001_normals.dds",
     "/env/paradise/layers/Rock001_normals.dds"
   ],
   "normalScales": [
-    24.0,
+    12.0,
+    6.0,
     16.0,
     16.0,
     16.0,
-    64.0,
     4.0,
-    32.0,
-    16.0,
+    6.0,
+    12.0,
     4.0
   ],
   "previewColors": [
@@ -60,7 +60,7 @@
       "falpha": 0.0
     },
     {
-      "value": -12566712,
+      "value": -12698052,
       "falpha": 0.0
     },
     {
@@ -72,15 +72,15 @@
       "falpha": 0.0
     },
     {
-      "value": -13484218,
+      "value": -11251391,
       "falpha": 0.0
     },
     {
-      "value": -11972515,
+      "value": -13749699,
       "falpha": 0.0
     },
     {
-      "value": -13947607,
+      "value": -14802660,
       "falpha": 0.0
     }
   ]

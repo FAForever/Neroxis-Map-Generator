@@ -87,6 +87,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentFloatMask threshold(float value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.threshold(value)
+        );
+    }
+
     public ConcurrentFloatMask maskToHills(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.maskToHills(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())

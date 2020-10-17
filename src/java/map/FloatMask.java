@@ -274,6 +274,18 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask threshold(float val) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if (get(x, y) < val) {
+                    set(x, y, 0f);
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask max(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
