@@ -30,7 +30,6 @@ public strictfp class MapPopulator {
     private String mapFolder;
     private String mapName;
     private SCMap map;
-    private Random random;
     private Path propsPath;
     private boolean populateSpawns;
     private boolean populateMexes;
@@ -43,16 +42,6 @@ public strictfp class MapPopulator {
     private int hydroCountPerPlayer;
     private boolean populateTextures;
 
-    //masks used in transformation
-    private BinaryMask land;
-    private BinaryMask mountains;
-    private BinaryMask plateaus;
-    private BinaryMask ramps;
-    private BinaryMask impassable;
-    private BinaryMask passable;
-    private BinaryMask passableLand;
-    private BinaryMask passableWater;
-    private FloatMask heightmapBase;
     private BinaryMask resourceMask;
     private BinaryMask waterResourceMask;
     private BinaryMask plateauResourceMask;
@@ -188,9 +177,9 @@ public strictfp class MapPopulator {
     }
 
     public void populate() {
-        random = new Random();
+        Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
-        heightmapBase = map.getHeightMask(symmetryHierarchy);
+        FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
         heightmapBase.applySymmetry();
         map.setHeightImage(heightmapBase);
         float waterHeight;
@@ -199,14 +188,15 @@ public strictfp class MapPopulator {
         } else {
             waterHeight = heightmapBase.getMin();
         }
-        land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-        plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+
+        BinaryMask land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
+        BinaryMask plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
-        impassable = new BinaryMask(slope, .9f, random.nextLong());
-        ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
-        passable = impassable.copy().invert();
-        passableLand = new BinaryMask(land, null);
-        passableWater = new BinaryMask(land, null).invert();
+        BinaryMask impassable = new BinaryMask(slope, .9f, random.nextLong());
+        BinaryMask ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
+        BinaryMask passable = impassable.copy().invert();
+        BinaryMask passableLand = new BinaryMask(land, null);
+        BinaryMask passableWater = new BinaryMask(land, null).invert();
 
         if (populateSpawns) {
             if (spawnCount > 0) {
@@ -376,7 +366,7 @@ public strictfp class MapPopulator {
             DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
 
             BinaryMask intDecal = new BinaryMask(land, random.nextLong());
-            BinaryMask rockDecal = new BinaryMask(mountains, random.nextLong());
+            BinaryMask rockDecal = new BinaryMask(slope, 1.25f, random.nextLong());
 
             BinaryMask noDecals = new BinaryMask(map.getSize() + 1, null, symmetryHierarchy);
 
