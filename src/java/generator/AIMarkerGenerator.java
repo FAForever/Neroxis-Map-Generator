@@ -40,6 +40,7 @@ public strictfp class AIMarkerGenerator {
         float airMarkerSpacing = 64f;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
         LinkedHashSet<Vector2f> airCoordinates = passableLand.getSpacedCoordinates(airMarkerSpacing, 8);
+        airCoordinates.forEach((location) -> location.add(.5f, .5f));
         ArrayList<Vector2f> airCoordinatesArray = new ArrayList<>(airCoordinates);
         airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(airCoordinatesArray.indexOf(location), location, IntStream.range(0, airCoordinatesArray.size())
                 .filter((ind) -> location.getDistance(airCoordinatesArray.get(ind)) < airMarkerConnectionDistance && ind != airCoordinatesArray.indexOf(location))
@@ -47,6 +48,7 @@ public strictfp class AIMarkerGenerator {
 
         float markerConnectionDistance = (float) StrictMath.sqrt(markerSpacing * markerSpacing * 2) + 1;
         LinkedHashSet<Vector2f> amphibiousCoordinates = passable.getSpacedCoordinatesEqualTo(true, markerSpacing, 4);
+        amphibiousCoordinates.forEach((location) -> location.add(.5f, .5f));
         if (symmetric) {
             LinkedHashSet<Vector2f> symAmphibiousCoordinates = new LinkedHashSet<>();
             amphibiousCoordinates.forEach((location) -> symAmphibiousCoordinates.add(passable.getSymmetryPoint(location)));

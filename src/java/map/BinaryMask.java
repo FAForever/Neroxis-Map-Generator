@@ -251,8 +251,8 @@ public strictfp class BinaryMask extends Mask {
             }
         }
         mask = largeMask;
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
-        applySymmetry(symmetryHierarchy.getTeamSymmetry());
         return this;
     }
 

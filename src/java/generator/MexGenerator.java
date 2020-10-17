@@ -45,6 +45,7 @@ public strictfp class MexGenerator {
                 if (location == null) {
                     break;
                 }
+                location.add(.5f, .5f);
                 Vector2f symLocation = baseMexes.getSymmetryPoint(location);
                 map.addMex(new Vector3f(location));
                 map.addMex(new Vector3f(symLocation));
@@ -62,6 +63,7 @@ public strictfp class MexGenerator {
                 if (location == null) {
                     break;
                 }
+                location.add(.5f, .5f);
                 Vector2f symLocation = nearMexes.getSymmetryPoint(location);
                 map.addMex(new Vector3f(location));
                 map.addMex(new Vector3f(symLocation));
@@ -105,7 +107,7 @@ public strictfp class MexGenerator {
                 break;
             }
 
-            Vector2f mexLocation = plateauLocations.remove(random.nextInt(plateauLocations.size()));
+            Vector2f mexLocation = plateauLocations.remove(random.nextInt(plateauLocations.size())).add(.5f, .5f);
             Vector2f mexSymLocation = spawnablePlateau.getSymmetryPoint(mexLocation);
             numMexesLeft -= 2;
 
@@ -120,7 +122,7 @@ public strictfp class MexGenerator {
                 break;
             }
 
-            Vector2f mexLocation = landLocations.remove(random.nextInt(landLocations.size()));
+            Vector2f mexLocation = landLocations.remove(random.nextInt(landLocations.size())).add(.5f, .5f);
             Vector2f mexSymLocation = spawnableLand.getSymmetryPoint(mexLocation);
             numMexesLeft -= 2;
 
@@ -139,7 +141,7 @@ public strictfp class MexGenerator {
                 break;
             }
 
-            Vector2f mexLocation = nearSpawnLocations.remove(random.nextInt(nearSpawnLocations.size()));
+            Vector2f mexLocation = nearSpawnLocations.remove(random.nextInt(nearSpawnLocations.size())).add(.5f, .5f);
             Vector2f mexSymLocation = spawnable.getSymmetryPoint(mexLocation);
             numMexesLeft -= 2;
 
@@ -153,7 +155,7 @@ public strictfp class MexGenerator {
                 break;
             }
 
-            Vector2f mexLocation = waterLocations.remove(random.nextInt(waterLocations.size()));
+            Vector2f mexLocation = waterLocations.remove(random.nextInt(waterLocations.size())).add(.5f, .5f);
             Vector2f mexSymLocation = spawnableWater.getSymmetryPoint(mexLocation);
 
             map.addMex(new Vector3f(mexLocation));
@@ -224,7 +226,7 @@ public strictfp class MexGenerator {
                     expMexCount -= i - iMex;
                     break;
                 }
-                mexLocation = expMexLocations.remove(random.nextInt(expMexLocations.size()));
+                mexLocation = expMexLocations.remove(random.nextInt(expMexLocations.size())).add(.5f, .5f);
                 mexSymLocation = expansion.getSymmetryPoint(mexLocation);
 
                 map.addMex(new Vector3f(mexLocation));

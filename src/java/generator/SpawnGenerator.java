@@ -42,6 +42,7 @@ public strictfp class SpawnGenerator {
                     return null;
                 }
             }
+            location.add(.5f, .5f);
             symLocation = spawnable.getSymmetryPoint(location);
             spawnable.fillCircle(location, separation, false);
             spawnable.fillCircle(symLocation, separation, false);

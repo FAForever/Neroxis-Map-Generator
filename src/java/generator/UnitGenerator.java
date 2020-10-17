@@ -57,6 +57,7 @@ public strictfp class UnitGenerator {
         spawnable.fillHalf(false);
         LinkedHashSet<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
+            location.add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
             Unit unit1 = new Unit(types[random.nextInt(types.length)], location, random.nextFloat() * (float) StrictMath.PI);
             Unit unit2 = new Unit(unit1.getType(), symLocation, spawnable.getReflectedRotation(unit1.getRotation()));

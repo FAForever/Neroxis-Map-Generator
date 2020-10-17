@@ -49,6 +49,7 @@ public strictfp class HydroGenerator {
                 if (location == null) {
                     continue;
                 }
+                location.add(.5f, .5f);
                 Vector2f symLocation = spawnable.getSymmetryPoint(location);
                 map.addHydro(new Vector3f(location));
                 map.addHydro(new Vector3f(symLocation));
@@ -70,7 +71,7 @@ public strictfp class HydroGenerator {
                 break;
             }
 
-            Vector2f location = hydroLocations.remove(random.nextInt(hydroLocations.size()));
+            Vector2f location = hydroLocations.remove(random.nextInt(hydroLocations.size())).add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
 
             map.addHydro(new Vector3f(location));

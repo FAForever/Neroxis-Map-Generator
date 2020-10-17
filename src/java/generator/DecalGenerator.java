@@ -94,6 +94,7 @@ public strictfp class DecalGenerator {
             }
         }
         coordinates.forEach((location) -> {
+            location.add(.5f, .5f);
             Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
             Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
             Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);

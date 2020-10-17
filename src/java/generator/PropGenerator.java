@@ -45,6 +45,7 @@ public strictfp class PropGenerator {
         spawnable.fillHalf(false);
         LinkedHashSet<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
+            location.add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
             Prop prop1 = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
             Prop prop2 = new Prop(prop1.getPath(), symLocation, spawnable.getReflectedRotation(prop1.getRotation()));

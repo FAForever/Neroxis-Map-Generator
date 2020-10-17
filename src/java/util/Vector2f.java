@@ -52,7 +52,13 @@ public strictfp class Vector2f {
     }
 
     public Vector2f add(Vector2f vector) {
-        return new Vector2f(x + vector.x, y + vector.y);
+        return add(vector.x, vector.y);
+    }
+
+    public Vector2f add(float x, float y) {
+        this.x += x;
+        this.y += y;
+        return this;
     }
 
     public void flip(Vector2f center, Symmetry symmetry) {
