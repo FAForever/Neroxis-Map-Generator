@@ -324,6 +324,23 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask enlarge(int size) {
+        float[][] largeMask = new float[size][size];
+        int smallX;
+        int smallY;
+        for (int x = 0; x < size; x++) {
+            smallX = StrictMath.min(x / (size / getSize()), getSize() - 1);
+            for (int y = 0; y < size; y++) {
+                smallY = StrictMath.min(y / (size / getSize()), getSize() - 1);
+                largeMask[x][y] = get(smallX, smallY);
+            }
+        }
+        mask = largeMask;
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask shrink(int size) {
         float[][] smallMask = new float[size][size];
         int largeX;
@@ -342,6 +359,16 @@ public strictfp class FloatMask extends Mask {
         mask = smallMask;
         VisualDebugger.visualizeMask(this);
         applySymmetry(symmetryHierarchy.getTeamSymmetry());
+        return this;
+    }
+
+    public FloatMask setSize(int size) {
+        if (getSize() > size) {
+            shrink(size);
+        }
+        if (getSize() < size) {
+            enlarge(size);
+        }
         return this;
     }
 

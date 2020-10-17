@@ -288,8 +288,29 @@ public strictfp class MapPopulator {
         }
 
         if (populateTextures) {
+
+            FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
+            oldLayer1 = texturesMasks[0];
+            oldLayer2 = texturesMasks[1];
+            oldLayer3 = texturesMasks[2];
+            oldLayer4 = texturesMasks[3];
+            oldLayer5 = texturesMasks[4];
+            oldLayer6 = texturesMasks[5];
+            oldLayer7 = texturesMasks[6];
+            oldLayer8 = texturesMasks[7];
+            FloatMask oldLayer0 = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
+
             map.setTextureMasksLow(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
+
+            oldLayer1.setSize(map.getSize()/2);
+            oldLayer2.setSize(map.getSize()/2);
+            oldLayer3.setSize(map.getSize()/2);
+            oldLayer4.setSize(map.getSize()/2);
+            oldLayer5.setSize(map.getSize()/2);
+            oldLayer6.setSize(map.getSize()/2);
+            oldLayer7.setSize(map.getSize()/2);
+            oldLayer8.setSize(map.getSize()/2);
 
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
@@ -344,17 +365,6 @@ public strictfp class MapPopulator {
             rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f);
             accentRockTexture.init(accentRock, 0, 1).subtract(waterBeachTexture).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
 
-            FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
-            oldLayer1 = texturesMasks[0];
-            oldLayer2 = texturesMasks[1];
-            oldLayer3 = texturesMasks[2];
-            oldLayer4 = texturesMasks[3];
-            oldLayer5 = texturesMasks[4];
-            oldLayer6 = texturesMasks[5];
-            oldLayer7 = texturesMasks[6];
-            oldLayer8 = texturesMasks[7];
-            FloatMask oldLayer0 = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-
             if (keepLayer1) {
                 accentGroundTexture.replaceWith(oldLayer1);
             }
@@ -399,7 +409,6 @@ public strictfp class MapPopulator {
                     accentRockTexture.replaceWith(oldLayer0);
                 }
             }
-
 
             map.setTextureMasksLow(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
             map.setTextureMasksHigh(steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
