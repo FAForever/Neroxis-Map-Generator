@@ -30,14 +30,14 @@ public strictfp class FloatMask extends Mask {
     private final Random random;
     private float[][] mask;
 
-    public FloatMask(int size, Long seed, SymmetryHierarchy symmetryHierarchy) {
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this.mask = new float[size][size];
         if (seed != null) {
             this.random = new Random(seed);
         } else {
             this.random = null;
         }
-        this.symmetryHierarchy = symmetryHierarchy;
+        this.symmetrySettings = symmetrySettings;
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 this.mask[x][y] = 0f;
@@ -46,7 +46,7 @@ public strictfp class FloatMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public FloatMask(BufferedImage image, Long seed, SymmetryHierarchy symmetryHierarchy) {
+    public FloatMask(BufferedImage image, Long seed, SymmetrySettings symmetrySettings) {
         this.mask = new float[image.getWidth()][image.getHeight()];
         if (seed != null) {
             this.random = new Random(seed);
@@ -54,7 +54,7 @@ public strictfp class FloatMask extends Mask {
             this.random = null;
         }
         Raster imageData = image.getData();
-        this.symmetryHierarchy = symmetryHierarchy;
+        this.symmetrySettings = symmetrySettings;
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
                 int[] vals = new int[1];
@@ -72,7 +72,7 @@ public strictfp class FloatMask extends Mask {
         } else {
             this.random = null;
         }
-        this.symmetryHierarchy = mask.getSymmetryHierarchy();
+        this.symmetrySettings = mask.getSymmetrySettings();
         for (int y = 0; y < mask.getSize(); y++) {
             for (int x = 0; x < mask.getSize(); x++) {
                 this.mask[x][y] = mask.get(x, y);
@@ -239,7 +239,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask add(BinaryMask other, float value) {
-        FloatMask otherFloat = new FloatMask(getSize(), null, symmetryHierarchy);
+        FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, value);
         add(otherFloat);
         VisualDebugger.visualizeMask(this);
@@ -247,7 +247,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask subtract(BinaryMask other, float value) {
-        FloatMask otherFloat = new FloatMask(getSize(), null, symmetryHierarchy);
+        FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, -value);
         add(otherFloat);
         VisualDebugger.visualizeMask(this);
@@ -323,7 +323,7 @@ public strictfp class FloatMask extends Mask {
         }
         mask = smallMask;
         VisualDebugger.visualizeMask(this);
-        applySymmetry(symmetryHierarchy.getTeamSymmetry());
+        applySymmetry(symmetrySettings.getTeamSymmetry());
         return this;
     }
 
@@ -335,7 +335,7 @@ public strictfp class FloatMask extends Mask {
         if (other.getSize() > size) {
             other = other.copy().shrink(size);
         }
-        FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetryHierarchy);
+        FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetrySettings);
         BinaryMask otherCopy = other.copy().fillHalf(false);
         LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
         LinkedList<Vector2f> coordinates = new LinkedList<>(otherCopy.getRandomCoordinates(4));
@@ -362,7 +362,7 @@ public strictfp class FloatMask extends Mask {
         if (other.getSize() > size) {
             other = other.copy().shrink(size);
         }
-        FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetryHierarchy);
+        FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetrySettings);
         brush.multiply(1 / brush.getMax());
         BinaryMask otherCopy = other.copy().fillHalf(false);
         LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
@@ -394,7 +394,7 @@ public strictfp class FloatMask extends Mask {
         while (other.getCount() > 0 && count < maxRepeat) {
             count++;
             add(other, -underWaterSlope);
-            other.erode(0.75f, symmetryHierarchy.getSpawnSymmetry());
+            other.erode(0.75f, symmetrySettings.getSpawnSymmetry());
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -494,15 +494,15 @@ public strictfp class FloatMask extends Mask {
     }
 
     public void applySymmetry() {
-        applySymmetry(symmetryHierarchy.getTerrainSymmetry());
+        applySymmetry(symmetrySettings.getTerrainSymmetry());
     }
 
     public void applySymmetry(Symmetry symmetry) {
-        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), false);
+        applySymmetry(symmetrySettings.getTerrainSymmetry(), false);
     }
 
     public void applySymmetry(boolean reverse) {
-        applySymmetry(symmetryHierarchy.getTerrainSymmetry(), reverse);
+        applySymmetry(symmetrySettings.getTerrainSymmetry(), reverse);
     }
 
     public void applySymmetry(Symmetry symmetry, boolean reverse) {
@@ -562,8 +562,8 @@ public strictfp class FloatMask extends Mask {
 
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        for (int x = getMinXBound(symmetryHierarchy.getSpawnSymmetry()); x < getMaxXBound(symmetryHierarchy.getSpawnSymmetry()); x++) {
-            for (int y = getMinYBound(x, symmetryHierarchy.getSpawnSymmetry()); y < getMaxYBound(x, symmetryHierarchy.getSpawnSymmetry()); y++) {
+        for (int x = getMinXBound(symmetrySettings.getSpawnSymmetry()); x < getMaxXBound(symmetrySettings.getSpawnSymmetry()); x++) {
+            for (int y = getMinYBound(x, symmetrySettings.getSpawnSymmetry()); y < getMaxYBound(x, symmetrySettings.getSpawnSymmetry()); y++) {
                 bytes.putFloat(get(x, y));
             }
         }

@@ -75,7 +75,7 @@ public strictfp class DecalGenerator {
         LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
         boolean flipX;
         boolean flipZ;
-        switch (spawnable.getSymmetryHierarchy().getTeamSymmetry()) {
+        switch (spawnable.getSymmetrySettings().getTeamSymmetry()) {
             case XZ, ZX -> {
                 flipX = true;
                 flipZ = true;

@@ -15,17 +15,17 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     private final String name;
     private FloatMask floatMask;
 
-    public ConcurrentFloatMask(int size, Long seed, SymmetryHierarchy symmetryHierarchy, String name) {
-        this.floatMask = new FloatMask(size, seed, symmetryHierarchy);
+    public ConcurrentFloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this.floatMask = new FloatMask(size, seed, symmetrySettings);
         this.name = name;
-        this.symmetryHierarchy = this.floatMask.getSymmetryHierarchy();
+        this.symmetrySettings = this.floatMask.getSymmetrySettings();
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, Long seed, String name) {
         this.name = name;
-        this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetryHierarchy());
+        this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);
@@ -33,7 +33,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
             Pipeline.add(this, Collections.singletonList(mask), res ->
                     this.floatMask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.floatMask.getRandom().nextLong())));
         }
-        this.symmetryHierarchy = mask.getSymmetryHierarchy();
+        this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentFloatMask init(ConcurrentBinaryMask other, float low, float high) {

@@ -42,7 +42,7 @@ public strictfp class UnitGenerator {
             try {
                 BaseTemplate base1 = new BaseTemplate(location, army, luaFile);
                 BaseTemplate base2 = new BaseTemplate(symLocation, army, luaFile);
-                base2.flip(spawnable.getSymmetryHierarchy().getSpawnSymmetry());
+                base2.flip(spawnable.getSymmetrySettings().getSpawnSymmetry());
                 base1.addUnits(map);
                 base2.addUnits(map);
             } catch (IOException | URISyntaxException e) {

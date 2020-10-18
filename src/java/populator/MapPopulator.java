@@ -46,7 +46,7 @@ public strictfp class MapPopulator {
     private BinaryMask waterResourceMask;
     private BinaryMask plateauResourceMask;
 
-    private SymmetryHierarchy symmetryHierarchy;
+    private SymmetrySettings symmetrySettings;
 
     public static void main(String[] args) throws IOException {
 
@@ -66,9 +66,9 @@ public strictfp class MapPopulator {
         populator.populate();
         populator.exportMap();
         System.out.println("Saving map to " + populator.outFolderPath.toAbsolutePath());
-        System.out.println("Terrain Symmetry: " + populator.symmetryHierarchy.getTerrainSymmetry());
-        System.out.println("Team Symmetry: " + populator.symmetryHierarchy.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + populator.symmetryHierarchy.getSpawnSymmetry());
+        System.out.println("Terrain Symmetry: " + populator.symmetrySettings.getTerrainSymmetry());
+        System.out.println("Team Symmetry: " + populator.symmetrySettings.getTeamSymmetry());
+        System.out.println("Spawn Symmetry: " + populator.symmetrySettings.getSpawnSymmetry());
         System.out.println("Done");
     }
 
@@ -117,8 +117,8 @@ public strictfp class MapPopulator {
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")));
-        symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("spawn-symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")));
+        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("spawn-symmetry")));
         populateSpawns = arguments.containsKey("spawns");
         if (populateSpawns) {
             spawnCount = Integer.parseInt(arguments.get("spawns"));
@@ -179,7 +179,7 @@ public strictfp class MapPopulator {
     public void populate() {
         Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
-        FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
+        FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
         heightmapBase.applySymmetry();
         map.setHeightImage(heightmapBase);
         float waterHeight;
@@ -267,14 +267,14 @@ public strictfp class MapPopulator {
             BinaryMask rockBase = new BinaryMask(slope, .55f, random.nextLong());
             BinaryMask rock = new BinaryMask(slope, 1.25f, random.nextLong());
             BinaryMask accentRock = new BinaryMask(slope, 1.25f, random.nextLong());
-            FloatMask waterBeachTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask accentGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask accentPlateauTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask slopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask accentSlopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask rockBaseTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask rockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
-            FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetryHierarchy);
+            FloatMask waterBeachTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentPlateauTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask slopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentSlopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask rockBaseTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask rockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
 
             inland.deflate(2);
             flatAboveCoast.intersect(flat);
@@ -285,15 +285,15 @@ public strictfp class MapPopulator {
             } else {
                 waterBeach.clear();
             }
-            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, symmetryHierarchy.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
-            accentPlateau.acid(.05f, 0).erode(.85f, symmetryHierarchy.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
-            slopes.intersect(land).flipValues(.95f).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetryHierarchy.getSpawnSymmetry());
-            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
-            rockBase.acid(.3f, 0).erode(.2f, symmetryHierarchy.getSpawnSymmetry());
-            accentRock.acid(.2f, 0).erode(.3f, symmetryHierarchy.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
+            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
+            accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
+            slopes.intersect(land).flipValues(.95f).erode(.5f, symmetrySettings.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
+            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
+            rockBase.acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
+            accentRock.acid(.2f, 0).erode(.3f, symmetrySettings.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
-            waterBeachTexture.init(waterBeach,0,1).subtract(rock, 1f).subtract(aboveBeachEdge,1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-            waterBeachTexture.subtract(aboveBeachEdge,.9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge,.8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
+            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
+            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
             waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
             waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
             accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f);
@@ -320,19 +320,19 @@ public strictfp class MapPopulator {
                 System.out.print("An error occured while loading props\n");
                 System.exit(1);
             }
-            BinaryMask treeMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetryHierarchy);
-            BinaryMask cliffRockMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetryHierarchy);
-            BinaryMask fieldStoneMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetryHierarchy);
-            BinaryMask largeRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetryHierarchy);
-            BinaryMask smallRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetryHierarchy);
+            BinaryMask treeMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetrySettings);
+            BinaryMask cliffRockMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetrySettings);
+            BinaryMask fieldStoneMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
+            BinaryMask largeRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
+            BinaryMask smallRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
 
-            cliffRockMask.randomize(.4f).intersect(impassable).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
+            cliffRockMask.randomize(.4f).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
             fieldStoneMask.randomize(random.nextFloat() * .001f).enlarge(256).intersect(land).minus(impassable);
             fieldStoneMask.enlarge(map.getSize() + 1).trimEdge(10);
-            treeMask.randomize(.2f).enlarge(map.getSize() / 4).inflate(2).erode(.5f, symmetryHierarchy.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetryHierarchy.getSpawnSymmetry());
+            treeMask.randomize(.2f).enlarge(map.getSize() / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
             treeMask.enlarge(map.getSize() + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).trimEdge(8).smooth(4, .25f);
-            largeRockFieldMask.randomize(random.nextFloat() * .001f).trimEdge(map.getSize() / 16).grow(.5f, symmetryHierarchy.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
-            smallRockFieldMask.randomize(random.nextFloat() * .003f).trimEdge(map.getSize() / 64).grow(.5f, symmetryHierarchy.getSpawnSymmetry()).intersect(land).minus(impassable);
+            largeRockFieldMask.randomize(random.nextFloat() * .001f).trimEdge(map.getSize() / 16).grow(.5f, symmetrySettings.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
+            smallRockFieldMask.randomize(random.nextFloat() * .003f).trimEdge(map.getSize() / 64).grow(.5f, symmetrySettings.getSpawnSymmetry()).intersect(land).minus(impassable);
 
             BinaryMask noProps = new BinaryMask(impassable, null);
 
@@ -368,7 +368,7 @@ public strictfp class MapPopulator {
             BinaryMask intDecal = new BinaryMask(land, random.nextLong());
             BinaryMask rockDecal = new BinaryMask(slope, 1.25f, random.nextLong());
 
-            BinaryMask noDecals = new BinaryMask(map.getSize() + 1, null, symmetryHierarchy);
+            BinaryMask noDecals = new BinaryMask(map.getSize() + 1, null, symmetrySettings);
 
             for (int i = 0; i < map.getSpawnCount(); i++) {
                 noDecals.fillCircle(map.getSpawn(i), 24, true);

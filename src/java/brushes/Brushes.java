@@ -2,7 +2,7 @@ package brushes;
 
 import lombok.Data;
 import map.FloatMask;
-import map.SymmetryHierarchy;
+import map.SymmetrySettings;
 import util.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -15,10 +15,10 @@ public strictfp class Brushes {
     public static final String[] HILL_BRUSHES = {"hill1.png", "hill2.png", "noise1.png", "noise2.png"};
     private static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
 
-    public static FloatMask loadBrush(String brushName, SymmetryHierarchy symmetryHierarchy) {
+    public static FloatMask loadBrush(String brushName, SymmetrySettings symmetrySettings) {
         try {
             BufferedImage image = ImageUtils.readImage(CUSTOM_BRUSHES_DIR.concat(brushName));
-            return new FloatMask(image, null, symmetryHierarchy);
+            return new FloatMask(image, null, symmetrySettings);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Could not load brush");

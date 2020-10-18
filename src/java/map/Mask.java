@@ -6,7 +6,7 @@ import util.Vector3f;
 
 @Getter
 public strictfp abstract class Mask {
-    protected SymmetryHierarchy symmetryHierarchy;
+    protected SymmetrySettings symmetrySettings;
 
     abstract void startVisualDebugger(String maskName);
 
@@ -29,7 +29,7 @@ public strictfp abstract class Mask {
     }
 
     public Vector2f getSymmetryPoint(Vector2f v) {
-        return getSymmetryPoint(v, symmetryHierarchy.getSpawnSymmetry());
+        return getSymmetryPoint(v, symmetrySettings.getSpawnSymmetry());
     }
 
     public Vector2f getSymmetryPoint(Vector2f v, Symmetry symmetry) {
@@ -37,7 +37,7 @@ public strictfp abstract class Mask {
     }
 
     public Vector2f getSymmetryPoint(float x, float y) {
-        return getSymmetryPoint(x, y, symmetryHierarchy.getSpawnSymmetry());
+        return getSymmetryPoint(x, y, symmetrySettings.getSpawnSymmetry());
     }
 
     public Vector2f getSymmetryPoint(float x, float y, Symmetry symmetry) {
@@ -52,7 +52,7 @@ public strictfp abstract class Mask {
     }
 
     public Vector2f[] getTerrainSymmetryPoints(Vector2f location) {
-        return getTerrainSymmetryPoints(location.x, location.y, symmetryHierarchy.getTerrainSymmetry());
+        return getTerrainSymmetryPoints(location.x, location.y, symmetrySettings.getTerrainSymmetry());
     }
 
     public Vector2f[] getTerrainSymmetryPoints(Vector2f location, Symmetry symmetry) {
@@ -87,7 +87,7 @@ public strictfp abstract class Mask {
     }
 
     public float getReflectedRotation(float rot) {
-        return getReflectedRotation(rot, symmetryHierarchy.getSpawnSymmetry());
+        return getReflectedRotation(rot, symmetrySettings.getSpawnSymmetry());
     }
 
     public float getReflectedRotation(float rot, Symmetry symmetry) {
@@ -101,7 +101,7 @@ public strictfp abstract class Mask {
     }
 
     public int getMinXBound() {
-        return getMinXBound(symmetryHierarchy.getTerrainSymmetry());
+        return getMinXBound(symmetrySettings.getTerrainSymmetry());
     }
 
     public int getMinXBound(Symmetry symmetry) {
@@ -111,19 +111,19 @@ public strictfp abstract class Mask {
     }
 
     public int getMaxXBound() {
-        return getMaxXBound(symmetryHierarchy.getTerrainSymmetry());
+        return getMaxXBound(symmetrySettings.getTerrainSymmetry());
     }
 
     public int getMaxXBound(Symmetry symmetry) {
         return switch (symmetry) {
-            case POINT -> getMaxXBound(symmetryHierarchy.getTeamSymmetry());
+            case POINT -> getMaxXBound(symmetrySettings.getTeamSymmetry());
             case X, QUAD, DIAG -> getSize() / 2 + 1;
             default -> getSize();
         };
     }
 
     public int getMinYBound(int x) {
-        return getMinYBound(x, symmetryHierarchy.getTerrainSymmetry());
+        return getMinYBound(x, symmetrySettings.getTerrainSymmetry());
     }
 
     public int getMinYBound(int x, Symmetry symmetry) {
@@ -134,12 +134,12 @@ public strictfp abstract class Mask {
     }
 
     public int getMaxYBound(int x) {
-        return getMaxYBound(x, symmetryHierarchy.getTerrainSymmetry());
+        return getMaxYBound(x, symmetrySettings.getTerrainSymmetry());
     }
 
     public int getMaxYBound(int x, Symmetry symmetry) {
         return switch (symmetry) {
-            case POINT -> getMaxYBound(x, symmetryHierarchy.getTeamSymmetry());
+            case POINT -> getMaxYBound(x, symmetrySettings.getTeamSymmetry());
             case XZ -> x + 1;
             case ZX, DIAG -> getSize() - x;
             case Z -> getSize() / 2 + 1;

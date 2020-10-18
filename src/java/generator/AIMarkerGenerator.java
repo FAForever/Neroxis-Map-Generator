@@ -30,7 +30,7 @@ public strictfp class AIMarkerGenerator {
     public void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater, float markerSpacing, float pruneSpacing, boolean symmetric) {
         BinaryMask symmetryRegion;
         if (symmetric) {
-            symmetryRegion = new BinaryMask(passable.getSize(), random.nextLong(), passable.getSymmetryHierarchy());
+            symmetryRegion = new BinaryMask(passable.getSize(), random.nextLong(), passable.getSymmetrySettings());
             symmetryRegion.fillHalf(true);
             passable.intersect(symmetryRegion);
             passableLand.intersect(symmetryRegion);

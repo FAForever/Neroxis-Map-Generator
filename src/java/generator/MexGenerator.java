@@ -38,7 +38,7 @@ public strictfp class MexGenerator {
         int numNearMexes = (random.nextInt(2) + 5 - numBaseMexes / 2) * 2;
         int iMex = 0;
         for (int i = 0; i < map.getSpawnCount(); i += 2) {
-            BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+            BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
             baseMexes.fillCircle(map.getSpawn(i + 1), 15, true).fillCircle(map.getSpawn(i + 1), 5, false).intersect(spawnable);
             for (int j = 0; j < numBaseMexes; j += 2) {
                 Vector2f location = baseMexes.getRandomPosition();
@@ -53,7 +53,7 @@ public strictfp class MexGenerator {
                 spawnable.fillCircle(location, 10, false);
                 iMex += 2;
             }
-            BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+            BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
             nearMexes.fillCircle(map.getSpawn(i + 1), spawnSize * 3, true).fillCircle(map.getSpawn(i + 1), spawnSize / 2f, false).intersect(spawnable);
             for (int j = 0; j < map.getSpawnCount(); j += 2) {
                 nearMexes.fillCircle(map.getSpawn(j + 1), spawnSize, false);
@@ -175,8 +175,8 @@ public strictfp class MexGenerator {
         int expSize = 10;
         int expSpacing = 96;
 
-        BinaryMask expansionSpawnable = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
-        BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+        BinaryMask expansionSpawnable = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
+        BinaryMask expansion = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
 
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(96, false).intersect(spawnable);
 

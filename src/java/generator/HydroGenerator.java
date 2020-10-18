@@ -37,7 +37,7 @@ public strictfp class HydroGenerator {
         boolean spawnHydro = random.nextBoolean();
         if (spawnHydro) {
             for (int i = 0; i < map.getSpawnCount(); i += 2) {
-                BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetryHierarchy());
+                BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
                 baseHydro.fillCircle(map.getSpawn(i + 1), spawnSize * 1.5f, true).fillCircle(map.getSpawn(i + 1), 10, false).intersect(spawnable);
                 for (int j = 0; j < map.getSpawnCount(); j += 2) {
                     baseHydro.fillCircle(map.getSpawn(j), 16, false);

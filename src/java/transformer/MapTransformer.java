@@ -45,7 +45,7 @@ public strictfp class MapTransformer {
     private boolean useAngle;
     private boolean reverseSide;
     private float angle;
-    private SymmetryHierarchy symmetryHierarchy;
+    private SymmetrySettings symmetrySettings;
 
     public static void main(String[] args) throws IOException {
 
@@ -65,9 +65,9 @@ public strictfp class MapTransformer {
         transformer.transform();
         transformer.exportMap();
         System.out.println("Saving map to " + transformer.outFolderPath.toAbsolutePath());
-        System.out.println("Terrain Symmetry: " + transformer.symmetryHierarchy.getTerrainSymmetry());
-        System.out.println("Team Symmetry: " + transformer.symmetryHierarchy.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + transformer.symmetryHierarchy.getSpawnSymmetry());
+        System.out.println("Terrain Symmetry: " + transformer.symmetrySettings.getTerrainSymmetry());
+        System.out.println("Team Symmetry: " + transformer.symmetrySettings.getTeamSymmetry());
+        System.out.println("Spawn Symmetry: " + transformer.symmetrySettings.getSpawnSymmetry());
         System.out.println("Done");
     }
 
@@ -167,8 +167,8 @@ public strictfp class MapTransformer {
                 }
             }
         }
-        symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
-        symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
+        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
         transformResources = arguments.containsKey("resources") || arguments.containsKey("all");
         transformProps = arguments.containsKey("props") || arguments.containsKey("all");
         transformDecals = arguments.containsKey("decals") || arguments.containsKey("all");
@@ -176,7 +176,7 @@ public strictfp class MapTransformer {
         transformCivilians = arguments.containsKey("civilians") || arguments.containsKey("all");
         transformTerrain = arguments.containsKey("terrain") || arguments.containsKey("all");
 
-        if (transformDecals && !symmetryHierarchy.getSpawnSymmetry().equals(Symmetry.POINT)) {
+        if (transformDecals && !symmetrySettings.getSpawnSymmetry().equals(Symmetry.POINT)) {
             System.out.println("This tool does not yet mirror decals");
         }
     }
@@ -221,11 +221,11 @@ public strictfp class MapTransformer {
 
     public void transform() {
 
-        heightmapBase = map.getHeightMask(symmetryHierarchy);
+        heightmapBase = map.getHeightMask(symmetrySettings);
 
         if (transformTerrain) {
-            FloatMask previewMask = map.getPreviewMask(symmetryHierarchy);
-            FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetryHierarchy);
+            FloatMask previewMask = map.getPreviewMask(symmetrySettings);
+            FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
             FloatMask texture1 = texturesMasks[0];
             FloatMask texture2 = texturesMasks[1];
             FloatMask texture3 = texturesMasks[2];
@@ -325,7 +325,7 @@ public strictfp class MapTransformer {
             map.getProps().addAll(getTransformedProps(props));
         }
 
-        if (transformDecals && symmetryHierarchy.getSpawnSymmetry().equals(Symmetry.POINT)) {
+        if (transformDecals && symmetrySettings.getSpawnSymmetry().equals(Symmetry.POINT)) {
             ArrayList<Decal> decals = new ArrayList<>(map.getDecals());
             map.getDecals().clear();
             map.getDecals().addAll(getTransformedDecals(decals));

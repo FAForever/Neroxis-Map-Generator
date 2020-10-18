@@ -24,7 +24,7 @@ public strictfp class MapEvaluator {
     private String mapFolder;
     private SCMap map;
 
-    private SymmetryHierarchy symmetryHierarchy;
+    private SymmetrySettings symmetrySettings;
     private boolean reverseSide;
     private float textureScore;
     private float terrainScore;
@@ -134,8 +134,8 @@ public strictfp class MapEvaluator {
                 reverseSide = false;
             }
         }
-        symmetryHierarchy = new SymmetryHierarchy(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
-        symmetryHierarchy.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
+        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
     }
 
     public void importMap() {
@@ -172,10 +172,10 @@ public strictfp class MapEvaluator {
 
     public void evaluate() {
         //masks used in evaluation
-        FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
+        FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
         float terrainScore = getFloatMaskScore(heightmapBase);
 
-        FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetryHierarchy);
+        FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
         float textureScore = 0;
         for (FloatMask textureMask : texturesMasks) {
             textureScore += getFloatMaskScore(textureMask);

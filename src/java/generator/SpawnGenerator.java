@@ -26,10 +26,10 @@ public strictfp class SpawnGenerator {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
-        BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
-        BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetryHierarchy());
+        BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
+        BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
         if (map.getSpawnCountInit() == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
-            spawnable.getSymmetryHierarchy().setSpawnSymmetry(Symmetry.POINT);
+            spawnable.getSymmetrySettings().setSpawnSymmetry(Symmetry.POINT);
         }
         spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 4 / 8, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
@@ -47,7 +47,7 @@ public strictfp class SpawnGenerator {
             spawnable.fillCircle(location, separation, false);
             spawnable.fillCircle(symLocation, separation, false);
 
-            if (spawnable.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
+            if (spawnable.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT) {
                 spawnable.fillCircle(symLocation, map.getSize() * 4 / 8f, false);
             }
 
@@ -108,7 +108,7 @@ public strictfp class SpawnGenerator {
             spawnableCopy.fillCircle(location, separation, false);
             spawnableCopy.fillCircle(symLocation, separation, false);
 
-            if (spawnableCopy.getSymmetryHierarchy().getSpawnSymmetry() == Symmetry.POINT) {
+            if (spawnableCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT) {
                 spawnableCopy.fillCircle(symLocation, map.getSize() * 3 / 8f, false);
             }
             map.addSpawn(new Vector3f(symLocation));
