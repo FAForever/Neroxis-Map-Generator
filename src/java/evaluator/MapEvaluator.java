@@ -175,7 +175,7 @@ public strictfp class MapEvaluator {
         FloatMask heightmapBase = map.getHeightMask(symmetryHierarchy);
         float terrainScore = getFloatMaskScore(heightmapBase);
 
-        FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
+        FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetryHierarchy);
         float textureScore = 0;
         for (FloatMask textureMask : texturesMasks) {
             textureScore += getFloatMaskScore(textureMask);

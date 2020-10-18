@@ -487,8 +487,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, rockBaseTexture, waterBeachTexture, rockTexture, accentRockTexture);
             long sTime = System.currentTimeMillis();
-            map.setTextureMasksLow(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
-            map.setTextureMasksHigh(rockBaseTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+            map.setTextureMasksLowScaled(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
+            map.setTextureMasksHighScaled(rockBaseTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateTextures\n",
                         System.currentTimeMillis() - sTime,

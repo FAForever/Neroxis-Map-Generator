@@ -225,7 +225,7 @@ public strictfp class MapTransformer {
 
         if (transformTerrain) {
             FloatMask previewMask = map.getPreviewMask(symmetryHierarchy);
-            FloatMask[] texturesMasks = map.getTextureMasks(symmetryHierarchy);
+            FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetryHierarchy);
             FloatMask texture1 = texturesMasks[0];
             FloatMask texture2 = texturesMasks[1];
             FloatMask texture3 = texturesMasks[2];
@@ -289,8 +289,8 @@ public strictfp class MapTransformer {
 
             map.setPreviewImage(previewMask);
             map.setHeightImage(heightmapBase);
-            map.setTextureMasksLow(texture1, texture2, texture3, texture4);
-            map.setTextureMasksHigh(texture5, texture6, texture7, texture8);
+            map.setTextureMasksLowRaw(texture1, texture2, texture3, texture4);
+            map.setTextureMasksHighRaw(texture5, texture6, texture7, texture8);
         }
         if (transformResources) {
             ArrayList<Vector3f> spawns = new ArrayList<>(map.getSpawns());
