@@ -127,6 +127,18 @@ public strictfp class FloatMask extends Mask {
         return getSum() / getSize() / getSize();
     }
 
+    public boolean isLocalMax(int x, int y) {
+        float value = get(x, y);
+        return ((x > 0 && get(x - 1, y) <= value)
+                && (y > 0 && get(x, y - 1) <= value)
+                && (x < getSize() - 1 && get(x + 1, y) <= value)
+                && (y < getSize() - 1 && get(x, y + 1) <= value)
+                && (get(x - 1, y - 1) <= value)
+                && (get(x + 1, y - 1) <= value)
+                && (get(x + 1, y + 1) <= value)
+                && (get(x + 1, y + 1) <= value));
+    }
+
     public void set(Vector2f location, float value) {
         set((int) location.x, (int) location.y, value);
     }
@@ -250,6 +262,16 @@ public strictfp class FloatMask extends Mask {
         FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, -value);
         add(otherFloat);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask sqrt() {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                set(x, y, (float) StrictMath.sqrt(get(x, y)));
+            }
+        }
         VisualDebugger.visualizeMask(this);
         return this;
     }

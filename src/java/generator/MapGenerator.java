@@ -44,7 +44,7 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MAX = .075f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .45f;
-    public static final float PLATEAU_DENSITY_MAX = .55f;
+    public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 5f;
     public static final float VALLEY_HEIGHT = -3f;
@@ -657,7 +657,9 @@ public strictfp class MapGenerator {
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterShapes(512);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
-        if (random.nextBoolean() || mapSize > 512) {
+        boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE) || mapSize > 512;
+
+        if (fillLandGaps) {
             land.fillGaps(64);
         } else {
             land.widenGaps(64);
@@ -670,7 +672,12 @@ public strictfp class MapGenerator {
         }
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask).filterShapes(mapSize * mapSize / 256);
+        land.combine(spawnLandMask).combine(spawnPlateauMask);
+        if (fillLandGaps) {
+            land.widenGaps(64);
+        }
+
+        land.filterShapes(mapSize * mapSize / 256);
 
         mountains.minus(spawnLandMask);
 
@@ -679,17 +686,17 @@ public strictfp class MapGenerator {
 
         spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.01f).inflate(16);
 
-        ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(16);
+        ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(32);
 
         mountains.minus(plateaus.copy().outline().inflate(64)).minus(land.copy().outline().inflate(64)).smooth(8).intersect(land).filterShapes(256);
         if (mountainDensity < .25) {
             mountains.fillGaps(24);
         } else {
-            mountains.widenGaps(24);
+            mountains.widenGaps(12);
         }
         mountains.filterShapes(64);
-        plateaus.combine(mountains).intersect(land).filterShapes(mapSize * mapSize / 256);
-        land.widenGaps(32);
+        plateaus.intersect(land).fillGaps(32).combine(mountains).filterShapes(mapSize * mapSize / 256);
+        land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
         ConcurrentBinaryMask landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));

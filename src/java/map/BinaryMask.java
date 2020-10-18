@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
@@ -687,6 +686,10 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location) {
+        return getShapeCoordinates(location, getSize() * getSize());
+    }
+
+    public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location, int maxSize) {
         LinkedHashSet<Vector2f> areaHash = new LinkedHashSet<>();
         LinkedHashSet<Vector2f> edgeHash = new LinkedHashSet<>();
         LinkedList<Vector2f> queue = new LinkedList<>();
@@ -710,6 +713,9 @@ public strictfp class BinaryMask extends Mask {
             } else if (get(next) != value) {
                 edgeHash.add(next);
             }
+            if (areaHash.size() > maxSize) {
+                break;
+            }
         }
         return areaHash;
     }
@@ -721,46 +727,17 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillGaps(int minDist) {
-        BinaryMask maskCopy = copy().outline();
+        FloatMask distanceField = getDistanceField();
         BinaryMask filledGaps = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
-        LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
-        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
-        LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
-        while (locList.size() > 0) {
-            Vector2f location = locList.removeFirst();
-            Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
-            BinaryMask otherEdgesMask = new BinaryMask(getSize(), null, symmetrySettings);
-            otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
-            Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
-            otherEdges.removeAll(connected);
-            List<Vector2f> connectedList = new LinkedList<>(connected);
-            List<Vector2f> otherEdgesList = new LinkedList<>(otherEdges);
-            connectedList.forEach(loc -> {
-                if (loc.x > getMinXBound(symmetrySettings.getSpawnSymmetry()) && loc.x < getMaxXBound(symmetrySettings.getSpawnSymmetry())
-                        && loc.y > getMinYBound((int) loc.x, symmetrySettings.getSpawnSymmetry()) && loc.y < getMaxYBound((int) loc.x, symmetrySettings.getSpawnSymmetry())) {
-                    AtomicReference<Float> smallestDist = new AtomicReference<>((float) getSize());
-                    AtomicReference<Vector2f> closest = new AtomicReference<>();
-                    otherEdgesList.forEach(otherLoc -> {
-                        if (get(otherLoc)) {
-                            float dist = loc.getDistance(otherLoc);
-                            if (dist < smallestDist.get()) {
-                                closest.set(otherLoc);
-                                smallestDist.set(dist);
-                            }
-                        }
-                    });
-                    if (smallestDist.get() < minDist) {
-                        toFill.addAll(loc.getLine(closest.get()));
-                        otherEdgesList.remove(closest.get());
-                    }
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                float distance = distanceField.get(x, y);
+                if (distance < minDist / 2f && distance > 0f && distanceField.isLocalMax(x, y)) {
+                    filledGaps.set(x, y, true);
                 }
-            });
-            locList.removeAll(connected);
-            locHash.removeAll(connected);
+            }
         }
-        filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
-        filledGaps.erode(.5f, symmetrySettings.getSpawnSymmetry(), 8).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8);
-        filledGaps.smooth(4);
+        filledGaps.grow(.5f, symmetrySettings.getSpawnSymmetry(), minDist).smooth(4, .75f);
         combine(filledGaps);
         applySymmetry(symmetrySettings.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
@@ -768,46 +745,17 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask widenGaps(int minDist) {
-        BinaryMask maskCopy = copy().invert().outline();
+        FloatMask distanceField = this.copy().invert().getDistanceField();
         BinaryMask filledGaps = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
-        LinkedHashSet<Vector2f> locHash = maskCopy.getAllCoordinatesEqualTo(true, 1);
-        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
-        LinkedHashSet<Vector2f> toFill = new LinkedHashSet<>();
-        while (locList.size() > 0) {
-            Vector2f location = locList.removeFirst();
-            Set<Vector2f> connected = maskCopy.getShapeCoordinates(location);
-            BinaryMask otherEdgesMask = new BinaryMask(getSize(), null, symmetrySettings);
-            otherEdgesMask.fillCoordinates(connected, true).inflate(minDist).intersect(maskCopy);
-            Set<Vector2f> otherEdges = otherEdgesMask.getAllCoordinatesEqualTo(true, 1);
-            otherEdges.removeAll(connected);
-            List<Vector2f> connectedList = new LinkedList<>(connected);
-            List<Vector2f> otherEdgesList = new LinkedList<>(otherEdges);
-            connectedList.forEach(loc -> {
-                if (loc.x > getMinXBound(symmetrySettings.getSpawnSymmetry()) && loc.x < getMaxXBound(symmetrySettings.getSpawnSymmetry())
-                        && loc.y > getMinYBound((int) loc.x, symmetrySettings.getSpawnSymmetry()) && loc.y < getMaxYBound((int) loc.x, symmetrySettings.getSpawnSymmetry())) {
-                    AtomicReference<Float> smallestDist = new AtomicReference<>((float) getSize());
-                    AtomicReference<Vector2f> closest = new AtomicReference<>();
-                    otherEdgesList.forEach(otherLoc -> {
-                        if (get(otherLoc)) {
-                            float dist = loc.getDistance(otherLoc);
-                            if (dist < smallestDist.get()) {
-                                closest.set(otherLoc);
-                                smallestDist.set(dist);
-                            }
-                        }
-                    });
-                    if (smallestDist.get() < minDist) {
-                        toFill.addAll(loc.getLine(closest.get()));
-                        otherEdgesList.remove(closest.get());
-                    }
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                float distance = distanceField.get(x, y);
+                if (distance < minDist / 2f && distance > 0f && distanceField.isLocalMax(x, y)) {
+                    filledGaps.set(x, y, true);
                 }
-            });
-            locList.removeAll(connected);
-            locHash.removeAll(connected);
+            }
         }
-        filledGaps.fillCoordinates(toFill, true).smooth(16, .1f);
-        filledGaps.erode(.5f, symmetrySettings.getSpawnSymmetry(), 8).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8);
-        filledGaps.smooth(4);
+        filledGaps.grow(.5f, symmetrySettings.getSpawnSymmetry(), minDist).smooth(4, .75f);
         minus(filledGaps);
         applySymmetry(symmetrySettings.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
@@ -815,33 +763,136 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask filterShapes(int minArea) {
-        BinaryMask maskCopy = copy();
-        LinkedHashSet<Vector2f> locHash = getAllCoordinatesEqualTo(true, 1);
-        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
-        while (locList.size() > 0) {
-            Vector2f location = locList.removeFirst();
-            Set<Vector2f> coordinates = getShapeCoordinates(location);
-            maskCopy.fillCoordinates(coordinates, false);
-            if (coordinates.size() < minArea) {
-                fillCoordinates(coordinates, false);
+        LinkedHashSet<Vector2f> locHash = new LinkedHashSet<>();
+        FloatMask distanceField = getDistanceField();
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                float distance = distanceField.get(x, y);
+                if (distance < StrictMath.sqrt(minArea) && distance > 0f && distanceField.isLocalMax(x, y)) {
+                    locHash.add(new Vector2f(x, y));
+                }
             }
-            locList.removeAll(coordinates);
         }
-        maskCopy = copy().invert();
-        locHash = getAllCoordinatesEqualTo(false, 1);
-        locList = new LinkedList<>(locHash);
-        while (locList.size() > 0) {
+        LinkedList<Vector2f> locList = new LinkedList<>(locHash);
+        while (locHash.size() > 0) {
             Vector2f location = locList.removeFirst();
-            Set<Vector2f> coordinates = getShapeCoordinates(location);
-            maskCopy.fillCoordinates(coordinates, false);
+            Set<Vector2f> coordinates = getShapeCoordinates(location, minArea);
             if (coordinates.size() < minArea) {
                 fillCoordinates(coordinates, true);
             }
-            locList.removeAll(coordinates);
+            locHash.removeAll(coordinates);
+            locList = new LinkedList<>(locHash);
+        }
+        locHash = new LinkedHashSet<>();
+        distanceField = copy().invert().getDistanceField();
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                float distance = distanceField.get(x, y);
+                if (distance < StrictMath.sqrt(minArea) && distance > 0f && distanceField.isLocalMax(x, y)) {
+                    locHash.add(new Vector2f(x, y));
+                }
+            }
+        }
+        locList = new LinkedList<>(locHash);
+        while (locHash.size() > 0) {
+            Vector2f location = locList.removeFirst();
+            Set<Vector2f> coordinates = getShapeCoordinates(location, minArea);
+            if (coordinates.size() < minArea) {
+                fillCoordinates(coordinates, false);
+            }
+            locHash.removeAll(coordinates);
+            locList = new LinkedList<>(locHash);
         }
         applySymmetry(symmetrySettings.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    public FloatMask getDistanceField() {
+        FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
+        distanceField.init(this, getSize() * getSize(), 0f);
+        for (int i = 0; i < getSize(); i++) {
+            ArrayList<Vector2f> vertices = new ArrayList<>();
+            ArrayList<Vector2f> intersections = new ArrayList<>();
+            int index = 0;
+            vertices.add(new Vector2f(0, distanceField.get(i, 0)));
+            intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
+            intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+            for (int j = 1; j < getSize(); j++) {
+                Vector2f current = new Vector2f(j, distanceField.get(i, j));
+                Vector2f vertex = vertices.get(index);
+                float xIntersect = ((current.y + current.x * current.x) - (vertex.y + vertex.x * vertex.x)) / (2 * current.x - 2 * vertex.x);
+                while (xIntersect <= intersections.get(index).x) {
+                    index -= 1;
+                    vertex = vertices.get(index);
+                    xIntersect = ((current.y + current.x * current.x) - (vertex.y + vertex.x * vertex.x)) / (2 * current.x - 2 * vertex.x);
+                }
+                index += 1;
+                if (index < vertices.size()) {
+                    vertices.set(index, current);
+                } else {
+                    vertices.add(current);
+                }
+                if (index < intersections.size() - 1) {
+                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.set(index + 1, new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                } else {
+                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                }
+            }
+            index = 0;
+            for (int j = 0; j < getSize(); j++) {
+                while (intersections.get(index + 1).x < j) {
+                    index += 1;
+                }
+                Vector2f vertex = vertices.get(index);
+                float dx = j - vertex.x;
+                distanceField.set(i, j, dx * dx + vertex.y);
+            }
+        }
+        for (int i = 0; i < getSize(); i++) {
+            ArrayList<Vector2f> vertices = new ArrayList<>();
+            ArrayList<Vector2f> intersections = new ArrayList<>();
+            int index = 0;
+            vertices.add(new Vector2f(0, distanceField.get(0, i)));
+            intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.MAX_VALUE));
+            intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.MAX_VALUE));
+            for (int j = 1; j < getSize(); j++) {
+                Vector2f current = new Vector2f(j, distanceField.get(j, i));
+                Vector2f vertex = vertices.get(index);
+                float xIntersect = ((current.y + current.x * current.x) - (vertex.y + vertex.x * vertex.x)) / (2 * current.x - 2 * vertex.x);
+                while (xIntersect <= intersections.get(index).x) {
+                    index -= 1;
+                    vertex = vertices.get(index);
+                    xIntersect = ((current.y + current.x * current.x) - (vertex.y + vertex.x * vertex.x)) / (2 * current.x - 2 * vertex.x);
+                }
+                index += 1;
+                if (index < vertices.size()) {
+                    vertices.set(index, current);
+                } else {
+                    vertices.add(current);
+                }
+                if (index < intersections.size() - 1) {
+                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.set(index + 1, new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                } else {
+                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                }
+            }
+            index = 0;
+            for (int j = 0; j < getSize(); j++) {
+                while (intersections.get(index + 1).x < j) {
+                    index += 1;
+                }
+                Vector2f vertex = vertices.get(index);
+                float dx = j - vertex.x;
+                distanceField.set(j, i, dx * dx + vertex.y);
+            }
+        }
+        distanceField.sqrt();
+        return distanceField;
     }
 
     public int getCount() {
