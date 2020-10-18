@@ -881,40 +881,40 @@ public strictfp class BinaryMask extends Mask {
 
     public LinkedHashSet<Vector2f> getSpacedCoordinates(float radius, int spacing) {
         LinkedHashSet<Vector2f> coordinates = getAllCoordinates(spacing);
-        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        LinkedList<Vector2f> coordinateList = new LinkedList<>(coordinates);
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinates.size() > 0) {
-            Vector2f location = coordinateArray[0];
+            Vector2f location = coordinateList.removeFirst();
             chosenCoordinates.add(location);
             coordinates.removeIf((loc) -> location.getDistance(loc) < radius);
-            coordinateArray = coordinates.toArray(new Vector2f[0]);
+            coordinateList = new LinkedList<>(coordinates);
         }
         return chosenCoordinates;
     }
 
     public LinkedHashSet<Vector2f> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
         LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(value, spacing);
-        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        LinkedList<Vector2f> coordinateList = new LinkedList<>(coordinates);
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinates.size() > 0) {
-            Vector2f location = coordinateArray[0];
+            Vector2f location = coordinateList.removeFirst();
             chosenCoordinates.add(location);
             coordinates.removeIf((loc) -> location.getDistance(loc) < radius);
-            coordinateArray = coordinates.toArray(new Vector2f[0]);
+            coordinateList = new LinkedList<>(coordinates);
         }
         return chosenCoordinates;
     }
 
     public LinkedHashSet<Vector2f> getRandomCoordinates(float minSpacing) {
         LinkedHashSet<Vector2f> coordinates = getAllCoordinatesEqualTo(true, 1);
-        Vector2f[] coordinateArray = coordinates.toArray(new Vector2f[0]);
+        ArrayList<Vector2f> coordinateArray = new ArrayList<>(coordinates);
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinates.size() > 0) {
-            Vector2f location = coordinateArray[random.nextInt(coordinates.size())];
+            Vector2f location = coordinateArray.get(random.nextInt(coordinateArray.size()));
             chosenCoordinates.add(location);
             coordinates.removeIf((loc) -> location.getDistance(loc) < minSpacing);
             coordinates.removeIf((loc) -> getSymmetryPoint(location).getDistance(loc) < minSpacing);
-            coordinateArray = coordinates.toArray(new Vector2f[0]);
+            coordinateArray = new ArrayList<>(coordinates);
         }
         return chosenCoordinates;
     }
