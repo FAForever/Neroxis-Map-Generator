@@ -359,7 +359,7 @@ public strictfp class FloatMask extends Mask {
                         sum += get((x * oldSize / size) + z, (y * oldSize / size) + w);
                     }
                 }
-                smallMask[x][y] = sum / oldSize * size;
+                smallMask[x][y] = sum / oldSize * size / oldSize * size;
                 sum = 0;
             }
         }
