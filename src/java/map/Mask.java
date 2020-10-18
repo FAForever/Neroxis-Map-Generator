@@ -169,6 +169,10 @@ public strictfp abstract class Mask {
 
     public boolean inHalf(Vector2f pos, float angle) {
         float vectorAngle = (float) ((new Vector2f(getSize() / 2f, getSize() / 2f).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
-        return (vectorAngle >= angle || vectorAngle < (angle + 180f) % 360f) && inBounds(pos);
+        if (angle >= 180) {
+            return (vectorAngle >= angle || vectorAngle < (angle + 180f) % 360f) && inBounds(pos);
+        } else {
+            return (vectorAngle <= angle || vectorAngle > (angle + 180f) % 360f) && inBounds(pos);
+        }
     }
 }
