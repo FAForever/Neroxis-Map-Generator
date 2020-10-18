@@ -225,7 +225,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask subtract(FloatMask other) {
-        add(other.copy().multiply(-1));
+        add(other.multiply(-1));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -341,6 +341,41 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask enlarge2 (int size) {
+        float[][] largeMask = new float[size][size];
+        int oldSize = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                largeMask[x][y] = get(Math.round(x / (size / oldSize)), Math.round(y / (size / oldSize)));
+            }
+        }
+        mask = largeMask;
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask shrink2 (int size) {
+        float[][] smallMask = new float[size][size];
+        int oldSize = getSize();
+        float sum = 0;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                for (int z = 0; z < (oldSize / size); z++) {
+                    for (int w = 0; w < (oldSize / size); w++) {
+                        sum += get((x * oldSize / size) + z, (y * oldSize / size) + w);
+                    }
+                }
+                smallMask[x][y] = sum / oldSize * size;
+                sum = 0;
+            }
+        }
+        mask = smallMask;
+        applySymmetry(symmetryHierarchy.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask shrink(int size) {
         float[][] smallMask = new float[size][size];
         int largeX;
@@ -364,10 +399,10 @@ public strictfp class FloatMask extends Mask {
 
     public FloatMask setSize(int size) {
         if (getSize() > size) {
-            shrink(size);
+            shrink2(size);
         }
         if (getSize() < size) {
-            enlarge(size);
+            enlarge2(size);
         }
         return this;
     }

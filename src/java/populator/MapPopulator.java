@@ -311,7 +311,7 @@ public strictfp class MapPopulator {
             oldLayer6.setSize(map.getSize()/2);
             oldLayer7.setSize(map.getSize()/2);
             oldLayer8.setSize(map.getSize()/2);
-
+            
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
             BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
