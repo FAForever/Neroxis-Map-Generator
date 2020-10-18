@@ -61,6 +61,12 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f clear() {
+        this.x = 0;
+        this.y = 0;
+        return this;
+    }
+
     public void flip(Vector2f center, Symmetry symmetry) {
         switch (symmetry) {
             case X -> x = 2 * center.x - x;
