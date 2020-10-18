@@ -62,7 +62,7 @@ public strictfp class SCMapImporter {
         int[] previewImageData = readInts(previewImageSize / 4);
         int version = readInt();
         if (version != 56 && version != 60) {
-            throw new UnsupportedEncodingException("File not valid SCMap");
+            throw new UnsupportedEncodingException(String.format("SCMap version %d not supported", version));
         }
 
         // heightmap
