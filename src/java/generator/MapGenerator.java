@@ -544,8 +544,8 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(intDecal, rockDecal);
             long sTime = System.currentTimeMillis();
-            decalGenerator.generateDecals(intDecal.getFinalMask().minus(noDecals), DecalGenerator.INT, 24f, 12f);
-            decalGenerator.generateDecals(rockDecal.getFinalMask().minus(noDecals), DecalGenerator.ROCKS, 4f, 8f);
+            decalGenerator.generateDecals(intDecal.getFinalMask().minus(noDecals), DecalGenerator.INT, 36f, 18f);
+            decalGenerator.generateDecals(rockDecal.getFinalMask().minus(noDecals), DecalGenerator.ROCKS, 16f, 8f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateDecals\n",
                         System.currentTimeMillis() - sTime,
