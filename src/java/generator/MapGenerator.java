@@ -93,7 +93,7 @@ public strictfp class MapGenerator {
     private ConcurrentFloatMask accentSlopesTexture;
     private ConcurrentFloatMask accentPlateauTexture;
     private ConcurrentFloatMask slopesTexture;
-    private ConcurrentFloatMask rockBaseTexture;
+    private ConcurrentFloatMask steepHillsTexture;
     private ConcurrentFloatMask rockTexture;
     private ConcurrentFloatMask accentRockTexture;
     private ConcurrentBinaryMask rockDecal;
@@ -485,10 +485,10 @@ public strictfp class MapGenerator {
 
 
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, rockBaseTexture, waterBeachTexture, rockTexture, accentRockTexture);
+            Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
             long sTime = System.currentTimeMillis();
             map.setTextureMasksLowScaled(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
-            map.setTextureMasksHighScaled(rockBaseTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+            map.setTextureMasksHighScaled(steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateTextures\n",
                         System.currentTimeMillis() - sTime,
@@ -778,7 +778,7 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(plateaus, random.nextLong(), "accentPlateau");
         ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "slopes");
         ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentSlopes").invert();
-        ConcurrentBinaryMask rockBase = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "rockBase");
+        ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
         ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "rock");
         ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "accentRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
@@ -788,7 +788,7 @@ public strictfp class MapGenerator {
         accentPlateauTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentPlateauTexture");
         slopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "slopesTexture");
         accentSlopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentSlopesTexture");
-        rockBaseTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "rockBaseTexture");
+        steepHillsTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "steepHillsTexture");
         rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentRockTexture");
 
@@ -801,7 +801,7 @@ public strictfp class MapGenerator {
         accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
         slopes.intersect(land).flipValues(.95f).erode(.5f, symmetrySettings.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
         accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
-        rockBase.acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
+        steepHills.acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
         accentRock.acid(.2f, 0).erode(.3f, symmetrySettings.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
         waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
@@ -812,7 +812,7 @@ public strictfp class MapGenerator {
         accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
         slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f).threshold(.05f).smooth(2);
         accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f).threshold(.05f).smooth(2);
-        rockBaseTexture.init(rockBase, 0, 1).smooth(8).clampMax(0.35f).add(rockBase, .65f).smooth(4).clampMax(0.65f).add(rockBase, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
+        steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
         rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f).threshold(.1f).smooth(2);
         accentRockTexture.init(accentRock, 0, 1).subtract(waterBeachTexture).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
 
