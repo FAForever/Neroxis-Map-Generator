@@ -188,6 +188,17 @@ public strictfp class FloatMask extends Mask {
         }
     }
 
+    public FloatMask clear() {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                set(x, y, 0);
+            }
+        }
+        applySymmetry();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask multiply(FloatMask other) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -328,6 +339,58 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask enlarge(int size) {
+        float[][] largeMask = new float[size][size];
+        int smallX;
+        int smallY;
+        for (int x = 0; x < size; x++) {
+            smallX = StrictMath.min(x / (size / getSize()), getSize() - 1);
+            for (int y = 0; y < size; y++) {
+                smallY = StrictMath.min(y / (size / getSize()), getSize() - 1);
+                largeMask[x][y] = get(smallX, smallY);
+            }
+        }
+        mask = largeMask;
+        applySymmetry(symmetrySettings.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask enlarge2 (int size) {
+        float[][] largeMask = new float[size][size];
+        int oldSize = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                largeMask[x][y] = get(StrictMath.round(x / (size / oldSize)), StrictMath.round(y / (size / oldSize)));
+            }
+        }
+        mask = largeMask;
+        applySymmetry(symmetrySettings.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask shrink2 (int size) {
+        float[][] smallMask = new float[size][size];
+        int oldSize = getSize();
+        float sum = 0;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                for (int z = 0; z < (oldSize / size); z++) {
+                    for (int w = 0; w < (oldSize / size); w++) {
+                        sum += get((x * oldSize / size) + z, (y * oldSize / size) + w);
+                    }
+                }
+                smallMask[x][y] = sum / oldSize * size / oldSize * size;
+                sum = 0;
+            }
+        }
+        mask = smallMask;
+        applySymmetry(symmetrySettings.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask shrink(int size) {
         float[][] smallMask = new float[size][size];
         int largeX;
@@ -346,6 +409,16 @@ public strictfp class FloatMask extends Mask {
         mask = smallMask;
         VisualDebugger.visualizeMask(this);
         applySymmetry(symmetrySettings.getTeamSymmetry());
+        return this;
+    }
+
+    public FloatMask setSize(int size) {
+        if (getSize() > size) {
+            shrink2(size);
+        }
+        if (getSize() < size) {
+            enlarge2(size);
+        }
         return this;
     }
 
