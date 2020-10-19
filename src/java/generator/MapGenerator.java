@@ -475,7 +475,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(passable, passableLand, passableWater);
             long sTime = System.currentTimeMillis();
-            aiMarkerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask(), 16, 18);
+            aiMarkerGenerator.generateAIMarkers(passable.getFinalMask(), passableLand.getFinalMask(), passableWater.getFinalMask(), mapSize / 32f, mapSize / 32f + 4f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
                         System.currentTimeMillis() - sTime,
