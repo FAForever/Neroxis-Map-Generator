@@ -740,7 +740,7 @@ public strictfp class MapGenerator {
 
         ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 2f, null, "mountainsPresent");
 
-        heightmapMountains.add(mountainsPresent, 2f);
+        heightmapMountains.add(mountainsPresent, 2.5f);
         heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
 
         heightmapBase.add(heightmapMountains);
@@ -755,7 +755,7 @@ public strictfp class MapGenerator {
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.deflate(8).trimEdge(8);
+        passable.deflate(mapSize / 64f).trimEdge(8);
         passableLand.deflate(4).intersect(passable);
         passableWater.deflate(16).trimEdge(8);
     }
