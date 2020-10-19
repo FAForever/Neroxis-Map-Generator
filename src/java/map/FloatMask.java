@@ -339,7 +339,7 @@ public strictfp class FloatMask extends Mask {
         int oldSize = getSize();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                largeMask[x][y] = get(Math.round(x / (size / oldSize)), Math.round(y / (size / oldSize)));
+                largeMask[x][y] = get(StrictMath.round(x / (size / oldSize)), StrictMath.round(y / (size / oldSize)));
             }
         }
         mask = largeMask;
