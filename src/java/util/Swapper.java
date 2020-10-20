@@ -19,7 +19,7 @@ public strictfp class Swapper {
     }
 
     public static float swap(float value) {
-        int intValue = Float.floatToIntBits(value);
+        int intValue = Float.floatToRawIntBits(value);
         intValue = swap(intValue);
 
         return Float.intBitsToFloat(intValue);
