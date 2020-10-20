@@ -26,15 +26,18 @@ public strictfp class SCMap {
 
     private float heightMapScale = 1f / 128f;
 
+    private final ArrayList<Spawn> spawns;
+    private String name = "";
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
+    private String description = "";
     private String terrainShaderPath = "TTerrainXP";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private final ArrayList<DecalGroup> decalGroups;
     private int spawnCountInit;
     private int mexCountInit;
     private int hydroCountInit;
-    private final ArrayList<Vector3f> spawns;
+    private float noRushRadius = 50;
     private final ArrayList<Vector3f> mexes;
     private final ArrayList<Vector3f> hydros;
     private final ArrayList<Decal> decals;
@@ -125,11 +128,11 @@ public strictfp class SCMap {
         return spawns.size();
     }
 
-    public Vector3f getSpawn(int i) {
+    public Spawn getSpawn(int i) {
         return spawns.get(i);
     }
 
-    public void addSpawn(Vector3f spawn) {
+    public void addSpawn(Spawn spawn) {
         spawns.add(spawn);
     }
 

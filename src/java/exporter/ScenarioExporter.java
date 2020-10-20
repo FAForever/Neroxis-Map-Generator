@@ -14,8 +14,8 @@ public strictfp class ScenarioExporter {
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("version = 3\n");
         out.writeBytes("ScenarioInfo = {\n");
-        out.writeBytes("  name = '" + mapname + "',\n");
-        out.writeBytes("  description = 'Your Quantum Gateway malfunctioned and deposited you on this random planet. It looks like you will have to fight your way out',\n");
+        out.writeBytes("  name = \"" + map.getName() + "\",\n");
+        out.writeBytes("  description = \"" + map.getDescription() + "\",\n");
         out.writeBytes("  type = 'skirmish',\n");
         out.writeBytes("  starts = true,\n");
         out.writeBytes("  preview = '',\n");
@@ -24,7 +24,11 @@ public strictfp class ScenarioExporter {
         out.writeBytes("  map_version = 1,\n");
         out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapname + "_save.lua',\n");
         out.writeBytes("  script = '/maps/" + mapFolder + "/" + mapname + "_script.lua',\n");
-        out.writeBytes("  norushradius = 50,\n");
+        out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
+        for (int i = 0; i < map.getSpawnCount(); i++) {
+            out.writeBytes("  norushoffsetX_ARMY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().x + ",\n");
+            out.writeBytes("  norushoffsetY_ARMY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().y + ",\n");
+        }
         out.writeBytes("  Configurations = {\n");
         out.writeBytes("    ['standard'] = {\n");
         out.writeBytes("      teams = {\n");
@@ -44,10 +48,6 @@ public strictfp class ScenarioExporter {
         out.writeBytes("      },\n");
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            out.writeBytes("  norushoffsetX_ARMY_" + (i + 1) + " = 0,\n");
-            out.writeBytes("  norushoffsetY_ARMY_" + (i + 1) + " = 0,\n");
-        }
         out.writeBytes("}\n");
 
         out.flush();

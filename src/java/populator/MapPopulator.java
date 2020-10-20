@@ -448,7 +448,7 @@ public strictfp class MapPopulator {
             BinaryMask noProps = new BinaryMask(impassable, null);
 
             for (int i = 0; i < map.getSpawnCount(); i++) {
-                noProps.fillCircle(map.getSpawn(i), 30, true);
+                noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
             }
             for (int i = 0; i < map.getMexCount(); i++) {
                 noProps.fillCircle(map.getMex(i), 10, true);
@@ -484,7 +484,7 @@ public strictfp class MapPopulator {
             BinaryMask noDecals = new BinaryMask(map.getSize() + 1, null, symmetrySettings);
 
             for (int i = 0; i < map.getSpawnCount(); i++) {
-                noDecals.fillCircle(map.getSpawn(i), 24, true);
+                noDecals.fillCircle(map.getSpawn(i).getPosition(), 24, true);
             }
 
             decalGenerator.generateDecals(intDecal.minus(noDecals), DecalGenerator.INT, 96f, 64f);

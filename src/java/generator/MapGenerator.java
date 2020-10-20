@@ -404,6 +404,7 @@ public strictfp class MapGenerator {
 
     public void save() {
         try {
+            map.setName(mapName);
             Path folderPath = Paths.get(pathToFolder);
 
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
@@ -874,7 +875,7 @@ public strictfp class MapGenerator {
         noProps.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            noProps.fillCircle(map.getSpawn(i), 30, true);
+            noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
             noProps.fillCircle(map.getMex(i), 1, true);
@@ -889,7 +890,7 @@ public strictfp class MapGenerator {
         noBases.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            noBases.fillCircle(map.getSpawn(i), 128, true);
+            noBases.fillCircle(map.getSpawn(i).getPosition(), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
             noBases.fillCircle(map.getMex(i), 32, true);
@@ -902,7 +903,7 @@ public strictfp class MapGenerator {
         noCivs.combine(ramps.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            noCivs.fillCircle(map.getSpawn(i), 96, true);
+            noCivs.fillCircle(map.getSpawn(i).getPosition(), 96, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
             noCivs.fillCircle(map.getMex(i), 32, true);
@@ -916,7 +917,7 @@ public strictfp class MapGenerator {
         noWrecks.combine(allBaseMask.getFinalMask());
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            noWrecks.fillCircle(map.getSpawn(i), 128, true);
+            noWrecks.fillCircle(map.getSpawn(i).getPosition(), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
             noWrecks.fillCircle(map.getMex(i), 8, true);
@@ -928,7 +929,7 @@ public strictfp class MapGenerator {
         noDecals = new BinaryMask(mapSize + 1, null, symmetrySettings);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            noDecals.fillCircle(map.getSpawn(i), 24, true);
+            noDecals.fillCircle(map.getSpawn(i).getPosition(), 24, true);
         }
     }
 

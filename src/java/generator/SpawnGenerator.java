@@ -1,11 +1,7 @@
 package generator;
 
-import map.AIMarker;
-import map.BinaryMask;
-import map.SCMap;
-import map.Symmetry;
+import map.*;
 import util.Vector2f;
-import util.Vector3f;
 
 import java.util.Random;
 
@@ -57,7 +53,7 @@ public strictfp class SpawnGenerator {
             if (random.nextFloat() < plateauDensity) {
                 boolean valid = true;
                 for (int j = 0; j < i; j += 2) {
-                    if (!spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 8) {
+                    if (!spawnPlateauMask.get(map.getSpawn(j).getPosition()) && map.getSpawn(j).getPosition().getXZDistance(location) < spawnSize * 8) {
                         valid = false;
                         break;
                     }
@@ -69,7 +65,7 @@ public strictfp class SpawnGenerator {
             } else {
                 boolean valid = false;
                 for (int j = 0; j < i; j += 2) {
-                    if (spawnPlateauMask.get(map.getSpawn(j)) && map.getSpawn(j).getXZDistance(location) < spawnSize * 8) {
+                    if (spawnPlateauMask.get(map.getSpawn(j).getPosition()) && map.getSpawn(j).getPosition().getXZDistance(location) < spawnSize * 8) {
                         valid = true;
                         break;
                     }
@@ -79,8 +75,8 @@ public strictfp class SpawnGenerator {
                     spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
                 }
             }
-            map.addSpawn(new Vector3f(location));
-            map.addSpawn(new Vector3f(symLocation));
+            map.addSpawn(new Spawn(i, location, new Vector2f(0, 0)));
+            map.addSpawn(new Spawn(i + 1, symLocation, new Vector2f(0, 0)));
             map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), location, null));
             map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), symLocation, null));
             location = spawnable.getRandomPosition();
@@ -111,8 +107,8 @@ public strictfp class SpawnGenerator {
             if (spawnableCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT) {
                 spawnableCopy.fillCircle(symLocation, map.getSize() * 3 / 8f, false);
             }
-            map.addSpawn(new Vector3f(symLocation));
-            map.addSpawn(new Vector3f(location));
+            map.addSpawn(new Spawn(i, symLocation, new Vector2f(0, 0)));
+            map.addSpawn(new Spawn(i + 1, location, new Vector2f(0, 0)));
             map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), location, null));
             map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), symLocation, null));
             location = spawnableCopy.getRandomPosition();
@@ -121,7 +117,7 @@ public strictfp class SpawnGenerator {
 
     public void setMarkerHeights() {
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            map.getSpawns().set(i, placeOnHeightmap(map, map.getSpawn(i)));
+            map.getSpawns().set(i, new Spawn(map.getSpawn(i).getId(), placeOnHeightmap(map, map.getSpawn(i).getPosition()), map.getSpawn(i).getNoRushOffset()));
         }
     }
 }

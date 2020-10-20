@@ -1,6 +1,7 @@
 package generator;
 
 import map.SCMap;
+import map.Spawn;
 import map.TerrainMaterials;
 import util.Vector3f;
 import util.serialized.LightingSettings;
@@ -64,10 +65,10 @@ public strictfp class PreviewGenerator {
                 image.getGraphics().drawImage(hydroImage, x, y, null);
             }
         }
-        for (Vector3f spawn : map.getSpawns()) {
+        for (Spawn spawn : map.getSpawns()) {
             if (spawn != null) {
-                int x = (int) (spawn.x / map.getSize() * 256 - armyImage.getWidth(null) / 2);
-                int y = (int) (spawn.z / map.getSize() * 256 - armyImage.getHeight(null) / 2);
+                int x = (int) (spawn.getPosition().x / map.getSize() * 256 - armyImage.getWidth(null) / 2);
+                int y = (int) (spawn.getPosition().z / map.getSize() * 256 - armyImage.getHeight(null) / 2);
                 x = StrictMath.min(Math.max(0, x), image.getWidth() - armyImage.getWidth(null));
                 y = StrictMath.min(Math.max(0, y), image.getHeight() - armyImage.getHeight(null));
                 image.getGraphics().drawImage(armyImage, x, y, null);

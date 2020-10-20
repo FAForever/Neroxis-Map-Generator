@@ -23,9 +23,9 @@ public strictfp class SaveExporter {
         out.writeBytes("    ['_MASTERCHAIN_'] = {\n");
         out.writeBytes("      Markers = {\n");
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            out.writeBytes("        ['ARMY_" + (i + 1) + "'] = {\n");
+            out.writeBytes("        ['ARMY_" + map.getSpawn(i).getId() + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
-            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).x) + ", " + map.getSpawn(i).y + ", " + (map.getSpawn(i).z) + " ),\n");
+            out.writeBytes("          ['position'] = VECTOR3( " + (map.getSpawn(i).getPosition().x) + ", " + map.getSpawn(i).getPosition().y + ", " + (map.getSpawn(i).getPosition().z) + " ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
