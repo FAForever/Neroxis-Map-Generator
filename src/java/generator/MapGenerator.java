@@ -438,7 +438,7 @@ public strictfp class MapGenerator {
         final int mexSpacing = mapSize / 12;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
         if (mapSize > 512) {
-            landDensity = StrictMath.max(landDensity - .125f, .675f);
+            landDensity = StrictMath.max(landDensity - .15f, .675f);
             mountainDensity = mountainDensity * .4f;
             plateauDensity = plateauDensity - .05f;
         }
@@ -659,23 +659,27 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE) || mapSize > 512;
+        int fillSize = 64;
+        if (mapSize < 512) {
+            fillSize = 32;
+        }
 
         if (fillLandGaps) {
-            land.fillGaps(64);
+            land.fillGaps(fillSize);
         } else {
-            land.widenGaps(64);
+            land.widenGaps(fillSize);
         }
 
         if (random.nextBoolean()) {
-            plateaus.fillGaps(64);
+            plateaus.fillGaps(fillSize);
         } else {
-            plateaus.widenGaps(64);
+            plateaus.widenGaps(fillSize);
         }
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (fillLandGaps) {
-            land.widenGaps(64);
+            land.widenGaps(fillSize);
         }
 
         land.filterShapes(mapSize * mapSize / 256);
@@ -696,7 +700,7 @@ public strictfp class MapGenerator {
             mountains.widenGaps(12);
         }
         mountains.filterShapes(64);
-        plateaus.intersect(land).fillGaps(32).combine(mountains).filterShapes(mapSize * mapSize / 256);
+        plateaus.intersect(land).fillGaps(fillSize / 2).combine(mountains).filterShapes(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
