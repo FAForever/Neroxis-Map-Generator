@@ -403,22 +403,15 @@ public strictfp class MapPopulator {
                 if (moveLayer0ToAndSmooth >= 10) {
                     oldLayer0Texture.smooth(8).clampMax(0.35f).add(oldLayer0).smooth(4).clampMax(0.65f).add(oldLayer0).smooth(1).add(oldLayer0).clampMax(1f);
                 }
-                if (moveLayer0ToAndSmooth == 1 || moveLayer0ToAndSmooth == 10) {
-                    accentGroundTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 2 || moveLayer0ToAndSmooth == 20) {
-                    accentPlateauTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 3 || moveLayer0ToAndSmooth == 30) {
-                    slopesTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 4 || moveLayer0ToAndSmooth == 40) {
-                    accentSlopesTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 5 || moveLayer0ToAndSmooth == 50) {
-                    steepHillsTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 6 || moveLayer0ToAndSmooth == 60) {
-                    waterBeachTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 7 || moveLayer0ToAndSmooth == 70) {
-                    rockTexture = new FloatMask(oldLayer0Texture, null);
-                } else if (moveLayer0ToAndSmooth == 8 || moveLayer0ToAndSmooth == 80) {
-                    accentRockTexture = new FloatMask(oldLayer0Texture, null);
+                switch (moveLayer0ToAndSmooth) {
+                    case 1, 10 -> accentGroundTexture = new FloatMask(oldLayer0Texture, null);
+                    case 2, 20 -> accentPlateauTexture = new FloatMask(oldLayer0Texture, null);
+                    case 3, 30 -> slopesTexture = new FloatMask(oldLayer0Texture, null);
+                    case 4, 40 -> accentSlopesTexture = new FloatMask(oldLayer0Texture, null);
+                    case 5, 50 -> steepHillsTexture = new FloatMask(oldLayer0Texture, null);
+                    case 6, 60 -> waterBeachTexture = new FloatMask(oldLayer0Texture, null);
+                    case 7, 70 -> rockTexture = new FloatMask(oldLayer0Texture, null);
+                    case 8, 80 -> accentRockTexture = new FloatMask(oldLayer0Texture, null);
                 }
             }
 
