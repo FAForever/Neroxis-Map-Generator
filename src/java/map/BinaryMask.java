@@ -762,7 +762,7 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
-    public BinaryMask filterShapes(int minArea) {
+    public BinaryMask removeAreasSmallerThan(int minArea) {
         LinkedHashSet<Vector2f> locHash = new LinkedHashSet<>();
         FloatMask distanceField = getDistanceField();
         for (int x = 0; x < getSize(); x++) {
@@ -803,6 +803,13 @@ public strictfp class BinaryMask extends Mask {
             locHash.removeAll(coordinates);
             locList = new LinkedList<>(locHash);
         }
+        applySymmetry(symmetrySettings.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask removeAreasBiggerThan(int maxArea) {
+        minus(copy().removeAreasSmallerThan(maxArea));
         applySymmetry(symmetrySettings.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
