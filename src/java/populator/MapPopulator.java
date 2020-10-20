@@ -43,7 +43,8 @@ public strictfp class MapPopulator {
     private boolean populateTextures;
     private boolean keepCurrentDecals;
     private boolean keepLayer0;
-    private int moveLayer0To;
+    private int moveLayer0ToAndSmooth;
+    private int mapImageSize;
     private boolean keepLayer1;
     private boolean keepLayer2;
     private boolean keepLayer3;
@@ -104,6 +105,8 @@ public strictfp class MapPopulator {
                     " - ie: to populate all texture layers except layer 7, use: --textures 1234568\n" +
                     " - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock" +
                     "--keep-layer-0 arg     optional, populate where texture layer 0 is currently visible to replace layer number arg (1, 2, 3, 4, 5, 6, 7, 8)\n" +
+                    " - to smooth this layer, add a 0 to its layer number arg: (10, 20, 30, 40, 50, 60, 70, 80)\n" +
+                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc\n" +
                     "--decals               optional, populate decals\n" +
                     "--ai                   optional, populate ai markers\n" +
                     "--keep-current-decals  optional, prevents decals currently on the map from being deleted\n" +
@@ -166,7 +169,10 @@ public strictfp class MapPopulator {
         }
         keepLayer0 = arguments.containsKey("keep-layer-0");
         if (keepLayer0) {
-            moveLayer0To = Integer.parseInt(arguments.get("keep-layer-0"));
+            moveLayer0ToAndSmooth = Integer.parseInt(arguments.get("keep-layer-0"));
+        }
+        if (arguments.containsKey("texture-res")) {
+            mapImageSize = Integer.parseInt(arguments.get("texture-res")) / 128 * 128;
         }
         populateDecals = arguments.containsKey("decals");
         populateAI = arguments.containsKey("ai");
@@ -222,6 +228,7 @@ public strictfp class MapPopulator {
             waterHeight = heightmapBase.getMin();
         }
 
+        BinaryMask wholeMap = new BinaryMask(heightmapBase, 0f, random.nextLong());
         BinaryMask land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
         BinaryMask plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
@@ -291,19 +298,26 @@ public strictfp class MapPopulator {
             FloatMask oldLayer6 = texturesMasks[5];
             FloatMask oldLayer7 = texturesMasks[6];
             FloatMask oldLayer8 = texturesMasks[7];
-            FloatMask oldLayer0 = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
 
-            map.setTextureMasksLow(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
-            map.setTextureMasksHigh(new BufferedImage(map.getSize() / 2, map.getSize() / 2, BufferedImage.TYPE_INT_ARGB));
+            if (mapImageSize == 0) {
+                mapImageSize = map.getSize();
+            } else {
+                if (mapImageSize > map.getSize() * 2) {
+                    mapImageSize = map.getSize() * 2;
+                }
+            }
 
-            oldLayer1.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer2.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer3.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer4.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer5.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer6.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer7.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
-            oldLayer8.clampMin(0f).clampMax(1f).setSize(map.getSize()/2);
+            map.setTextureMasksLow(new BufferedImage(mapImageSize / 2, mapImageSize / 2, BufferedImage.TYPE_INT_ARGB));
+            map.setTextureMasksHigh(new BufferedImage(mapImageSize / 2, mapImageSize / 2, BufferedImage.TYPE_INT_ARGB));
+
+            oldLayer1.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer2.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer3.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer4.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer5.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer6.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer7.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
+            oldLayer8.clampMin(0f).clampMax(1f).setSize(mapImageSize/2);
 
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
@@ -321,14 +335,14 @@ public strictfp class MapPopulator {
             BinaryMask steepHills = new BinaryMask(slope, .55f, random.nextLong());
             BinaryMask rock = new BinaryMask(slope, 1.25f, random.nextLong());
             BinaryMask accentRock = new BinaryMask(slope, 1.25f, random.nextLong());
-            FloatMask waterBeachTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask accentGroundTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask accentPlateauTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask slopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask accentSlopesTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask steepHillsTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask rockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
-            FloatMask accentRockTexture = new FloatMask(map.getSize() / 2, random.nextLong(), symmetrySettings);
+            FloatMask waterBeachTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentGroundTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentPlateauTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask slopesTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentSlopesTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask steepHillsTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask rockTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+            FloatMask accentRockTexture = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
 
             inland.deflate(2);
             flatAboveCoast.intersect(flat);
@@ -383,23 +397,28 @@ public strictfp class MapPopulator {
                 accentRockTexture = new FloatMask(oldLayer8, null);
             }
             if (keepLayer0) {
-                oldLayer0.subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1);
-                if (moveLayer0To == 1) {
-                    accentGroundTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 2) {
-                    accentPlateauTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 3) {
-                    slopesTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 4) {
-                    accentSlopesTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 5) {
-                    steepHillsTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 6) {
-                    waterBeachTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 7) {
-                    rockTexture = new FloatMask(oldLayer0, null);
-                } else if (moveLayer0To == 8) {
-                    accentRockTexture = new FloatMask(oldLayer0, null);
+                FloatMask oldLayer0 = new FloatMask(mapImageSize / 2, random.nextLong(), symmetrySettings);
+                oldLayer0.init(wholeMap, 0f, 1f).subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1).clampMin(0f);
+                FloatMask oldLayer0Texture = new FloatMask(oldLayer0, null);
+                if (moveLayer0ToAndSmooth >= 10) {
+                    oldLayer0Texture.smooth(8).clampMax(0.35f).add(oldLayer0).smooth(4).clampMax(0.65f).add(oldLayer0).smooth(1).add(oldLayer0).clampMax(1f);
+                }
+                if (moveLayer0ToAndSmooth == 1 || moveLayer0ToAndSmooth == 10) {
+                    accentGroundTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 2 || moveLayer0ToAndSmooth == 20) {
+                    accentPlateauTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 3 || moveLayer0ToAndSmooth == 30) {
+                    slopesTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 4 || moveLayer0ToAndSmooth == 40) {
+                    accentSlopesTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 5 || moveLayer0ToAndSmooth == 50) {
+                    steepHillsTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 6 || moveLayer0ToAndSmooth == 60) {
+                    waterBeachTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 7 || moveLayer0ToAndSmooth == 70) {
+                    rockTexture = new FloatMask(oldLayer0Texture, null);
+                } else if (moveLayer0ToAndSmooth == 8 || moveLayer0ToAndSmooth == 80) {
+                    accentRockTexture = new FloatMask(oldLayer0Texture, null);
                 }
             }
 
