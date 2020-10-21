@@ -330,7 +330,11 @@ public strictfp class MapGenerator {
         if (mapSize < 512) {
             mexMultiplier = .75f;
         } else if (mapSize > 512) {
-            mexMultiplier = 2.5f;
+            switch (spawnCount) {
+                case 2 -> mexMultiplier = 2.5f;
+                case 4, 6 -> mexMultiplier = 1.75f;
+                case 8, 10 -> mexMultiplier = 1.3f;
+            }
         }
         mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(30 / spawnCount)) * mexMultiplier);
         Symmetry[] symmetries;
@@ -435,12 +439,12 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        final int mexSpacing = mapSize / 12;
         final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
+        int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
-            landDensity = StrictMath.max(landDensity - .15f, .675f);
-            mountainDensity = mountainDensity * .4f;
-            plateauDensity = plateauDensity - .05f;
+            landDensity = StrictMath.max(landDensity - .125f, .7f);
+            mountainDensity = mountainDensity * .65f;
+            mexSpacing = 64;
         }
         hasCivilians = random.nextBoolean();
         enemyCivilians = random.nextBoolean();
