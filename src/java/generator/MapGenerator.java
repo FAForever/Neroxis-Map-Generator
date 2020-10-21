@@ -745,12 +745,15 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapShore = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapShore");
         ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapHills");
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapValleys");
+        ConcurrentBinaryMask oceanFloor = land.copy().invert();
+
+        oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(16, .75f).invert();
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
         heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(8, ramps).smooth(1);
         heightmapHills.maskToHills(hills).clampMax(HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
         heightmapValleys.maskToHills(valleys).multiply(-1).clampMin(VALLEY_HEIGHT).smooth(16, plateaus);
-        heightmapLand.maskToHeightmap(0.25f, 48, land).add(heightmapHills).add(heightmapValleys).smooth(2);
+        heightmapLand.add(heightmapHills).add(heightmapValleys).smooth(2).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight).maskToOceanHeights(-0.15f, oceanFloor);
         heightmapCliffs.init(cliffs, 0, 1f).maskToMountains(cliffs);
         heightmapShore.init(shore, 0, 1.5f).maskToMountains(shore);
         heightmapMountains.maskToMountains(mountains).smooth(2);
@@ -784,7 +787,7 @@ public strictfp class MapGenerator {
 
         resourceMask.minus(unbuildable).deflate(8);
         resourceMask.trimEdge(16).fillCenter(16, false);
-        waterResourceMask.deflate(48).trimEdge(16).fillCenter(16, false);
+        waterResourceMask.minus(unbuildable).deflate(8).trimEdge(16).fillCenter(16, false);
         plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, false);
     }
 

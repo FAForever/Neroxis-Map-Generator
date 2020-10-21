@@ -105,9 +105,9 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentFloatMask maskToHeightmap(float underWaterSlope, int maxRepeat, ConcurrentBinaryMask other) {
+    public ConcurrentFloatMask maskToOceanHeights(float underWaterSlope, ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToHeightmap(underWaterSlope, maxRepeat, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.floatMask.maskToOceanHeights(underWaterSlope, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 

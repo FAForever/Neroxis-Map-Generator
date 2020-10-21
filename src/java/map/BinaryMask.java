@@ -614,7 +614,7 @@ public strictfp class BinaryMask extends Mask {
             for (int py = 0; py < height; py++) {
                 int calcX = x + px + py * xSlope;
                 int calcY = y + py + px * ySlope;
-                if (calcX >= 0 && calcX < getSize() && calcY >= 0 && calcY < getSize()) {
+                if (inBounds(calcX, calcY)) {
                     set(calcX, calcY, value);
                 }
             }

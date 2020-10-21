@@ -18,10 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static brushes.Brushes.loadBrush;
 
@@ -432,18 +430,14 @@ public strictfp class FloatMask extends Mask {
         }
         FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetrySettings);
         BinaryMask otherCopy = other.copy().fillHalf(false);
-        LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
+        FloatMask otherDistance = other.copy().invert().getDistanceField();
         LinkedList<Vector2f> coordinates = new LinkedList<>(otherCopy.getRandomCoordinates(4));
         while (coordinates.size() > 0) {
             Vector2f loc = coordinates.removeFirst();
-            AtomicReference<Float> distance = new AtomicReference<>(Float.MAX_VALUE);
-            extents.forEach(eloc -> distance.set(StrictMath.min(distance.get(), loc.getDistance(eloc))));
-            if (distance.get() > 1) {
-                FloatMask useBrush = brush.copy().shrink(distance.get().intValue() * 4).multiply(distance.get() / 2);
-                add(useBrush, loc);
-                add(useBrush, getSymmetryPoint(loc));
-                coordinates.removeIf(cloc -> loc.getDistance(cloc) < distance.get());
-            }
+            FloatMask useBrush = brush.copy().shrink((int) otherDistance.get(loc) * 4).multiply(otherDistance.get(loc));
+            add(useBrush, loc);
+            add(useBrush, getSymmetryPoint(loc));
+            coordinates.removeIf(cloc -> loc.getDistance(cloc) < otherDistance.get(loc));
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -460,37 +454,28 @@ public strictfp class FloatMask extends Mask {
         FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetrySettings);
         brush.multiply(1 / brush.getMax());
         BinaryMask otherCopy = other.copy().fillHalf(false);
-        LinkedHashSet<Vector2f> extents = other.copy().outline().fillHalf(false).getAllCoordinatesEqualTo(true, 1);
+        FloatMask otherDistance = other.copy().invert().getDistanceField();
         LinkedList<Vector2f> coordinates = new LinkedList<>(otherCopy.getRandomCoordinates(4));
         while (coordinates.size() > 0) {
             Vector2f loc = coordinates.removeFirst();
-            AtomicReference<Float> distance = new AtomicReference<>(Float.MAX_VALUE);
-            extents.forEach(eloc -> distance.set(StrictMath.min(distance.get(), loc.getDistance(eloc))));
-            if (distance.get() > 1) {
-                FloatMask useBrush = brush.copy().shrink(distance.get().intValue() * 4).multiply(distance.get());
-                add(useBrush, loc);
-                add(useBrush, getSymmetryPoint(loc));
-                coordinates.removeIf(cloc -> loc.getDistance(cloc) < distance.get());
-            }
+            FloatMask useBrush = brush.copy().shrink((int) otherDistance.get(loc) * 4).multiply(otherDistance.get(loc));
+            add(useBrush, loc);
+            add(useBrush, getSymmetryPoint(loc));
+            coordinates.removeIf(cloc -> loc.getDistance(cloc) < otherDistance.get(loc));
         }
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public FloatMask maskToHeightmap(float underWaterSlope, int maxRepeat, BinaryMask other) {
-        other = other.copy().invert();
+    public FloatMask maskToOceanHeights(float underWaterSlope, BinaryMask other) {
         int size = getSize();
         if (other.getSize() < size)
             other = other.copy().enlarge(size);
         if (other.getSize() > size) {
             other = other.copy().shrink(size);
         }
-        int count = 0;
-        while (other.getCount() > 0 && count < maxRepeat) {
-            count++;
-            add(other, -underWaterSlope);
-            other.erode(0.75f, symmetrySettings.getSpawnSymmetry());
-        }
+        FloatMask otherDistance = other.getDistanceField();
+        add(otherDistance.multiply(-underWaterSlope));
         VisualDebugger.visualizeMask(this);
         return this;
     }
