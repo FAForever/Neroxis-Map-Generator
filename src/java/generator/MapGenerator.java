@@ -706,6 +706,14 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
         ConcurrentBinaryMask landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));
 
+        ConcurrentBinaryMask shoreLine = landOutline.copy();
+
+        shoreLine.shrink(mapSize / 4).erode(.75f, symmetrySettings.getSpawnSymmetry()).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).enlarge(mapSize + 1).erode(.25f, symmetrySettings.getSpawnSymmetry(), 2);
+        shoreLine.combine(landOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetrySettings.getSpawnSymmetry(), 18)).minus(ramps).smooth(2, .75f);
+
+        land.combine(shoreLine);
+        landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));
+
         cliffs = plateauOutline.copy();
         shore = landOutline.copy();
 
