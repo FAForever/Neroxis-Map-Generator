@@ -455,7 +455,7 @@ public strictfp class MapGenerator {
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
             landDensity = StrictMath.max(landDensity - .125f, .7f);
-            mountainDensity = mountainDensity * .65f;
+            mountainDensity = mountainDensity * .5f;
             mexSpacing = 64;
         }
         hasCivilians = random.nextBoolean();
