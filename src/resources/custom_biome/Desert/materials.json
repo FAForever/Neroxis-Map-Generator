@@ -26,7 +26,7 @@
   ],
   "normalPaths": [
     "/env/Desert/Layers/Des_SandDark_normal.dds",
-    "/env/Desert/Layers/Des_Gravel_normal.dds",
+    "/env/Desert/Layers/Des_SandMed_normal.dds",
     "/env/Desert/Layers/Des_sandLight_normal.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Desert/Layers/Des_Gravel_normal.dds",
