@@ -357,7 +357,6 @@ public strictfp class MapPopulator {
             FloatMask steepHillsTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            waterBeachTexture.startVisualDebugger("wb");
 
             accentGround.minus(highGround).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
             accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
