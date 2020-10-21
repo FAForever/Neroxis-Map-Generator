@@ -292,6 +292,8 @@ public strictfp class MapPopulator {
 
         if (populateTextures) {
 
+            int smallWaterSizeLimit = 9000;
+
             FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
             FloatMask oldLayer1 = texturesMasks[0];
             FloatMask oldLayer2 = texturesMasks[1];
@@ -318,6 +320,7 @@ public strictfp class MapPopulator {
             oldLayer7.clampMin(0f).clampMax(1f).setSize(mapImageSize);
             oldLayer8.clampMin(0f).clampMax(1f).setSize(mapImageSize);
 
+            BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
             BinaryMask inland = new BinaryMask(land, random.nextLong());
             BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
@@ -326,8 +329,8 @@ public strictfp class MapPopulator {
             BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 0.29f, random.nextLong());
             BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 1.2f, random.nextLong());
             BinaryMask lowWaterBeach = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-            BinaryMask tinyWater = land.copy().invert().removeAreasBiggerThan(3000);
-            BinaryMask smallWater = land.copy().invert().removeAreasBiggerThan(9000);
+            BinaryMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
+            BinaryMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
             BinaryMask smallWaterBeach = smallWater.minus(tinyWater).inflate(2).combine(tinyWater);
             FloatMask smallWaterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
@@ -354,6 +357,7 @@ public strictfp class MapPopulator {
             FloatMask steepHillsTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
+            waterBeachTexture.startVisualDebugger("wb");
 
             accentGround.minus(highGround).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
             accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
@@ -376,13 +380,14 @@ public strictfp class MapPopulator {
             waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
             waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
             waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
+            waterBeachTexture.removeAreasOfSpecifiedSizeWithLocalMaximums(0, smallWaterSizeLimit, 15).smooth(1).smooth(1).reduceValuesOnIntersectingSmoothingZones(rock);
             if (smallWaterTexturesOnLayer5) {
                 steepHillsTexture.add(smallWaterBeachTexture).clampMax(1f);
             } else {
                 waterBeachTexture.add(smallWaterBeachTexture).clampMax(1f);
             }
             rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f);
-            accentRockTexture.init(accentRock, 0, 1).subtract(waterBeachTexture).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
+            accentRockTexture.init(accentRock, 0, 1).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
 
             if (keepLayer1) {
                 accentGroundTexture = new FloatMask(oldLayer1, null);

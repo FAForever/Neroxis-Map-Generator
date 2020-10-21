@@ -815,6 +815,25 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask removeAreasOutsideOfSpecifiedSize(int minSize, int maxSize) {
+        removeAreasSmallerThan(minSize);
+        removeAreasBiggerThan(maxSize);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask removeAreasOfSpecifiedSize(int minSize, int maxSize) {
+        minus(this.copy().removeAreasOutsideOfSpecifiedSize(minSize, maxSize));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask getAreasWithinSpecifiedDistanceOfEdges(int distance) {
+        BinaryMask newMask = copy().inflate(distance).minus(copy().deflate(distance));
+        VisualDebugger.visualizeMask(this);
+        return newMask;
+    }
+
     public FloatMask getDistanceField() {
         FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
         distanceField.init(this, getSize() * getSize(), 0f);
