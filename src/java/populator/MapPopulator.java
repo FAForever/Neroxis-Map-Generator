@@ -454,9 +454,9 @@ public strictfp class MapPopulator {
             if (restrictTextures && x1 >= 0 && x1 <= mapImageSize && x2 >= 0 && x2 <= mapImageSize && z1 >= 0 && z1 <= mapImageSize && z2 >= 0 && z2 <= mapImageSize) {
                 BinaryMask textureBox = new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings);
                 if (texturesInside) {
-                    textureBox.invert().setRectangularAreaWithoutSymmetry(x1, x2, z1, z2, true);
+                    textureBox.invert().setRectangularAreaFromPoints(x1, x2, z1, z2, true);
                 } else {
-                    textureBox.setRectangularAreaWithoutSymmetry(x1, x2, z1, z2, false);
+                    textureBox.setRectangularAreaFromPoints(x1, x2, z1, z2, false);
                 }
                 accentGroundTexture.replaceValuesInRangeWith(textureBox, oldLayer1);
                 accentPlateauTexture.replaceValuesInRangeWith(textureBox, oldLayer2);

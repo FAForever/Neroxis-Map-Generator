@@ -134,7 +134,7 @@ public strictfp class BinaryMask extends Mask {
                 || (y < getSize() - 1 && get(x, y + 1) != value));
     }
 
-    public BinaryMask setRectangularAreaWithoutSymmetry(int x1, int x2, int z1, int z2, boolean trueOrFalse) {
+    public BinaryMask setRectangularAreaFromPoints(int x1, int x2, int z1, int z2, boolean trueOrFalse) {
         int smallX;
         int bigX;
         int smallY;
@@ -153,18 +153,7 @@ public strictfp class BinaryMask extends Mask {
             smallY = z1;
             bigY = z2;
         }
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (x > smallX && x < bigX && y > smallY && y < bigY)
-                    if (trueOrFalse) {
-                    set(x, y, false);
-                    } else {
-                    set(x, y, true);
-                    }
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return fillParallelogram(smallX, smallY, bigX - smallX, bigY - smallY, 0, 0, trueOrFalse);
     }
 
     public BinaryMask copy() {
