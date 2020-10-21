@@ -276,6 +276,16 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask setSize(int size) {
+        if (getSize() < size)
+            enlarge(size);
+        if (getSize() > size) {
+            shrink(size);
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask inflate(float radius) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
