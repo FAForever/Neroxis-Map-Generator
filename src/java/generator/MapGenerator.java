@@ -810,14 +810,14 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "accentRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
         rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
-        waterBeachTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "waterBeachTexture");
-        accentGroundTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentGroundTexture");
-        accentPlateauTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentPlateauTexture");
-        slopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "slopesTexture");
-        accentSlopesTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentSlopesTexture");
-        steepHillsTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "steepHillsTexture");
-        rockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "rockTexture");
-        accentRockTexture = new ConcurrentFloatMask(mapSize / 2, random.nextLong(), symmetrySettings, "accentRockTexture");
+        waterBeachTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "waterBeachTexture");
+        accentGroundTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "accentGroundTexture");
+        accentPlateauTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "accentPlateauTexture");
+        slopesTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "slopesTexture");
+        accentSlopesTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "accentSlopesTexture");
+        steepHillsTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "steepHillsTexture");
+        rockTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "rockTexture");
+        accentRockTexture = new ConcurrentFloatMask(mapSize, random.nextLong(), symmetrySettings, "accentRockTexture");
 
         inland.deflate(2);
         flatAboveCoast.intersect(flat);
@@ -837,8 +837,8 @@ public strictfp class MapGenerator {
         waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f).threshold(.1f).smooth(2);
         accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
         accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f).threshold(.05f).smooth(2);
-        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f).threshold(.05f).smooth(2);
+        slopesTexture.init(slopes, 0, 1).smooth(16).add(slopes, .65f).smooth(8).add(slopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
+        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(16).add(accentSlopes, .65f).smooth(8).add(accentSlopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
         steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
         rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f).threshold(.1f).smooth(2);
         accentRockTexture.init(accentRock, 0, 1).subtract(waterBeachTexture).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
