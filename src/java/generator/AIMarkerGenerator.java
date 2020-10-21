@@ -90,26 +90,28 @@ public strictfp class AIMarkerGenerator {
     }
 
     public void pruneMarkerNeighbors(AIMarker aiMarker, List<AIMarker> aiMarkers, float spacing) {
-        LinkedHashSet<Integer> validNeighbors = getFarNeighbors(aiMarker, aiMarker, aiMarkers, new LinkedHashSet<>(), spacing);
+        LinkedHashSet<Integer> validNeighbors = getFarNeighbors(aiMarker, aiMarker, aiMarkers, new LinkedHashSet<>(), spacing, 0);
         aiMarker.getNeighbors().removeIf(id -> !validNeighbors.contains(id));
         aiMarker.getNeighbors().addAll(validNeighbors);
     }
 
-    public LinkedHashSet<Integer> getFarNeighbors(AIMarker origMarker, AIMarker neighbor, List<AIMarker> aiMarkers, LinkedHashSet<Integer> seenIDs, float spacing) {
+    public synchronized LinkedHashSet<Integer> getFarNeighbors(AIMarker origMarker, AIMarker neighbor, List<AIMarker> aiMarkers, LinkedHashSet<Integer> seenIDs, float spacing, int depth) {
         LinkedHashSet<Integer> farNeighbors = new LinkedHashSet<>();
-        neighbor.getNeighbors().forEach(id -> {
-            seenIDs.add(id);
-            AIMarker neighborNeighbor = aiMarkers.get(id);
-            if (neighborNeighbor.getNeighborCount() > 0) {
-                if (origMarker.getPosition().getXZDistance(neighborNeighbor.getPosition()) > spacing) {
-                    farNeighbors.add(id);
-                } else if (origMarker.equals(neighbor) || !seenIDs.contains(id)) {
-                    neighborNeighbor.getNeighbors().removeIf(nid -> nid == neighbor.getId());
-                    farNeighbors.addAll(getFarNeighbors(origMarker, neighborNeighbor, aiMarkers, seenIDs, spacing));
-                    neighborNeighbor.getNeighbors().clear();
+        if (depth < 10) {
+            neighbor.getNeighbors().forEach(id -> {
+                seenIDs.add(id);
+                AIMarker neighborNeighbor = aiMarkers.get(id);
+                if (neighborNeighbor.getNeighborCount() > 0) {
+                    if (origMarker.getPosition().getXZDistance(neighborNeighbor.getPosition()) > spacing) {
+                        farNeighbors.add(id);
+                    } else if (origMarker.equals(neighbor) || !seenIDs.contains(id)) {
+                        neighborNeighbor.getNeighbors().removeIf(nid -> nid == neighbor.getId());
+                        farNeighbors.addAll(getFarNeighbors(origMarker, neighborNeighbor, aiMarkers, seenIDs, spacing, depth + 1));
+                        neighborNeighbor.getNeighbors().clear();
+                    }
                 }
-            }
-        });
+            });
+        }
         return farNeighbors;
     }
 
