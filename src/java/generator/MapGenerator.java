@@ -330,13 +330,25 @@ public strictfp class MapGenerator {
         if (mapSize < 512) {
             mexMultiplier = .75f;
         } else if (mapSize > 512) {
-            switch (spawnCount) {
-                case 2 -> mexMultiplier = 2.5f;
-                case 4, 6 -> mexMultiplier = 1.75f;
-                case 8, 10 -> mexMultiplier = 1.3f;
-            }
+            mexMultiplier = switch (spawnCount) {
+                case 2 -> 2.5f;
+                case 4, 6 -> 1.75f;
+                case 8, 10 -> 1.3f;
+                default -> 1f;
+            };
         }
-        mexCount = (int) ((8 + 4 / spawnCount + random.nextInt(30 / spawnCount)) * mexMultiplier);
+        mexCount = switch (spawnCount) {
+            case 2 -> 10 + random.nextInt(15);
+            case 4 -> 9 + random.nextInt(8);
+            case 6 -> 8 + random.nextInt(5);
+            case 8 -> 8 + random.nextInt(4);
+            case 10 -> 8 + random.nextInt(3);
+            case 12 -> 6 + random.nextInt(4);
+            case 14 -> 6 + random.nextInt(3);
+            case 16 -> 6 + random.nextInt(2);
+            default -> 8 + random.nextInt(8);
+        };
+        mexCount *= mexMultiplier;
         Symmetry[] symmetries;
         if (spawnCount == 2) {
             symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
