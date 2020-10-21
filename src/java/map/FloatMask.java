@@ -472,13 +472,11 @@ public strictfp class FloatMask extends Mask {
 
     public FloatMask copyWithinRange(BinaryMask other) {
         FloatMask newMask = copy().removeValuesOutsideOf(other);
-        VisualDebugger.visualizeMask(this);
         return newMask;
     }
 
     public FloatMask copyOutsideRange(BinaryMask other) {
         FloatMask newMask = copy().removeValuesInsideOf(other);
-        VisualDebugger.visualizeMask(this);
         return newMask;
     }
 
