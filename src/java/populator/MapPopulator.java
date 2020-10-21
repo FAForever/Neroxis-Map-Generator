@@ -46,6 +46,12 @@ public strictfp class MapPopulator {
     private boolean smallWaterTexturesOnLayer5;
     private int moveLayer0ToAndSmooth;
     private int mapImageSize;
+    private boolean restrictTextures;
+    private boolean texturesInside;
+    private int x1;
+    private int x2;
+    private int z1;
+    private int z2;
     private boolean keepLayer1;
     private boolean keepLayer2;
     private boolean keepLayer3;
@@ -107,7 +113,13 @@ public strictfp class MapPopulator {
                     " - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock" +
                     "--keep-layer-0 arg     optional, populate where texture layer 0 is currently visible to replace layer number arg (1, 2, 3, 4, 5, 6, 7, 8)\n" +
                     " - to smooth this layer, add a 0 to its layer number arg: (10, 20, 30, 40, 50, 60, 70, 80)\n" +
-                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc\n" +
+                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc) - resolution cannot exceed map size (256 = 5 km)\n" +
+                    "--textures-inside      optional, if x1/x2/z1/z2 are entered, textures will only be populated within the box formed between points those points \n" +
+                    " - if this is not entered and if x1/x2/z1/z2 are entered, textures will only be populated outside of the box formed between points those points\n" +
+                    "--x1 arg               optional, x-coordinate for point 1 for optional restriction on where textures will be populated\n" +
+                    "--z1 arg               optional, z-coordinate for point 1 for optional restriction on where textures will be populated\n" +
+                    "--x2 arg               optional, x-coordinate for point 2 for optional restriction on where textures will be populated\n" +
+                    "--z2 arg               optional, z-coordinate for point 2 for optional restriction on where textures will be populated\n" +
                     "--lakes                optional, switches texturing for small bodies of water to layer 5 (instead of layer 6)\n" +
                     "--decals               optional, populate decals\n" +
                     "--ai                   optional, populate ai markers\n" +
@@ -175,6 +187,14 @@ public strictfp class MapPopulator {
         }
         if (arguments.containsKey("texture-res")) {
             mapImageSize = Integer.parseInt(arguments.get("texture-res")) / 128 * 128;
+        }
+        texturesInside = arguments.containsKey("textures-inside");
+        if (arguments.containsKey("x1") && arguments.containsKey("x2") && arguments.containsKey("z1") && arguments.containsKey("z2")) {
+            x1 = Integer.parseInt(arguments.get("x1"));
+            x2 = Integer.parseInt(arguments.get("x2"));
+            z1 = Integer.parseInt(arguments.get("z1"));
+            z2 = Integer.parseInt(arguments.get("z2"));
+            restrictTextures = true;
         }
         smallWaterTexturesOnLayer5 = arguments.containsKey("lakes");
         populateDecals = arguments.containsKey("decals");
@@ -429,6 +449,23 @@ public strictfp class MapPopulator {
                     case 7, 70 -> rockTexture = new FloatMask(oldLayer0Texture, null);
                     case 8, 80 -> accentRockTexture = new FloatMask(oldLayer0Texture, null);
                 }
+            }
+
+            if (restrictTextures && x1 >= 0 && x1 <= mapImageSize && x2 >= 0 && x2 <= mapImageSize && z1 >= 0 && z1 <= mapImageSize && z2 >= 0 && z2 <= mapImageSize) {
+                BinaryMask textureBox = new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings);
+                if (texturesInside) {
+                    textureBox.invert().setRectangularAreaWithoutSymmetry(x1, x2, z1, z2, true);
+                } else {
+                    textureBox.setRectangularAreaWithoutSymmetry(x1, x2, z1, z2, false);
+                }
+                accentGroundTexture.replaceValuesInRangeWith(textureBox, oldLayer1);
+                accentPlateauTexture.replaceValuesInRangeWith(textureBox, oldLayer2);
+                slopesTexture.replaceValuesInRangeWith(textureBox, oldLayer3);
+                accentSlopesTexture.replaceValuesInRangeWith(textureBox, oldLayer4);
+                steepHillsTexture.replaceValuesInRangeWith(textureBox, oldLayer5);
+                waterBeachTexture.replaceValuesInRangeWith(textureBox, oldLayer6);
+                rockTexture.replaceValuesInRangeWith(textureBox, oldLayer7);
+                accentRockTexture.replaceValuesInRangeWith(textureBox, oldLayer8);
             }
 
             map.setTextureMasksLowScaled(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
