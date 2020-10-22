@@ -5,11 +5,9 @@ import exporter.SaveExporter;
 import exporter.ScenarioExporter;
 import importer.SCMapImporter;
 import importer.SaveImporter;
+import importer.ScenarioImporter;
 import map.*;
-import util.ArgumentParser;
-import util.FileUtils;
-import util.Placement;
-import util.Vector3f;
+import util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,6 +193,7 @@ public strictfp class MapTransformer {
             mapName = scmapFile.getName().replace(".scmap", "");
             map = SCMapImporter.loadSCMAP(inMapPath);
             SaveImporter.importSave(inMapPath, map);
+            ScenarioImporter.importScenario(inMapPath, map);
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while saving the map.");
@@ -293,11 +292,11 @@ public strictfp class MapTransformer {
             map.setTextureMasksHighRaw(texture5, texture6, texture7, texture8);
         }
         if (transformResources) {
-            ArrayList<Vector3f> spawns = new ArrayList<>(map.getSpawns());
+            ArrayList<Spawn> spawns = new ArrayList<>(map.getSpawns());
             ArrayList<Vector3f> mexes = new ArrayList<>(map.getMexes());
             ArrayList<Vector3f> hydros = new ArrayList<>(map.getHydros());
             map.getSpawns().clear();
-            map.getSpawns().addAll(getTransformedVector3fs(spawns));
+            map.getSpawns().addAll(getTransformedSpawns(spawns));
             map.getMexes().clear();
             map.getMexes().addAll(getTransformedVector3fs(mexes));
             map.getHydros().clear();
@@ -330,6 +329,35 @@ public strictfp class MapTransformer {
             map.getDecals().clear();
             map.getDecals().addAll(getTransformedDecals(decals));
         }
+    }
+
+    public ArrayList<Spawn> getTransformedSpawns(ArrayList<Spawn> spawns) {
+        ArrayList<Spawn> transformedSpawns = new ArrayList<>();
+        spawns.forEach(spawn -> {
+            if ((!useAngle && heightmapBase.inHalf(spawn.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(spawn.getPosition(), angle))) {
+                transformedSpawns.add(new Spawn(0, Placement.placeOnHeightmap(map, spawn.getPosition()), spawn.getNoRushOffset()));
+                Vector2f symmetricNoRushOffset = new Vector2f(spawn.getNoRushOffset().x, spawn.getNoRushOffset().y);
+                symmetricNoRushOffset.flip(new Vector2f(0, 0), symmetrySettings.getSpawnSymmetry());
+                transformedSpawns.add(new Spawn(0, Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(spawn.getPosition())), symmetricNoRushOffset));
+            }
+        });
+        transformedSpawns.forEach(spawn -> {
+            if (spawns.size() == transformedSpawns.size()) {
+                Spawn[] closestSpawn = {null};
+                float[] minDistance = {Float.POSITIVE_INFINITY};
+                spawns.forEach(s -> {
+                    float distance = spawn.getPosition().getXZDistance(s.getPosition());
+                    if (distance < minDistance[0]) {
+                        closestSpawn[0] = s;
+                        minDistance[0] = distance;
+                    }
+                });
+                spawn.setId(closestSpawn[0].getId());
+            } else {
+                spawn.setId(transformedSpawns.indexOf(spawn));
+            }
+        });
+        return transformedSpawns;
     }
 
     public ArrayList<Vector3f> getTransformedVector3fs(ArrayList<Vector3f> vectors) {

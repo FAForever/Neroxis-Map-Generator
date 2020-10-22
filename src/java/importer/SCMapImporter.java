@@ -431,7 +431,7 @@ public strictfp class SCMapImporter {
     }
 
     private static float readFloat() throws IOException {
-        return swap(in.readFloat());
+        return Float.intBitsToFloat(swap(in.readInt()));
     }
 
     private static int readInt() throws IOException {

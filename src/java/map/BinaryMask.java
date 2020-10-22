@@ -298,6 +298,16 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
+    public BinaryMask setSize(int size) {
+        if (getSize() < size)
+            enlarge(size);
+        if (getSize() > size) {
+            shrink(size);
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask inflate(float radius) {
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
 
@@ -636,7 +646,7 @@ public strictfp class BinaryMask extends Mask {
             for (int py = 0; py < height; py++) {
                 int calcX = x + px + py * xSlope;
                 int calcY = y + py + px * ySlope;
-                if (calcX >= 0 && calcX < getSize() && calcY >= 0 && calcY < getSize()) {
+                if (inBounds(calcX, calcY)) {
                     set(calcX, calcY, value);
                 }
             }

@@ -326,7 +326,7 @@ public strictfp class SCMapExporter {
     }
 
     private static void writeFloat(float f) throws IOException {
-        out.writeFloat(swap(f));
+        out.writeInt(swap(Float.floatToRawIntBits(f)));
     }
 
     private static void writeInt(int i) throws IOException {

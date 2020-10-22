@@ -3,10 +3,12 @@ package importer;
 import com.faforever.commons.lua.LuaLoader;
 import map.AIMarker;
 import map.SCMap;
+import map.Spawn;
 import map.Unit;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import util.Vector2f;
 import util.Vector3f;
 
 import java.io.File;
@@ -62,8 +64,11 @@ public strictfp class SaveImporter {
             }
             case "Blank Marker" -> {
                 locTable = marker.get("position").checktable();
+                String stringID = key.checkjstring();
+                String[] idParts = stringID.split("_");
+                int id = Integer.parseInt(idParts[idParts.length - 1]);
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addSpawn(location);
+                map.addSpawn(new Spawn(id, location, new Vector2f(0, 0)));
             }
             case "Air Path Node" -> {
                 locTable = marker.get("position").checktable();

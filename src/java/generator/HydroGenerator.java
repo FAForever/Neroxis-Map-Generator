@@ -38,9 +38,9 @@ public strictfp class HydroGenerator {
         if (spawnHydro) {
             for (int i = 0; i < map.getSpawnCount(); i += 2) {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-                baseHydro.fillCircle(map.getSpawn(i + 1), spawnSize * 1.5f, true).fillCircle(map.getSpawn(i + 1), 10, false).intersect(spawnable);
+                baseHydro.fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize * 1.5f, true).fillCircle(map.getSpawn(i + 1).getPosition(), 10, false).intersect(spawnable);
                 for (int j = 0; j < map.getSpawnCount(); j += 2) {
-                    baseHydro.fillCircle(map.getSpawn(j), 16, false);
+                    baseHydro.fillCircle(map.getSpawn(j).getPosition(), 16, false);
                 }
                 for (int j = 0; j < iHydro; j += 2) {
                     baseHydro.fillCircle(map.getHydro(j), 16, false);
@@ -53,14 +53,14 @@ public strictfp class HydroGenerator {
                 Vector2f symLocation = spawnable.getSymmetryPoint(location);
                 map.addHydro(new Vector3f(location));
                 map.addHydro(new Vector3f(symLocation));
-                spawnable.fillCircle(map.getSpawn(i + 1), 30, false);
+                spawnable.fillCircle(map.getSpawn(i + 1).getPosition(), 30, false);
                 spawnable.fillCircle(location, hydroSpacing, false);
                 iHydro += 2;
             }
         }
 
         for (int i = 0; i < map.getSpawnCount(); i += 2) {
-            spawnable.fillCircle(map.getSpawn(i + 1), spawnSize, false);
+            spawnable.fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize, false);
         }
 
         int baseHydroCount = iHydro;
