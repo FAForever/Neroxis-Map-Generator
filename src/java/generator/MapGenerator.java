@@ -715,13 +715,8 @@ public strictfp class MapGenerator {
         } else {
             mountains.widenGaps(12);
         }
-
         mountains.filterShapes(64);
         plateaus.intersect(land).fillGaps(fillSize / 2).combine(mountains).filterShapes(mapSize * mapSize / 256);
-=======
-        mountains.filterShapes(64);
-        plateaus.intersect(land).fillGaps(fillSize / 2).combine(mountains).filterShapes(mapSize * mapSize / 256);
-
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
