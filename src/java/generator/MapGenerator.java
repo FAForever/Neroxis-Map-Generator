@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 @Setter
 public strictfp class MapGenerator {
 
-    public static final String VERSION = "1.1.2";
+    public static final String VERSION = "1.1.3";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     public static final float LAND_DENSITY_MIN = .8f;
     public static final float LAND_DENSITY_MAX = .95f;
