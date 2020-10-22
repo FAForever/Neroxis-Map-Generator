@@ -6,9 +6,9 @@
     "/env/Desert/Layers/Des_SandDark_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_Rock06_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
+    "/env/Desert/Layers/Des_SandMed02_albedo.dds",
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
+    "/env/Red Barrens/Layers/RB_Rock_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Sandwet01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
@@ -20,7 +20,7 @@
     10.0,
     7.0,
     12.0,
-    32.0,
+    16.0,
     32.0,
     128.0
   ],
@@ -68,7 +68,7 @@
       "falpha": 0.0
     },
     {
-      "value": -11722475,
+      "value": -8293798,
       "falpha": 0.0
     },
     {
@@ -76,7 +76,7 @@
       "falpha": 0.0
     },
     {
-      "value": -11722475,
+      "value": -13627131,
       "falpha": 0.0
     },
     {
