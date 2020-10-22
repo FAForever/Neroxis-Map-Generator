@@ -848,8 +848,8 @@ public strictfp class MapGenerator {
         waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
         waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f).threshold(.1f).smooth(2);
         accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
-        accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(16).add(slopes, .65f).smooth(8).add(slopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
+        accentPlateauTexture.init(accentPlateau, 0, 1).smooth(16).add(accentPlateau, .65f).smooth(8).add(accentPlateau, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
+        slopesTexture.init(slopes, 0, 1).smooth(32).add(slopes, .65f).smooth(16).add(slopes, .5f).smooth(4).clampMax(1f).threshold(.05f).smooth(2);
         accentSlopesTexture.init(accentSlopes, 0, 1).smooth(16).add(accentSlopes, .65f).smooth(8).add(accentSlopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
         steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
         rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f).threshold(.1f).smooth(2);
