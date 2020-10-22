@@ -671,7 +671,7 @@ public strictfp class MapGenerator {
         }
 
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).filterShapes(512);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(512);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE) || mapSize > 512;
@@ -698,7 +698,7 @@ public strictfp class MapGenerator {
             land.widenGaps(fillSize);
         }
 
-        land.filterShapes(mapSize * mapSize / 256);
+        land.removeAreasSmallerThan(mapSize * mapSize / 256);
 
         mountains.minus(spawnLandMask);
 
@@ -709,7 +709,7 @@ public strictfp class MapGenerator {
 
         ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(32);
 
-        mountains.minus(plateaus.copy().outline().inflate(64)).minus(land.copy().outline().inflate(64)).smooth(8).intersect(land).filterShapes(256);
+        mountains.minus(plateaus.copy().outline().inflate(64)).minus(land.copy().outline().inflate(64)).smooth(8).intersect(land).removeAreasSmallerThan(256);
         if (mountainDensity < .25) {
             mountains.fillGaps(24);
         } else {

@@ -134,6 +134,28 @@ public strictfp class BinaryMask extends Mask {
                 || (y < getSize() - 1 && get(x, y + 1) != value));
     }
 
+    public BinaryMask setRectangularAreaFromPoints(int x1, int x2, int z1, int z2, boolean trueOrFalse) {
+        int smallX;
+        int bigX;
+        int smallY;
+        int bigY;
+        if (x1 > x2) {
+            smallX = x2;
+            bigX = x1;
+        } else {
+            smallX = x1;
+            bigX = x2;
+        }
+        if (z1 > z2) {
+            smallY = z2;
+            bigY = z1;
+        } else {
+            smallY = z1;
+            bigY = z2;
+        }
+        return fillParallelogram(smallX, smallY, bigX - smallX, bigY - smallY, 0, 0, trueOrFalse);
+    }
+
     public BinaryMask copy() {
         if (random != null) {
             return new BinaryMask(this, random.nextLong());
@@ -772,7 +794,7 @@ public strictfp class BinaryMask extends Mask {
         return this;
     }
 
-    public BinaryMask filterShapes(int minArea) {
+    public BinaryMask removeAreasSmallerThan(int minArea) {
         LinkedHashSet<Vector2f> locHash = new LinkedHashSet<>();
         FloatMask distanceField = getDistanceField();
         for (int x = 0; x < getSize(); x++) {
@@ -816,6 +838,31 @@ public strictfp class BinaryMask extends Mask {
         applySymmetry(symmetrySettings.getSpawnSymmetry());
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    public BinaryMask removeAreasBiggerThan(int maxArea) {
+        minus(copy().removeAreasSmallerThan(maxArea));
+        applySymmetry(symmetrySettings.getSpawnSymmetry());
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask removeAreasOutsideOfSpecifiedSize(int minSize, int maxSize) {
+        removeAreasSmallerThan(minSize);
+        removeAreasBiggerThan(maxSize);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask removeAreasOfSpecifiedSize(int minSize, int maxSize) {
+        minus(this.copy().removeAreasOutsideOfSpecifiedSize(minSize, maxSize));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask getAreasWithinSpecifiedDistanceOfEdges(int distance) {
+        BinaryMask newMask = copy().inflate(distance).minus(copy().deflate(distance));
+        return newMask;
     }
 
     public FloatMask getDistanceField() {

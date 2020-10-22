@@ -420,6 +420,116 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask removeValuesOutsideOf(BinaryMask other) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (!other.get(x, y)) {
+                    set(x, y, 0f);
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeValuesInsideOf(BinaryMask other) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                if (other.get(x, y)) {
+                    set(x, y, 0f);
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeValuesOutsideOfRange(float min, float max) {
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if (this.get(x, y) < min || this.get(x, y) > max) {
+                    set(x, y, 0f);
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeValuesInRange(float min, float max) {
+        subtract(this.copy().removeValuesOutsideOfRange(min, max));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask replaceValuesInRangeWith(BinaryMask range, FloatMask replacement) {
+        removeValuesInsideOf(range).add(replacement.copy().removeValuesOutsideOf(range));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask copyWithinRange(BinaryMask other) {
+        FloatMask newMask = copy().removeValuesOutsideOf(other);
+        return newMask;
+    }
+
+    public FloatMask copyOutsideRange(BinaryMask other) {
+        FloatMask newMask = copy().removeValuesInsideOf(other);
+        return newMask;
+    }
+
+    public FloatMask smoothWithinSpecifiedDistanceOfEdgesOf(BinaryMask other, int distance) {
+        for (int x = 0; x < distance; x = x + 2) {
+            replaceValuesInRangeWith(other.getAreasWithinSpecifiedDistanceOfEdges(x + 1), copy().smooth(1));
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
+        FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f * floatMax);
+        BinaryMask zones = newMaskInZones.copy().removeValuesInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, 1f * floatMax).inflate(34);
+        BinaryMask newMaskInZonesBase = convertToBinaryMask(1f * floatMax, 1f * floatMax).deflate(3).minus(zones.copy().invert());
+        newMaskInZones.init(newMaskInZonesBase, 0, 1).smooth(4).clampMax(0.35f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(2).clampMax(0.65f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(1).add(newMaskInZonesBase, 1f * floatMax).clampMax(1f * floatMax);
+        replaceValuesInRangeWith(zones, newMaskInZones).smoothWithinSpecifiedDistanceOfEdgesOf(zones, 30);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask convertToBinaryMask(float minValueToConvert, float maxValueToConvert) {
+        BinaryMask newMask = new BinaryMask(this.copy().removeValuesOutsideOfRange(minValueToConvert, maxValueToConvert), minValueToConvert, random.nextLong());
+        VisualDebugger.visualizeMask(this);
+        return newMask;
+    }
+
+    public FloatMask getDistanceFieldForRange(float minValue, float maxValue) {
+        convertToBinaryMask(minValue, maxValue).getDistanceField();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeAreasOutsideOfSpecifiedIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
+        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideOfSpecifiedSize(minSize, maxSize).invert(), 0f, 1f);
+        this.subtract(tempMask2).clampMin(0f);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeAreasOfSpecifiedIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
+        subtract(this.copy().removeAreasOutsideOfSpecifiedIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
+        for (int x = 0; x < levelOfPrecision; x++) {
+            removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), 1f * floatMax);
+        }
+        removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, 0.0000001f, 1f * floatMax);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask maskToHills(BinaryMask other) {
         other = other.copy();
         int size = getSize();
