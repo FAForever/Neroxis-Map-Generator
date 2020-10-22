@@ -26,11 +26,12 @@ public strictfp class PreviewGenerator {
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
+                boolean useAlpha = i == 1 || i == 3 || i == 4 || i == 5 || i == 6 || i == 7 || i == 8;
                 BufferedImage layer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(materials.getPreviewColors()[i]);
                 layerGraphics.fillRect(0, 0, 256, 256);
-                BufferedImage shadedLayer = getShadedImage(layer, map, i);
+                BufferedImage shadedLayer = getShadedImage(layer, map, i, useAlpha);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
                 graphics.setPaint(layerPaint);
                 graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
@@ -77,7 +78,7 @@ public strictfp class PreviewGenerator {
         return image;
     }
 
-    static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex) {
+    static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex, boolean useAlpha) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         BufferedImage heightMap = map.getHeightmap();
         BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
@@ -142,8 +143,10 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
                 newRGBA[1] = StrictMath.max(StrictMath.min(newRGBA[1], 255), 0);
                 newRGBA[2] = StrictMath.max(StrictMath.min(newRGBA[2], 255), 0);
-                if (relativeLayerIndex > 0) {
+                if (relativeLayerIndex > 0 && useAlpha) {
                     newRGBA[3] = StrictMath.max(StrictMath.min((int) ((textureAlphas[relativeLayerIndex - 1] - 128) / 127f * 255f), 255), 0);
+                } else {
+                    newRGBA[3] = 255;
                 }
                 image.getRaster().setPixel(x, y, newRGBA);
             }
