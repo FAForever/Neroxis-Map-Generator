@@ -488,12 +488,12 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
-    public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere) {
-        FloatMask newMask = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f);
-        BinaryMask Zones = newMask.copy().removeValuesInRange(0f, 0.5f).smooth(2).convertToBinaryMask(0.5f, 1f).inflate(34);
-        BinaryMask newMaskBase = convertToBinaryMask(1f, 1f).deflate(3).minus(Zones.copy().invert());
-        newMask.init(newMaskBase, 0, 1).smooth(4).clampMax(0.35f).add(newMaskBase, 1f).smooth(2).clampMax(0.65f).add(newMaskBase, 1f).smooth(1).add(newMaskBase, 1f).clampMax(1f);
-        replaceValuesInRangeWith(Zones, newMask).smoothWithinSpecifiedDistanceOfEdgesOf(Zones, 30);
+    public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
+        FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f * floatMax);
+        BinaryMask zones = newMaskInZones.copy().removeValuesInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, 1f * floatMax).inflate(34);
+        BinaryMask newMaskInZonesBase = convertToBinaryMask(1f * floatMax, 1f * floatMax).deflate(3).minus(zones.copy().invert());
+        newMaskInZones.init(newMaskInZonesBase, 0, 1).smooth(4).clampMax(0.35f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(2).clampMax(0.65f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(1).add(newMaskInZonesBase, 1f * floatMax).clampMax(1f * floatMax);
+        replaceValuesInRangeWith(zones, newMaskInZones).smoothWithinSpecifiedDistanceOfEdgesOf(zones, 30);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -523,11 +523,11 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
-    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision) {
+    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
         for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, (1f -(float) x / (float) levelOfPrecision), 1f);
+            removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), 1f * floatMax);
         }
-        removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, 0.0000001f, 1f);
+        removeAreasOfSpecifiedIntensityAndSize(minSize, maxSize, 0.0000001f, 1f * floatMax);
         VisualDebugger.visualizeMask(this);
         return this;
     }

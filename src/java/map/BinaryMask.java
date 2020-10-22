@@ -852,7 +852,6 @@ public strictfp class BinaryMask extends Mask {
 
     public BinaryMask getAreasWithinSpecifiedDistanceOfEdges(int distance) {
         BinaryMask newMask = copy().inflate(distance).minus(copy().deflate(distance));
-        VisualDebugger.visualizeMask(this);
         return newMask;
     }
 
