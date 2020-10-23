@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -676,6 +678,23 @@ public strictfp class FloatMask extends Mask {
                 float xSlope = get(xPos, y) - get(xNeg, y);
                 float ySlope = get(x, yPos) - get(x, yNeg);
                 maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
+            }
+        }
+        mask = maskCopy;
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask supcomGradient() {
+        float[][] maskCopy = new float[getSize()][getSize()];
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                int xPos = StrictMath.min(getSize() - 1, x + 1);
+                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                float xSlope = StrictMath.abs(get(x, y) - get(xPos, y));
+                float ySlope = StrictMath.abs(get(x, y) - get(x, yPos));
+                float diagSlope = StrictMath.abs(get(x, y) - get(xPos, yPos));
+                maskCopy[x][y] = Collections.max(Arrays.asList(xSlope, ySlope, diagSlope));
             }
         }
         mask = maskCopy;
