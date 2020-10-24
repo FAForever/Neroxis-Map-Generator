@@ -239,6 +239,14 @@ public strictfp class MapPopulator {
     }
 
     public void populate() {
+        /*SupComSlopeValues
+        const float FlatHeight = 0.002f;
+        const float NonFlatHeight = 0.30f;
+        const float AlmostUnpassableHeight = 0.75f;
+        const float UnpassableHeight = 0.75f;
+        const float ScaleHeight = 256;
+        */
+
         Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
