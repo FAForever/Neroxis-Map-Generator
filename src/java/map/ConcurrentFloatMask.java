@@ -31,7 +31,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
             this.floatMask = new FloatMask(mask.getFloatMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.floatMask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.floatMask.getRandom().nextLong())));
+                    this.floatMask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize()).add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.floatMask.getRandom().nextLong())));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }

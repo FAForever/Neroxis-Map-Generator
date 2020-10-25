@@ -160,13 +160,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
-        other = other.copy();
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
-        }
+        other = other.copy().setSize(getSize());
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 if (other.get(x, y)) {
@@ -200,6 +194,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask multiply(FloatMask other) {
+        other = other.copy().setSize(getSize());
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 multiply(x, y, other.get(x, y));
@@ -220,6 +215,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask add(FloatMask other) {
+        other = other.copy().setSize(getSize());
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 add(x, y, other.get(x, y));
@@ -230,6 +226,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask subtract(FloatMask other) {
+        other = other.copy().setSize(getSize());
         add(other.copy().multiply(-1));
         VisualDebugger.visualizeMask(this);
         return this;
@@ -262,6 +259,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask add(BinaryMask other, float value) {
+        other = other.copy().setSize(getSize());
         FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, value);
         add(otherFloat);
@@ -270,6 +268,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask subtract(BinaryMask other, float value) {
+        other = other.copy().setSize(getSize());
         FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, -value);
         add(otherFloat);
@@ -288,6 +287,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask min(FloatMask other) {
+        other = other.copy().setSize(getSize());
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 set(x, y, StrictMath.min(get(x, y), other.get(x, y)));
@@ -320,6 +320,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask max(FloatMask other) {
+        other = other.copy().setSize(getSize());
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 set(x, y, StrictMath.max(get(x, y), other.get(x, y)));
@@ -423,6 +424,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask removeValuesOutsideOf(BinaryMask other) {
+        other = other.copy().setSize(getSize());
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (!other.get(x, y)) {
@@ -435,6 +437,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask removeValuesInsideOf(BinaryMask other) {
+        other = other.copy().setSize(getSize());
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (other.get(x, y)) {
@@ -471,16 +474,17 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask copyWithinRange(BinaryMask other) {
-        FloatMask newMask = copy().removeValuesOutsideOf(other);
-        return newMask;
+        other = other.copy().setSize(getSize());
+        return copy().removeValuesOutsideOf(other);
     }
 
     public FloatMask copyOutsideRange(BinaryMask other) {
-        FloatMask newMask = copy().removeValuesInsideOf(other);
-        return newMask;
+        other = other.copy().setSize(getSize());
+        return copy().removeValuesInsideOf(other);
     }
 
     public FloatMask smoothWithinSpecifiedDistanceOfEdgesOf(BinaryMask other, int distance) {
+        other = other.copy().setSize(getSize());
         for (int x = 0; x < distance; x = x + 2) {
             replaceValuesInRangeWith(other.getAreasWithinSpecifiedDistanceOfEdges(x + 1), copy().smooth(1));
         }
@@ -489,6 +493,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
+        avoidMakingZonesHere = avoidMakingZonesHere.copy().setSize(getSize());
         FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f * floatMax);
         BinaryMask zones = newMaskInZones.copy().removeValuesInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, 1f * floatMax).inflate(34);
         BinaryMask newMaskInZonesBase = convertToBinaryMask(1f * floatMax, 1f * floatMax).deflate(3).minus(zones.copy().invert());
@@ -533,13 +538,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToHills(BinaryMask other) {
-        other = other.copy();
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
-        }
+        other = other.copy().setSize(getSize());
         FloatMask brush = loadBrush(Brushes.HILL_BRUSHES[random.nextInt(Brushes.HILL_BRUSHES.length)], symmetrySettings);
         BinaryMask otherCopy = other.copy().fillHalf(false);
         FloatMask otherDistance = other.copy().invert().getDistanceField();
@@ -556,13 +555,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToMountains(BinaryMask other) {
-        other = other.copy();
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
-        }
+        other = other.copy().setSize(getSize());
         FloatMask brush = loadBrush(Brushes.MOUNTAIN_BRUSHES[random.nextInt(Brushes.MOUNTAIN_BRUSHES.length)], symmetrySettings);
         brush.multiply(1 / brush.getMax());
         BinaryMask otherCopy = other.copy().fillHalf(false);
@@ -580,12 +573,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask maskToOceanHeights(float underWaterSlope, BinaryMask other) {
-        int size = getSize();
-        if (other.getSize() < size)
-            other = other.copy().enlarge(size);
-        if (other.getSize() > size) {
-            other = other.copy().shrink(size);
-        }
+        other = other.copy().setSize(getSize());
         FloatMask otherDistance = other.getDistanceField();
         add(otherDistance.multiply(-underWaterSlope));
         VisualDebugger.visualizeMask(this);
@@ -626,13 +614,7 @@ public strictfp class FloatMask extends Mask {
     }
 
     public FloatMask smooth(int radius, BinaryMask limiter) {
-        limiter = limiter.copy();
-        int size = getSize();
-        if (limiter.getSize() < size)
-            limiter = limiter.copy().enlarge(size);
-        if (limiter.getSize() > size) {
-            limiter = limiter.copy().shrink(size);
-        }
+        limiter = limiter.copy().setSize(getSize());
         int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {

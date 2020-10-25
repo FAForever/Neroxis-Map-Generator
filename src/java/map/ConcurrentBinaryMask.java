@@ -39,7 +39,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
             this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.binaryMask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
+                    this.binaryMask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize()).combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
@@ -64,7 +64,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
             this.binaryMask = new BinaryMask(mask.getFloatMask(), threshold, seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.binaryMask.combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
+                    this.binaryMask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize()).combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
