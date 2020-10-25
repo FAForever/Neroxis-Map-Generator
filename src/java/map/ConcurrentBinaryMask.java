@@ -115,6 +115,12 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
+    public ConcurrentBinaryMask setSize(int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.setSize(size)
+        );
+    }
+
     public ConcurrentBinaryMask enlarge(int size) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.enlarge(size)
