@@ -134,26 +134,12 @@ public strictfp class BinaryMask extends Mask {
                 || (y < getSize() - 1 && get(x, y + 1) != value));
     }
 
-    public BinaryMask setRectangularAreaFromPoints(int x1, int x2, int z1, int z2, boolean trueOrFalse) {
-        int smallX;
-        int bigX;
-        int smallY;
-        int bigY;
-        if (x1 > x2) {
-            smallX = x2;
-            bigX = x1;
-        } else {
-            smallX = x1;
-            bigX = x2;
-        }
-        if (z1 > z2) {
-            smallY = z2;
-            bigY = z1;
-        } else {
-            smallY = z1;
-            bigY = z2;
-        }
-        return fillParallelogram(smallX, smallY, bigX - smallX, bigY - smallY, 0, 0, trueOrFalse);
+    public BinaryMask fillRectangularAreaFromPoints(int x1, int x2, int z1, int z2, boolean value) {
+        int smallX = StrictMath.min(x1, x2);
+        int bigX = StrictMath.max(x1, x2);
+        int smallZ = StrictMath.min(z1, z2);
+        int bigZ = StrictMath.max(z1, z2);
+        return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
     }
 
     public BinaryMask copy() {
@@ -506,15 +492,10 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask combine(BinaryMask other) {
-        int size = StrictMath.max(getSize(), other.getSize());
-        if (getSize() != size)
-            enlarge(size);
-        if (other.getSize() != size) {
-            other = other.copy().enlarge(size);
-        }
+        other = other.copy().setSize(getSize());
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 maskCopy[x][y] = get(x, y) || other.get(x, y);
             }
         }
@@ -524,14 +505,10 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask intersect(BinaryMask other) {
-        int size = StrictMath.max(getSize(), other.getSize());
-        if (getSize() != size)
-            enlarge(size);
-        if (other.getSize() != size)
-            other = other.copy().enlarge(size);
+        other = other.copy().setSize(getSize());
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 maskCopy[x][y] = get(x, y) && other.get(x, y);
             }
         }
@@ -541,14 +518,10 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask minus(BinaryMask other) {
-        int size = StrictMath.max(getSize(), other.getSize());
-        if (getSize() != size)
-            enlarge(size);
-        if (other.getSize() != size)
-            other = other.copy().enlarge(size);
+        other = other.copy().setSize(getSize());
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
                 maskCopy[x][y] = get(x, y) && !other.get(x, y);
             }
         }
