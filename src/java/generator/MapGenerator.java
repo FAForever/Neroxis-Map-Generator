@@ -16,6 +16,7 @@ import util.FileUtils;
 import util.Pipeline;
 import util.Util;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,11 +29,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
+import static util.ImageUtils.readImage;
+
 @Getter
 @Setter
 public strictfp class MapGenerator {
 
     public static final String VERSION = "1.1.4";
+    private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     public static final float LAND_DENSITY_MIN = .8f;
     public static final float LAND_DENSITY_MAX = .95f;
@@ -55,6 +59,7 @@ public strictfp class MapGenerator {
     private String mapName = "debugMap";
     private long seed = new Random().nextLong();
     private Random random = new Random(seed);
+    private boolean noPreview = true;
 
     //read from key value arguments or map name
     private int spawnCount = 6;
@@ -210,6 +215,7 @@ public strictfp class MapGenerator {
                     "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Z, XZ, ZX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
+                    "--no-preview        optional, set map to tourney style which will remove the preview\n" +
                     "--debug                optional, turn on debugging options");
             System.exit(0);
         }
@@ -242,6 +248,8 @@ public strictfp class MapGenerator {
         }
 
         randomizeOptions();
+
+        noPreview = arguments.containsKey("no-preview");
 
         if (arguments.containsKey("land-density")) {
             landDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("land-density")), LAND_DENSITY_MAX), LAND_DENSITY_MIN);
@@ -318,6 +326,11 @@ public strictfp class MapGenerator {
             String optionString = args[5];
             byte[] optionBytes = NAME_ENCODER.decode(optionString);
             parseOptions(optionBytes);
+        }
+        if (args.length >= 7) {
+            if (args[6].contains("np")) {
+                noPreview = false;
+            }
         }
     }
 
@@ -415,6 +428,9 @@ public strictfp class MapGenerator {
                 (byte) (symmetry.ordinal()),
                 (byte) (Biomes.list.indexOf(biome))};
         String optionString = NAME_ENCODER.encode(optionArray);
+        if (noPreview) {
+            optionString = optionString.concat("_np");
+        }
         mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
     }
 
@@ -428,7 +444,9 @@ public strictfp class MapGenerator {
             long startTime = System.currentTimeMillis();
             Files.createDirectory(folderPath.resolve(mapName));
             SCMapExporter.exportSCMAP(folderPath.resolve(mapName), mapName, map);
-            SCMapExporter.exportPreview(folderPath.resolve(mapName), mapName, map);
+            if (!noPreview) {
+                SCMapExporter.exportPreview(folderPath.resolve(mapName), mapName, map);
+            }
             SaveExporter.exportSave(folderPath.resolve(mapName), mapName, map);
             ScenarioExporter.exportScenario(folderPath.resolve(mapName), mapName, map);
             ScriptExporter.exportScript(folderPath.resolve(mapName), mapName, map);
@@ -447,7 +465,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    public SCMap generate() {
+    public SCMap generate() throws IOException {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
@@ -622,7 +640,13 @@ public strictfp class MapGenerator {
         placementFuture.join();
         Pipeline.stop();
         long sTime = System.currentTimeMillis();
-        PreviewGenerator.generate(map.getPreview(), map);
+        map.setGeneratePreview(!noPreview);
+        if (!noPreview) {
+            PreviewGenerator.generate(map.getPreview(), map);
+        } else {
+            BufferedImage tourneyPreview = readImage(BLANK_PREVIEW);
+            map.getPreview().setData(tourneyPreview.getData());
+        }
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
                     System.currentTimeMillis() - sTime,

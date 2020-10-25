@@ -24,6 +24,7 @@ public strictfp class ScenarioExporter {
         out.writeBytes("  map_version = 1,\n");
         out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapname + "_save.lua',\n");
         out.writeBytes("  script = '/maps/" + mapFolder + "/" + mapname + "_script.lua',\n");
+        out.writeBytes("  hidePreviewMarkers = " + !map.isGeneratePreview() + ",\n");
         out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
         for (int i = 0; i < map.getSpawnCount(); i++) {
             out.writeBytes("  norushoffsetX_ARMY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().x + ",\n");

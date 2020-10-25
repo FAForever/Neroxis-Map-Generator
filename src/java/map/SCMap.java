@@ -37,6 +37,7 @@ public strictfp class SCMap {
     private int spawnCountInit;
     private int mexCountInit;
     private int hydroCountInit;
+    private boolean generatePreview;
     private float noRushRadius = 50;
     private final ArrayList<Vector3f> mexes;
     private final ArrayList<Vector3f> hydros;
@@ -106,6 +107,7 @@ public strictfp class SCMap {
         cubeMaps = new ArrayList<>();
         cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
 
+        generatePreview = true;
         preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
         normalMap = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
