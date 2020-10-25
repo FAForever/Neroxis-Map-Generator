@@ -796,7 +796,7 @@ public strictfp class MapGenerator {
 
         ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 2f, null, "mountainsPresent");
 
-        heightmapMountains.add(mountainsPresent, 2.5f);
+        heightmapMountains.add(mountainsPresent, 3f);
         heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
 
         heightmapBase.add(heightmapMountains);
