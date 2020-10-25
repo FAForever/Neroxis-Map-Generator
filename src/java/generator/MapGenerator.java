@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.BitSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -59,7 +61,9 @@ public strictfp class MapGenerator {
     private String mapName = "debugMap";
     private long seed = new Random().nextLong();
     private Random random = new Random(seed);
-    private boolean noPreview = true;
+    private boolean tournamentStyle = false;
+    private boolean blind = false;
+    private long generationTime;
 
     //read from key value arguments or map name
     private int spawnCount = 6;
@@ -143,6 +147,7 @@ public strictfp class MapGenerator {
         }
 
         MapGenerator generator = new MapGenerator();
+        generator.generationTime = Instant.now().getEpochSecond();
 
         generator.interpretArguments(args);
 
@@ -208,14 +213,15 @@ public strictfp class MapGenerator {
                     "--spawn-count arg      optional, set the spawn count for the generated map\n" +
                     "--land-density arg     optional, set the land density for the generated map\n" +
                     "--plateau-density arg  optional, set the plateau density for the generated map\n" +
-                    String.format("--mountain-density arg optional, set the mountain density for the generated map (max %.2f)\n", MOUNTAIN_DENSITY_MAX) +
+                    "--mountain-density arg optional, set the mountain density for the generated map\n" +
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
                     "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Z, XZ, ZX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
-                    "--no-preview        optional, set map to tourney style which will remove the preview\n" +
+                    "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
+                    "--blind     optional, set map to tournament style which will remove the preview in the scmap and add time of original generation to map\n" +
                     "--debug                optional, turn on debugging options");
             System.exit(0);
         }
@@ -249,7 +255,8 @@ public strictfp class MapGenerator {
 
         randomizeOptions();
 
-        noPreview = arguments.containsKey("no-preview");
+        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind");
+        blind = arguments.containsKey("blind");
 
         if (arguments.containsKey("land-density")) {
             landDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("land-density")), LAND_DENSITY_MAX), LAND_DENSITY_MIN);
@@ -328,9 +335,13 @@ public strictfp class MapGenerator {
             parseOptions(optionBytes);
         }
         if (args.length >= 7) {
-            if (args[6].contains("np")) {
-                noPreview = false;
-            }
+            String parametersString = args[6];
+            byte[] parameterBytes = NAME_ENCODER.decode(parametersString);
+            parseParameters(parameterBytes);
+        }
+        if (args.length >= 8) {
+            String timeString = args[7];
+            generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
         }
     }
 
@@ -409,7 +420,12 @@ public strictfp class MapGenerator {
         if (optionBytes.length > 9) {
             biome = Biomes.list.get(optionBytes[9]);
         }
+    }
 
+    private void parseParameters(byte[] parameterBytes) {
+        BitSet parameters = BitSet.valueOf(parameterBytes);
+        tournamentStyle = parameters.get(0);
+        blind = parameters.get(1);
     }
 
     private void generateMapName() {
@@ -427,9 +443,13 @@ public strictfp class MapGenerator {
                 (byte) (mexCount),
                 (byte) (symmetry.ordinal()),
                 (byte) (Biomes.list.indexOf(biome))};
-        String optionString = NAME_ENCODER.encode(optionArray);
-        if (noPreview) {
-            optionString = optionString.concat("_np");
+        BitSet parameters = new BitSet();
+        parameters.set(0, tournamentStyle);
+        parameters.set(1, blind);
+        String optionString = NAME_ENCODER.encode(optionArray) + "_" + NAME_ENCODER.encode(parameters.toByteArray());
+        if (tournamentStyle) {
+            String timeString = NAME_ENCODER.encode(ByteBuffer.allocate(8).putLong(generationTime).array());
+            optionString += "_" + timeString;
         }
         mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
     }
@@ -444,7 +464,7 @@ public strictfp class MapGenerator {
             long startTime = System.currentTimeMillis();
             Files.createDirectory(folderPath.resolve(mapName));
             SCMapExporter.exportSCMAP(folderPath.resolve(mapName), mapName, map);
-            if (!noPreview) {
+            if (!tournamentStyle) {
                 SCMapExporter.exportPreview(folderPath.resolve(mapName), mapName, map);
             }
             SaveExporter.exportSave(folderPath.resolve(mapName), mapName, map);
@@ -640,12 +660,15 @@ public strictfp class MapGenerator {
         placementFuture.join();
         Pipeline.stop();
         long sTime = System.currentTimeMillis();
-        map.setGeneratePreview(!noPreview);
-        if (!noPreview) {
+        map.setGeneratePreview(!blind);
+        if (!blind) {
             PreviewGenerator.generate(map.getPreview(), map);
         } else {
-            BufferedImage tourneyPreview = readImage(BLANK_PREVIEW);
-            map.getPreview().setData(tourneyPreview.getData());
+            BufferedImage blindPreview = readImage(BLANK_PREVIEW);
+            map.getPreview().setData(blindPreview.getData());
+        }
+        if (tournamentStyle) {
+            map.setDescription(String.format("Map originally generated at %s", Instant.ofEpochSecond(generationTime).toString()));
         }
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
