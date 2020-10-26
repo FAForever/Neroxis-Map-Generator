@@ -492,7 +492,9 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask combine(BinaryMask other) {
-        other = other.copy().setSize(getSize());
+        if (other.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size");
+        }
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
@@ -505,7 +507,9 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask intersect(BinaryMask other) {
-        other = other.copy().setSize(getSize());
+        if (other.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size");
+        }
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
@@ -518,7 +522,9 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask minus(BinaryMask other) {
-        other = other.copy().setSize(getSize());
+        if (other.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size");
+        }
         boolean[][] maskCopy = new boolean[getSize()][getSize()];
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
