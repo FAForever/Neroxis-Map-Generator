@@ -4,7 +4,6 @@ import biomes.Biome;
 import lombok.Data;
 import lombok.SneakyThrows;
 import util.Vector2f;
-import util.Vector3f;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -39,14 +38,13 @@ public strictfp class SCMap {
     private int hydroCountInit;
     private boolean generatePreview;
     private float noRushRadius = 50;
-    private final ArrayList<Vector3f> mexes;
-    private final ArrayList<Vector3f> hydros;
+    private final ArrayList<Mex> mexes;
+    private final ArrayList<Hydro> hydros;
     private final ArrayList<Decal> decals;
     private final ArrayList<WaveGenerator> waveGenerators;
     private final ArrayList<Prop> props;
-    private final ArrayList<Unit> units;
-    private final ArrayList<Unit> civs;
-    private final ArrayList<Unit> wrecks;
+    private final ArrayList<Army> armies;
+    private final ArrayList<BlankMarker> blankMarkers;
     private final ArrayList<AIMarker> landAIMarkers;
     private final ArrayList<AIMarker> amphibiousAIMarkers;
     private final ArrayList<AIMarker> navyAIMarkers;
@@ -91,9 +89,8 @@ public strictfp class SCMap {
         decals = new ArrayList<>();
         decalGroups = new ArrayList<>();
         props = new ArrayList<>();
-        units = new ArrayList<>();
-        civs = new ArrayList<>();
-        wrecks = new ArrayList<>();
+        armies = new ArrayList<>();
+        blankMarkers = new ArrayList<>();
         landAIMarkers = new ArrayList<>();
         amphibiousAIMarkers = new ArrayList<>();
         navyAIMarkers = new ArrayList<>();
@@ -142,11 +139,11 @@ public strictfp class SCMap {
         return mexes.size();
     }
 
-    public Vector3f getMex(int i) {
+    public Mex getMex(int i) {
         return mexes.get(i);
     }
 
-    public void addMex(Vector3f mex) {
+    public void addMex(Mex mex) {
         mexes.add(mex);
     }
 
@@ -154,11 +151,11 @@ public strictfp class SCMap {
         return hydros.size();
     }
 
-    public Vector3f getHydro(int i) {
+    public Hydro getHydro(int i) {
         return hydros.get(i);
     }
 
-    public void addHydro(Vector3f hydro) {
+    public void addHydro(Hydro hydro) {
         hydros.add(hydro);
     }
 
@@ -198,40 +195,32 @@ public strictfp class SCMap {
         props.add(prop);
     }
 
-    public int getUnitCount() {
-        return units.size();
+    public int getArmyCount() {
+        return armies.size();
     }
 
-    public Unit getUnit(int i) {
-        return units.get(i);
+    public Army getArmy(int i) {
+        return armies.get(i);
     }
 
-    public void addUnit(Unit unit) {
-        units.add(unit);
+    public Army getArmy(String id) {
+        return armies.stream().filter(army -> army.getId().equals(id)).findFirst().orElse(null);
     }
 
-    public int getCivCount() {
-        return civs.size();
+    public void addArmy(Army army) {
+        armies.add(army);
     }
 
-    public Unit getCiv(int i) {
-        return civs.get(i);
+    public int getBlankCount() {
+        return blankMarkers.size();
     }
 
-    public void addCiv(Unit unit) {
-        civs.add(unit);
+    public BlankMarker getBlank(int i) {
+        return blankMarkers.get(i);
     }
 
-    public int getWreckCount() {
-        return wrecks.size();
-    }
-
-    public Unit getWreck(int i) {
-        return wrecks.get(i);
-    }
-
-    public void addWreck(Unit wreck) {
-        wrecks.add(wreck);
+    public void addBlank(BlankMarker blank) {
+        blankMarkers.add(blank);
     }
 
     public int getLandMarkerCount() {

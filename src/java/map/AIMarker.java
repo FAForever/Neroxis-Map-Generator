@@ -9,15 +9,15 @@ import java.util.LinkedHashSet;
 
 @Data
 public strictfp class AIMarker {
-    private int id;
+    private String id;
     private Vector3f position;
-    private LinkedHashSet<Integer> neighbors;
+    private LinkedHashSet<String> neighbors;
 
-    public AIMarker(int id, Vector2f position, LinkedHashSet<Integer> neighbors) {
+    public AIMarker(String id, Vector2f position, LinkedHashSet<String> neighbors) {
         this(id, new Vector3f(position), neighbors);
     }
 
-    public AIMarker(int id, Vector3f position, LinkedHashSet<Integer> neighbors) {
+    public AIMarker(String id, Vector3f position, LinkedHashSet<String> neighbors) {
         this.id = id;
         this.position = position;
         this.neighbors = neighbors;
@@ -27,11 +27,11 @@ public strictfp class AIMarker {
         return neighbors.size();
     }
 
-    public void addNeighbor(int i) {
-        neighbors.add(i);
+    public void addNeighbor(String id) {
+        neighbors.add(id);
     }
 
-    public void addNeighbors(Collection<? extends Integer> ids) {
+    public void addNeighbors(Collection<? extends String> ids) {
         neighbors.addAll(ids);
     }
 

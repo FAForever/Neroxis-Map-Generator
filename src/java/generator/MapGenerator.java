@@ -1,6 +1,5 @@
 package generator;
 
-import bases.Army;
 import biomes.Biome;
 import biomes.Biomes;
 import com.google.common.io.BaseEncoding;
@@ -25,10 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.BitSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static util.ImageUtils.readImage;
@@ -504,7 +500,6 @@ public strictfp class MapGenerator {
         SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), spawnSize);
         MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), spawnSize, mexSpacing);
         HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), spawnSize);
-        WreckGenerator wreckGenerator = new WreckGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
         UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
@@ -569,11 +564,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> wrecksFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
             long sTime = System.currentTimeMillis();
-            wreckGenerator.generateWrecks(t1LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T1_Land, 3f);
-            wreckGenerator.generateWrecks(t2LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Land, 30f);
-            wreckGenerator.generateWrecks(t3LandWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T3_Land, 128f);
-            wreckGenerator.generateWrecks(t2NavyWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.T2_Navy, 128f);
-            wreckGenerator.generateWrecks(navyFactoryWreckMask.getFinalMask().minus(noWrecks), WreckGenerator.Navy_Factory, 256f);
+
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateWrecks\n",
                         System.currentTimeMillis() - sTime,
@@ -609,10 +600,25 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> baseFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(baseMask);
+            Pipeline.await(baseMask, civReclaimMask, t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
             long sTime = System.currentTimeMillis();
-            unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, Army.ENEMY, 512f);
-            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, Army.CIVILIAN, 256f);
+            Army army17 = new Army("ARMY_17", new ArrayList<>());
+            Group army17Initial = new Group("INITIAL", new ArrayList<>());
+            Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
+            army17.addGroup(army17Initial);
+            army17.addGroup(army17Wreckage);
+            Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
+            Group civilianInitial = new Group("INITIAL", new ArrayList<>());
+            civilian.addGroup(civilianInitial);
+            map.addArmy(army17);
+            map.addArmy(civilian);
+            unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
+            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+            unitGenerator.generateUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T1_Land, army17, army17Wreckage, 3f);
+            unitGenerator.generateUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Land, army17, army17Wreckage, 30f);
+            unitGenerator.generateUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T3_Land, army17, army17Wreckage, 128f);
+            unitGenerator.generateUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Navy, army17, army17Wreckage, 128f);
+            unitGenerator.generateUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.Navy_Factory, army17, army17Wreckage, 256f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateBases\n",
                         System.currentTimeMillis() - sTime,
@@ -645,7 +651,6 @@ public strictfp class MapGenerator {
             mexGenerator.setMarkerHeights();
             hydroGenerator.setMarkerHeights();
             propGenerator.setPropHeights();
-            wreckGenerator.setWreckHeights();
             decalGenerator.setDecalHeights();
             unitGenerator.setUnitHeights();
             aiMarkerGenerator.setMarkerHeights();
@@ -960,10 +965,10 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noProps.fillCircle(map.getMex(i), 1, true);
+            noProps.fillCircle(map.getMex(i).getPosition(), 1, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noProps.fillCircle(map.getHydro(i), 8, true);
+            noProps.fillCircle(map.getHydro(i).getPosition(), 8, true);
         }
 
         noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
@@ -975,10 +980,10 @@ public strictfp class MapGenerator {
             noBases.fillCircle(map.getSpawn(i).getPosition(), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noBases.fillCircle(map.getMex(i), 32, true);
+            noBases.fillCircle(map.getMex(i).getPosition(), 32, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noBases.fillCircle(map.getHydro(i), 32, true);
+            noBases.fillCircle(map.getHydro(i).getPosition(), 32, true);
         }
 
         noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
@@ -988,10 +993,10 @@ public strictfp class MapGenerator {
             noCivs.fillCircle(map.getSpawn(i).getPosition(), 96, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noCivs.fillCircle(map.getMex(i), 32, true);
+            noCivs.fillCircle(map.getMex(i).getPosition(), 32, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noCivs.fillCircle(map.getHydro(i), 32, true);
+            noCivs.fillCircle(map.getHydro(i).getPosition(), 32, true);
         }
 
         noWrecks = new BinaryMask(impassable.getFinalMask(), null);
@@ -1002,10 +1007,10 @@ public strictfp class MapGenerator {
             noWrecks.fillCircle(map.getSpawn(i).getPosition(), 128, true);
         }
         for (int i = 0; i < map.getMexCount(); i++) {
-            noWrecks.fillCircle(map.getMex(i), 8, true);
+            noWrecks.fillCircle(map.getMex(i).getPosition(), 8, true);
         }
         for (int i = 0; i < map.getHydroCount(); i++) {
-            noWrecks.fillCircle(map.getHydro(i), 32, true);
+            noWrecks.fillCircle(map.getHydro(i).getPosition(), 32, true);
         }
 
         noDecals = new BinaryMask(mapSize + 1, null, symmetrySettings);

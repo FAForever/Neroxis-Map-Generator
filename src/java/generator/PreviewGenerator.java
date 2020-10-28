@@ -1,9 +1,6 @@
 package generator;
 
-import map.SCMap;
-import map.Spawn;
-import map.TerrainMaterials;
-import util.Vector3f;
+import map.*;
 import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
@@ -48,19 +45,19 @@ public strictfp class PreviewGenerator {
         BufferedImage massImage = scaleImage(readImage(MASS_IMAGE), resourceImageSize, resourceImageSize);
         BufferedImage hydroImage = scaleImage(readImage(HYDRO_IMAGE), resourceImageSize, resourceImageSize);
         BufferedImage armyImage = scaleImage(readImage(ARMY_IMAGE), resourceImageSize, resourceImageSize);
-        for (Vector3f mex : map.getMexes()) {
+        for (Mex mex : map.getMexes()) {
             if (mex != null) {
-                int x = (int) (mex.x / map.getSize() * 256 - massImage.getWidth(null) / 2);
-                int y = (int) (mex.z / map.getSize() * 256 - massImage.getHeight(null) / 2);
+                int x = (int) (mex.getPosition().x / map.getSize() * 256 - massImage.getWidth(null) / 2);
+                int y = (int) (mex.getPosition().z / map.getSize() * 256 - massImage.getHeight(null) / 2);
                 x = StrictMath.min(Math.max(0, x), image.getWidth() - massImage.getWidth(null));
                 y = StrictMath.min(Math.max(0, y), image.getHeight() - massImage.getHeight(null));
                 image.getGraphics().drawImage(massImage, x, y, null);
             }
         }
-        for (Vector3f hydro : map.getHydros()) {
+        for (Hydro hydro : map.getHydros()) {
             if (hydro != null) {
-                int x = (int) (hydro.x / map.getSize() * 256 - hydroImage.getWidth(null) / 2);
-                int y = (int) (hydro.z / map.getSize() * 256 - hydroImage.getHeight(null) / 2);
+                int x = (int) (hydro.getPosition().x / map.getSize() * 256 - hydroImage.getWidth(null) / 2);
+                int y = (int) (hydro.getPosition().z / map.getSize() * 256 - hydroImage.getHeight(null) / 2);
                 x = StrictMath.min(Math.max(0, x), image.getWidth() - hydroImage.getWidth(null));
                 y = StrictMath.min(Math.max(0, y), image.getHeight() - hydroImage.getHeight(null));
                 image.getGraphics().drawImage(hydroImage, x, y, null);

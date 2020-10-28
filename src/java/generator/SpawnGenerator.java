@@ -3,6 +3,7 @@ package generator;
 import map.*;
 import util.Vector2f;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -75,10 +76,18 @@ public strictfp class SpawnGenerator {
                     spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
                 }
             }
-            map.addSpawn(new Spawn(i + 1, location, new Vector2f(0, 0)));
-            map.addSpawn(new Spawn(i + 2, symLocation, new Vector2f(0, 0)));
-            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), location, null));
-            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), symLocation, null));
+            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 1), location, new Vector2f(0, 0)));
+            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 2), symLocation, new Vector2f(0, 0)));
+            Group initial1 = new Group("INITIAL", new ArrayList<>());
+            Army army1 = new Army(String.format("ARMY_%d", i + 1), new ArrayList<>());
+            army1.addGroup(initial1);
+            Group initial2 = new Group("INITIAL", new ArrayList<>());
+            Army army2 = new Army(String.format("ARMY_%d", i + 1), new ArrayList<>());
+            army2.addGroup(initial2);
+            map.addArmy(army1);
+            map.addArmy(army2);
+            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
+            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symLocation, null));
             location = spawnable.getRandomPosition();
         }
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
@@ -107,17 +116,17 @@ public strictfp class SpawnGenerator {
             if (spawnableCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT) {
                 spawnableCopy.fillCircle(symLocation, map.getSize() * 3 / 8f, false);
             }
-            map.addSpawn(new Spawn(i + 1, symLocation, new Vector2f(0, 0)));
-            map.addSpawn(new Spawn(i + 2, location, new Vector2f(0, 0)));
-            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), location, null));
-            map.addLargeExpansionMarker(new AIMarker(map.getLargeExpansionMarkerCount(), symLocation, null));
+            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 1), location, new Vector2f(0, 0)));
+            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 2), symLocation, new Vector2f(0, 0)));
+            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
+            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symLocation, null));
             location = spawnableCopy.getRandomPosition();
         }
     }
 
     public void setMarkerHeights() {
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            map.getSpawns().set(i, new Spawn(map.getSpawn(i).getId(), placeOnHeightmap(map, map.getSpawn(i).getPosition()), map.getSpawn(i).getNoRushOffset()));
+        for (Spawn spawn : map.getSpawns()) {
+            spawn.setPosition(placeOnHeightmap(map, spawn.getPosition()));
         }
     }
 }

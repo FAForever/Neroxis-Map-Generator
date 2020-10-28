@@ -2,7 +2,8 @@ package bases;
 
 import com.faforever.commons.lua.LuaLoader;
 import lombok.Data;
-import map.SCMap;
+import map.Army;
+import map.Group;
 import map.Symmetry;
 import map.Unit;
 import org.luaj.vm2.LuaTable;
@@ -19,12 +20,14 @@ import java.util.LinkedHashSet;
 public class BaseTemplate {
     private final Vector2f center;
     private final Army army;
+    private final Group group;
     private final String luaFile;
     private final LinkedHashMap<String, LinkedHashSet<Vector2f>> structures = new LinkedHashMap<>();
 
-    public BaseTemplate(Vector2f center, Army army, String luaFile) throws IOException, URISyntaxException {
+    public BaseTemplate(Vector2f center, Army army, Group group, String luaFile) throws IOException, URISyntaxException {
         this.center = center;
         this.army = army;
+        this.group = group;
         this.luaFile = luaFile;
         loadUnits();
     }
@@ -47,15 +50,10 @@ public class BaseTemplate {
         }
     }
 
-    public void addUnits(SCMap map) {
+    public void addUnits() {
         structures.forEach((name, positions) -> {
             positions.forEach(position -> {
-                Unit unit = new Unit(name, position.add(center), 0);
-                switch (army) {
-                    case CIVILIAN -> map.addCiv(unit);
-                    case ENEMY -> map.addUnit(unit);
-                    case WRECK -> map.addWreck(unit);
-                }
+                group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, position.add(center), 0));
             });
         });
     }

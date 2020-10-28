@@ -1,6 +1,7 @@
 package generator;
 
 import map.BinaryMask;
+import map.Hydro;
 import map.SCMap;
 import util.Vector2f;
 import util.Vector3f;
@@ -31,7 +32,7 @@ public strictfp class HydroGenerator {
         spawnable.fillCenter(64, false);
 
         for (int i = 0; i < map.getMexCount(); i++) {
-            spawnable.fillCircle(map.getMex(i), 10, false);
+            spawnable.fillCircle(map.getMex(i).getPosition(), 10, false);
         }
 
         boolean spawnHydro = random.nextBoolean();
@@ -43,7 +44,7 @@ public strictfp class HydroGenerator {
                     baseHydro.fillCircle(map.getSpawn(j).getPosition(), 16, false);
                 }
                 for (int j = 0; j < iHydro; j += 2) {
-                    baseHydro.fillCircle(map.getHydro(j), 16, false);
+                    baseHydro.fillCircle(map.getHydro(j).getPosition(), 16, false);
                 }
                 Vector2f location = baseHydro.getRandomPosition();
                 if (location == null) {
@@ -51,8 +52,8 @@ public strictfp class HydroGenerator {
                 }
                 location.add(.5f, .5f);
                 Vector2f symLocation = spawnable.getSymmetryPoint(location);
-                map.addHydro(new Vector3f(location));
-                map.addHydro(new Vector3f(symLocation));
+                map.addHydro(new Hydro(String.format("Hydro %d", map.getHydroCount()), new Vector3f(location)));
+                map.addHydro(new Hydro(String.format("Hydro %d", map.getHydroCount()), new Vector3f(symLocation)));
                 spawnable.fillCircle(map.getSpawn(i + 1).getPosition(), 30, false);
                 spawnable.fillCircle(location, hydroSpacing, false);
                 iHydro += 2;
@@ -74,14 +75,14 @@ public strictfp class HydroGenerator {
             Vector2f location = hydroLocations.remove(random.nextInt(hydroLocations.size())).add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
 
-            map.addHydro(new Vector3f(location));
-            map.addHydro(new Vector3f(symLocation));
+            map.addHydro(new Hydro(String.format("Hydro %d", map.getHydroCount()), new Vector3f(location)));
+            map.addHydro(new Hydro(String.format("Hydro %d", map.getHydroCount()), new Vector3f(symLocation)));
         }
     }
 
     public void setMarkerHeights() {
-        for (int i = 0; i < map.getHydroCount(); i++) {
-            map.getHydros().set(i, placeOnHeightmap(map, map.getHydro(i)));
+        for (Hydro hydro : map.getHydros()) {
+            hydro.setPosition(placeOnHeightmap(map, hydro.getPosition()));
         }
     }
 }

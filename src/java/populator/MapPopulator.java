@@ -359,7 +359,7 @@ public strictfp class MapPopulator {
             BinaryMask lowWaterBeach = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
             BinaryMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
             BinaryMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
-            BinaryMask smallWaterBeach = smallWater.minus(tinyWater).inflate(2).combine(tinyWater);
+            BinaryMask smallWaterBeach = smallWater.copy().minus(tinyWater).inflate(2).combine(tinyWater);
             FloatMask smallWaterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
             inland.deflate(2);
@@ -367,6 +367,8 @@ public strictfp class MapPopulator {
             higherFlatAboveCoast.intersect(flat);
             lowWaterBeach.invert().minus(smallWater).inflate(6).minus(aboveBeach);
             smallWaterBeach.minus(flatAboveCoast).smooth(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(1);
+            smallWaterBeach.setSize(mapImageSize);
+
             smallWaterBeachTexture.init(smallWaterBeach, 0, 1).smooth(8).clampMax(0.35f).add(smallWaterBeach, 1f).smooth(4).clampMax(0.65f).add(smallWaterBeach, 1f).smooth(1).add(smallWaterBeach, 1f).clampMax(1f);
 
             BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight + 1f, random.nextLong());
@@ -398,6 +400,16 @@ public strictfp class MapPopulator {
             }
             accentRock.acid(.2f, 0).erode(.3f, symmetrySettings.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
+            accentGround.setSize(mapImageSize);
+            accentPlateau.setSize(mapImageSize);
+            slopes.setSize(mapImageSize);
+            accentSlopes.setSize(mapImageSize);
+            steepHills.setSize(mapImageSize);
+            waterBeach.setSize(mapImageSize);
+            aboveBeachEdge.setSize(mapImageSize);
+            rock.setSize(mapImageSize);
+            accentRock.setSize(mapImageSize);
+            smallWater.setSize(mapImageSize);
             accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f);
             accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f);
             slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
@@ -512,10 +524,10 @@ public strictfp class MapPopulator {
                 noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
             }
             for (int i = 0; i < map.getMexCount(); i++) {
-                noProps.fillCircle(map.getMex(i), 10, true);
+                noProps.fillCircle(map.getMex(i).getPosition(), 10, true);
             }
             for (int i = 0; i < map.getHydroCount(); i++) {
-                noProps.fillCircle(map.getHydro(i), 16, true);
+                noProps.fillCircle(map.getHydro(i).getPosition(), 16, true);
             }
 
             if (propMaterials.getTreeGroups() != null && propMaterials.getTreeGroups().length > 0) {
