@@ -172,7 +172,7 @@ public strictfp abstract class Mask {
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < (angle + 180f) % 360f) && inBounds(pos);
         } else {
-            return (vectorAngle <= angle || vectorAngle > (angle + 180f) % 360f) && inBounds(pos);
+            return (vectorAngle >= angle && vectorAngle < (angle + 180f) % 360f) && inBounds(pos);
         }
     }
 }
