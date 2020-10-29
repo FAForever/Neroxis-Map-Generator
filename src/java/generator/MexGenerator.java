@@ -88,7 +88,7 @@ public strictfp class MexGenerator {
         }
 
         if (nonBaseMexCount / 2 > 10) {
-            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / 2 / spawnCount) + nonBaseMexCount / 2 / spawnCount) * 2;
+            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / spawnCount) + nonBaseMexCount / spawnCount) * 2;
             actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
             numMexesLeft = nonBaseMexCount - actualExpMexCount;
         } else {
