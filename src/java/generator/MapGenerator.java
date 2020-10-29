@@ -757,10 +757,7 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE) || mapSize > 512;
-        int fillSize = 64;
-        if (mapSize < 512) {
-            fillSize = 32;
-        }
+        int fillSize = map.getSize() / 8;
 
         if (fillLandGaps) {
             land.fillGaps(fillSize);
@@ -802,7 +799,7 @@ public strictfp class MapGenerator {
             mountains.acid(.0001f, 24).widenGaps(24);
         }
         mountains.removeAreasSmallerThan(128);
-        plateaus.intersect(land).fillGaps(fillSize / 2).combine(mountains).removeAreasSmallerThan(mapSize * mapSize / 256);
+        plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).combine(mountains).removeAreasSmallerThan(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
