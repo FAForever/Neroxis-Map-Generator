@@ -76,7 +76,7 @@ public strictfp class SpawnGenerator {
             Army army1 = new Army(String.format("ARMY_%d", i + 1), new ArrayList<>());
             army1.addGroup(initial1);
             Group initial2 = new Group("INITIAL", new ArrayList<>());
-            Army army2 = new Army(String.format("ARMY_%d", i + 1), new ArrayList<>());
+            Army army2 = new Army(String.format("ARMY_%d", i + 2), new ArrayList<>());
             army2.addGroup(initial2);
             map.addArmy(army1);
             map.addArmy(army2);
