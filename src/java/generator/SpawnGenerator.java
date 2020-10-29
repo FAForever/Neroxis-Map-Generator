@@ -70,16 +70,19 @@ public strictfp class SpawnGenerator {
                 spawnPlateauMask.fillCircle(location, spawnSize, true);
                 spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
             }
-            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 1), location, new Vector2f(0, 0)));
-            map.addSpawn(new Spawn(String.format("ARMY_%d", i + 2), symLocation, new Vector2f(0, 0)));
+
+            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0)));
             Group initial1 = new Group("INITIAL", new ArrayList<>());
-            Army army1 = new Army(String.format("ARMY_%d", i + 1), new ArrayList<>());
+            Army army1 = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
             army1.addGroup(initial1);
-            Group initial2 = new Group("INITIAL", new ArrayList<>());
-            Army army2 = new Army(String.format("ARMY_%d", i + 2), new ArrayList<>());
-            army2.addGroup(initial2);
             map.addArmy(army1);
+
+            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symLocation, new Vector2f(0, 0)));
+            Group initial2 = new Group("INITIAL", new ArrayList<>());
+            Army army2 = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
+            army2.addGroup(initial2);
             map.addArmy(army2);
+
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symLocation, null));
             BinaryMask nextSpawn = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
