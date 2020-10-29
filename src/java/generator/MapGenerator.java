@@ -827,8 +827,8 @@ public strictfp class MapGenerator {
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "valleys");
 
-        hills.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).setSize(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus);
-        valleys.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).setSize(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(4));
+        hills.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).setSize(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus).minus(ramps);
+        valleys.randomWalk(random.nextInt(5) + 3, random.nextInt(500) + 350).setSize(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(4)).minus(ramps);
     }
 
     private void setupHeightmapPipeline() {
