@@ -48,30 +48,27 @@ public strictfp class SpawnGenerator {
             spawnLandMask.fillCircle(location, spawnSize, true);
             spawnLandMask.fillCircle(symLocation, spawnSize, true);
 
+            boolean valid;
             if (random.nextFloat() < plateauDensity) {
-                boolean valid = true;
+                valid = true;
                 for (int j = 0; j < i; j += 2) {
                     if (!spawnPlateauMask.get(map.getSpawn(j).getPosition()) && map.getSpawn(j).getPosition().getXZDistance(location) < spawnSize * 8) {
                         valid = false;
                         break;
                     }
                 }
-                if (valid) {
-                    spawnPlateauMask.fillCircle(location, spawnSize, true);
-                    spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
-                }
             } else {
-                boolean valid = false;
+                valid = false;
                 for (int j = 0; j < i; j += 2) {
                     if (spawnPlateauMask.get(map.getSpawn(j).getPosition()) && map.getSpawn(j).getPosition().getXZDistance(location) < spawnSize * 8) {
                         valid = true;
                         break;
                     }
                 }
-                if (valid) {
-                    spawnPlateauMask.fillCircle(location, spawnSize, true);
-                    spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
-                }
+            }
+            if (valid) {
+                spawnPlateauMask.fillCircle(location, spawnSize, true);
+                spawnPlateauMask.fillCircle(symLocation, spawnSize, true);
             }
             map.addSpawn(new Spawn(String.format("ARMY_%d", i + 1), location, new Vector2f(0, 0)));
             map.addSpawn(new Spawn(String.format("ARMY_%d", i + 2), symLocation, new Vector2f(0, 0)));
@@ -85,7 +82,12 @@ public strictfp class SpawnGenerator {
             map.addArmy(army2);
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symLocation, null));
-            location = spawnable.getRandomPosition();
+            BinaryMask nextSpawn = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
+            nextSpawn.fillCircle(location, separation * 2, true).intersect(spawnable);
+            location = nextSpawn.getRandomPosition();
+            if (location == null) {
+                location = spawnable.getRandomPosition();
+            }
         }
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
     }
