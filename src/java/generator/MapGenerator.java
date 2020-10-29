@@ -401,10 +401,10 @@ public strictfp class MapGenerator {
                 teamSymmetry = terrainSymmetry;
             }
         }
+        symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
         if (spawnCount == 2 && (terrainSymmetry == Symmetry.POINT || terrainSymmetry == Symmetry.DIAG || terrainSymmetry == Symmetry.QUAD)) {
             symmetrySettings.setSpawnSymmetry(Symmetry.POINT);
         }
-        symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
         biome = Biomes.getRandomBiome(random);
     }
 
@@ -513,7 +513,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        final int hydroCount = spawnCount + random.nextInt(spawnCount / 4) * 2;
+        final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
             landDensity = StrictMath.max(landDensity - .125f, .7f);
