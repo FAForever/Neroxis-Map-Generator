@@ -842,13 +842,13 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapValleys");
         ConcurrentBinaryMask oceanFloor = land.copy().invert();
 
-        oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(16, .75f).invert();
+        oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(32, .75f).invert().removeAreasSmallerThan(128);
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
         heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(8, ramps).smooth(1);
         heightmapHills.maskToHills(hills).clampMax(HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
         heightmapValleys.maskToHills(valleys).multiply(-1).clampMin(VALLEY_HEIGHT).smooth(16, plateaus);
-        heightmapLand.add(heightmapHills).add(heightmapValleys).smooth(2).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight).maskToOceanHeights(-0.15f, oceanFloor);
+        heightmapLand.add(heightmapHills).add(heightmapValleys).smooth(2).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight + 1f).maskToOceanHeights(0.15f, oceanFloor).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight - 1f);
         heightmapCliffs.init(cliffs, 0, 1f).maskToMountains(cliffs);
         heightmapShore.init(shore, 0, 1.5f).maskToMountains(shore);
         heightmapMountains.maskToMountains(mountains).smooth(2);
@@ -930,7 +930,7 @@ public strictfp class MapGenerator {
         waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
         waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
         waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f).threshold(.1f).smooth(2);
-        accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
+        accentGroundTexture.init(accentGround, 0, 1).smooth(16).add(accentGround, .65f).smooth(8).add(accentGround, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
         accentPlateauTexture.init(accentPlateau, 0, 1).smooth(16).add(accentPlateau, .65f).smooth(8).add(accentPlateau, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
         slopesTexture.init(slopes, 0, 1).smooth(32).add(slopes, .65f).smooth(16).add(slopes, .5f).smooth(4).clampMax(1f).threshold(.05f).smooth(2);
         accentSlopesTexture.init(accentSlopes, 0, 1).smooth(16).add(accentSlopes, .65f).smooth(8).add(accentSlopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
