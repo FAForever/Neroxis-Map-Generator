@@ -9,6 +9,7 @@ import org.junit.Test;
 import util.FileUtils;
 import util.Pipeline;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 
@@ -152,7 +153,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestDeterminism() {
+    public void TestDeterminism() throws IOException {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
         String[] hashArray1 = Pipeline.hashArray.clone();
@@ -169,8 +170,7 @@ public class MapGeneratorTest {
             assertEquals(map1.getSpawns(), map2.getSpawns());
             assertEquals(map1.getMexes(), map2.getMexes());
             assertEquals(map1.getHydros(), map2.getHydros());
-            assertEquals(map1.getUnits(), map2.getUnits());
-            assertEquals(map1.getWrecks(), map2.getWrecks());
+            assertEquals(map1.getArmies(), map2.getArmies());
             assertEquals(map1.getProps(), map2.getProps());
             assertEquals(map1.getDecals(), map2.getDecals());
             assertEquals(map1.getBiome(), map2.getBiome());
@@ -189,7 +189,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapNameKeyword() {
+    public void TestEqualityMapNameKeyword() throws IOException {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
 
@@ -202,8 +202,7 @@ public class MapGeneratorTest {
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());
         assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getUnits(), map2.getUnits());
-        assertEquals(map1.getWrecks(), map2.getWrecks());
+        assertEquals(map1.getArmies(), map2.getArmies());
         assertEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getBiome(), map2.getBiome());
         assertEquals(map1.getSize(), map2.getSize());
@@ -220,7 +219,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapNameNameKeyword() {
+    public void TestEqualityMapNameNameKeyword() throws IOException {
         String[] args;
         args = new String[]{"--map-name", b32MapName};
         instance.interpretArguments(args);
@@ -235,8 +234,7 @@ public class MapGeneratorTest {
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());
         assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getUnits(), map2.getUnits());
-        assertEquals(map1.getWrecks(), map2.getWrecks());
+        assertEquals(map1.getArmies(), map2.getArmies());
         assertEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getBiome(), map2.getBiome());
         assertEquals(map1.getSize(), map2.getSize());
