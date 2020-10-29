@@ -1,7 +1,7 @@
 {
   "name": "Syrtis",
   "texturePaths": [
-    "/env/Red Barrens/Layers/RB_Rock03_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sandwet.dds",
     "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
@@ -48,7 +48,7 @@
   ],
   "previewColors": [
     {
-      "value": -9421518,
+      "value": -12970227,
       "falpha": 0.0
     },
     {
