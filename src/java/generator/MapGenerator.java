@@ -919,7 +919,7 @@ public strictfp class MapGenerator {
         higherFlatAboveCoast.intersect(flat);
         lowWaterBeach.invert().inflate(6).minus(aboveBeach);
         waterBeach.invert().minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
-        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, symmetrySettings.getSpawnSymmetry()).smooth(3, .75f);
+        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, symmetrySettings.getSpawnSymmetry()).smooth(8, .75f);
         accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
         slopes.intersect(land).flipValues(.95f).erode(.5f, symmetrySettings.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
         accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
