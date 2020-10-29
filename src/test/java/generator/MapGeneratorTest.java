@@ -114,7 +114,7 @@ public class MapGeneratorTest {
         assertEquals(instance.getRampDensity(), rampDensity, .01);
         assertEquals(instance.getReclaimDensity(), reclaimDensity, .01);
         assertEquals(instance.getMexCount(), mexCount);
-        assertEquals(instance.getSymmetry(), Symmetry.valueOf(symmetry));
+        assertEquals(instance.getTerrainSymmetry(), Symmetry.valueOf(symmetry));
         assertEquals(instance.getMapSize(), mapSize);
     }
 
@@ -147,7 +147,7 @@ public class MapGeneratorTest {
         assertEquals(instance.getRampDensity(), rampDensity, .01);
         assertEquals(instance.getReclaimDensity(), reclaimDensity, .01);
         assertEquals(instance.getMexCount(), mexCount);
-        assertEquals(instance.getSymmetry(), Symmetry.valueOf(symmetry));
+        assertEquals(instance.getTerrainSymmetry(), Symmetry.valueOf(symmetry));
         assertEquals(instance.getMapSize(), mapSize);
     }
 

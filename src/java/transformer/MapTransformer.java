@@ -163,8 +163,7 @@ public strictfp class MapTransformer {
                 }
             }
         }
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
-        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry, Symmetry.valueOf(arguments.get("symmetry")));
         transformResources = arguments.containsKey("resources") || arguments.containsKey("all");
         transformProps = arguments.containsKey("props") || arguments.containsKey("all");
         transformDecals = arguments.containsKey("decals") || arguments.containsKey("all");

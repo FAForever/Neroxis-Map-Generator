@@ -19,22 +19,19 @@ public strictfp class SpawnGenerator {
         random = new Random(seed);
     }
 
-    public BinaryMask[] generateSpawns(float separation, Symmetry symmetry, float plateauDensity) {
+    public BinaryMask[] generateSpawns(float separation, SymmetrySettings symmetrySettings, float plateauDensity) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetry);
+        BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings);
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
-        if (map.getSpawnCountInit() == 2 && (symmetry == Symmetry.POINT || symmetry == Symmetry.DIAG || symmetry == Symmetry.QUAD)) {
-            spawnable.getSymmetrySettings().setSpawnSymmetry(Symmetry.POINT);
-        }
-        spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 4 / 8, false).trimEdge(map.getSize() / 16);
+        spawnable.fillHalf(true).fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() / 2, false).trimEdge(map.getSize() / 16);
         Vector2f location = spawnable.getRandomPosition();
         Vector2f symLocation;
         for (int i = 0; i < map.getSpawnCountInit(); i += 2) {
             if (location == null) {
                 if (separation - 4 >= 10) {
-                    return generateSpawns(separation - 8, symmetry, plateauDensity);
+                    return generateSpawns(separation - 8, symmetrySettings, plateauDensity);
                 } else {
                     return null;
                 }

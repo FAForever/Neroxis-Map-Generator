@@ -33,39 +33,6 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(int size, Long seed, Symmetry symmetry) {
-        this.mask = new boolean[size][size];
-        this.random = new Random(seed);
-        Symmetry spawnSymmetry;
-        Symmetry teamSymmetry;
-        Symmetry[] teams;
-        Symmetry[] spawns;
-        switch (symmetry) {
-            case POINT -> {
-                spawnSymmetry = symmetry;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX};
-                teamSymmetry = teams[random.nextInt(teams.length)];
-            }
-            case QUAD -> {
-                spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Z};
-                teamSymmetry = teams[random.nextInt(teams.length)];
-            }
-            case DIAG -> {
-                spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.XZ, Symmetry.ZX};
-                teamSymmetry = teams[random.nextInt(teams.length)];
-            }
-            default -> {
-                spawnSymmetry = symmetry;
-                teamSymmetry = symmetry;
-            }
-        }
-        this.symmetrySettings = new SymmetrySettings(symmetry, teamSymmetry);
-        this.symmetrySettings.setSpawnSymmetry(spawnSymmetry);
-        VisualDebugger.visualizeMask(this);
-    }
-
     public BinaryMask(BinaryMask mask, Long seed) {
         this.mask = new boolean[mask.getSize()][mask.getSize()];
         this.symmetrySettings = mask.getSymmetrySettings();

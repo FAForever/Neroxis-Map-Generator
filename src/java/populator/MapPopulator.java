@@ -149,8 +149,7 @@ public strictfp class MapPopulator {
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")));
-        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("spawn-symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")), Symmetry.valueOf(arguments.get("spawn-symmetry")));
         populateSpawns = arguments.containsKey("spawns");
         if (populateSpawns) {
             spawnCount = Integer.parseInt(arguments.get("spawns"));

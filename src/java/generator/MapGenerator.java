@@ -70,7 +70,7 @@ public strictfp class MapGenerator {
     private int mapSize = 512;
     private float reclaimDensity;
     private int mexCount;
-    private Symmetry symmetry;
+    private Symmetry terrainSymmetry;
     private Biome biome;
 
     private SCMap map;
@@ -159,7 +159,7 @@ public strictfp class MapGenerator {
         System.out.println("Ramp Density: " + generator.rampDensity);
         System.out.println("Reclaim Density: " + generator.reclaimDensity);
         System.out.println("Mex Count: " + generator.mexCount);
-        System.out.println("Terrain Symmetry: " + generator.symmetry);
+        System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
         System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
         System.out.println("Spawn Separation: " + generator.spawnSeparation);
@@ -284,7 +284,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("symmetry")) {
-            symmetry = Symmetry.valueOf(arguments.get("symmetry"));
+            terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
         }
 
         if (arguments.containsKey("map-size")) {
@@ -376,7 +376,35 @@ public strictfp class MapGenerator {
             symmetries = Symmetry.values();
         }
         int symmetryValue = random.nextInt(symmetries.length - 1);
-        symmetry = symmetries[symmetryValue];
+        terrainSymmetry = symmetries[symmetryValue];
+        Symmetry spawnSymmetry;
+        Symmetry teamSymmetry;
+        Symmetry[] teams;
+        switch (terrainSymmetry) {
+            case POINT -> {
+                spawnSymmetry = terrainSymmetry;
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+            }
+            case QUAD -> {
+                spawnSymmetry = Symmetry.POINT;
+                teams = new Symmetry[]{Symmetry.X, Symmetry.Z};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+            }
+            case DIAG -> {
+                spawnSymmetry = Symmetry.POINT;
+                teams = new Symmetry[]{Symmetry.XZ, Symmetry.ZX};
+                teamSymmetry = teams[random.nextInt(teams.length)];
+            }
+            default -> {
+                spawnSymmetry = terrainSymmetry;
+                teamSymmetry = terrainSymmetry;
+            }
+        }
+        if (spawnCount == 2 && (terrainSymmetry == Symmetry.POINT || terrainSymmetry == Symmetry.DIAG || terrainSymmetry == Symmetry.QUAD)) {
+            symmetrySettings.setSpawnSymmetry(Symmetry.POINT);
+        }
+        symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
         biome = Biomes.getRandomBiome(random);
     }
 
@@ -411,7 +439,7 @@ public strictfp class MapGenerator {
             mexCount = optionBytes[7];
         }
         if (optionBytes.length > 8) {
-            symmetry = Symmetry.values()[optionBytes[8]];
+            terrainSymmetry = Symmetry.values()[optionBytes[8]];
         }
         if (optionBytes.length > 9) {
             biome = Biomes.list.get(optionBytes[9]);
@@ -437,7 +465,7 @@ public strictfp class MapGenerator {
                 (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
                 (byte) (reclaimDensity * 127f),
                 (byte) (mexCount),
-                (byte) (symmetry.ordinal()),
+                (byte) (terrainSymmetry.ordinal()),
                 (byte) (Biomes.list.indexOf(biome))};
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
@@ -505,9 +533,12 @@ public strictfp class MapGenerator {
         UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
         AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, random.nextLong());
 
-        spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 24);
+        spawnSeparation = switch (terrainSymmetry) {
+            case Z, X -> StrictMath.max(StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, map.getSize() / spawnCount), 24);
+            default -> StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 24);
+        };
 
-        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetry, (plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE);
+        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, (plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE);
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
         spawnPlateauMask = new ConcurrentBinaryMask(spawnMasks[1], random.nextLong(), "spawnsPlateau");
 
@@ -1039,7 +1070,7 @@ public strictfp class MapGenerator {
                     "\nRamp Density: " + rampDensity +
                     "\nReclaim Density: " + reclaimDensity +
                     "\nMex Count: " + mexCount +
-                    "\nTerrain Symmetry: " + symmetry +
+                    "\nTerrain Symmetry: " + terrainSymmetry +
                     "\nTeam Symmetry: " + symmetrySettings.getTeamSymmetry() +
                     "\nSpawn Symmetry: " + symmetrySettings.getSpawnSymmetry();
             out.write(summaryString.getBytes());
