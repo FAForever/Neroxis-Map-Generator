@@ -45,7 +45,7 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = .030f;
     public static final float RAMP_DENSITY_MAX = .065f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .45f;
+    public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 5f;
@@ -255,22 +255,22 @@ public strictfp class MapGenerator {
         blind = arguments.containsKey("blind");
 
         if (arguments.containsKey("land-density")) {
-            landDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("land-density")), LAND_DENSITY_MAX), LAND_DENSITY_MIN);
+            landDensity = Float.parseFloat(arguments.get("land-density")) * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
             landDensity = (float) StrictMath.round((landDensity - LAND_DENSITY_MIN) / (LAND_DENSITY_RANGE) * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
         }
 
         if (arguments.containsKey("plateau-density")) {
-            plateauDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("plateau-density")), PLATEAU_DENSITY_MAX), PLATEAU_DENSITY_MIN);
+            plateauDensity = Float.parseFloat(arguments.get("plateau-density")) * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
             plateauDensity = (float) StrictMath.round((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
         }
 
         if (arguments.containsKey("mountain-density")) {
-            mountainDensity = StrictMath.min(Float.parseFloat(arguments.get("mountain-density")), MOUNTAIN_DENSITY_MAX);
+            mountainDensity = Float.parseFloat(arguments.get("mountain-density")) * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
             mountainDensity = (float) StrictMath.round((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         }
 
         if (arguments.containsKey("ramp-density")) {
-            rampDensity = StrictMath.max(StrictMath.min(Float.parseFloat(arguments.get("ramp-density")), RAMP_DENSITY_MAX), RAMP_DENSITY_MIN);
+            rampDensity = Float.parseFloat(arguments.get("ramp-density")) * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
             rampDensity = (float) StrictMath.round((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         }
 
@@ -764,10 +764,14 @@ public strictfp class MapGenerator {
         mountains.minus(plateaus.copy().outline().inflate(64)).minus(land.copy().outline().inflate(64)).smooth(8).intersect(land).removeAreasSmallerThan(256);
         if (mountainDensity < .25) {
             mountains.fillGaps(24);
+        } else if (mountainDensity < .5) {
+            mountains.widenGaps(24);
+        } else if (mountainDensity < .75) {
+            mountains.acid(.0001f, 12).widenGaps(24);
         } else {
-            mountains.widenGaps(12);
+            mountains.acid(.0001f, 24).widenGaps(24);
         }
-        mountains.removeAreasSmallerThan(64);
+        mountains.removeAreasSmallerThan(128);
         plateaus.intersect(land).fillGaps(fillSize / 2).combine(mountains).removeAreasSmallerThan(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 

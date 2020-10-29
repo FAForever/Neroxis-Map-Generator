@@ -756,7 +756,7 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask widenGaps(int minDist) {
-        FloatMask distanceField = this.copy().invert().getDistanceField();
+        FloatMask distanceField = copy().invert().getDistanceField();
         BinaryMask filledGaps = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
