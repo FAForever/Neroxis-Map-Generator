@@ -134,8 +134,7 @@ public strictfp class MapEvaluator {
                 reverseSide = false;
             }
         }
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry);
-        symmetrySettings.setSpawnSymmetry(Symmetry.valueOf(arguments.get("symmetry")));
+        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry, Symmetry.valueOf(arguments.get("symmetry")));
     }
 
     public void importMap() {
