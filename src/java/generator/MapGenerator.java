@@ -513,7 +513,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 48;
-        final int hydroCount = spawnCount + random.nextInt(spawnCount / 2) * 2;
+        final int hydroCount = spawnCount + random.nextInt(spawnCount / 4) * 2;
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
             landDensity = StrictMath.max(landDensity - .125f, .7f);
