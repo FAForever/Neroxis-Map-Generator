@@ -881,9 +881,9 @@ public strictfp class MapGenerator {
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
         resourceMask.minus(unbuildable).deflate(8);
-        resourceMask.trimEdge(16).fillCenter(16, false);
-        waterResourceMask.minus(unbuildable).deflate(8).trimEdge(16).fillCenter(16, false);
-        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, false);
+        resourceMask.trimEdge(16).fillCenter(24, false);
+        waterResourceMask.minus(unbuildable).deflate(8).trimEdge(16).fillCenter(24, false);
+        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(24, false);
     }
 
     private void setupTexturePipeline() {
