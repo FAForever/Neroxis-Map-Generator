@@ -353,7 +353,7 @@ public strictfp class MapGenerator {
             mexMultiplier = switch (spawnCount) {
                 case 2 -> 2.5f;
                 case 4, 6 -> 1.75f;
-                case 8, 10 -> 1.3f;
+                case 8, 10 -> 1.45f;
                 default -> 1f;
             };
         }
