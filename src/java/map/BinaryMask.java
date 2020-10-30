@@ -3,10 +3,12 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.luaj.vm2.ast.Str;
 import util.Util;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.awt.*;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -16,6 +18,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.List;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
@@ -91,6 +94,41 @@ public strictfp class BinaryMask extends Mask {
 
     public void set(int x, int y, boolean value) {
         mask[x][y] = value;
+    }
+
+    public float getDistanceBetweenPoints(int x1, int y1, int x2, int y2) {
+        return (float) StrictMath.sqrt((double) ((x1 - x2) ^ 2 + (y1 - y2) ^ 2));
+    }
+
+    public float getDistanceBetweenPoints(int x1, int y1, Point Point2) {
+        return (float) StrictMath.sqrt((double) ((x1 - Point2.x) ^ 2 + (y1 - Point2.y) ^ 2));
+    }
+
+    public float getDistanceBetweenPoints(Point Point1, Point Point2) {
+        return (float) StrictMath.sqrt((double) ((Point1.x - Point2.x) ^ 2 + (Point2.x - Point2.y) ^ 2));
+    }
+
+    public Point getNearestPointInAreaTo(int x, int y) {
+        Point nearestPoint = new Point (x, y);
+        int rank;
+        FloatMask distanceField = getDistanceFieldFromPointInArea(x, y);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                if (this.get(a, b)) {
+                    rank = distanceField.getRankOfPointInArea(a, b, this);
+                    if(rank == 1) {
+                        nearestPoint.setLocation(a, b);
+                        a = getSize();
+                        b = getSize();
+                    }
+                }
+            }
+        }
+        return nearestPoint;
+    }
+
+    public float getLowestDistanceFromPointToArea(int x, int y) {
+        return getDistanceBetweenPoints(x, y, getNearestPointInAreaTo(x, y));
     }
 
     public boolean isEdge(int x, int y) {
@@ -809,6 +847,62 @@ public strictfp class BinaryMask extends Mask {
     public BinaryMask getAreasWithinSpecifiedDistanceOfEdges(int distance) {
         BinaryMask newMask = copy().inflate(distance).minus(copy().deflate(distance));
         return newMask;
+    }
+
+    public FloatMask getDistanceFieldFromPoint(int x, int y) {
+        FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                distanceField.set(a, b, getDistanceBetweenPoints(x, y, a, b));
+            }
+        }
+        return distanceField;
+    }
+
+    public FloatMask getDistanceFieldFromPointInArea(int x, int y) {
+        FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                if (this.get(a, b)) {
+                    distanceField.set(a, b, getDistanceBetweenPoints(x, y, a, b));
+                }
+            }
+        }
+        return distanceField;
+    }
+
+    public FloatMask getRankedDistanceFieldFromPoint(int x, int y) {
+        FloatMask distanceField = getDistanceFieldFromPoint(x, y);
+        FloatMask rankedDistanceField = new FloatMask(getSize(), null, symmetrySettings);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                rankedDistanceField.set(a, b, distanceField.getRankOfPoint(a, b));
+            }
+        }
+        return rankedDistanceField;
+    }
+
+    public FloatMask getRankedDistanceFieldFromPointInArea(int x, int y) {
+        FloatMask distanceField = getDistanceFieldFromPointInArea(x, y);
+        FloatMask rankedDistanceField = new FloatMask(getSize(), null, symmetrySettings);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                if (this.get(a, b)) {
+                    rankedDistanceField.set(a, b, distanceField.getRankOfPointInArea(a, b, this));
+                }
+            }
+        }
+        return rankedDistanceField;
+    }
+
+    public FloatMask getDistanceFieldFromArea() {
+        FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                distanceField.set(x, y, getLowestDistanceFromPointToArea(x, y));
+            }
+        }
+        return distanceField;
     }
 
     public FloatMask getDistanceField() {

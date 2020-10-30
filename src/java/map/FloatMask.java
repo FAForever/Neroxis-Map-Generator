@@ -572,6 +572,64 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public FloatMask scaleFloatMaskBy(float scaleMultiplier) {
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                multiply(x, y, scaleMultiplier);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask scaleFloatMaskTo(float newFloatMax) {
+        float scaleMultiplier = newFloatMax / getMax();
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                multiply(x, y, scaleMultiplier);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask scaleFloatMaskFromTo(float oldFloatMax, float newFloatMax) {
+        float scaleMultiplier = newFloatMax / oldFloatMax;
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                multiply(x, y, scaleMultiplier);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public int getRankOfPoint(int x, int y) {
+        int rank = 1;
+        float value = get(x, y);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                if(value > get(a, b) || (value == get(a, b) && x * 100 + y > a * 100 + b)) {
+                    rank += 1;
+                }
+            }
+        }
+        return rank;
+    }
+
+    public int getRankOfPointInArea(int x, int y, BinaryMask Area) {
+        int rank = 1;
+        float value = get(x, y);
+        for (int a = 0; a < getSize(); a++) {
+            for (int b = 0; b < getSize(); b++) {
+                if(Area.get(a, b) && (value > get(a, b) || (value == get(a, b) && x * 100 + y > a * 100 + b))) {
+                    rank += 1;
+                }
+            }
+        }
+        return rank;
+    }
+
     public FloatMask maskToHills(BinaryMask other) {
         if (other.getSize() != getSize()) {
             throw new IllegalArgumentException("Masks not the same size");
