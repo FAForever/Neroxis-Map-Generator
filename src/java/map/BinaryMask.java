@@ -96,39 +96,27 @@ public strictfp class BinaryMask extends Mask {
         mask[x][y] = value;
     }
 
-    public float getDistanceBetweenPoints(int x1, int y1, int x2, int y2) {
-        return (float) StrictMath.sqrt((double) ((x1 - x2) ^ 2 + (y1 - y2) ^ 2));
-    }
-
-    public float getDistanceBetweenPoints(int x1, int y1, Point Point2) {
-        return (float) StrictMath.sqrt((double) ((x1 - Point2.x) ^ 2 + (y1 - Point2.y) ^ 2));
-    }
-
-    public float getDistanceBetweenPoints(Point Point1, Point Point2) {
-        return (float) StrictMath.sqrt((double) ((Point1.x - Point2.x) ^ 2 + (Point2.x - Point2.y) ^ 2));
-    }
-
-    public Point getNearestPointInAreaTo(int x, int y) {
-        Point nearestPoint = new Point (x, y);
+    public Vector2f getNearestPointInAreaTo(int x, int y) {
+        Vector2f nearestPoint = new Vector2f(x, y);
         int rank;
-        FloatMask distanceField = getDistanceFieldFromPointInArea(x, y);
-        for (int a = 0; a < getSize(); a++) {
-            for (int b = 0; b < getSize(); b++) {
-                if (this.get(a, b)) {
-                    rank = distanceField.getRankOfPointInArea(a, b, this);
-                    if(rank == 1) {
-                        nearestPoint.setLocation(a, b);
-                        a = getSize();
-                        b = getSize();
-                    }
-                }
+        float minDistance = Float.POSITIVE_INFINITY;
+        if(get(x, y)) {
+            return nearestPoint;
+        }
+        LinkedHashSet<Vector2f> coordinates = copy().outline().getAllCoordinatesEqualTo(true, 1);
+        ArrayList<Vector2f> coordinatesArray = new ArrayList<>(coordinates);
+        for (int i = 0; i < coordinates.size(); i++) {
+            if(coordinatesArray.get(i).getDistance(new Vector2f(x, y)) < minDistance && get(coordinatesArray.get(i))) {
+                nearestPoint = coordinatesArray.get(i);
+                minDistance = coordinatesArray.get(i).getDistance(new Vector2f(x, y));
             }
         }
         return nearestPoint;
     }
 
     public float getLowestDistanceFromPointToArea(int x, int y) {
-        return getDistanceBetweenPoints(x, y, getNearestPointInAreaTo(x, y));
+        Vector2f location = new Vector2f(x, y);
+        return getNearestPointInAreaTo(x,y).getDistance(location);
     }
 
     public boolean isEdge(int x, int y) {

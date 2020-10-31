@@ -572,34 +572,16 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
-    public FloatMask scaleFloatMaskBy(float scaleMultiplier) {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                multiply(x, y, scaleMultiplier);
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
     public FloatMask scaleFloatMaskTo(float newFloatMax) {
         float scaleMultiplier = newFloatMax / getMax();
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                multiply(x, y, scaleMultiplier);
-            }
-        }
+        multiply(scaleMultiplier);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public FloatMask scaleFloatMaskFromTo(float oldFloatMax, float newFloatMax) {
         float scaleMultiplier = newFloatMax / oldFloatMax;
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                multiply(x, y, scaleMultiplier);
-            }
-        }
+        multiply(scaleMultiplier);
         VisualDebugger.visualizeMask(this);
         return this;
     }
