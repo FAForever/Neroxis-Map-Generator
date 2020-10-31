@@ -3,12 +3,10 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.luaj.vm2.ast.Str;
 import util.Util;
 import util.Vector2f;
 import util.Vector3f;
 
-import java.awt.*;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -18,7 +16,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.List;
 
 @Getter
 public strictfp class BinaryMask extends Mask {
