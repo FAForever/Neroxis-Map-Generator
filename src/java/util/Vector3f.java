@@ -2,6 +2,8 @@ package util;
 
 import lombok.EqualsAndHashCode;
 
+import java.util.LinkedHashSet;
+
 @EqualsAndHashCode
 public strictfp class Vector3f {
     public float x;
@@ -28,6 +30,18 @@ public strictfp class Vector3f {
         float dx = x - location.x;
         float dz = z - location.z;
         return (float) StrictMath.sqrt(dx * dx + dz * dz);
+    }
+
+    public LinkedHashSet<Vector2f> getXZLine(Vector3f location) {
+        LinkedHashSet<Vector2f> line = new LinkedHashSet<>();
+        Vector2f currentPoint = new Vector2f(this);
+        Vector2f targetPoint = new Vector2f(location);
+        while (currentPoint.getDistance(targetPoint) > 1) {
+            line.add(currentPoint);
+            float angle = currentPoint.getAngle(location);
+            currentPoint = new Vector2f(StrictMath.round(currentPoint.x + StrictMath.cos(angle)), StrictMath.round(currentPoint.y + StrictMath.sin(angle)));
+        }
+        return line;
     }
 
     public float getAzimuth() {

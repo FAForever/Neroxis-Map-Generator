@@ -572,6 +572,19 @@ public strictfp class FloatMask extends Mask {
         return this;
     }
 
+    public BinaryMask getLocalMaximums(int minValue, int maxValue) {
+        BinaryMask localMaxima = new BinaryMask(getSize(), null, symmetrySettings);
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                float value = get(x, y);
+                if (value > minValue && value < maxValue && isLocalMax(x, y)) {
+                    localMaxima.set(x, y, true);
+                }
+            }
+        }
+        return localMaxima;
+    }
+
     public FloatMask maskToHills(BinaryMask other) {
         if (other.getSize() != getSize()) {
             throw new IllegalArgumentException("Masks not the same size");
