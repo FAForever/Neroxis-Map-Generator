@@ -25,8 +25,8 @@ public strictfp class SCMapExporter {
 
     private static DataOutputStream out;
 
-    public static void exportSCMAP(Path folderPath, String mapname, SCMap map) throws IOException {
-        file = folderPath.resolve(mapname + ".scmap").toFile();
+    public static void exportSCMAP(Path folderPath, String mapName, SCMap map) throws IOException {
+        file = folderPath.resolve(mapName + ".scmap").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 

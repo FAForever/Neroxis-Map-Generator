@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class VisualDebugger {
 
-    public static final boolean ENABLED = MapGenerator.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG;
+    public static boolean ENABLED = MapGenerator.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
@@ -80,7 +80,7 @@ public class VisualDebugger {
                     0xFF_FF_00_FF,
                     0xFF_00_FF_FF,
                     0xFF_00_00_00};
-            int[] ranges = new int[]{1, 2, 5, 10, 20, 50};
+            int[] ranges = new int[]{10, 20, 30, 40, 50, 60};
 
             for (int i = 0; i < colors.length; i++) {
                 int color = colors[i];

@@ -7,8 +7,8 @@ import java.nio.file.Path;
 
 public strictfp class ScenarioExporter {
 
-    public static void exportScenario(Path folderPath, String mapname, SCMap map) throws IOException {
-        File file = folderPath.resolve(mapname + "_scenario.lua").toFile();
+    public static void exportScenario(Path folderPath, String mapName, SCMap map) throws IOException {
+        File file = folderPath.resolve(mapName + "_scenario.lua").toFile();
         String mapFolder = folderPath.getFileName().toString();
         boolean status = file.createNewFile();
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
@@ -20,10 +20,10 @@ public strictfp class ScenarioExporter {
         out.writeBytes("  starts = true,\n");
         out.writeBytes("  preview = '',\n");
         out.writeBytes("  size = {" + map.getSize() + ", " + map.getSize() + "},\n");
-        out.writeBytes("  map = '/maps/" + mapFolder + "/" + mapname + ".scmap',\n");
+        out.writeBytes("  map = '/maps/" + mapFolder + "/" + mapName + ".scmap',\n");
         out.writeBytes("  map_version = 1,\n");
-        out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapname + "_save.lua',\n");
-        out.writeBytes("  script = '/maps/" + mapFolder + "/" + mapname + "_script.lua',\n");
+        out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapName + "_save.lua',\n");
+        out.writeBytes("  script = '/maps/" + mapFolder + "/" + mapName + "_script.lua',\n");
         out.writeBytes("  hidePreviewMarkers = " + !map.isGeneratePreview() + ",\n");
         out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
         for (int i = 0; i < map.getSpawnCount(); i++) {

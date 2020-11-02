@@ -3,10 +3,8 @@ package generator;
 import biomes.Biome;
 import biomes.Biomes;
 import com.google.common.io.BaseEncoding;
+import exporter.MapExporter;
 import exporter.SCMapExporter;
-import exporter.SaveExporter;
-import exporter.ScenarioExporter;
-import exporter.ScriptExporter;
 import lombok.Getter;
 import lombok.Setter;
 import map.*;
@@ -486,14 +484,7 @@ public strictfp class MapGenerator {
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
 
             long startTime = System.currentTimeMillis();
-            Files.createDirectory(folderPath.resolve(mapName));
-            SCMapExporter.exportSCMAP(folderPath.resolve(mapName), mapName, map);
-            if (!tournamentStyle) {
-                SCMapExporter.exportPreview(folderPath.resolve(mapName), mapName, map);
-            }
-            SaveExporter.exportSave(folderPath.resolve(mapName), mapName, map);
-            ScenarioExporter.exportScenario(folderPath.resolve(mapName), mapName, map);
-            ScriptExporter.exportScript(folderPath.resolve(mapName), mapName, map);
+            MapExporter.exportMap(folderPath.resolve(mapName), mapName, map, tournamentStyle);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             startTime = System.currentTimeMillis();

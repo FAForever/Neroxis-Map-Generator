@@ -1,8 +1,6 @@
 package populator;
 
-import exporter.SCMapExporter;
-import exporter.SaveExporter;
-import exporter.ScenarioExporter;
+import exporter.MapExporter;
 import generator.*;
 import importer.SCMapImporter;
 import importer.SaveImporter;
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -224,11 +221,7 @@ public strictfp class MapPopulator {
     public void exportMap() {
         try {
             long startTime = System.currentTimeMillis();
-            FileUtils.copyRecursiveIfExists(inMapPath, outFolderPath);
-            SCMapExporter.exportSCMAP(outFolderPath.resolve(mapFolder), mapName, map);
-            SaveExporter.exportSave(outFolderPath.resolve(mapFolder), mapName, map);
-            ScenarioExporter.exportScenario(outFolderPath.resolve(mapFolder), mapName, map);
-            Files.copy(inMapPath.resolve(mapName + "_script.lua"), outFolderPath.resolve(mapFolder).resolve(mapName + "_script.lua"), StandardCopyOption.REPLACE_EXISTING);
+            MapExporter.exportMap(outFolderPath.resolve(mapFolder), mapName, map, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
