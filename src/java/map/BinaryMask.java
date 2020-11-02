@@ -812,7 +812,7 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public FloatMask getDistanceField() {
-        FloatMask distanceField = new FloatMask(getSize(), null, symmetrySettings);
+        FloatMask distanceField = new FloatMask(getSize(), random.nextLong(), symmetrySettings);
         distanceField.init(this, getSize() * getSize(), 0f);
         for (int i = 0; i < getSize(); i++) {
             ArrayList<Vector2f> vertices = new ArrayList<>();
