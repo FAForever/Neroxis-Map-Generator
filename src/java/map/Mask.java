@@ -156,7 +156,7 @@ public strictfp abstract class Mask {
     }
 
     public boolean inHalf(int x, int y, boolean reverse) {
-        return (x >= getMinXBound() && x < getMaxXBound() && y >= getMinYBound(x) && y < getMaxYBound(x)) ^ reverse && inBounds(x, y);
+        return (x >= getMinXBound(symmetrySettings.getTeamSymmetry()) && x < getMaxXBound(symmetrySettings.getTeamSymmetry()) && y >= getMinYBound(x, symmetrySettings.getTeamSymmetry()) && y < getMaxYBound(x, symmetrySettings.getTeamSymmetry())) ^ reverse && inBounds(x, y);
     }
 
     public boolean inHalf(Vector3f pos, float angle) {
