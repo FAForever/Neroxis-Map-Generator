@@ -21,7 +21,7 @@ public strictfp class AIMarkerGenerator {
     }
 
     public void generateAIMarkers(BinaryMask passable, ArrayList<AIMarker> markerArrayList, String nameFormat) {
-        LinkedHashSet<Vector2f> coordinates = passable.getAllCoordinatesEqualTo(true, 32);
+        LinkedHashSet<Vector2f> coordinates = passable.getSpacedCoordinatesEqualTo(true, 32, 8);
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
             if (!unusedCoordinates.contains(location)) {
@@ -31,13 +31,12 @@ public strictfp class AIMarkerGenerator {
                 }
                 coordinates.forEach(location1 -> {
                     if (location != location1) {
-                        LinkedHashSet<Vector2f> lineCoordinates = location.getLine(location1);
-                        boolean connected = !lineCoordinates.removeIf(loc -> !passable.get(loc));
-                        float distance = location.getDistance(location1);
-                        if (distance < passable.getSize() / 16f) {
-                            unusedCoordinates.add(location1);
-                        } else if (location.getDistance(location1) < passable.getSize() / 8f && connected) {
-                            unusedCoordinates.add(location1);
+                        if (location.getDistance(location1) < 64) {
+                            LinkedHashSet<Vector2f> lineCoordinates = location.getLine(location1);
+                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.get(loc));
+                            if (connected) {
+                                unusedCoordinates.add(location1);
+                            }
                         }
                     }
                 });
@@ -45,13 +44,16 @@ public strictfp class AIMarkerGenerator {
         });
         coordinates.removeAll(unusedCoordinates);
         coordinates.forEach(location -> location.add(.5f, .5f));
-        ArrayList<Vector2f> amphibiousCoordinatesArray = new ArrayList<>(coordinates);
+        ArrayList<Vector2f> coordinatesArray = new ArrayList<>(coordinates);
         coordinates.forEach((location) -> {
-            markerArrayList.add(new AIMarker(String.format(nameFormat, amphibiousCoordinatesArray.indexOf(location)), location, new LinkedHashSet<>()));
-            markerArrayList.add(new AIMarker(String.format(nameFormat + "s", amphibiousCoordinatesArray.indexOf(location)), passable.getSymmetryPoint(location), new LinkedHashSet<>()));
+            markerArrayList.add(new AIMarker(String.format(nameFormat, coordinatesArray.indexOf(location)), location, new LinkedHashSet<>()));
+            Vector2f symLocation = passable.getSymmetryPoint(location);
+            if (symLocation != null) {
+                markerArrayList.add(new AIMarker(String.format(nameFormat + "s", coordinatesArray.indexOf(location)), symLocation, new LinkedHashSet<>()));
+            }
         });
         markerArrayList.forEach(aiMarker -> markerArrayList.forEach(aiMarker1 -> {
-            if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) < passable.getSize() / 4f) {
+            if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) < 128) {
                 LinkedHashSet<Vector2f> lineCoordinates = aiMarker.getPosition().getXZLine(aiMarker1.getPosition());
                 boolean connected = !lineCoordinates.removeIf(location -> !passable.get(location));
                 if (connected) {
@@ -62,7 +64,7 @@ public strictfp class AIMarkerGenerator {
     }
 
     public void generateAirAIMarkers() {
-        float airMarkerSpacing = map.getSize() / 8f;
+        float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
         LinkedHashSet<Vector2f> airCoordinates = new BinaryMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
         airCoordinates.forEach((location) -> location.add(.5f, .5f));

@@ -589,17 +589,6 @@ public strictfp class MapGenerator {
 
         resourcesFuture.join();
 
-        CompletableFuture<Void> wrecksFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
-            long sTime = System.currentTimeMillis();
-
-            if (DEBUG) {
-                System.out.printf("Done: %4d ms, %s, generateWrecks\n",
-                        System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(MapGenerator.class));
-            }
-        });
-
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
@@ -627,7 +616,7 @@ public strictfp class MapGenerator {
             }
         });
 
-        CompletableFuture<Void> baseFuture = CompletableFuture.runAsync(() -> {
+        CompletableFuture<Void> unitsFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(baseMask, civReclaimMask, t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
             long sTime = System.currentTimeMillis();
             Army army17 = new Army("ARMY_17", new ArrayList<>());
@@ -666,12 +655,11 @@ public strictfp class MapGenerator {
             }
         });
 
-        wrecksFuture.join();
         propsFuture.join();
         decalsFuture.join();
         aiMarkerFuture.join();
         heightMapFuture.join();
-        baseFuture.join();
+        unitsFuture.join();
 
         CompletableFuture<Void> placementFuture = CompletableFuture.runAsync(() -> {
             long sTime = System.currentTimeMillis();
@@ -868,8 +856,8 @@ public strictfp class MapGenerator {
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.deflate(mapSize / 64f).trimEdge(8);
-        passableLand.deflate(4).intersect(passable);
+        passable.trimEdge(8);
+        passableLand.intersect(passable);
         passableWater.deflate(16).trimEdge(8);
     }
 

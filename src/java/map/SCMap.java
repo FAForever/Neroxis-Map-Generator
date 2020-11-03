@@ -219,6 +219,10 @@ public strictfp class SCMap {
         return blankMarkers.get(i);
     }
 
+    public BlankMarker getBlank(String id) {
+        return blankMarkers.stream().filter(blankMarker -> blankMarker.getId().equals(id)).findFirst().orElse(null);
+    }
+
     public void addBlank(BlankMarker blank) {
         blankMarkers.add(blank);
     }
@@ -229,6 +233,10 @@ public strictfp class SCMap {
 
     public AIMarker getLandMarker(int i) {
         return landAIMarkers.get(i);
+    }
+
+    public AIMarker getLandMarker(String id) {
+        return landAIMarkers.stream().filter(landMarker -> landMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
     public void addLandMarker(AIMarker aiMarker) {
@@ -243,6 +251,10 @@ public strictfp class SCMap {
         return amphibiousAIMarkers.get(i);
     }
 
+    public AIMarker getAmphibiousMarker(String id) {
+        return amphibiousAIMarkers.stream().filter(amphibiousMarker -> amphibiousMarker.getId().equals(id)).findFirst().orElse(null);
+    }
+
     public void addAmphibiousMarker(AIMarker aiMarker) {
         amphibiousAIMarkers.add(aiMarker);
     }
@@ -253,6 +265,10 @@ public strictfp class SCMap {
 
     public AIMarker getNavyMarker(int i) {
         return navyAIMarkers.get(i);
+    }
+
+    public AIMarker getNavyMarker(String id) {
+        return navyAIMarkers.stream().filter(navyMarker -> navyMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
     public void addNavyMarker(AIMarker aiMarker) {
@@ -269,6 +285,10 @@ public strictfp class SCMap {
 
     public void addAirMarker(AIMarker aiMarker) {
         airAIMarkers.add(aiMarker);
+    }
+
+    public AIMarker getAirMarker(String id) {
+        return airAIMarkers.stream().filter(airMarker -> airMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
     public int getRallyMarkerCount() {

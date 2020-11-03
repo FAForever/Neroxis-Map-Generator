@@ -1009,10 +1009,12 @@ public strictfp class BinaryMask extends Mask {
                 for (int x = getMinXBound(symmetry); x < getMaxXBound(symmetry); x++) {
                     for (int y = getMinYBound(x, symmetry); y < getMaxYBound(x, symmetry); y++) {
                         Vector2f symPoint = getSymmetryPoint(x, y, symmetry);
-                        if (reverse) {
-                            set(x, y, get(symPoint));
-                        } else {
-                            set(symPoint, get(x, y));
+                        if (symPoint != null) {
+                            if (reverse) {
+                                set(x, y, get(symPoint));
+                            } else {
+                                set(symPoint, get(x, y));
+                            }
                         }
                     }
                 }
