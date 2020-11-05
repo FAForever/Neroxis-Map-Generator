@@ -242,6 +242,7 @@ public strictfp class MapPopulator {
         Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
+        heightmapBase = new FloatMask(heightmapBase, random.nextLong());
         heightmapBase.applySymmetry();
         map.setHeightImage(heightmapBase);
         float waterHeight;
@@ -258,8 +259,8 @@ public strictfp class MapPopulator {
         BinaryMask impassable = new BinaryMask(slope, .9f, random.nextLong());
         BinaryMask ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
         BinaryMask passable = impassable.copy().invert();
-        BinaryMask passableLand = new BinaryMask(land, null);
-        BinaryMask passableWater = new BinaryMask(land, null).invert();
+        BinaryMask passableLand = new BinaryMask(land, random.nextLong());
+        BinaryMask passableWater = new BinaryMask(land, random.nextLong()).invert();
 
         if (populateSpawns) {
             if (spawnCount > 0) {

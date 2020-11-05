@@ -22,6 +22,7 @@ public strictfp class AIMarkerGenerator {
 
     public void generateAIMarkers(BinaryMask passable, ArrayList<AIMarker> markerArrayList, String nameFormat) {
         LinkedHashSet<Vector2f> coordinates = passable.getSpacedCoordinatesEqualTo(true, 32, 8);
+        coordinates.addAll(passable.getDistanceField().getLocalMaximums(8, passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
             if (!unusedCoordinates.contains(location)) {
