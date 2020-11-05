@@ -22,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -689,7 +691,9 @@ public strictfp class MapGenerator {
             map.getPreview().setData(blindPreview.getData());
         }
         if (tournamentStyle) {
-            map.setDescription(String.format("Map originally generated at %s", Instant.ofEpochSecond(generationTime).toString()));
+            map.setDescription(String.format("Map originally generated at %s UTC",
+                    DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
+                            .format(Instant.ofEpochSecond(generationTime).atZone(ZoneOffset.UTC))));
         }
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
