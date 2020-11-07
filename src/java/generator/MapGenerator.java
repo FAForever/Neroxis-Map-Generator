@@ -42,8 +42,8 @@ public strictfp class MapGenerator {
     public static final float MOUNTAIN_DENSITY_MIN = 0f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
     public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
-    public static final float RAMP_DENSITY_MIN = .030f;
-    public static final float RAMP_DENSITY_MAX = .065f;
+    public static final float RAMP_DENSITY_MIN = .015f;
+    public static final float RAMP_DENSITY_MAX = .03f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
@@ -509,8 +509,7 @@ public strictfp class MapGenerator {
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
-            landDensity = StrictMath.max(landDensity - .1f, .675f);
-            mountainDensity = mountainDensity * .75f;
+            mountainDensity = mountainDensity * .5f + .15f;
             mexSpacing = 64;
         }
         hasCivilians = random.nextBoolean();
@@ -772,11 +771,11 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity).setSize(mapSize + 1);
-        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(16);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(24);
 
-        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.01f).inflate(16);
+        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.005f).inflate(24);
 
-        ramps.combine(spawnRamps).smooth(8, .125f).fillGaps(32);
+        ramps.combine(spawnRamps).fillGaps(32).smooth(8, .25f);
 
         mountains.minus(plateaus.copy().outline().inflate(32)).minus(land.copy().outline().inflate(32)).smooth(8).intersect(land).removeAreasSmallerThan(256);
         if (mountainDensity < .25) {
@@ -835,7 +834,7 @@ public strictfp class MapGenerator {
         oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(32, .75f).invert().removeAreasSmallerThan(128);
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
-        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(8, ramps).smooth(1);
+        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(10, ramps).smooth(1);
         heightmapHills.maskToHills(hills).clampMax(HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
         heightmapValleys.maskToHills(valleys).multiply(-1).clampMin(VALLEY_HEIGHT).smooth(16, plateaus);
         heightmapLand.add(heightmapHills).add(heightmapValleys).smooth(2).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight + 1f).maskToOceanHeights(0.15f, oceanFloor).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight - 1f);
@@ -853,7 +852,9 @@ public strictfp class MapGenerator {
 
         impassable = new ConcurrentBinaryMask(slope, 1f, random.nextLong(), "impassable");
         unbuildable = new ConcurrentBinaryMask(slope, .5f, random.nextLong(), "unbuildable");
+        ConcurrentBinaryMask notFlat = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "notFlat");
 
+        unbuildable.combine(ramps.copy().intersect(notFlat));
         impassable.inflate(2);
 
         passable = new ConcurrentBinaryMask(impassable, random.nextLong(), "passable").invert();
@@ -995,7 +996,7 @@ public strictfp class MapGenerator {
         noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
 
         noBases = new BinaryMask(unbuildable.getFinalMask(), null);
-        noBases.combine(ramps.getFinalMask());
+        noBases.combine(ramps.getFinalMask()).fillCenter(16, true);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noBases.fillCircle(map.getSpawn(i).getPosition(), 128, true);
@@ -1008,7 +1009,7 @@ public strictfp class MapGenerator {
         }
 
         noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
-        noCivs.combine(ramps.getFinalMask());
+        noCivs.combine(ramps.getFinalMask()).fillCenter(16, true);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noCivs.fillCircle(map.getSpawn(i).getPosition(), 96, true);
@@ -1022,7 +1023,7 @@ public strictfp class MapGenerator {
 
         noWrecks = new BinaryMask(impassable.getFinalMask(), null);
 
-        noWrecks.combine(allBaseMask.getFinalMask());
+        noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noWrecks.fillCircle(map.getSpawn(i).getPosition(), 128, true);
