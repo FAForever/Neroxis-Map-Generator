@@ -351,7 +351,7 @@ public strictfp class MapGenerator {
             mexMultiplier = .75f;
         } else if (mapSize > 512) {
             mexMultiplier = switch (spawnCount) {
-                case 2 -> 2.5f;
+                case 2 -> 2f;
                 case 4, 6 -> 1.75f;
                 case 8, 10 -> 1.45f;
                 default -> 1f;
@@ -505,7 +505,7 @@ public strictfp class MapGenerator {
     public SCMap generate() throws IOException {
         long startTime = System.currentTimeMillis();
 
-        final int spawnSize = 48;
+        final int spawnSize = 32;
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
@@ -578,7 +578,7 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(resourceMask, plateaus, land, ramps, impassable, unbuildable, allWreckMask, plateauResourceMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
-            mexGenerator.generateMexes(resourceMask.getFinalMask(), plateauResourceMask.getFinalMask(), waterResourceMask.getFinalMask());
+            mexGenerator.generateMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(4));
             generateExclusionMasks();
             if (DEBUG) {

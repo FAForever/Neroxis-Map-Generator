@@ -1,9 +1,6 @@
 package generator;
 
-import map.AIMarker;
-import map.BinaryMask;
-import map.Mex;
-import map.SCMap;
+import map.*;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -26,18 +23,35 @@ public strictfp class MexGenerator {
         random = new Random(seed);
     }
 
-    public void generateMexes(BinaryMask spawnable, BinaryMask spawnablePlateau, BinaryMask spawnableWater) {
+    public void generateMexes(BinaryMask spawnable, BinaryMask spawnableWater) {
         map.getMexes().clear();
-        BinaryMask spawnableLand = new BinaryMask(spawnable, random.nextLong());
         spawnable.fillHalf(false);
         spawnableWater.fillHalf(false);
-        int mexSpawnDistance = 32;
-        BinaryMask spawnableNoSpawns = new BinaryMask(spawnable, random.nextLong());
-        int spawnCount = map.getSpawnCount();
-        int totalMexCount = map.getMexCountInit();
+
+        generateBaseMexes(spawnable);
+
+        for (Spawn spawn : map.getSpawns()) {
+            spawnable.fillCircle(spawn.getPosition(), 24, false);
+        }
+
+        int nonBaseMexCount = map.getMexCountInit() - map.getMexCount();
+
+        for (Mex mex : map.getMexes()) {
+            spawnable.fillCircle(mex.getPosition(), mexSpacing, false);
+        }
+
+        if (nonBaseMexCount / 2 > 8) {
+            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / map.getSpawnCount() / 2) + nonBaseMexCount / map.getSpawnCount() / 2) * 2;
+            generateMexExpansions(spawnable, possibleExpMexCount);
+        }
+
+        generateIndividualMexes(spawnable, map.getMexCountInit() - map.getMexCount());
+        generateIndividualMexes(spawnableWater, StrictMath.min(map.getMexCountInit() - map.getMexCount(), 20));
+    }
+
+    public void generateBaseMexes(BinaryMask spawnable) {
         int numBaseMexes = (random.nextInt(2) + 3) * 2;
         int numNearMexes = (random.nextInt(2) + 5 - numBaseMexes / 2) * 2;
-        int iMex = 0;
         for (int i = 0; i < map.getSpawnCount(); i += 2) {
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
             baseMexes.fillCircle(map.getSpawn(i + 1).getPosition(), 15, true).fillCircle(map.getSpawn(i + 1).getPosition(), 5, false).intersect(spawnable);
@@ -52,7 +66,6 @@ public strictfp class MexGenerator {
                 map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
                 baseMexes.fillCircle(location, 10, false);
                 spawnable.fillCircle(location, 10, false);
-                iMex += 2;
             }
             BinaryMask nearMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
             nearMexes.fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize * 3, true).fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize / 2f, false).intersect(spawnable);
@@ -70,108 +83,16 @@ public strictfp class MexGenerator {
                 map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
                 nearMexes.fillCircle(location, 10, false);
                 spawnable.fillCircle(location, 10, false);
-                iMex += 2;
             }
-        }
-        for (int i = 0; i < map.getSpawnCount(); i += 2) {
-            spawnable.fillCircle(map.getSpawn(i + 1).getPosition(), 24, false);
-            spawnableNoSpawns.fillCircle(map.getSpawn(i + 1).getPosition(), mexSpawnDistance, false);
-        }
-
-        int numMexesLeft;
-        int actualExpMexCount;
-        int baseMexCount = iMex;
-        int nonBaseMexCount = totalMexCount - baseMexCount;
-
-        for (int i = 0; i < baseMexCount; i++) {
-            spawnable.fillCircle(map.getMex(i).getPosition(), mexSpacing, false);
-        }
-
-        if (nonBaseMexCount / 2 > 10) {
-            int possibleExpMexCount = (random.nextInt(nonBaseMexCount / spawnCount) + nonBaseMexCount / spawnCount) * 2;
-            actualExpMexCount = generateMexExpansions(spawnable, baseMexCount, possibleExpMexCount);
-            numMexesLeft = nonBaseMexCount - actualExpMexCount;
-        } else {
-            numMexesLeft = nonBaseMexCount;
-        }
-
-        spawnableNoSpawns.intersect(spawnable);
-        spawnablePlateau.intersect(spawnableNoSpawns);
-        spawnableLand.intersect(spawnableNoSpawns).minus(spawnablePlateau);
-
-        float plateauDensity = (float) spawnablePlateau.getCount() / spawnableNoSpawns.getCount();
-        int plateauMexCount = (int) (plateauDensity * numMexesLeft / 2) * 2;
-
-        List<Vector2f> plateauLocations = new ArrayList<>(spawnablePlateau.getRandomCoordinates(mexSpacing));
-        for (int i = 0; i < plateauMexCount; i += 2) {
-            if (plateauLocations.size() == 0) {
-                break;
-            }
-
-            Vector2f location = plateauLocations.remove(random.nextInt(plateauLocations.size())).add(.5f, .5f);
-            Vector2f symLocation = spawnablePlateau.getSymmetryPoint(location);
-            numMexesLeft -= 2;
-
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
-        }
-
-        int numLandMexes = numMexesLeft;
-        List<Vector2f> landLocations = new ArrayList<>(spawnableLand.getRandomCoordinates(mexSpacing));
-        for (int i = 0; i < numLandMexes; i += 2) {
-            if (landLocations.size() == 0) {
-                break;
-            }
-
-            Vector2f location = landLocations.remove(random.nextInt(landLocations.size())).add(.5f, .5f);
-            Vector2f symLocation = spawnableLand.getSymmetryPoint(location);
-            numMexesLeft -= 2;
-
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
-        }
-
-        for (int i = 0; i < map.getMexCount(); i += 1) {
-            spawnable.fillCircle(map.getMex(i).getPosition(), mexSpacing, false);
-        }
-
-        int numNearSpawnMexes = numMexesLeft;
-        List<Vector2f> nearSpawnLocations = new ArrayList<>(spawnable.getRandomCoordinates(mexSpacing));
-        for (int i = 0; i < numNearSpawnMexes; i += 2) {
-            if (nearSpawnLocations.size() == 0) {
-                break;
-            }
-
-            Vector2f location = nearSpawnLocations.remove(random.nextInt(nearSpawnLocations.size())).add(.5f, .5f);
-            Vector2f symLocation = spawnable.getSymmetryPoint(location);
-            numMexesLeft -= 2;
-
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
-        }
-
-        List<Vector2f> waterLocations = new ArrayList<>(spawnableWater.getRandomCoordinates(mexSpacing));
-        for (int i = 0; i < StrictMath.min(numMexesLeft, 20); i += 2) {
-            if (waterLocations.size() == 0) {
-                break;
-            }
-
-            Vector2f location = waterLocations.remove(random.nextInt(waterLocations.size())).add(.5f, .5f);
-            Vector2f symLocation = spawnableWater.getSymmetryPoint(location);
-
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
         }
     }
 
-    public int generateMexExpansions(BinaryMask spawnable, int baseMexCount, int possibleExpMexCount) {
+    public void generateMexExpansions(BinaryMask spawnable, int possibleExpMexCount) {
         Vector2f expLocation;
         Vector2f location;
         Vector2f symLocation;
-        int actualExpMexCount = possibleExpMexCount;
         int expMexCount;
         int expMexCountLeft = possibleExpMexCount;
-        int iMex = baseMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
         int expSpacing = 96;
@@ -203,7 +124,6 @@ public strictfp class MexGenerator {
             }
 
             if (expLocation == null) {
-                actualExpMexCount = possibleExpMexCount - expMexCountLeft;
                 break;
             }
 
@@ -222,9 +142,9 @@ public strictfp class MexGenerator {
 
 
             List<Vector2f> expMexLocations = new ArrayList<>(expansion.getRandomCoordinates(expMexSpacing));
-            for (int i = iMex; i < iMex + expMexCount; i += 2) {
+            for (int i = 0; i < expMexCount; i += 2) {
                 if (expMexLocations.size() == 0) {
-                    expMexCount -= i - iMex;
+                    expMexCount -= i;
                     break;
                 }
                 location = expMexLocations.remove(random.nextInt(expMexLocations.size())).add(.5f, .5f);
@@ -233,14 +153,26 @@ public strictfp class MexGenerator {
                 map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
                 map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
 
-                spawnable.fillCircle(location, mexSpacing, false);
-                spawnable.fillCircle(symLocation, mexSpacing, false);
+                spawnable.fillCircle(location, mexSpacing * 1.5f, false);
+                spawnable.fillCircle(symLocation, mexSpacing * 1.5f, false);
             }
-
-            iMex += expMexCount;
             expMexCountLeft -= expMexCount;
         }
-        return actualExpMexCount;
+    }
+
+    public void generateIndividualMexes(BinaryMask spawnable, int numMexes) {
+        List<Vector2f> mexLocations = new ArrayList<>(spawnable.getRandomCoordinates(mexSpacing));
+        for (int i = 0; i < numMexes; i += 2) {
+            if (mexLocations.size() == 0) {
+                break;
+            }
+
+            Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
+            Vector2f symLocation = spawnable.getSymmetryPoint(location);
+
+            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
+            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
+        }
     }
 
     private boolean isMexExpValid(Vector2f location, float size, float density, BinaryMask spawnable) {
