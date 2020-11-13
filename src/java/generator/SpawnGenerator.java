@@ -86,7 +86,7 @@ public strictfp class SpawnGenerator {
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
             map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symLocation, null));
             BinaryMask nextSpawn = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-            nextSpawn.fillCircle(location, separation * 2, true).intersect(spawnable);
+            nextSpawn.fillCircle(location, separation * 4, true).intersect(spawnable);
             location = nextSpawn.getRandomPosition();
             if (location == null) {
                 location = spawnable.getRandomPosition();
