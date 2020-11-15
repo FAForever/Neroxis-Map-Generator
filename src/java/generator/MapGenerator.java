@@ -715,9 +715,9 @@ public strictfp class MapGenerator {
         land.randomize(landDensity).smooth(2, .75f);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (mountainDensity * mapSize / 4), mapSize / 16);
+            mountains.progressiveWalk((int) (mountainDensity * 128), mapSize / 16);
         } else {
-            mountains.randomWalk((int) (mountainDensity * mapSize / 4), mapSize / 16);
+            mountains.randomWalk((int) (mountainDensity * 128), mapSize / 16);
         }
         mountains.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), 4).grow(.5f, symmetrySettings.getTerrainSymmetry(), 6);
         plateaus.randomize(plateauDensity).smooth(4);
@@ -732,14 +732,8 @@ public strictfp class MapGenerator {
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
         spawnPlateauMask.erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(4);
 
-        if (mapSize <= 512) {
-            spawnLandMask.shrink(mapSize / 4).erode(.25f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
-            spawnLandMask.erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(4);
-        } else {
-            spawnLandMask.shrink(mapSize / 16).erode(.5f, symmetrySettings.getSpawnSymmetry(), 2).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
-            spawnLandMask.setSize(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(8);
-            spawnPlateauMask.clear();
-        }
+        spawnLandMask.shrink(mapSize / 4).erode(.25f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
+        spawnLandMask.erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(4);
 
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(512);
