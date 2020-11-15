@@ -50,7 +50,7 @@ public strictfp class MexGenerator {
             previousMexCount = map.getMexCount();
         }
 
-        int numPlayerMexes = numMexesLeft / map.getSpawnCount() * 2;
+        int numPlayerMexes = StrictMath.min(numMexesLeft / map.getSpawnCount(), 5) * 2;
         for (int i = 0; i < map.getSpawnCount(); i += 2) {
             BinaryMask playerSpawnable = new BinaryMask(spawnable.getSize(), 0L, spawnable.getSymmetrySettings());
             playerSpawnable.fillCircle(map.getSpawn(i + 1).getPosition(), map.getSize() / 2f, true).intersect(spawnable);
@@ -159,8 +159,9 @@ public strictfp class MexGenerator {
             Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
 
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(location)));
-            map.addMex(new Mex(String.format("Mex %d", map.getMexCount()), new Vector3f(symLocation)));
+            int mexId = map.getMexCount() + 1;
+            map.addMex(new Mex(String.format("Mex %d", mexId), new Vector3f(location)));
+            map.addMex(new Mex(String.format("sym Mex %d", mexId), new Vector3f(symLocation)));
         }
     }
 

@@ -344,7 +344,7 @@ public strictfp class MapTransformer {
         mexes.forEach(mex -> {
             if ((!useAngle && heightmapBase.inHalf(mex.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(mex.getPosition(), angle))) {
                 transformedMexes.add(new Mex(mex.getId(), Placement.placeOnHeightmap(map, mex.getPosition())));
-                transformedMexes.add(new Mex(mex.getId() + "s", Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(mex.getPosition()))));
+                transformedMexes.add(new Mex("sym " + mex.getId(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(mex.getPosition()))));
             }
         });
         return transformedMexes;
@@ -355,7 +355,7 @@ public strictfp class MapTransformer {
         hydros.forEach(hydro -> {
             if ((!useAngle && heightmapBase.inHalf(hydro.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(hydro.getPosition(), angle))) {
                 transformedHydros.add(new Hydro(hydro.getId(), Placement.placeOnHeightmap(map, hydro.getPosition())));
-                transformedHydros.add(new Hydro(hydro.getId() + "s", Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(hydro.getPosition()))));
+                transformedHydros.add(new Hydro("sym " + hydro.getId(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(hydro.getPosition()))));
             }
         });
         return transformedHydros;
@@ -404,7 +404,7 @@ public strictfp class MapTransformer {
         units.forEach(unit -> {
             if ((!useAngle && heightmapBase.inHalf(unit.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(unit.getPosition(), angle))) {
                 transformedUnits.add(new Unit(unit.getId(), unit.getType(), Placement.placeOnHeightmap(map, unit.getPosition()), unit.getRotation()));
-                transformedUnits.add(new Unit(unit.getId() + "s", unit.getType(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(unit.getPosition())), heightmapBase.getReflectedRotation(unit.getRotation())));
+                transformedUnits.add(new Unit("sym " + unit.getId(), unit.getType(), Placement.placeOnHeightmap(map, heightmapBase.getSymmetryPoint(unit.getPosition())), heightmapBase.getReflectedRotation(unit.getRotation())));
             }
         });
         return transformedUnits;
