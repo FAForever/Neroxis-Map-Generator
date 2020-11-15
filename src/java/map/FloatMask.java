@@ -1001,12 +1001,13 @@ public strictfp class FloatMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public void startVisualDebugger(String maskName) {
-        startVisualDebugger(maskName, Util.getStackTraceParentClass());
+    public FloatMask startVisualDebugger(String maskName) {
+        return startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 
-    public void startVisualDebugger(String maskName, String parentClass) {
+    public FloatMask startVisualDebugger(String maskName, String parentClass) {
         VisualDebugger.whitelistMask(this, maskName, parentClass);
         show();
+        return this;
     }
 }

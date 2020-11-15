@@ -42,12 +42,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
-    public ConcurrentBinaryMask(FloatMask mask, float threshold, Long seed, String name) {
-        this.name = name;
-        this.binaryMask = new BinaryMask(mask, threshold, seed);
-        this.symmetrySettings = mask.getSymmetrySettings();
-    }
-
     public ConcurrentBinaryMask(ConcurrentFloatMask mask, float threshold, Long seed, String name) {
         this.name = name;
         this.binaryMask = new BinaryMask(1, seed, mask.getSymmetrySettings());
@@ -303,7 +297,8 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         this.binaryMask.show();
     }
 
-    public void startVisualDebugger(String maskName) {
+    public ConcurrentBinaryMask startVisualDebugger(String maskName) {
         this.binaryMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
+        return this;
     }
 }

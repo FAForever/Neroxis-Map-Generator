@@ -1070,12 +1070,13 @@ public strictfp class BinaryMask extends Mask {
         VisualDebugger.visualizeMask(this);
     }
 
-    public void startVisualDebugger(String maskName) {
-        startVisualDebugger(maskName, Util.getStackTraceParentClass());
+    public BinaryMask startVisualDebugger(String maskName) {
+        return startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 
-    public void startVisualDebugger(String maskName, String parentClass) {
+    public BinaryMask startVisualDebugger(String maskName, String parentClass) {
         VisualDebugger.whitelistMask(this, maskName, parentClass);
         show();
+        return this;
     }
 }

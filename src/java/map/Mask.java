@@ -8,8 +8,6 @@ import util.Vector3f;
 public strictfp abstract class Mask {
     protected SymmetrySettings symmetrySettings;
 
-    abstract void startVisualDebugger(String maskName);
-
     abstract int getSize();
 
     public boolean inBounds(Vector3f location) {
