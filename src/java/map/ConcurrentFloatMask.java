@@ -36,6 +36,19 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
+    public ConcurrentFloatMask(ConcurrentBinaryMask mask, float low, float high, Long seed, String name) {
+        this.name = name;
+        this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
+
+        if (name.equals("mocked")) {
+            this.floatMask = new FloatMask(mask.getBinaryMask(), low, high, seed);
+        } else {
+            Pipeline.add(this, Collections.singletonList(mask), res ->
+                    this.floatMask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize()).add(new FloatMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), low, high, this.floatMask.getRandom().nextLong())));
+        }
+        this.symmetrySettings = mask.getSymmetrySettings();
+    }
+
     public ConcurrentFloatMask init(ConcurrentBinaryMask other, float low, float high) {
         return Pipeline.add(this, Arrays.asList(this, other), res -> this.floatMask.init(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), low, high)
         );

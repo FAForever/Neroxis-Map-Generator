@@ -557,8 +557,8 @@ public strictfp class BinaryMask extends Mask {
     }
 
     public BinaryMask fillCircle(float x, float y, float radius, boolean value) {
-        int ex = (int) StrictMath.min(getSize(), x + radius);
-        int ey = (int) StrictMath.min(getSize(), y + radius);
+        int ex = (int) StrictMath.min(getSize(), x + radius + 1);
+        int ey = (int) StrictMath.min(getSize(), y + radius + 1);
         float dx;
         float dy;
         float radius2 = radius * radius;
@@ -573,6 +573,14 @@ public strictfp class BinaryMask extends Mask {
         }
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    public BinaryMask fillSquare(Vector2f v, int extent, boolean value) {
+        return fillSquare((int) v.x, (int) v.y, extent, value);
+    }
+
+    public BinaryMask fillSquare(int x, int y, int extent, boolean value) {
+        return fillRect(x, y, extent, extent, value);
     }
 
     public BinaryMask fillRect(Vector2f v, int width, int height, boolean value) {
