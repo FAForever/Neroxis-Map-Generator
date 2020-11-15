@@ -42,7 +42,7 @@ public strictfp class MapGenerator {
     public static final float MOUNTAIN_DENSITY_MIN = 0f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
     public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
-    public static final float RAMP_DENSITY_MIN = .015f;
+    public static final float RAMP_DENSITY_MIN = .02f;
     public static final float RAMP_DENSITY_MAX = .03f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
@@ -526,8 +526,8 @@ public strictfp class MapGenerator {
         AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, random.nextLong());
 
         spawnSeparation = switch (terrainSymmetry) {
-            case Z, X -> StrictMath.max(StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, map.getSize() / spawnCount), 24);
-            default -> StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 24);
+            case Z, X -> StrictMath.max(StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, map.getSize() / spawnCount), 48);
+            default -> StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 48);
         };
 
         BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, (plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE);
@@ -746,7 +746,7 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE);
-        int fillSize = 96;
+        int fillSize = 32;
 
         if (fillLandGaps) {
             land.fillGaps(fillSize);
@@ -788,7 +788,7 @@ public strictfp class MapGenerator {
             mountains.acid(.00010f, 24).widenGaps(24);
         }
         mountains.removeAreasSmallerThan(128).smooth(8, .5f);
-        plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).combine(mountains).removeAreasSmallerThan(mapSize * mapSize / 256);
+        plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
@@ -844,7 +844,7 @@ public strictfp class MapGenerator {
 
         ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 3f, random.nextLong(), "mountainsPresent");
 
-        heightmapMountains.add(mountainsPresent, 2f).subtract(mountainsPresent.copy().invert(), 10f).clampMin(0);
+        heightmapMountains.add(mountainsPresent.copy().minus(plateaus), PLATEAU_HEIGHT).subtract(mountainsPresent.copy().invert(), 10f).clampMin(0);
 
         heightmapBase.add(heightmapMountains).add(heightmapLand).add(heightmapPlateaus).smooth(1);
         slope = heightmapBase.copy().gradient();

@@ -728,7 +728,7 @@ public strictfp class FloatMask extends Mask {
         FloatMask otherDistance = other.copy().invert().getDistanceField();
         BinaryMask distanceMaximums = otherDistance.getLocalMaximums(.1f, Float.POSITIVE_INFINITY);
         LinkedList<Vector2f> coordinates = new LinkedList<>(distanceMaximums.getRandomCoordinates(16));
-        FloatMask heightMultiplier = otherDistance.copy().clampMax(10f).smooth(2);
+        FloatMask heightMultiplier = otherDistance.copy().clampMax(16f).smooth(2);
         while (coordinates.size() > 0) {
             Vector2f loc = coordinates.removeFirst();
             FloatMask useBrush = brush.copy().shrink((int) otherDistance.get(loc) * 8).multiply(heightMultiplier, loc, true);
