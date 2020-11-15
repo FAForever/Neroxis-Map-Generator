@@ -171,7 +171,7 @@ public class VisualDebugger {
         at.scale(perPixelSize, perPixelSize);
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         scaleOp.filter(currentImage, scaledImage);
-        VisualDebuggerGui.update(maskName + " " + function, scaledImage, perPixelSize);
+        VisualDebuggerGui.update(maskName + " " + function, scaledImage, size);
     }
 
     private static float calculateAutoZoom(int imageSize) {

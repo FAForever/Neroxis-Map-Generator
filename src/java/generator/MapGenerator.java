@@ -715,11 +715,11 @@ public strictfp class MapGenerator {
         land.randomize(landDensity).smooth(2, .75f);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (mountainDensity * mapSize / 8), mapSize / 8);
+            mountains.progressiveWalk((int) (mountainDensity * mapSize / 4), mapSize / 16);
         } else {
-            mountains.randomWalk((int) (mountainDensity * mapSize / 8), mapSize / 8);
+            mountains.randomWalk((int) (mountainDensity * mapSize / 4), mapSize / 16);
         }
-        mountains.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), 2).grow(.5f, symmetrySettings.getTerrainSymmetry(), 4);
+        mountains.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), 4).grow(.5f, symmetrySettings.getTerrainSymmetry(), 6);
         plateaus.randomize(plateauDensity).smooth(4);
 
         land.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), mapSize / 256).grow(.5f, symmetrySettings.getTerrainSymmetry(), mapSize / 256);
@@ -746,7 +746,7 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
         boolean fillLandGaps = (random.nextFloat() < (landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE);
-        int fillSize = 64;
+        int fillSize = 96;
 
         if (fillLandGaps) {
             land.fillGaps(fillSize);
@@ -771,11 +771,11 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity).setSize(mapSize + 1);
-        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(24);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(32);
 
-        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.005f).inflate(24);
+        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.005f).inflate(32);
 
-        ramps.combine(spawnRamps).fillGaps(32).smooth(8, .25f);
+        ramps.combine(spawnRamps).fillGaps(48).smooth(8, .25f);
 
         mountains.smooth(8).intersect(land).minus(ramps);
         if (mountainDensity < .25) {
@@ -785,9 +785,9 @@ public strictfp class MapGenerator {
         } else if (mountainDensity < .75) {
             mountains.acid(.00005f, 24).widenGaps(24);
         } else {
-            mountains.acid(.00015f, 24).widenGaps(24);
+            mountains.acid(.00010f, 24).widenGaps(24);
         }
-        mountains.removeAreasSmallerThan(128).deflate(4);
+        mountains.removeAreasSmallerThan(128).smooth(8, .5f);
         plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).combine(mountains).removeAreasSmallerThan(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
@@ -834,20 +834,19 @@ public strictfp class MapGenerator {
         oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(32, .75f).invert().removeAreasSmallerThan(128);
 
         heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
-        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(10, ramps).smooth(1);
-        heightmapHills.maskToHills(hills).clampMax(HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
-        heightmapValleys.maskToHills(valleys).multiply(-1).clampMin(VALLEY_HEIGHT).smooth(16, plateaus);
-        heightmapLand.add(heightmapHills).add(heightmapValleys).smooth(2).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight + 1f).maskToOceanHeights(0.15f, oceanFloor).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight - 1f);
+        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(10, ramps);
+        heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
+        heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(16, plateaus);
+        heightmapLand.add(heightmapHills).add(heightmapValleys).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight + 1f).maskToOceanHeights(0.15f, oceanFloor).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight - 1f);
         heightmapCliffs.init(cliffs, 0, 1f).maskToMountains(cliffs);
         heightmapShore.init(shore, 0, 1.5f).maskToMountains(shore);
-        heightmapMountains.maskToMountains(mountains).smooth(1);
+        heightmapMountains.maskToMountains(mountains).add(heightmapCliffs).add(heightmapShore);
 
-        ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 3f, null, "mountainsPresent");
+        ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 3f, random.nextLong(), "mountainsPresent");
 
-        heightmapMountains.add(mountainsPresent, 3f);
-        heightmapMountains.add(heightmapLand).add(heightmapCliffs).add(heightmapShore).smooth(2).add(heightmapPlateaus).smooth(1);
+        heightmapMountains.add(mountainsPresent, 2f).subtract(mountainsPresent.copy().invert(), 10f).clampMin(0);
 
-        heightmapBase.add(heightmapMountains);
+        heightmapBase.add(heightmapMountains).add(heightmapLand).add(heightmapPlateaus).smooth(1);
         slope = heightmapBase.copy().gradient();
 
         impassable = new ConcurrentBinaryMask(slope, 1f, random.nextLong(), "impassable");
