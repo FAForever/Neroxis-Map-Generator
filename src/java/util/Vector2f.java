@@ -15,6 +15,10 @@ public strictfp class Vector2f {
         this.y = y;
     }
 
+    public Vector2f(Vector2f location) {
+        this(location.x, location.y);
+    }
+
     public Vector2f(Vector3f location) {
         this.x = location.x;
         this.y = location.z;
@@ -58,6 +62,16 @@ public strictfp class Vector2f {
     public Vector2f add(float x, float y) {
         this.x += x;
         this.y += y;
+        return this;
+    }
+
+    public Vector2f subtract(Vector2f vector) {
+        return subtract(vector.x, vector.y);
+    }
+
+    public Vector2f subtract(float x, float y) {
+        this.x -= x;
+        this.y -= y;
         return this;
     }
 
