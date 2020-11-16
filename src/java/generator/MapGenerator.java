@@ -509,7 +509,7 @@ public strictfp class MapGenerator {
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 12;
         if (mapSize > 512) {
-            mountainDensity = mountainDensity * .5f + .15f;
+            landDensity = landDensity - .05f;
             mexSpacing = 64;
         }
         hasCivilians = random.nextBoolean();
