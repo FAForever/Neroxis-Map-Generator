@@ -779,7 +779,7 @@ public strictfp class MapGenerator {
         } else if (mountainDensity < .75) {
             mountains.acid(.00005f, 24).widenGaps(24);
         } else {
-            mountains.acid(.00010f, 24).widenGaps(24);
+            mountains.acid(.000125f, 24).widenGaps(24);
         }
         mountains.removeAreasSmallerThan(128).smooth(8, .5f);
         plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(mapSize * mapSize / 256);
