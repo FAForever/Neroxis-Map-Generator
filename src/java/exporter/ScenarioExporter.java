@@ -27,8 +27,8 @@ public strictfp class ScenarioExporter {
         out.writeBytes("  hidePreviewMarkers = " + !map.isGeneratePreview() + ",\n");
         out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            out.writeBytes("  norushoffsetX_ARMY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().x + ",\n");
-            out.writeBytes("  norushoffsetY_ARMY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().y + ",\n");
+            out.writeBytes("  norushoffsetX_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().x + ",\n");
+            out.writeBytes("  norushoffsetY_" + map.getSpawn(i).getId() + " = " + map.getSpawn(i).getNoRushOffset().y + ",\n");
         }
         out.writeBytes("  Configurations = {\n");
         out.writeBytes("    ['standard'] = {\n");
@@ -37,7 +37,7 @@ public strictfp class ScenarioExporter {
         out.writeBytes("          name = 'FFA',\n");
         out.writeBytes("          armies = {");
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            out.writeBytes("'ARMY_" + (i + 1) + "'");
+            out.writeBytes("'" + map.getSpawn(i).getId() + "'");
             if (i < map.getSpawnCount() - 1)
                 out.writeBytes(",");
         }

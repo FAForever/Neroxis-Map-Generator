@@ -96,8 +96,9 @@ public strictfp class UnitGenerator {
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);
             Vector2f symLocation = spawnable.getSymmetryPoint(location);
-            group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), type, location, rot));
-            group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), type, symLocation, spawnable.getReflectedRotation(rot)));
+            int groupID = group.getUnitCount();
+            group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot));
+            group.addUnit(new Unit(String.format("sym %s %s Unit %d", army.getId(), group.getId(), groupID), type, symLocation, spawnable.getReflectedRotation(rot)));
         });
     }
 
