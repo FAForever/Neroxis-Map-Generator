@@ -594,9 +594,9 @@ public strictfp class MapGenerator {
             Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
             long sTime = System.currentTimeMillis();
             propGenerator.generateProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 5f);
-            propGenerator.generateProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 1.5f);
-            propGenerator.generateProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 1.5f);
-            propGenerator.generateProps(smallRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 1.5f);
+            propGenerator.generateProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), 2.5f);
+            propGenerator.generateProps(largeRockFieldMask.getFinalMask().minus(noProps.copy().inflate(16)), biome.getPropMaterials().getRocks(), 1.5f);
+            propGenerator.generateProps(smallRockFieldMask.getFinalMask().minus(noProps.copy().inflate(16)), biome.getPropMaterials().getRocks(), 1.5f);
             propGenerator.generateProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateProps\n",
@@ -952,8 +952,8 @@ public strictfp class MapGenerator {
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).trimEdge(10);
         treeMask.randomize(.2f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
         treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).trimEdge(8).smooth(4, .25f);
-        largeRockFieldMask.randomize(reclaimDensity * .001f).trimEdge(mapSize / 16).grow(.5f, symmetrySettings.getSpawnSymmetry(), 3).setSize(mapSize + 1).intersect(land).minus(impassable);
-        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).grow(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).intersect(land).minus(impassable);
+        largeRockFieldMask.randomize(reclaimDensity * .0015f).trimEdge(mapSize / 16).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).setSize(mapSize + 1).intersect(land).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).setSize(mapSize + 1).intersect(land).minus(impassable);
     }
 
     private void setupWreckPipeline() {
@@ -964,7 +964,7 @@ public strictfp class MapGenerator {
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetrySettings, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "allWreck");
 
-        t1LandWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land).deflate(mapSize / 512f).trimEdge(20);
+        t1LandWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land).inflate(2).trimEdge(20);
         t2LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).trimEdge(64);
         t3LandWreckMask.randomize(reclaimDensity * .00025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).minus(land.copy().inflate(16)).trimEdge(20);
@@ -973,8 +973,7 @@ public strictfp class MapGenerator {
     }
 
     private void generateExclusionMasks() {
-        noProps = new BinaryMask(impassable.getFinalMask(), null);
-        noProps.combine(ramps.getFinalMask());
+        noProps = new BinaryMask(unbuildable.getFinalMask(), null);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
@@ -986,10 +985,9 @@ public strictfp class MapGenerator {
             noProps.fillCircle(map.getHydro(i).getPosition(), 8, true);
         }
 
-        noProps.combine(allWreckMask.getFinalMask()).combine(allBaseMask.getFinalMask());
+        noProps.combine(allBaseMask.getFinalMask());
 
         noBases = new BinaryMask(unbuildable.getFinalMask(), null);
-        noBases.combine(ramps.getFinalMask()).fillCenter(16, true);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noBases.fillCircle(map.getSpawn(i).getPosition(), 128, true);
@@ -1002,7 +1000,6 @@ public strictfp class MapGenerator {
         }
 
         noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
-        noCivs.combine(ramps.getFinalMask()).fillCenter(16, true);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
             noCivs.fillCircle(map.getSpawn(i).getPosition(), 96, true);
@@ -1014,7 +1011,7 @@ public strictfp class MapGenerator {
             noCivs.fillCircle(map.getHydro(i).getPosition(), 32, true);
         }
 
-        noWrecks = new BinaryMask(impassable.getFinalMask(), null);
+        noWrecks = new BinaryMask(unbuildable.getFinalMask(), null);
 
         noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
 
