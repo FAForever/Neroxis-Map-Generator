@@ -23,12 +23,11 @@ public strictfp class PreviewGenerator {
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
-                boolean useAlpha = i == 1 || i == 3 || i == 4 || i == 5 || i == 6 || i == 7 || i == 8;
                 BufferedImage layer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(materials.getPreviewColors()[i]);
                 layerGraphics.fillRect(0, 0, 256, 256);
-                BufferedImage shadedLayer = getShadedImage(layer, map, i, useAlpha);
+                BufferedImage shadedLayer = getShadedImage(layer, map, i, true);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
                 graphics.setPaint(layerPaint);
                 graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
