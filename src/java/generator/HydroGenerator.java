@@ -3,6 +3,7 @@ package generator;
 import map.BinaryMask;
 import map.Hydro;
 import map.SCMap;
+import map.SymmetryPoint;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -16,61 +17,67 @@ public strictfp class HydroGenerator {
     private final SCMap map;
     private final Random random;
     private final int spawnSize;
+    private final int hydroSpacing;
 
     public HydroGenerator(SCMap map, long seed, int spawnSize) {
         this.map = map;
         this.spawnSize = spawnSize;
+        this.hydroSpacing = 64;
         random = new Random(seed);
     }
 
     public void generateHydros(BinaryMask spawnable) {
         map.getHydros().clear();
-        int hydroSpacing = 64;
+        int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
 
-        spawnable.fillHalf(false);
+        spawnable.limitToSpawnRegion();
         spawnable.fillCenter(64, false);
 
         for (int i = 0; i < map.getMexCount(); i++) {
             spawnable.fillCircle(map.getMex(i).getPosition(), 10, false);
         }
 
+        generateBaseHydros(spawnable);
+
+        for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
+            spawnable.fillCircle(map.getSpawn(i).getPosition(), spawnSize, false);
+        }
+
+        int numHydrosLeft = (map.getHydroCountInit() - map.getHydroCount()) / numSymPoints;
+
+        generateIndividualHydros(spawnable, numHydrosLeft, hydroSpacing);
+    }
+
+    public void generateBaseHydros(BinaryMask spawnable) {
         boolean spawnHydro = random.nextBoolean();
+        int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
         if (spawnHydro) {
-            for (int i = 0; i < map.getSpawnCount(); i += 2) {
+            for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-                baseHydro.fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize * 2f, true).fillCircle(map.getSpawn(i + 1).getPosition(), 10, false).intersect(spawnable);
-                for (int j = 0; j < map.getSpawnCount(); j += 2) {
+                baseHydro.fillCircle(map.getSpawn(i).getPosition(), spawnSize * 2f, true).fillCircle(map.getSpawn(i).getPosition(), 10, false).intersect(spawnable);
+                for (int j = 0; j < map.getSpawnCount(); j += numSymPoints) {
                     baseHydro.fillCircle(map.getSpawn(j).getPosition(), 16, false);
                 }
                 for (Hydro hydro : map.getHydros()) {
                     baseHydro.fillCircle(hydro.getPosition(), 16, false);
                 }
-                generateIndividualHydros(baseHydro, 2, hydroSpacing);
+                generateIndividualHydros(baseHydro, 1, hydroSpacing);
             }
         }
-
-        for (int i = 0; i < map.getSpawnCount(); i += 2) {
-            spawnable.fillCircle(map.getSpawn(i + 1).getPosition(), spawnSize, false);
-        }
-
-        int numHydrosLeft = map.getHydroCountInit() - map.getHydroCount();
-
-        generateIndividualHydros(spawnable, numHydrosLeft, hydroSpacing);
     }
 
     public void generateIndividualHydros(BinaryMask spawnable, int numHydros, int hydroSpacing) {
         List<Vector2f> mexLocations = new ArrayList<>(spawnable.getRandomCoordinates(hydroSpacing));
-        for (int i = 0; i < numHydros; i += 2) {
+        for (int i = 0; i < numHydros; i++) {
             if (mexLocations.size() == 0) {
                 break;
             }
-
-            Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
-            Vector2f symLocation = spawnable.getSymmetryPoint(location);
-
             int hydroId = map.getHydroCount() + 1;
-            map.addHydro(new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location)));
-            map.addHydro(new Hydro(String.format("sym Hydro %d", hydroId), new Vector3f(symLocation)));
+            Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
+            Hydro hydro = new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location));
+            map.addHydro(hydro);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition());
+            symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Hydro(String.format("sym %d Hydro %d", symmetryPoints.indexOf(symmetryPoint), hydroId), new Vector3f(symmetryPoint.getLocation()))));
         }
     }
 

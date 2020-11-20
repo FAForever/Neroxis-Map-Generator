@@ -10,12 +10,13 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Getter
-public strictfp class ConcurrentFloatMask extends ConcurrentMask {
+public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     private final String name;
     private FloatMask floatMask;
 
     public ConcurrentFloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        super(seed);
         this.floatMask = new FloatMask(size, seed, symmetrySettings);
         this.name = name;
         this.symmetrySettings = this.floatMask.getSymmetrySettings();
@@ -24,6 +25,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     }
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, Long seed, String name) {
+        super(seed);
         this.name = name;
         this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
 
@@ -37,6 +39,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
     }
 
     public ConcurrentFloatMask(ConcurrentBinaryMask mask, float low, float high, Long seed, String name) {
+        super(seed);
         this.name = name;
         this.floatMask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
 
@@ -167,7 +170,6 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask {
         return floatMask.copy();
     }
 
-    @Override
     public ConcurrentFloatMask mockClone() {
         return new ConcurrentFloatMask(this, 0L, "mocked");
     }

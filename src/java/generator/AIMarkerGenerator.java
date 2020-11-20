@@ -3,6 +3,7 @@ package generator;
 import map.AIMarker;
 import map.BinaryMask;
 import map.SCMap;
+import map.SymmetryPoint;
 import util.Vector2f;
 
 import java.util.ArrayList;
@@ -47,14 +48,13 @@ public strictfp class AIMarkerGenerator {
         coordinates.forEach(location -> location.add(.5f, .5f));
         ArrayList<Vector2f> coordinatesArray = new ArrayList<>(coordinates);
         coordinates.forEach((location) -> {
-            markerArrayList.add(new AIMarker(String.format(nameFormat, coordinatesArray.indexOf(location)), location, new LinkedHashSet<>()));
-            Vector2f symLocation = passable.getSymmetryPoint(location);
-            if (symLocation != null) {
-                markerArrayList.add(new AIMarker(String.format(nameFormat + "s", coordinatesArray.indexOf(location)), symLocation, new LinkedHashSet<>()));
-            }
+            AIMarker aiMarker = new AIMarker(String.format(nameFormat, coordinatesArray.indexOf(location)), location, new LinkedHashSet<>());
+            markerArrayList.add(aiMarker);
+            ArrayList<SymmetryPoint> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition());
+            symmetryPoints.forEach(symmetryPoint -> markerArrayList.add(new AIMarker(String.format(nameFormat + "s%d", coordinatesArray.indexOf(location), symmetryPoints.indexOf(symmetryPoint)), symmetryPoint.getLocation(), new LinkedHashSet<>())));
         });
         markerArrayList.forEach(aiMarker -> markerArrayList.forEach(aiMarker1 -> {
-            if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) < 128) {
+            if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) <= 128) {
                 LinkedHashSet<Vector2f> lineCoordinates = aiMarker.getPosition().getXZLine(aiMarker1.getPosition());
                 boolean connected = !lineCoordinates.removeIf(location -> !passable.get(location));
                 if (connected) {

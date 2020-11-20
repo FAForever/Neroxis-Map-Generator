@@ -3,9 +3,11 @@ package generator;
 import map.BinaryMask;
 import map.Decal;
 import map.SCMap;
+import map.SymmetryPoint;
 import util.Vector2f;
 import util.Vector3f;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Random;
 
@@ -71,7 +73,7 @@ public strictfp class DecalGenerator {
 
     public void generateDecals(BinaryMask spawnable, String[] paths, float separation, float scale) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
-        spawnableCopy.fillHalf(false);
+        spawnableCopy.limitToSpawnRegion();
         LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
         boolean flipX;
         boolean flipZ;
@@ -95,14 +97,16 @@ public strictfp class DecalGenerator {
         }
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);
-            Vector2f symLocation = spawnableCopy.getSymmetryPoint(location);
             Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
-            Decal decal1 = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
-            float rot = spawnableCopy.getReflectedRotation(decal1.getRotation().y);
-            Vector3f symRotation = new Vector3f(decal1.getRotation().x, rot, decal1.getRotation().z);
-            Decal decal2 = new Decal(decal1.getPath(), symLocation, symRotation, scale, 2400);
-            map.addDecal(decal1);
-            map.addDecal(decal2);
+            Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
+            map.addDecal(decal);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(decal.getPosition());
+            ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(decal.getRotation().y);
+            for (int i = 0; i < symmetryPoints.size(); i++) {
+                Vector3f symVectorRotation = new Vector3f(decal.getRotation().x, symmetryRotation.get(i), decal.getRotation().z);
+                Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i).getLocation(), symVectorRotation, scale, decal.getCutOffLOD());
+                map.addDecal(symDecal);
+            }
         });
     }
 

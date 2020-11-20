@@ -1,7 +1,7 @@
 package bases;
 
 import com.faforever.commons.lua.LuaLoader;
-import lombok.Data;
+import lombok.Value;
 import map.Army;
 import map.Group;
 import map.Symmetry;
@@ -11,54 +11,58 @@ import org.luaj.vm2.LuaValue;
 import util.Vector2f;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
-@Data
+@Value
 public class BaseTemplate {
-    private final Vector2f center;
-    private final Army army;
-    private final Group group;
-    private final String luaFile;
-    private final LinkedHashMap<String, LinkedHashSet<Vector2f>> structures = new LinkedHashMap<>();
+    Vector2f center;
+    Army army;
+    Group group;
+    LinkedHashMap<String, LinkedHashSet<Vector2f>> units;
 
-    public BaseTemplate(Vector2f center, Army army, Group group, String luaFile) throws IOException, URISyntaxException {
+    public BaseTemplate(Vector2f center, Army army, Group group, LinkedHashMap<String, LinkedHashSet<Vector2f>> units) {
         this.center = center;
         this.army = army;
         this.group = group;
-        this.luaFile = luaFile;
-        loadUnits();
+        this.units = units;
     }
 
-    protected void loadUnits() throws IOException {
+    public BaseTemplate(Vector2f center, Army army, Group group, String luaFile) throws IOException {
+        this.center = center;
+        this.army = army;
+        this.group = group;
+        this.units = new LinkedHashMap<>(loadUnits(luaFile));
+    }
+
+    public static LinkedHashMap<String, LinkedHashSet<Vector2f>> loadUnits(String luaFile) throws IOException {
+        LinkedHashMap<String, LinkedHashSet<Vector2f>> units = new LinkedHashMap<>();
         LuaValue lua = LuaLoader.load(BaseTemplate.class.getResourceAsStream(luaFile));
-        LuaTable units = lua.get("Units").checktable();
+        LuaTable luaUnits = lua.get("Units").checktable();
         LuaValue key = LuaValue.NIL;
-        while (units.next(key) != LuaValue.NIL) {
-            key = units.next(key).checkvalue(1);
-            LuaValue unit = units.get(key);
+        while (luaUnits.next(key) != LuaValue.NIL) {
+            key = luaUnits.next(key).checkvalue(1);
+            LuaValue unit = luaUnits.get(key);
             String type = unit.get("type").checkstring().toString();
             LuaTable posTable = unit.get("Position").checktable();
             Vector2f position = new Vector2f(posTable.get(1).tofloat(), posTable.get(3).tofloat());
-            if (structures.containsKey(type)) {
-                structures.get(type).add(position);
+            if (units.containsKey(type)) {
+                units.get(type).add(position);
             } else {
-                structures.put(type, new LinkedHashSet<>(Collections.singletonList(position)));
+                units.put(type, new LinkedHashSet<>(Collections.singletonList(position)));
             }
         }
+        return units;
     }
 
     public void addUnits() {
-        structures.forEach((name, positions) -> {
-            positions.forEach(position -> {
-                group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, position.add(center), 0));
-            });
-        });
+        units.forEach((name, positions) ->
+                positions.forEach(position ->
+                        group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, new Vector2f(position).add(center), 0))));
     }
 
     public void flip(Symmetry symmetry) {
-        structures.values().forEach(positions -> positions.forEach(position -> position.flip(new Vector2f(0, 0), symmetry)));
+        units.values().forEach(positions -> positions.forEach(position -> position.flip(new Vector2f(0, 0), symmetry)));
     }
 }

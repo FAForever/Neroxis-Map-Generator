@@ -396,7 +396,7 @@ public strictfp class SCMap {
     public void setPreviewImage(FloatMask previewMask) {
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
-                this.preview.setRGB(x, y, (int) previewMask.get(x, y));
+                this.preview.setRGB(x, y, previewMask.get(x, y).intValue());
             }
         }
     }
@@ -405,7 +405,7 @@ public strictfp class SCMap {
         FloatMask previewMask = new FloatMask(this.preview.getHeight(), null, symmetrySettings);
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
-                previewMask.set(x, y, this.preview.getRGB(x, y));
+                previewMask.set(x, y, (float) this.preview.getRGB(x, y));
             }
         }
         return previewMask;

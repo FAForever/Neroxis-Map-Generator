@@ -10,12 +10,13 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Getter
-public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
+public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     private final String name;
     private BinaryMask binaryMask;
 
     public ConcurrentBinaryMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        super(seed);
         this.binaryMask = new BinaryMask(size, seed, symmetrySettings);
         this.name = name;
         this.symmetrySettings = this.binaryMask.getSymmetrySettings();
@@ -24,6 +25,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     }
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, Long seed, String name) {
+        super(seed);
         this.name = name;
         this.binaryMask = new BinaryMask(1, seed, mask.getSymmetrySettings());
 
@@ -37,12 +39,14 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
     }
 
     public ConcurrentBinaryMask(BinaryMask mask, Long seed, String name) {
+        super(seed);
         this.name = name;
         this.binaryMask = new BinaryMask(mask, seed);
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask(ConcurrentFloatMask mask, float threshold, Long seed, String name) {
+        super(seed);
         this.name = name;
         this.binaryMask = new BinaryMask(1, seed, mask.getSymmetrySettings());
 
@@ -239,9 +243,9 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask {
         );
     }
 
-    public ConcurrentBinaryMask trimEdge(int rimWidth) {
+    public ConcurrentBinaryMask fillEdge(int rimWidth, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.trimEdge(rimWidth)
+                this.binaryMask.fillEdge(rimWidth, value)
         );
     }
 

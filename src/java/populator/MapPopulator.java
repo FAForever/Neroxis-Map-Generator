@@ -282,9 +282,9 @@ public strictfp class MapPopulator {
             plateauResourceMask = new BinaryMask(land, random.nextLong());
 
             resourceMask.minus(impassable).deflate(8).minus(ramps);
-            resourceMask.trimEdge(16).fillCenter(16, false);
-            waterResourceMask.minus(ramps).deflate(16).trimEdge(16).fillCenter(16, false);
-            plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(16, true);
+            resourceMask.fillEdge(16, false).fillCenter(16, false);
+            waterResourceMask.minus(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false);
+            plateauResourceMask.combine(resourceMask).intersect(plateaus).fillEdge(16, false).fillCenter(16, true);
         }
 
         if (populateMexes) {
@@ -504,12 +504,12 @@ public strictfp class MapPopulator {
             BinaryMask smallRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
 
             cliffRockMask.randomize(.4f).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
-            fieldStoneMask.randomize(random.nextFloat() * .001f).enlarge(256).intersect(land).minus(impassable);
-            fieldStoneMask.enlarge(map.getSize() + 1).trimEdge(10);
-            treeMask.randomize(.2f).enlarge(map.getSize() / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
-            treeMask.enlarge(map.getSize() + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).trimEdge(8).smooth(4, .25f);
-            largeRockFieldMask.randomize(random.nextFloat() * .001f).trimEdge(map.getSize() / 16).grow(.5f, symmetrySettings.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
-            smallRockFieldMask.randomize(random.nextFloat() * .003f).trimEdge(map.getSize() / 64).grow(.5f, symmetrySettings.getSpawnSymmetry()).intersect(land).minus(impassable);
+            fieldStoneMask.randomize(random.nextFloat() * .001f).setSize(256).intersect(land).minus(impassable);
+            fieldStoneMask.setSize(map.getSize() + 1).fillEdge(10, false);
+            treeMask.randomize(.2f).setSize(map.getSize() / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
+            treeMask.setSize(map.getSize() + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);
+            largeRockFieldMask.randomize(random.nextFloat() * .001f).fillEdge(map.getSize() / 16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
+            smallRockFieldMask.randomize(random.nextFloat() * .003f).fillEdge(map.getSize() / 64, false).grow(.5f, symmetrySettings.getSpawnSymmetry()).intersect(land).minus(impassable);
 
             BinaryMask noProps = new BinaryMask(impassable, null);
 
@@ -562,9 +562,9 @@ public strictfp class MapPopulator {
             map.getLandAIMarkers().clear();
             map.getNavyAIMarkers().clear();
             map.getAirAIMarkers().clear();
-            BinaryMask passableAI = passable.copy().combine(land.copy().invert()).trimEdge(8);
+            BinaryMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
             passableLand.intersect(passableAI);
-            passableWater.deflate(16).intersect(passableAI).trimEdge(8);
+            passableWater.deflate(16).intersect(passableAI).fillEdge(8, false);
             AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, 0);
             aiMarkerGenerator.generateAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
             aiMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");

@@ -85,7 +85,7 @@ public strictfp class Vector2f {
         switch (symmetry) {
             case X -> x = 2 * center.x - x;
             case Z -> y = 2 * center.y - y;
-            case XZ, ZX, POINT -> {
+            case XZ, ZX, POINT2 -> {
                 x = 2 * center.x - x;
                 y = 2 * center.y - y;
             }

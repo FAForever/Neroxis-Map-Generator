@@ -52,6 +52,14 @@ public class VisualDebugger {
         isDrawAllMasks = false;
     }
 
+    public static void visualizeMask(Mask<?> mask) {
+        if (mask.getMask() instanceof Float[][]) {
+            visualizeMask((FloatMask) mask);
+        } else if (mask.getMask() instanceof Boolean[][]) {
+            visualizeMask((BinaryMask) mask);
+        }
+    }
+
     public static void visualizeMask(BinaryMask mask) {
         if (!shouldRecord(mask)) {
             return;

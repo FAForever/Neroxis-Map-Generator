@@ -1,11 +1,28 @@
 package map;
 
+import lombok.Getter;
+
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
-public strictfp abstract class ConcurrentMask extends Mask {
+@Getter
+public strictfp abstract class ConcurrentMask<T extends Mask<?>> {
+    protected final Random random;
+    protected T mask;
+    protected SymmetrySettings symmetrySettings;
 
-    abstract public ConcurrentMask mockClone();
+    public ConcurrentMask(Long seed) {
+        if (seed != null) {
+            this.random = new Random(seed);
+        } else {
+            this.random = null;
+        }
+    }
+
+    abstract public ConcurrentMask<T> mockClone();
+
+    abstract int getSize();
 
     abstract public String getName();
 

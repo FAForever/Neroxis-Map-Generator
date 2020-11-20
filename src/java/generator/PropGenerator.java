@@ -3,8 +3,10 @@ package generator;
 import map.BinaryMask;
 import map.Prop;
 import map.SCMap;
+import map.SymmetryPoint;
 import util.Vector2f;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Random;
 
@@ -42,15 +44,19 @@ public strictfp class PropGenerator {
     }
 
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
-        spawnable.fillHalf(false);
+        spawnable.limitToSpawnRegion();
         LinkedHashSet<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);
-            Vector2f symLocation = spawnable.getSymmetryPoint(location);
-            Prop prop1 = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
-            Prop prop2 = new Prop(prop1.getPath(), symLocation, spawnable.getReflectedRotation(prop1.getRotation()));
-            map.addProp(prop1);
-            map.addProp(prop2);
+            Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
+            map.addProp(prop);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(prop.getPosition());
+            ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(prop.getRotation());
+            for (int i = 0; i < symmetryPoints.size(); i++) {
+                Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i).getLocation(), symmetryRotation.get(i));
+                map.addProp(symProp);
+            }
+
         });
     }
 

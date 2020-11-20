@@ -42,8 +42,8 @@ public strictfp class MapGenerator {
     public static final float MOUNTAIN_DENSITY_MIN = 0f;
     public static final float MOUNTAIN_DENSITY_MAX = 1f;
     public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
-    public static final float RAMP_DENSITY_MIN = .02f;
-    public static final float RAMP_DENSITY_MAX = .03f;
+    public static final float RAMP_DENSITY_MIN = .025f;
+    public static final float RAMP_DENSITY_MAX = .05f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
@@ -146,6 +146,7 @@ public strictfp class MapGenerator {
         generator.generationTime = Instant.now().getEpochSecond();
 
         generator.interpretArguments(args);
+        generator.setupSymmetrySettings();
 
         System.out.println("Generating map " + generator.mapName.replace('/', '^'));
         generator.generate();
@@ -213,7 +214,7 @@ public strictfp class MapGenerator {
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
-                    "--symmetry arg         optional, set the symmetry for the generated map (Point, X, Z, XZ, ZX)\n" +
+                    "--symmetry arg         optional, set the symmetry for the generated map (POINT2, POINT4, QUAD, DIAG, X, Z, XZ, ZX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
@@ -369,32 +370,60 @@ public strictfp class MapGenerator {
             default -> 8 + random.nextInt(8);
         };
         mexCount *= mexMultiplier;
-        Symmetry[] symmetries;
+        List<Symmetry> terrainSymmetries;
         if (spawnCount == 2) {
-            symmetries = new Symmetry[]{Symmetry.POINT, Symmetry.QUAD, Symmetry.DIAG};
+            terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.QUAD, Symmetry.DIAG));
         } else {
-            symmetries = Symmetry.values();
+            terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
         }
-        int symmetryValue = random.nextInt(symmetries.length - 1);
-        terrainSymmetry = symmetries[symmetryValue];
+        terrainSymmetries.remove(Symmetry.NONE);
+        terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
+        biome = Biomes.getRandomBiome(random);
+    }
+
+    private void setupSymmetrySettings() {
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
-        Symmetry[] teams;
+        List<Symmetry> spawns;
+        List<Symmetry> teams;
         switch (terrainSymmetry) {
-            case POINT -> {
+            case POINT2 -> {
                 spawnSymmetry = terrainSymmetry;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX};
-                teamSymmetry = teams[random.nextInt(teams.length)];
+                teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX));
+                teamSymmetry = teams.get(random.nextInt(teams.size()));
+            }
+            case POINT4 -> {
+                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4));
+                if (spawnCount % 4 != 0) {
+                    spawns.remove(Symmetry.POINT4);
+                }
+                spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
+                if (spawnSymmetry.equals(Symmetry.POINT2)) {
+                    teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX));
+                } else {
+                    teams = new ArrayList<>(Arrays.asList(Symmetry.QUAD, Symmetry.DIAG));
+                }
+                teamSymmetry = teams.get(random.nextInt(teams.size()));
             }
             case QUAD -> {
-                spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.X, Symmetry.Z};
-                teamSymmetry = teams[random.nextInt(teams.length)];
+                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
+                if (spawnCount % 4 != 0) {
+                    spawns.remove(Symmetry.POINT4);
+                    spawns.remove(Symmetry.QUAD);
+                }
+                spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z));
+                teamSymmetry = teams.get(random.nextInt(teams.size()));
             }
             case DIAG -> {
-                spawnSymmetry = Symmetry.POINT;
-                teams = new Symmetry[]{Symmetry.XZ, Symmetry.ZX};
-                teamSymmetry = teams[random.nextInt(teams.length)];
+                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));
+                if (spawnCount % 4 != 0) {
+                    spawns.remove(Symmetry.POINT4);
+                    spawns.remove(Symmetry.DIAG);
+                }
+                spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.XZ, Symmetry.ZX));
+                teamSymmetry = teams.get(random.nextInt(teams.size()));
             }
             default -> {
                 spawnSymmetry = terrainSymmetry;
@@ -402,10 +431,9 @@ public strictfp class MapGenerator {
             }
         }
         symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
-        if (spawnCount == 2 && (terrainSymmetry == Symmetry.POINT || terrainSymmetry == Symmetry.DIAG || terrainSymmetry == Symmetry.QUAD)) {
-            symmetrySettings.setSpawnSymmetry(Symmetry.POINT);
+        if (spawnCount == 2) {
+            symmetrySettings.setSpawnSymmetry(Symmetry.POINT2);
         }
-        biome = Biomes.getRandomBiome(random);
     }
 
     private void parseOptions(byte[] optionBytes) {
@@ -715,9 +743,9 @@ public strictfp class MapGenerator {
         land.randomize(landDensity).smooth(2, .75f);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (mountainDensity * 128), mapSize / 16);
+            mountains.progressiveWalk((int) (mountainDensity * 192 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
         } else {
-            mountains.randomWalk((int) (mountainDensity * 128), mapSize / 16);
+            mountains.randomWalk((int) (mountainDensity * 192 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
         }
         mountains.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), 4).grow(.5f, symmetrySettings.getTerrainSymmetry(), 6);
         plateaus.randomize(plateauDensity).smooth(4);
@@ -757,7 +785,7 @@ public strictfp class MapGenerator {
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (fillLandGaps) {
-            land.widenGaps(fillSize);
+            land.widenGaps((int) (fillSize * 1.5f));
         }
 
         land.removeAreasSmallerThan(mapSize * mapSize / 256);
@@ -765,9 +793,9 @@ public strictfp class MapGenerator {
         mountains.minus(spawnLandMask);
 
         ramps.randomize(rampDensity).setSize(mapSize + 1);
-        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(32);
+        ramps.intersect(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).inflate(24);
 
-        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(32).intersect(plateaus.copy().outline()).flipValues(.005f).inflate(32);
+        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(24).intersect(plateaus.copy().outline()).flipValues(.005f).inflate(24);
 
         ramps.combine(spawnRamps).fillGaps(48).smooth(8, .25f);
 
@@ -775,11 +803,11 @@ public strictfp class MapGenerator {
         if (mountainDensity < .25) {
             mountains.widenGaps(12);
         } else if (mountainDensity < .5) {
-            mountains.widenGaps(24);
+            mountains.widenGaps(16);
         } else if (mountainDensity < .75) {
-            mountains.acid(.00005f, 24).widenGaps(24);
+            mountains.acid(.0001f / terrainSymmetry.getNumSymPoints(), 24).widenGaps(16);
         } else {
-            mountains.acid(.000125f, 24).widenGaps(24);
+            mountains.acid(.00025f / terrainSymmetry.getNumSymPoints(), 24).widenGaps(16);
         }
         mountains.removeAreasSmallerThan(128).smooth(8, .5f);
         plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(mapSize * mapSize / 256);
@@ -854,9 +882,9 @@ public strictfp class MapGenerator {
         passableLand = new ConcurrentBinaryMask(land, random.nextLong(), "passableLand");
         passableWater = new ConcurrentBinaryMask(land, random.nextLong(), "passableWater").invert();
 
-        passable.trimEdge(8);
+        passable.fillEdge(8, false);
         passableLand.intersect(passable);
-        passableWater.deflate(16).trimEdge(8);
+        passableWater.deflate(16).fillEdge(8, false);
     }
 
     private void setupResourcePipeline() {
@@ -865,9 +893,9 @@ public strictfp class MapGenerator {
         plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
         resourceMask.minus(unbuildable).deflate(8);
-        resourceMask.trimEdge(16).fillCenter(24, false);
-        waterResourceMask.minus(unbuildable).deflate(8).trimEdge(16).fillCenter(24, false);
-        plateauResourceMask.combine(resourceMask).intersect(plateaus).trimEdge(16).fillCenter(24, false);
+        resourceMask.fillEdge(16, false).fillCenter(24, false);
+        waterResourceMask.minus(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
+        plateauResourceMask.combine(resourceMask).intersect(plateaus).fillEdge(16, false).fillCenter(24, false);
     }
 
     private void setupTexturePipeline() {
@@ -937,10 +965,10 @@ public strictfp class MapGenerator {
         if (hasCivilians) {
             if (!enemyCivilians) {
                 baseMask.setSize(mapSize + 1);
-                civReclaimMask.randomize(.005f).setSize(mapSize + 1).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(64);
+                civReclaimMask.randomize(.005f).setSize(mapSize + 1).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).fillEdge(64, false);
             } else {
                 civReclaimMask.setSize(mapSize + 1);
-                baseMask.randomize(.005f).setSize(mapSize + 1).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).trimEdge(32).minus(civReclaimMask.copy().inflate(16));
+                baseMask.randomize(.005f).setSize(mapSize + 1).intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).fillEdge(32, false).minus(civReclaimMask.copy().inflate(16));
             }
         } else {
             civReclaimMask.setSize(mapSize + 1);
@@ -949,11 +977,11 @@ public strictfp class MapGenerator {
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
 
         cliffRockMask.randomize(.4f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
-        fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).trimEdge(10);
+        fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
         treeMask.randomize(.2f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
-        treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).trimEdge(8).smooth(4, .25f);
-        largeRockFieldMask.randomize(reclaimDensity * .0015f).trimEdge(mapSize / 16).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).setSize(mapSize + 1).intersect(land).minus(impassable);
-        smallRockFieldMask.randomize(reclaimDensity * .003f).trimEdge(mapSize / 64).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).setSize(mapSize + 1).intersect(land).minus(impassable);
+        treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);
+        largeRockFieldMask.randomize(reclaimDensity * .00125f).fillEdge(mapSize / 16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).setSize(mapSize + 1).intersect(land).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .0025f).fillEdge(mapSize / 64, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).setSize(mapSize + 1).intersect(land).minus(impassable);
     }
 
     private void setupWreckPipeline() {
@@ -964,11 +992,11 @@ public strictfp class MapGenerator {
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetrySettings, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "allWreck");
 
-        t1LandWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land).inflate(2).trimEdge(20);
-        t2LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).trimEdge(64);
-        t3LandWreckMask.randomize(reclaimDensity * .00025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).trimEdge(mapSize / 8);
-        navyFactoryWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).minus(land.copy().inflate(16)).trimEdge(20);
-        t2NavyWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land.copy().inflate(4).outline()).trimEdge(20);
+        t1LandWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land).inflate(2).fillEdge(20, false);
+        t2LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).fillEdge(64, false);
+        t3LandWreckMask.randomize(reclaimDensity * .00025f).setSize(mapSize + 1).intersect(land).minus(t1LandWreckMask).minus(t2LandWreckMask).fillEdge(mapSize / 8, false);
+        navyFactoryWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).minus(land.copy().inflate(16)).fillEdge(20, false);
+        t2NavyWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land.copy().inflate(4).outline()).fillEdge(20, false);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
     }
 
