@@ -534,6 +534,7 @@ public strictfp class MapGenerator {
             landDensity = landDensity - .05f;
             mexSpacing = 64;
         }
+        mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.75f);
         hasCivilians = random.nextBoolean();
         enemyCivilians = random.nextBoolean();
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
