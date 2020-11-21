@@ -495,18 +495,40 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
-            case POINT2, POINT4 -> fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+            case POINT2 -> fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+            case POINT4 -> {
+                fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.Z || symmetrySettings.getTeamSymmetry() == Symmetry.X) {
+                    fillCenter(extent / 2, value, Symmetry.X);
+                    fillCenter(extent / 2, value, Symmetry.Z);
+                } else if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX || symmetrySettings.getTeamSymmetry() == Symmetry.XZ) {
+                    fillCenter(extent / 2, value, Symmetry.XZ);
+                    fillCenter(extent / 2, value, Symmetry.ZX);
+                }
+            }
             case Z -> fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
             case X -> fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
             case XZ -> fillDiagonal(extent * 3 / 4, false, value);
             case ZX -> fillDiagonal(extent * 3 / 4, true, value);
             case DIAG -> {
-                fillCenter(extent / 2, value, Symmetry.XZ);
-                fillCenter(extent / 2, value, Symmetry.ZX);
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.DIAG) {
+                    fillCenter(extent / 2, value, Symmetry.XZ);
+                    fillCenter(extent / 2, value, Symmetry.ZX);
+                } else {
+                    fillCenter(extent / 4, value, Symmetry.XZ);
+                    fillCenter(extent / 4, value, Symmetry.ZX);
+                    fillCenter(extent, value, symmetrySettings.getTeamSymmetry());
+                }
             }
             case QUAD -> {
-                fillCenter(extent / 2, value, Symmetry.X);
-                fillCenter(extent / 2, value, Symmetry.Z);
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
+                    fillCenter(extent / 2, value, Symmetry.X);
+                    fillCenter(extent / 2, value, Symmetry.Z);
+                } else {
+                    fillCenter(extent / 4, value, Symmetry.X);
+                    fillCenter(extent / 4, value, Symmetry.Z);
+                    fillCenter(extent, value, symmetrySettings.getTeamSymmetry());
+                }
             }
         }
         VisualDebugger.visualizeMask(this);

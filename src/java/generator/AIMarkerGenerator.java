@@ -27,7 +27,7 @@ public strictfp class AIMarkerGenerator {
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
             if (!unusedCoordinates.contains(location)) {
-                if (!passable.inHalf(location, false)) {
+                if (!passable.inTeam(location, false)) {
                     unusedCoordinates.add(location);
                     return;
                 }

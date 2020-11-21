@@ -398,17 +398,12 @@ public strictfp class MapGenerator {
                     spawns.remove(Symmetry.POINT4);
                 }
                 spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
-                if (spawnSymmetry.equals(Symmetry.POINT2)) {
-                    teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX));
-                } else {
-                    teams = new ArrayList<>(Arrays.asList(Symmetry.QUAD, Symmetry.DIAG));
-                }
+                teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX));
                 teamSymmetry = teams.get(random.nextInt(teams.size()));
             }
             case QUAD -> {
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
                 if (spawnCount % 4 != 0) {
-                    spawns.remove(Symmetry.POINT4);
                     spawns.remove(Symmetry.QUAD);
                 }
                 spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
@@ -418,7 +413,6 @@ public strictfp class MapGenerator {
             case DIAG -> {
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));
                 if (spawnCount % 4 != 0) {
-                    spawns.remove(Symmetry.POINT4);
                     spawns.remove(Symmetry.DIAG);
                 }
                 spawnSymmetry = spawns.get(random.nextInt(spawns.size()));

@@ -87,14 +87,26 @@ public strictfp abstract class Mask<T> {
             case XZ -> symmetryPoints.add(new SymmetryPoint(new Vector2f(y, x), Symmetry.XZ));
             case ZX -> symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - y - 1, getSize() - x - 1), Symmetry.ZX));
             case QUAD -> {
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.Z));
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.X));
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.Z));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.X));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                } else {
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.X));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.Z));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                }
             }
             case DIAG -> {
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.ZX));
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.XZ));
-                symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.ZX));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.XZ));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                } else {
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.XZ));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.ZX));
+                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                }
             }
         }
         return symmetryPoints;
@@ -117,14 +129,26 @@ public strictfp abstract class Mask<T> {
             case Z -> symmetryRotation.add((float) StrictMath.atan2(-StrictMath.cos(rot), StrictMath.sin(rot)));
             case XZ, ZX -> symmetryRotation.add((float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot)));
             case QUAD -> {
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.Z));
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.X));
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.Z));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.X));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                } else {
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.X));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.Z));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                }
             }
             case DIAG -> {
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.ZX));
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.XZ));
-                symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.ZX));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.XZ));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                } else {
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.XZ));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.ZX));
+                    symmetryRotation.addAll(getSymmetryRotation(rot, Symmetry.POINT2));
+                }
             }
         }
         return symmetryRotation;
@@ -159,7 +183,7 @@ public strictfp abstract class Mask<T> {
     public int getMinYBound(int x, Symmetry symmetry) {
         return switch (symmetry) {
             case POINT2, POINT4 -> getMinYBound(x, symmetrySettings.getTeamSymmetry());
-            case DIAG -> x;
+            case DIAG, XZ -> x;
             default -> 0;
         };
     }
@@ -171,22 +195,21 @@ public strictfp abstract class Mask<T> {
     public int getMaxYBound(int x, Symmetry symmetry) {
         return switch (symmetry) {
             case POINT2, POINT4 -> getMaxYBound(x, symmetrySettings.getTeamSymmetry());
-            case XZ -> x + 1;
             case ZX, DIAG -> getSize() - x;
             case Z, QUAD -> getSize() / 2;
             default -> getSize();
         };
     }
 
-    public boolean inHalf(Vector3f pos, boolean reverse) {
-        return inHalf(new Vector2f(pos), reverse);
+    public boolean inTeam(Vector3f pos, boolean reverse) {
+        return inTeam(new Vector2f(pos), reverse);
     }
 
-    public boolean inHalf(Vector2f pos, boolean reverse) {
-        return inHalf((int) pos.x, (int) pos.y, reverse);
+    public boolean inTeam(Vector2f pos, boolean reverse) {
+        return inTeam((int) pos.x, (int) pos.y, reverse);
     }
 
-    public boolean inHalf(int x, int y, boolean reverse) {
+    public boolean inTeam(int x, int y, boolean reverse) {
         return (x >= getMinXBound(symmetrySettings.getTeamSymmetry()) && x < getMaxXBound(symmetrySettings.getTeamSymmetry()) && y >= getMinYBound(x, symmetrySettings.getTeamSymmetry()) && y < getMaxYBound(x, symmetrySettings.getTeamSymmetry())) ^ reverse && inBounds(x, y);
     }
 

@@ -38,11 +38,13 @@ public strictfp class SpawnGenerator {
             location.add(.5f, .5f);
             spawnable.fillCircle(location, separation, false);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location);
-            symmetryPoints.forEach(symmetryPoint -> spawnable.fillCircle(symmetryPoint.getLocation(), separation, false));
-
-            if (spawnable.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
-                symmetryPoints.forEach(symmetryPoint -> spawnable.fillCircle(symmetryPoint.getLocation(), separation, false));
-            }
+            symmetryPoints.forEach(symmetryPoint -> {
+                if (spawnable.inTeam(symmetryPoint.getLocation(), false)) {
+                    spawnable.fillCircle(symmetryPoint.getLocation(), separation, false);
+                } else {
+                    spawnable.fillCircle(symmetryPoint.getLocation(), map.getSize() / 2f, false);
+                }
+            });
 
             spawnLandMask.fillCircle(location, spawnSize, true);
             symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
