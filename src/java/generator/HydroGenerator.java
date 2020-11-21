@@ -72,7 +72,7 @@ public strictfp class HydroGenerator {
             if (mexLocations.size() == 0) {
                 break;
             }
-            int hydroId = map.getHydroCount() + 1;
+            int hydroId = map.getHydroCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
             Hydro hydro = new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location));
             map.addHydro(hydro);

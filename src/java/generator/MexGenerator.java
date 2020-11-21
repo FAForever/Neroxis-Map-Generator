@@ -160,7 +160,7 @@ public strictfp class MexGenerator {
             if (mexLocations.size() == 0) {
                 break;
             }
-            int mexId = map.getMexCount() + 1;
+            int mexId = map.getMexCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
             Mex mex = new Mex(String.format("Mex %d", mexId), new Vector3f(location));
             map.addMex(mex);
