@@ -497,19 +497,27 @@ public strictfp class MapPopulator {
                 System.out.print("An error occured while loading props\n");
                 System.exit(1);
             }
-            BinaryMask treeMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetrySettings);
-            BinaryMask cliffRockMask = new BinaryMask(map.getSize() / 16, random.nextLong(), symmetrySettings);
-            BinaryMask fieldStoneMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
-            BinaryMask largeRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
-            BinaryMask smallRockFieldMask = new BinaryMask(map.getSize() / 4, random.nextLong(), symmetrySettings);
 
-            cliffRockMask.randomize(.4f).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline()).intersect(land);
-            fieldStoneMask.randomize(random.nextFloat() * .001f).setSize(256).intersect(land).minus(impassable);
-            fieldStoneMask.setSize(map.getSize() + 1).fillEdge(10, false);
-            treeMask.randomize(.2f).setSize(map.getSize() / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
-            treeMask.setSize(map.getSize() + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);
-            largeRockFieldMask.randomize(random.nextFloat() * .001f).fillEdge(map.getSize() / 16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 3).intersect(land).minus(impassable);
-            smallRockFieldMask.randomize(random.nextFloat() * .003f).fillEdge(map.getSize() / 64, false).grow(.5f, symmetrySettings.getSpawnSymmetry()).intersect(land).minus(impassable);
+            BinaryMask flatEnough = new BinaryMask(slope, .02f, random.nextLong());
+            BinaryMask flatish = new BinaryMask(slope, .042f, random.nextLong());
+            BinaryMask nearSteepHills = new BinaryMask(slope,.55f, random.nextLong());
+            BinaryMask flatEnoughNearRock = new BinaryMask(slope,1.25f, random.nextLong());
+            flatEnough.invert().intersect(land).erode(.15f);
+            flatish.invert().intersect(land).erode(.15f);
+            nearSteepHills.inflate(6).combine(flatEnoughNearRock.copy().inflate(16).intersect(nearSteepHills.copy().inflate(11).minus(flatEnough))).intersect(land.copy().deflate(10));
+            flatEnoughNearRock.inflate(7).combine(nearSteepHills).intersect(flatish);
+
+            BinaryMask treeMask = new BinaryMask(flatEnough, random.nextLong());
+            BinaryMask cliffRockMask = new BinaryMask(land, random.nextLong());
+            BinaryMask fieldStoneMask = new BinaryMask(land, random.nextLong());
+            BinaryMask largeRockFieldMask = new BinaryMask(land, random.nextLong());
+            BinaryMask smallRockFieldMask = new BinaryMask(land, random.nextLong());
+
+            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0));
+            cliffRockMask.randomize(.017f).intersect(flatEnoughNearRock);
+            fieldStoneMask.randomize(.00145f).intersect(flatEnoughNearRock.copy().deflate(1));
+            largeRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);
+            smallRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);
 
             BinaryMask noProps = new BinaryMask(impassable, null);
 
