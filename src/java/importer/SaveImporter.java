@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public strictfp class SaveImporter {
 
@@ -76,23 +77,20 @@ public strictfp class SaveImporter {
             case "Air Path Node" -> {
                 locTable = marker.get("position").checktable();
                 List<String> neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                neighbors.removeIf(String::isEmpty);
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors)));
+                map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isBlank()).collect(Collectors.toList()))));
             }
             case "Amphibious Path Node" -> {
                 locTable = marker.get("position").checktable();
                 List<String> neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                neighbors.removeIf(String::isEmpty);
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors)));
+                map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isBlank()).collect(Collectors.toList()))));
             }
             case "Water Path Node" -> {
                 locTable = marker.get("position").checktable();
                 List<String> neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                neighbors.removeIf(String::isEmpty);
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors)));
+                map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isBlank()).collect(Collectors.toList()))));
             }
             case "Naval Area" -> {
                 locTable = marker.get("position").checktable();
@@ -112,9 +110,8 @@ public strictfp class SaveImporter {
             case "Land Path Node" -> {
                 locTable = marker.get("position").checktable();
                 List<String> neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                neighbors.removeIf(String::isEmpty);
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors)));
+                map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isBlank()).collect(Collectors.toList()))));
             }
             case "Rally Point" -> {
                 locTable = marker.get("position").checktable();
