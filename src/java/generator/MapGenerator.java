@@ -8,10 +8,7 @@ import exporter.SCMapExporter;
 import lombok.Getter;
 import lombok.Setter;
 import map.*;
-import util.ArgumentParser;
-import util.FileUtils;
-import util.Pipeline;
-import util.Util;
+import util.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -724,6 +721,9 @@ public strictfp class MapGenerator {
         }
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+
+        map.addBlank(new BlankMarker(mapName, new Vector2f(0, 0)));
+        map.addDecalGroup(new DecalGroup(mapName, new int[0]));
 
         return map;
     }
