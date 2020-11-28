@@ -46,8 +46,8 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 5f;
-    public static final float VALLEY_HEIGHT = -3f;
-    public static final float HILL_HEIGHT = 3f;
+    public static final float VALLEY_HEIGHT = -2f;
+    public static final float HILL_HEIGHT = 2f;
     public static boolean DEBUG = false;
     //read from cli args
     private String pathToFolder = ".";
@@ -143,9 +143,8 @@ public strictfp class MapGenerator {
         generator.generationTime = Instant.now().getEpochSecond();
 
         generator.interpretArguments(args);
-        generator.setupSymmetrySettings();
 
-        System.out.println("Generating map " + generator.mapName.replace('/', '^'));
+        System.out.println(generator.mapName);
         generator.generate();
         generator.save();
         System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
@@ -195,6 +194,7 @@ public strictfp class MapGenerator {
                 System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
             }
         }
+        setupSymmetrySettings();
     }
 
     private void interpretArguments(Map<String, String> arguments) {
@@ -228,22 +228,22 @@ public strictfp class MapGenerator {
             pathToFolder = arguments.get("folder-path");
         }
 
-        if (arguments.containsKey("map-name")) {
+        if (arguments.containsKey("map-name") && arguments.get("map-name") != null) {
             mapName = arguments.get("map-name");
             parseMapName();
             return;
         }
 
-        if (arguments.containsKey("seed")) {
+        if (arguments.containsKey("seed") && arguments.get("seed") != null) {
             seed = Long.parseLong(arguments.get("seed"));
             random = new Random(seed);
         }
 
-        if (arguments.containsKey("spawn-count")) {
+        if (arguments.containsKey("spawn-count") && arguments.get("spawn-count") != null) {
             spawnCount = Integer.parseInt(arguments.get("spawn-count"));
         }
 
-        if (arguments.containsKey("map-size")) {
+        if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
             mapSize = Integer.parseInt(arguments.get("map-size"));
         }
 
@@ -252,44 +252,44 @@ public strictfp class MapGenerator {
         tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind");
         blind = arguments.containsKey("blind");
 
-        if (arguments.containsKey("land-density")) {
-            landDensity = Float.parseFloat(arguments.get("land-density")) * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
-            landDensity = (float) StrictMath.round((landDensity - LAND_DENSITY_MIN) / (LAND_DENSITY_RANGE) * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
+        if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
+            landDensity = Float.parseFloat(arguments.get("land-density"));
+            landDensity = (float) StrictMath.round(landDensity * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
         }
 
-        if (arguments.containsKey("plateau-density")) {
-            plateauDensity = Float.parseFloat(arguments.get("plateau-density")) * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
-            plateauDensity = (float) StrictMath.round((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
+        if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
+            plateauDensity = Float.parseFloat(arguments.get("plateau-density"));
+            plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
         }
 
-        if (arguments.containsKey("mountain-density")) {
-            mountainDensity = Float.parseFloat(arguments.get("mountain-density")) * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
-            mountainDensity = (float) StrictMath.round((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
+        if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
+            mountainDensity = Float.parseFloat(arguments.get("mountain-density"));
+            mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
         }
 
-        if (arguments.containsKey("ramp-density")) {
-            rampDensity = Float.parseFloat(arguments.get("ramp-density")) * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
-            rampDensity = (float) StrictMath.round((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
+        if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
+            rampDensity = Float.parseFloat(arguments.get("ramp-density"));
+            rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
         }
 
-        if (arguments.containsKey("reclaim-density")) {
+        if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
             reclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
             reclaimDensity = (float) StrictMath.round(reclaimDensity * 127f) / 127f;
         }
 
-        if (arguments.containsKey("mex-count")) {
+        if (arguments.containsKey("mex-count") && arguments.get("mex-count") != null) {
             mexCount = Integer.parseInt(arguments.get("mex-count"));
         }
 
-        if (arguments.containsKey("symmetry")) {
+        if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
             terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
         }
 
-        if (arguments.containsKey("map-size")) {
+        if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
             mapSize = Integer.parseInt(arguments.get("map-size"));
         }
 
-        if (arguments.containsKey("biome")) {
+        if (arguments.containsKey("biome") && arguments.get("biome") != null) {
             biome = Biomes.getBiomeByName(arguments.get("biome"));
         }
 
@@ -481,11 +481,7 @@ public strictfp class MapGenerator {
                 (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
                 (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
                 (byte) ((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f),
-                (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
-                (byte) (reclaimDensity * 127f),
-                (byte) (mexCount),
-                (byte) (terrainSymmetry.ordinal()),
-                (byte) (Biomes.list.indexOf(biome))};
+                (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f)};
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
         parameters.set(1, blind);
@@ -547,6 +543,7 @@ public strictfp class MapGenerator {
 
         spawnSeparation = switch (terrainSymmetry) {
             case Z, X -> StrictMath.max(StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, map.getSize() / spawnCount), 48);
+            case NONE -> mapSize / spawnCount * 2;
             default -> StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 48);
         };
 

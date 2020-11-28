@@ -24,21 +24,26 @@ public class MapGeneratorTest {
     BaseEncoding NameEncoder = BaseEncoding.base32().omitPadding().lowerCase();
     long seed = 1234;
     byte spawnCount = 2;
-    float landDensity = StrictMath.round((.85f - LAND_DENSITY_MIN) / (LAND_DENSITY_RANGE) * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
-    float plateauDensity = StrictMath.round((.5f - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
-    float mountainDensity = StrictMath.round((.025 - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f) / 127f * MOUNTAIN_DENSITY_RANGE;
-    float rampDensity = StrictMath.round((.05f - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
-    float reclaimDensity = StrictMath.round(.75f * 127f) / 127f;
+    float inLandDensity = .5f;
+    float inPlateauDensity = .5f;
+    float inMountainDensity = .5f;
+    float inRampDensity = .5f;
+    float inReclaimDensity = .75f;
+    float landDensity = StrictMath.round(inLandDensity * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
+    float plateauDensity = StrictMath.round(inPlateauDensity * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
+    float mountainDensity = StrictMath.round(inMountainDensity * 127f) / 127f * MOUNTAIN_DENSITY_RANGE;
+    float rampDensity = StrictMath.round(inRampDensity * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
+    float reclaimDensity = StrictMath.round(inReclaimDensity * 127f) / 127f;
     int mexCount = 16;
-    String symmetry = "POINT";
+    String symmetry = "POINT2";
     int mapSize = 512;
     byte[] optionArray = {spawnCount,
             (byte) (mapSize / 64),
-            (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
-            (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
-            (byte) ((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f),
-            (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f),
-            (byte) (reclaimDensity * 127f),
+            (byte) StrictMath.round(inLandDensity * 127f),
+            (byte) StrictMath.round(inPlateauDensity * 127f),
+            (byte) StrictMath.round(inMountainDensity * 127f),
+            (byte) StrictMath.round(inRampDensity * 127f),
+            (byte) StrictMath.round(inReclaimDensity * 127f),
             (byte) (mexCount),
             (byte) (Symmetry.valueOf(symmetry).ordinal())};
     byte[] clientOptionArray = {spawnCount,
@@ -54,11 +59,11 @@ public class MapGeneratorTest {
     String[] keywordArgs = {"--folder-path", ".",
             "--seed", Long.toString(seed),
             "--spawn-count", Byte.toString(spawnCount),
-            "--land-density", Float.toString(landDensity),
-            "--plateau-density", Float.toString(plateauDensity),
-            "--mountain-density", Float.toString(mountainDensity),
-            "--ramp-density", Float.toString(rampDensity),
-            "--reclaim-density", Float.toString(reclaimDensity),
+            "--land-density", Float.toString(inLandDensity),
+            "--plateau-density", Float.toString(inPlateauDensity),
+            "--mountain-density", Float.toString(inMountainDensity),
+            "--ramp-density", Float.toString(inRampDensity),
+            "--reclaim-density", Float.toString(inReclaimDensity),
             "--mex-count", Integer.toString(mexCount),
             "--symmetry", symmetry,
             "--map-size", Integer.toString(mapSize)};
@@ -142,11 +147,11 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), landDensity, .01);
-        assertEquals(instance.getPlateauDensity(), plateauDensity, .01);
-        assertEquals(instance.getMountainDensity(), mountainDensity, .01);
-        assertEquals(instance.getRampDensity(), rampDensity, .01);
-        assertEquals(instance.getReclaimDensity(), reclaimDensity, .01);
+        assertEquals(instance.getLandDensity(), landDensity, 0);
+        assertEquals(instance.getPlateauDensity(), plateauDensity, 0);
+        assertEquals(instance.getMountainDensity(), mountainDensity, 0);
+        assertEquals(instance.getRampDensity(), rampDensity, 0);
+        assertEquals(instance.getReclaimDensity(), reclaimDensity, 0);
         assertEquals(instance.getMexCount(), mexCount);
         assertEquals(instance.getTerrainSymmetry(), Symmetry.valueOf(symmetry));
         assertEquals(instance.getMapSize(), mapSize);
