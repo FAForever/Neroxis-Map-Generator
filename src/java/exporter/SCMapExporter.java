@@ -10,10 +10,7 @@ import util.serialized.LightingSettings;
 import util.serialized.WaterSettings;
 
 import javax.imageio.ImageIO;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.RenderedImage;
+import java.awt.image.*;
 import java.io.*;
 import java.nio.file.Path;
 
@@ -30,16 +27,6 @@ public strictfp class SCMapExporter {
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 
-        DDSHeader previewDDSHeader = new DDSHeader();
-        previewDDSHeader.setWidth(256);
-        previewDDSHeader.setHeight(256);
-        previewDDSHeader.setRGBBitCount(32);
-        previewDDSHeader.setRBitMask(0x00FF0000);
-        previewDDSHeader.setGBitMask(0x0000FF00);
-        previewDDSHeader.setBBitMask(0x000000FF);
-        previewDDSHeader.setABitMask(0xFF000000);
-        byte[] previewHeaderBytes = previewDDSHeader.toBytes();
-
         // header
         writeInt(SCMap.SIGNATURE);
         writeInt(SCMap.VERSION_MAJOR);
@@ -49,9 +36,18 @@ public strictfp class SCMapExporter {
         writeFloat(map.getSize()); // height
         writeInt(0); // unknown
         writeShort((short) 0); // unknown
-        writeInt(previewHeaderBytes.length + map.getPreview().getWidth() * map.getPreview().getHeight() * 4); // preview image byte count
-        writeBytes(previewHeaderBytes);
-        writeInts(((DataBufferInt) map.getPreview().getData().getDataBuffer()).getData()); // preview image data
+
+        DDSHeader previewDDSHeader = new DDSHeader();
+        previewDDSHeader.setWidth(256);
+        previewDDSHeader.setHeight(256);
+        previewDDSHeader.setRGBBitCount(32);
+        previewDDSHeader.setRBitMask(0x00FF0000);
+        previewDDSHeader.setGBitMask(0x0000FF00);
+        previewDDSHeader.setBBitMask(0x000000FF);
+        previewDDSHeader.setABitMask(0xFF000000);
+
+        writeImageData(map.getPreview(), previewDDSHeader);
+
         writeInt(map.getMinorVersion());
 
         // heightmap
@@ -59,6 +55,7 @@ public strictfp class SCMapExporter {
         writeInt(map.getSize()); // height
         writeFloat(map.getHeightMapScale());
         writeShorts(((DataBufferUShort) map.getHeightmap().getData().getDataBuffer()).getData()); // heightmap data
+
         writeByte((byte) 0); // unknown
 
         // textures
@@ -73,67 +70,16 @@ public strictfp class SCMapExporter {
 
         // lighting
         LightingSettings mapLightingSettings = map.getBiome().getLightingSettings();
-        writeFloat(mapLightingSettings.getLightingMultiplier());
-        writeVector3f(mapLightingSettings.getSunDirection());
-        writeVector3f(mapLightingSettings.getSunAmbience());
-        writeVector3f(mapLightingSettings.getSunColor());
-        writeVector3f(mapLightingSettings.getShadowFillColor());
-        writeVector4f(mapLightingSettings.getSpecularColor());
-        writeFloat(mapLightingSettings.getBloom());
-        writeVector3f(mapLightingSettings.getFogColor());
-        writeFloat(mapLightingSettings.getFogStart());
-        writeFloat(mapLightingSettings.getFogEnd());
+        writeLightingSettings(mapLightingSettings);
 
         // water
         WaterSettings mapWaterSettings = map.getBiome().getWaterSettings();
-        writeByte((byte) (mapWaterSettings.isWaterPresent() ? 1 : 0));
-        writeFloat(mapWaterSettings.getElevation());
-        writeFloat(mapWaterSettings.getElevationDeep());
-        writeFloat(mapWaterSettings.getElevationAbyss());
-        writeVector3f(mapWaterSettings.getSurfaceColor());
-        writeVector2f(mapWaterSettings.getColorLerp());
-        writeFloat(mapWaterSettings.getRefractionScale());
-        writeFloat(mapWaterSettings.getFresnelBias());
-        writeFloat(mapWaterSettings.getFresnelPower());
-        writeFloat(mapWaterSettings.getUnitReflection());
-        writeFloat(mapWaterSettings.getSkyReflection());
-        writeFloat(mapWaterSettings.getSunShininess());
-        writeFloat(mapWaterSettings.getSunStrength());
-        writeVector3f(mapWaterSettings.getSunDirection());
-        writeVector3f(mapWaterSettings.getSunColor());
-        writeFloat(mapWaterSettings.getSunReflection());
-        writeFloat(mapWaterSettings.getSunGlow());
-        writeStringNull(mapWaterSettings.getTexPathCubemap());
-        writeStringNull(mapWaterSettings.getTexPathWaterRamp());
-
-        // waves
-        for (WaterSettings.WaveTexture waveTexture : mapWaterSettings.getWaveTextures()) {
-            writeFloat(waveTexture.getNormalRepeat());
-        }
-
-        for (WaterSettings.WaveTexture waveTexture : mapWaterSettings.getWaveTextures()) {
-            writeVector2f(waveTexture.getNormalMovement());
-            writeStringNull(waveTexture.getTexPath());
-        }
+        writeWaterSettings(mapWaterSettings);
 
         // wave generators
         writeInt(map.getWaveGeneratorCount());
         for (WaveGenerator waveGenerator : map.getWaveGenerators()) {
-            writeStringNull(waveGenerator.getTextureName());
-            writeStringNull(waveGenerator.getRampName());
-            writeVector3f(waveGenerator.getPosition());
-            writeFloat(waveGenerator.getRotation());
-            writeVector3f(waveGenerator.getVelocity());
-            writeFloat(waveGenerator.getLifeTimeFirst());
-            writeFloat(waveGenerator.getLifeTimeSecond());
-            writeFloat(waveGenerator.getPeriodFirst());
-            writeFloat(waveGenerator.getPeriodSecond());
-            writeFloat(waveGenerator.getScaleFirst());
-            writeFloat(waveGenerator.getScaleSecond());
-            writeFloat(waveGenerator.getFrameCount());
-            writeFloat(waveGenerator.getFrameRateFirst());
-            writeFloat(waveGenerator.getFrameRateSecond());
-            writeFloat(waveGenerator.getStripCount());
+            writeWaveGenerator(waveGenerator);
         }
 
         // terrain textures
@@ -162,30 +108,13 @@ public strictfp class SCMapExporter {
 
         // decals
         writeInt(map.getDecalCount());
-        for (int i = 0; i < map.getDecalCount(); i++) {
-            Decal decal = map.getDecal(i);
-            writeInt(i);
-            writeInt(decal.getType());
-            writeInt(2);
-            writeString(decal.getPath());
-            writeString("");
-            writeVector3f(decal.getScale());
-            writeVector3f(decal.getPosition());
-            writeVector3f(decal.getRotation());
-            writeFloat(decal.getCutOffLOD());
-            writeFloat(0);
-            writeInt(-1);
+        for (Decal decal : map.getDecals()) {
+            writeDecal(decal, map.getDecals().indexOf(decal));
         }
 
         writeInt(map.getDecalGroupCount());
-        for (int i = 0; i < map.getDecalGroupCount(); i++) {
-            DecalGroup decalGroup = map.getDecalGroup(i);
-            writeInt(i);
-            writeStringNull(decalGroup.getName());
-            writeInt(decalGroup.getData().length);
-            for (int j = 0; j < decalGroup.getData().length; j++) {
-                writeInt(decalGroup.getData()[j]);
-            }
+        for (DecalGroup decalGroup : map.getDecalGroups()) {
+            writeDecalGroup(decalGroup, map.getDecalGroups().indexOf(decalGroup));
         }
 
         writeInt(map.getSize()); // width
@@ -195,13 +124,10 @@ public strictfp class SCMapExporter {
         normalDDSHeader.setWidth(map.getNormalMap().getWidth());
         normalDDSHeader.setHeight(map.getNormalMap().getHeight());
         normalDDSHeader.setFourCC("DXT5");
-        byte[] normalHeaderBytes = normalDDSHeader.toBytes();
 
         // normal maps
         writeInt(1); // normal map count
-        writeInt(normalHeaderBytes.length + map.getNormalMap().getWidth() * map.getNormalMap().getHeight() * 4); // normalmap byte count
-        writeBytes(normalHeaderBytes); // dds header
-        writeInts(((DataBufferInt) map.getNormalMap().getData().getDataBuffer()).getData()); // normalmap data
+        writeImageData(map.getNormalMap(), normalDDSHeader);
 
         DDSHeader textureMaskLowDDSHeader = new DDSHeader();
         textureMaskLowDDSHeader.setWidth(map.getTextureMasksLow().getWidth());
@@ -211,12 +137,8 @@ public strictfp class SCMapExporter {
         textureMaskLowDDSHeader.setGBitMask(0x0000FF00);
         textureMaskLowDDSHeader.setBBitMask(0x000000FF);
         textureMaskLowDDSHeader.setABitMask(0xFF000000);
-        byte[] textureLowHeaderBytes = textureMaskLowDDSHeader.toBytes();
 
-        // texture maps
-        writeInt(textureLowHeaderBytes.length + map.getTextureMasksLow().getWidth() * map.getTextureMasksLow().getHeight() * 4); // texture masks low byte count
-        writeBytes(textureLowHeaderBytes); // dds header
-        writeInts(((DataBufferInt) map.getTextureMasksLow().getData().getDataBuffer()).getData()); // texture masks low data
+        writeImageData(map.getTextureMasksLow(), textureMaskLowDDSHeader);
 
         DDSHeader textureMaskHighDDSHeader = new DDSHeader();
         textureMaskHighDDSHeader.setWidth(map.getTextureMasksHigh().getWidth());
@@ -226,11 +148,8 @@ public strictfp class SCMapExporter {
         textureMaskHighDDSHeader.setGBitMask(0x0000FF00);
         textureMaskHighDDSHeader.setBBitMask(0x000000FF);
         textureMaskHighDDSHeader.setABitMask(0xFF000000);
-        byte[] textureHighHeaderBytes = textureMaskHighDDSHeader.toBytes();
 
-        writeInt(textureHighHeaderBytes.length + map.getTextureMasksHigh().getWidth() * map.getTextureMasksHigh().getHeight() * 4); // texture maks high byte count
-        writeBytes(textureHighHeaderBytes); // dds header
-        writeInts(((DataBufferInt) map.getTextureMasksHigh().getData().getDataBuffer()).getData()); // texture masks high data
+        writeImageData(map.getTextureMasksHigh(), textureMaskHighDDSHeader);
 
         DDSHeader waterDDSHeader = new DDSHeader();
         waterDDSHeader.setWidth(map.getWaterMap().getWidth());
@@ -253,57 +172,13 @@ public strictfp class SCMapExporter {
         // additional skybox
         if (map.getMinorVersion() >= 60) {
             SkyBox skyBox = map.getSkyBox();
-            writeVector3f(skyBox.getPosition());
-            writeFloat(skyBox.getHorizonHeight());
-            writeFloat(skyBox.getScale());
-            writeFloat(skyBox.getSubHeight());
-            writeInt(skyBox.getSubDivAx());
-            writeInt(skyBox.getSubDivHeight());
-            writeFloat(skyBox.getZenithHeight());
-            writeVector3f(skyBox.getHorizonColor());
-            writeVector3f(skyBox.getZenithColor());
-            writeFloat(skyBox.getDecalGlowMultiplier());
-
-            writeStringNull(skyBox.getAlbedo());
-            writeStringNull(skyBox.getGlow());
-
-            // Array of Planets/Stars
-            writeInt(skyBox.getPlanets().length);
-            for (SkyBox.Planet planet : skyBox.getPlanets()) {
-                writeVector3f(planet.getPosition());
-                writeFloat(planet.getRotation());
-                writeVector2f(planet.getScale());
-                writeVector4f(planet.getUv());
-            }
-
-            // Mid
-            writeByte((byte) skyBox.getMidRgbColor().getRed());
-            writeByte((byte) skyBox.getMidRgbColor().getBlue());
-            writeByte((byte) skyBox.getMidRgbColor().getGreen());
-
-            // Cirrus
-            writeFloat(skyBox.getCirrusMultiplier());
-            writeVector3f(skyBox.getCirrusColor());
-            writeStringNull(skyBox.getCirrusTexture());
-
-            writeInt(skyBox.getCirrusLayers().length);
-            for (SkyBox.Cirrus cirrus : skyBox.getCirrusLayers()) {
-                writeVector2f(cirrus.getFrequency());
-                writeFloat(cirrus.getSpeed());
-                writeVector2f(cirrus.getDirection());
-            }
-            writeFloat(skyBox.getClouds7());
+            writeSkyBox(skyBox);
         }
 
         // props
         writeInt(map.getPropCount());
         for (Prop prop : map.getProps()) {
-            writeStringNull(prop.getPath());
-            writeVector3f(prop.getPosition());
-            writeVector3f(new Vector3f((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
-            writeVector3f(new Vector3f(0f, 1f, 0f));
-            writeVector3f(new Vector3f((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
-            writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
+            writeProp(prop);
         }
 
         out.flush();
@@ -389,4 +264,148 @@ public strictfp class SCMapExporter {
         writeFloat(v.y);
     }
 
+    private static void writeProp(Prop prop) throws IOException {
+        writeStringNull(prop.getPath());
+        writeVector3f(prop.getPosition());
+        writeVector3f(new Vector3f((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
+        writeVector3f(new Vector3f(0f, 1f, 0f));
+        writeVector3f(new Vector3f((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
+        writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
+    }
+
+    private static void writeDecal(Decal decal, int id) throws IOException {
+        writeInt(id);
+        writeInt(decal.getType().getTypeNum());
+        writeInt(2);
+        writeString(decal.getPath());
+        writeString("");
+        writeVector3f(decal.getScale());
+        writeVector3f(decal.getPosition());
+        writeVector3f(decal.getRotation());
+        writeFloat(decal.getCutOffLOD());
+        writeFloat(0);
+        writeInt(-1);
+    }
+
+    private static void writeDecalGroup(DecalGroup decalGroup, int id) throws IOException {
+        writeInt(id);
+        writeStringNull(decalGroup.getName());
+        writeInt(decalGroup.getData().length);
+        for (int j = 0; j < decalGroup.getData().length; j++) {
+            writeInt(decalGroup.getData()[j]);
+        }
+    }
+
+    private static void writeWaveGenerator(WaveGenerator waveGenerator) throws IOException {
+        writeStringNull(waveGenerator.getTextureName());
+        writeStringNull(waveGenerator.getRampName());
+        writeVector3f(waveGenerator.getPosition());
+        writeFloat(waveGenerator.getRotation());
+        writeVector3f(waveGenerator.getVelocity());
+        writeFloat(waveGenerator.getLifeTimeFirst());
+        writeFloat(waveGenerator.getLifeTimeSecond());
+        writeFloat(waveGenerator.getPeriodFirst());
+        writeFloat(waveGenerator.getPeriodSecond());
+        writeFloat(waveGenerator.getScaleFirst());
+        writeFloat(waveGenerator.getScaleSecond());
+        writeFloat(waveGenerator.getFrameCount());
+        writeFloat(waveGenerator.getFrameRateFirst());
+        writeFloat(waveGenerator.getFrameRateSecond());
+        writeFloat(waveGenerator.getStripCount());
+    }
+
+    private static void writeWaterSettings(WaterSettings waterSettings) throws IOException {
+        writeByte((byte) (waterSettings.isWaterPresent() ? 1 : 0));
+        writeFloat(waterSettings.getElevation());
+        writeFloat(waterSettings.getElevationDeep());
+        writeFloat(waterSettings.getElevationAbyss());
+        writeVector3f(waterSettings.getSurfaceColor());
+        writeVector2f(waterSettings.getColorLerp());
+        writeFloat(waterSettings.getRefractionScale());
+        writeFloat(waterSettings.getFresnelBias());
+        writeFloat(waterSettings.getFresnelPower());
+        writeFloat(waterSettings.getUnitReflection());
+        writeFloat(waterSettings.getSkyReflection());
+        writeFloat(waterSettings.getSunShininess());
+        writeFloat(waterSettings.getSunStrength());
+        writeVector3f(waterSettings.getSunDirection());
+        writeVector3f(waterSettings.getSunColor());
+        writeFloat(waterSettings.getSunReflection());
+        writeFloat(waterSettings.getSunGlow());
+        writeStringNull(waterSettings.getTexPathCubemap());
+        writeStringNull(waterSettings.getTexPathWaterRamp());
+
+        // waves
+        for (WaterSettings.WaveTexture waveTexture : waterSettings.getWaveTextures()) {
+            writeFloat(waveTexture.getNormalRepeat());
+        }
+
+        for (WaterSettings.WaveTexture waveTexture : waterSettings.getWaveTextures()) {
+            writeVector2f(waveTexture.getNormalMovement());
+            writeStringNull(waveTexture.getTexPath());
+        }
+    }
+
+    private static void writeLightingSettings(LightingSettings lightingSettings) throws IOException {
+        writeFloat(lightingSettings.getLightingMultiplier());
+        writeVector3f(lightingSettings.getSunDirection());
+        writeVector3f(lightingSettings.getSunAmbience());
+        writeVector3f(lightingSettings.getSunColor());
+        writeVector3f(lightingSettings.getShadowFillColor());
+        writeVector4f(lightingSettings.getSpecularColor());
+        writeFloat(lightingSettings.getBloom());
+        writeVector3f(lightingSettings.getFogColor());
+        writeFloat(lightingSettings.getFogStart());
+        writeFloat(lightingSettings.getFogEnd());
+    }
+
+    private static void writeSkyBox(SkyBox skyBox) throws IOException {
+        writeVector3f(skyBox.getPosition());
+        writeFloat(skyBox.getHorizonHeight());
+        writeFloat(skyBox.getScale());
+        writeFloat(skyBox.getSubHeight());
+        writeInt(skyBox.getSubDivAx());
+        writeInt(skyBox.getSubDivHeight());
+        writeFloat(skyBox.getZenithHeight());
+        writeVector3f(skyBox.getHorizonColor());
+        writeVector3f(skyBox.getZenithColor());
+        writeFloat(skyBox.getDecalGlowMultiplier());
+
+        writeStringNull(skyBox.getAlbedo());
+        writeStringNull(skyBox.getGlow());
+
+        // Array of Planets/Stars
+        writeInt(skyBox.getPlanets().length);
+        for (SkyBox.Planet planet : skyBox.getPlanets()) {
+            writeVector3f(planet.getPosition());
+            writeFloat(planet.getRotation());
+            writeVector2f(planet.getScale());
+            writeVector4f(planet.getUv());
+        }
+
+        // Mid
+        writeByte((byte) skyBox.getMidRgbColor().getRed());
+        writeByte((byte) skyBox.getMidRgbColor().getBlue());
+        writeByte((byte) skyBox.getMidRgbColor().getGreen());
+
+        // Cirrus
+        writeFloat(skyBox.getCirrusMultiplier());
+        writeVector3f(skyBox.getCirrusColor());
+        writeStringNull(skyBox.getCirrusTexture());
+
+        writeInt(skyBox.getCirrusLayers().length);
+        for (SkyBox.Cirrus cirrus : skyBox.getCirrusLayers()) {
+            writeVector2f(cirrus.getFrequency());
+            writeFloat(cirrus.getSpeed());
+            writeVector2f(cirrus.getDirection());
+        }
+        writeFloat(skyBox.getClouds7());
+    }
+
+    private static void writeImageData(BufferedImage image, DDSHeader ddsHeader) throws IOException {
+        byte[] headerBytes = ddsHeader.toBytes();
+        writeInt(headerBytes.length + image.getWidth() * image.getHeight() * 4); // image byte count
+        writeBytes(headerBytes);
+        writeInts(((DataBufferInt) image.getData().getDataBuffer()).getData()); // image data
+    }
 }

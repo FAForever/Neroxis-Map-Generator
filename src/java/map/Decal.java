@@ -9,7 +9,7 @@ public strictfp class Decal {
     private final String path;
     private final Vector3f rotation;
     private final Vector3f scale;
-    private final int type;
+    private final DecalType type;
     private final float cutOffLOD;
     private Vector3f position;
 
@@ -24,10 +24,19 @@ public strictfp class Decal {
     public Decal(String path, Vector3f position, Vector3f rotation, Vector3f scale, float cutOffLOD) {
         this.path = path;
         if (path.contains("normal")) {
-            this.type = 2;
+            this.type = DecalType.NORMALS;
         } else {
-            this.type = 1;
+            this.type = DecalType.ALBEDO;
         }
+        this.position = position;
+        this.rotation = rotation;
+        this.scale = scale;
+        this.cutOffLOD = cutOffLOD;
+    }
+
+    public Decal(String path, Vector3f position, Vector3f rotation, Vector3f scale, float cutOffLOD, DecalType type) {
+        this.path = path;
+        this.type = type;
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;

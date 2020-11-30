@@ -87,72 +87,16 @@ public strictfp class SCMapImporter {
         }
 
         // lighting
-        LightingSettings mapLightingSettings = new LightingSettings();
-        mapLightingSettings.setLightingMultiplier(readFloat());
-        mapLightingSettings.setSunDirection(readVector3f());
-        mapLightingSettings.setSunAmbience(readVector3f());
-        mapLightingSettings.setSunColor(readVector3f());
-        mapLightingSettings.setShadowFillColor(readVector3f());
-        mapLightingSettings.setSpecularColor(readVector4f());
-        mapLightingSettings.setBloom(readFloat());
-        mapLightingSettings.setFogColor(readVector3f());
-        mapLightingSettings.setFogStart(readFloat());
-        mapLightingSettings.setFogEnd(readFloat());
+        LightingSettings mapLightingSettings = readLightingSettings();
 
         // water
-        WaterSettings mapWaterSettings = new WaterSettings();
-        mapWaterSettings.setWaterPresent(readByte() == 1);
-        mapWaterSettings.setElevation(readFloat());
-        mapWaterSettings.setElevationDeep(readFloat());
-        mapWaterSettings.setElevationAbyss(readFloat());
-        mapWaterSettings.setSurfaceColor(readVector3f());
-        mapWaterSettings.setColorLerp(readVector2f());
-        mapWaterSettings.setRefractionScale(readFloat());
-        mapWaterSettings.setFresnelBias(readFloat());
-        mapWaterSettings.setFresnelPower(readFloat());
-        mapWaterSettings.setUnitReflection(readFloat());
-        mapWaterSettings.setSkyReflection(readFloat());
-        mapWaterSettings.setSunShininess(readFloat());
-        mapWaterSettings.setSunStrength(readFloat());
-        mapWaterSettings.setSunDirection(readVector3f());
-        mapWaterSettings.setSunColor(readVector3f());
-        mapWaterSettings.setSunReflection(readFloat());
-        mapWaterSettings.setSunGlow(readFloat());
-        mapWaterSettings.setTexPathCubemap(readStringNull());
-        mapWaterSettings.setTexPathWaterRamp(readStringNull());
-
-        // waves
-        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            mapWaterSettings.getWaveTextures()[i].setNormalRepeat(readFloat());
-        }
-
-        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            mapWaterSettings.getWaveTextures()[i].setNormalMovement(readVector2f());
-            mapWaterSettings.getWaveTextures()[i].setTexPath(readStringNull());
-        }
+        WaterSettings mapWaterSettings = readWaterSettings();
 
         // wave generators
         int waveGeneratorCount = readInt();
         WaveGenerator[] waveGenerators = new WaveGenerator[waveGeneratorCount];
         for (int i = 0; i < waveGeneratorCount; i++) {
-            String textureName = readStringNull();
-            String rampName = readStringNull();
-            Vector3f position = readVector3f();
-            float rotation = readFloat();
-            Vector3f velocity = readVector3f();
-
-            waveGenerators[i] = new WaveGenerator(textureName, rampName, position, rotation, velocity);
-
-            waveGenerators[i].setLifeTimeFirst(readFloat());
-            waveGenerators[i].setLifeTimeSecond(readFloat());
-            waveGenerators[i].setPeriodFirst(readFloat());
-            waveGenerators[i].setPeriodSecond(readFloat());
-            waveGenerators[i].setScaleFirst(readFloat());
-            waveGenerators[i].setScaleSecond(readFloat());
-            waveGenerators[i].setFrameCount(readFloat());
-            waveGenerators[i].setFrameRateFirst(readFloat());
-            waveGenerators[i].setFrameRateSecond(readFloat());
-            waveGenerators[i].setStripCount(readFloat());
+            waveGenerators[i] = readWaveGenerator();
         }
 
         // terrain textures
@@ -184,35 +128,14 @@ public strictfp class SCMapImporter {
         int decalCount = readInt();
         Decal[] decals = new Decal[decalCount];
         for (int i = 0; i < decalCount; i++) {
-            int id = readInt();
-            int type = readInt();
-            int textureCount = readInt();
-            String[] texturePaths = new String[textureCount];
-            for (int j = 0; j < textureCount; j++) {
-                int stringLength = readInt();
-                texturePaths[j] = readString(stringLength);
-            }
-            Vector3f scale = readVector3f();
-            Vector3f position = readVector3f();
-            Vector3f rotation = readVector3f();
-            float cutOffLOD = readFloat();
-            float nearCutOffLOD = readFloat();
-            int ownerArmy = readInt();
-            decals[i] = new Decal(texturePaths[0], position, rotation, scale, cutOffLOD);
+            decals[i] = readDecal();
         }
 
         //decal group count
         int groupCount = readInt();
         DecalGroup[] decalGroups = new DecalGroup[groupCount];
         for (int i = 0; i < groupCount; i++) {
-            int id = readInt();
-            String name = readStringNull();
-            int length = readInt();
-            int[] data = new int[length];
-            for (int j = 0; j < length; j++) {
-                data[j] = readInt();
-            }
-            decalGroups[i] = new DecalGroup(name, data);
+            decalGroups[i] = readDecalGroup();
         }
 
         int widthInt2 = readInt();
@@ -223,17 +146,11 @@ public strictfp class SCMapImporter {
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        int normalMapByteCount = readInt() - 128;
-        DDSHeader normalDDSHeader = DDSHeader.parseHeader(readBytes(128));
-        int[] normalMapData = readInts(normalMapByteCount / 4);
+        int[] normalMapData = readImageData();
 
         // texture maps
-        int textureMaskLowByteCount = readInt() - 128;
-        DDSHeader textureMaskLowDDSHeader = DDSHeader.parseHeader(readBytes(128));
-        int[] textureMaskLowData = readInts(textureMaskLowByteCount / 4);
-        int textureMaskHighByteCount = readInt() - 128;
-        DDSHeader textureMaskHighDDSHeader = DDSHeader.parseHeader(readBytes(128));
-        int[] textureMaskHighData = readInts(textureMaskHighByteCount / 4);
+        int[] textureMaskLowData = readImageData();
+        int[] textureMaskHighData = readImageData();
 
         // water maps
         if (readInt() != 1) {
@@ -251,70 +168,16 @@ public strictfp class SCMapImporter {
         int[] terrainTypeData = readInts(widthInt * heightInt / 4);
 
         // Additional Skybox
-        SkyBox skyBox = new SkyBox();
+        SkyBox skyBox = null;
         if (version >= 60) {
-            skyBox.setPosition(readVector3f());
-            skyBox.setHorizonHeight(readFloat());
-            skyBox.setScale(readFloat());
-            skyBox.setSubHeight(readFloat());
-            skyBox.setSubDivAx(readInt());
-            skyBox.setSubDivHeight(readInt());
-            skyBox.setZenithHeight(readFloat());
-            skyBox.setHorizonColor(readVector3f());
-            skyBox.setZenithColor(readVector3f());
-            skyBox.setDecalGlowMultiplier(readFloat());
-
-            skyBox.setAlbedo(readStringNull());
-            skyBox.setGlow(readStringNull());
-
-            // Array of Planets/Stars
-            int length = readInt();
-            SkyBox.Planet[] planets = new SkyBox.Planet[length];
-            for (int i = 0; i < length; i++) {
-                planets[i] = new SkyBox.Planet();
-                planets[i].setPosition(readVector3f());
-                planets[i].setRotation(readFloat());
-                planets[i].setScale(readVector2f());
-                planets[i].setUv(readVector4f());
-            }
-            skyBox.setPlanets(planets);
-
-            // Mid
-            skyBox.setMidRgbColor(new Color(readByte(), readByte(), readByte(), 0));
-
-            // Cirrus
-            skyBox.setCirrusMultiplier(readFloat());
-            skyBox.setCirrusColor(readVector3f());
-
-            skyBox.setCirrusTexture(readStringNull());
-
-            int cirrusLayerCount = readInt();
-            SkyBox.Cirrus[] cirrusLayers = new SkyBox.Cirrus[cirrusLayerCount];
-            for (int i = 0; i < cirrusLayerCount; i++) {
-                cirrusLayers[i] = new SkyBox.Cirrus();
-                cirrusLayers[i].setFrequency(readVector2f());
-                cirrusLayers[i].setSpeed(readFloat());
-                cirrusLayers[i].setDirection(readVector2f());
-            }
-            skyBox.setCirrusLayers(cirrusLayers);
-            skyBox.setClouds7(readFloat());
+            skyBox = readSkyBox();
         }
 
         // props
         int propCount = readInt();
         Prop[] props = new Prop[propCount];
         for (int i = 0; i < propCount; i++) {
-            String path = readStringNull();
-            Vector3f position = readVector3f();
-            Vector3f rotationX = readVector3f();
-            Vector3f rotationY = readVector3f();
-            Vector3f rotationZ = readVector3f();
-            Vector3f scale = readVector3f();
-            float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
-            if ((rotation - StrictMath.atan2(-rotationZ.x, rotationZ.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
-//                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
-            }
-            props[i] = new Prop(path, position, rotation);
+            props[i] = readProp();
         }
 
         in.close();
@@ -501,6 +364,178 @@ public strictfp class SCMapImporter {
         return new Vector2f(readFloat(), readFloat());
     }
 
+    private static LightingSettings readLightingSettings() throws IOException {
+        LightingSettings lightingSettings = new LightingSettings();
+        lightingSettings.setLightingMultiplier(readFloat());
+        lightingSettings.setSunDirection(readVector3f());
+        lightingSettings.setSunAmbience(readVector3f());
+        lightingSettings.setSunColor(readVector3f());
+        lightingSettings.setShadowFillColor(readVector3f());
+        lightingSettings.setSpecularColor(readVector4f());
+        lightingSettings.setBloom(readFloat());
+        lightingSettings.setFogColor(readVector3f());
+        lightingSettings.setFogStart(readFloat());
+        lightingSettings.setFogEnd(readFloat());
+        return lightingSettings;
+    }
+
+    private static WaterSettings readWaterSettings() throws IOException {
+        WaterSettings waterSettings = new WaterSettings();
+        waterSettings.setWaterPresent(readByte() == 1);
+        waterSettings.setElevation(readFloat());
+        waterSettings.setElevationDeep(readFloat());
+        waterSettings.setElevationAbyss(readFloat());
+        waterSettings.setSurfaceColor(readVector3f());
+        waterSettings.setColorLerp(readVector2f());
+        waterSettings.setRefractionScale(readFloat());
+        waterSettings.setFresnelBias(readFloat());
+        waterSettings.setFresnelPower(readFloat());
+        waterSettings.setUnitReflection(readFloat());
+        waterSettings.setSkyReflection(readFloat());
+        waterSettings.setSunShininess(readFloat());
+        waterSettings.setSunStrength(readFloat());
+        waterSettings.setSunDirection(readVector3f());
+        waterSettings.setSunColor(readVector3f());
+        waterSettings.setSunReflection(readFloat());
+        waterSettings.setSunGlow(readFloat());
+        waterSettings.setTexPathCubemap(readStringNull());
+        waterSettings.setTexPathWaterRamp(readStringNull());
+
+        // waves
+        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+            waterSettings.getWaveTextures()[i].setNormalRepeat(readFloat());
+        }
+
+        for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
+            waterSettings.getWaveTextures()[i].setNormalMovement(readVector2f());
+            waterSettings.getWaveTextures()[i].setTexPath(readStringNull());
+        }
+
+        return waterSettings;
+    }
+
+    private static WaveGenerator readWaveGenerator() throws IOException {
+        String textureName = readStringNull();
+        String rampName = readStringNull();
+        Vector3f position = readVector3f();
+        float rotation = readFloat();
+        Vector3f velocity = readVector3f();
+
+        WaveGenerator waveGenerator = new WaveGenerator(textureName, rampName, position, rotation, velocity);
+
+        waveGenerator.setLifeTimeFirst(readFloat());
+        waveGenerator.setLifeTimeSecond(readFloat());
+        waveGenerator.setPeriodFirst(readFloat());
+        waveGenerator.setPeriodSecond(readFloat());
+        waveGenerator.setScaleFirst(readFloat());
+        waveGenerator.setScaleSecond(readFloat());
+        waveGenerator.setFrameCount(readFloat());
+        waveGenerator.setFrameRateFirst(readFloat());
+        waveGenerator.setFrameRateSecond(readFloat());
+        waveGenerator.setStripCount(readFloat());
+
+        return waveGenerator;
+    }
+
+    private static Decal readDecal() throws IOException {
+        int id = readInt();
+        int type = readInt();
+        int textureCount = readInt();
+        String[] texturePaths = new String[textureCount];
+        for (int j = 0; j < textureCount; j++) {
+            int stringLength = readInt();
+            texturePaths[j] = readString(stringLength);
+        }
+        Vector3f scale = readVector3f();
+        Vector3f position = readVector3f();
+        Vector3f rotation = readVector3f();
+        float cutOffLOD = readFloat();
+        float nearCutOffLOD = readFloat();
+        int ownerArmy = readInt();
+        return new Decal(texturePaths[0], position, rotation, scale, cutOffLOD, DecalType.of(type));
+    }
+
+    private static DecalGroup readDecalGroup() throws IOException {
+        int id = readInt();
+        String name = readStringNull();
+        int length = readInt();
+        int[] data = new int[length];
+        for (int j = 0; j < length; j++) {
+            data[j] = readInt();
+        }
+        return new DecalGroup(name, data);
+    }
+
+    private static int[] readImageData() throws IOException {
+        int byteCount = readInt() - 128;
+        DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
+        return readInts(byteCount / 4);
+    }
+
+    private static SkyBox readSkyBox() throws IOException {
+        SkyBox skyBox = new SkyBox();
+        skyBox.setPosition(readVector3f());
+        skyBox.setHorizonHeight(readFloat());
+        skyBox.setScale(readFloat());
+        skyBox.setSubHeight(readFloat());
+        skyBox.setSubDivAx(readInt());
+        skyBox.setSubDivHeight(readInt());
+        skyBox.setZenithHeight(readFloat());
+        skyBox.setHorizonColor(readVector3f());
+        skyBox.setZenithColor(readVector3f());
+        skyBox.setDecalGlowMultiplier(readFloat());
+
+        skyBox.setAlbedo(readStringNull());
+        skyBox.setGlow(readStringNull());
+
+        // Array of Planets/Stars
+        int length = readInt();
+        SkyBox.Planet[] planets = new SkyBox.Planet[length];
+        for (int i = 0; i < length; i++) {
+            planets[i] = new SkyBox.Planet();
+            planets[i].setPosition(readVector3f());
+            planets[i].setRotation(readFloat());
+            planets[i].setScale(readVector2f());
+            planets[i].setUv(readVector4f());
+        }
+        skyBox.setPlanets(planets);
+
+        // Mid
+        skyBox.setMidRgbColor(new Color(readByte(), readByte(), readByte(), 0));
+
+        // Cirrus
+        skyBox.setCirrusMultiplier(readFloat());
+        skyBox.setCirrusColor(readVector3f());
+
+        skyBox.setCirrusTexture(readStringNull());
+
+        int cirrusLayerCount = readInt();
+        SkyBox.Cirrus[] cirrusLayers = new SkyBox.Cirrus[cirrusLayerCount];
+        for (int i = 0; i < cirrusLayerCount; i++) {
+            cirrusLayers[i] = new SkyBox.Cirrus();
+            cirrusLayers[i].setFrequency(readVector2f());
+            cirrusLayers[i].setSpeed(readFloat());
+            cirrusLayers[i].setDirection(readVector2f());
+        }
+        skyBox.setCirrusLayers(cirrusLayers);
+        skyBox.setClouds7(readFloat());
+        return skyBox;
+    }
+
+    private static Prop readProp() throws IOException {
+        String path = readStringNull();
+        Vector3f position = readVector3f();
+        Vector3f rotationX = readVector3f();
+        Vector3f rotationY = readVector3f();
+        Vector3f rotationZ = readVector3f();
+        Vector3f scale = readVector3f();
+        float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
+        if ((rotation - StrictMath.atan2(-rotationZ.x, rotationZ.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
+//                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
+        }
+        return new Prop(path, position, rotation);
+    }
+
     private static <T> BufferedImage getBufferedImageFromData(int bufferedImageType, T[] imageData) {
         int imageSize = (int) StrictMath.sqrt(imageData.length);
         BufferedImage image = new BufferedImage(imageSize, imageSize, bufferedImageType);
@@ -510,6 +545,5 @@ public strictfp class SCMapImporter {
         }
         return image;
     }
-
 }
 
