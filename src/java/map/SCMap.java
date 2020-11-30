@@ -378,7 +378,7 @@ public strictfp class SCMap {
     public void setHeightImage(FloatMask heightmap) {
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
-                this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.get(x, y) / heightMapScale)});
+                this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.getValueAt(x, y) / heightMapScale)});
             }
         }
     }
@@ -387,7 +387,7 @@ public strictfp class SCMap {
         FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), null, symmetrySettings);
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
-                heightMask.set(x, y, this.heightmap.getRaster().getPixel(x, y, new int[1])[0] * heightMapScale);
+                heightMask.setValueAt(x, y, this.heightmap.getRaster().getPixel(x, y, new int[1])[0] * heightMapScale);
             }
         }
         return heightMask;
@@ -396,7 +396,7 @@ public strictfp class SCMap {
     public void setPreviewImage(FloatMask previewMask) {
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
-                this.preview.setRGB(x, y, previewMask.get(x, y).intValue());
+                this.preview.setRGB(x, y, previewMask.getValueAt(x, y).intValue());
             }
         }
     }
@@ -405,7 +405,7 @@ public strictfp class SCMap {
         FloatMask previewMask = new FloatMask(this.preview.getHeight(), null, symmetrySettings);
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
-                previewMask.set(x, y, (float) this.preview.getRGB(x, y));
+                previewMask.setValueAt(x, y, (float) this.preview.getRGB(x, y));
             }
         }
         return previewMask;
@@ -414,10 +414,10 @@ public strictfp class SCMap {
     public void setTextureMasksLowScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
-                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
-                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
-                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
-                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 127 + 128) : 0;
+                int val0 = mask0.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.getValueAt(x, y)) * 127 + 128) : 0;
+                int val1 = mask1.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.getValueAt(x, y)) * 127 + 128) : 0;
+                int val2 = mask2.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.getValueAt(x, y)) * 127 + 128) : 0;
+                int val3 = mask3.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.getValueAt(x, y)) * 127 + 128) : 0;
                 textureMasksLow.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
@@ -426,10 +426,10 @@ public strictfp class SCMap {
     public void setTextureMasksHighScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
-                int val0 = mask0.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.get(x, y)) * 127 + 128) : 0;
-                int val1 = mask1.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.get(x, y)) * 127 + 128) : 0;
-                int val2 = mask2.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.get(x, y)) * 127 + 128) : 0;
-                int val3 = mask3.get(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.get(x, y)) * 127 + 128) : 0;
+                int val0 = mask0.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.getValueAt(x, y)) * 127 + 128) : 0;
+                int val1 = mask1.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.getValueAt(x, y)) * 127 + 128) : 0;
+                int val2 = mask2.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.getValueAt(x, y)) * 127 + 128) : 0;
+                int val3 = mask3.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.getValueAt(x, y)) * 127 + 128) : 0;
                 textureMasksHigh.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
@@ -438,10 +438,10 @@ public strictfp class SCMap {
     public void setTextureMasksLowRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
-                float val0 = mask0.get(x, y);
-                float val1 = mask1.get(x, y);
-                float val2 = mask2.get(x, y);
-                float val3 = mask3.get(x, y);
+                float val0 = mask0.getValueAt(x, y);
+                float val1 = mask1.getValueAt(x, y);
+                float val2 = mask2.getValueAt(x, y);
+                float val3 = mask3.getValueAt(x, y);
                 textureMasksLow.getRaster().setPixel(x, y, new float[]{val0, val1, val2, val3});
             }
         }
@@ -450,10 +450,10 @@ public strictfp class SCMap {
     public void setTextureMasksHighRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
-                float val0 = mask0.get(x, y);
-                float val1 = mask1.get(x, y);
-                float val2 = mask2.get(x, y);
-                float val3 = mask3.get(x, y);
+                float val0 = mask0.getValueAt(x, y);
+                float val1 = mask1.getValueAt(x, y);
+                float val2 = mask2.getValueAt(x, y);
+                float val3 = mask3.getValueAt(x, y);
                 textureMasksHigh.getRaster().setPixel(x, y, new float[]{val0, val1, val2, val3});
             }
         }
@@ -468,10 +468,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksLow.getHeight(); x++) {
                 int[] valsLow = new int[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                mask0.set(x, y, valsLow[0] > 0 ? (valsLow[0] - 128) / 127f : 0f);
-                mask1.set(x, y, valsLow[1] > 0 ? (valsLow[1] - 128) / 127f : 0f);
-                mask2.set(x, y, valsLow[2] > 0 ? (valsLow[2] - 128) / 127f : 0f);
-                mask3.set(x, y, valsLow[3] > 0 ? (valsLow[3] - 128) / 127f : 0f);
+                mask0.setValueAt(x, y, valsLow[0] > 0 ? (valsLow[0] - 128) / 127f : 0f);
+                mask1.setValueAt(x, y, valsLow[1] > 0 ? (valsLow[1] - 128) / 127f : 0f);
+                mask2.setValueAt(x, y, valsLow[2] > 0 ? (valsLow[2] - 128) / 127f : 0f);
+                mask3.setValueAt(x, y, valsLow[3] > 0 ? (valsLow[3] - 128) / 127f : 0f);
             }
         }
         FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
@@ -482,10 +482,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksHigh.getHeight(); x++) {
                 int[] valsHigh = new int[4];
                 textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
-                mask4.set(x, y, valsHigh[0] > 0 ? (valsHigh[0] - 128) / 127f : 0f);
-                mask5.set(x, y, valsHigh[1] > 0 ? (valsHigh[1] - 128) / 127f : 0f);
-                mask6.set(x, y, valsHigh[2] > 0 ? (valsHigh[2] - 128) / 127f : 0f);
-                mask7.set(x, y, valsHigh[3] > 0 ? (valsHigh[3] - 128) / 127f : 0f);
+                mask4.setValueAt(x, y, valsHigh[0] > 0 ? (valsHigh[0] - 128) / 127f : 0f);
+                mask5.setValueAt(x, y, valsHigh[1] > 0 ? (valsHigh[1] - 128) / 127f : 0f);
+                mask6.setValueAt(x, y, valsHigh[2] > 0 ? (valsHigh[2] - 128) / 127f : 0f);
+                mask7.setValueAt(x, y, valsHigh[3] > 0 ? (valsHigh[3] - 128) / 127f : 0f);
             }
         }
         return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
@@ -500,10 +500,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksLow.getHeight(); x++) {
                 float[] valsLow = new float[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                mask0.set(x, y, valsLow[0]);
-                mask1.set(x, y, valsLow[1]);
-                mask2.set(x, y, valsLow[2]);
-                mask3.set(x, y, valsLow[3]);
+                mask0.setValueAt(x, y, valsLow[0]);
+                mask1.setValueAt(x, y, valsLow[1]);
+                mask2.setValueAt(x, y, valsLow[2]);
+                mask3.setValueAt(x, y, valsLow[3]);
             }
         }
         FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
@@ -514,10 +514,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksHigh.getHeight(); x++) {
                 float[] valsHigh = new float[4];
                 textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
-                mask4.set(x, y, valsHigh[0]);
-                mask5.set(x, y, valsHigh[1]);
-                mask6.set(x, y, valsHigh[2]);
-                mask7.set(x, y, valsHigh[3]);
+                mask4.setValueAt(x, y, valsHigh[0]);
+                mask5.setValueAt(x, y, valsHigh[1]);
+                mask6.setValueAt(x, y, valsHigh[2]);
+                mask7.setValueAt(x, y, valsHigh[3]);
             }
         }
         return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};

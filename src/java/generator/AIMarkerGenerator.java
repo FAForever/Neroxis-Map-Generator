@@ -8,6 +8,7 @@ import util.Vector2f;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -22,7 +23,7 @@ public strictfp class AIMarkerGenerator {
     }
 
     public void generateAIMarkers(BinaryMask passable, ArrayList<AIMarker> markerArrayList, String nameFormat) {
-        LinkedHashSet<Vector2f> coordinates = passable.getSpacedCoordinatesEqualTo(true, 32, 8);
+        LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
         coordinates.addAll(passable.getDistanceField().getLocalMaximums(8, passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
@@ -35,7 +36,7 @@ public strictfp class AIMarkerGenerator {
                     if (location != location1) {
                         if (location.getDistance(location1) < 64) {
                             LinkedHashSet<Vector2f> lineCoordinates = location.getLine(location1);
-                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.get(loc));
+                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.getValueAt(loc));
                             if (connected) {
                                 unusedCoordinates.add(location1);
                             }
@@ -56,7 +57,7 @@ public strictfp class AIMarkerGenerator {
         markerArrayList.forEach(aiMarker -> markerArrayList.forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) <= 128) {
                 LinkedHashSet<Vector2f> lineCoordinates = aiMarker.getPosition().getXZLine(aiMarker1.getPosition());
-                boolean connected = !lineCoordinates.removeIf(location -> !passable.get(location));
+                boolean connected = !lineCoordinates.removeIf(location -> !passable.getValueAt(location));
                 if (connected) {
                     aiMarker.addNeighbor(aiMarker1.getId());
                 }
@@ -67,7 +68,7 @@ public strictfp class AIMarkerGenerator {
     public void generateAirAIMarkers() {
         float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
-        LinkedHashSet<Vector2f> airCoordinates = new BinaryMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
+        LinkedList<Vector2f> airCoordinates = new BinaryMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
         airCoordinates.forEach((location) -> location.add(.5f, .5f));
         ArrayList<Vector2f> airCoordinatesArray = new ArrayList<>(airCoordinates);
         airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(String.format("AirPN%d", airCoordinatesArray.indexOf(location)), location, new LinkedHashSet<>())));

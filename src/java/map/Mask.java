@@ -25,13 +25,13 @@ public strictfp abstract class Mask<T> {
 
     protected abstract T[][] getEmptyMask(int size);
 
-    abstract T get(Vector2f location);
+    abstract T getValueAt(Vector2f location);
 
-    abstract T get(int x, int y);
+    abstract T getValueAt(int x, int y);
 
-    abstract void set(Vector2f location, T value);
+    abstract void setValueAt(Vector2f location, T value);
 
-    abstract void set(int x, int y, T value);
+    abstract void setValueAt(int x, int y, T value);
 
     abstract int getSize();
 
@@ -250,9 +250,9 @@ public strictfp abstract class Mask<T> {
                 int finalY = y;
                 symPoints.forEach(symmetryPoint -> {
                     if (reverse) {
-                        set(finalX, finalY, get(symmetryPoint.getLocation()));
+                        setValueAt(finalX, finalY, getValueAt(symmetryPoint.getLocation()));
                     } else {
-                        set(symmetryPoint.getLocation(), get(finalX, finalY));
+                        setValueAt(symmetryPoint.getLocation(), getValueAt(finalX, finalY));
                     }
                 });
             }
@@ -266,7 +266,7 @@ public strictfp abstract class Mask<T> {
                     ArrayList<SymmetryPoint> symPoints = getSymmetryPoints(x, y, Symmetry.POINT2);
                     int finalX = x;
                     int finalY = y;
-                    symPoints.forEach(symmetryPoint -> set(symmetryPoint.getLocation(), get(finalX, finalY)));
+                    symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), getValueAt(finalX, finalY)));
                 }
             }
         }
@@ -284,7 +284,7 @@ public strictfp abstract class Mask<T> {
             smallX = StrictMath.min(x / (size / getSize()), getSize() - 1);
             for (int y = 0; y < size; y++) {
                 smallY = StrictMath.min(y / (size / getSize()), getSize() - 1);
-                largeMask[x][y] = get(smallX, smallY);
+                largeMask[x][y] = getValueAt(smallX, smallY);
             }
         }
         mask = largeMask;
@@ -309,7 +309,7 @@ public strictfp abstract class Mask<T> {
                 largeY = (y * getSize()) / size + (getSize() / size / 2);
                 if (largeY >= getSize())
                     largeY = getSize() - 1;
-                smallMask[x][y] = get(largeX, largeY);
+                smallMask[x][y] = getValueAt(largeX, largeY);
             }
         }
         mask = smallMask;
@@ -326,7 +326,7 @@ public strictfp abstract class Mask<T> {
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetry);
-                newMask[x][y] = get(symmetryPoints.get(0).getLocation());
+                newMask[x][y] = getValueAt(symmetryPoints.get(0).getLocation());
             }
         }
         this.mask = newMask;

@@ -64,7 +64,7 @@ public class VisualDebugger {
         if (!shouldRecord(mask)) {
             return;
         }
-        visualize((x, y) -> mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask.getClass());
+        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask.getClass());
     }
 
     public static void visualizeMask(FloatMask mask) {
@@ -73,7 +73,7 @@ public class VisualDebugger {
         }
         ImageSource checkerBoard = (x, y) -> (x + y) % 2 == 0 ? 0xFF_66_66_66 : 0xDD_DD_DD_DD;
         visualize((x, y) -> {
-            float value = mask.get(x, y);
+            float value = mask.getValueAt(x, y);
 
             if (ignoreNegativeRange && value < 0) {
                 return checkerBoard.get(x, y);

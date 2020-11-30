@@ -87,7 +87,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public ConcurrentFloatMask multiply(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.floatMask.multiply(value)
+                this.floatMask.multiplyAll(value)
         );
     }
 

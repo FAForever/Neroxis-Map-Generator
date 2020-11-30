@@ -8,7 +8,7 @@ import util.Vector2f;
 import util.Vector3f;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -67,7 +67,7 @@ public strictfp class HydroGenerator {
     }
 
     public void generateIndividualHydros(BinaryMask spawnable, int numHydros, int hydroSpacing) {
-        List<Vector2f> mexLocations = new ArrayList<>(spawnable.getRandomCoordinates(hydroSpacing));
+        LinkedList<Vector2f> mexLocations = spawnable.getRandomCoordinates(hydroSpacing);
         for (int i = 0; i < numHydros; i++) {
             if (mexLocations.size() == 0) {
                 break;

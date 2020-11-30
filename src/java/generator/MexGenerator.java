@@ -5,7 +5,7 @@ import util.Vector2f;
 import util.Vector3f;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -155,7 +155,7 @@ public strictfp class MexGenerator {
     }
 
     public void generateIndividualMexes(BinaryMask spawnable, int numMexes, int mexSpacing) {
-        List<Vector2f> mexLocations = new ArrayList<>(spawnable.getRandomCoordinates(mexSpacing));
+        LinkedList<Vector2f> mexLocations = spawnable.getRandomCoordinates(mexSpacing);
         for (int i = 0; i < numMexes; i++) {
             if (mexLocations.size() == 0) {
                 break;
@@ -177,7 +177,7 @@ public strictfp class MexGenerator {
             for (int dy = 0; dy < size; dy++) {
                 Vector2f loc = new Vector2f(location).add(dx - size / 2, dy - size / 2);
                 if (spawnable.inBounds(loc)) {
-                    if (spawnable.get(loc)) {
+                    if (spawnable.getValueAt(loc)) {
                         count++;
                     }
                 }

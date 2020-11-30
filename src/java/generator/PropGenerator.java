@@ -7,7 +7,7 @@ import map.SymmetryPoint;
 import util.Vector2f;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -45,7 +45,7 @@ public strictfp class PropGenerator {
 
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
         spawnable.limitToSpawnRegion();
-        LinkedHashSet<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
+        LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);
             Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);

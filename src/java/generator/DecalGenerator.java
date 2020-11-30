@@ -8,7 +8,7 @@ import util.Vector2f;
 import util.Vector3f;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 import static util.Placement.placeOnHeightmap;
@@ -74,7 +74,7 @@ public strictfp class DecalGenerator {
     public void generateDecals(BinaryMask spawnable, String[] paths, float separation, float scale) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
         spawnableCopy.limitToSpawnRegion();
-        LinkedHashSet<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
+        LinkedList<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
         boolean flipX;
         boolean flipZ;
         switch (spawnable.getSymmetrySettings().getTeamSymmetry()) {
