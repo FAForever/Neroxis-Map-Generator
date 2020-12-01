@@ -149,17 +149,13 @@ public strictfp class MexGenerator {
 
     public void generateIndividualMexes(BinaryMask spawnable, int numMexes, int mexSpacing) {
         LinkedList<Vector2f> mexLocations = spawnable.getRandomCoordinates(mexSpacing);
-        for (int i = 0; i < numMexes; i++) {
-            if (mexLocations.size() == 0) {
-                break;
-            }
+        mexLocations.stream().limit(numMexes).forEachOrdered(location -> {
             int mexId = map.getMexCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-            Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
             Mex mex = new Mex(String.format("Mex %d", mexId), new Vector3f(location));
             map.addMex(mex);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(mex.getPosition());
             symmetryPoints.forEach(symmetryPoint -> map.addMex(new Mex(String.format("sym %d Mex %d", symmetryPoints.indexOf(symmetryPoint), mexId), new Vector3f(symmetryPoint.getLocation()))));
-        }
+        });
     }
 
     private boolean isMexExpValid(Vector2f location, float size, float density, BinaryMask spawnable) {

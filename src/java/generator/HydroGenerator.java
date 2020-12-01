@@ -67,18 +67,14 @@ public strictfp class HydroGenerator {
     }
 
     public void generateIndividualHydros(BinaryMask spawnable, int numHydros, int hydroSpacing) {
-        LinkedList<Vector2f> mexLocations = spawnable.getRandomCoordinates(hydroSpacing);
-        for (int i = 0; i < numHydros; i++) {
-            if (mexLocations.size() == 0) {
-                break;
-            }
+        LinkedList<Vector2f> hydroLocations = spawnable.getRandomCoordinates(hydroSpacing);
+        hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
             int hydroId = map.getHydroCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-            Vector2f location = mexLocations.remove(random.nextInt(mexLocations.size())).add(.5f, .5f);
             Hydro hydro = new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location));
             map.addHydro(hydro);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition());
             symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Hydro(String.format("sym %d Hydro %d", symmetryPoints.indexOf(symmetryPoint), hydroId), new Vector3f(symmetryPoint.getLocation()))));
-        }
+        });
     }
 
     public void setMarkerHeights() {
