@@ -18,10 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 
 import static brushes.Brushes.loadBrush;
 
@@ -423,6 +420,21 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
+    public FloatMask clampMinInArea(float val, BinaryMask area) {
+        if (area.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size: area is " + area.getSize() + " and FloatMask is " + getSize());
+        }
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if(area.get(x, y)) {
+                    set(x, y, StrictMath.max(get(x, y), val));
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask threshold(float val) {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -452,6 +464,21 @@ public strictfp class FloatMask extends Mask<Float> {
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
                 setValueAt(x, y, StrictMath.min(getValueAt(x, y), val));
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask clampMaxInArea(float val, BinaryMask area) {
+        if (area.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size: area is " + area.getSize() + " and FloatMask is " + getSize());
+        }
+        for (int y = 0; y < getSize(); y++) {
+            for (int x = 0; x < getSize(); x++) {
+                if(area.get(x, y)) {
+                    set(x, y, StrictMath.min(get(x, y), val));
+                }
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -757,6 +784,48 @@ public strictfp class FloatMask extends Mask<Float> {
             }
         }
 
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask addFloatMaskCenteredAtLocationWithSize(FloatMask other, Vector2f location, int size) {
+        if (size > getSize()) {
+            throw new IllegalArgumentException("Added mask size is larger than base mask size");
+        }
+        FloatMask maskToBeAdded = other.copy().setSize(size);
+        add(maskToBeAdded, location, true);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
+        FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        brush.multiply(intensity / brush.getMax());
+        addFloatMaskCenteredAtLocationWithSize(brush, location, size);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask useBrushRepeatedlyCenteredWithinArea(BinaryMask area, String brushName, int size, int frequency, float intensity) {
+        if (size > getSize()) {
+            throw new IllegalArgumentException("Added mask size is larger than base mask size");
+        }
+        List<Vector2f> possibleLocations = new ArrayList<Vector2f>(area.getAllCoordinatesEqualTo(true, 1));
+        int length = possibleLocations.size();
+        FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        brush.multiply(intensity / brush.getMax()).setSize(size);
+        for (int z = 0; z < frequency; z++) {
+            add(brush, possibleLocations.get(random.nextInt(length)), true);
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(BinaryMask area, String brushName, int size, float density, float intensity) {
+        List<Vector2f> possibleLocations = new ArrayList<Vector2f>(area.getAllCoordinatesEqualTo(true, 1));
+        int length = possibleLocations.size();
+        int frequency = (int) (density * (float) length / (float) 2621);
+        useBrushRepeatedlyCenteredWithinArea(area, brushName, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;
     }

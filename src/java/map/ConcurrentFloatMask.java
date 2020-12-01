@@ -3,6 +3,7 @@ package map;
 import lombok.Getter;
 import util.Pipeline;
 import util.Util;
+import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -97,15 +98,45 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
+    public ConcurrentFloatMask clampMaxInArea(float value, ConcurrentBinaryMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.clampMaxInArea(value, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
     public ConcurrentFloatMask clampMin(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.clampMin(value)
         );
     }
 
+    public ConcurrentFloatMask clampMinInArea(float value, ConcurrentBinaryMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.clampMinInArea(value, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
     public ConcurrentFloatMask threshold(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.threshold(value)
+        );
+    }
+
+    public ConcurrentFloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.useBrush(location, brushName, intensity, size)
+        );
+    }
+
+    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinArea(ConcurrentBinaryMask area, String brushName, int size, int frequency, float intensity) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinArea(area.getBinaryMask(), brushName, size, frequency, intensity)
+        );
+    }
+
+    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinAreaToDensity(area.getBinaryMask(), brushName, size, density, intensity)
         );
     }
 
