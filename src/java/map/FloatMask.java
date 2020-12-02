@@ -18,7 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 
 import static brushes.Brushes.loadBrush;
 
@@ -426,8 +429,8 @@ public strictfp class FloatMask extends Mask<Float> {
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                if (area.get(x, y)) {
-                    set(x, y, StrictMath.max(get(x, y), val));
+                if (area.getValueAt(x, y)) {
+                    setValueAt(x, y, StrictMath.max(getValueAt(x, y), val));
                 }
             }
         }
@@ -476,8 +479,8 @@ public strictfp class FloatMask extends Mask<Float> {
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                if (area.get(x, y)) {
-                    set(x, y, StrictMath.min(get(x, y), val));
+                if (area.getValueAt(x, y)) {
+                    setValueAt(x, y, StrictMath.min(getValueAt(x, y), val));
                 }
             }
         }
@@ -793,14 +796,14 @@ public strictfp class FloatMask extends Mask<Float> {
             throw new IllegalArgumentException("Added mask size is larger than base mask size");
         }
         FloatMask maskToBeAdded = other.copy().setSize(size);
-        add(maskToBeAdded, location, true);
+        addWithOffset(maskToBeAdded, location, true);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
         FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-        brush.multiply(intensity / brush.getMax());
+        brush.multiplyAll(intensity / brush.getMax());
         addFloatMaskCenteredAtLocationWithSize(brush, location, size);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -810,12 +813,12 @@ public strictfp class FloatMask extends Mask<Float> {
         if (size > getSize()) {
             throw new IllegalArgumentException("Added mask size is larger than base mask size");
         }
-        List<Vector2f> possibleLocations = new ArrayList<Vector2f>(area.getAllCoordinatesEqualTo(true, 1));
+        ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
         FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-        brush.multiply(intensity / brush.getMax()).setSize(size);
+        brush.multiplyAll(intensity / brush.getMax()).setSize(size);
         for (int z = 0; z < frequency; z++) {
-            add(brush, possibleLocations.get(random.nextInt(length)), true);
+            addWithOffset(brush, possibleLocations.get(random.nextInt(length)), true);
         }
         VisualDebugger.visualizeMask(this);
         return this;
