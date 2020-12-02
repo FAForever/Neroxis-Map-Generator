@@ -2,6 +2,7 @@ package generator;
 
 import biomes.Biome;
 import biomes.Biomes;
+import brushes.Brushes;
 import com.google.common.io.BaseEncoding;
 import exporter.MapExporter;
 import exporter.SCMapExporter;
@@ -835,16 +836,13 @@ public strictfp class MapGenerator {
 
     private void setupHeightmapPipeline() {
         heightmapBase = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapBase");
-        ConcurrentBinaryMask land2 = land.copy().setSize(mapSize + 1);
+        ConcurrentBinaryMask landResized = land.copy().setSize(mapSize + 1);
 
-        List<String> allBrushes = Arrays.asList("buttons.png", "crescent.png", "crystal.png", "hawaii1.png", "hawaii2.png", "hill1.png", "hill2.png", "mountain1.png", "mountain2.png", "mountain3.png", "mountain4.png", "mountain5.png", "mountain6.png", "mountain7.png", "mountain8.png", "mountain9.png", "noise1.png", "noise2.png", "striations.png", "structured.png", "sun.png", "volcano2.png");
-        List<String> okayBrushes = Arrays.asList("hawaii1.png", "hawaii2.png", "hill1.png", "hill2.png", "mountain1.png", "mountain2.png", "mountain3.png", "mountain4.png", "mountain5.png", "mountain6.png", "mountain7.png", "mountain8.png", "structured.png", "volcano2.png");
-        List<String> goodBrushes = Arrays.asList("hawaii2.png", "hill1.png", "mountain1.png", "mountain2.png", "mountain4.png", "mountain5.png", "mountain6.png", "mountain7.png", "volcano2.png");
-        int length = goodBrushes.size();
-        String brush1 = goodBrushes.get(random.nextInt(length));
-        String brush2 = goodBrushes.get(random.nextInt(length));
-        String brush3 = goodBrushes.get(random.nextInt(length));
-        String brush4 = goodBrushes.get(random.nextInt(length));
+        int length = Brushes.goodBrushes.size();
+        String brush1 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush2 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush3 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush4 = Brushes.goodBrushes.get(random.nextInt(length));
 
         float deepWaterFloorHeight = waterHeight - 15f;
         float shallowWaterFloorHeight = waterHeight - 8f;
@@ -853,12 +851,12 @@ public strictfp class MapGenerator {
         float plateauHeight = waterHeight + 7f;
         float plateauValleyFloorHeight = plateauHeight - 5f;
 
-        heightmapBase.clampMin(deepWaterFloorHeight).clampMinInArea(shallowWaterFloorHeight, land2.copy().inflate(23)).clampMinInArea(landFloorHeight, land2).smooth(30).clampMinInArea(landFloorHeight, land2.copy().inflate(8)).smooth(8);
-        heightmapBase.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus, brush1, 42,16,14f).clampMax(plateauHeight);
+        heightmapBase.clampMin(deepWaterFloorHeight).clampMinInArea(shallowWaterFloorHeight, landResized.copy().inflate(23)).clampMinInArea(landFloorHeight, landResized).smooth(30).clampMinInArea(landFloorHeight, landResized.copy().inflate(8)).smooth(8);
+        heightmapBase.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus, brush1, 42, 16, 14f).clampMax(plateauHeight);
         heightmapBase.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 64, 48, -0.5f).smooth(2, valleys.copy().inflate(32));
         heightmapBase.useBrushRepeatedlyCenteredWithinAreaToDensity(mountains, brush3, 32, 40, 2.5f);
         heightmapBase.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, 32, 0.5f);
-        heightmapBase.clampMinInArea(landValleyFloorHeight, valleys.copy().intersect(land2)).clampMinInArea(plateauValleyFloorHeight, plateaus.copy().intersect(valleys.copy().inflate(32)));
+        heightmapBase.clampMinInArea(landValleyFloorHeight, valleys.copy().intersect(landResized)).clampMinInArea(plateauValleyFloorHeight, plateaus.copy().intersect(valleys.copy().inflate(32)));
         heightmapBase.clampMinInArea(landFloorHeight, spawnLandMask).clampMaxInArea(landFloorHeight, spawnLandMask);
         heightmapBase.clampMinInArea(plateauHeight, spawnPlateauMask.copy().inflate(10)).clampMaxInArea(plateauHeight, spawnPlateauMask.copy().inflate(10));
         heightmapBase.smooth(3, spawnLandMask.copy().combine(spawnPlateauMask.copy().inflate(10)).inflate(4));

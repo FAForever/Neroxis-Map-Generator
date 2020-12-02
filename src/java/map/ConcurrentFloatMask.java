@@ -129,14 +129,14 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     }
 
     public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinArea(ConcurrentBinaryMask area, String brushName, int size, int frequency, float intensity) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.floatMask.useBrushRepeatedlyCenteredWithinArea(area.getBinaryMask(), brushName, size, frequency, intensity)
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinArea(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, frequency, intensity)
         );
     }
 
     public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.floatMask.useBrushRepeatedlyCenteredWithinAreaToDensity(area.getBinaryMask(), brushName, size, density, intensity)
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinAreaToDensity(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, density, intensity)
         );
     }
 

@@ -426,7 +426,7 @@ public strictfp class FloatMask extends Mask<Float> {
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                if(area.get(x, y)) {
+                if (area.get(x, y)) {
                     set(x, y, StrictMath.max(get(x, y), val));
                 }
             }
@@ -476,7 +476,7 @@ public strictfp class FloatMask extends Mask<Float> {
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
-                if(area.get(x, y)) {
+                if (area.get(x, y)) {
                     set(x, y, StrictMath.min(get(x, y), val));
                 }
             }
@@ -822,9 +822,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(BinaryMask area, String brushName, int size, float density, float intensity) {
-        List<Vector2f> possibleLocations = new ArrayList<Vector2f>(area.getAllCoordinatesEqualTo(true, 1));
-        int length = possibleLocations.size();
-        int frequency = (int) (density * (float) length / (float) 2621);
+        int frequency = (int) (density * (float) area.getCount() / 2621f);
         useBrushRepeatedlyCenteredWithinArea(area, brushName, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;
