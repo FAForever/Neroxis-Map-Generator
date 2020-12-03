@@ -3,6 +3,7 @@ package map;
 import lombok.Getter;
 import util.Pipeline;
 import util.Util;
+import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -73,6 +74,18 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
+    public ConcurrentFloatMask addAll(float value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.addAll(value)
+        );
+    }
+
+    public ConcurrentFloatMask addGaussianNoise(float scale) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.addGaussianNoise(scale)
+        );
+    }
+
     public ConcurrentFloatMask subtract(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.subtract(((ConcurrentFloatMask) res.get(1)).getFloatMask())
@@ -85,9 +98,21 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask multiply(float value) {
+    public ConcurrentFloatMask multiplyAll(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.multiplyAll(value)
+        );
+    }
+
+    public ConcurrentFloatMask setValueInArea(float value, ConcurrentBinaryMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.setValueInArea(value, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
+    public ConcurrentFloatMask setNonZeroValues(ConcurrentFloatMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.setNonZeroValues(((ConcurrentFloatMask) res.get(1)).getFloatMask())
         );
     }
 
@@ -97,9 +122,21 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
+    public ConcurrentFloatMask clampMaxInArea(float value, ConcurrentBinaryMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.clampMaxInArea(value, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
     public ConcurrentFloatMask clampMin(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.clampMin(value)
+        );
+    }
+
+    public ConcurrentFloatMask clampMinInArea(float value, ConcurrentBinaryMask area) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.clampMinInArea(value, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
@@ -109,21 +146,27 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask maskToHills(ConcurrentBinaryMask other) {
-        return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToHills(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+    public ConcurrentFloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.useBrush(location, brushName, intensity, size)
         );
     }
 
-    public ConcurrentFloatMask maskToMountains(ConcurrentBinaryMask other) {
-        return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToMountains(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinArea(ConcurrentBinaryMask area, String brushName, int size, int frequency, float intensity) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinArea(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, frequency, intensity)
         );
     }
 
-    public ConcurrentFloatMask maskToOceanHeights(float underWaterSlope, ConcurrentBinaryMask other) {
+    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
+        return Pipeline.add(this, Arrays.asList(this, area), res ->
+                this.floatMask.useBrushRepeatedlyCenteredWithinAreaToDensity(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, density, intensity)
+        );
+    }
+
+    public ConcurrentFloatMask addDistance(ConcurrentBinaryMask other, float scale) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.floatMask.maskToOceanHeights(underWaterSlope, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.floatMask.addDistance(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), scale)
         );
     }
 
@@ -148,6 +191,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     public ConcurrentFloatMask gradient() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.floatMask.gradient()
+        );
+    }
+
+    public ConcurrentFloatMask supcomGradient() {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.supcomGradient()
         );
     }
 

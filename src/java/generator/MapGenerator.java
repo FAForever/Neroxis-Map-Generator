@@ -2,6 +2,7 @@ package generator;
 
 import biomes.Biome;
 import biomes.Biomes;
+import brushes.Brushes;
 import com.google.common.io.BaseEncoding;
 import exporter.MapExporter;
 import exporter.SCMapExporter;
@@ -45,9 +46,10 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 5f;
-    public static final float VALLEY_HEIGHT = -2f;
-    public static final float HILL_HEIGHT = 2f;
+    public static final float PLATEAU_HEIGHT = 7f;
+    public static final float OCEAN_FLOOR = -15f;
+    public static final float VALLEY_FLOOR = -5f;
+    public static final float LAND_HEIGHT = .5f;
     public static boolean DEBUG = false;
     //read from cli args
     private String pathToFolder = ".";
@@ -80,8 +82,6 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask hills;
     private ConcurrentBinaryMask valleys;
     private ConcurrentBinaryMask plateaus;
-    private ConcurrentBinaryMask cliffs;
-    private ConcurrentBinaryMask shore;
     private ConcurrentBinaryMask ramps;
     private ConcurrentBinaryMask impassable;
     private ConcurrentBinaryMask unbuildable;
@@ -729,14 +729,13 @@ public strictfp class MapGenerator {
         mountains = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "mountains");
         plateaus = new ConcurrentBinaryMask(mapSize / 16, random.nextLong(), symmetrySettings, "plateaus");
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
-        ConcurrentBinaryMask spawnRamps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "spawnRamps");
 
         land.randomize(landDensity).smooth(2, .75f);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (mountainDensity * 192 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
+            mountains.progressiveWalk((int) (mountainDensity * 160 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
         } else {
-            mountains.randomWalk((int) (mountainDensity * 192 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
+            mountains.randomWalk((int) (mountainDensity * 160 / terrainSymmetry.getNumSymPoints()), mapSize / 16);
         }
         mountains.setSize(mapSize / 4).erode(.5f, symmetrySettings.getTerrainSymmetry(), 4).grow(.5f, symmetrySettings.getTerrainSymmetry(), 6);
         plateaus.randomize(plateauDensity).smooth(4);
@@ -748,7 +747,7 @@ public strictfp class MapGenerator {
         mountains.setSize(mapSize + 1);
         plateaus.setSize(mapSize + 1).smooth(12, .1f);
 
-        spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
+        spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8);
         spawnPlateauMask.erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(4);
 
         spawnLandMask.shrink(mapSize / 4).erode(.25f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
@@ -785,12 +784,6 @@ public strictfp class MapGenerator {
         plateaus.intersect(land).fillGaps(fillSize / 2).minus(spawnLandMask).combine(spawnPlateauMask).removeAreasSmallerThan(mapSize * mapSize / 256);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
 
-        ramps.combine(plateaus.copy().outline()).minus(mountains.copy().inflate(8)).flipValues(rampDensity * .004f + .002f).inflate(24);
-
-        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(24).intersect(plateaus.copy().outline()).flipValues(.0075f).inflate(24);
-
-        ramps.combine(spawnRamps).fillGaps(48).smooth(8, .25f);
-
         mountains.smooth(8).intersect(land).minus(ramps);
         if (mountainDensity < .25) {
             mountains.widenGaps(12);
@@ -803,7 +796,6 @@ public strictfp class MapGenerator {
         }
         mountains.removeAreasSmallerThan(128).smooth(8, .5f);
 
-        ConcurrentBinaryMask plateauOutline = plateaus.copy().outline().minus(ramps).minus(mountains.copy().inflate(1));
         ConcurrentBinaryMask landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));
 
         ConcurrentBinaryMask shoreLine = landOutline.copy();
@@ -812,18 +804,7 @@ public strictfp class MapGenerator {
         shoreLine.combine(landOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetrySettings.getSpawnSymmetry(), 18)).minus(ramps).smooth(2, .75f);
 
         land.combine(shoreLine);
-        landOutline = land.copy().outline().minus(plateaus.copy().inflate(1));
 
-        cliffs = plateauOutline.copy();
-        shore = landOutline.copy();
-
-        cliffs.setSize(mapSize / 4).erode(.75f, symmetrySettings.getSpawnSymmetry()).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).setSize(mapSize + 1).erode(.25f, symmetrySettings.getSpawnSymmetry(), 2);
-        cliffs.combine(plateauOutline.copy().flipValues(random.nextFloat() * .01f).grow(.5f, symmetrySettings.getSpawnSymmetry(), 18)).minus(ramps).smooth(2, .75f);
-
-        shore.setSize(mapSize / 4).flipValues(random.nextFloat() * .15f).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).setSize(mapSize + 1).intersect(landOutline.copy().inflate(6));
-        shore.minus(ramps).smooth(2, .75f);
-
-        plateaus.combine(cliffs);
 
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "valleys");
@@ -834,32 +815,51 @@ public strictfp class MapGenerator {
 
     private void setupHeightmapPipeline() {
         heightmapBase = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapBase");
-        ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapLand");
-        ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapMountains");
-        ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
-        ConcurrentFloatMask heightmapCliffs = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapCliffs");
-        ConcurrentFloatMask heightmapShore = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapShore");
-        ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapHills");
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapValleys");
-        ConcurrentBinaryMask oceanFloor = land.copy().invert();
+        ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapHills");
+        ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
+        ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapMountains");
+        ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapMountains");
 
-        oceanFloor.acid(.01f, 1).erode(.75f, symmetrySettings.getSpawnSymmetry(), 2).smooth(32, .75f).invert().removeAreasSmallerThan(128);
+        int length = Brushes.goodBrushes.size();
+        String brush1 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush2 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush3 = Brushes.goodBrushes.get(random.nextInt(length));
+        String brush4 = Brushes.goodBrushes.get(random.nextInt(length));
 
-        heightmapBase.init(land, waterHeight + .5f, waterHeight + .5f);
-        heightmapPlateaus.init(plateaus, 0, PLATEAU_HEIGHT).smooth(10, ramps);
-        heightmapHills.init(hills, 0, HILL_HEIGHT).smooth(16, land.copy().minus(plateaus));
-        heightmapValleys.init(valleys, 0, VALLEY_HEIGHT).smooth(16, plateaus);
-        heightmapLand.add(heightmapHills).add(heightmapValleys).maskToOceanHeights(0.35f, land).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight + 1f).maskToOceanHeights(0.15f, oceanFloor).clampMin(biome.getWaterSettings().getElevationAbyss() - waterHeight - 1f);
-        heightmapCliffs.init(cliffs, 0, 1f).maskToMountains(cliffs);
-        heightmapShore.init(shore, 0, 1.5f).maskToMountains(shore);
-        heightmapMountains.maskToMountains(mountains).add(heightmapCliffs).add(heightmapShore);
+        heightmapMountains.useBrushRepeatedlyCenteredWithinAreaToDensity(mountains.deflate(4), brush3, 32, .5f, 2.5f).smooth(1);
 
-        ConcurrentBinaryMask mountainsPresent = new ConcurrentBinaryMask(heightmapMountains, 3f, random.nextLong(), "mountainsPresent");
+        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
 
-        heightmapMountains.add(mountainsPresent.copy().minus(plateaus), PLATEAU_HEIGHT).subtract(mountainsPresent.copy().invert(), 10f).clampMin(0);
+        plateaus.combine(paintedMountains.intersect(plateaus.copy().inflate(32)));
 
-        heightmapBase.add(heightmapMountains).add(heightmapLand).add(heightmapPlateaus).smooth(1);
-        slope = heightmapBase.copy().gradient();
+        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .16f, 14f).clampMax(PLATEAU_HEIGHT);
+        heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .28f, -0.25f)
+                .clampMin(VALLEY_FLOOR).smooth(2);
+        heightmapHills.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, .28f, 0.25f)
+                .smooth(2);
+
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedPlateaus");
+
+        ConcurrentBinaryMask spawnRamps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "spawnRamps");
+        ramps.combine(paintedPlateaus.copy().outline()).minus(paintedMountains.copy().inflate(8)).flipValues(rampDensity * .004f + .001f).inflate(12);
+        spawnRamps.combine(spawnLandMask.copy().outline()).combine(spawnPlateauMask.copy().outline()).inflate(36).intersect(paintedPlateaus.copy().outline()).flipValues(.01f).inflate(12);
+        ramps.combine(spawnRamps).fillGaps(24).smooth(8, .25f);
+
+        land.combine(paintedPlateaus);
+        plateaus.combine(paintedPlateaus);
+
+        heightmapBase.addDistance(land, -.5f).clampMin(OCEAN_FLOOR).smooth(4, land.copy().invert().inflate(4));
+
+        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT, spawnPlateauMask);
+        heightmapLand.smooth(24, ramps).smooth(16, ramps.copy().inflate(10)).smooth(4, ramps.copy().inflate(14)).smooth(2, ramps.copy().inflate(18));
+
+        heightmapBase.add(heightmapLand);
+        heightmapBase.smooth(4, spawnLandMask.copy().combine(spawnPlateauMask).inflate(4));
+
+        heightmapBase.addAll(waterHeight).addGaussianNoise(.025f).clampMin(0f).clampMax(256f);
+
+        slope = heightmapBase.copy().supcomGradient();
 
         impassable = new ConcurrentBinaryMask(slope, 1f, random.nextLong(), "impassable");
         unbuildable = new ConcurrentBinaryMask(slope, .5f, random.nextLong(), "unbuildable");
@@ -889,22 +889,21 @@ public strictfp class MapGenerator {
     }
 
     private void setupTexturePipeline() {
-        ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "flat").invert();
+        ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .2f, random.nextLong(), "flat").invert();
         ConcurrentBinaryMask inland = new ConcurrentBinaryMask(land, random.nextLong(), "inland");
         ConcurrentBinaryMask highGround = new ConcurrentBinaryMask(heightmapBase, waterHeight + 3f, random.nextLong(), "highGround");
         ConcurrentBinaryMask aboveBeach = new ConcurrentBinaryMask(heightmapBase, waterHeight + 1.5f, random.nextLong(), "aboveBeach");
-        ConcurrentBinaryMask aboveBeachEdge = new ConcurrentBinaryMask(heightmapBase, waterHeight + 3f, random.nextLong(), "aboveBeachEdge");
         ConcurrentBinaryMask flatAboveCoast = new ConcurrentBinaryMask(heightmapBase, waterHeight + 0.29f, random.nextLong(), "flatAboveCoast");
         ConcurrentBinaryMask higherFlatAboveCoast = new ConcurrentBinaryMask(heightmapBase, waterHeight + 1.2f, random.nextLong(), "higherFlatAboveCoast");
         ConcurrentBinaryMask lowWaterBeach = new ConcurrentBinaryMask(heightmapBase, waterHeight, random.nextLong(), "lowWaterBeach");
-        ConcurrentBinaryMask waterBeach = new ConcurrentBinaryMask(heightmapBase, waterHeight + 1f, random.nextLong(), "waterBeach");
+        ConcurrentBinaryMask waterBeach = new ConcurrentBinaryMask(heightmapBase, waterHeight + 1f, random.nextLong(), "waterBeach").invert();
         ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(land, random.nextLong(), "accentGround");
         ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(plateaus, random.nextLong(), "accentPlateau");
-        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "slopes");
-        ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentSlopes").invert();
+        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .3f, random.nextLong(), "slopes");
+        ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
         ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
-        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "rock");
-        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, 1.25f, random.nextLong(), "accentRock");
+        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rock");
+        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentRock");
         intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
         rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
         waterBeachTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "waterBeachTexture");
@@ -920,26 +919,22 @@ public strictfp class MapGenerator {
         flatAboveCoast.intersect(flat);
         higherFlatAboveCoast.intersect(flat);
         lowWaterBeach.invert().inflate(6).minus(aboveBeach);
-        waterBeach.invert().minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
-        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, symmetrySettings.getSpawnSymmetry()).smooth(8, .75f);
+        waterBeach.minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
+        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, symmetrySettings.getSpawnSymmetry()).smooth(3, .75f);
         accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
         slopes.intersect(land).flipValues(.95f).erode(.5f, symmetrySettings.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
         accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
         steepHills.acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
         accentRock.acid(.2f, 0).erode(.3f, symmetrySettings.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
-        waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-        waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
-        waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
-        waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f).threshold(.1f).smooth(2);
-        accentGroundTexture.init(accentGround, 0, 1).smooth(16).add(accentGround, .65f).smooth(8).add(accentGround, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
-        accentPlateauTexture.init(accentPlateau, 0, 1).smooth(16).add(accentPlateau, .65f).smooth(8).add(accentPlateau, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(32).add(slopes, .65f).smooth(16).add(slopes, .5f).smooth(4).clampMax(1f).threshold(.05f).smooth(2);
-        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(16).add(accentSlopes, .65f).smooth(8).add(accentSlopes, .5f).smooth(2).clampMax(1f).threshold(.05f).smooth(2);
-        steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
-        rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f).threshold(.1f).smooth(2);
-        accentRockTexture.init(accentRock, 0, 1).subtract(waterBeachTexture).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
-
+        waterBeachTexture.init(land.copy().invert().inflate(12).minus(plateaus.copy().minus(ramps)), 0, 1).smooth(12);
+        accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f).threshold(.1f).smooth(2);
+        accentPlateauTexture.init(accentPlateau, 0, 1).smooth(12).add(accentPlateau, .65f).smooth(6).add(accentPlateau, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
+        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
+        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f);
+        steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f);
+        rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(4).add(rock, 1f).smooth(2).clampMax(1f);
+        accentRockTexture.init(accentRock, 0, 1).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
     }
 
     private void setupPropPipeline() {
