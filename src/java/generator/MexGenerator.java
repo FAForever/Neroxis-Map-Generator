@@ -29,14 +29,11 @@ public strictfp class MexGenerator {
         spawnableWater.limitToSpawnRegion();
         int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
 
-        int previousMexCount = map.getMexCount();
+        int previousMexCount;
         generateBaseMexes(spawnable);
         int numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
         for (Spawn spawn : map.getSpawns()) {
             spawnable.fillCircle(spawn.getPosition(), 24, false);
-        }
-        for (Mex mex : map.getMexes().subList(previousMexCount, map.getMexCount())) {
-            spawnable.fillCircle(mex.getPosition(), spawnSize, false);
         }
 
         previousMexCount = map.getMexCount();
@@ -54,7 +51,7 @@ public strictfp class MexGenerator {
         int numPlayerMexes = numMexesLeft / map.getSpawnCount() / 2;
         for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
             BinaryMask playerSpawnable = new BinaryMask(spawnable.getSize(), 0L, spawnable.getSymmetrySettings());
-            playerSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize() / 2f, true).intersect(spawnable);
+            playerSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize(), true).intersect(spawnable);
             generateIndividualMexes(playerSpawnable, numPlayerMexes);
             for (Mex mex : map.getMexes().subList(previousMexCount, map.getMexCount())) {
                 spawnable.fillCircle(mex.getPosition(), mexSpacing, false);
@@ -65,7 +62,7 @@ public strictfp class MexGenerator {
         numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
         generateIndividualMexes(spawnable, numMexesLeft);
         for (Mex mex : map.getMexes().subList(previousMexCount, map.getMexCount())) {
-            spawnable.fillCircle(mex.getPosition(), mexSpacing / 2f, false);
+            spawnable.fillCircle(mex.getPosition(), mexSpacing, false);
         }
         numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
 
@@ -94,7 +91,7 @@ public strictfp class MexGenerator {
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(96, false).fillEdge(16, false).intersect(spawnable);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            expansionSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize() * 3f / 8f, false);
+            expansionSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize() / 4f, false);
         }
 
         expMexCount = StrictMath.min((random.nextInt(3) + 2), expMexCountLeft);
