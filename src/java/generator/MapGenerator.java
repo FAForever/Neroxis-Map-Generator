@@ -46,9 +46,10 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MIN = .35f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 5f;
-    public static final float VALLEY_HEIGHT = -2f;
-    public static final float HILL_HEIGHT = 2f;
+    public static final float PLATEAU_HEIGHT = 7f;
+    public static final float OCEAN_FLOOR = -15f;
+    public static final float VALLEY_FLOOR = -5f;
+    public static final float LAND_HEIGHT = .5f;
     public static boolean DEBUG = false;
     //read from cli args
     private String pathToFolder = ".";
@@ -826,24 +827,19 @@ public strictfp class MapGenerator {
         String brush3 = Brushes.goodBrushes.get(random.nextInt(length));
         String brush4 = Brushes.goodBrushes.get(random.nextInt(length));
 
-        float deepWaterFloorHeight = -15f;
-        float plateauHeight = 7f;
-        float plateauValleyFloorHeight = -5f;
-        float landFloorHeight = .5f;
-
         heightmapMountains.useBrushRepeatedlyCenteredWithinAreaToDensity(mountains.deflate(2), brush3, 32, .30f, 5f).smooth(1);
 
-        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
+        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
 
         plateaus.combine(paintedMountains.intersect(plateaus.copy().inflate(32)));
 
-        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .16f, 14f).clampMax(plateauHeight);
+        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .16f, 14f).clampMax(PLATEAU_HEIGHT);
         heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .28f, -0.25f)
-                .clampMin(plateauValleyFloorHeight).smooth(2);
+                .clampMin(VALLEY_FLOOR).smooth(2);
         heightmapHills.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, .28f, 0.25f)
                 .smooth(2);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight / 2, random.nextLong(), "paintedPlateaus");
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedPlateaus");
 
         ConcurrentBinaryMask spawnRamps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "spawnRamps");
         ramps.combine(paintedPlateaus.copy().outline()).minus(paintedMountains.copy().inflate(8)).flipValues(rampDensity * .004f + .002f).inflate(12);
@@ -852,15 +848,15 @@ public strictfp class MapGenerator {
 
         land.combine(paintedPlateaus);
 
-        heightmapBase.addDistance(land, -.5f).clampMin(deepWaterFloorHeight).smooth(4, land.copy().invert().deflate(4));
+        heightmapBase.addDistance(land, -.5f).clampMin(OCEAN_FLOOR).smooth(4, land.copy().invert().deflate(4));
 
-        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).setValueInArea(landFloorHeight, spawnLandMask).add(heightmapPlateaus).setValueInArea(plateauHeight, spawnPlateauMask);
+        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT, spawnPlateauMask);
         heightmapLand.smooth(24, ramps).smooth(16, ramps.copy().inflate(10)).smooth(4, ramps.copy().inflate(14)).smooth(2, ramps.copy().inflate(18));
 
         heightmapBase.add(heightmapLand);
         heightmapBase.smooth(4, spawnLandMask.copy().combine(spawnPlateauMask).inflate(4));
 
-        heightmapBase.addAll(waterHeight + landFloorHeight).addGaussianNoise(.025f).clampMin(0f).clampMax(256f);
+        heightmapBase.addAll(waterHeight + LAND_HEIGHT).addGaussianNoise(.025f).clampMin(0f).clampMax(256f);
 
         slope = heightmapBase.copy().supcomGradient();
 
