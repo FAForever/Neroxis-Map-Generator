@@ -43,8 +43,8 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = 0f;
     public static final float RAMP_DENSITY_MAX = 1f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .35f;
-    public static final float PLATEAU_DENSITY_MAX = .5f;
+    public static final float PLATEAU_DENSITY_MIN = .3f;
+    public static final float PLATEAU_DENSITY_MAX = .45f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float PLATEAU_HEIGHT = 7f;
     public static final float OCEAN_FLOOR = -15f;
@@ -865,7 +865,7 @@ public strictfp class MapGenerator {
         unbuildable = new ConcurrentBinaryMask(slope, .3f, random.nextLong(), "unbuildable");
         ConcurrentBinaryMask notFlat = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "notFlat");
 
-        unbuildable.combine(ramps.copy().inflate(4).intersect(notFlat));
+        unbuildable.combine(ramps.copy().inflate(2).intersect(notFlat));
         impassable.inflate(2).combine(paintedMountains);
 
         passable = new ConcurrentBinaryMask(impassable, random.nextLong(), "passable").invert();
@@ -961,7 +961,7 @@ public strictfp class MapGenerator {
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
 
-        cliffRockMask.randomize(.5f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 12).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
+        cliffRockMask.randomize(.5f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 10).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
         treeMask.randomize(.2f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
         treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);

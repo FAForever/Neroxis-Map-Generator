@@ -465,7 +465,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask max(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
