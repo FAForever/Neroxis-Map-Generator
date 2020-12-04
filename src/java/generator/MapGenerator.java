@@ -846,10 +846,10 @@ public strictfp class MapGenerator {
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).addAll(LAND_HEIGHT)
                 .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
-                .smooth(24, ramps).smooth(16, ramps.copy().inflate(8))
-                .smooth(4, ramps.copy().inflate(10)).smooth(2, ramps.copy().inflate(14)).smooth(1);
+                .smooth(24, ramps).smooth(16, ramps.copy().inflate(10))
+                .smooth(4, ramps.copy().inflate(14)).smooth(2, ramps.copy().inflate(18));
 
-        heightmapBase.add(heightmapLand);
+        heightmapBase.add(heightmapLand).smooth(1);
 
         heightmapBase.addAll(waterHeight).addWhiteNoise(.05f).clampMin(0f).clampMax(256f);
 
