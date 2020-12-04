@@ -802,8 +802,8 @@ public strictfp class MapGenerator {
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "valleys");
 
-        hills.randomWalk(random.nextInt(3) + 1, random.nextInt(mapSize / 2)).setSize(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus).minus(ramps).minus(spawnLandMask);
-        valleys.randomWalk(random.nextInt(3) + 1, random.nextInt(mapSize / 2)).setSize(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(4)).minus(ramps).minus(spawnPlateauMask);
+        hills.randomWalk(random.nextInt(3) + 1, random.nextInt(mapSize / 2)).setSize(mapSize + 1).smooth(10, .25f).intersect(land.copy().deflate(8)).minus(plateaus.copy().inflate(8)).minus(ramps).minus(spawnLandMask);
+        valleys.randomWalk(random.nextInt(3) + 1, random.nextInt(mapSize / 2)).setSize(mapSize + 1).smooth(10, .25f).intersect(plateaus.copy().deflate(8)).minus(ramps).minus(spawnPlateauMask);
     }
 
     private void setupHeightmapPipeline() {
@@ -827,7 +827,7 @@ public strictfp class MapGenerator {
         plateaus.combine(paintedMountains.copy().intersect(plateaus.copy().inflate(32)));
         mountains.combine(paintedMountains);
 
-        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .16f, 14f).clampMax(PLATEAU_HEIGHT);
+        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .24f, 24f).clampMax(PLATEAU_HEIGHT);
         heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .36f, -0.35f)
                 .clampMin(VALLEY_FLOOR);
         heightmapHills.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, .36f, 0.5f);
@@ -846,11 +846,10 @@ public strictfp class MapGenerator {
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).addAll(LAND_HEIGHT)
                 .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
-                .smooth(24, ramps).smooth(16, ramps.copy().inflate(10))
-                .smooth(4, ramps.copy().inflate(14)).smooth(2, ramps.copy().inflate(18)).smooth(1);
+                .smooth(24, ramps).smooth(16, ramps.copy().inflate(8))
+                .smooth(4, ramps.copy().inflate(10)).smooth(2, ramps.copy().inflate(14)).smooth(1);
 
         heightmapBase.add(heightmapLand);
-        heightmapBase.smooth(4, spawnLandMask.copy().combine(spawnPlateauMask).inflate(4));
 
         heightmapBase.addAll(waterHeight).addWhiteNoise(.05f).clampMin(0f).clampMax(256f);
 
@@ -943,7 +942,7 @@ public strictfp class MapGenerator {
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
 
-        cliffRockMask.randomize(.5f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
+        cliffRockMask.randomize(.5f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
         treeMask.randomize(.2f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
         treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);
@@ -959,7 +958,7 @@ public strictfp class MapGenerator {
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetrySettings, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "allWreck");
 
-        t1LandWreckMask.randomize(reclaimDensity * .0035f).setSize(mapSize + 1).intersect(land).inflate(1).minus(impassable).fillEdge(20, false);
+        t1LandWreckMask.randomize(reclaimDensity * .003f).setSize(mapSize + 1).intersect(land).inflate(1).minus(impassable).fillEdge(20, false);
         t2LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).fillEdge(64, false);
         t3LandWreckMask.randomize(reclaimDensity * .00025f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).minus(t2LandWreckMask).fillEdge(mapSize / 8, false);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).minus(land.copy().inflate(16)).fillEdge(20, false).fillCenter(32, false);
