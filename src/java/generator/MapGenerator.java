@@ -104,7 +104,6 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask spawnLandMask;
     private ConcurrentBinaryMask spawnPlateauMask;
     private ConcurrentBinaryMask resourceMask;
-    private ConcurrentBinaryMask plateauResourceMask;
     private ConcurrentBinaryMask waterResourceMask;
     private ConcurrentBinaryMask t1LandWreckMask;
     private ConcurrentBinaryMask t2LandWreckMask;
@@ -522,7 +521,7 @@ public strictfp class MapGenerator {
 
         final int spawnSize = 32;
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
-        int mexSpacing = mapSize / 10;
+        int mexSpacing = mapSize / 8;
         if (mapSize > 512) {
             landDensity = landDensity - .05f;
         }
@@ -592,7 +591,7 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(resourceMask, plateaus, land, ramps, impassable, unbuildable, allWreckMask, plateauResourceMask, waterResourceMask);
+            Pipeline.await(resourceMask, plateaus, land, ramps, impassable, unbuildable, allWreckMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
             mexGenerator.generateMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(4));
@@ -747,7 +746,7 @@ public strictfp class MapGenerator {
         mountains.setSize(mapSize + 1);
         plateaus.setSize(mapSize + 1).smooth(12, .1f);
 
-        spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8);
+        spawnPlateauMask.shrink(mapSize / 4).erode(.5f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 12);
         spawnPlateauMask.erode(.5f, symmetrySettings.getSpawnSymmetry()).setSize(mapSize + 1).smooth(4);
 
         spawnLandMask.shrink(mapSize / 4).erode(.25f, symmetrySettings.getSpawnSymmetry(), 4).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6);
@@ -825,7 +824,7 @@ public strictfp class MapGenerator {
         mountains.combine(paintedMountains);
 
         heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .16f, 14f).clampMax(PLATEAU_HEIGHT);
-        heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .36f, -0.5f)
+        heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .36f, -0.35f)
                 .clampMin(VALLEY_FLOOR);
         heightmapHills.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, .36f, 0.5f);
 
@@ -857,7 +856,7 @@ public strictfp class MapGenerator {
         unbuildable = new ConcurrentBinaryMask(slope, .3f, random.nextLong(), "unbuildable");
         ConcurrentBinaryMask notFlat = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "notFlat");
 
-        unbuildable.combine(ramps.copy().inflate(2).intersect(notFlat));
+        unbuildable.combine(ramps.copy().intersect(notFlat));
         impassable.inflate(2).combine(paintedMountains);
 
         passable = new ConcurrentBinaryMask(impassable, random.nextLong(), "passable").invert();
@@ -872,12 +871,10 @@ public strictfp class MapGenerator {
     private void setupResourcePipeline() {
         resourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "resource");
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
-        plateauResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "plateauResource");
 
         resourceMask.minus(unbuildable).deflate(8);
         resourceMask.fillEdge(16, false).fillCenter(24, false);
         waterResourceMask.minus(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
-        plateauResourceMask.combine(resourceMask).intersect(plateaus).fillEdge(16, false).fillCenter(24, false);
     }
 
     private void setupTexturePipeline() {
