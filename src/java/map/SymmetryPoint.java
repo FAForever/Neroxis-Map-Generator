@@ -1,9 +1,11 @@
 package map;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import util.Vector2f;
 
-@Value
+@Data
+@AllArgsConstructor
 public strictfp class SymmetryPoint {
     Vector2f location;
     Symmetry symmetry;

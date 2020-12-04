@@ -89,22 +89,30 @@ public strictfp abstract class Mask<T> {
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.Z));
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.X));
-                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                    ArrayList<SymmetryPoint> symPoint2 = getSymmetryPoints(x, y, Symmetry.POINT2);
+                    symPoint2.get(0).setSymmetry(Symmetry.Z);
+                    symmetryPoints.addAll(symPoint2);
                 } else {
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.X));
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.Z));
-                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                    ArrayList<SymmetryPoint> symPoint2 = getSymmetryPoints(x, y, Symmetry.POINT2);
+                    symPoint2.get(0).setSymmetry(Symmetry.X);
+                    symmetryPoints.addAll(symPoint2);
                 }
             }
             case DIAG -> {
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.ZX));
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.XZ));
-                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                    ArrayList<SymmetryPoint> symPoint2 = getSymmetryPoints(x, y, Symmetry.POINT2);
+                    symPoint2.get(0).setSymmetry(Symmetry.ZX);
+                    symmetryPoints.addAll(symPoint2);
                 } else {
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.XZ));
                     symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.ZX));
-                    symmetryPoints.addAll(getSymmetryPoints(x, y, Symmetry.POINT2));
+                    ArrayList<SymmetryPoint> symPoint2 = getSymmetryPoints(x, y, Symmetry.POINT2);
+                    symPoint2.get(0).setSymmetry(Symmetry.XZ);
+                    symmetryPoints.addAll(symPoint2);
                 }
             }
         }
