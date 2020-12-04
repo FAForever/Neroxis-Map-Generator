@@ -86,6 +86,12 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
+    public ConcurrentFloatMask addWhiteNoise(float scale) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.floatMask.addWhiteNoise(scale)
+        );
+    }
+
     public ConcurrentFloatMask subtract(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.floatMask.subtract(((ConcurrentFloatMask) res.get(1)).getFloatMask())

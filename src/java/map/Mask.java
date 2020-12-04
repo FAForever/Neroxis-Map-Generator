@@ -41,7 +41,6 @@ public strictfp abstract class Mask<T> {
         if (getSize() > size) {
             shrink(size);
         }
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
