@@ -3,10 +3,13 @@ package map;
 import generator.VisualDebugger;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.signature.qual.BinaryName;
 import util.Util;
 import util.Vector2f;
 import util.Vector3f;
 
+import javax.lang.model.element.Name;
+import javax.xml.namespace.QName;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -16,6 +19,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
+import static brushes.Brushes.loadBrush;
 
 @Getter
 public strictfp class BinaryMask extends Mask<Boolean> {
@@ -167,6 +172,51 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         VisualDebugger.visualizeMask(this);
         return this;
     }
+
+    public BinaryMask addFloatMaskValuesWithinRangeCenteredAtLocationWithSize(FloatMask other, float minValueToConvert, float maxValueToConvert, Vector2f location, int size) {
+        if (size > getSize()) {
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
+        }
+        BinaryMask maskToBeAdded = other.copy().setSize(size).convertToBinaryMask(minValueToConvert, maxValueToConvert);
+        combineWithOffset(maskToBeAdded, location, true);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask useBrush(Vector2f location, String brushName, float minIntensityForTrue, float maxIntensityForTrue, int size) {
+        FloatMask brush = loadBrush(brushName, random.nextLong() ,new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        addFloatMaskValuesWithinRangeCenteredAtLocationWithSize(brush, minIntensityForTrue, maxIntensityForTrue, location, size);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        int x = (int) startingLocation.x;
+        int y = (int) startingLocation.y;
+        BinaryMask brush = loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE)).convertToBinaryMask(minIntensityForTrue, maxIntensityForTrue).setSize(size);
+        for (int z = 0; z < numberOfUses; z++) {
+            x += random.nextBoolean() ? random.nextInt(maxDistanceBetweenBrushstrokeCenters + 1) : - random.nextInt(maxDistanceBetweenBrushstrokeCenters + 1);
+            y += random.nextBoolean() ? random.nextInt(maxDistanceBetweenBrushstrokeCenters + 1) : - random.nextInt(maxDistanceBetweenBrushstrokeCenters + 1);
+            combineWithOffset(brush, x, y, true);
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int percentChanceToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        for (int z = 0; z < spawns.size() / 2; z+=2) {
+            if(percentChanceToAttemptConnectionPerOddNumberedSpawn > random.nextInt(100) - 1) {
+                Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
+                int halfSize = getSize() / 2;
+                while(!getValueAt(halfSize, halfSize)) {
+                    useBrushRepeatedlyForRandomConsecutiveExpansion(spawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters);
+                }
+            }
+        }
+            VisualDebugger.visualizeMask(this);
+            return this;
+    }
+
 
     public BinaryMask randomWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
@@ -431,7 +481,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask combine(BinaryMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
         }
         Boolean[][] maskCopy = getEmptyMask(getSize());
         for (int x = 0; x < getSize(); x++) {
@@ -444,9 +494,42 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
+    public BinaryMask combineWithOffset(BinaryMask other, int offsetX, int offsetY, boolean center) {
+        int size = StrictMath.min(getSize(), other.getSize());
+        if (center) {
+            offsetX -= size / 2;
+            offsetY -= size / 2;
+        }
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int shiftX = x + offsetX - 1;
+                int shiftY = y + offsetY - 1;
+                if (getSize() != size) {
+                    if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
+                        setValueAt(shiftX, shiftY, true);
+                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY);
+                        for (SymmetryPoint symmetryPoint : symmetryPoints) {
+                            setValueAt(symmetryPoint.getLocation(), true);
+                        }
+                    }
+                } else {
+                    if (other.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
+                        setValueAt(x, y, true);
+                    }
+                }
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered) {
+        return combineWithOffset(other, (int) loc.x, (int) loc.y, centered);
+    }
+
     public BinaryMask intersect(BinaryMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
         }
         Boolean[][] maskCopy = getEmptyMask(getSize());
         for (int x = 0; x < getSize(); x++) {
@@ -461,7 +544,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask minus(BinaryMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
         }
         Boolean[][] maskCopy = getEmptyMask(getSize());
         for (int x = 0; x < getSize(); x++) {
@@ -1036,6 +1119,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public void show() {
         VisualDebugger.visualizeMask(this);
+    }
+
+    public BinaryMask startVisualDebugger() {
+        return startVisualDebugger(toString(), Util.getStackTraceParentClass());
     }
 
     public BinaryMask startVisualDebugger(String maskName) {

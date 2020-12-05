@@ -196,7 +196,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask init(BinaryMask other, float low, float high) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -225,7 +225,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask multiply(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -273,7 +273,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask add(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -296,7 +296,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask subtract(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         add(other.copy().multiplyAll(-1));
         VisualDebugger.visualizeMask(this);
@@ -346,7 +346,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask add(BinaryMask other, float value) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, value);
@@ -379,7 +379,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask subtract(BinaryMask other, float value) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         FloatMask otherFloat = new FloatMask(getSize(), null, symmetrySettings);
         otherFloat.init(other, 0, -value);
@@ -400,7 +400,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask min(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int y = 0; y < getSize(); y++) {
             for (int x = 0; x < getSize(); x++) {
@@ -532,7 +532,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask setNonZeroValues(FloatMask other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
@@ -547,7 +547,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask setToZeroForValue(BinaryMask other, boolean value) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
@@ -580,7 +580,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask replaceValuesInRangeWith(BinaryMask range, FloatMask replacement) {
         if (range.getSize() != getSize() || replacement.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: replacement is " + replacement.getSize() + " and FloatMask is " + getSize());
         }
         setToZeroForValue(range, true).add(replacement.copy().setToZeroForValue(range, false));
         VisualDebugger.visualizeMask(this);
@@ -589,7 +589,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask smoothWithinSpecifiedDistanceOfEdgesOf(BinaryMask other, int distance) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and FloatMask is " + getSize());
         }
         for (int x = 0; x < distance; x = x + 2) {
             replaceValuesInRangeWith(other.getAreasWithinSpecifiedDistanceOfEdges(x + 1), copy().smooth(1));
@@ -600,7 +600,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
         if (avoidMakingZonesHere.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: avoidMakingZonesHere is " + avoidMakingZonesHere.getSize() + " and FloatMask is " + getSize());
         }
         avoidMakingZonesHere = avoidMakingZonesHere.copy();
         FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f * floatMax);
@@ -712,7 +712,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask smooth(int radius, BinaryMask limiter) {
         if (limiter.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: limiter is " + limiter.getSize() + " and FloatMask is " + getSize());
         }
         int[][] innerCount = getInnerCount();
 
@@ -763,7 +763,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask spike(int radius, BinaryMask limiter) {
         if (limiter.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size");
+            throw new IllegalArgumentException("Masks not the same size: limiter is " + limiter.getSize() + " and FloatMask is " + getSize());
         }
         int[][] innerCount = getInnerCount();
 
@@ -800,7 +800,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
-        FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        FloatMask brush = loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
         brush.multiplyAll(intensity / brush.getMax());
         addFloatMaskCenteredAtLocationWithSize(brush, location, size);
         VisualDebugger.visualizeMask(this);
@@ -813,7 +813,7 @@ public strictfp class FloatMask extends Mask<Float> {
         }
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        FloatMask brush = loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
         brush.multiplyAll(intensity / brush.getMax()).setSize(size);
         for (int z = 0; z < frequency; z++) {
             addWithOffset(brush, possibleLocations.get(random.nextInt(length)), true);
@@ -906,6 +906,10 @@ public strictfp class FloatMask extends Mask<Float> {
         return stringBuilder.toString();
     }
 
+
+    public FloatMask startVisualDebugger() {
+        return startVisualDebugger(toString(), Util.getStackTraceParentClass());
+    }
 
     public FloatMask startVisualDebugger(String maskName) {
         return startVisualDebugger(maskName, Util.getStackTraceParentClass());

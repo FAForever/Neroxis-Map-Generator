@@ -19,10 +19,10 @@ public strictfp class Brushes {
 
     public static final List<String> goodBrushes = Arrays.asList("mountain1.png", "mountain2.png", "mountain4.png", "mountain5.png", "mountain6.png", "volcano2.png");
 
-    public static FloatMask loadBrush(String brushName, SymmetrySettings symmetrySettings) {
+    public static FloatMask loadBrush(String brushName, Long seed, SymmetrySettings symmetrySettings) {
         try {
             BufferedImage image = ImageUtils.readImage(CUSTOM_BRUSHES_DIR.concat(brushName));
-            return new FloatMask(image, null, symmetrySettings);
+            return new FloatMask(image, seed, symmetrySettings);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Could not load brush");
