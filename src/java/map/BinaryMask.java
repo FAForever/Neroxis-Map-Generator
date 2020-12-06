@@ -175,7 +175,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask addFloatMaskValuesWithinRangeCenteredAtLocationWithSize(FloatMask other, float minValueToConvert, float maxValueToConvert, Vector2f location, int size) {
         if (size > getSize()) {
-            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
+            throw new IllegalArgumentException("Designated size of other mask is larger than BinaryMask: other is " + other.getSize() + " and BinaryMask is " + getSize());
         }
         BinaryMask maskToBeAdded = other.copy().setSize(size).convertToBinaryMask(minValueToConvert, maxValueToConvert);
         combineWithOffset(maskToBeAdded, location, true);
@@ -203,9 +203,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int percentChanceToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
         for (int z = 0; z < spawns.size() / 2; z+=2) {
-            if(percentChanceToAttemptConnectionPerOddNumberedSpawn > random.nextInt(100) - 1) {
+            if(probabilityToAttemptConnectionPerOddNumberedSpawn > random.nextFloat()) {
                 Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
                 int halfSize = getSize() / 2;
                 while(!getValueAt(halfSize, halfSize)) {
