@@ -238,6 +238,11 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         this.floatMask.show();
     }
 
+    public ConcurrentFloatMask startVisualDebugger() {
+        this.floatMask.startVisualDebugger(Util.getStackTraceParentClass());
+        return this;
+    }
+
     public ConcurrentFloatMask startVisualDebugger(String maskName) {
         this.floatMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
         return this;

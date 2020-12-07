@@ -3,9 +3,11 @@ package map;
 import lombok.Getter;
 import util.Pipeline;
 import util.Util;
+import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -84,6 +86,18 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask flipValues(float density, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.binaryMask.flipValues(density, symmetry)
+        );
+    }
+
+    public ConcurrentBinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.useBrushRepeatedlyForRandomConsecutiveExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+        );
+    }
+
+    public ConcurrentBinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int percentChanceToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.binaryMask.connectSpawnsWithRandomConsecutiveBrushUse(spawns, percentChanceToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
         );
     }
 
@@ -299,6 +313,11 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     public void show() {
         this.binaryMask.show();
+    }
+
+    public ConcurrentBinaryMask startVisualDebugger() {
+        this.binaryMask.startVisualDebugger(Util.getStackTraceParentClass());
+        return this;
     }
 
     public ConcurrentBinaryMask startVisualDebugger(String maskName) {
