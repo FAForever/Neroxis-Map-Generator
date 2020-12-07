@@ -25,15 +25,33 @@ public strictfp abstract class Mask<T> {
 
     protected abstract T[][] getEmptyMask(int size);
 
-    abstract T getValueAt(Vector2f location);
+    public T getValueAt(Vector3f location) {
+        return getValueAt((int) location.x, (int) location.z);
+    }
 
-    abstract T getValueAt(int x, int y);
+    public T getValueAt(Vector2f location) {
+        return getValueAt((int) location.x, (int) location.y);
+    }
 
-    abstract void setValueAt(Vector2f location, T value);
+    public T getValueAt(int x, int y) {
+        return mask[x][y];
+    }
 
-    abstract void setValueAt(int x, int y, T value);
+    public void setValueAt(Vector3f location, T value) {
+        setValueAt((int) location.x, (int) location.z, value);
+    }
 
-    abstract int getSize();
+    public void setValueAt(Vector2f location, T value) {
+        setValueAt((int) location.x, (int) location.y, value);
+    }
+
+    public void setValueAt(int x, int y, T value) {
+        mask[x][y] = value;
+    }
+
+    public int getSize() {
+        return mask[0].length;
+    }
 
     public Mask<T> setSize(int size) {
         if (getSize() < size)

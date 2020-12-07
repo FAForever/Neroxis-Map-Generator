@@ -30,7 +30,7 @@ public strictfp class HydroGenerator {
         map.getHydros().clear();
         int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
 
-        spawnable.limitToSpawnRegion();
+        spawnable.limitToSymmetryRegion();
         spawnable.fillCenter(64, false);
 
         for (int i = 0; i < map.getMexCount(); i++) {

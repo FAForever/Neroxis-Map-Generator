@@ -7,298 +7,298 @@ import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
 @Getter
 public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
-    private final String name;
-    private BinaryMask binaryMask;
-
     public ConcurrentBinaryMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(seed);
-        this.binaryMask = new BinaryMask(size, seed, symmetrySettings);
-        this.name = name;
-        this.symmetrySettings = this.binaryMask.getSymmetrySettings();
+        super(seed, name);
+        this.mask = new BinaryMask(size, seed, symmetrySettings);
+        this.symmetrySettings = this.mask.getSymmetrySettings();
 
         Pipeline.add(this, Collections.emptyList(), Arrays::asList);
     }
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, Long seed, String name) {
-        super(seed);
-        this.name = name;
-        this.binaryMask = new BinaryMask(1, seed, mask.getSymmetrySettings());
+        super(seed, name);
+        this.mask = new BinaryMask(1, seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
-            this.binaryMask = new BinaryMask(mask.getBinaryMask(), seed);
+            this.mask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.binaryMask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize()).combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
+                    ((BinaryMask) this.mask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize())).combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask(BinaryMask mask, Long seed, String name) {
-        super(seed);
-        this.name = name;
-        this.binaryMask = new BinaryMask(mask, seed);
+        super(seed, name);
+        this.mask = new BinaryMask(mask, seed);
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask(ConcurrentFloatMask mask, float threshold, Long seed, String name) {
-        super(seed);
-        this.name = name;
-        this.binaryMask = new BinaryMask(1, seed, mask.getSymmetrySettings());
+        super(seed, name);
+        this.mask = new BinaryMask(1, seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
-            this.binaryMask = new BinaryMask(mask.getFloatMask(), threshold, seed);
+            this.mask = new BinaryMask(mask.getFloatMask(), threshold, seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    this.binaryMask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize()).combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
+                    ((BinaryMask) this.mask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize())).combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask copy() {
-        return new ConcurrentBinaryMask(this, this.binaryMask.getRandom().nextLong(), name + "Copy");
+        return new ConcurrentBinaryMask(this, this.mask.getRandom().nextLong(), name + "Copy");
     }
 
     public ConcurrentBinaryMask clear() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.clear()
+                this.mask.clear()
         );
     }
 
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.randomize(density)
+                this.mask.randomize(density)
         );
     }
 
     public ConcurrentBinaryMask flipValues(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.flipValues(density)
+                this.mask.flipValues(density)
         );
     }
 
     public ConcurrentBinaryMask flipValues(float density, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.flipValues(density, symmetry)
+                this.mask.flipValues(density, symmetry)
         );
     }
 
     public ConcurrentBinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.useBrushRepeatedlyForRandomConsecutiveExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+                this.mask.useBrushForExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
         );
     }
 
-    public ConcurrentBinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int percentChanceToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+    public ConcurrentBinaryMask connectLocationToCenterWithBrush(Vector2f location, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.connectSpawnsWithRandomConsecutiveBrushUse(spawns, percentChanceToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+                this.mask.connectLocationToCenterWithBrush(location, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
         );
     }
 
     public ConcurrentBinaryMask randomWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.randomWalk(numWalkers, numSteps)
+                this.mask.randomWalk(numWalkers, numSteps)
         );
     }
 
     public ConcurrentBinaryMask progressiveWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.progressiveWalk(numWalkers, numSteps)
+                this.mask.progressiveWalk(numWalkers, numSteps)
         );
     }
 
     public ConcurrentBinaryMask invert() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.invert()
-        );
-    }
-
-    public ConcurrentBinaryMask setSize(int size) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.setSize(size)
+                this.mask.invert()
         );
     }
 
     public ConcurrentBinaryMask enlarge(int size) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.enlarge(size)
+                this.mask.enlarge(size)
         );
     }
 
     public ConcurrentBinaryMask shrink(int size) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.shrink(size)
+                this.mask.shrink(size)
         );
     }
 
     public ConcurrentBinaryMask inflate(float radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.inflate(radius)
+                this.mask.inflate(radius)
         );
     }
 
     public ConcurrentBinaryMask deflate(float radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.deflate(radius)
+                this.mask.deflate(radius)
         );
     }
 
     public ConcurrentBinaryMask cutCorners() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.cutCorners()
+                this.mask.cutCorners()
         );
     }
 
     public ConcurrentBinaryMask grow(float strength, Symmetry symmetry, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.grow(strength, symmetry, count)
+                this.mask.grow(strength, symmetry, count)
         );
     }
 
     public ConcurrentBinaryMask grow(float strength, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.grow(strength, symmetry)
+                this.mask.grow(strength, symmetry)
         );
     }
 
     public ConcurrentBinaryMask grow(float strength) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.grow(strength)
+                this.mask.grow(strength)
         );
     }
 
     public ConcurrentBinaryMask erode(float strength, Symmetry symmetry, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.erode(strength, symmetry, count)
+                this.mask.erode(strength, symmetry, count)
         );
     }
 
     public ConcurrentBinaryMask erode(float strength, Symmetry symmetry) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.erode(strength, symmetry)
+                this.mask.erode(strength, symmetry)
         );
     }
 
     public ConcurrentBinaryMask acid(float strength, float size) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.acid(strength, size)
+                this.mask.acid(strength, size)
         );
     }
 
     public ConcurrentBinaryMask erode(float strength) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.erode(strength)
+                this.mask.erode(strength)
         );
     }
 
     public ConcurrentBinaryMask outline() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.outline()
+                this.mask.outline()
         );
     }
 
     public ConcurrentBinaryMask smooth(int radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.smooth(radius)
+                this.mask.smooth(radius)
         );
     }
 
     public ConcurrentBinaryMask smooth(int radius, float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.smooth(radius, density)
+                this.mask.smooth(radius, density)
         );
     }
 
     public ConcurrentBinaryMask combine(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.binaryMask.combine(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.mask.combine(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
     public ConcurrentBinaryMask intersect(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.binaryMask.intersect(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.mask.intersect(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
     public ConcurrentBinaryMask minus(ConcurrentBinaryMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
-                this.binaryMask.minus(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+                this.mask.minus(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
     public ConcurrentBinaryMask fillCenter(int extent, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillCenter(extent, value)
+                this.mask.fillCenter(extent, value)
         );
     }
 
     public ConcurrentBinaryMask fillCircle(float x, float y, float radius, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillCircle(x, y, radius, value)
+                this.mask.fillCircle(x, y, radius, value)
         );
     }
 
     public ConcurrentBinaryMask fillRect(int x, int y, int width, int height, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillRect(x, y, width, height, value)
+                this.mask.fillRect(x, y, width, height, value)
         );
     }
 
     public ConcurrentBinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillParallelogram(x, y, width, height, xSlope, ySlope, value)
+                this.mask.fillParallelogram(x, y, width, height, xSlope, ySlope, value)
         );
     }
 
     public ConcurrentBinaryMask fillEdge(int rimWidth, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillEdge(rimWidth, value)
+                this.mask.fillEdge(rimWidth, value)
         );
     }
 
     public ConcurrentBinaryMask removeAreasSmallerThan(int minArea) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.removeAreasSmallerThan(minArea)
+                this.mask.removeAreasSmallerThan(minArea)
         );
     }
 
     public ConcurrentBinaryMask fillGaps(int minDistance) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.fillGaps(minDistance)
+                this.mask.fillGaps(minDistance)
         );
     }
 
     public ConcurrentBinaryMask widenGaps(int minDistance) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.binaryMask.widenGaps(minDistance)
+                this.mask.widenGaps(minDistance)
         );
     }
 
-
     @Override
     public void writeToFile(Path path) {
-        binaryMask.writeToFile(path);
+        mask.writeToFile(path);
     }
 
     @Override
     public String toHash() throws NoSuchAlgorithmException {
-        return binaryMask.toHash();
+        return mask.toHash();
     }
 
     protected BinaryMask getBinaryMask() {
-        return binaryMask;
+        return mask;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public BinaryMask getFinalMask() {
         Pipeline.await(this);
-        return binaryMask.copy();
+        return mask.copy();
+    }
+
+    @Override
+    int getSize() {
+        return mask.getSize();
+    }
+
+    public ConcurrentBinaryMask setSize(int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.setSize(size)
+        );
     }
 
     @Override
@@ -306,22 +306,17 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         return new ConcurrentBinaryMask(this, 0L, "mocked");
     }
 
-    @Override
-    int getSize() {
-        return binaryMask.getSize();
-    }
-
     public void show() {
-        this.binaryMask.show();
+        this.mask.show();
     }
 
     public ConcurrentBinaryMask startVisualDebugger() {
-        this.binaryMask.startVisualDebugger(Util.getStackTraceParentClass());
+        this.mask.startVisualDebugger(Util.getStackTraceParentClass());
         return this;
     }
 
     public ConcurrentBinaryMask startVisualDebugger(String maskName) {
-        this.binaryMask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
+        this.mask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
         return this;
     }
 }

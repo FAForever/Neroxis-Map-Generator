@@ -25,8 +25,8 @@ public strictfp class MexGenerator {
 
     public void generateMexes(BinaryMask spawnable, BinaryMask spawnableWater) {
         map.getMexes().clear();
-        spawnable.limitToSpawnRegion();
-        spawnableWater.limitToSpawnRegion();
+        spawnable.limitToSymmetryRegion();
+        spawnableWater.limitToSymmetryRegion();
         int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
 
         int previousMexCount;

@@ -44,7 +44,7 @@ public strictfp class PropGenerator {
     }
 
     public void generateProps(BinaryMask spawnable, String[] paths, float separation) {
-        spawnable.limitToSpawnRegion();
+        spawnable.limitToSymmetryRegion();
         LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);

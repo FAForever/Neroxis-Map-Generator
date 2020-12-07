@@ -73,7 +73,7 @@ public strictfp class DecalGenerator {
 
     public void generateDecals(BinaryMask spawnable, String[] paths, float separation, float scale) {
         BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
-        spawnableCopy.limitToSpawnRegion();
+        spawnableCopy.limitToSymmetryRegion();
         LinkedList<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
         boolean flipX;
         boolean flipZ;

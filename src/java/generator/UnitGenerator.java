@@ -70,7 +70,7 @@ public strictfp class UnitGenerator {
 
     public void generateBases(BinaryMask spawnable, String[] templates, Army army, Group group, float separation) {
         String luaFile = templates[random.nextInt(templates.length)];
-        spawnable.limitToSpawnRegion();
+        spawnable.limitToSymmetryRegion();
         LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
             try {
@@ -91,7 +91,7 @@ public strictfp class UnitGenerator {
     }
 
     public void generateUnits(BinaryMask spawnable, String[] types, Army army, Group group, float separation) {
-        spawnable.limitToSpawnRegion();
+        spawnable.limitToSymmetryRegion();
         LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
         String type = types[random.nextInt(types.length)];
         float rot = random.nextFloat() * 3.14159f;
