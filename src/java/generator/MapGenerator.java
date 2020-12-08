@@ -959,12 +959,12 @@ public strictfp class MapGenerator {
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
 
-        cliffRockMask.randomize(reclaimDensity * .5f + .1f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
+        cliffRockMask.randomize(reclaimDensity * .5f + .1f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
         treeMask.randomize(reclaimDensity * .2f + .05f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
         treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).minus(notFlat).smooth(4, .25f);
-        largeRockFieldMask.randomize(reclaimDensity * .00075f).fillEdge(32, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
-        smallRockFieldMask.randomize(reclaimDensity * .002f).fillEdge(16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 2).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
+        largeRockFieldMask.randomize(reclaimDensity * .001f).fillEdge(32, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 8).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .0025f).fillEdge(16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
     }
 
     private void setupWreckPipeline() {
@@ -975,9 +975,9 @@ public strictfp class MapGenerator {
         navyFactoryWreckMask = new ConcurrentBinaryMask(mapSize / 8, random.nextLong(), symmetrySettings, "navyFactoryWreck");
         allWreckMask = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "allWreck");
 
-        t1LandWreckMask.randomize(reclaimDensity * .003f).setSize(mapSize + 1).intersect(land).inflate(1).minus(impassable).fillEdge(20, false);
-        t2LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).fillEdge(64, false);
-        t3LandWreckMask.randomize(reclaimDensity * .00025f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).minus(t2LandWreckMask).fillEdge(mapSize / 8, false);
+        t1LandWreckMask.randomize(reclaimDensity * .0025f).setSize(mapSize + 1).intersect(land).inflate(1).minus(impassable).fillEdge(20, false);
+        t2LandWreckMask.randomize(reclaimDensity * .002f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).fillEdge(64, false);
+        t3LandWreckMask.randomize(reclaimDensity * .0004f).setSize(mapSize + 1).intersect(land).minus(impassable).minus(t1LandWreckMask).minus(t2LandWreckMask).fillEdge(mapSize / 8, false);
         navyFactoryWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).minus(land.copy().inflate(16)).fillEdge(20, false).fillCenter(32, false);
         t2NavyWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1).intersect(land.copy().inflate(4).outline()).fillEdge(20, false);
         allWreckMask.combine(t1LandWreckMask).combine(t2LandWreckMask).combine(t3LandWreckMask).combine(t2NavyWreckMask).inflate(2);
