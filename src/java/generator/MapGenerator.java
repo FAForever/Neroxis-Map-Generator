@@ -31,7 +31,13 @@ import static util.ImageUtils.readImage;
 @Setter
 public strictfp class MapGenerator {
 
-    public static final String VERSION = "1.2.0";
+    private static final String VERSION;
+
+    static {
+        String version = MapGenerator.class.getPackage().getImplementationVersion();
+        VERSION = version != null ? version : "SNAPSHOT";
+    }
+
     private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     public static final float LAND_DENSITY_MIN = .8f;
@@ -317,7 +323,7 @@ public strictfp class MapGenerator {
         }
         String version = args[3];
         if (!VERSION.equals(version)) {
-            throw new RuntimeException("Unsupported generator version: " + version);
+            throw new RuntimeException("Wrong generator version: " + version);
         }
         if (args.length >= 8) {
             String timeString = args[7];

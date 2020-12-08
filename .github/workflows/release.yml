@@ -17,14 +17,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up JDK 15.0.1
       uses: actions/setup-java@v1
       with:
         java-version: 15.0.1
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
     - name: Build with Gradle
       run: ./gradlew build
+
+    - name: Create Jar
+      run: ./gradlew shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}
+
     - name: Create Draft Release
       id: create_release
       uses: actions/create-release@v1
@@ -35,15 +42,14 @@ jobs:
         release_name: NeroxisGen_${{ github.event.inputs.version }}
         draft: true
         prerelease: false
-    - name: Create Jar
-      run: ./gradlew shadowJar
+
     - name: Upload Jar
-      id: upload-jar 
+      id: upload-jar
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: build/libs/NeroxisGen-SNAPSHOT.jar
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/libs/NeroxisGen_${{ github.event.inputs.version }}.jar
         asset_name: NeroxisGen_${{ github.event.inputs.version }}.jar
         asset_content_type: application/zip
