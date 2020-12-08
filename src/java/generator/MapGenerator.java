@@ -86,6 +86,7 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask ramps;
     private ConcurrentBinaryMask impassable;
     private ConcurrentBinaryMask unbuildable;
+    private ConcurrentBinaryMask notFlat;
     private ConcurrentBinaryMask passable;
     private ConcurrentBinaryMask passableLand;
     private ConcurrentBinaryMask passableWater;
@@ -872,8 +873,8 @@ public strictfp class MapGenerator {
         slope = heightmapBase.copy().supcomGradient();
 
         impassable = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "impassable");
-        unbuildable = new ConcurrentBinaryMask(slope, .3f, random.nextLong(), "unbuildable");
-        ConcurrentBinaryMask notFlat = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "notFlat");
+        unbuildable = new ConcurrentBinaryMask(slope, .2f, random.nextLong(), "unbuildable");
+        notFlat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "notFlat");
 
         unbuildable.combine(ramps.copy().intersect(notFlat));
         impassable.inflate(2).combine(paintedMountains);
@@ -961,9 +962,9 @@ public strictfp class MapGenerator {
         cliffRockMask.randomize(reclaimDensity * .5f + .1f).setSize(mapSize + 1).intersect(impassable).grow(.5f, symmetrySettings.getSpawnSymmetry(), 4).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
         treeMask.randomize(reclaimDensity * .2f + .05f).setSize(mapSize / 4).inflate(2).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).erode(.5f, symmetrySettings.getSpawnSymmetry());
-        treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).smooth(4, .25f);
-        largeRockFieldMask.randomize(reclaimDensity * .00075f).fillEdge(32, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6).setSize(mapSize + 1).intersect(land).minus(impassable);
-        smallRockFieldMask.randomize(reclaimDensity * .002f).fillEdge(16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 2).setSize(mapSize + 1).intersect(land).minus(impassable);
+        treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).minus(notFlat).smooth(4, .25f);
+        largeRockFieldMask.randomize(reclaimDensity * .00075f).fillEdge(32, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 6).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
+        smallRockFieldMask.randomize(reclaimDensity * .002f).fillEdge(16, false).grow(.5f, symmetrySettings.getSpawnSymmetry(), 2).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
     }
 
     private void setupWreckPipeline() {
