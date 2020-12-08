@@ -14,11 +14,9 @@ public strictfp class MexGenerator {
     private final SCMap map;
     private final Random random;
     private final int mexSpacing;
-    private final int spawnSize;
 
-    public MexGenerator(SCMap map, long seed, int spawnSize, int mexSpacing) {
+    public MexGenerator(SCMap map, long seed, int mexSpacing) {
         this.map = map;
-        this.spawnSize = spawnSize;
         this.mexSpacing = mexSpacing;
         random = new Random(seed);
     }

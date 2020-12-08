@@ -290,7 +290,7 @@ public strictfp class MapPopulator {
         if (populateMexes) {
             if (mexCountPerPlayer > 0) {
                 map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
-                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), 48, map.getSize() / 8);
+                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), map.getSize() / 8);
 
                 mexGenerator.generateMexes(resourceMask, waterResourceMask);
                 mexGenerator.setMarkerHeights();
@@ -302,7 +302,7 @@ public strictfp class MapPopulator {
         if (populateHydros) {
             if (hydroCountPerPlayer > 0) {
                 map.setMexCountInit(hydroCountPerPlayer * map.getSpawnCount());
-                HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), 48);
+                HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
 
                 hydroGenerator.generateHydros(resourceMask.deflate(4));
                 hydroGenerator.setMarkerHeights();

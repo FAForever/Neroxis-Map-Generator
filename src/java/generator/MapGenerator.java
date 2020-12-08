@@ -523,7 +523,7 @@ public strictfp class MapGenerator {
     public SCMap generate() throws IOException {
         long startTime = System.currentTimeMillis();
 
-        final int spawnSize = 32;
+        final int spawnSize = 36;
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 8;
         if (mapSize > 512) {
@@ -536,8 +536,8 @@ public strictfp class MapGenerator {
         waterHeight = biome.getWaterSettings().getElevation();
 
         SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), spawnSize);
-        MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), spawnSize, mexSpacing);
-        HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong(), spawnSize);
+        MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), mexSpacing);
+        HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
         UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
@@ -875,7 +875,7 @@ public strictfp class MapGenerator {
         resourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "resource");
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
 
-        resourceMask.minus(unbuildable).deflate(8);
+        resourceMask.minus(unbuildable).deflate(4);
         resourceMask.fillEdge(16, false).fillCenter(24, false);
         waterResourceMask.minus(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
     }
