@@ -147,7 +147,7 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), landDensity, 0);
+        assertEquals(instance.getLandDensity(), -landDensity, 0);
         assertEquals(instance.getPlateauDensity(), plateauDensity, 0);
         assertEquals(instance.getMountainDensity(), mountainDensity, 0);
         assertEquals(instance.getRampDensity(), rampDensity, 0);
