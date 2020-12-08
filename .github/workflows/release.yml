@@ -37,8 +37,6 @@ jobs:
         prerelease: false
     - name: Create Jar
       run: ./gradlew shadowJar
-    - name: Rename Jar
-      run: mv "build/libs/NeroxisGen-SNAPSHOT.jar" "build/libs/NeroxisGen_${{ github.event.inputs.version }}.jar"
     - name: Upload Jar
       id: upload-jar 
       uses: actions/upload-release-asset@v1
