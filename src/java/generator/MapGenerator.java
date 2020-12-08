@@ -46,7 +46,7 @@ public strictfp class MapGenerator {
     public static final float PLATEAU_DENSITY_MIN = .4f;
     public static final float PLATEAU_DENSITY_MAX = .5f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 7f;
+    public static final float PLATEAU_HEIGHT = 10f;
     public static final float OCEAN_FLOOR = -15f;
     public static final float VALLEY_FLOOR = -5f;
     public static final float LAND_HEIGHT = 1f;
@@ -827,7 +827,7 @@ public strictfp class MapGenerator {
         plateaus.combine(paintedMountains.copy().intersect(plateaus.copy().inflate(32)));
         mountains.combine(paintedMountains);
 
-        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 42, .24f, 24f).clampMax(PLATEAU_HEIGHT);
+        heightmapPlateaus.useBrushRepeatedlyCenteredWithinAreaToDensity(plateaus.deflate(8), brush1, 48, .24f, 24f).clampMax(PLATEAU_HEIGHT);
         heightmapValleys.useBrushRepeatedlyCenteredWithinAreaToDensity(valleys, brush2, 24, .36f, -0.35f)
                 .clampMin(VALLEY_FLOOR);
         heightmapHills.useBrushRepeatedlyCenteredWithinAreaToDensity(hills, brush4, 24, .36f, 0.5f);
