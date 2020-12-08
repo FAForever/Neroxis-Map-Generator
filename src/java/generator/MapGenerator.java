@@ -75,6 +75,7 @@ public strictfp class MapGenerator {
     private SCMap map;
     private int spawnSeparation;
     private float waterHeight;
+    private boolean optionsUsed = false;
 
     //masks used in generation
     private ConcurrentBinaryMask land;
@@ -139,7 +140,6 @@ public strictfp class MapGenerator {
         }
 
         MapGenerator generator = new MapGenerator();
-        generator.generationTime = Instant.now().getEpochSecond();
 
         generator.interpretArguments(args);
 
@@ -233,9 +233,16 @@ public strictfp class MapGenerator {
             return;
         }
 
+        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind");
+        blind = arguments.containsKey("blind");
+
+        if (tournamentStyle) {
+            generationTime = Instant.now().getEpochSecond();
+        }
+
         if (arguments.containsKey("seed") && arguments.get("seed") != null) {
             seed = Long.parseLong(arguments.get("seed"));
-            random = new Random(seed);
+            random = new Random(seed ^ generationTime);
         }
 
         if (arguments.containsKey("spawn-count") && arguments.get("spawn-count") != null) {
@@ -248,55 +255,58 @@ public strictfp class MapGenerator {
 
         randomizeOptions();
 
-        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind");
-        blind = arguments.containsKey("blind");
 
-        if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
-            landDensity = Float.parseFloat(arguments.get("land-density"));
-            landDensity = (float) StrictMath.round(landDensity * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
-        }
+        if (!tournamentStyle && !blind) {
+            if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
+                landDensity = Float.parseFloat(arguments.get("land-density"));
+                landDensity = (float) StrictMath.round(landDensity * 127f) / 127f * LAND_DENSITY_RANGE + LAND_DENSITY_MIN;
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
-            plateauDensity = Float.parseFloat(arguments.get("plateau-density"));
-            plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
-        }
+            if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
+                plateauDensity = Float.parseFloat(arguments.get("plateau-density"));
+                plateauDensity = (float) StrictMath.round(plateauDensity * 127f) / 127f * PLATEAU_DENSITY_RANGE + PLATEAU_DENSITY_MIN;
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
-            mountainDensity = Float.parseFloat(arguments.get("mountain-density"));
-            mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
-        }
+            if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
+                mountainDensity = Float.parseFloat(arguments.get("mountain-density"));
+                mountainDensity = (float) StrictMath.round(mountainDensity * 127f) / 127f * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
-            rampDensity = Float.parseFloat(arguments.get("ramp-density"));
-            rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
-        }
+            if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
+                rampDensity = Float.parseFloat(arguments.get("ramp-density"));
+                rampDensity = (float) StrictMath.round(rampDensity * 127f) / 127f * RAMP_DENSITY_RANGE + RAMP_DENSITY_MIN;
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
-            reclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
-            reclaimDensity = (float) StrictMath.round(reclaimDensity * 127f) / 127f;
-        }
+            if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
+                reclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
+                reclaimDensity = (float) StrictMath.round(reclaimDensity * 127f) / 127f;
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("mex-count") && arguments.get("mex-count") != null) {
-            mexCount = Integer.parseInt(arguments.get("mex-count"));
-        }
+            if (arguments.containsKey("mex-count") && arguments.get("mex-count") != null) {
+                mexCount = Integer.parseInt(arguments.get("mex-count"));
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
-            terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
-        }
+            if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
+                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
+                optionsUsed = true;
+            }
 
-        if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
-            mapSize = Integer.parseInt(arguments.get("map-size"));
-        }
-
-        if (arguments.containsKey("biome") && arguments.get("biome") != null) {
-            biome = Biomes.getBiomeByName(arguments.get("biome"));
+            if (arguments.containsKey("biome") && arguments.get("biome") != null) {
+                biome = Biomes.getBiomeByName(arguments.get("biome"));
+                optionsUsed = true;
+            }
         }
 
         generateMapName();
     }
 
     private void parseMapName() {
-        mapName = mapName.replace('^', '/');
         if (!mapName.startsWith("neroxis_map_generator")) {
             throw new IllegalArgumentException("Map name is not a generated map");
         }
@@ -308,6 +318,10 @@ public strictfp class MapGenerator {
         if (!VERSION.equals(version)) {
             throw new RuntimeException("Unsupported generator version: " + version);
         }
+        if (args.length >= 8) {
+            String timeString = args[7];
+            generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
+        }
         if (args.length >= 5) {
             String seedString = args[4];
             try {
@@ -317,7 +331,7 @@ public strictfp class MapGenerator {
                 ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
                 seed = seedWrapper.getLong();
             }
-            random = new Random(seed);
+            random = new Random(seed ^ generationTime);
             if (args.length < 6) {
                 randomizeOptions();
             }
@@ -331,10 +345,6 @@ public strictfp class MapGenerator {
             String parametersString = args[6];
             byte[] parameterBytes = NAME_ENCODER.decode(parametersString);
             parseParameters(parameterBytes);
-        }
-        if (args.length >= 8) {
-            String timeString = args[7];
-            generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
         }
     }
 
@@ -479,12 +489,18 @@ public strictfp class MapGenerator {
         ByteBuffer seedBuffer = ByteBuffer.allocate(8);
         seedBuffer.putLong(seed);
         String seedString = NAME_ENCODER.encode(seedBuffer.array());
-        byte[] optionArray = {(byte) spawnCount,
-                (byte) (mapSize / 64),
-                (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
-                (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
-                (byte) ((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f),
-                (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f)};
+        byte[] optionArray;
+        if (optionsUsed) {
+            optionArray = new byte[]{(byte) spawnCount,
+                    (byte) (mapSize / 64),
+                    (byte) ((landDensity - LAND_DENSITY_MIN) / LAND_DENSITY_RANGE * 127f),
+                    (byte) ((plateauDensity - PLATEAU_DENSITY_MIN) / PLATEAU_DENSITY_RANGE * 127f),
+                    (byte) ((mountainDensity - MOUNTAIN_DENSITY_MIN) / MOUNTAIN_DENSITY_RANGE * 127f),
+                    (byte) ((rampDensity - RAMP_DENSITY_MIN) / RAMP_DENSITY_RANGE * 127f)};
+        } else {
+            optionArray = new byte[]{(byte) spawnCount,
+                    (byte) (mapSize / 64)};
+        }
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
         parameters.set(1, blind);
