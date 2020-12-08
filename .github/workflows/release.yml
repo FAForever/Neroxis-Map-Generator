@@ -27,10 +27,10 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew --stacktrace build
 
     - name: Create Jar
-      run: ./gradlew shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}
+      run: ./gradlew --stacktrace shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}
 
     - name: Create Draft Release
       id: create_release
