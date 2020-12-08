@@ -91,8 +91,12 @@ public strictfp class UnitGenerator {
     }
 
     public void generateUnits(BinaryMask spawnable, String[] types, Army army, Group group, float separation) {
+        generateUnits(spawnable, types, army, group, separation, separation);
+    }
+
+    public void generateUnits(BinaryMask spawnable, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
         spawnable.limitToSymmetryRegion();
-        LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
+        LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(minSeparation, maxSeparation);
         String type = types[random.nextInt(types.length)];
         float rot = random.nextFloat() * 3.14159f;
         coordinates.forEach((location) -> {

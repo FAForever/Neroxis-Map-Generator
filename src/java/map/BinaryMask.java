@@ -986,13 +986,18 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return new LinkedList<>(chosenCoordinates);
     }
 
-    public LinkedList<Vector2f> getRandomCoordinates(float minSpacing) {
+    public LinkedList<Vector2f> getRandomCoordinates(float spacing) {
+        return getRandomCoordinates(spacing, spacing);
+    }
+
+    public LinkedList<Vector2f> getRandomCoordinates(float minSpacing, float maxSpacing) {
         LinkedList<Vector2f> coordinateList = getAllCoordinatesEqualTo(true, 1);
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinateList.size() > 0) {
             Vector2f location = coordinateList.remove(random.nextInt(coordinateList.size()));
+            float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
             chosenCoordinates.add(location);
-            coordinateList.removeIf((loc) -> location.getDistance(loc) < minSpacing);
+            coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
             ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location);
             symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getLocation().getDistance(loc) < minSpacing));
         }
