@@ -31,7 +31,7 @@ import static util.ImageUtils.readImage;
 @Setter
 public strictfp class MapGenerator {
 
-    private static final String VERSION;
+    public static final String VERSION;
 
     static {
         String version = MapGenerator.class.getPackage().getImplementationVersion();
