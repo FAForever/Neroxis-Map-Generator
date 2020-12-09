@@ -7,6 +7,7 @@ import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -84,6 +85,18 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.useBrushForExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+        );
+    }
+
+    public ConcurrentBinaryMask connectLocationToNearItsSymmetricLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectLocationToNearItsSymmetricLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectSpawnsWithRandomConsecutiveBrushUse(spawns, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
         );
     }
 
