@@ -28,9 +28,9 @@ public strictfp class ScenarioImporter {
         map.setDescription(lua.get("description").checkjstring());
         map.setNoRushRadius((float) lua.get("norushradius").checkdouble());
         map.getSpawns().forEach(spawn -> {
-            if (lua.get("norushoffsetX_ARMY_" + spawn.getId()) != LuaValue.NIL && lua.get("norushoffsetY_ARMY_" + spawn.getId()) != LuaValue.NIL) {
-                float xOffset = (float) lua.get("norushoffsetX_ARMY_" + spawn.getId()).checkdouble();
-                float yOffset = (float) lua.get("norushoffsetY_ARMY_" + spawn.getId()).checkdouble();
+            if (lua.get("norushoffsetX_" + spawn.getId()) != LuaValue.NIL && lua.get("norushoffsetY_" + spawn.getId()) != LuaValue.NIL) {
+                float xOffset = (float) lua.get("norushoffsetX_" + spawn.getId()).checkdouble();
+                float yOffset = (float) lua.get("norushoffsetY_" + spawn.getId()).checkdouble();
                 spawn.setNoRushOffset(new Vector2f(xOffset, yOffset));
             }
         });

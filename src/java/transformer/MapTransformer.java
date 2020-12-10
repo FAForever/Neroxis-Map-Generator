@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public strictfp class MapTransformer {
@@ -75,8 +72,8 @@ public strictfp class MapTransformer {
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the transformed map\n" +
-                    "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
-                    "--source arg           required, set which half to use as base for forced symmetry (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, ALL, {ANGLE})\n" +
+                    "--symmetry arg         required, set the symmetry for the map(" + Arrays.toString(Symmetry.values()) + ")\n" +
+                    "--source arg           required, set which half to use as base for forced symmetry (" + Arrays.toString(SymmetrySource.values()) + ", {ANGLE})\n" +
                     "--marker               optional, force spawn, mex, hydro, and ai marker symmetry\n" +
                     "--props                optional, force prop symmetry\n" +
                     "--decals               optional, force decal symmetry\n" +

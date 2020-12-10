@@ -37,7 +37,7 @@ public strictfp class ScenarioExporter {
         out.writeBytes("          name = 'FFA',\n");
         out.writeBytes("          armies = {");
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            out.writeBytes("'" + map.getSpawn(i).getId() + "'");
+            out.writeBytes("'ARMY_" + (i + 1) + "'");
             if (i < map.getSpawnCount() - 1)
                 out.writeBytes(",");
         }
