@@ -88,9 +88,9 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask connectLocationToNearItsSymmetricLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction) {
+    public ConcurrentBinaryMask connectLocationToNearItsSymLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToNearItsSymmetricLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction)
+                this.mask.connectLocationToNearItsSymLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
         );
     }
 
