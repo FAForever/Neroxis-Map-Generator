@@ -1034,15 +1034,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask connectLocationToNearItsSymmetricLocation(Vector2f startLocation, String brushName, int size, int usesBatchSize,
+    public BinaryMask connectLocationToNearItsSymLocation(Vector2f startLocation, String brushName, int size, int usesBatchSize,
                                            float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
-        ArrayList<SymmetryPoint> symmetricalLocationList = getSymmetryPoints(startLocation);
-        Vector2f symmetricalLocation = symmetricalLocationList.get(0).getLocation();
+        ArrayList<SymmetryPoint> symLocationList = getSymmetryPoints(startLocation);
+        Vector2f symLocation = symLocationList.get(0).getLocation();
         int mapSize = getSize();
-        int symX = (int) symmetricalLocation.x;
-        int symY = (int) symmetricalLocation.y;
+        int symX = (int) symLocation.x;
+        int symY = (int) symLocation.y;
         int x = (int) startLocation.x;
         int y = (int) startLocation.y;
         while ((StrictMath.abs(x - symX) > minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
@@ -1104,7 +1104,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction) {
+    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
         ArrayList<Vector2f> targetSpawns = new ArrayList<>();
         for (int z = spawns.size() / numberOfTeams; z < spawns.size(); z++) {
             targetSpawns.add(new Vector2f (spawns.get(z).getPosition().x, spawns.get(z).getPosition().z));
@@ -1112,18 +1112,18 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         for (int z = 0; z < spawns.size() / numberOfTeams; z+=numberOfTeams) {
             if(probabilityToAttemptConnectionPerOddNumberedSpawn > random.nextFloat()) {
                 Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
-                connectLocationToNearAtLeastOneLocationFromList(spawn,targetSpawns, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction);
+                connectLocationToNearAtLeastOneLocationFromList(spawn,targetSpawns, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction);
             }
         }
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public BinaryMask connectSymSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction) {
+    public BinaryMask connectSymSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
         for (int z = 0; z < spawns.size() / numberOfTeams; z+=numberOfTeams) {
             if(probabilityToAttemptConnectionPerOddNumberedSpawn > random.nextFloat()) {
                 Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
-                connectLocationToNearItsSymmetricLocation(spawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymmetricalLocationRequiredToCompleteFunction);
+                connectLocationToNearItsSymLocation(spawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction);
             }
         }
         VisualDebugger.visualizeMask(this);
