@@ -381,17 +381,17 @@ public strictfp class MapPopulator {
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
-            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
-            accentPlateau.acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0);
-            slopes.intersect(land).flipValues(.95f).erode(.5f, symmetrySettings.getSpawnSymmetry()).acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
-            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, symmetrySettings.getSpawnSymmetry()).smooth(4, .75f).acid(.55f, 0);
-            steepHills.acid(.3f, 0).erode(.2f, symmetrySettings.getSpawnSymmetry());
+            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
+            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
+            slopes.intersect(land).flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
+            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f).acid(.55f, 0);
+            steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
             if (waterPresent) {
                 waterBeach.invert().minus(smallWater).minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
             } else {
                 waterBeach.clear();
             }
-            accentRock.acid(.2f, 0).erode(.3f, symmetrySettings.getSpawnSymmetry()).acid(.2f, 0).smooth(2, .5f).intersect(rock);
+            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
             accentGround.setSize(mapImageSize);
             accentPlateau.setSize(mapImageSize);
@@ -513,7 +513,7 @@ public strictfp class MapPopulator {
             BinaryMask largeRockFieldMask = new BinaryMask(land, random.nextLong());
             BinaryMask smallRockFieldMask = new BinaryMask(land, random.nextLong());
 
-            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, symmetrySettings.getSpawnSymmetry()).smooth(2, .75f).acid(.45f, 0));
+            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).intersect(flatEnoughNearRock);
             fieldStoneMask.randomize(.00145f).intersect(flatEnoughNearRock.copy().deflate(1));
             largeRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);

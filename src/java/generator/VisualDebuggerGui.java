@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class VisualDebuggerGui {
 
-    public static final boolean AUTO_SELECT_NEW_MASKS = false;
     private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
     private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
     private static JFrame frame;
@@ -48,7 +47,6 @@ public class VisualDebuggerGui {
                 onSelect(selectedItem.maskName);
             }
         });
-
         JScrollPane listScroller = new JScrollPane(list);
         listScroller.setMinimumSize(new Dimension(100, 0));
         contentPane.add(listScroller);
@@ -69,11 +67,10 @@ public class VisualDebuggerGui {
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
             canvas.setViewModel(image, size);
+            if (list.getSelectedIndex() == -1) {
+                list.setSelectedIndex(ind);
+            }
         }
-    }
-
-    public static void remove(String uniqueMaskName) {
-        listModel.removeElement(new MaskListItem(uniqueMaskName));
     }
 
     private static void onSelect(String uniqueMaskName) {
@@ -86,6 +83,7 @@ public class VisualDebuggerGui {
     private static void updateVisibleCanvas(String maskName, ImagePanel canvas) {
         canvas.revalidate();
         canvas.repaint();
+        contentPane.repaint();
         frame.pack();
         frame.setTitle("Mask: " + maskName + ", Size: " + canvas.getImageSize());
     }

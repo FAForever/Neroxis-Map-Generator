@@ -76,53 +76,27 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask flipValues(float density, Symmetry symmetry) {
+    public ConcurrentBinaryMask flipValues(float density, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.flipValues(density, symmetry)
-        );
-    }
-
-    public ConcurrentBinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.useBrushForExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
-        );
-    }
-
-    public ConcurrentBinaryMask connectLocationToNearItsSymLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToNearItsSymLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-    public ConcurrentBinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectSymSpawnsWithRandomConsecutiveBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-    public ConcurrentBinaryMask connectLocationToNearAtLeastOneLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize, float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToNearAtLeastOneLocationFromList(startLocation, targetLocations, brushName, size, usesBatchSize,
-        minValue, maxValue, maxDistanceBetweenBrushUse, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-
-    public ConcurrentBinaryMask connectSymSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectSymSpawnsWithRandomConsecutiveBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-    public ConcurrentBinaryMask connectLocationToCenterWithBrush(Vector2f location, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToCenterWithBrush(location, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+                this.mask.flipValues(density, symmetryType)
         );
     }
 
     public ConcurrentBinaryMask randomWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.randomWalk(numWalkers, numSteps)
+        );
+    }
+
+    public ConcurrentBinaryMask randomWalkWithBrush(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.randomWalkWithBrush(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+        );
+    }
+
+    public ConcurrentBinaryMask directedWalk(Vector2f start, Vector2f end, float maxStep, float maxAngleError, float distanceThreshold) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.directedWalk(start, end, maxStep, maxAngleError, distanceThreshold)
         );
     }
 
@@ -168,15 +142,15 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask grow(float strength, Symmetry symmetry, int count) {
+    public ConcurrentBinaryMask grow(float strength, SymmetryType symmetryType, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.grow(strength, symmetry, count)
+                this.mask.grow(strength, symmetryType, count)
         );
     }
 
-    public ConcurrentBinaryMask grow(float strength, Symmetry symmetry) {
+    public ConcurrentBinaryMask grow(float strength, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.grow(strength, symmetry)
+                this.mask.grow(strength, symmetryType)
         );
     }
 
@@ -186,15 +160,15 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask erode(float strength, Symmetry symmetry, int count) {
+    public ConcurrentBinaryMask erode(float strength, SymmetryType symmetryType, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.erode(strength, symmetry, count)
+                this.mask.erode(strength, symmetryType, count)
         );
     }
 
-    public ConcurrentBinaryMask erode(float strength, Symmetry symmetry) {
+    public ConcurrentBinaryMask erode(float strength, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.erode(strength, symmetry)
+                this.mask.erode(strength, symmetryType)
         );
     }
 
@@ -291,6 +265,38 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask widenGaps(int minDistance) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.widenGaps(minDistance)
+        );
+    }
+
+    public ConcurrentBinaryMask connectLocationToNearItsSymLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectLocationToNearItsSymLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectSymSpawnWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectSymSpawnWithRandomBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectLocationToLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize, float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectLocationToLocationFromList(startLocation, targetLocations, brushName, size, usesBatchSize,
+                        minValue, maxValue, maxDistanceBetweenBrushUse, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+
+    public ConcurrentBinaryMask connectSymSpawnsWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectSymSpawnWithRandomBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectToCenterWithBrush(Vector2f location, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectToCenterWithBrush(location, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
         );
     }
 

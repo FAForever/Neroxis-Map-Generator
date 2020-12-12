@@ -53,9 +53,9 @@ public class VisualDebugger {
     }
 
     public static void visualizeMask(Mask<?> mask) {
-        if (mask.getMask() instanceof Float[][]) {
+        if (mask instanceof FloatMask) {
             visualizeMask((FloatMask) mask);
-        } else if (mask.getMask() instanceof Boolean[][]) {
+        } else if (mask instanceof BinaryMask) {
             visualizeMask((BinaryMask) mask);
         }
     }
@@ -153,6 +153,7 @@ public class VisualDebugger {
         String maskName = maskDetails[0];
         String parentClass = maskDetails[1];
         LinkedHashSet<String> methods = Util.getStackTraceMethods(clazz);
+        methods.addAll(Util.getStackTraceMethods("map.Mask"));
         String function;
         if (clazz.getCanonicalName().equals(parentClass)) {
             function = methods.iterator().next();

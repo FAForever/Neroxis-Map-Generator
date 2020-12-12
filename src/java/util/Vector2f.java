@@ -75,6 +75,18 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f clampMin(float x, float y) {
+        this.x = StrictMath.max(x, this.x);
+        this.y = StrictMath.max(y, this.y);
+        return this;
+    }
+
+    public Vector2f clampMax(float x, float y) {
+        this.x = StrictMath.min(x, this.x);
+        this.y = StrictMath.min(y, this.y);
+        return this;
+    }
+
     public Vector2f clear() {
         this.x = 0;
         this.y = 0;
