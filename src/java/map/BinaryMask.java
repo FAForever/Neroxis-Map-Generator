@@ -1050,18 +1050,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             for (int i = 0; i < usesBatchSize; i++) {
                 x += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
                 y += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                if(x < 0) {
-                    x = 0;
-                }
-                if(x > mapSize) {
-                    x = mapSize;
-                }
-                if(y < 0) {
-                    y = 0;
-                }
-                if(y > mapSize) {
-                    y = mapSize;
-                }
+                x = StrictMath.min(x, mapSize);
+                x = StrictMath.max(x, 0);
+                y = StrictMath.min(y, mapSize);
+                y = StrictMath.max(y, 0);
                 combineWithOffset(brush, x, y, true);
             }
         }
@@ -1081,18 +1073,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             for (int i = 0; i < usesBatchSize; i++) {
                 x += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
                 y += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                if(x < 0) {
-                    x = 0;
-                }
-                if(x > mapSize) {
-                    x = mapSize;
-                }
-                if(y < 0) {
-                    y = 0;
-                }
-                if(y > mapSize) {
-                    y = mapSize;
-                }
+                x = StrictMath.min(x, mapSize);
+                x = StrictMath.max(x, 0);
+                y = StrictMath.min(y, mapSize);
+                y = StrictMath.max(y, 0);
                 combineWithOffset(brush, x, y, true);
                 int finalY = y;
                 int finalX = x;
