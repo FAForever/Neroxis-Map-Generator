@@ -1034,6 +1034,86 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
+    public BinaryMask connectLocationToNearItsSymLocation(Vector2f startLocation, String brushName, int size, int usesBatchSize,
+                                           float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
+                .setSize(size)).convertToBinaryMask(minValue, maxValue);
+        ArrayList<SymmetryPoint> symLocationList = getSymmetryPoints(startLocation);
+        Vector2f symLocation = symLocationList.get(0).getLocation();
+        int mapSize = getSize();
+        int symX = (int) symLocation.x;
+        int symY = (int) symLocation.y;
+        int x = (int) startLocation.x;
+        int y = (int) startLocation.y;
+        while ((StrictMath.abs(x - symX) > minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+                || (StrictMath.abs(y - symY) > minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)) {
+            for (int i = 0; i < usesBatchSize; i++) {
+                x += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+                y += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+                x = StrictMath.min(x, mapSize);
+                x = StrictMath.max(x, 0);
+                y = StrictMath.min(y, mapSize);
+                y = StrictMath.max(y, 0);
+                combineWithOffset(brush, x, y, true);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask connectLocationToNearAtLeastOneLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize,
+                                                                float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
+                .setSize(size)).convertToBinaryMask(minValue, maxValue);
+        int mapSize = getSize();
+        int x = (int) startLocation.x;
+        int y = (int) startLocation.y;
+        boolean flag = false;
+        while (!flag) {
+            for (int i = 0; i < usesBatchSize; i++) {
+                x += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+                y += (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+                x = StrictMath.min(x, mapSize);
+                x = StrictMath.max(x, 0);
+                y = StrictMath.min(y, mapSize);
+                y = StrictMath.max(y, 0);
+                combineWithOffset(brush, x, y, true);
+                int finalY = y;
+                int finalX = x;
+                flag = targetLocations.stream().anyMatch(n -> !(StrictMath.abs(finalX - n.x) < minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) &&
+                        StrictMath.abs(finalY - n.y) < minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        ArrayList<Vector2f> targetSpawns = new ArrayList<>();
+        for (int z = spawns.size() / numberOfTeams; z < spawns.size(); z++) {
+            targetSpawns.add(new Vector2f (spawns.get(z).getPosition().x, spawns.get(z).getPosition().z));
+        }
+        for (int z = 0; z < spawns.size() / numberOfTeams; z+=numberOfTeams) {
+            if(probabilityToAttemptConnectionPerOddNumberedSpawn > random.nextFloat()) {
+                Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
+                connectLocationToNearAtLeastOneLocationFromList(spawn,targetSpawns, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask connectSymSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        for (int z = 0; z < spawns.size() / numberOfTeams; z+=numberOfTeams) {
+            if(probabilityToAttemptConnectionPerOddNumberedSpawn > random.nextFloat()) {
+                Vector2f spawn = new Vector2f(spawns.get(z).getPosition().x, spawns.get(z).getPosition().z);
+                connectLocationToNearItsSymLocation(spawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction);
+            }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask connectLocationToCenterWithBrush(Vector2f location, String brushName, int size, int usesBatchSize, float minIntensity, float maxIntensity, int maxDistanceBetweenBrushstroke) {
         int halfSize = getSize() / 2;
         while (!getValueAt(halfSize, halfSize)) {

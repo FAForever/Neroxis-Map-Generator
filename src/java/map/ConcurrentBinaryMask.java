@@ -7,6 +7,7 @@ import util.Vector2f;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -84,6 +85,32 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask useBrushRepeatedlyForRandomConsecutiveExpansion(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.useBrushForExpansion(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
+        );
+    }
+
+    public ConcurrentBinaryMask connectLocationToNearItsSymLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectLocationToNearItsSymLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectSymSpawnsWithRandomConsecutiveBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+    public ConcurrentBinaryMask connectLocationToNearAtLeastOneLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize, float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectLocationToNearAtLeastOneLocationFromList(startLocation, targetLocations, brushName, size, usesBatchSize,
+        minValue, maxValue, maxDistanceBetweenBrushUse, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
+        );
+    }
+
+
+    public ConcurrentBinaryMask connectSymSpawnsWithRandomConsecutiveBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connectSymSpawnsWithRandomConsecutiveBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
         );
     }
 
