@@ -756,12 +756,14 @@ public strictfp class MapGenerator {
     }
 
     private void setupTerrainPipeline() {
+        boolean landPathed = false;
         if (landDensity > .75f && mountainDensity > .5f && random.nextFloat() < mountainDensity) {
             allLandInit();
             pathMountainInit();
         } else {
             if (landDensity > .5 && random.nextBoolean()) {
                 pathLandInit();
+                landPathed = true;
             } else {
                 smoothLandInit();
             }
@@ -773,6 +775,8 @@ public strictfp class MapGenerator {
         } else {
             smoothPlateauInit();
         }
+
+        land.startVisualDebugger("land");
 
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 12);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1).smooth(4);
@@ -786,10 +790,12 @@ public strictfp class MapGenerator {
         boolean fillLandGaps = (random.nextFloat() < landDensity);
         int fillSize = map.getSize() / 16;
 
-        if (fillLandGaps) {
-            land.fillGaps(fillSize);
-        } else {
-            land.widenGaps(fillSize);
+        if (!landPathed) {
+            if (fillLandGaps) {
+                land.fillGaps(fillSize);
+            } else {
+                land.widenGaps(fillSize);
+            }
         }
 
         if (random.nextBoolean()) {
@@ -800,8 +806,10 @@ public strictfp class MapGenerator {
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
-        if (fillLandGaps) {
-            land.widenGaps((int) (fillSize * 2f));
+        if (!landPathed) {
+            if (fillLandGaps) {
+                land.widenGaps((int) (fillSize * 1.5f));
+            }
         }
 
         land.removeAreasSmallerThan(mapSize * mapSize / 256);
@@ -831,17 +839,26 @@ public strictfp class MapGenerator {
 
         land.randomize(scaledLandDensity).smooth(2, .75f).erode(.5f, SymmetryType.TERRAIN, mapSize / 256);
         land.setSize(mapSize / 4).grow(.5f, SymmetryType.TERRAIN, mapSize / 128);
-        land.setSize(mapSize + 1).smooth(8, .9f);
+        land.setSize(mapSize + 1).smooth(8, .75f);
     }
 
     private void pathLandInit() {
         float maxStepSize = mapSize / 128f;
-        float maxAngleError = (float) (StrictMath.PI * 4f / 5f);
+        float maxAngleError = (float) (StrictMath.PI * 19f / 20f);
         float inertia = random.nextFloat() * .75f + .2f;
         float distanceThreshold = maxStepSize / 2f;
         int maxNumSteps = mapSize * mapSize;
-        int numWalkers = (int) (8 * (landDensity - .5f) / .5f + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numWalkersPerPlayer = 1;
+        int numWalkers = (int) (4 * (landDensity - .5f) / .5f + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         land = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "land");
+
+        map.getSpawns().forEach(spawn -> {
+            for (int i = 0; i < numWalkersPerPlayer; i++) {
+                Vector2f start = new Vector2f(spawn.getPosition());
+                Vector2f end = new Vector2f(random.nextInt(mapSize), random.nextInt(mapSize));
+                land.path(start, end, maxStepSize, maxAngleError, inertia, distanceThreshold, maxNumSteps);
+            }
+        });
 
         for (int i = 0; i < numWalkers; i++) {
             Vector2f start = new Vector2f(random.nextInt(mapSize + 1), random.nextInt(mapSize + 1));
@@ -850,7 +867,7 @@ public strictfp class MapGenerator {
         }
         land.inflate(mapSize / 256f).setSize(mapSize / 4).smooth(4).setSize(mapSize + 1).smooth(8);
         if (mapSize > 512) {
-            land.setSize(mapSize / 4).grow(.5f, SymmetryType.TERRAIN, 16);
+            land.setSize(mapSize / 4).grow(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1).smooth(4, .25f);
         }
     }
 
