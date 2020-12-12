@@ -162,7 +162,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask randomWalkWithBrush(Vector2f start, String brushName, int size, int numberOfUses,
                                           float minValue, float maxValue, int maxStepSize) {
         Vector2f location = new Vector2f(start);
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
             combineWithOffset(brush, location, true);
@@ -174,17 +174,22 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask directedWalk(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float distanceThreshold) {
+    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float inertia,
+                           float distanceThreshold, int maxNumSteps) {
         Vector2f location = new Vector2f(start);
         setValueAt(location, true);
-        while (location.getDistance(end) > distanceThreshold) {
+        int numSteps = 0;
+        float oldAngle = location.getAngle(end) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
+        while (location.getDistance(end) > distanceThreshold && numSteps < maxNumSteps) {
             float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-            float angle = location.getAngle(end) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
+            float angle = oldAngle * inertia + location.getAngle(end) * (1 - inertia) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
             location.add((float) (magnitude * StrictMath.cos(angle)), (float) (magnitude * StrictMath.sin(angle)));
             if (inBounds(location)) {
                 setValueAt(location, true);
                 getSymmetryPoints(location, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
             }
+            oldAngle = angle;
+            numSteps++;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -473,7 +478,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
-        FloatMask brush = (FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE)).setSize(size);
+        FloatMask brush = (FloatMask) loadBrush(brushName, random.nextLong()).setSize(size);
         combineWithOffset(brush, minValue, maxValue, location);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -1046,7 +1051,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask connectLocationToNearItsSymLocation(Vector2f start, String brushName, int size, int usesBatchSize,
                                                           float minValue, float maxValue, int maxDistanceBetweenBrushUse, int distanceThreshold) {
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         ArrayList<SymmetryPoint> symLocationList = getSymmetryPoints(start);
         Vector2f location = new Vector2f(start);
@@ -1066,7 +1071,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask connectLocationToLocationFromList(Vector2f start, ArrayList<Vector2f> targetLocations, String brushName, int size, int batchSize,
                                                         float minValue, float maxValue, int maxDistanceBetweenBrushUse, int distanceThreshold) {
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE))
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         int maskSize = getSize();
         Vector2f location = new Vector2f(start);

@@ -94,9 +94,10 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask directedWalk(Vector2f start, Vector2f end, float maxStep, float maxAngleError, float distanceThreshold) {
+    public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float inertia,
+                                     float distanceThreshold, int maxNumSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.directedWalk(start, end, maxStep, maxAngleError, distanceThreshold)
+                this.mask.path(start, end, maxStepSize, maxAngleError, inertia, distanceThreshold, maxNumSteps)
         );
     }
 

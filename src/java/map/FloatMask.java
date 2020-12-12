@@ -763,7 +763,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
-        FloatMask brush = loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        FloatMask brush = loadBrush(brushName, random.nextLong());
         brush.multiply(intensity / brush.getMax()).setSize(size);
         addWithOffset(brush, location, true);
         VisualDebugger.visualizeMask(this);
@@ -774,7 +774,7 @@ public strictfp class FloatMask extends Mask<Float> {
         checkSize(size);
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+        FloatMask brush = loadBrush(brushName, random.nextLong());
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
             addWithOffset(brush, possibleLocations.get(random.nextInt(length)), true);

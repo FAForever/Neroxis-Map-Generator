@@ -68,7 +68,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask addAll(float value) {
+    public ConcurrentFloatMask add(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.add(value)
         );
@@ -98,7 +98,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask multiplyAll(float value) {
+    public ConcurrentFloatMask multiply(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.multiply(value)
         );
@@ -152,7 +152,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinAreaToDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
+    public ConcurrentFloatMask useBrushWithinAreaWithDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
                 this.mask.useBrushWithinAreaWithDensity(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, density, intensity)
         );

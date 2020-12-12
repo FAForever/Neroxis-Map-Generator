@@ -85,15 +85,14 @@ public strictfp class MexGenerator {
         int expSize = 10;
 
         BinaryMask expansionSpawnable = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() / 2f, true).fillCenter(96, false).fillEdge(16, false).intersect(spawnable);
 
         for (int i = 0; i < map.getSpawnCount(); i++) {
-            expansionSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize() / 4f, false);
+            expansionSpawnable.fillCircle(map.getSpawn(i).getPosition(), map.getSize() / 6f, false);
         }
 
         expMexCount = StrictMath.min((random.nextInt(3) + 2), expMexCountLeft);
-        int expSpacing = map.getSize() / 3;
+        int expSpacing = map.getSize() / 8 * expMexCount / 2;
 
         LinkedList<Vector2f> expansionLocations = expansionSpawnable.getRandomCoordinates(expSpacing);
 
