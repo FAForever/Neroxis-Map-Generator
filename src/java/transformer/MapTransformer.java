@@ -346,7 +346,7 @@ public strictfp class MapTransformer {
                 transformedMexes.add(new Mex(mex.getId(), Placement.placeOnHeightmap(map, mex.getPosition())));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(mex.getPosition());
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
-                    transformedMexes.add(new Mex("sym " + mex.getId(), Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
+                    transformedMexes.add(new Mex(mex.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
                 }
             }
         });
@@ -360,7 +360,7 @@ public strictfp class MapTransformer {
                 transformedHydros.add(new Hydro(hydro.getId(), Placement.placeOnHeightmap(map, hydro.getPosition())));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(hydro.getPosition());
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
-                    transformedHydros.add(new Hydro("sym " + hydro.getId(), Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
+                    transformedHydros.add(new Hydro(hydro.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
                 }
             }
         });
@@ -419,7 +419,7 @@ public strictfp class MapTransformer {
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition());
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    transformedUnits.add(new Unit("sym " + unit.getId(), unit.getType(), Placement.placeOnHeightmap(map, symmetryPoints.get(i).getLocation()), symmetryRotation.get(i)));
+                    transformedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), Placement.placeOnHeightmap(map, symmetryPoints.get(i).getLocation()), symmetryRotation.get(i)));
                 }
             }
         });

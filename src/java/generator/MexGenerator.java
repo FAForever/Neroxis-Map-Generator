@@ -148,7 +148,7 @@ public strictfp class MexGenerator {
             Mex mex = new Mex(String.format("Mex %d", mexId), new Vector3f(location.add(.5f, .5f)));
             map.addMex(mex);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(mex.getPosition());
-            symmetryPoints.forEach(symmetryPoint -> map.addMex(new Mex(String.format("sym %d Mex %d", symmetryPoints.indexOf(symmetryPoint), mexId), new Vector3f(symmetryPoint.getLocation()))));
+            symmetryPoints.forEach(symmetryPoint -> map.addMex(new Mex(String.format("Mex %d sym %d", mexId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
         });
     }
 

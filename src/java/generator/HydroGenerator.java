@@ -71,7 +71,7 @@ public strictfp class HydroGenerator {
             Hydro hydro = new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
             map.addHydro(hydro);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition());
-            symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Hydro(String.format("sym %d Hydro %d", symmetryPoints.indexOf(symmetryPoint), hydroId), new Vector3f(symmetryPoint.getLocation()))));
+            symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Hydro(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
         });
     }
 

@@ -107,7 +107,7 @@ public strictfp class UnitGenerator {
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(unit.getPosition());
             ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(unit.getRotation());
             for (int i = 0; i < symmetryPoints.size(); i++) {
-                group.addUnit(new Unit(String.format("sym %s %s %s Unit %d", i, army.getId(), group.getId(), groupID), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
+                group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
             }
         });
     }
