@@ -64,7 +64,7 @@ public strictfp class MapGenerator {
     private String pathToFolder = ".";
     private String mapName = "debugMap";
     private long seed = new Random().nextLong();
-    private Random random = new Random(seed);
+    private Random random;
     private boolean tournamentStyle = false;
     private boolean blind = false;
     private long generationTime;
@@ -184,7 +184,6 @@ public strictfp class MapGenerator {
                 pathToFolder = args[0];
                 try {
                     seed = Long.parseLong(args[1]);
-                    random = new Random(seed);
                 } catch (NumberFormatException nfe) {
                     System.out.println("Seed not numeric using default seed or mapname");
                 }
@@ -252,7 +251,6 @@ public strictfp class MapGenerator {
 
         if (arguments.containsKey("seed") && arguments.get("seed") != null) {
             seed = Long.parseLong(arguments.get("seed"));
-            random = new Random(seed ^ generationTime);
         }
 
         if (arguments.containsKey("spawn-count") && arguments.get("spawn-count") != null) {
@@ -324,41 +322,47 @@ public strictfp class MapGenerator {
         if (args.length < 4) {
             throw new RuntimeException("Version not specified");
         }
+        if (args.length < 5) {
+            throw new RuntimeException("Seed not specified");
+        }
         String version = args[3];
         if (!VERSION.equals(version)) {
             throw new RuntimeException("Wrong generator version: " + version);
         }
-        if (args.length >= 8) {
-            String timeString = args[7];
-            generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
+
+        byte[] optionBytes = new byte[0];
+
+        String seedString = args[4];
+        try {
+            seed = Long.parseLong(seedString);
+        } catch (NumberFormatException nfe) {
+            byte[] seedBytes = NAME_ENCODER.decode(seedString);
+            ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
+            seed = seedWrapper.getLong();
         }
-        if (args.length >= 5) {
-            String seedString = args[4];
-            try {
-                seed = Long.parseLong(seedString);
-            } catch (NumberFormatException nfe) {
-                byte[] seedBytes = NAME_ENCODER.decode(seedString);
-                ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
-                seed = seedWrapper.getLong();
-            }
-            random = new Random(seed ^ generationTime);
-            if (args.length < 6) {
-                randomizeOptions();
-            }
-        }
+
         if (args.length >= 6) {
             String optionString = args[5];
-            byte[] optionBytes = NAME_ENCODER.decode(optionString);
-            parseOptions(optionBytes);
+            optionBytes = NAME_ENCODER.decode(optionString);
         }
+
         if (args.length >= 7) {
             String parametersString = args[6];
             byte[] parameterBytes = NAME_ENCODER.decode(parametersString);
             parseParameters(parameterBytes);
         }
+
+        if (args.length >= 8) {
+            String timeString = args[7];
+            generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
+        }
+
+        parseOptions(optionBytes);
     }
 
     private void randomizeOptions() {
+        random = new Random(seed ^ generationTime);
+
         landDensity = random.nextInt(127) / 127f;
         plateauDensity = random.nextInt(127) / 127f;
         mountainDensity = random.nextInt(127) / 127f;
