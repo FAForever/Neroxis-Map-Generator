@@ -48,7 +48,7 @@ public strictfp class MapGenerator {
     public static final float RECLAIM_DENSITY_MIN = 0f;
     public static final float RECLAIM_DENSITY_MAX = 1f;
     public static final float RECLAIM_DENSITY_RANGE = RECLAIM_DENSITY_MAX - RECLAIM_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 10f;
+    public static final float PLATEAU_HEIGHT = 8.5f;
     public static final float OCEAN_FLOOR = -17f;
     public static final float VALLEY_FLOOR = -5f;
     public static final float LAND_HEIGHT = 1f;
@@ -776,8 +776,6 @@ public strictfp class MapGenerator {
             smoothPlateauInit();
         }
 
-        land.startVisualDebugger("land");
-
         spawnPlateauMask.shrink(mapSize / 4).erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 12);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1).smooth(4);
 
@@ -914,11 +912,11 @@ public strictfp class MapGenerator {
     private void pathMountainInit() {
         float maxStepSize = mapSize / 128f;
         float maxAngleError = (float) (StrictMath.PI * 4f / 5f);
-        float inertiaSpawn = .25f;
-        float inertiaPath = random.nextFloat() * .75f + .2f;
+        float inertiaSpawn = .75f;
+        float inertiaPath = random.nextFloat() * .45f + .5f;
         float distanceThreshold = maxStepSize / 2f;
         int maxNumSteps = mapSize * mapSize;
-        int numWalkers = (int) (mapSize / 32 * (1 - (mountainDensity - .5f) / .5f) + random.nextInt(4) + 6) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numWalkers = 8;
         mountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "mountains");
         ConcurrentBinaryMask connections = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "connections");
 
@@ -974,8 +972,8 @@ public strictfp class MapGenerator {
         float inertia = .25f;
         float distanceThreshold = maxStepSize / 2f;
         int maxNumSteps = mapSize * mapSize;
-        int numWalkersPerPlayer = (int) (rampDensity * 2 + 1);
-        int numWalkers = (int) (rampDensity * 8 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
+        int numWalkersPerPlayer = (int) (rampDensity * 4 + 2);
+        int numWalkers = (int) (rampDensity * 12 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
         map.getSpawns().forEach(spawn -> {
             for (int i = 0; i < numWalkersPerPlayer; i++) {
