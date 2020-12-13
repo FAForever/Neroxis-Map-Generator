@@ -212,7 +212,6 @@ public strictfp class SCMapImporter {
         }
         map.setHeightmap(heightmap);
 
-
         int normalMapSize = (int) StrictMath.sqrt(normalMapData.length);
         BufferedImage normalMap = new BufferedImage(normalMapSize, normalMapSize, BufferedImage.TYPE_INT_ARGB);
         DataBuffer normalMapDataBuffer = normalMap.getRaster().getDataBuffer();
@@ -276,6 +275,9 @@ public strictfp class SCMapImporter {
         }
         map.setTerrainType(terrainType);
 
+        for (WaveGenerator waveGenerator : waveGenerators) {
+            map.addWaveGenerator(waveGenerator);
+        }
 
         for (Prop prop : props) {
             map.addProp(prop);

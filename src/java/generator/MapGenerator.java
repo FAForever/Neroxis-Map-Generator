@@ -507,7 +507,7 @@ public strictfp class MapGenerator {
                     (byte) StrictMath.round(plateauDensity * 127f),
                     (byte) StrictMath.round(mountainDensity * 127f),
                     (byte) StrictMath.round(rampDensity * 127f),
-                    (byte) StrictMath.round(reclaimDensity * 127)};
+                    (byte) StrictMath.round(reclaimDensity * 127f)};
         } else {
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64)};
