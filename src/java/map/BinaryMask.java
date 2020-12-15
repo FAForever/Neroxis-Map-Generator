@@ -143,7 +143,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             for (int j = 0; j < numSteps; j++) {
                 if (inBounds(x, y)) {
                     setValueAt(x, y, true);
-                    getSymmetryPoints(x, y).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
+                    getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
                 }
                 int dir = random.nextInt(4);
                 switch (dir) {
@@ -184,7 +184,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
             float angle = oldAngle * inertia + location.getAngle(end) * (1 - inertia) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
             location.add((float) (magnitude * StrictMath.cos(angle)), (float) (magnitude * StrictMath.sin(angle)));
-            if (inBounds(location)) {
+            ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.TERRAIN);
+            if (inBounds(location) && symmetryPoints.stream().allMatch(symmetryPoint -> inBounds(symmetryPoint.getLocation()))) {
                 setValueAt(location, true);
                 getSymmetryPoints(location, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
             }
@@ -205,6 +206,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             for (int j = 0; j < numSteps; j++) {
                 if (inBounds(x, y)) {
                     setValueAt(x, y, true);
+                    getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
                 }
                 int dir = directions.get(random.nextInt(directions.size()));
                 switch (dir) {
