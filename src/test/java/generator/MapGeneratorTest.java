@@ -2,7 +2,6 @@ package generator;
 
 import com.google.common.io.BaseEncoding;
 import map.SCMap;
-import map.Symmetry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,6 @@ public class MapGeneratorTest {
     float roundedRampDensity = StrictMath.round(rampDensity * 127f) / 127f;
     float roundedReclaimDensity = StrictMath.round(reclaimDensity * 127f) / 127f;
     int mexCount = 16;
-    String symmetry = "POINT2";
     int mapSize = 512;
     byte[] optionArray = {spawnCount,
             (byte) (mapSize / 64),
@@ -43,18 +41,10 @@ public class MapGeneratorTest {
             (byte) StrictMath.round(roundedMountainDensity * 127f),
             (byte) StrictMath.round(roundedRampDensity * 127f),
             (byte) StrictMath.round(roundedReclaimDensity * 127f),
-            (byte) (mexCount),
-            (byte) (Symmetry.valueOf(symmetry).ordinal())};
-    byte[] clientOptionArray = {spawnCount,
-            (byte) (mapSize / 64),
-            (byte) StrictMath.round(roundedLandDensity * 127f),
-            (byte) StrictMath.round(roundedPlateauDensity * 127f),
-            (byte) StrictMath.round(roundedMountainDensity * 127f),
-            (byte) StrictMath.round(roundedRampDensity * 127f)};
+            (byte) (mexCount)};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
     String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(optionArray));
-    String b32MapNameClient = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(clientOptionArray));
     String[] keywordArgs = {"--folder-path", ".",
             "--seed", Long.toString(seed),
             "--spawn-count", Byte.toString(spawnCount),
@@ -64,7 +54,6 @@ public class MapGeneratorTest {
             "--ramp-density", Float.toString(rampDensity),
             "--reclaim-density", Float.toString(reclaimDensity),
             "--mex-count", Integer.toString(mexCount),
-            "--symmetry", symmetry,
             "--map-size", Integer.toString(mapSize)};
     private MapGenerator instance;
 
@@ -119,24 +108,6 @@ public class MapGeneratorTest {
         assertEquals(instance.getRampDensity(), rampDensity, .01);
         assertEquals(instance.getReclaimDensity(), reclaimDensity, .01);
         assertEquals(instance.getMexCount(), mexCount);
-        assertEquals(instance.getTerrainSymmetry(), Symmetry.valueOf(symmetry));
-        assertEquals(instance.getMapSize(), mapSize);
-    }
-
-    @Test
-    public void TestParseClientB32MapName() {
-        String[] args = {folderPath, b32MapNameClient};
-
-        instance.interpretArguments(args);
-
-        assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), roundedLandDensity, 0);
-        assertEquals(instance.getPlateauDensity(), roundedPlateauDensity, 0);
-        assertEquals(instance.getMountainDensity(), roundedMountainDensity, 0);
-        assertEquals(instance.getRampDensity(), roundedRampDensity, 0);
         assertEquals(instance.getMapSize(), mapSize);
     }
 
@@ -157,7 +128,6 @@ public class MapGeneratorTest {
         assertEquals(instance.getRampDensity(), roundedRampDensity, 0);
         assertEquals(instance.getReclaimDensity(), roundedReclaimDensity, 0);
         assertEquals(instance.getMexCount(), mexCount);
-        assertEquals(instance.getTerrainSymmetry(), Symmetry.valueOf(symmetry));
         assertEquals(instance.getMapSize(), mapSize);
     }
 
