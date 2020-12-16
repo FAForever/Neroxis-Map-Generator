@@ -219,7 +219,6 @@ public strictfp class MapGenerator {
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
-                    "--symmetry arg         optional, set the symmetry for the generated map (POINT2, POINT4, QUAD, DIAG, X, Z, XZ, ZX)\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
@@ -297,11 +296,6 @@ public strictfp class MapGenerator {
 
             if (arguments.containsKey("mex-count") && arguments.get("mex-count") != null) {
                 mexCount = Integer.parseInt(arguments.get("mex-count"));
-                optionsUsed = true;
-            }
-
-            if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
-                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
                 optionsUsed = true;
             }
 
@@ -485,10 +479,7 @@ public strictfp class MapGenerator {
             mexCount = optionBytes[7];
         }
         if (optionBytes.length > 8) {
-            terrainSymmetry = Symmetry.values()[optionBytes[8]];
-        }
-        if (optionBytes.length > 9) {
-            biome = Biomes.list.get(optionBytes[9]);
+            biome = Biomes.list.get(optionBytes[8]);
         }
     }
 
@@ -511,7 +502,9 @@ public strictfp class MapGenerator {
                     (byte) StrictMath.round(plateauDensity * 127f),
                     (byte) StrictMath.round(mountainDensity * 127f),
                     (byte) StrictMath.round(rampDensity * 127f),
-                    (byte) StrictMath.round(reclaimDensity * 127f)};
+                    (byte) StrictMath.round(reclaimDensity * 127f),
+                    (byte) mexCount,
+                    (byte) Biomes.list.indexOf(Biomes.getBiomeByName(biome.getName()))};
         } else {
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64)};
@@ -556,8 +549,8 @@ public strictfp class MapGenerator {
 
         final int spawnSize = 36;
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
-        int mexSpacing = mapSize / 8;
-        mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.75f);
+        int mexSpacing = mapSize / 10;
+        mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.5f);
         hasCivilians = random.nextBoolean();
         enemyCivilians = random.nextBoolean();
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
@@ -934,10 +927,12 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask connections = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "connections");
 
         map.getSpawns().forEach(startSpawn -> {
-            Spawn endSpawn = map.getSpawn(random.nextInt(map.getSpawnCount()));
-            Vector2f start = new Vector2f(startSpawn.getPosition());
-            Vector2f end = new Vector2f(endSpawn.getPosition());
-            connections.path(start, end, maxStepSize, maxAngleError, inertiaSpawn, distanceThreshold, maxNumSteps);
+            for (int i = 0; i < 2; i++) {
+                Spawn endSpawn = map.getSpawn(random.nextInt(map.getSpawnCount()));
+                Vector2f start = new Vector2f(startSpawn.getPosition());
+                Vector2f end = new Vector2f(endSpawn.getPosition());
+                connections.path(start, end, maxStepSize, maxAngleError, inertiaSpawn, distanceThreshold, maxNumSteps);
+            }
         });
 
         for (int i = 0; i < numWalkers; i++) {
@@ -995,17 +990,18 @@ public strictfp class MapGenerator {
 
         heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 32, .5f, 2.5f);
 
-        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
+        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, LAND_HEIGHT, random.nextLong(), "paintedMountains");
 
         plateaus.combine(paintedMountains.copy().intersect(plateaus.copy().inflate(32)));
         mountains.combine(paintedMountains);
+        land.combine(paintedMountains);
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus.deflate(8), brush1, 48, .24f, 24f).clampMax(PLATEAU_HEIGHT);
         heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, 24, .36f, -0.35f)
                 .clampMin(VALLEY_FLOOR);
         heightmapHills.useBrushWithinAreaWithDensity(hills, brush4, 24, .36f, 0.5f);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedPlateaus");
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, LAND_HEIGHT, random.nextLong(), "paintedPlateaus");
 
         land.combine(paintedPlateaus);
         plateaus.combine(paintedPlateaus);
