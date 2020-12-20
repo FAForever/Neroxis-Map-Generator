@@ -113,12 +113,12 @@ public strictfp class FloatMask extends Mask<Float> {
     public boolean isLocalMax(int x, int y) {
         float value = getValueAt(x, y);
         return ((x > 0 && getValueAt(x - 1, y) <= value)
-                && (y > 0 && getValueAt(x, y - 1) <= value)
                 && (x < getSize() - 1 && getValueAt(x + 1, y) <= value)
+                && (y > 0 && getValueAt(x, y - 1) <= value)
                 && (y < getSize() - 1 && getValueAt(x, y + 1) <= value)
                 && (getValueAt(x - 1, y - 1) <= value)
                 && (getValueAt(x + 1, y - 1) <= value)
-                && (getValueAt(x + 1, y + 1) <= value)
+                && (getValueAt(x - 1, y + 1) <= value)
                 && (getValueAt(x + 1, y + 1) <= value));
     }
 
@@ -193,7 +193,6 @@ public strictfp class FloatMask extends Mask<Float> {
                 setValueAt(x, y, 0f);
             }
         }
-        applySymmetry();
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -363,16 +362,6 @@ public strictfp class FloatMask extends Mask<Float> {
                         multiplyValueAt(x, y, other.getValueAt(shiftX, shiftY));
                     }
                 }
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask convolve(FloatMask other) {
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
-                multiplyWithOffset(other, x, y, true);
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -694,7 +683,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutside(minSize, maxSize).invert(), 0f, 1f);
+        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideRange(minSize, maxSize).invert(), 0f, 1f);
         this.subtract(tempMask2).min(0f);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -717,11 +706,13 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public BinaryMask getLocalMaximums(float minValue, float maxValue) {
         BinaryMask localMaxima = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        for (int x = getMinXBound(SymmetryType.SPAWN); x < getMaxXBound(SymmetryType.SPAWN); x++) {
+            for (int y = getMinYBound(x, SymmetryType.SPAWN); y < getMaxYBound(x, SymmetryType.SPAWN); y++) {
                 float value = getValueAt(x, y);
-                if (value > minValue && value < maxValue && isLocalMax(x, y)) {
+                if (value >= minValue && value < maxValue && isLocalMax(x, y)) {
                     localMaxima.setValueAt(x, y, true);
+                    ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, SymmetryType.SPAWN);
+                    symmetryPoints.forEach(symmetryPoint -> localMaxima.setValueAt(symmetryPoint.getLocation(), true));
                 }
             }
         }

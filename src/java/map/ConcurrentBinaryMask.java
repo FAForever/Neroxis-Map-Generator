@@ -76,12 +76,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask flipValues(float density, SymmetryType symmetryType) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.flipValues(density, symmetryType)
-        );
-    }
-
     public ConcurrentBinaryMask randomWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.randomWalk(numWalkers, numSteps)
@@ -95,9 +89,9 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     }
 
     public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float inertia,
-                                     float distanceThreshold, int maxNumSteps) {
+                                     float distanceThreshold, int maxNumSteps, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.path(start, end, maxStepSize, maxAngleError, inertia, distanceThreshold, maxNumSteps)
+                this.mask.path(start, end, maxStepSize, maxAngleError, inertia, distanceThreshold, maxNumSteps, symmetryType)
         );
     }
 

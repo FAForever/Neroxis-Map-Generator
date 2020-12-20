@@ -88,7 +88,7 @@ public class VisualDebugger {
                     0xFF_FF_00_FF,
                     0xFF_00_FF_FF,
                     0xFF_00_00_00};
-            int[] ranges = new int[]{10, 20, 30, 40, 50, 60};
+            int[] ranges = new int[]{25, 50, 75, 100, 125, 150};
 
             for (int i = 0; i < colors.length; i++) {
                 int color = colors[i];

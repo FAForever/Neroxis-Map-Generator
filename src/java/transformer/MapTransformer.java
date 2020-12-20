@@ -219,16 +219,16 @@ public strictfp class MapTransformer {
             FloatMask texture8 = texturesMasks[7];
 
             if (!useAngle) {
-                previewMask.applySymmetry(reverseSide);
-                heightmapBase.applySymmetry(reverseSide);
-                texture1.applySymmetry(reverseSide);
-                texture2.applySymmetry(reverseSide);
-                texture3.applySymmetry(reverseSide);
-                texture4.applySymmetry(reverseSide);
-                texture5.applySymmetry(reverseSide);
-                texture6.applySymmetry(reverseSide);
-                texture7.applySymmetry(reverseSide);
-                texture8.applySymmetry(reverseSide);
+                previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                heightmapBase.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture1.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture2.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture3.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture4.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture5.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture6.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture7.applySymmetry(SymmetryType.SPAWN, reverseSide);
+                texture8.applySymmetry(SymmetryType.SPAWN, reverseSide);
             } else {
                 previewMask.applySymmetry(angle);
                 heightmapBase.applySymmetry(angle);

@@ -184,7 +184,7 @@ public strictfp class MapEvaluator {
 
     public float getFloatMaskScore(FloatMask mask) {
         FloatMask difference = mask.copy();
-        difference.applySymmetry(reverseSide);
+        difference.applySymmetry(SymmetryType.SPAWN, reverseSide);
         return (float) StrictMath.sqrt(difference.subtract(mask).multiply(difference).getSum());
     }
 }

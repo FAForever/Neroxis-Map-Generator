@@ -37,15 +37,15 @@ public strictfp abstract class Mask<T> {
         return mask[x][y];
     }
 
-    public void setValueAt(Vector3f location, T value) {
+    protected void setValueAt(Vector3f location, T value) {
         setValueAt((int) location.x, (int) location.z, value);
     }
 
-    public void setValueAt(Vector2f location, T value) {
+    protected void setValueAt(Vector2f location, T value) {
         setValueAt((int) location.x, (int) location.y, value);
     }
 
-    public void setValueAt(int x, int y, T value) {
+    protected void setValueAt(int x, int y, T value) {
         mask[x][y] = value;
     }
 
@@ -175,21 +175,13 @@ public strictfp abstract class Mask<T> {
         return symmetryRotation;
     }
 
-    public int getMinXBound() {
-        return getMinXBound(SymmetryType.TERRAIN);
-    }
-
-    public int getMinXBound(SymmetryType symmetryType) {
+    protected int getMinXBound(SymmetryType symmetryType) {
         return switch (symmetrySettings.getSymmetry(symmetryType)) {
             default -> 0;
         };
     }
 
-    public int getMaxXBound() {
-        return getMaxXBound(SymmetryType.TERRAIN);
-    }
-
-    public int getMaxXBound(SymmetryType symmetryType) {
+    protected int getMaxXBound(SymmetryType symmetryType) {
         return switch (symmetrySettings.getSymmetry(symmetryType)) {
             case POINT2, POINT4 -> getMaxXBound(SymmetryType.TEAM);
             case X, QUAD, DIAG -> getSize() / 2;
@@ -197,11 +189,7 @@ public strictfp abstract class Mask<T> {
         };
     }
 
-    public int getMinYBound(int x) {
-        return getMinYBound(x, SymmetryType.TERRAIN);
-    }
-
-    public int getMinYBound(int x, SymmetryType symmetryType) {
+    protected int getMinYBound(int x, SymmetryType symmetryType) {
         return switch (symmetrySettings.getSymmetry(symmetryType)) {
             case POINT2, POINT4 -> getMinYBound(x, SymmetryType.TEAM);
             case DIAG, XZ -> x;
@@ -209,11 +197,7 @@ public strictfp abstract class Mask<T> {
         };
     }
 
-    public int getMaxYBound(int x) {
-        return getMaxYBound(x, SymmetryType.TERRAIN);
-    }
-
-    public int getMaxYBound(int x, SymmetryType symmetryType) {
+    protected int getMaxYBound(int x, SymmetryType symmetryType) {
         return switch (symmetrySettings.getSymmetry(symmetryType)) {
             case POINT2, POINT4 -> getMaxYBound(x, SymmetryType.TEAM);
             case ZX, DIAG -> getSize() - x;
@@ -251,16 +235,8 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    public void applySymmetry() {
-        applySymmetry(SymmetryType.TERRAIN);
-    }
-
     public void applySymmetry(SymmetryType symmetryType) {
         applySymmetry(symmetryType, false);
-    }
-
-    public void applySymmetry(boolean reverse) {
-        applySymmetry(SymmetryType.TERRAIN, reverse);
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {

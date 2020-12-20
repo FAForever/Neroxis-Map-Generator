@@ -243,7 +243,7 @@ public strictfp class MapPopulator {
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
         heightmapBase = new FloatMask(heightmapBase, random.nextLong());
-        heightmapBase.applySymmetry();
+        heightmapBase.applySymmetry(SymmetryType.SPAWN);
         map.setHeightImage(heightmapBase);
         float waterHeight;
         if (waterPresent) {

@@ -25,7 +25,7 @@ public strictfp class SpawnGenerator {
         BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
-        int centerFill = StrictMath.min(map.getSize() / 2, 256);
+        int centerFill = StrictMath.min(map.getSize() * 3 / 8, 256);
         spawnable.limitToSymmetryRegion().fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(centerFill, false).fillEdge(map.getSize() / 16, false);
         Vector2f location = spawnable.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
