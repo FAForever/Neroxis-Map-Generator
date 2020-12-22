@@ -75,30 +75,55 @@ public strictfp abstract class Mask<T> {
         return x >= 0 && x < getSize() && y >= 0 && y < getSize();
     }
 
-    public ArrayList<SymmetryPoint> getSymmetryPoints(Vector3f v) {
-        return getSymmetryPoints(new Vector2f(v));
-    }
-
-    public ArrayList<SymmetryPoint> getSymmetryPoints(Vector2f v) {
-        return getSymmetryPoints(v, SymmetryType.SPAWN);
+    public ArrayList<SymmetryPoint> getSymmetryPoints(Vector3f v, SymmetryType symmetryType) {
+        return getSymmetryPoints(new Vector2f(v), symmetryType);
     }
 
     public ArrayList<SymmetryPoint> getSymmetryPoints(Vector2f v, SymmetryType symmetryType) {
         return getSymmetryPoints(v.x, v.y, symmetryType);
     }
 
-    public ArrayList<SymmetryPoint> getSymmetryPoints(float x, float y) {
-        return getSymmetryPoints(x, y, SymmetryType.SPAWN);
-    }
-
     public ArrayList<SymmetryPoint> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
         ArrayList<SymmetryPoint> symmetryPoints = new ArrayList<>();
-        switch (symmetrySettings.getSymmetry(symmetryType)) {
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        switch (symmetry) {
             case POINT2 -> symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - x - 1, getSize() - y - 1), Symmetry.POINT2));
             case POINT4 -> {
                 symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - x - 1, getSize() - y - 1), Symmetry.POINT2));
                 symmetryPoints.add(new SymmetryPoint(new Vector2f(y, getSize() - x - 1), Symmetry.POINT2));
                 symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - y - 1, x), Symmetry.POINT2));
+            }
+            case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
+                float angle = (float) StrictMath.PI;
+                float newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
+                float newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
+                if (inBounds((int) newX, (int) newY)) {
+                    symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
+                }
+                for (int i = 1; i < symmetry.getNumSymPoints() / 2; i++) {
+                    angle = (float) (2 * StrictMath.PI * i / symmetry.getNumSymPoints());
+                    newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
+                    newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
+                    if (inBounds((int) newX, (int) newY)) {
+                        symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
+                    }
+                    angle += StrictMath.PI;
+                    newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
+                    newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
+                    if (inBounds((int) newX, (int) newY)) {
+                        symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
+                    }
+                }
+            }
+            case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
+                for (int i = 1; i < symmetry.getNumSymPoints(); i++) {
+                    float angle = (float) (2 * StrictMath.PI * i / symmetry.getNumSymPoints());
+                    float newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
+                    float newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
+                    if (inBounds((int) newX, (int) newY)) {
+                        symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
+                    }
+                }
             }
             case X -> symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - x - 1, y), Symmetry.X));
             case Z -> symmetryPoints.add(new SymmetryPoint(new Vector2f(x, getSize() - y - 1), Symmetry.Z));
@@ -139,12 +164,18 @@ public strictfp abstract class Mask<T> {
         final float xRotation = (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
         final float zRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), StrictMath.sin(rot));
         final float diagRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
-        switch (symmetrySettings.getSymmetry(symmetryType)) {
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        switch (symmetry) {
             case POINT2 -> symmetryRotation.add(rot + (float) StrictMath.PI);
             case POINT4 -> {
                 symmetryRotation.add(rot + (float) StrictMath.PI);
                 symmetryRotation.add(rot + (float) StrictMath.PI / 2);
                 symmetryRotation.add(rot - (float) StrictMath.PI / 2);
+            }
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
+                for (int i = 1; i < symmetry.getNumSymPoints(); i++) {
+                    symmetryRotation.add(rot + (float) (2 * StrictMath.PI * i / symmetry.getNumSymPoints()));
+                }
             }
             case X -> symmetryRotation.add(xRotation);
             case Z -> symmetryRotation.add(zRotation);
@@ -176,34 +207,64 @@ public strictfp abstract class Mask<T> {
     }
 
     protected int getMinXBound(SymmetryType symmetryType) {
-        return switch (symmetrySettings.getSymmetry(symmetryType)) {
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return switch (symmetry) {
             default -> 0;
         };
     }
 
     protected int getMaxXBound(SymmetryType symmetryType) {
-        return switch (symmetrySettings.getSymmetry(symmetryType)) {
-            case POINT2, POINT4 -> getMaxXBound(SymmetryType.TEAM);
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return switch (symmetry) {
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> StrictMath.max(getMaxXFromAngle(360f / symmetry.getNumSymPoints()), getSize() / 2);
             case X, QUAD, DIAG -> getSize() / 2;
             default -> getSize();
         };
     }
 
     protected int getMinYBound(int x, SymmetryType symmetryType) {
-        return switch (symmetrySettings.getSymmetry(symmetryType)) {
-            case POINT2, POINT4 -> getMinYBound(x, SymmetryType.TEAM);
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return switch (symmetry) {
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> getMinYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
             case DIAG, XZ -> x;
             default -> 0;
         };
     }
 
     protected int getMaxYBound(int x, SymmetryType symmetryType) {
-        return switch (symmetrySettings.getSymmetry(symmetryType)) {
-            case POINT2, POINT4 -> getMaxYBound(x, SymmetryType.TEAM);
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return switch (symmetry) {
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> getMaxYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
             case ZX, DIAG -> getSize() - x;
             case Z, QUAD -> getSize() / 2;
             default -> getSize();
         };
+    }
+
+    private int getMaxXFromAngle(float angle) {
+        return (int) StrictMath.round(StrictMath.cos(((angle + 180) / 180) % 2 * StrictMath.PI) * getSize() / 2f + getSize() / 2f);
+    }
+
+    private int getMinYFromXOnArc(int x, float angle) {
+        float dx = x - getSize() / 2f;
+        int y;
+        if (x > getMaxXFromAngle(angle)) {
+            y = (int) (getSize() / 2 + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
+        } else {
+            y = (int) StrictMath.round(getSize() / 2f - StrictMath.sqrt((getSize() / 2f) * (getSize() / 2f) - dx * dx));
+        }
+        return y;
+    }
+
+    private int getMaxYFromXOnArc(int x, float angle) {
+        float dx = x - getSize() / 2f;
+        int y;
+        if (x > getSize() / 2) {
+            y = (int) (getSize() / 2 + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
+        } else {
+            y = getSize() / 2;
+        }
+        return y;
     }
 
     public boolean inTeam(Vector3f pos, boolean reverse) {

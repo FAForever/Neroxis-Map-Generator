@@ -312,7 +312,7 @@ public strictfp class MapTransformer {
         spawns.forEach(spawn -> {
             if ((!useAngle && heightmapBase.inTeam(spawn.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(spawn.getPosition(), angle))) {
                 transformedSpawns.add(new Spawn("", Placement.placeOnHeightmap(map, spawn.getPosition()), spawn.getNoRushOffset()));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(spawn.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(spawn.getPosition(), SymmetryType.SPAWN);
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
                     Vector2f symmetricNoRushOffset = new Vector2f(spawn.getNoRushOffset());
                     symmetricNoRushOffset.flip(new Vector2f(0, 0), symmetryPoint.getSymmetry());
@@ -344,7 +344,7 @@ public strictfp class MapTransformer {
         mexes.forEach(mex -> {
             if ((!useAngle && heightmapBase.inTeam(mex.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(mex.getPosition(), angle))) {
                 transformedMexes.add(new Mex(mex.getId(), Placement.placeOnHeightmap(map, mex.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(mex.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(mex.getPosition(), SymmetryType.SPAWN);
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
                     transformedMexes.add(new Mex(mex.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
                 }
@@ -358,7 +358,7 @@ public strictfp class MapTransformer {
         hydros.forEach(hydro -> {
             if ((!useAngle && heightmapBase.inTeam(hydro.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(hydro.getPosition(), angle))) {
                 transformedHydros.add(new Hydro(hydro.getId(), Placement.placeOnHeightmap(map, hydro.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(hydro.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
                     transformedHydros.add(new Hydro(hydro.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
                 }
@@ -372,7 +372,7 @@ public strictfp class MapTransformer {
         aiMarkers.forEach(aiMarker -> {
             if ((!useAngle && heightmapBase.inTeam(aiMarker.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(aiMarker.getPosition(), angle))) {
                 transformedAImarkers.add(new AIMarker(aiMarker.getId(), Placement.placeOnHeightmap(map, aiMarker.getPosition()), aiMarker.getNeighbors()));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(aiMarker.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
                     LinkedHashSet<String> newNeighbors = new LinkedHashSet<>();
                     aiMarker.getNeighbors().forEach(marker -> newNeighbors.add(String.format(marker + "s%d", symmetryPoints.indexOf(symmetryPoint))));
@@ -388,7 +388,7 @@ public strictfp class MapTransformer {
         blankMarkers.forEach(blank -> {
             if ((!useAngle && heightmapBase.inTeam(blank.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(blank.getPosition(), angle))) {
                 transformedBlanks.add(new BlankMarker(blank.getId(), Placement.placeOnHeightmap(map, blank.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(blank.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(blank.getPosition(), SymmetryType.SPAWN);
                 for (SymmetryPoint symmetryPoint : symmetryPoints) {
                     transformedBlanks.add(new BlankMarker(blank.getId() + "s", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
                 }
@@ -416,7 +416,7 @@ public strictfp class MapTransformer {
         units.forEach(unit -> {
             if ((!useAngle && heightmapBase.inTeam(unit.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(unit.getPosition(), angle))) {
                 transformedUnits.add(new Unit(unit.getId(), unit.getType(), Placement.placeOnHeightmap(map, unit.getPosition()), unit.getRotation()));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     transformedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), Placement.placeOnHeightmap(map, symmetryPoints.get(i).getLocation()), symmetryRotation.get(i)));
@@ -431,7 +431,7 @@ public strictfp class MapTransformer {
         props.forEach(prop -> {
             if ((!useAngle && heightmapBase.inTeam(prop.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(prop.getPosition(), angle))) {
                 transformedProps.add(new Prop(prop.getPath(), Placement.placeOnHeightmap(map, prop.getPosition()), prop.getRotation()));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(prop.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     transformedProps.add(new Prop(prop.getPath(), Placement.placeOnHeightmap(map, symmetryPoints.get(i).getLocation()), symmetryRotation.get(i)));
@@ -446,7 +446,7 @@ public strictfp class MapTransformer {
         decals.forEach(decal -> {
             if ((!useAngle && heightmapBase.inTeam(decal.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(decal.getPosition(), angle))) {
                 transformedDecals.add(new Decal(decal.getPath(), Placement.placeOnHeightmap(map, decal.getPosition()), decal.getRotation(), decal.getScale(), decal.getCutOffLOD()));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(decal.getPosition());
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(decal.getRotation().y);
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     Vector3f symVectorRotation = new Vector3f(decal.getRotation().x, symmetryRotation.get(i), decal.getRotation().z);

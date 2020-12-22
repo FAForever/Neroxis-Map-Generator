@@ -161,6 +161,8 @@ public class VisualDebugger {
             function = methods.iterator().next();
         } else if (methods.contains("fillParallelogram")) {
             function = methods.iterator().next();
+        } else if (methods.contains("fillArc")) {
+            function = methods.iterator().next();
         } else if (methods.contains("show")) {
             function = "show";
         } else {

@@ -38,14 +38,9 @@ public strictfp class SpawnGenerator {
             }
             location.add(.5f, .5f);
             spawnable.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location);
-            symmetryPoints.forEach(symmetryPoint -> {
-                if (spawnable.inTeam(symmetryPoint.getLocation(), false)) {
-                    spawnable.fillCircle(symmetryPoint.getLocation(), separation, false);
-                } else {
-                    spawnable.fillCircle(symmetryPoint.getLocation(), map.getSize() / 2f, false);
-                }
-            });
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+            symmetryPoints.forEach(symmetryPoint -> spawnable.fillCircle(symmetryPoint.getLocation(), centerFill, false));
 
             spawnLandMask.fillCircle(location, spawnSize, true);
             symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
@@ -114,7 +109,8 @@ public strictfp class SpawnGenerator {
                 }
             }
             spawnableCopy.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnableCopy.getSymmetryPoints(location);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnableCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
             symmetryPoints.forEach(symmetryPoint -> spawnableCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
 
             if (spawnableCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {

@@ -274,7 +274,7 @@ public strictfp class FloatMask extends Mask<Float> {
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY)) {
                         addValueAt(shiftX, shiftY, other.getValueAt(x, y));
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY);
+                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                         for (SymmetryPoint symmetryPoint : symmetryPoints) {
                             addValueAt(symmetryPoint.getLocation(), other.getValueAt(x, y));
                         }
@@ -352,7 +352,7 @@ public strictfp class FloatMask extends Mask<Float> {
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY)) {
                         multiplyValueAt(shiftX, shiftY, other.getValueAt(x, y));
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY);
+                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                         for (SymmetryPoint symmetryPoint : symmetryPoints) {
                             multiplyValueAt(symmetryPoint.getLocation(), other.getValueAt(x, y));
                         }
@@ -775,7 +775,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity) {
-        int frequency = (int) (density * (float) area.getCount() / 26.21f);
+        int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
         useBrushWithinArea(area, brushName, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;

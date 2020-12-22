@@ -56,6 +56,11 @@ public strictfp class Vector3f {
         return new Vector3f(x + vector.x, y + vector.y, z + vector.z);
     }
 
+    public void roundXYToNearestHalfPoint() {
+        x = StrictMath.round(x * 2) / 2f;
+        z = StrictMath.round((y * 2) / 2f);
+    }
+
     @Override
     public String toString() {
         return String.format("(%f, %f, %f)", x, y, z);

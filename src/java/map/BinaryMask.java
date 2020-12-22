@@ -140,8 +140,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     setValueAt(x, y, true);
                     getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
                 }
-                int dir = random.nextInt(4);
-                switch (dir) {
+                switch (random.nextInt(4)) {
                     case 0 -> x++;
                     case 1 -> x--;
                     case 2 -> y++;
@@ -203,8 +202,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     setValueAt(x, y, true);
                     getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
                 }
-                int dir = directions.get(random.nextInt(directions.size()));
-                switch (dir) {
+                switch (directions.get(random.nextInt(directions.size()))) {
                     case 0 -> x++;
                     case 1 -> x--;
                     case 2 -> y++;
@@ -454,7 +452,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
                         setValueAt(shiftX, shiftY, true);
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY);
+                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                         for (SymmetryPoint symmetryPoint : symmetryPoints) {
                             setValueAt(symmetryPoint.getLocation(), true);
                         }
@@ -506,7 +504,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask limitToSymmetryRegion() {
-        return limitToSymmetryRegion(SymmetryType.SPAWN);
+        return limitToSymmetryRegion(SymmetryType.TEAM);
     }
 
     public BinaryMask limitToSymmetryRegion(SymmetryType symmetryType) {
@@ -545,17 +543,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
         switch (symmetry) {
-            case POINT2 -> fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
-            case POINT4 -> {
-                fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
-                if (symmetrySettings.getTeamSymmetry() == Symmetry.Z || symmetrySettings.getTeamSymmetry() == Symmetry.X) {
-                    fillCenter(extent / 2, value, Symmetry.X);
-                    fillCenter(extent / 2, value, Symmetry.Z);
-                } else if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX || symmetrySettings.getTeamSymmetry() == Symmetry.XZ) {
-                    fillCenter(extent / 2, value, Symmetry.XZ);
-                    fillCenter(extent / 2, value, Symmetry.ZX);
-                }
-            }
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10,
+                    POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
             case Z -> fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
             case X -> fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
             case XZ -> fillDiagonal(extent * 3 / 4, false, value);
@@ -594,6 +583,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillCircle(float x, float y, float radius, boolean value) {
+        return fillArc(x, y, 0, 360, radius, value);
+    }
+
+    public BinaryMask fillArc(float x, float y, float startAngle, float endAngle, float radius, boolean value) {
         int ex = StrictMath.round(StrictMath.min(getSize(), x + radius + 1));
         int ey = StrictMath.round(StrictMath.min(getSize(), y + radius + 1));
         float dx;
@@ -603,7 +596,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             for (int cy = StrictMath.round(StrictMath.max(0, y - radius)); cy < ey; cy++) {
                 dx = x - cx;
                 dy = y - cy;
-                if (dx * dx + dy * dy <= radius2) {
+                float angle = (float) (StrictMath.atan2(dy, dx) / StrictMath.PI * 180 + 360) % 360;
+                if (dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
                     setValueAt(cx, cy, value);
                 }
             }
@@ -988,7 +982,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
             chosenCoordinates.add(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
-            ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location);
+            ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getLocation().getDistance(loc) < minSpacing));
         }
         return new LinkedList<>(chosenCoordinates);
@@ -1006,7 +1000,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                                                           float minValue, float maxValue, int maxDistanceBetweenBrushUse, int distanceThreshold) {
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
-        ArrayList<SymmetryPoint> symLocationList = getSymmetryPoints(start);
+        ArrayList<SymmetryPoint> symLocationList = getSymmetryPoints(start, SymmetryType.SPAWN);
         Vector2f location = new Vector2f(start);
         Vector2f end = symLocationList.get(0).getLocation();
         int maskSize = getSize();

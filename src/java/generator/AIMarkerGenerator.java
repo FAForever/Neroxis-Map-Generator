@@ -1,9 +1,6 @@
 package generator;
 
-import map.AIMarker;
-import map.BinaryMask;
-import map.SCMap;
-import map.SymmetryPoint;
+import map.*;
 import util.Vector2f;
 
 import java.util.ArrayList;
@@ -51,7 +48,7 @@ public strictfp class AIMarkerGenerator {
         coordinates.forEach((location) -> {
             AIMarker aiMarker = new AIMarker(String.format(nameFormat, coordinatesArray.indexOf(location)), location, new LinkedHashSet<>());
             markerArrayList.add(aiMarker);
-            ArrayList<SymmetryPoint> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition());
+            ArrayList<SymmetryPoint> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> markerArrayList.add(new AIMarker(String.format(nameFormat + "s%d", coordinatesArray.indexOf(location), symmetryPoints.indexOf(symmetryPoint)), symmetryPoint.getLocation(), new LinkedHashSet<>())));
         });
         markerArrayList.forEach(aiMarker -> markerArrayList.forEach(aiMarker1 -> {

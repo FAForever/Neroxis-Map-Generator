@@ -104,6 +104,11 @@ public strictfp class Vector2f {
         }
     }
 
+    public void roundToNearestHalfPoint() {
+        x = StrictMath.round(x * 2) / 2f;
+        y = StrictMath.round((y * 2) / 2f);
+    }
+
     @Override
     public String toString() {
         return String.format("(%f, %f)", x, y);

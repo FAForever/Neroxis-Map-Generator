@@ -1,9 +1,6 @@
 package generator;
 
-import map.BinaryMask;
-import map.Hydro;
-import map.SCMap;
-import map.SymmetryPoint;
+import map.*;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -26,7 +23,7 @@ public strictfp class HydroGenerator {
 
     public void generateHydros(BinaryMask spawnable) {
         map.getHydros().clear();
-        int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
+        int numSymPoints = spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
 
         spawnable.limitToSymmetryRegion();
         spawnable.fillCenter(64, false);
@@ -48,7 +45,7 @@ public strictfp class HydroGenerator {
 
     public void generateBaseHydros(BinaryMask spawnable) {
         boolean spawnHydro = random.nextBoolean();
-        int numSymPoints = spawnable.getSymmetryPoints(0, 0).size() + 1;
+        int numSymPoints = spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
         if (spawnHydro) {
             for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
@@ -70,7 +67,8 @@ public strictfp class HydroGenerator {
             int hydroId = map.getHydroCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             Hydro hydro = new Hydro(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
             map.addHydro(hydro);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition());
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
             symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Hydro(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
         });
     }

@@ -1,9 +1,6 @@
 package generator;
 
-import map.BinaryMask;
-import map.Decal;
-import map.SCMap;
-import map.SymmetryPoint;
+import map.*;
 import util.Vector2f;
 import util.Vector3f;
 
@@ -100,7 +97,8 @@ public strictfp class DecalGenerator {
             Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
             Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
             map.addDecal(decal);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(decal.getPosition());
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
             ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(decal.getRotation().y);
             for (int i = 0; i < symmetryPoints.size(); i++) {
                 Vector3f symVectorRotation = new Vector3f(decal.getRotation().x, symmetryRotation.get(i), decal.getRotation().z);

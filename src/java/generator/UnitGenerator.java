@@ -76,7 +76,8 @@ public strictfp class UnitGenerator {
             try {
                 BaseTemplate base = new BaseTemplate(location, army, group, luaFile);
                 base.addUnits();
-                ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location);
+                ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location, SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
                 symmetryPoints.forEach(symmetryPoint -> {
                     BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
                     symBase.flip(symmetryPoint.getSymmetry());
@@ -104,7 +105,8 @@ public strictfp class UnitGenerator {
             int groupID = group.getUnitCount();
             Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
             group.addUnit(unit);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(unit.getPosition());
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
             ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(unit.getRotation());
             for (int i = 0; i < symmetryPoints.size(); i++) {
                 group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
