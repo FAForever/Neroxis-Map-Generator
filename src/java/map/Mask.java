@@ -25,6 +25,8 @@ public strictfp abstract class Mask<T> {
 
     protected abstract T[][] getEmptyMask(int size);
 
+    public abstract Mask<T> interpolate();
+
     public T getValueAt(Vector3f location) {
         return getValueAt((int) location.x, (int) location.z);
     }
@@ -94,16 +96,11 @@ public strictfp abstract class Mask<T> {
                 symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - y - 1, x), Symmetry.POINT2));
             }
             case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
-                float angle = (float) StrictMath.PI;
-                float newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
-                float newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
-                if (inBounds((int) newX, (int) newY)) {
-                    symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
-                }
+                symmetryPoints.add(new SymmetryPoint(new Vector2f(getSize() - x - 1, getSize() - y - 1), Symmetry.POINT2));
                 for (int i = 1; i < symmetry.getNumSymPoints() / 2; i++) {
-                    angle = (float) (2 * StrictMath.PI * i / symmetry.getNumSymPoints());
-                    newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
-                    newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
+                    float angle = (float) (2 * StrictMath.PI * i / symmetry.getNumSymPoints());
+                    float newX = (float) ((x - getSize() / 2f) * StrictMath.cos(angle) - (y - getSize() / 2f) * StrictMath.sin(angle) + getSize() / 2f);
+                    float newY = (float) ((x - getSize() / 2f) * StrictMath.sin(angle) + (y - getSize() / 2f) * StrictMath.cos(angle) + getSize() / 2f);
                     if (inBounds((int) newX, (int) newY)) {
                         symmetryPoints.add(new SymmetryPoint(new Vector2f(newX, newY), Symmetry.POINT2));
                     }
@@ -242,7 +239,8 @@ public strictfp abstract class Mask<T> {
     }
 
     private int getMaxXFromAngle(float angle) {
-        return (int) StrictMath.round(StrictMath.cos(((angle + 180) / 180) % 2 * StrictMath.PI) * getSize() / 2f + getSize() / 2f);
+        int x = (int) StrictMath.round(StrictMath.cos(((angle + 180) / 180) % 2 * StrictMath.PI) * getSize() + getSize() / 2f);
+        return StrictMath.max(StrictMath.min(x, getSize()), 0);
     }
 
     private int getMinYFromXOnArc(int x, float angle) {
@@ -251,9 +249,9 @@ public strictfp abstract class Mask<T> {
         if (x > getMaxXFromAngle(angle)) {
             y = (int) (getSize() / 2 + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
         } else {
-            y = (int) StrictMath.round(getSize() / 2f - StrictMath.sqrt((getSize() / 2f) * (getSize() / 2f) - dx * dx));
+            y = (int) StrictMath.round(getSize() / 2f - StrictMath.sqrt(getSize() * getSize() - dx * dx));
         }
-        return y;
+        return StrictMath.max(StrictMath.min(y, getSize()), 0);
     }
 
     private int getMaxYFromXOnArc(int x, float angle) {
@@ -264,7 +262,7 @@ public strictfp abstract class Mask<T> {
         } else {
             y = getSize() / 2;
         }
-        return y;
+        return StrictMath.max(StrictMath.min(y, getSize()), 0);
     }
 
     public boolean inTeam(Vector3f pos, boolean reverse) {
@@ -313,6 +311,9 @@ public strictfp abstract class Mask<T> {
                     }
                 });
             }
+        }
+        if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
+            interpolate();
         }
     }
 

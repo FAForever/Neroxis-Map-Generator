@@ -185,15 +185,21 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask smooth(int radius) {
+    public ConcurrentBinaryMask smooth(int radius, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.smooth(radius)
+                this.mask.smooth(radius, symmetryType)
         );
     }
 
-    public ConcurrentBinaryMask smooth(int radius, float density) {
+    public ConcurrentBinaryMask smooth(int radius, float density, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.smooth(radius, density)
+                this.mask.smooth(radius, density, symmetryType)
+        );
+    }
+
+    public ConcurrentBinaryMask replace(ConcurrentBinaryMask other) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.mask.replace(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
     }
 
@@ -339,7 +345,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     }
 
     public ConcurrentBinaryMask startVisualDebugger() {
-        this.mask.startVisualDebugger(Util.getStackTraceParentClass());
+        this.mask.startVisualDebugger(name, Util.getStackTraceParentClass());
         return this;
     }
 

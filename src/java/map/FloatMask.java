@@ -203,7 +203,11 @@ public strictfp class FloatMask extends Mask<Float> {
                 addValueAt(x, y, (float) random.nextGaussian() * scale);
             }
         }
-        applySymmetry(SymmetryType.SPAWN);
+        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        boolean symmetric = numSymPoints % 2 == 0 && numSymPoints <= 4;
+        if (symmetric) {
+            applySymmetry(SymmetryType.SPAWN);
+        }
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -267,6 +271,7 @@ public strictfp class FloatMask extends Mask<Float> {
             offsetX -= size / 2;
             offsetY -= size / 2;
         }
+        boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 int shiftX = x + offsetX - 1;
@@ -274,9 +279,11 @@ public strictfp class FloatMask extends Mask<Float> {
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY)) {
                         addValueAt(shiftX, shiftY, other.getValueAt(x, y));
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
-                        for (SymmetryPoint symmetryPoint : symmetryPoints) {
-                            addValueAt(symmetryPoint.getLocation(), other.getValueAt(x, y));
+                        if (symmetric) {
+                            ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                            for (SymmetryPoint symmetryPoint : symmetryPoints) {
+                                addValueAt(symmetryPoint.getLocation(), other.getValueAt(x, y));
+                            }
                         }
                     }
                 } else {
@@ -491,6 +498,11 @@ public strictfp class FloatMask extends Mask<Float> {
         VisualDebugger.visualizeMask(this);
         return this;
     }
+
+    public FloatMask interpolate() {
+        return smooth(1);
+    }
+
 
     public FloatMask smooth(int radius) {
         int[][] innerCount = getInnerCount();
@@ -755,6 +767,8 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
         FloatMask brush = loadBrush(brushName, random.nextLong());
+        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        boolean symmetric = numSymPoints % 2 == 0 && numSymPoints <= 4;
         brush.multiply(intensity / brush.getMax()).setSize(size);
         addWithOffset(brush, location, true);
         VisualDebugger.visualizeMask(this);
@@ -763,12 +777,18 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity) {
         checkSize(size);
+        boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
         FloatMask brush = loadBrush(brushName, random.nextLong());
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
-            addWithOffset(brush, possibleLocations.get(random.nextInt(length)), true);
+            Vector2f location = possibleLocations.get(random.nextInt(length));
+            addWithOffset(brush, location, true);
+            if (!symmetric) {
+                ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> addWithOffset(brush, symmetryPoint.getLocation(), true));
+            }
         }
         VisualDebugger.visualizeMask(this);
         return this;

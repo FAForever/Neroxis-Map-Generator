@@ -148,7 +148,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
         }
-        applySymmetry(SymmetryType.TERRAIN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -339,7 +338,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                         boolean value = random.nextFloat() < strength || getValueAt(x, y);
                         maskCopy.setValueAt(x, y, value);
                         ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                        symmetryPoints.forEach(symmetryPoint -> maskCopy.setValueAt(symmetryPoint.getLocation(), value));
                     }
                 }
             }
@@ -367,7 +365,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                         boolean value = random.nextFloat() > strength && getValueAt(x, y);
                         maskCopy.setValueAt(x, y, value);
                         ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                        symmetryPoints.forEach(symmetryPoint -> maskCopy.setValueAt(symmetryPoint.getLocation(), value));
                     }
                 }
             }
@@ -391,11 +388,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask smooth(int radius) {
-        return smooth(radius, .5f);
+    public BinaryMask interpolate() {
+        return smooth(1, .35f, SymmetryType.SPAWN);
     }
 
-    public BinaryMask smooth(int radius, float density) {
+    public BinaryMask smooth(int radius, SymmetryType symmetryType) {
+        return smooth(radius, .5f, symmetryType);
+    }
+
+    public BinaryMask smooth(int radius, float density, SymmetryType symmetryType) {
         int[][] innerCount = getInnerCount();
 
         for (int x = 0; x < getSize(); x++) {
@@ -414,6 +415,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             }
         }
 
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask replace(BinaryMask other) {
+        checkSize(other);
+        for (int x = 0; x < getSize(); x++) {
+            for (int y = 0; y < getSize(); y++) {
+                mask[x][y] = other.getValueAt(x, y);
+            }
+        }
         VisualDebugger.visualizeMask(this);
         return this;
     }

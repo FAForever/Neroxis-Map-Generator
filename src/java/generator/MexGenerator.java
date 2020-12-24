@@ -64,7 +64,7 @@ public strictfp class MexGenerator {
         }
         numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
 
-        generateIndividualMexes(spawnableWater, StrictMath.min(numMexesLeft, 5));
+        generateIndividualMexes(spawnableWater, StrictMath.min(numMexesLeft, 10));
     }
 
     public void generateBaseMexes(BinaryMask spawnable) {
