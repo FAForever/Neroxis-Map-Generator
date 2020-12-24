@@ -34,14 +34,16 @@ public class MapGeneratorTest {
     float roundedReclaimDensity = StrictMath.round(reclaimDensity * 127f) / 127f;
     int mexCount = 16;
     int mapSize = 512;
-    byte[] optionArray = {spawnCount,
+    int numTeams = 2;
+    byte[] optionArray = new byte[]{spawnCount,
             (byte) (mapSize / 64),
             (byte) StrictMath.round(roundedLandDensity * 127f),
             (byte) StrictMath.round(roundedPlateauDensity * 127f),
             (byte) StrictMath.round(roundedMountainDensity * 127f),
             (byte) StrictMath.round(roundedRampDensity * 127f),
+            (byte) numTeams,
             (byte) StrictMath.round(roundedReclaimDensity * 127f),
-            (byte) (mexCount)};
+            (byte) mexCount};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
     String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(optionArray));
@@ -54,7 +56,8 @@ public class MapGeneratorTest {
             "--ramp-density", Float.toString(rampDensity),
             "--reclaim-density", Float.toString(reclaimDensity),
             "--mex-count", Integer.toString(mexCount),
-            "--map-size", Integer.toString(mapSize)};
+            "--map-size", Integer.toString(mapSize),
+            "--num-teams", Integer.toString(numTeams)};
     private MapGenerator instance;
 
     @Before
