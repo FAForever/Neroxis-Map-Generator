@@ -414,6 +414,9 @@ public strictfp class MapGenerator {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
         }
+        if (random.nextFloat() < .75f) {
+            terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
+        }
         terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
         biome = Biomes.getRandomBiome(random);
     }
@@ -1077,7 +1080,7 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask highGround = new ConcurrentBinaryMask(heightmapBase, waterHeight + PLATEAU_HEIGHT / 2f, random.nextLong(), "highGround");
         ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(land, random.nextLong(), "accentGround");
         ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(plateaus, random.nextLong(), "accentPlateau");
-        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .3f, random.nextLong(), "slopes");
+        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopes");
         ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
         ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
         ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rock");
@@ -1093,21 +1096,21 @@ public strictfp class MapGenerator {
         rockTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "accentRockTexture");
 
-        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).smooth(3, .75f, SymmetryType.SPAWN);
-        accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f, SymmetryType.SPAWN).acid(.6f, 0);
+        accentGround.minus(highGround).acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).smooth(6, .75f, SymmetryType.SPAWN);
+        accentPlateau.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).smooth(6, .75f, SymmetryType.SPAWN);
         slopes.intersect(land).flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
         accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f, SymmetryType.SPAWN).acid(.55f, 0);
         steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
         accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f, SymmetryType.SPAWN).intersect(rock);
 
-        waterBeachTexture.init(land.copy().invert().inflate(12).minus(plateaus.copy().minus(ramps)), 0, 1).smooth(12);
-        accentGroundTexture.init(accentGround, 0, 1).smooth(12).add(accentGround, .65f).smooth(8).add(accentGround, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
-        accentPlateauTexture.init(accentPlateau, 0, 1).smooth(12).add(accentPlateau, .65f).smooth(8).add(accentPlateau, .5f).smooth(2).clampMax(1f).threshold(.1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
+        accentGroundTexture.init(accentGround, 0, .5f).smooth(12).add(accentGround, .325f).smooth(8).add(accentGround, .25f).smooth(2).clampMax(1f).smooth(2);
+        accentPlateauTexture.init(accentPlateau, 0, .5f).smooth(12).add(accentPlateau, .325f).smooth(8).add(accentPlateau, .25f).smooth(2).clampMax(1f).smooth(2);
+        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .75f).smooth(4).clampMax(1f);
         accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f);
         steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f);
-        rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(4).add(rock, 1f).smooth(2).clampMax(1f);
-        accentRockTexture.init(accentRock, 0, 1).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
+        waterBeachTexture.init(land.copy().invert().inflate(12).minus(plateaus.copy().minus(ramps)), 0, 1).smooth(12);
+        rockTexture.init(rock, 0, 1f).smooth(4).add(rock, 1f).smooth(2).clampMax(1f);
+        accentRockTexture.init(accentRock, 0, 1f).smooth(4).clampMax(1f);
     }
 
     private void setupPropPipeline() {

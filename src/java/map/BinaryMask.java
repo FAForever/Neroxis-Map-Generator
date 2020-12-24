@@ -312,7 +312,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask acid(float strength, float size) {
-        BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), getSymmetrySettings());
+        Symmetry spawnSymmetry = symmetrySettings.getSpawnSymmetry();
+        BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), new SymmetrySettings(spawnSymmetry, spawnSymmetry, spawnSymmetry));
         holes.randomize(strength).inflate(size);
         BinaryMask maskCopy = this.copy();
         maskCopy.minus(holes);
