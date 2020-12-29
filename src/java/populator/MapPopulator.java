@@ -283,7 +283,7 @@ public strictfp class MapPopulator {
         } else {
             waterHeight = heightmapBase.getMin();
         }
-        
+
         BinaryMask wholeMap = new BinaryMask(heightmapBase, 0f, random.nextLong());
         BinaryMask land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
         BinaryMask plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
