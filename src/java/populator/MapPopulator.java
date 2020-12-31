@@ -94,7 +94,7 @@ public strictfp class MapPopulator {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("map-transformer usage:\n" +
+            System.out.println("map-populator usage:\n" +
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the transformed map\n" +

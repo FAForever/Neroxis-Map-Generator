@@ -21,8 +21,7 @@ public strictfp class MapImageWriter {
 
     private Path inMapPath;
     private SCMap map;
-    private boolean writeImages;
-    private int mapImageSize;
+    private boolean writeOnlySelectImages;
     private String writeImagesPath;
     private boolean writeLayer0;
     private boolean writeLayer1;
@@ -61,14 +60,11 @@ public strictfp class MapImageWriter {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("map-transformer usage:\n" +
+            System.out.println("map-image-writer usage:\n" +
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n" +
-                    "--team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)\n" +
-                    "--spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)\n" +
-                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc) - resolution cannot exceed map size (256 = 5 km)\n" +
-                    "--create-images arg    optional, create images arg determines which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n" +
-                    " - ie: to create all available PNG images except the one for layer 7, use: --create-images 01234568h\n" +
+                    "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n" +
+                    " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n" +
                     " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap" +
                     "--debug                optional, turn on debugging options\n");
             System.exit(0);
@@ -83,20 +79,12 @@ public strictfp class MapImageWriter {
             System.exit(1);
         }
 
-        if (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry")) {
-            System.out.println("Symmetries not Specified");
-            System.exit(3);
-        }
-
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         writeImagesPath = arguments.get("in-folder-path");
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")), Symmetry.valueOf(arguments.get("spawn-symmetry")));
-        if (arguments.containsKey("texture-res")) {
-            mapImageSize = Integer.parseInt(arguments.get("texture-res")) / 128 * 128;
-        }
-        writeImages = arguments.containsKey("create-images");
-        if (writeImages) {
-            String whichImages = arguments.get("create-images");
+        symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
+        writeOnlySelectImages = arguments.containsKey("create-only");
+        if (writeOnlySelectImages) {
+            String whichImages = arguments.get("create-only");
             if (whichImages != null) {
                 writeLayer0 = whichImages.contains("0");
                 writeLayer1 = whichImages.contains("1");
@@ -109,6 +97,17 @@ public strictfp class MapImageWriter {
                 writeLayer8 = whichImages.contains("8");
                 writeLayerh = whichImages.contains("h");
             }
+        } else {
+            writeLayer0 = true;
+            writeLayer1 = true;
+            writeLayer2 = true;
+            writeLayer3 = true;
+            writeLayer4 = true;
+            writeLayer5 = true;
+            writeLayer6 = true;
+            writeLayer7 = true;
+            writeLayer8 = true;
+            writeLayerh = true;
         }
     }
 
@@ -137,56 +136,55 @@ public strictfp class MapImageWriter {
         heightmapBase.applySymmetry(SymmetryType.SPAWN);
         map.setHeightImage(heightmapBase);
 
-        if(writeImages) {
-            FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
-            FloatMask oldLayer1 = texturesMasks[0];
-            FloatMask oldLayer2 = texturesMasks[1];
-            FloatMask oldLayer3 = texturesMasks[2];
-            FloatMask oldLayer4 = texturesMasks[3];
-            FloatMask oldLayer5 = texturesMasks[4];
-            FloatMask oldLayer6 = texturesMasks[5];
-            FloatMask oldLayer7 = texturesMasks[6];
-            FloatMask oldLayer8 = texturesMasks[7];
-            if(writeLayerh) {
-                util.ImageUtils.writePNGFromMask(heightmapBase, 1, writeImagesPath + "\\Heightmap.png");
-            }
-            if(writeLayer1) {
-                util.ImageUtils.writePNGFromMask(oldLayer1, 255, writeImagesPath + "\\Layer 1.png");
-            }
-            if(writeLayer2) {
-                util.ImageUtils.writePNGFromMask(oldLayer2, 255, writeImagesPath + "\\Layer 2.png");
-            }
-            if(writeLayer3) {
-                util.ImageUtils.writePNGFromMask(oldLayer3, 255, writeImagesPath + "\\Layer 3.png");
-            }
-            if(writeLayer4) {
-                util.ImageUtils.writePNGFromMask(oldLayer4, 255, writeImagesPath + "\\Layer 4.png");
-            }
-            if(writeLayer5) {
-                util.ImageUtils.writePNGFromMask(oldLayer5, 255, writeImagesPath + "\\Layer 5.png");
-            }
-            if(writeLayer6) {
-                util.ImageUtils.writePNGFromMask(oldLayer6, 255, writeImagesPath + "\\Layer 6.png");
-            }
-            if(writeLayer7) {
-                util.ImageUtils.writePNGFromMask(oldLayer7, 255, writeImagesPath + "\\Layer 7.png");
-            }
-            if(writeLayer8) {
-                util.ImageUtils.writePNGFromMask(oldLayer8, 255, writeImagesPath + "\\Layer 8.png");
-            }
-            if(writeLayer0) {
-                oldLayer1.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer2.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer3.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer4.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer5.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer6.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer7.min(0f).max(1f).setSize(mapImageSize);
-                oldLayer8.min(0f).max(1f).setSize(mapImageSize);
-                FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-                oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1).min(0f);
-                util.ImageUtils.writePNGFromMask(oldLayer0, 255, writeImagesPath + "\\Layer 0.png");
-            }
+        FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
+        FloatMask oldLayer1 = texturesMasks[0];
+        FloatMask oldLayer2 = texturesMasks[1];
+        FloatMask oldLayer3 = texturesMasks[2];
+        FloatMask oldLayer4 = texturesMasks[3];
+        FloatMask oldLayer5 = texturesMasks[4];
+        FloatMask oldLayer6 = texturesMasks[5];
+        FloatMask oldLayer7 = texturesMasks[6];
+        FloatMask oldLayer8 = texturesMasks[7];
+        if(writeLayerh) {
+            util.ImageUtils.writePNGFromMask(heightmapBase, 1, writeImagesPath + "\\Heightmap.png");
+        }
+        if(writeLayer1) {
+            util.ImageUtils.writePNGFromMask(oldLayer1, 255, writeImagesPath + "\\Layer 1.png");
+        }
+        if(writeLayer2) {
+            util.ImageUtils.writePNGFromMask(oldLayer2, 255, writeImagesPath + "\\Layer 2.png");
+        }
+        if(writeLayer3) {
+            util.ImageUtils.writePNGFromMask(oldLayer3, 255, writeImagesPath + "\\Layer 3.png");
+        }
+        if(writeLayer4) {
+            util.ImageUtils.writePNGFromMask(oldLayer4, 255, writeImagesPath + "\\Layer 4.png");
+        }
+        if(writeLayer5) {
+            util.ImageUtils.writePNGFromMask(oldLayer5, 255, writeImagesPath + "\\Layer 5.png");
+        }
+        if(writeLayer6) {
+            util.ImageUtils.writePNGFromMask(oldLayer6, 255, writeImagesPath + "\\Layer 6.png");
+        }
+        if(writeLayer7) {
+            util.ImageUtils.writePNGFromMask(oldLayer7, 255, writeImagesPath + "\\Layer 7.png");
+        }
+        if(writeLayer8) {
+            util.ImageUtils.writePNGFromMask(oldLayer8, 255, writeImagesPath + "\\Layer 8.png");
+        }
+        if(writeLayer0) {
+            int mapImageSize = oldLayer1.getSize();
+            oldLayer1.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer2.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer3.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer4.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer5.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer6.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer7.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer8.min(0f).max(1f).setSize(mapImageSize);
+            FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
+            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1).min(0f);
+            util.ImageUtils.writePNGFromMask(oldLayer0, 255, writeImagesPath + "\\Layer 0.png");
         }
     }
 }
