@@ -283,7 +283,6 @@ public strictfp class MapPopulator {
         } else {
             waterHeight = heightmapBase.getMin();
         }
-        util.ImageUtils.writePNGFromMasks(heightmapBase, heightmapBase, heightmapBase, 1, "C:\\Users\\aaa18\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\image.png");
 
         BinaryMask wholeMap = new BinaryMask(heightmapBase, 0f, random.nextLong());
         BinaryMask land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
