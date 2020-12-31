@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class VisualDebugger {
 
-    public static boolean ENABLED = MapGenerator.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG;
+    public static boolean ENABLED = MapGenerator.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG || ImageGenerator.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.

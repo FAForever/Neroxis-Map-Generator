@@ -805,6 +805,25 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
+    public boolean areAnyEdgesGreaterThan(float value) {
+        int size = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y += size - 1) {
+                if(getValueAt(x, y) > value) {
+                    return true;
+                }
+            }
+        }
+        for (int x = 0; x < size; x += size - 1) {
+            for (int y = 0; y < size; y++) {
+                if(getValueAt(x, y) > value) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // -------------------------------------------
 
     @SneakyThrows

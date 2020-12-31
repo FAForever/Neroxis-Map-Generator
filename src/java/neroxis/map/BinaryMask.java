@@ -175,6 +175,21 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
+    public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
+                                          float minValue, float maxValue, int maxStepSize) {
+        Vector2f location = new Vector2f(start);
+        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
+                .setSize(size)).convertToBinaryMask(minValue, maxValue);
+        for (int i = 0; i < numberOfUses; i++) {
+            combineWithOffset(brush, location, true);
+            int dx = (target.x > location.x ? 1 : -1) * random.nextInt(maxStepSize + 1);
+            int dy = (target.y > location.y ? 1 : -1) * random.nextInt(maxStepSize + 1);
+            location.add(dx, dy);
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float inertia,
                            float distanceThreshold, int maxNumSteps, SymmetryType symmetryType) {
         Vector2f location = new Vector2f(start);
