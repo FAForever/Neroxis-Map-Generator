@@ -10,16 +10,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public strictfp class ImageGenerator {
 
     public static boolean DEBUG = false;
     private String folderPath;
-    private int size;
-    private int numberToGenerate;
+    private int size = 512;
+    private int numberToGenerate = 1;
+    private  boolean textures;
+    private  boolean brushes;
+    private float colorVariation = 25;
+    private float redStrength = -1;
+    private float greenStrength = -1;
+    private float blueStrength = -1;
+    private int levelOfDetail = 100;
+
+    private FloatMask redMask;
+    private FloatMask greenMask;
+    private FloatMask blueMask;
 
     public static void main(String[] args) throws IOException {
 
@@ -47,11 +56,18 @@ public strictfp class ImageGenerator {
             System.out.println("image-generator usage:\n" +
                     "--help                 produce help message\n" +
                     "--folder-path arg      required, set the folder where the images will appear\n" +
-                    "--size arg             required, set the size (side length) of the images\n" +
-                    "--num arg              required, set the of images that will be generated\n" +
-                    "--textures             optional, generate textures\n" +
                     "--brushes              optional, generate brushes\n" +
-                    "--debug                optional, turn on debugging options\n");
+                    "--textures             optional, generate textures\n" +
+                    "--size arg             optional, set the size (side length) of images that will be generated\n" +
+                    "--num arg              optional, set the number of images to generate\n" +
+                    "--color-variation arg  optional, set the percent of color variation for textures that will be generated\n" +
+                    "--red arg              optional, set the average percent strength of red for textures that will be generated\n" +
+                    "--green arg            optional, set the average percent strength of green for textures that will be generated\n" +
+                    "--blue arg             optional, set the average percent strength of blue for textures that will be generated\n" +
+                    "--level-of-detail arg  optional, set the amount of fullness/detail for the textures that will be generated\n" +
+                    "- numerical input - default is 100, but there is no limit (higher numbers will have higher processing times)\n" +
+                    "--debug                optional, turn on debugging options\n" +
+                    "*** Note that generating images will overwrite previously made images of the same name in the same folder ***");
             System.exit(0);
         }
 
@@ -65,18 +81,53 @@ public strictfp class ImageGenerator {
         }
 
         folderPath = arguments.get("folder-path");
-        size = Integer.parseInt(arguments.get("size"));
-        numberToGenerate = Integer.parseInt(arguments.get("num"));
+
+        if (arguments.containsKey("size")) {
+            size = Integer.parseInt(arguments.get("size"));
+        }
+
+        if (arguments.containsKey("num")) {
+            numberToGenerate = Integer.parseInt(arguments.get("num"));
+        }
+
+        if (arguments.containsKey("brushes")) {
+            brushes = true;
+        }
+
+        if (arguments.containsKey("textures")) {
+            textures = true;
+        }
+
+        if (arguments.containsKey("color-variation")) {
+            colorVariation = Float.parseFloat(arguments.get("color-variation"));
+        }
+
+        if (arguments.containsKey("red")) {
+            redStrength = Float.parseFloat(arguments.get("red"));
+        }
+
+        if (arguments.containsKey("green")) {
+            greenStrength = Float.parseFloat(arguments.get("green"));
+        }
+
+        if (arguments.containsKey("blue")) {
+            blueStrength = Float.parseFloat(arguments.get("blue"));
+        }
+
+        if (arguments.containsKey("level-of-detail")) {
+            levelOfDetail = Integer.parseInt(arguments.get("level-of-detail"));
+        }
     }
 
     public void generateCustomBrushes(int size, int numberToGenerate) throws IOException {
-        Random random = new Random();
+
         for (int i = 0; i < numberToGenerate; i++) {
             int brushListLength = Brushes.goodBrushes.size();
             int reducedSize = size * 2 / 3;
             int variationDistance = StrictMath.max(size - reducedSize - 3, 0);
             int center = size / 2;
             int mountainsBrushSize = size / 10;
+            Random random = new Random();
 
             String brush1 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
             String brush2 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
@@ -112,17 +163,106 @@ public strictfp class ImageGenerator {
             if(newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
-                util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, folderPath + "\\Brush " + (i + 1) + ".png");
+                util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, folderPath + "\\Brush_" + (i + 1) + ".png");
             }
         }
     }
 
-    public void generateCustomTextures(int size, int numberToGenerate) {
+    public void generateCustomTextures(int size, int numberToGenerate, float colorVariation) throws IOException {
 
+        float redLocus;
+        float greenLocus;
+        float blueLocus;
+
+        for (int i = 0; i < numberToGenerate; i++) {
+
+            int brushListLength = Brushes.goodBrushes.size();
+            Random random = new Random();
+            boolean tooEmpty = true;
+
+            redMask = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            greenMask = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            blueMask = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+
+            BinaryMask wholeImage = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            wholeImage.fillRect(0,0, size, size, true);
+            BinaryMask areaToTexture = wholeImage;
+
+            if(redStrength == -1) {
+                redLocus = random.nextFloat();
+            } else {
+                redLocus = redStrength / 100;
+            }
+            if(greenStrength == -1) {
+                greenLocus = random.nextFloat();
+            } else {
+                greenLocus = greenStrength / 100;
+            }
+            if(blueStrength == -1) {
+                blueLocus = random.nextFloat();
+            } else {
+                blueLocus = blueStrength / 100;
+            }
+
+            for (int a = 0; a < levelOfDetail; a++) {
+                int chainBrushSize = random.nextInt(size / 5) + 1;
+                int chainTextureBrushSize = random.nextInt(size / 5) + 1;
+                BinaryMask chain = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+                FloatMask chainTexture = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+                if(a > 0.75 * levelOfDetail && tooEmpty) {
+                    FloatMask wholeImageTexture = redMask.copy().add(greenMask).add(blueMask);
+                    areaToTexture = wholeImageTexture.convertToBinaryMask(0f, 0.1f);
+                    if(areaToTexture.getCount() > size * 3) {
+                        tooEmpty = false;
+                        areaToTexture = wholeImage;
+                    }
+                }
+                for (int x = 0; x < 5; x++) {
+                    Vector2f loc = areaToTexture.getRandomPosition();
+                    while(loc == null) {
+                        loc = wholeImage.getRandomPosition();
+                    }
+                    Vector2f target = areaToTexture.getRandomPosition();
+                    while(target == null) {
+                        target = wholeImage.getRandomPosition();
+                    }
+                    chain.guidedWalkWithBrushToroidally(loc, target, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainBrushSize,
+                            random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
+                }
+                chainTexture.useBrushWithinAreaWithDensityTorroidally(chain, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+
+                float redWeight = redLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
+                float greenWeight = greenLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
+                float blueWeight = blueLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
+
+                if(redWeight < 0) { redWeight = 0;}
+                if(greenWeight < 0) { greenWeight = 0;}
+                if(blueWeight < 0) { blueWeight = 0;}
+
+                color(redWeight, greenWeight, blueWeight, chainTexture);
+            }
+            util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, folderPath + "\\Texture_" + (i + 1) + ".png");
+        }
+    }
+
+    private void color(float redPercent, float greenPercent, float bluePercent, FloatMask other) {
+        redMask.addWeighted(other, redPercent);
+        greenMask.addWeighted(other, greenPercent);
+        blueMask.addWeighted(other, bluePercent);
+    }
+
+    private void colorScaled(float redPercent, float greenPercent, float bluePercent, FloatMask other, float scaleMultiplier) {
+        redMask.addWeighted(other, redPercent);
+        greenMask.addWeighted(other, greenPercent);
+        blueMask.addWeighted(other, bluePercent);
     }
 
     public void generate() throws IOException {
-        generateCustomBrushes(size, numberToGenerate);
-        generateCustomTextures(size, numberToGenerate);
+        if(brushes) {
+            generateCustomBrushes(size, numberToGenerate);
+        }
+        if(textures) {
+            generateCustomTextures(size, numberToGenerate, colorVariation);
+        }
     }
 }
