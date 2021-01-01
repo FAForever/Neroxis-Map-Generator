@@ -9,7 +9,7 @@ import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.file.Path;
 
 public class ImageUtils {
 
@@ -49,7 +49,7 @@ public class ImageUtils {
         return imageScaled;
     }
 
-    public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, float scaleMultiplier, String path) throws IOException {
+    public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, float scaleMultiplier, Path path) throws IOException {
         int size = redMask.getSize();
         if (size != greenMask.getSize() || size != blueMask.getSize()) {
             throw new IllegalArgumentException("Masks not the same size: redMask is " + redMask.getSize() +
@@ -75,20 +75,20 @@ public class ImageUtils {
         WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2}, new Point(0, 0));
         ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
         RenderedImage image = (RenderedImage) new BufferedImage(colorModel, raster, true, null);
-        ImageIO.write(image, "png", new File(path));
-        System.out.println("PNG created at " + path);
+        ImageIO.write(image, "png", path.toFile());
+        System.out.println("PNG created at " + path.toString());
     }
 
-    public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, String path) throws IOException {
+    public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, Path path) throws IOException {
         float scaleMultiplier = 255 / StrictMath.max(StrictMath.max(redMask.getMax(), greenMask.getMax()), blueMask.getMax());
         writePNGFromMasks(redMask, greenMask, blueMask, scaleMultiplier, path);
     }
 
-    public static void writePNGFromMask(FloatMask mask, float scaleMultiplier, String path) throws IOException {
+    public static void writePNGFromMask(FloatMask mask, float scaleMultiplier, Path path) throws IOException {
         writePNGFromMasks(mask, mask, mask, scaleMultiplier, path);
     }
 
-    public static void writeAutoScaledPNGFromMask(FloatMask mask, String path) throws IOException {
+    public static void writeAutoScaledPNGFromMask(FloatMask mask, Path path) throws IOException {
         float scaleMultiplier = 255 / mask.getMax();
         writePNGFromMasks(mask, mask, mask, scaleMultiplier, path);
     }

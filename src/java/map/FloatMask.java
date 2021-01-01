@@ -886,16 +886,11 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public boolean areAnyEdgesGreaterThan(float value) {
         int size = getSize();
+        int farEdge = size - 1;
         for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y += size - 1) {
-                if(getValueAt(x, y) > value) {
-                    return true;
-                }
-            }
-        }
-        for (int x = 0; x < size; x += size - 1) {
-            for (int y = 0; y < size; y++) {
-                if(getValueAt(x, y) > value) {
+            for (int y = 0; y < size; y += farEdge) {
+                if(getValueAt(x, y) > value || getValueAt(farEdge - x, farEdge - y) > value
+                        || getValueAt(x, farEdge - y)  > value || getValueAt(farEdge - x, y) > value) {
                     return true;
                 }
             }

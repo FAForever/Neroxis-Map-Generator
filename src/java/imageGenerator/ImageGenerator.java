@@ -18,8 +18,8 @@ public strictfp class ImageGenerator {
     private String folderPath;
     private int size = 512;
     private int numberToGenerate = 1;
-    private  boolean textures;
-    private  boolean brushes;
+    private boolean textures;
+    private boolean brushes;
     private float colorVariation = 25;
     private float redStrength = -1;
     private float greenStrength = -1;
@@ -163,7 +163,7 @@ public strictfp class ImageGenerator {
             if(newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
-                util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, folderPath + "\\Brush_" + (i + 1) + ".png");
+                util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
             }
         }
     }
@@ -241,7 +241,7 @@ public strictfp class ImageGenerator {
 
                 color(redWeight, greenWeight, blueWeight, chainTexture);
             }
-            util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, folderPath + "\\Texture_" + (i + 1) + ".png");
+            util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, Paths.get(folderPath + "\\Texture_" + (i + 1) + ".png"));
         }
     }
 
