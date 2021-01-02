@@ -25,6 +25,7 @@ public strictfp class ImageGenerator {
     private float greenStrength = -1;
     private float blueStrength = -1;
     private int levelOfDetail = 100;
+    private int maxFeatureSize = 100;
 
     private FloatMask redMask;
     private FloatMask greenMask;
@@ -65,7 +66,9 @@ public strictfp class ImageGenerator {
                     "--green arg            optional, set the average percent strength of green for textures that will be generated\n" +
                     "--blue arg             optional, set the average percent strength of blue for textures that will be generated\n" +
                     "--level-of-detail arg  optional, set the amount of fullness/detail for the textures that will be generated\n" +
-                    "- numerical input - default is 100, but there is no limit (higher numbers will have higher processing times)\n" +
+                    "- positive numerical input - default is 100, but there is no limit (higher numbers will have higher processing times)\n" +
+                    "--max-feature-size arg optional, set the maximum size of features/details for the textures that will be generated\n" +
+                    "- positive numerical input - default is 100, but there is no limit\n" +
                     "--debug                optional, turn on debugging options\n" +
                     "*** Note that generating images will overwrite previously made images of the same name in the same folder ***");
             System.exit(0);
@@ -116,6 +119,10 @@ public strictfp class ImageGenerator {
 
         if (arguments.containsKey("level-of-detail")) {
             levelOfDetail = Integer.parseInt(arguments.get("level-of-detail"));
+        }
+
+        if (arguments.containsKey("max-feature-size")) {
+            maxFeatureSize = Integer.parseInt(arguments.get("max-feature-size"));
         }
     }
 
@@ -205,8 +212,8 @@ public strictfp class ImageGenerator {
             }
 
             for (int a = 0; a < levelOfDetail; a++) {
-                int chainBrushSize = random.nextInt(size / 5) + 1;
-                int chainTextureBrushSize = random.nextInt(size / 5) + 1;
+                int chainBrushSize = random.nextInt(maxFeatureSize) + 1;
+                int chainTextureBrushSize = random.nextInt(maxFeatureSize) + 1;
                 BinaryMask chain = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
                 FloatMask chainTexture = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
                 if(a > 0.75 * levelOfDetail && tooEmpty) {
