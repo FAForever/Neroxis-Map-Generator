@@ -57,7 +57,7 @@ public strictfp class MapGenerator {
 
     static {
         String version = MapGenerator.class.getPackage().getImplementationVersion();
-        VERSION = version != null ? version : "SNAPSHOT";
+        VERSION = version != null ? version : "snapshot";
     }
 
     //read from cli args
