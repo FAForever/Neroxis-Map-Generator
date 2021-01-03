@@ -17,8 +17,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static brushes.Brushes.loadBrush;
 
@@ -477,9 +477,13 @@ public strictfp class FloatMask extends Mask<Float> {
             for (int y = 0; y < getSize(); y++) {
                 int xPos = StrictMath.min(getSize() - 1, x + 1);
                 int yPos = StrictMath.min(getSize() - 1, y + 1);
-                float xSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
-                float ySlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yPos));
-                maskCopy[x][y] = Collections.max(Arrays.asList(xSlope, ySlope));
+                int xNeg = StrictMath.max(0, x - 1);
+                int yNeg = StrictMath.max(0, y - 1);
+                float xPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
+                float yPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yPos));
+                float xNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xNeg, y));
+                float yNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yNeg));
+                maskCopy[x][y] = Collections.max(List.of(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
             }
         }
         mask = maskCopy;
