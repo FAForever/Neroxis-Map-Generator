@@ -33,31 +33,33 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
             out.writeBytes("        },\n");
         }
-        for (Mex mex : map.getMexes()) {
-            out.writeBytes(String.format("        ['%s'] = {\n", mex.getId()));
-            out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
-            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            Vector3f v = mex.getPosition();
-            out.writeBytes(String.format("          ['position'] = VECTOR3( %f, %f, %f),\n", v.x, v.y, v.z));
-            out.writeBytes("        },\n");
-        }
-        for (Hydro hydro : map.getHydros()) {
-            out.writeBytes(String.format("        ['%s'] = {\n", hydro.getId()));
-            out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
-            out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
-            out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
-            out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
-            out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
-            out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
-            out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            Vector3f v = hydro.getPosition();
-            out.writeBytes(String.format("          ['position'] = VECTOR3( %f, %f, %f),\n", v.x, v.y, v.z));
-            out.writeBytes("        },\n");
+        if (!map.isUnexplored()) {
+            for (Mex mex : map.getMexes()) {
+                out.writeBytes(String.format("        ['%s'] = {\n", mex.getId()));
+                out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
+                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                Vector3f v = mex.getPosition();
+                out.writeBytes(String.format("          ['position'] = VECTOR3( %f, %f, %f),\n", v.x, v.y, v.z));
+                out.writeBytes("        },\n");
+            }
+            for (Hydro hydro : map.getHydros()) {
+                out.writeBytes(String.format("        ['%s'] = {\n", hydro.getId()));
+                out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
+                out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
+                out.writeBytes("          ['amount'] = FLOAT( 100.000000 ),\n");
+                out.writeBytes("          ['color'] = STRING( 'ff808080' ),\n");
+                out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
+                out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
+                out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
+                Vector3f v = hydro.getPosition();
+                out.writeBytes(String.format("          ['position'] = VECTOR3( %f, %f, %f),\n", v.x, v.y, v.z));
+                out.writeBytes("        },\n");
+            }
         }
         for (BlankMarker blankMarker : map.getBlankMarkers()) {
             out.writeBytes("        ['" + blankMarker.getId() + "'] = {\n");

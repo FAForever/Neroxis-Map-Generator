@@ -67,6 +67,7 @@ public strictfp class MapGenerator {
     private Random random;
     private boolean tournamentStyle = false;
     private boolean blind = false;
+    private boolean unexplored = false;
     private long generationTime;
 
     //read from key value arguments or map name
@@ -224,7 +225,8 @@ public strictfp class MapGenerator {
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
-                    "--blind     optional, set map to tournament style which will remove the preview in the scmap and add time of original generation to map\n" +
+                    "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
+                    "--unexplored           optional, set map to unexplore style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options");
             System.exit(0);
         }
@@ -243,8 +245,9 @@ public strictfp class MapGenerator {
             return;
         }
 
-        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind");
-        blind = arguments.containsKey("blind");
+        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind") || arguments.containsKey("unexplored");
+        blind = arguments.containsKey("blind") || arguments.containsKey("unexplored");
+        unexplored = arguments.containsKey("unexplored");
 
         if (tournamentStyle) {
             generationTime = Instant.now().getEpochSecond();
@@ -507,6 +510,7 @@ public strictfp class MapGenerator {
         BitSet parameters = BitSet.valueOf(parameterBytes);
         tournamentStyle = parameters.get(0);
         blind = parameters.get(1);
+        unexplored = parameters.get(2);
     }
 
     private void generateMapName() {
@@ -534,12 +538,13 @@ public strictfp class MapGenerator {
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
         parameters.set(1, blind);
+        parameters.set(2, unexplored);
         String optionString = NAME_ENCODER.encode(optionArray) + "_" + NAME_ENCODER.encode(parameters.toByteArray());
         if (tournamentStyle) {
             String timeString = NAME_ENCODER.encode(ByteBuffer.allocate(8).putLong(generationTime).array());
             optionString += "_" + timeString;
         }
-        mapName = String.format(mapNameFormat, VERSION, seedString, optionString);
+        mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
     }
 
     public void save() {
@@ -573,7 +578,7 @@ public strictfp class MapGenerator {
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
         int mexSpacing = mapSize / 10;
         mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.5f);
-        hasCivilians = random.nextBoolean();
+        hasCivilians = random.nextBoolean() && !unexplored;
         enemyCivilians = random.nextBoolean();
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
@@ -675,29 +680,31 @@ public strictfp class MapGenerator {
         });
 
         CompletableFuture<Void> unitsFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(baseMask, civReclaimMask, t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
-            long sTime = System.currentTimeMillis();
-            Army army17 = new Army("ARMY_17", new ArrayList<>());
-            Group army17Initial = new Group("INITIAL", new ArrayList<>());
-            Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
-            army17.addGroup(army17Initial);
-            army17.addGroup(army17Wreckage);
-            Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
-            Group civilianInitial = new Group("INITIAL", new ArrayList<>());
-            civilian.addGroup(civilianInitial);
-            map.addArmy(army17);
-            map.addArmy(civilian);
-            unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
-            unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
-            unitGenerator.generateUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T1_Land, army17, army17Wreckage, 1f, 4f);
-            unitGenerator.generateUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Land, army17, army17Wreckage, 30f);
-            unitGenerator.generateUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T3_Land, army17, army17Wreckage, 128f);
-            unitGenerator.generateUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Navy, army17, army17Wreckage, 128f);
-            unitGenerator.generateUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.Navy_Factory, army17, army17Wreckage, 256f);
-            if (DEBUG) {
-                System.out.printf("Done: %4d ms, %s, generateBases\n",
-                        System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(MapGenerator.class));
+            if (!unexplored) {
+                Pipeline.await(baseMask, civReclaimMask, t1LandWreckMask, t2LandWreckMask, t3LandWreckMask, t2NavyWreckMask, navyFactoryWreckMask);
+                long sTime = System.currentTimeMillis();
+                Army army17 = new Army("ARMY_17", new ArrayList<>());
+                Group army17Initial = new Group("INITIAL", new ArrayList<>());
+                Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
+                army17.addGroup(army17Initial);
+                army17.addGroup(army17Wreckage);
+                Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
+                Group civilianInitial = new Group("INITIAL", new ArrayList<>());
+                civilian.addGroup(civilianInitial);
+                map.addArmy(army17);
+                map.addArmy(civilian);
+                unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                unitGenerator.generateUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T1_Land, army17, army17Wreckage, 1f, 4f);
+                unitGenerator.generateUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Land, army17, army17Wreckage, 30f);
+                unitGenerator.generateUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T3_Land, army17, army17Wreckage, 128f);
+                unitGenerator.generateUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Navy, army17, army17Wreckage, 128f);
+                unitGenerator.generateUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.Navy_Factory, army17, army17Wreckage, 256f);
+                if (DEBUG) {
+                    System.out.printf("Done: %4d ms, %s, generateBases\n",
+                            System.currentTimeMillis() - sTime,
+                            Util.getStackTraceLineInClass(MapGenerator.class));
+                }
             }
         });
 
@@ -740,17 +747,31 @@ public strictfp class MapGenerator {
         Pipeline.stop();
         long sTime = System.currentTimeMillis();
         map.setGeneratePreview(!blind);
+        map.setUnexplored(unexplored);
+        if (unexplored) {
+            map.setMiniMapContourInterval(100);
+            map.setMiniMapDeepWaterColor(1);
+            map.setMiniMapContourColor(1);
+            map.setMiniMapShoreColor(1);
+            map.setMiniMapLandStartColor(1);
+            map.setMiniMapLandEndColor(1);
+        }
         if (!blind) {
             PreviewGenerator.generate(map.getPreview(), map);
         } else {
             BufferedImage blindPreview = readImage(BLANK_PREVIEW);
             map.getPreview().setData(blindPreview.getData());
         }
+        StringBuilder descriptionBuilder = new StringBuilder();
         if (tournamentStyle) {
-            map.setDescription(String.format("Map originally generated at %s UTC",
+            descriptionBuilder.append(String.format("Map originally generated at %s UTC. ",
                     DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
                             .format(Instant.ofEpochSecond(generationTime).atZone(ZoneOffset.UTC))));
         }
+        if (unexplored) {
+            descriptionBuilder.append("Use with the Unexplored Maps Mod for best experience");
+        }
+        map.setDescription(descriptionBuilder.toString());
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
                     System.currentTimeMillis() - sTime,

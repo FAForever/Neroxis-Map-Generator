@@ -107,9 +107,13 @@ public strictfp class SCMapExporter {
         writeInt(0); // unknown
 
         // decals
-        writeInt(map.getDecalCount());
-        for (Decal decal : map.getDecals()) {
-            writeDecal(decal, map.getDecals().indexOf(decal));
+        if (!map.isUnexplored()) {
+            writeInt(map.getDecalCount());
+            for (Decal decal : map.getDecals()) {
+                writeDecal(decal, map.getDecals().indexOf(decal));
+            }
+        } else {
+            writeInt(0);
         }
 
         writeInt(map.getDecalGroupCount());
@@ -175,10 +179,14 @@ public strictfp class SCMapExporter {
             writeSkyBox(skyBox);
         }
 
-        // props
-        writeInt(map.getPropCount());
-        for (Prop prop : map.getProps()) {
-            writeProp(prop);
+        //props
+        if (!map.isUnexplored()) {
+            writeInt(map.getPropCount());
+            for (Prop prop : map.getProps()) {
+                writeProp(prop);
+            }
+        } else {
+            writeInt(0);
         }
 
         out.flush();

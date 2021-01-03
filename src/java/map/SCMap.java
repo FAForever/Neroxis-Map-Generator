@@ -37,6 +37,7 @@ public strictfp class SCMap {
     private int mexCountInit;
     private int hydroCountInit;
     private boolean generatePreview;
+    private boolean isUnexplored;
     private float noRushRadius = 50;
     private final ArrayList<Mex> mexes;
     private final ArrayList<Hydro> hydros;
