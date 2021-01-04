@@ -221,6 +221,7 @@ public strictfp class MapGenerator {
                     "--mountain-density arg optional, set the mountain density for the generated map\n" +
                     "--ramp-density arg     optional, set the ramp density for the generated map\n" +
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
+                    "--mex-density arg      optional, set the mex density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
                     "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
                     "--biome arg		    optional, set the biome\n" +
@@ -275,7 +276,7 @@ public strictfp class MapGenerator {
         randomizeOptions();
 
 
-        if (!tournamentStyle && !blind) {
+        if (!tournamentStyle) {
             if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
                 float inLandDensity = Float.parseFloat(arguments.get("land-density"));
                 landDensity = StrictMath.round(inLandDensity * 127f) / 127f;
@@ -303,6 +304,12 @@ public strictfp class MapGenerator {
             if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
                 float inReclaimDensity = Float.parseFloat(arguments.get("reclaim-density"));
                 reclaimDensity = StrictMath.round(inReclaimDensity * 127f) / 127f;
+                optionsUsed = true;
+            }
+
+            if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
+                float mexDensity = Float.parseFloat(arguments.get("mex-density"));
+                setMexCount(mexDensity);
                 optionsUsed = true;
             }
 
@@ -382,28 +389,7 @@ public strictfp class MapGenerator {
         mountainDensity = random.nextInt(127) / 127f;
         rampDensity = random.nextInt(127) / 127f;
         reclaimDensity = random.nextInt(127) / 127f;
-        if (mapSize < 512) {
-            mexMultiplier = .75f;
-        } else if (mapSize > 512) {
-            mexMultiplier = switch (spawnCount) {
-                case 2 -> 2f;
-                case 4, 6 -> 1.75f;
-                case 8, 10 -> 1.45f;
-                default -> 1f;
-            };
-        }
-        mexCount = switch (spawnCount) {
-            case 2 -> 10 + random.nextInt(15);
-            case 4 -> 9 + random.nextInt(8);
-            case 6 -> 8 + random.nextInt(5);
-            case 8 -> 8 + random.nextInt(4);
-            case 10 -> 8 + random.nextInt(3);
-            case 12 -> 6 + random.nextInt(4);
-            case 14 -> 6 + random.nextInt(3);
-            case 16 -> 6 + random.nextInt(2);
-            default -> 8 + random.nextInt(8);
-        };
-        mexCount *= mexMultiplier;
+        setMexCount(random.nextFloat());
         List<Symmetry> terrainSymmetries;
         if (spawnCount == 2) {
             terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
@@ -422,6 +408,30 @@ public strictfp class MapGenerator {
         }
         terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
         biome = Biomes.getRandomBiome(random);
+    }
+
+    private void setMexCount(float mexDensity) {
+        mexCount = (int) switch (spawnCount) {
+            case 2 -> 10 + 15 * mexDensity;
+            case 4 -> 9 + 8 * mexDensity;
+            case 6, 8 -> 8 + 5 * mexDensity;
+            case 10 -> 8 + 3 * mexDensity;
+            case 12 -> 6 + 4 * mexDensity;
+            case 14 -> 6 + 3 * mexDensity;
+            case 16 -> 6 + 2 * mexDensity;
+            default -> 8 + 8 * mexDensity;
+        };
+        if (mapSize < 512) {
+            mexMultiplier = .75f;
+        } else if (mapSize > 512) {
+            mexMultiplier = switch (spawnCount) {
+                case 2 -> 1.75f;
+                case 4, 6 -> 1.5f;
+                case 8, 10 -> 1.25f;
+                default -> 1f;
+            };
+        }
+        mexCount *= mexMultiplier;
     }
 
     private void setupSymmetrySettings() {
@@ -474,8 +484,8 @@ public strictfp class MapGenerator {
         if (optionBytes.length > 1) {
             mapSize = (int) optionBytes[1] * 64;
         }
-        if (optionBytes.length > 6) {
-            numTeams = optionBytes[6];
+        if (optionBytes.length > 8) {
+            numTeams = optionBytes[8];
         }
 
         randomizeOptions();
@@ -492,11 +502,11 @@ public strictfp class MapGenerator {
         if (optionBytes.length > 5) {
             rampDensity = optionBytes[5] / 127f;
         }
-        if (optionBytes.length > 7) {
-            reclaimDensity = optionBytes[7] / 127f;
+        if (optionBytes.length > 6) {
+            reclaimDensity = optionBytes[6] / 127f;
         }
-        if (optionBytes.length > 8) {
-            mexCount = optionBytes[8];
+        if (optionBytes.length > 7) {
+            mexCount = optionBytes[7];
         }
         if (optionBytes.length > 9) {
             terrainSymmetry = Symmetry.values()[optionBytes[9]];
@@ -526,9 +536,9 @@ public strictfp class MapGenerator {
                     (byte) StrictMath.round(plateauDensity * 127f),
                     (byte) StrictMath.round(mountainDensity * 127f),
                     (byte) StrictMath.round(rampDensity * 127f),
-                    (byte) numTeams,
                     (byte) StrictMath.round(reclaimDensity * 127f),
                     (byte) mexCount,
+                    (byte) numTeams,
                     (byte) terrainSymmetry.ordinal(),
                     (byte) Biomes.list.indexOf(Biomes.getBiomeByName(biome.getName()))};
         } else {

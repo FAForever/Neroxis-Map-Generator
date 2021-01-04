@@ -27,11 +27,13 @@ public class MapGeneratorTest {
     float mountainDensity = .7956f;
     float rampDensity = .5649f;
     float reclaimDensity = .1354f;
+    float mexDensity = .7325f;
     float roundedLandDensity = StrictMath.round(landDensity * 127f) / 127f;
     float roundedPlateauDensity = StrictMath.round(plateauDensity * 127f) / 127f;
     float roundedMountainDensity = StrictMath.round(mountainDensity * 127f) / 127f;
     float roundedRampDensity = StrictMath.round(rampDensity * 127f) / 127f;
     float roundedReclaimDensity = StrictMath.round(reclaimDensity * 127f) / 127f;
+    float roundedMexDensity = StrictMath.round(mexDensity * 127f) / 127f;
     int mexCount = 16;
     int mapSize = 512;
     int numTeams = 2;
@@ -41,9 +43,9 @@ public class MapGeneratorTest {
             (byte) StrictMath.round(roundedPlateauDensity * 127f),
             (byte) StrictMath.round(roundedMountainDensity * 127f),
             (byte) StrictMath.round(roundedRampDensity * 127f),
-            (byte) numTeams,
             (byte) StrictMath.round(roundedReclaimDensity * 127f),
-            (byte) mexCount};
+            (byte) mexCount,
+            (byte) numTeams};
     ByteBuffer seedBuffer = ByteBuffer.allocate(8).putLong(seed);
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
     String b32MapName = String.format("neroxis_map_generator_%s_%s_%s", version, NameEncoder.encode(seedBuffer.array()), NameEncoder.encode(optionArray));
@@ -178,6 +180,36 @@ public class MapGeneratorTest {
         Pipeline.reset();
 
         String[] args = {folderPath, b32MapName};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getArmies(), map2.getArmies());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    @Test
+    public void TestEqualityMapDensityKeyword() throws IOException {
+        instance.interpretArguments(new String[]{"--map-density", Float.toString(mexDensity)});
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+
+        String[] args = {folderPath, instance.getMapName()};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
