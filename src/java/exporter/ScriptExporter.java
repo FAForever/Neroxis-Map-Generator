@@ -63,7 +63,7 @@ public strictfp class ScriptExporter {
 
     public static void writeUnexploredScript() throws IOException {
         int mapSize = map.getSize();
-        int decalSize = 48 * mapSize / 512;
+        int decalSize = mapSize * mapSize / 8192;
         double decalDiagonal = StrictMath.sqrt(2 * decalSize / 2f * decalSize / 2f);
         out.writeBytes("local ScenarioFramework = import('/lua/ScenarioFramework.lua')\n" +
                 "local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')\n" +
@@ -72,7 +72,7 @@ public strictfp class ScriptExporter {
                 String.format("local decalSpacing = %d;\n", decalSize) +
                 String.format("local decalSize = %d;\n", decalSize) +
                 String.format("local checkDecalRange = %d;\n", (int) (decalDiagonal * 1.5f)) +
-                String.format("local checkRange = %d;\n", (int) (decalDiagonal)) +
+                String.format("local checkRange = %d;\n", (int) (decalDiagonal * 1.25f)) +
                 "\n" +
                 "function OnPopulate()\n" +
                 "\t\n" +
@@ -110,7 +110,7 @@ public strictfp class ScriptExporter {
                 "\ttable.insert(decals, decalInfo)\n" +
                 "\tfor i=decalSize / 2,ScenarioInfo.size[1] + decalSize / 2,decalSpacing do\n" +
                 "\t\tfor j=decalSize / 2,ScenarioInfo.size[2] + decalSize / 2,decalSpacing do\n" +
-                "\t\t\tlocal decal = CreateDecal({i, 0, j}, 0, \"/env/Common/decals/NoSpec_spec.dds\", \"\", \"Water Albedo\", decalSize * 1.1, decalSize * 1.1, 10000, 0, -1, -1)\n" +
+                "\t\t\tlocal decal = CreateDecal({i, 0, j}, 0, \"/env/Common/decals/NoSpec_spec.dds\", \"\", \"Water Albedo\", decalSize * 1.125, decalSize * 1.125, 10000, 0, -1, -1)\n" +
                 "\t\t\tlocal position = {i,0,j}\n" +
                 "\t\t\tlocal decalInfo = {decal = decal, position = position}\n" +
                 "\t\t\tcount = count + 1\n" +
