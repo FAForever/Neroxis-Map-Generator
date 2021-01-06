@@ -1,7 +1,6 @@
 package generator;
 
 import evaluator.MapEvaluator;
-import imageGenerator.ImageGenerator;
 import map.BinaryMask;
 import map.FloatMask;
 import map.Mask;
