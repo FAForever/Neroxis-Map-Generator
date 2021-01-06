@@ -1,4 +1,4 @@
-package mapImageWriter;
+package exporter;
 
 import importer.SCMapImporter;
 import importer.SaveImporter;

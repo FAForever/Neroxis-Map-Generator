@@ -1,4 +1,4 @@
-package imageGenerator;
+package generator;
 
 import brushes.Brushes;
 import map.*;
@@ -144,11 +144,16 @@ public strictfp class ImageGenerator {
 
             BinaryMask base = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
+            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
+            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, random.nextFloat(), 1f, reducedSize);
+            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, random.nextFloat(), 1f, reducedSize);
+            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, random.nextFloat(), 1f, reducedSize);
+            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
 
             BinaryMask mountains = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
@@ -219,28 +224,30 @@ public strictfp class ImageGenerator {
                 if(a > 0.75 * levelOfDetail && tooEmpty) {
                     FloatMask wholeImageTexture = redMask.copy().add(greenMask).add(blueMask);
                     areaToTexture = wholeImageTexture.convertToBinaryMask(0f, 0.1f);
-                    if(areaToTexture.getCount() > size * 3) {
+                    if(areaToTexture.getCount() < size * 3) {
                         tooEmpty = false;
                         areaToTexture = wholeImage;
                     }
                 }
+                LinkedList<Vector2f> possibleLocations = areaToTexture.getAllCoordinatesEqualTo(true, 1);
+                int numPossibleLocations = possibleLocations.size();
                 for (int x = 0; x < 5; x++) {
-                    Vector2f loc = areaToTexture.getRandomPosition();
+                    Vector2f loc = possibleLocations.get(random.nextInt(numPossibleLocations));
                     while(loc == null) {
                         loc = wholeImage.getRandomPosition();
                     }
-                    Vector2f target = areaToTexture.getRandomPosition();
+                    Vector2f target = possibleLocations.get(random.nextInt(numPossibleLocations));
                     while(target == null) {
                         target = wholeImage.getRandomPosition();
                     }
                     chain.guidedWalkWithBrushToroidally(loc, target, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainBrushSize,
                             random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
                 }
-                chainTexture.useBrushWithinAreaWithDensityTorroidally(chain, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+                chainTexture.useBrushWithinAreaWithDensitytoroidally(chain, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
 
-                float redWeight = redLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
-                float greenWeight = greenLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
-                float blueWeight = blueLocus + (random.nextBoolean() ? random.nextFloat() * colorVariation / 100 : - random.nextFloat() * colorVariation / 100);
+                float redWeight = redLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
+                float greenWeight = greenLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
+                float blueWeight = blueLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
 
                 if(redWeight < 0) { redWeight = 0;}
                 if(greenWeight < 0) { greenWeight = 0;}

@@ -272,7 +272,7 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addTorroidally(FloatMask other) {
+    public FloatMask addtoroidally(FloatMask other) {
         int size = getSize();
         int otherSize = other.getSize();
         for (int y = 0; y < otherSize; y++) {
@@ -284,7 +284,7 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addWeightedTorroidally(FloatMask other, float weight) {
+    public FloatMask addWeightedtoroidally(FloatMask other, float weight) {
         int size = getSize();
         int otherSize = other.getSize();
         for (int y = 0; y < otherSize; y++) {
@@ -296,7 +296,7 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addWithOffsetTorroidally(FloatMask other, int offsetX, int offsetY, boolean centered) {
+    public FloatMask addWithOffsettoroidally(FloatMask other, int offsetX, int offsetY, boolean centered) {
         int size = getSize();
         int otherSize = other.getSize();
         if(centered) {
@@ -312,8 +312,8 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addWithOffsetTorroidally(FloatMask other, Vector2f loc, boolean centered) {
-        addWithOffsetTorroidally(other, (int) loc.x, (int) loc.y, centered);
+    public FloatMask addWithOffsettoroidally(FloatMask other, Vector2f loc, boolean centered) {
+        addWithOffsettoroidally(other, (int) loc.x, (int) loc.y, centered);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -855,7 +855,7 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask useBrushWithinAreaTorroidally(BinaryMask area, String brushName, int size, int numUses, float intensity) {
+    public FloatMask useBrushWithinAreatoroidally(BinaryMask area, String brushName, int size, int numUses, float intensity) {
         checkSize(size);
         boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
@@ -864,10 +864,10 @@ public strictfp class FloatMask extends Mask<Float> {
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
             Vector2f location = possibleLocations.get(random.nextInt(length));
-            addWithOffsetTorroidally(brush, location, true);
+            addWithOffsettoroidally(brush, location, true);
             if (!symmetric) {
                 ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> addWithOffsetTorroidally(brush, symmetryPoint.getLocation(), true));
+                symmetryPoints.forEach(symmetryPoint -> addWithOffsettoroidally(brush, symmetryPoint.getLocation(), true));
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -881,9 +881,9 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask useBrushWithinAreaWithDensityTorroidally(BinaryMask area, String brushName, int size, float density, float intensity) {
+    public FloatMask useBrushWithinAreaWithDensitytoroidally(BinaryMask area, String brushName, int size, float density, float intensity) {
         int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinAreaTorroidally(area, brushName, size, frequency, intensity);
+        useBrushWithinAreatoroidally(area, brushName, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;
     }
