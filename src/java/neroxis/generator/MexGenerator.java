@@ -93,7 +93,7 @@ public strictfp class MexGenerator {
         }
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
-        int expSpacing = (int) (map.getSize() / 8 * expMexCount / 2f);
+        int expSpacing = map.getSize() / 4;
 
         LinkedList<Vector2f> expansionLocations = expansionSpawnable.getRandomCoordinates(expSpacing);
 
