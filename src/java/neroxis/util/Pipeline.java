@@ -23,7 +23,7 @@ public strictfp class Pipeline {
 
     private static final List<Entry> pipeline = new ArrayList<>();
     public static CompletableFuture<List<ConcurrentMask<?>>> started = new CompletableFuture<>();
-    public static List<String> hashArray;
+    public static String[] hashArray;
 
     public static void reset() {
         started = new CompletableFuture<>();
@@ -61,7 +61,7 @@ public strictfp class Pipeline {
                     startTime = System.currentTimeMillis();
                     if (HASH_MASK) {
                         try {
-                            hashArray.add(String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod));
+                            hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod);
                         } catch (NoSuchAlgorithmException e) {
                             System.err.println("Cannot hash mask");
                         }
@@ -101,7 +101,7 @@ public strictfp class Pipeline {
 
     public static void start() {
         System.out.println("Starting pipeline");
-        hashArray = new ArrayList<>(getPipelineSize());
+        hashArray = new String[getPipelineSize()];
         started.complete(null);
     }
 
@@ -137,7 +137,7 @@ public strictfp class Pipeline {
     /**
      * Returns a future that completes once all dependencies are met and returns their result
      *
-     * @param dependencyList
+     * @param dependencyList list of dependencies
      * @return a list of the results, DO NOT MODIFY THOSE!, may be mocks
      */
     public static CompletableFuture<List<ConcurrentMask<?>>> getDependencyFuture(List<Entry> dependencyList, ConcurrentMask<?> requestingMask) {
@@ -169,7 +169,9 @@ public strictfp class Pipeline {
         boolean status = outFile.createNewFile();
         FileOutputStream out = new FileOutputStream(outFile);
         for (String s : hashArray) {
-            out.write(s.getBytes());
+            if (s != null) {
+                out.write(s.getBytes());
+            }
         }
         out.flush();
         out.close();
