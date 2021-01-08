@@ -8,7 +8,7 @@ plugins {
 group 'net.neroxis'
 version "${version}"
 
-sourceCompatibility = 1.14
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 sourceSets {
     main {
@@ -50,7 +50,7 @@ dependencies {
 shadowJar {
     getArchiveFileName().set("NeroxisGen_${generatorVersion}.jar")
     manifest {
-        attributes 'Main-Class': 'generator.MapGenerator',
+        attributes 'Main-Class': 'neroxis.generator.MapGenerator',
                 "Implementation-Version": generatorVersion,
                 "Impletementation-Title": "Neroxis Map Generator"
     }
@@ -60,7 +60,7 @@ task populatorJar(type: ShadowJar) {
     getArchiveBaseName().set('MapPopulator')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'populator.MapPopulator'
+            attributes 'Main-Class': 'neroxis.populator.MapPopulator'
         }
     }
     project.configurations.implementation.canBeResolved = true
@@ -71,7 +71,7 @@ task evaluatorJar(type: ShadowJar) {
     getArchiveBaseName().set('MapEvaluator')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'evaluator.MapEvaluator'
+            attributes 'Main-Class': 'neroxis.evaluator.MapEvaluator'
         }
     }
     project.configurations.implementation.canBeResolved = true
@@ -82,7 +82,7 @@ task transformerJar(type: ShadowJar) {
     getArchiveBaseName().set('MapTransformer')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'transformer.MapTransformer'
+            attributes 'Main-Class': 'neroxis.transformer.MapTransformer'
         }
     }
     project.configurations.implementation.canBeResolved = true
