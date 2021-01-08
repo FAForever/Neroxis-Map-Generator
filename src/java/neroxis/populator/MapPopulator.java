@@ -97,7 +97,7 @@ public strictfp class MapPopulator {
             System.out.println("neroxis.map-neroxis.transformer usage:\n" +
                     "--help                 produce help message\n" +
                     "--in-folder-path arg   required, set the input folder for the neroxis.map\n" +
-                    "--out-folder-path arg  required, set the output folder for the transformed neroxis.map\n" +
+                    "--out-folder-path arg  required, set the output folder for the populated neroxis.map\n" +
                     "--team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)\n" +
                     "--spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)\n" +
                     "--spawns arg           optional, populate arg spawns\n" +
