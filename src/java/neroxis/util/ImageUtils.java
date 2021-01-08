@@ -1,6 +1,6 @@
 package neroxis.util;
 
-import map.FloatMask;
+import neroxis.map.FloatMask;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

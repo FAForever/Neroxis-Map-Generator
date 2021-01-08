@@ -1,10 +1,11 @@
-package generator;
+package neroxis.generator;
 
-import brushes.Brushes;
-import map.*;
-import util.ArgumentParser;
-import util.FileUtils;
-import util.Vector2f;
+import neroxis.brushes.Brushes;
+import neroxis.map.*;
+import neroxis.map.FloatMask;
+import neroxis.util.ArgumentParser;
+import neroxis.util.FileUtils;
+import neroxis.util.Vector2f;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -129,18 +130,18 @@ public strictfp class ImageGenerator {
     public void generateCustomBrushes(int size, int numberToGenerate) throws IOException {
 
         for (int i = 0; i < numberToGenerate; i++) {
-            int brushListLength = Brushes.goodBrushes.size();
+            int brushListLength = Brushes.GENERATOR_BRUSHES.size();
             int reducedSize = size * 2 / 3;
             int variationDistance = StrictMath.max(size - reducedSize - 3, 0);
             int center = size / 2;
             int mountainsBrushSize = size / 10;
             Random random = new Random();
 
-            String brush1 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
-            String brush2 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
-            String brush3 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
-            String brush4 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
-            String brush5 = Brushes.goodBrushes.get(random.nextInt(brushListLength));
+            String brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            String brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            String brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
 
             BinaryMask base = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
@@ -175,7 +176,7 @@ public strictfp class ImageGenerator {
             if(newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
-                util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
+                neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
             }
         }
     }
@@ -188,7 +189,7 @@ public strictfp class ImageGenerator {
 
         for (int i = 0; i < numberToGenerate; i++) {
 
-            int brushListLength = Brushes.goodBrushes.size();
+            int brushListLength = Brushes.GENERATOR_BRUSHES.size();
             Random random = new Random();
             boolean tooEmpty = true;
 
@@ -240,10 +241,10 @@ public strictfp class ImageGenerator {
                     while(target == null) {
                         target = wholeImage.getRandomPosition();
                     }
-                    chain.guidedWalkWithBrushToroidally(loc, target, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainBrushSize,
+                    chain.guidedWalkWithBrushToroidally(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
                             random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
                 }
-                chainTexture.useBrushWithinAreaWithDensitytoroidally(chain, Brushes.goodBrushes.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+                chainTexture.useBrushWithinAreaWithDensitytoroidally(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
 
                 float redWeight = redLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
                 float greenWeight = greenLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
@@ -255,7 +256,7 @@ public strictfp class ImageGenerator {
 
                 color(redWeight, greenWeight, blueWeight, chainTexture);
             }
-            util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, Paths.get(folderPath + "\\Texture_" + (i + 1) + ".png"));
+            neroxis.util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, Paths.get(folderPath + "\\Texture_" + (i + 1) + ".png"));
         }
     }
 
