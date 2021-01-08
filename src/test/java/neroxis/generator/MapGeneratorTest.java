@@ -204,7 +204,7 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityMapDensityKeyword() throws IOException {
-        instance.interpretArguments(new String[]{"--neroxis.map-density", Float.toString(mexDensity)});
+        instance.interpretArguments(new String[]{"--map-density", Float.toString(mexDensity)});
         SCMap map1 = instance.generate();
 
         Pipeline.reset();
@@ -242,7 +242,7 @@ public class MapGeneratorTest {
 
         Pipeline.reset();
 
-        instance.interpretArguments(new String[]{"--neroxis.map-name", mapName});
+        instance.interpretArguments(new String[]{"--map-name", mapName});
         SCMap map2 = instance.generate();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
@@ -278,7 +278,7 @@ public class MapGeneratorTest {
 
         Pipeline.reset();
 
-        instance.interpretArguments(new String[]{"--neroxis.map-name", mapName});
+        instance.interpretArguments(new String[]{"--map-name", mapName});
         SCMap map2 = instance.generate();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
@@ -314,7 +314,7 @@ public class MapGeneratorTest {
 
         Pipeline.reset();
 
-        instance.interpretArguments(new String[]{"--neroxis.map-name", mapName});
+        instance.interpretArguments(new String[]{"--map-name", mapName});
         SCMap map2 = instance.generate();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
@@ -343,7 +343,7 @@ public class MapGeneratorTest {
     @Test
     public void TestEqualityMapNameNameKeyword() throws IOException {
         String[] args;
-        args = new String[]{"--neroxis.map-name", b32MapName};
+        args = new String[]{"--map-name", b32MapName};
         instance.interpretArguments(args);
         SCMap map1 = instance.generate();
 
