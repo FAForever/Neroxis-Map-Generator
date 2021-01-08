@@ -19,9 +19,11 @@ import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
 
+    public static boolean HASH_MASK = true;
+
     private static final List<Entry> pipeline = new ArrayList<>();
     public static CompletableFuture<List<ConcurrentMask<?>>> started = new CompletableFuture<>();
-    public static String[] hashArray;
+    public static List<String> hashArray;
 
     public static void reset() {
         started = new CompletableFuture<>();
@@ -57,10 +59,12 @@ public strictfp class Pipeline {
                     Object res = function.apply(m);
                     long functionTime = System.currentTimeMillis() - startTime;
                     startTime = System.currentTimeMillis();
-                    try {
-                        hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod);
-                    } catch (NoSuchAlgorithmException e) {
-                        System.err.println("Cannot hash mask");
+                    if (HASH_MASK) {
+                        try {
+                            hashArray.add(String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod));
+                        } catch (NoSuchAlgorithmException e) {
+                            System.err.println("Cannot hash mask");
+                        }
                     }
                     long hashTime = System.currentTimeMillis() - startTime;
                     if (MapGenerator.DEBUG) {
@@ -97,7 +101,7 @@ public strictfp class Pipeline {
 
     public static void start() {
         System.out.println("Starting pipeline");
-        hashArray = new String[getPipelineSize()];
+        hashArray = new ArrayList<>(getPipelineSize());
         started.complete(null);
     }
 

@@ -240,9 +240,14 @@ public strictfp class MapGenerator {
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplore style which will apply tournament and blind style and add unexplored fog of war\n" +
-                    "--debug                optional, turn on debugging options");
+                    "--debug                optional, turn on debugging options\n" +
+                    "--no-hash              optional, turn off pipeline hashing of masks");
             validArgs = false;
             return;
+        }
+
+        if (arguments.containsKey("no-hash")) {
+            Pipeline.HASH_MASK = false;
         }
 
         if (arguments.containsKey("debug")) {
