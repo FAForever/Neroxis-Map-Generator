@@ -47,7 +47,7 @@ public strictfp class MapEvaluator {
 
         evaluator.interpretArguments(args);
 
-        System.out.println("Evaluating neroxis.map " + evaluator.inMapPath);
+        System.out.println("Evaluating map " + evaluator.inMapPath);
         evaluator.importMap();
         evaluator.evaluate();
 //        neroxis.evaluator.saveReport();
@@ -61,11 +61,11 @@ public strictfp class MapEvaluator {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("neroxis.map-neroxis.transformer usage:\n" +
+            System.out.println("neroxis.map-transformer usage:\n" +
                     "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the neroxis.map\n" +
+                    "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the symmetry report\n" +
-                    "--symmetry arg         required, set the symmetry for the neroxis.map(X, Z, XZ, ZX, POINT)\n" +
+                    "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
                     "--source arg           required, set which half to use as reference for evaluation (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
                     "--debug                optional, turn on debugging options\n");
             System.exit(0);
@@ -145,7 +145,7 @@ public strictfp class MapEvaluator {
 
             File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
             if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in neroxis.map folder");
+                System.out.println("No scmap file in map folder");
                 return;
             }
             File scmapFile = mapFiles[0];
@@ -155,7 +155,7 @@ public strictfp class MapEvaluator {
             SaveImporter.importSave(inMapPath, map);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the neroxis.map.");
+            System.err.println("Error while saving the map.");
         }
     }
 
@@ -169,7 +169,7 @@ public strictfp class MapEvaluator {
 //
 //        } catch (IOException e) {
 //            e.printStackTrace();
-//            System.err.println("Error while saving the neroxis.map.");
+//            System.err.println("Error while saving the map.");
 //        }
 //    }
 

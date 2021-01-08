@@ -34,7 +34,7 @@ public class BiomeGenerator {
 
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
         if (mapFiles == null || mapFiles.length == 0) {
-            System.out.println("No scmap file in neroxis.map folder");
+            System.out.println("No scmap file in map folder");
             return;
         }
         File scmapFile = mapFiles[0];
@@ -50,7 +50,7 @@ public class BiomeGenerator {
             System.out.println("neroxis.map-gen usage:\n" +
                     "--help                 produce help message\n" +
                     "--biome-name arg       required, set the name for the generated biome\n" +
-                    "--neroxis.map-path arg         required, set the neroxis.map path to generate biome from\n" +
+                    "--map-path arg         required, set the map path to generate biome from\n" +
                     "--env-path arg         required, set the env path to load textures from\n" +
                     "--folder-path arg      optional, set the target folder for the generated biome\n");
             System.exit(0);

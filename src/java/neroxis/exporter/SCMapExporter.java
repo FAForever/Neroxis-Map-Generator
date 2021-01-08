@@ -130,7 +130,7 @@ public strictfp class SCMapExporter {
         normalDDSHeader.setFourCC("DXT5");
 
         // normal maps
-        writeInt(1); // normal neroxis.map count
+        writeInt(1); // normal map count
         writeImageData(map.getNormalMap(), normalDDSHeader);
 
         DDSHeader textureMaskLowDDSHeader = new DDSHeader();

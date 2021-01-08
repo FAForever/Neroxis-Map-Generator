@@ -25,7 +25,7 @@ public strictfp class SaveImporter {
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith("_save.lua"));
         assert mapFiles != null;
         if (mapFiles.length == 0) {
-            System.out.println("No save file in neroxis.map folder");
+            System.out.println("No save file in map folder");
             return;
         }
 

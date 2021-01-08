@@ -58,7 +58,7 @@ public class MapGeneratorTest {
             "--ramp-density", Float.toString(rampDensity),
             "--reclaim-density", Float.toString(reclaimDensity),
             "--mex-count", Integer.toString(mexCount),
-            "--neroxis.map-size", Integer.toString(mapSize),
+            "--map-size", Integer.toString(mapSize),
             "--num-teams", Integer.toString(numTeams)};
     private MapGenerator instance;
 
