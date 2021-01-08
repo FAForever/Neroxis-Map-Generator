@@ -213,6 +213,9 @@ public strictfp class MapGenerator {
                 System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
             }
         }
+        if (!validArgs) {
+            return;
+        }
         setupSymmetrySettings();
     }
 
