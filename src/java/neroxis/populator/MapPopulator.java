@@ -60,11 +60,10 @@ public strictfp class MapPopulator {
 
     private BinaryMask resourceMask;
     private BinaryMask waterResourceMask;
-    private BinaryMask plateauResourceMask;
 
     private SymmetrySettings symmetrySettings;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         Locale.setDefault(Locale.US);
         if (DEBUG) {
@@ -76,6 +75,9 @@ public strictfp class MapPopulator {
         MapPopulator populator = new MapPopulator();
 
         populator.interpretArguments(args);
+        if (populator.inMapPath == null) {
+            return;
+        }
 
         System.out.println("Populating map " + populator.inMapPath);
         populator.importMap();
@@ -122,7 +124,7 @@ public strictfp class MapPopulator {
                     "--ai                   optional, populate ai markers\n" +
                     "--keep-current-decals  optional, prevents decals currently on the map from being deleted\n" +
                     "--debug                optional, turn on debugging options\n");
-            System.exit(0);
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -131,17 +133,17 @@ public strictfp class MapPopulator {
 
         if (!arguments.containsKey("in-folder-path")) {
             System.out.println("Input Folder not Specified");
-            System.exit(1);
+            return;
         }
 
         if (!arguments.containsKey("out-folder-path")) {
             System.out.println("Output Folder not Specified");
-            System.exit(2);
+            return;
         }
 
         if (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry")) {
             System.out.println("Symmetries not Specified");
-            System.exit(3);
+            return;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -230,7 +232,7 @@ public strictfp class MapPopulator {
         }
     }
 
-    public void populate() {
+    public void populate() throws Exception {
         /*SupComSlopeValues
         const float FlatHeight = 0.002f;
         const float NonFlatHeight = 0.30f;
@@ -279,12 +281,10 @@ public strictfp class MapPopulator {
         if (populateMexes || populateHydros) {
             resourceMask = new BinaryMask(land, random.nextLong());
             waterResourceMask = new BinaryMask(land, random.nextLong()).invert();
-            plateauResourceMask = new BinaryMask(land, random.nextLong());
 
             resourceMask.minus(impassable).deflate(8).minus(ramps);
             resourceMask.fillEdge(16, false).fillCenter(16, false);
             waterResourceMask.minus(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false);
-            plateauResourceMask.combine(resourceMask).intersect(plateaus).fillEdge(16, false).fillCenter(16, true);
         }
 
         if (populateMexes) {
@@ -512,14 +512,12 @@ public strictfp class MapPopulator {
         if (populateProps) {
             map.getProps().clear();
             PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
-            PropMaterials propMaterials = null;
+            PropMaterials propMaterials;
 
             try {
                 propMaterials = FileUtils.deserialize(propsPath.toString(), PropMaterials.class);
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.print("An error occured while loading props\n");
-                System.exit(1);
+                throw new Exception("An error occured while loading props\n", e);
             }
 
             BinaryMask flatEnough = new BinaryMask(slope, .02f, random.nextLong());

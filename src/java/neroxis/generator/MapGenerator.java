@@ -141,8 +141,10 @@ public strictfp class MapGenerator {
     private boolean hasCivilians;
     private boolean enemyCivilians;
     private float mexMultiplier = 1f;
+    private boolean validArgs = true;
+    private boolean generationComplete = true;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         Locale.setDefault(Locale.US);
         if (DEBUG) {
@@ -154,9 +156,16 @@ public strictfp class MapGenerator {
         MapGenerator generator = new MapGenerator();
 
         generator.interpretArguments(args);
+        if (!generator.validArgs) {
+            return;
+        }
 
         System.out.println(generator.mapName);
         generator.generate();
+        if (generator.map == null) {
+            System.out.println("Map Generation Failed see stack trace for details");
+            return;
+        }
         generator.save();
         System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
         System.out.println("Seed: " + generator.seed);
@@ -174,7 +183,7 @@ public strictfp class MapGenerator {
         System.out.println("Done");
     }
 
-    public void interpretArguments(String[] args) {
+    public void interpretArguments(String[] args) throws Exception {
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
@@ -191,7 +200,7 @@ public strictfp class MapGenerator {
                 }
                 if (!VERSION.equals(args[2])) {
                     System.out.println("This generator only supports version " + VERSION);
-                    System.exit(-1);
+                    validArgs = false;
                 }
                 if (args.length >= 4) {
                     mapName = args[3];
@@ -207,7 +216,7 @@ public strictfp class MapGenerator {
         setupSymmetrySettings();
     }
 
-    private void interpretArguments(Map<String, String> arguments) {
+    private void interpretArguments(Map<String, String> arguments) throws Exception {
         if (arguments.containsKey("help")) {
             System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
@@ -229,7 +238,8 @@ public strictfp class MapGenerator {
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplore style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options");
-            System.exit(0);
+            validArgs = false;
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -324,7 +334,7 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("biome") && arguments.get("biome") != null) {
-                biome = Biomes.loadResourceBiome(arguments.get("biome"));
+                biome = Biomes.loadBiome(arguments.get("biome"));
                 optionsUsed = true;
             }
         }
@@ -332,7 +342,7 @@ public strictfp class MapGenerator {
         generateMapName();
     }
 
-    private void parseMapName() {
+    private void parseMapName() throws Exception {
         if (!mapName.startsWith("neroxis_map_generator")) {
             throw new IllegalArgumentException("Map name is not a generated map");
         }
@@ -378,7 +388,7 @@ public strictfp class MapGenerator {
         parseOptions(optionBytes);
     }
 
-    private void randomizeOptions() {
+    private void randomizeOptions() throws Exception {
         if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
         }
@@ -407,7 +417,7 @@ public strictfp class MapGenerator {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
         terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
-        biome = Biomes.getRandomBiome(random);
+        biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
     }
 
     private void setMexCount(float mexDensity) {
@@ -515,7 +525,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    private void parseOptions(byte[] optionBytes) {
+    private void parseOptions(byte[] optionBytes) throws Exception {
         if (optionBytes.length > 0) {
             if (optionBytes[0] <= 16) {
                 spawnCount = optionBytes[0];
@@ -552,7 +562,7 @@ public strictfp class MapGenerator {
             terrainSymmetry = Symmetry.values()[optionBytes[9]];
         }
         if (optionBytes.length > 10) {
-            biome = Biomes.loadResourceBiome(Biomes.BIOMES_LIST.get(optionBytes[10]));
+            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[10]));
         }
     }
 
@@ -749,8 +759,14 @@ public strictfp class MapGenerator {
                 civilian.addGroup(civilianInitial);
                 map.addArmy(army17);
                 map.addArmy(civilian);
-                unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
-                unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                try {
+                    unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                    unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                } catch (IOException e) {
+                    generationComplete = false;
+                    System.out.println("Could not generate bases due to lua parsing error");
+                    e.printStackTrace();
+                }
                 unitGenerator.generateUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T1_Land, army17, army17Wreckage, 1f, 4f);
                 unitGenerator.generateUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Land, army17, army17Wreckage, 30f);
                 unitGenerator.generateUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T3_Land, army17, army17Wreckage, 128f);
@@ -838,6 +854,10 @@ public strictfp class MapGenerator {
 
         map.addBlank(new BlankMarker(mapName, new Vector2f(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
+
+        if (!generationComplete) {
+            map = null;
+        }
 
         return map;
     }

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 @Data
 public strictfp class Biomes {
@@ -21,78 +20,63 @@ public strictfp class Biomes {
     // ├ Biome
     // ├-- materials.json <required>
     // ├-- props.json <required>
-    // ├-- WaterSettings.scmwtr <optional>
-    // └-- Light.scmlighting <optional>
+    // ├-- WaterSettings.scmwtr <required>
+    // └-- Light.scmlighting <required>
 
     public static final List<String> BIOMES_LIST = Arrays.asList("Desert", "Frithen", "Loki", "Mars", "Moonlight", "Prayer", "Stones", "Syrtis", "Wonder");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
-    public static Biome loadResourceBiome(String resource) {
+    public static Biome loadBiome(String folderPath) throws Exception {
         TerrainMaterials terrainMaterials = null;
-        String resourcePath = CUSTOM_BIOMES_DIR + resource;
-        if (Biomes.class.getResource(resourcePath) == null) {
-            resourcePath = resource;
-        }
-        resourcePath = Paths.get(resourcePath).toString();
-        if (!resourcePath.endsWith(File.separator)) {
-            resourcePath += File.separator;
-        }
-        try {
-            terrainMaterials = FileUtils.deserialize(resourcePath + "materials.json", TerrainMaterials.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while loading biome %s\n", resourcePath);
-            System.exit(1);
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while parsing the following biome:%s\n", resourcePath);
-            System.exit(1);
+        if (Biomes.class.getResourceAsStream(CUSTOM_BIOMES_DIR + folderPath) != null) {
+            folderPath = CUSTOM_BIOMES_DIR + folderPath;
+            if (!folderPath.endsWith("/")) {
+                folderPath += "/";
+            }
+        } else {
+            folderPath = Paths.get(folderPath).toString();
+            if (!folderPath.endsWith(File.separator)) {
+                folderPath += File.separator;
+            }
         }
 
-        PropMaterials propMaterials = null;
-
         try {
-            propMaterials = FileUtils.deserialize(resourcePath + "props.json", PropMaterials.class);
+            terrainMaterials = FileUtils.deserialize(folderPath + "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while loading biome %s\n", resourcePath);
-            System.exit(1);
+            throw new Exception(String.format("An error occurred while loading %s materials.json\n", folderPath), e);
         } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while parsing the following biome:%s\n", resourcePath);
-            System.exit(1);
+            throw new Exception(String.format("An error occurred while parsing materials.json from the following biome:%s\n", folderPath), e);
+        }
+
+        PropMaterials propMaterials;
+        try {
+            propMaterials = FileUtils.deserialize(folderPath + "props.json", PropMaterials.class);
+        } catch (IOException e) {
+            throw new Exception(String.format("An error occurred while loading %s props.json\n", folderPath), e);
+        } catch (JsonParseException e) {
+            throw new Exception(String.format("An error occurred while parsing props.json from the following biome:%s\n", folderPath), e);
         }
 
         // Water parameters
-        WaterSettings waterSettings = null;
+        WaterSettings waterSettings;
         try {
-            waterSettings = FileUtils.deserialize(resourcePath + "WaterSettings.scmwtr", WaterSettings.class);
+            waterSettings = FileUtils.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
         } catch (IOException e) {
-            System.out.printf("Did not find water settings for biome: %s, falling back to default\n", resourcePath);
-            waterSettings = new WaterSettings();
+            throw new Exception(String.format("An error occurred while loading %s WaterSettings\n", folderPath), e);
         } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while parsing the following biome: %s\n", resourcePath);
-            System.exit(1);
+            throw new Exception(String.format("An error occurred while parsing WaterSettings from the following biome:%s\n", folderPath), e);
         }
 
         // Lighting settings
-        LightingSettings lightingSettings = null;
+        LightingSettings lightingSettings;
         try {
-            lightingSettings = FileUtils.deserialize(resourcePath + "Light.scmlighting", LightingSettings.class);
+            lightingSettings = FileUtils.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);
         } catch (IOException e) {
-            System.out.printf("Did not find light settings for biome: %s, falling back to default\n", resourcePath);
-            lightingSettings = new LightingSettings();
+            throw new Exception(String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
         } catch (JsonParseException e) {
-            e.printStackTrace();
-            System.out.printf("An error occurred while parsing the following biome: %s\n", resourcePath);
-            System.exit(1);
+            throw new Exception(String.format("An error occurred while parsing LightingSettings from the following biome:%s\n", folderPath), e);
         }
 
         return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, waterSettings, lightingSettings);
-    }
-
-    public static Biome getRandomBiome(Random random) {
-        return loadResourceBiome(BIOMES_LIST.get(random.nextInt(BIOMES_LIST.size())));
     }
 }

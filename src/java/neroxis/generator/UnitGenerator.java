@@ -5,9 +5,7 @@ import neroxis.map.*;
 import neroxis.util.Vector2f;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 import static neroxis.util.Placement.placeOnHeightmap;
 
@@ -68,26 +66,21 @@ public strictfp class UnitGenerator {
         random = new Random(seed);
     }
 
-    public void generateBases(BinaryMask spawnable, String[] templates, Army army, Group group, float separation) {
+    public void generateBases(BinaryMask spawnable, String[] templates, Army army, Group group, float separation) throws IOException {
         String luaFile = templates[random.nextInt(templates.length)];
         spawnable.limitToSymmetryRegion();
         LinkedList<Vector2f> coordinates = spawnable.getRandomCoordinates(separation);
+        LinkedHashMap<String, LinkedHashSet<Vector2f>> units = BaseTemplate.loadUnits(luaFile);
         coordinates.forEach((location) -> {
-            try {
-                BaseTemplate base = new BaseTemplate(location, army, group, luaFile);
-                base.addUnits();
-                ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-                symmetryPoints.forEach(symmetryPoint -> {
-                    BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
-                    symBase.flip(symmetryPoint.getSymmetry());
-                    symBase.addUnits();
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.printf("An error occured while parsing the following base: %s\n", luaFile);
-                System.exit(1);
-            }
+            BaseTemplate base = new BaseTemplate(location, army, group, units);
+            base.addUnits();
+            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+            symmetryPoints.forEach(symmetryPoint -> {
+                BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
+                symBase.flip(symmetryPoint.getSymmetry());
+                symBase.addUnits();
+            });
         });
     }
 

@@ -46,6 +46,9 @@ public strictfp class MapEvaluator {
         MapEvaluator evaluator = new MapEvaluator();
 
         evaluator.interpretArguments(args);
+        if (evaluator.inMapPath == null) {
+            return;
+        }
 
         System.out.println("Evaluating map " + evaluator.inMapPath);
         evaluator.importMap();
@@ -68,7 +71,7 @@ public strictfp class MapEvaluator {
                     "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
                     "--source arg           required, set which half to use as reference for evaluation (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
                     "--debug                optional, turn on debugging options\n");
-            System.exit(0);
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -77,22 +80,22 @@ public strictfp class MapEvaluator {
 
         if (!arguments.containsKey("in-folder-path")) {
             System.out.println("Input Folder not Specified");
-            System.exit(1);
+            return;
         }
 
         if (!arguments.containsKey("out-folder-path")) {
             System.out.println("Output Folder not Specified");
-            System.exit(2);
+            return;
         }
 
         if (!arguments.containsKey("symmetry")) {
             System.out.println("Symmetry not Specified");
-            System.exit(3);
+            return;
         }
 
         if (!arguments.containsKey("source")) {
             System.out.println("Source not Specified");
-            System.exit(4);
+            return;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
