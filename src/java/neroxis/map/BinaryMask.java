@@ -197,25 +197,25 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffsettoroidally(brush, location, true);
-            float positivetoroidalXDistance = target.x + maskSize - location.x;
-            float negativetoroidalXDistance = location.x + maskSize - target.x;
-            if(positivetoroidalXDistance < 0) {
-                positivetoroidalXDistance = maskSize;
+            combineWithOffsetToroidally(brush, location, true);
+            float positiveToroidalXDistance = target.x + maskSize - location.x;
+            float negativeToroidalXDistance = location.x + maskSize - target.x;
+            if(positiveToroidalXDistance < 0) {
+                positiveToroidalXDistance = maskSize;
             }
-            if(negativetoroidalXDistance < 0) {
-                negativetoroidalXDistance = maskSize;
+            if(negativeToroidalXDistance < 0) {
+                negativeToroidalXDistance = maskSize;
             }
-            int dx = (StrictMath.min(positivetoroidalXDistance, target.x - location.x) < StrictMath.min(negativetoroidalXDistance, location.x - target.x) ? 1 : -1) * random.nextInt(maxStepSize + 1);
-            float positivetoroidalYDistance = target.y + maskSize - location.y;
-            float negativetoroidalYDistance = location.y + maskSize - target.y;
-            if(positivetoroidalYDistance < 0) {
-                positivetoroidalYDistance = maskSize;
+            int dx = (StrictMath.min(positiveToroidalXDistance, target.x - location.x) < StrictMath.min(negativeToroidalXDistance, location.x - target.x) ? 1 : -1) * random.nextInt(maxStepSize + 1);
+            float positiveToroidalYDistance = target.y + maskSize - location.y;
+            float negativeToroidalYDistance = location.y + maskSize - target.y;
+            if(positiveToroidalYDistance < 0) {
+                positiveToroidalYDistance = maskSize;
             }
-            if(negativetoroidalYDistance < 0) {
-                negativetoroidalYDistance = maskSize;
+            if(negativeToroidalYDistance < 0) {
+                negativeToroidalYDistance = maskSize;
             }
-            int dy = (StrictMath.min(positivetoroidalYDistance, target.y - location.y) < StrictMath.min(negativetoroidalYDistance, location.y - target.y) ? 1 : -1) * random.nextInt(maxStepSize + 1);
+            int dy = (StrictMath.min(positiveToroidalYDistance, target.y - location.y) < StrictMath.min(negativeToroidalYDistance, location.y - target.y) ? 1 : -1) * random.nextInt(maxStepSize + 1);
             location.add(dx, dy);
         }
         VisualDebugger.visualizeMask(this);
@@ -550,7 +550,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffsettoroidally(BinaryMask other, int offsetX, int offsetY, boolean centered) {
+    public BinaryMask combineWithOffsetToroidally(BinaryMask other, int offsetX, int offsetY, boolean centered) {
         int size = getSize();
         int otherSize = other.getSize();
         if(centered) {
@@ -574,8 +574,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffsettoroidally(BinaryMask other, Vector2f loc, boolean centered) {
-        return combineWithOffsettoroidally(other, (int) loc.x, (int) loc.y, centered);
+    public BinaryMask combineWithOffsetToroidally(BinaryMask other, Vector2f loc, boolean centered) {
+        return combineWithOffsetToroidally(other, (int) loc.x, (int) loc.y, centered);
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
