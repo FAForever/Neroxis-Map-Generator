@@ -190,17 +190,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask guidedWalkWithBrushToroidally(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
-                                          float minValue, float maxValue, int maxStepSize) {
+    public BinaryMask guidedWalkWithBrushWrapEdges(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
+                                                   float minValue, float maxValue, int maxStepSize) {
         int maskSize = getSize();
         Vector2f location = new Vector2f(start);
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffsetToroidally(brush, location, true);
+            combineWithOffsetWrapEdges(brush, location, true);
             float positiveToroidalXDistance = target.x + maskSize - location.x;
             float negativeToroidalXDistance = location.x + maskSize - target.x;
-            if(positiveToroidalXDistance < 0) {
+            if (positiveToroidalXDistance < 0) {
                 positiveToroidalXDistance = maskSize;
             }
             if(negativeToroidalXDistance < 0) {
@@ -550,21 +550,21 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffsetToroidally(BinaryMask other, int offsetX, int offsetY, boolean centered) {
+    public BinaryMask combineWithOffsetWrapEdges(BinaryMask other, int offsetX, int offsetY, boolean centered) {
         int size = getSize();
         int otherSize = other.getSize();
-        if(centered) {
+        if (centered) {
             offsetX = offsetX - otherSize / 2;
             offsetY = offsetY - otherSize / 2;
         }
         for (int y = 0; y < otherSize; y++) {
             for (int x = 0; x < otherSize; x++) {
                 int setXLocation = x + offsetX;
-                while(setXLocation < 0) {
+                while (setXLocation < 0) {
                     setXLocation += size;
                 }
                 int setYLocation = y + offsetY;
-                while(setYLocation < 0) {
+                while (setYLocation < 0) {
                     setYLocation += size;
                 }
                 setValueAt(setXLocation % size, setYLocation % size, other.getValueAt(x, y));
@@ -574,8 +574,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffsetToroidally(BinaryMask other, Vector2f loc, boolean centered) {
-        return combineWithOffsetToroidally(other, (int) loc.x, (int) loc.y, centered);
+    public BinaryMask combineWithOffsetWrapEdges(BinaryMask other, Vector2f loc, boolean centered) {
+        return combineWithOffsetWrapEdges(other, (int) loc.x, (int) loc.y, centered);
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {

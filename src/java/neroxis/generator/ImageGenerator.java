@@ -1,8 +1,10 @@
 package neroxis.generator;
 
 import neroxis.brushes.Brushes;
-import neroxis.map.*;
+import neroxis.map.BinaryMask;
 import neroxis.map.FloatMask;
+import neroxis.map.Symmetry;
+import neroxis.map.SymmetrySettings;
 import neroxis.util.ArgumentParser;
 import neroxis.util.FileUtils;
 import neroxis.util.Vector2f;
@@ -11,7 +13,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
 
 public strictfp class ImageGenerator {
 
@@ -241,10 +246,10 @@ public strictfp class ImageGenerator {
                     while(target == null) {
                         target = wholeImage.getRandomPosition();
                     }
-                    chain.guidedWalkWithBrushToroidally(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
+                    chain.guidedWalkWithBrushWrapEdges(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
                             random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
                 }
-                chainTexture.useBrushWithinAreaWithDensityToroidally(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+                chainTexture.useBrushWithinAreaWithDensityWrapEdges(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
 
                 float redWeight = redLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
                 float greenWeight = greenLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
