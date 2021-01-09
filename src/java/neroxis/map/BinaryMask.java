@@ -222,23 +222,37 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, float maxAngleError, float inertia,
-                           float distanceThreshold, int maxNumSteps, SymmetryType symmetryType) {
-        Vector2f location = new Vector2f(start);
-        setValueAt(location, true);
+    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, SymmetryType symmetryType) {
+        float distance = start.getDistance(end);
+        List<Vector2f> checkPoints = new ArrayList<>();
+        checkPoints.add(start);
+        for (int i = 0; i < numMiddlePoints; i++) {
+            Vector2f previousLoc = checkPoints.get(checkPoints.size() - 1);
+            float angle = (float) (previousLoc.getAngle(end) + (random.nextFloat() - .5f) * 2f * StrictMath.PI / 2);
+            float magnitude = (random.nextFloat() + .5f) * distance / numMiddlePoints;
+            checkPoints.add(new Vector2f(previousLoc).addPolar(angle, magnitude));
+        }
+        checkPoints.add(end);
         int numSteps = 0;
-        float oldAngle = location.getAngle(end) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
-        while (location.getDistance(end) > distanceThreshold && numSteps < maxNumSteps) {
-            float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-            float angle = oldAngle * inertia + location.getAngle(end) * (1 - inertia) + (random.nextFloat() - .5f) * 2f * (maxAngleError);
-            location.add((float) (magnitude * StrictMath.cos(angle)), (float) (magnitude * StrictMath.sin(angle)));
-            ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, symmetryType);
-            if (inBounds(location) && symmetryPoints.stream().allMatch(symmetryPoint -> inBounds(symmetryPoint.getLocation()))) {
-                setValueAt(location, true);
-                getSymmetryPoints(location, symmetryType).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
+        for (int i = 0; i < checkPoints.size() - 1; i++) {
+            Vector2f location = checkPoints.get(i);
+            Vector2f nextLoc = checkPoints.get(i + 1);
+            float oldAngle = (float) (location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * (StrictMath.PI / 2));
+            while (location.getDistance(nextLoc) > maxStepSize && numSteps < getSize() * getSize()) {
+                ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                if (inBounds(location) && symmetryPoints.stream().allMatch(symmetryPoint -> inBounds(symmetryPoint.getLocation()))) {
+                    setValueAt(location, true);
+                    getSymmetryPoints(location, symmetryType).forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), true));
+                }
+                float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
+                float angle = (float) (oldAngle * .5f + location.getAngle(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * (StrictMath.PI / 2));
+                location.addPolar(angle, magnitude);
+                oldAngle = angle;
+                numSteps++;
             }
-            oldAngle = angle;
-            numSteps++;
+            if (numSteps == getSize() * getSize()) {
+                break;
+            }
         }
         VisualDebugger.visualizeMask(this);
         return this;

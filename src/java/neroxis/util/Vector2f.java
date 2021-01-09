@@ -65,6 +65,12 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f addPolar(float angle, float magnitude) {
+        this.x += magnitude * StrictMath.cos(angle);
+        this.y += magnitude * StrictMath.sin(angle);
+        return this;
+    }
+
     public Vector2f subtract(Vector2f vector) {
         return subtract(vector.x, vector.y);
     }
