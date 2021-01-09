@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingFormatArgumentException;
 
 public class BiomeGenerator {
 
@@ -27,6 +26,9 @@ public class BiomeGenerator {
         BiomeGenerator generator = new BiomeGenerator();
 
         generator.interpretArguments(ArgumentParser.parse(args));
+        if (generator.biomeName == null) {
+            return;
+        }
 
         System.out.println("Generating biome " + generator.biomeName + " from " + generator.mapPath);
 
@@ -34,7 +36,7 @@ public class BiomeGenerator {
 
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
         if (mapFiles == null || mapFiles.length == 0) {
-            System.out.println("No scmap file in neroxis.map folder");
+            System.out.println("No scmap file in map folder");
             return;
         }
         File scmapFile = mapFiles[0];
@@ -50,28 +52,29 @@ public class BiomeGenerator {
             System.out.println("neroxis.map-gen usage:\n" +
                     "--help                 produce help message\n" +
                     "--biome-name arg       required, set the name for the generated biome\n" +
-                    "--neroxis.map-path arg         required, set the neroxis.map path to generate biome from\n" +
+                    "--map-path arg         required, set the map path to generate biome from\n" +
                     "--env-path arg         required, set the env path to load textures from\n" +
                     "--folder-path arg      optional, set the target folder for the generated biome\n");
-            System.exit(0);
+            return;
         }
 
         if (!arguments.containsKey("biome-name")) {
             System.out.println("Biome name not supplied");
-            throw new MissingFormatArgumentException("Biome Name Missing");
+            return;
         }
-        biomeName = arguments.get("biome-name");
 
-        if (!arguments.containsKey("neroxis.map-path")) {
+        if (!arguments.containsKey("map-path")) {
             System.out.println("Map path not supplied");
-            throw new MissingFormatArgumentException("Map Path Missing");
+            return;
         }
-        mapPath = Paths.get(arguments.get("neroxis.map-path"));
 
         if (!arguments.containsKey("env-path")) {
             System.out.println("Env path not supplied");
-            throw new MissingFormatArgumentException("Env Path Missing");
+            return;
         }
+
+        biomeName = arguments.get("biome-name");
+        mapPath = Paths.get(arguments.get("neroxis.map-path"));
         envPath = Paths.get(arguments.get("env-path"));
 
         if (arguments.containsKey("folder-path")) {

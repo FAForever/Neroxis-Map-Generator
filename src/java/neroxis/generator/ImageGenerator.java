@@ -244,7 +244,7 @@ public strictfp class ImageGenerator {
                     chain.guidedWalkWithBrushToroidally(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
                             random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
                 }
-                chainTexture.useBrushWithinAreaWithDensityToroidally(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+                chainTexture.useBrushWithinAreaWithDensitytoroidally(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
 
                 float redWeight = redLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
                 float greenWeight = greenLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);

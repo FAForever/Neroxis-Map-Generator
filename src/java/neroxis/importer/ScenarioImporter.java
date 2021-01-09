@@ -17,7 +17,7 @@ public strictfp class ScenarioImporter {
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith("_scenario.lua"));
         assert mapFiles != null;
         if (mapFiles.length == 0) {
-            System.out.println("No scenario file in neroxis.map folder");
+            System.out.println("No scenario file in map folder");
             return;
         }
 

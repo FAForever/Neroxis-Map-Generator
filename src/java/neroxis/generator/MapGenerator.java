@@ -42,8 +42,8 @@ public strictfp class MapGenerator {
     public static final float RAMP_DENSITY_MIN = 0f;
     public static final float RAMP_DENSITY_MAX = 1f;
     public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .4f;
-    public static final float PLATEAU_DENSITY_MAX = .55f;
+    public static final float PLATEAU_DENSITY_MIN = .5f;
+    public static final float PLATEAU_DENSITY_MAX = .75f;
     public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
     public static final float RECLAIM_DENSITY_MIN = 0f;
     public static final float RECLAIM_DENSITY_MAX = 1f;
@@ -141,8 +141,10 @@ public strictfp class MapGenerator {
     private boolean hasCivilians;
     private boolean enemyCivilians;
     private float mexMultiplier = 1f;
+    private boolean validArgs = true;
+    private boolean generationComplete = true;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         Locale.setDefault(Locale.US);
         if (DEBUG) {
@@ -154,9 +156,16 @@ public strictfp class MapGenerator {
         MapGenerator generator = new MapGenerator();
 
         generator.interpretArguments(args);
+        if (!generator.validArgs) {
+            return;
+        }
 
         System.out.println(generator.mapName);
         generator.generate();
+        if (generator.map == null) {
+            System.out.println("Map Generation Failed see stack trace for details");
+            return;
+        }
         generator.save();
         System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
         System.out.println("Seed: " + generator.seed);
@@ -174,7 +183,7 @@ public strictfp class MapGenerator {
         System.out.println("Done");
     }
 
-    public void interpretArguments(String[] args) {
+    public void interpretArguments(String[] args) throws Exception {
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
@@ -191,7 +200,7 @@ public strictfp class MapGenerator {
                 }
                 if (!VERSION.equals(args[2])) {
                     System.out.println("This generator only supports version " + VERSION);
-                    System.exit(-1);
+                    validArgs = false;
                 }
                 if (args.length >= 4) {
                     mapName = args[3];
@@ -204,10 +213,13 @@ public strictfp class MapGenerator {
                 System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
             }
         }
+        if (!validArgs) {
+            return;
+        }
         setupSymmetrySettings();
     }
 
-    private void interpretArguments(Map<String, String> arguments) {
+    private void interpretArguments(Map<String, String> arguments) throws Exception {
         if (arguments.containsKey("help")) {
             System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
@@ -229,7 +241,8 @@ public strictfp class MapGenerator {
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplore style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options");
-            System.exit(0);
+            validArgs = false;
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -324,7 +337,7 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("biome") && arguments.get("biome") != null) {
-                biome = Biomes.loadResourceBiome(arguments.get("biome"));
+                biome = Biomes.loadBiome(arguments.get("biome"));
                 optionsUsed = true;
             }
         }
@@ -332,7 +345,7 @@ public strictfp class MapGenerator {
         generateMapName();
     }
 
-    private void parseMapName() {
+    private void parseMapName() throws Exception {
         if (!mapName.startsWith("neroxis_map_generator")) {
             throw new IllegalArgumentException("Map name is not a generated map");
         }
@@ -378,7 +391,7 @@ public strictfp class MapGenerator {
         parseOptions(optionBytes);
     }
 
-    private void randomizeOptions() {
+    private void randomizeOptions() throws Exception {
         if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
         }
@@ -407,7 +420,7 @@ public strictfp class MapGenerator {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
         terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
-        biome = Biomes.getRandomBiome(random);
+        biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
     }
 
     private void setMexCount(float mexDensity) {
@@ -515,7 +528,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    private void parseOptions(byte[] optionBytes) {
+    private void parseOptions(byte[] optionBytes) throws Exception {
         if (optionBytes.length > 0) {
             if (optionBytes[0] <= 16) {
                 spawnCount = optionBytes[0];
@@ -552,7 +565,7 @@ public strictfp class MapGenerator {
             terrainSymmetry = Symmetry.values()[optionBytes[9]];
         }
         if (optionBytes.length > 10) {
-            biome = Biomes.loadResourceBiome(Biomes.BIOMES_LIST.get(optionBytes[10]));
+            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[10]));
         }
     }
 
@@ -749,8 +762,14 @@ public strictfp class MapGenerator {
                 civilian.addGroup(civilianInitial);
                 map.addArmy(army17);
                 map.addArmy(civilian);
-                unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
-                unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                try {
+                    unitGenerator.generateBases(baseMask.getFinalMask().minus(noBases), UnitGenerator.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                    unitGenerator.generateBases(civReclaimMask.getFinalMask().minus(noCivs), UnitGenerator.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                } catch (IOException e) {
+                    generationComplete = false;
+                    System.out.println("Could not generate bases due to lua parsing error");
+                    e.printStackTrace();
+                }
                 unitGenerator.generateUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T1_Land, army17, army17Wreckage, 1f, 4f);
                 unitGenerator.generateUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T2_Land, army17, army17Wreckage, 30f);
                 unitGenerator.generateUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitGenerator.T3_Land, army17, army17Wreckage, 128f);
@@ -839,6 +858,10 @@ public strictfp class MapGenerator {
         map.addBlank(new BlankMarker(mapName, new Vector2f(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
 
+        if (!generationComplete) {
+            map = null;
+        }
+
         return map;
     }
 
@@ -873,10 +896,10 @@ public strictfp class MapGenerator {
             smoothPlateauInit();
         }
 
-        spawnPlateauMask.setSize(mapSize / 4).erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 12);
+        spawnPlateauMask.setSize(mapSize / 4).erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 16);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1).smooth(4, SymmetryType.SPAWN);
 
-        spawnLandMask.setSize(mapSize / 4).erode(.25f, SymmetryType.SPAWN, mapSize / 128).grow(.5f, SymmetryType.SPAWN, mapSize / 64);
+        spawnLandMask.setSize(mapSize / 4).erode(.25f, SymmetryType.SPAWN, mapSize / 128).grow(.5f, SymmetryType.SPAWN, 12);
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1).smooth(4, SymmetryType.SPAWN);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
@@ -961,7 +984,7 @@ public strictfp class MapGenerator {
         float inertia = random.nextFloat() * .35f + .25f;
         float distanceThreshold = maxStepSize / 2f;
         int maxNumSteps = mapSize * mapSize;
-        int numWalkers = (int) (8 * plateauDensity + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numWalkers = (int) (8 * plateauDensity) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         plateaus = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "plateaus");
 
         for (int i = 0; i < numWalkers; i++) {
@@ -1051,7 +1074,7 @@ public strictfp class MapGenerator {
         float distanceThreshold = maxStepSize / 2f;
         int maxNumSteps = mapSize * mapSize;
         int numWalkersPerPlayer = (int) (rampDensity * 16 + 8) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
-        int numWalkers = (int) (rampDensity * 8 + 8) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount / 4;
+        int numWalkers = (int) (rampDensity * 12 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount / 4;
         int bound = mapSize / 32;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
         map.getSpawns().forEach(spawn -> {
@@ -1095,11 +1118,12 @@ public strictfp class MapGenerator {
         land.combine(paintedMountains);
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, 36, .48f, 12f).clampMax(PLATEAU_HEIGHT);
-        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, 24, .72f, -0.35f)
-                .clampMin(VALLEY_FLOOR);
-        heightmapHills.useBrushWithinAreaWithDensity(hills, brush4, 24, .72f, 0.5f);
 
         ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, LAND_HEIGHT, random.nextLong(), "paintedPlateaus");
+
+        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, 24, .72f, -0.35f)
+                .clampMin(VALLEY_FLOOR);
+        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(8)), brush4, 24, .72f, 0.5f);
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
@@ -1216,7 +1240,7 @@ public strictfp class MapGenerator {
 
         cliffRockMask.randomize(reclaimDensity * .5f + .1f).setSize(mapSize + 1).intersect(impassable).grow(.5f, SymmetryType.SPAWN, 6).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
         fieldStoneMask.randomize(reclaimDensity * .001f).setSize(mapSize + 1).intersect(land).minus(impassable).fillEdge(10, false);
-        treeMask.randomize(reclaimDensity * .2f + .05f).setSize(mapSize / 4).inflate(2).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
+        treeMask.randomize(reclaimDensity * .2f + .1f).setSize(mapSize / 4).inflate(2).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
         treeMask.setSize(mapSize + 1).intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).minus(notFlat).smooth(4, .25f, SymmetryType.SPAWN);
         largeRockFieldMask.randomize(reclaimDensity * .001f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);
         smallRockFieldMask.randomize(reclaimDensity * .0025f).fillEdge(16, false).grow(.5f, SymmetryType.SPAWN, 4).setSize(mapSize + 1).minus(notFlat).intersect(land).minus(impassable);

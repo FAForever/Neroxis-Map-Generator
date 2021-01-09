@@ -7,8 +7,10 @@ import neroxis.map.TerrainMaterials;
 import neroxis.util.serialized.TerrainMaterialsAdapter;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class FileUtils {
@@ -37,31 +39,35 @@ public class FileUtils {
      * @param filePath the filePath to the directory where the file is located as a String
      * @return the content of the file
      */
-    public static byte[] readResource(String filePath) throws IOException {
-        InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream(filePath);
-        assert inputStream != null;
-        DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(inputStream));
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        int bytesRead;
-        byte[] buffer = new byte[1024];
-        while (-1 != (bytesRead = dataInputStream.read(buffer, 0, 1024))) {
-            outputStream.write(buffer, 0, bytesRead);
+    public static String readFile(String filePath) throws IOException {
+        BufferedReader bufferedReader;
+        InputStream inputStream;
+        URL resource;
+        if ((inputStream = FileUtils.class.getResourceAsStream(filePath)) != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        } else if ((resource = FileUtils.class.getResource(filePath)) != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
+        } else {
+            bufferedReader = new BufferedReader(new FileReader(Paths.get(filePath).toFile()));
         }
 
-        return outputStream.toByteArray();
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            stringBuilder.append(line).append("\n");
+        }
+
+        return stringBuilder.toString();
     }
 
     /**
      * Deserializes a file
      *
-     * @param path the file to be read, either as path if to be read from the file system or as String if to be read from inside the currently running jar
+     * @param path the file to be read
      * @return the deserialized object
      */
     public static <T> T deserialize(String path, Class<?> clazz) throws IOException {
-        String content = new String(readResource(path));
-
-        return (T) gson.fromJson(content, clazz);
+        return (T) gson.fromJson(readFile(path), clazz);
     }
 
     public static <T> void serialize(String filename, T obj, Class<?> clazz) throws IOException {

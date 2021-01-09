@@ -50,6 +50,9 @@ public strictfp class MapTransformer {
         MapTransformer transformer = new MapTransformer();
 
         transformer.interpretArguments(args);
+        if (transformer.inMapPath == null) {
+            return;
+        }
 
         System.out.println("Transforming map " + transformer.inMapPath);
         transformer.importMap();
@@ -81,7 +84,7 @@ public strictfp class MapTransformer {
                     "--terrain              optional, force terrain symmetry\n" +
                     "--all                  optional, force symmetry for all components\n" +
                     "--debug                optional, turn on debugging options\n");
-            System.exit(0);
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -90,22 +93,22 @@ public strictfp class MapTransformer {
 
         if (!arguments.containsKey("in-folder-path")) {
             System.out.println("Input Folder not Specified");
-            System.exit(1);
+            return;
         }
 
         if (!arguments.containsKey("out-folder-path")) {
             System.out.println("Output Folder not Specified");
-            System.exit(2);
+            return;
         }
 
         if (!arguments.containsKey("symmetry")) {
             System.out.println("Symmetry not Specified");
-            System.exit(3);
+            return;
         }
 
         if (!arguments.containsKey("source")) {
             System.out.println("Source not Specified");
-            System.exit(4);
+            return;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));

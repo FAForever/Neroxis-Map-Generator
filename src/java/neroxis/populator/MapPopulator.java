@@ -60,11 +60,10 @@ public strictfp class MapPopulator {
 
     private BinaryMask resourceMask;
     private BinaryMask waterResourceMask;
-    private BinaryMask plateauResourceMask;
 
     private SymmetrySettings symmetrySettings;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         Locale.setDefault(Locale.US);
         if (DEBUG) {
@@ -76,12 +75,15 @@ public strictfp class MapPopulator {
         MapPopulator populator = new MapPopulator();
 
         populator.interpretArguments(args);
+        if (populator.inMapPath == null) {
+            return;
+        }
 
-        System.out.println("Populating neroxis.map " + populator.inMapPath);
+        System.out.println("Populating map " + populator.inMapPath);
         populator.importMap();
         populator.populate();
         populator.exportMap();
-        System.out.println("Saving neroxis.map to " + populator.outFolderPath.toAbsolutePath());
+        System.out.println("Saving map to " + populator.outFolderPath.toAbsolutePath());
         System.out.println("Terrain Symmetry: " + populator.symmetrySettings.getTerrainSymmetry());
         System.out.println("Team Symmetry: " + populator.symmetrySettings.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + populator.symmetrySettings.getSpawnSymmetry());
@@ -94,10 +96,10 @@ public strictfp class MapPopulator {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("neroxis.map-neroxis.transformer usage:\n" +
+            System.out.println("map-populator usage:\n" +
                     "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the neroxis.map\n" +
-                    "--out-folder-path arg  required, set the output folder for the populated neroxis.map\n" +
+                    "--in-folder-path arg   required, set the input folder for the map\n" +
+                    "--out-folder-path arg  required, set the output folder for the populated map\n" +
                     "--team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)\n" +
                     "--spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)\n" +
                     "--spawns arg           optional, populate arg spawns\n" +
@@ -110,7 +112,7 @@ public strictfp class MapPopulator {
                     " - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock" +
                     "--keep-layer-0 arg     optional, populate where texture layer 0 is currently visible to replace layer number arg (1, 2, 3, 4, 5, 6, 7, 8)\n" +
                     " - to smooth this layer, add a 0 to its layer number arg: (10, 20, 30, 40, 50, 60, 70, 80)\n" +
-                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc) - resolution cannot exceed neroxis.map size (256 = 5 km)\n" +
+                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc) - resolution cannot exceed map size (256 = 5 km)\n" +
                     "--textures-inside      optional, if x1/x2/z1/z2 are entered, textures will only be populated within the box formed between points those points \n" +
                     " - if this is not entered and if x1/x2/z1/z2 are entered, textures will only be populated outside of the box formed between points those points\n" +
                     "--x1 arg               optional, x-coordinate for point 1 for optional restriction on where textures will be populated\n" +
@@ -120,9 +122,9 @@ public strictfp class MapPopulator {
                     "--lakes                optional, switches texturing for small bodies of water to layer 5 (instead of layer 6)\n" +
                     "--decals               optional, populate decals\n" +
                     "--ai                   optional, populate ai markers\n" +
-                    "--keep-current-decals  optional, prevents decals currently on the neroxis.map from being deleted\n" +
+                    "--keep-current-decals  optional, prevents decals currently on the map from being deleted\n" +
                     "--debug                optional, turn on debugging options\n");
-            System.exit(0);
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -131,17 +133,17 @@ public strictfp class MapPopulator {
 
         if (!arguments.containsKey("in-folder-path")) {
             System.out.println("Input Folder not Specified");
-            System.exit(1);
+            return;
         }
 
         if (!arguments.containsKey("out-folder-path")) {
             System.out.println("Output Folder not Specified");
-            System.exit(2);
+            return;
         }
 
         if (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry")) {
             System.out.println("Symmetries not Specified");
-            System.exit(3);
+            return;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -204,7 +206,7 @@ public strictfp class MapPopulator {
 
             File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
             if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in neroxis.map folder");
+                System.out.println("No scmap file in map folder");
                 return;
             }
             File scmapFile = mapFiles[0];
@@ -214,7 +216,7 @@ public strictfp class MapPopulator {
             SaveImporter.importSave(inMapPath, map);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the neroxis.map.");
+            System.err.println("Error while saving the map.");
         }
     }
 
@@ -226,11 +228,11 @@ public strictfp class MapPopulator {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the neroxis.map.");
+            System.err.println("Error while saving the map.");
         }
     }
 
-    public void populate() {
+    public void populate() throws Exception {
         /*SupComSlopeValues
         const float FlatHeight = 0.002f;
         const float NonFlatHeight = 0.30f;
@@ -279,12 +281,10 @@ public strictfp class MapPopulator {
         if (populateMexes || populateHydros) {
             resourceMask = new BinaryMask(land, random.nextLong());
             waterResourceMask = new BinaryMask(land, random.nextLong()).invert();
-            plateauResourceMask = new BinaryMask(land, random.nextLong());
 
             resourceMask.minus(impassable).deflate(8).minus(ramps);
             resourceMask.fillEdge(16, false).fillCenter(16, false);
             waterResourceMask.minus(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false);
-            plateauResourceMask.combine(resourceMask).intersect(plateaus).fillEdge(16, false).fillCenter(16, true);
         }
 
         if (populateMexes) {
@@ -512,14 +512,12 @@ public strictfp class MapPopulator {
         if (populateProps) {
             map.getProps().clear();
             PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
-            PropMaterials propMaterials = null;
+            PropMaterials propMaterials;
 
             try {
                 propMaterials = FileUtils.deserialize(propsPath.toString(), PropMaterials.class);
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.print("An error occured while loading props\n");
-                System.exit(1);
+                throw new Exception("An error occured while loading props\n", e);
             }
 
             BinaryMask flatEnough = new BinaryMask(slope, .02f, random.nextLong());

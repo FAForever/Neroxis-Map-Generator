@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 
@@ -58,7 +57,7 @@ public class MapGeneratorTest {
             "--ramp-density", Float.toString(rampDensity),
             "--reclaim-density", Float.toString(reclaimDensity),
             "--mex-count", Integer.toString(mexCount),
-            "--neroxis.map-size", Integer.toString(mapSize),
+            "--map-size", Integer.toString(mapSize),
             "--num-teams", Integer.toString(numTeams)};
     private MapGenerator instance;
 
@@ -68,7 +67,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseOrdered3Args() {
+    public void TestParseOrdered3Args() throws Exception {
         String[] args = {folderPath, Long.toString(seed), version};
 
         instance.interpretArguments(args);
@@ -78,7 +77,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseOrdered2Args() {
+    public void TestParseOrdered2Args() throws Exception {
         String[] args = {folderPath, numericMapName};
 
         instance.interpretArguments(args);
@@ -88,7 +87,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseOrdered4Args() {
+    public void TestParseOrdered4Args() throws Exception {
         String[] args = {folderPath, Long.toString(seed), version, numericMapName};
 
         instance.interpretArguments(args);
@@ -98,7 +97,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseB32MapName() {
+    public void TestParseB32MapName() throws Exception {
         String[] args = {folderPath, b32MapName};
 
         instance.interpretArguments(args);
@@ -117,7 +116,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseKeywordArgs() {
+    public void TestParseKeywordArgs() throws Exception {
         instance.interpretArguments(keywordArgs);
 
         assertEquals(instance.getSeed(), seed);
@@ -137,7 +136,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestDeterminism() throws IOException {
+    public void TestDeterminism() throws Exception {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
         String[] hashArray1 = Pipeline.hashArray.clone();
@@ -173,7 +172,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapNameKeyword() throws IOException {
+    public void TestEqualityMapNameKeyword() throws Exception {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
 
@@ -203,7 +202,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapDensityKeyword() throws IOException {
+    public void TestEqualityMapDensityKeyword() throws Exception {
         instance.interpretArguments(new String[]{"--map-density", Float.toString(mexDensity)});
         SCMap map1 = instance.generate();
 
@@ -233,7 +232,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityTournamentStyle() throws IOException {
+    public void TestEqualityTournamentStyle() throws Exception {
         instance.interpretArguments(new String[]{"--tournament-style"});
         SCMap map1 = instance.generate();
         String mapName = instance.getMapName();
@@ -269,7 +268,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityBlind() throws IOException {
+    public void TestEqualityBlind() throws Exception {
         instance.interpretArguments(new String[]{"--blind"});
         SCMap map1 = instance.generate();
         String mapName = instance.getMapName();
@@ -305,7 +304,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityUnexplored() throws IOException {
+    public void TestEqualityUnexplored() throws Exception {
         instance.interpretArguments(new String[]{"--unexplored"});
         SCMap map1 = instance.generate();
         String mapName = instance.getMapName();
@@ -341,7 +340,7 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapNameNameKeyword() throws IOException {
+    public void TestEqualityMapNameNameKeyword() throws Exception {
         String[] args;
         args = new String[]{"--map-name", b32MapName};
         instance.interpretArguments(args);

@@ -46,8 +46,11 @@ public strictfp class MapEvaluator {
         MapEvaluator evaluator = new MapEvaluator();
 
         evaluator.interpretArguments(args);
+        if (evaluator.inMapPath == null) {
+            return;
+        }
 
-        System.out.println("Evaluating neroxis.map " + evaluator.inMapPath);
+        System.out.println("Evaluating map " + evaluator.inMapPath);
         evaluator.importMap();
         evaluator.evaluate();
 //        neroxis.evaluator.saveReport();
@@ -61,14 +64,14 @@ public strictfp class MapEvaluator {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("neroxis.map-neroxis.transformer usage:\n" +
+            System.out.println("neroxis.map-transformer usage:\n" +
                     "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the neroxis.map\n" +
+                    "--in-folder-path arg   required, set the input folder for the map\n" +
                     "--out-folder-path arg  required, set the output folder for the symmetry report\n" +
-                    "--symmetry arg         required, set the symmetry for the neroxis.map(X, Z, XZ, ZX, POINT)\n" +
+                    "--symmetry arg         required, set the symmetry for the map(X, Z, XZ, ZX, POINT)\n" +
                     "--source arg           required, set which half to use as reference for evaluation (TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT)\n" +
                     "--debug                optional, turn on debugging options\n");
-            System.exit(0);
+            return;
         }
 
         if (arguments.containsKey("debug")) {
@@ -77,22 +80,22 @@ public strictfp class MapEvaluator {
 
         if (!arguments.containsKey("in-folder-path")) {
             System.out.println("Input Folder not Specified");
-            System.exit(1);
+            return;
         }
 
         if (!arguments.containsKey("out-folder-path")) {
             System.out.println("Output Folder not Specified");
-            System.exit(2);
+            return;
         }
 
         if (!arguments.containsKey("symmetry")) {
             System.out.println("Symmetry not Specified");
-            System.exit(3);
+            return;
         }
 
         if (!arguments.containsKey("source")) {
             System.out.println("Source not Specified");
-            System.exit(4);
+            return;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -145,7 +148,7 @@ public strictfp class MapEvaluator {
 
             File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
             if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in neroxis.map folder");
+                System.out.println("No scmap file in map folder");
                 return;
             }
             File scmapFile = mapFiles[0];
@@ -155,7 +158,7 @@ public strictfp class MapEvaluator {
             SaveImporter.importSave(inMapPath, map);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the neroxis.map.");
+            System.err.println("Error while saving the map.");
         }
     }
 
@@ -169,7 +172,7 @@ public strictfp class MapEvaluator {
 //
 //        } catch (IOException e) {
 //            e.printStackTrace();
-//            System.err.println("Error while saving the neroxis.map.");
+//            System.err.println("Error while saving the map.");
 //        }
 //    }
 

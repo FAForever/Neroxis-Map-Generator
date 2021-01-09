@@ -133,6 +133,7 @@ public strictfp class MapImageWriter {
         Random random = new Random();
         FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
         heightmapBase = new FloatMask(heightmapBase, random.nextLong());
+        heightmapBase.applySymmetry(SymmetryType.SPAWN);
         map.setHeightImage(heightmapBase);
 
         FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
