@@ -885,7 +885,7 @@ public strictfp class MapGenerator {
             allLandInit();
             inversePathMountainInit();
         } else {
-            if (random.nextBoolean() && random.nextFloat() > landDensity) {
+            if (RandomUtils.andRandomBoolean(random, 2) && random.nextFloat() > landDensity) {
                 pathLandInit();
                 landPathed = true;
             } else {
