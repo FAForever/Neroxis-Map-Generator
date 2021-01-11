@@ -379,7 +379,7 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void reSize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent) {
+    public void resize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent) {
         int oldSize = getSize();
         Vector2f locToPutTopLeftOfCurrentMapContent = new Vector2f(locToPutCenterOfCurrentMapContent.x - (float) resizeCurrentMapContentTo / 2, locToPutCenterOfCurrentMapContent.y - (float) resizeCurrentMapContentTo / 2);
         float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;

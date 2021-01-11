@@ -34,11 +34,15 @@ public strictfp class MapTransformer {
     private boolean reverseSide;
     private float angle;
     private SymmetrySettings symmetrySettings;
-    private int resize = -1;
-    private int mapSize = -1;
+    private int resize;
+    private int mapSize;
+    private boolean resizeSet = false;
+    private boolean mapSizeSet = false;
     private int oldMapSize;
-    private int shiftX = 1000000;
-    private int shiftZ = 1000000;
+    private int shiftX;
+    private int shiftZ;
+    private boolean shiftXSet = false;
+    private boolean shiftZSet = false;
 
     public static void main(String[] args) throws IOException {
 
@@ -119,18 +123,22 @@ public strictfp class MapTransformer {
 
         if (arguments.containsKey("resize")) {
             resize = Integer.parseInt(arguments.get("resize"));
+            resizeSet = true;
         }
 
         if (arguments.containsKey("map-size")) {
             mapSize = Integer.parseInt(arguments.get("map-size"));
+            mapSizeSet = true;
         }
 
         if (arguments.containsKey("x")) {
             shiftX = Integer.parseInt(arguments.get("x"));
+            shiftXSet = true;
         }
 
         if (arguments.containsKey("z")) {
             shiftZ = Integer.parseInt(arguments.get("z"));
+            shiftZSet = true;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -320,21 +328,21 @@ public strictfp class MapTransformer {
         }
 
         oldMapSize = map.getSize();
-        if (mapSize == -1) {
-            mapSize = resize;
+        if (!mapSizeSet) {
+            if (resizeSet) {
+                mapSize = resize;
+            } else {
+                mapSize = oldMapSize;
+            }
         }
-        if (mapSize == -1) {
-            mapSize = oldMapSize;
-        }
-        float sizeRatio = (float) resize / (float) oldMapSize;
-        if (shiftX == 1000000) {
+        if (!shiftXSet) {
             shiftX = mapSize / 2;
         }
-        if (shiftZ == 1000000) {
+        if (!shiftZSet) {
             shiftZ = mapSize / 2;
         }
         if (mapSize != oldMapSize || resize != oldMapSize) {
-            map.reSize(resize, mapSize, new Vector2f(shiftX, shiftZ));
+            map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ));
         }
     }
 
