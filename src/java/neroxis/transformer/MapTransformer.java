@@ -34,6 +34,11 @@ public strictfp class MapTransformer {
     private boolean reverseSide;
     private float angle;
     private SymmetrySettings symmetrySettings;
+    private int resize = -1;
+    private int mapSize = -1;
+    private int oldMapSize;
+    private int shiftX = 1000000;
+    private int shiftZ = 1000000;
 
     public static void main(String[] args) throws IOException {
 
@@ -80,6 +85,10 @@ public strictfp class MapTransformer {
                     "--units                optional, force unit symmetry\n" +
                     "--terrain              optional, force terrain symmetry\n" +
                     "--all                  optional, force symmetry for all components\n" +
+                    "--resize arg           optional, resize the whole map's placement of features/details to arg size (256 = 5 km x 5 km map)\n" +
+                    "--map-size arg         optional, resize the map bounds to arg size (256 = 5 km x 5 km map)\n" +
+                    "--x arg                optional, set arg x-coordinate for the center of the map's placement of features/details\n" +
+                    "--z arg                optional, set arg z-coordinate for the center of the map's placement of features/details\n" +
                     "--debug                optional, turn on debugging options\n");
             return;
         }
@@ -106,6 +115,22 @@ public strictfp class MapTransformer {
         if (!arguments.containsKey("source")) {
             System.out.println("Source not Specified");
             return;
+        }
+
+        if (arguments.containsKey("resize")) {
+            resize = Integer.parseInt(arguments.get("resize"));
+        }
+
+        if (arguments.containsKey("map-size")) {
+            mapSize = Integer.parseInt(arguments.get("map-size"));
+        }
+
+        if (arguments.containsKey("x")) {
+            shiftX = Integer.parseInt(arguments.get("x"));
+        }
+
+        if (arguments.containsKey("z")) {
+            shiftZ = Integer.parseInt(arguments.get("z"));
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -292,6 +317,24 @@ public strictfp class MapTransformer {
             ArrayList<Decal> decals = new ArrayList<>(map.getDecals());
             map.getDecals().clear();
             map.getDecals().addAll(getTransformedDecals(decals));
+        }
+
+        oldMapSize = map.getSize();
+        if (mapSize == -1) {
+            mapSize = resize;
+        }
+        if (mapSize == -1) {
+            mapSize = oldMapSize;
+        }
+        float sizeRatio = (float) resize / (float) oldMapSize;
+        if (shiftX == 1000000) {
+            shiftX = mapSize / 2;
+        }
+        if (shiftZ == 1000000) {
+            shiftZ = mapSize / 2;
+        }
+        if (mapSize != oldMapSize || resize != oldMapSize) {
+            map.reSize(resize, mapSize, new Vector2f(shiftX, shiftZ));
         }
     }
 

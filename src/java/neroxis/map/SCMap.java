@@ -29,7 +29,7 @@ public strictfp class SCMap {
     private String name = "";
     private final ArrayList<Marker> mexes;
     private final ArrayList<Marker> hydros;
-    private final int size; // must be a power of 2. 512 equals a 10x10km Map
+    private int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
     private final ArrayList<Marker> blankMarkers;
     private String description = "";
@@ -377,6 +377,257 @@ public strictfp class SCMap {
 
     public void addCubeMap(CubeMap cubeMap) {
         cubeMaps.add(cubeMap);
+    }
+
+    public void reSize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent) {
+        int oldSize = getSize();
+        Vector2f locToPutTopLeftOfCurrentMapContent = new Vector2f(locToPutCenterOfCurrentMapContent.x - (float) resizeCurrentMapContentTo / 2, locToPutCenterOfCurrentMapContent.y - (float) resizeCurrentMapContentTo / 2);
+        float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;
+        float boundsScaler = (float) newMapBoundsSize / (float) oldSize / contentScaler;
+        SymmetrySettings symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
+        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScaler / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * contentScaler / 64) * 64 + 1);
+        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScaler) / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * boundsScaler / 64) * 64 + 1, locToPutTopLeftOfCurrentMapContent);
+        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScaler),  StrictMath.round(normalMap.getHeight() * contentScaler));
+        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScaler),  StrictMath.round(normalMap.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScaler),  StrictMath.round(waterMap.getHeight() * contentScaler));
+        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScaler),  StrictMath.round(waterMap.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+        waterFoamMask = scaleImage(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * contentScaler),  StrictMath.round(waterFoamMask.getHeight() * contentScaler));
+        waterFoamMask = insertImageIntoNewImageOfSize(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * boundsScaler),  StrictMath.round(waterFoamMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+        waterFlatnessMask = scaleImage(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * contentScaler),  StrictMath.round(waterFlatnessMask.getHeight() * contentScaler));
+        waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScaler),  StrictMath.round(waterFlatnessMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+        waterDepthBiasMask = scaleImage(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * contentScaler),  StrictMath.round(waterDepthBiasMask.getHeight() * contentScaler));
+        waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScaler),  StrictMath.round(waterDepthBiasMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScaler),  StrictMath.round(terrainType.getHeight() * contentScaler));
+        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScaler),  StrictMath.round(terrainType.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
+
+        FloatMask[] texturesMasks = getTextureMasksScaled(symmetrySettings);
+        FloatMask oldLayer1 = texturesMasks[0];
+        FloatMask oldLayer2 = texturesMasks[1];
+        FloatMask oldLayer3 = texturesMasks[2];
+        FloatMask oldLayer4 = texturesMasks[3];
+        FloatMask oldLayer5 = texturesMasks[4];
+        FloatMask oldLayer6 = texturesMasks[5];
+        FloatMask oldLayer7 = texturesMasks[6];
+        FloatMask oldLayer8 = texturesMasks[7];
+
+        setTextureMasksLow(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
+        setTextureMasksHigh(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
+
+        oldLayer1.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer2.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer3.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer4.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer5.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer6.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer7.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+        oldLayer8.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
+
+        FloatMask layer1 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer1.addWithOffset(oldLayer1, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer2 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer2.addWithOffset(oldLayer2, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer3 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer3.addWithOffset(oldLayer3, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer4 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer4.addWithOffset(oldLayer4, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer5 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer5.addWithOffset(oldLayer5, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer6 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer6.addWithOffset(oldLayer6, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer7 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer7.addWithOffset(oldLayer7, locToPutCenterOfCurrentMapContent, true);
+        FloatMask layer8 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        layer8.addWithOffset(oldLayer8, locToPutCenterOfCurrentMapContent, true);
+
+        setTextureMasksLowScaled(layer1, layer2, layer3, layer4);
+        setTextureMasksHighScaled(layer5, layer6, layer7, layer8);
+
+        this.size = newMapBoundsSize;
+
+        FloatMask smallHeightmapBase = getHeightMask(symmetrySettings);
+        FloatMask heightmapBase =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
+        heightmapBase.addWithOffset(smallHeightmapBase, locToPutCenterOfCurrentMapContent, true);
+        int shiftX = (int) locToPutCenterOfCurrentMapContent.x - resizeCurrentMapContentTo / 2;
+        int shiftZ = (int) locToPutCenterOfCurrentMapContent.y - resizeCurrentMapContentTo / 2;
+
+        for (int i = 0; i < getSpawnCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getSpawn(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getSpawn(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getSpawn(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getAirMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getAirMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getAirMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getAirMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getAmphibiousMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getAmphibiousMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getAmphibiousMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getAmphibiousMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getLandMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getLandMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getExpansionMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getExpansionMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getExpansionMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getExpansionMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getLargeExpansionMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getLargeExpansionMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getLargeExpansionMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getLargeExpansionMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getNavalAreaMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getNavalAreaMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getNavalAreaMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getNavalAreaMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getNavyMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getNavyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getNavyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getNavyMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getLandMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getLandMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getNavyRallyMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getNavyRallyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getNavyRallyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getNavyRallyMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getRallyMarkerCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getRallyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getRallyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getRallyMarker(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getBlankCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getBlank(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getBlank(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getBlank(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getDecalCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getDecal(i).setPosition(new Vector3f(x, y, z));
+            Vector3f scale = getDecal(i).getScale();
+            getDecal(i).setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
+        }
+        for (int i = 0; i < getHydroCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getHydro(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getHydro(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getHydro(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getMexCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getMex(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getMex(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getMex(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getPropCount(); i++) {
+            float x = (float) (StrictMath.round((contentScaler * getProp(i).getPosition().x + shiftX) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((contentScaler * getProp(i).getPosition().z + shiftZ) + 0.5) - 0.5);
+            float y;
+            if(heightmapBase.inBounds((int) x,  (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0; }
+            getProp(i).setPosition(new Vector3f(x, y, z));
+        }
+        for (int i = 0; i < getArmyCount(); i++) {
+            Army army = getArmy(i);
+            for (int a = 0; a < army.getGroupCount(); a++) {
+                Group group = army.getGroup(a);
+                for (int b = 0; b < group.getUnitCount(); b++) {
+                    float x = (float) (StrictMath.round((contentScaler * group.getUnit(b).getPosition().x + shiftX) + 0.5) - 0.5);
+                    float z = (float) (StrictMath.round((contentScaler * group.getUnit(b).getPosition().z + shiftZ) + 0.5) - 0.5);
+                    float y;
+                    if(heightmapBase.inBounds((int) x,  (int) z)) {
+                        y = heightmapBase.getValueAt((int) x, (int) z);
+                    } else {
+                        y = 0; }
+                    group.getUnit(b).setPosition(new Vector3f(x, y, z));
+                }
+            }
+        }
     }
 
     public void setHeightImage(FloatMask heightmap) {

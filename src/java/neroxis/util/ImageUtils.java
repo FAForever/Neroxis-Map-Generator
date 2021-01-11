@@ -49,6 +49,12 @@ public class ImageUtils {
         return imageScaled;
     }
 
+    public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height, Vector2f locToInsertTopLeft) {
+        BufferedImage newImage = new BufferedImage(width, height, image.getType());
+        newImage.createGraphics().drawImage(image, StrictMath.round(locToInsertTopLeft.x), StrictMath.round(locToInsertTopLeft.y), null);
+        return newImage;
+    }
+
     public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, float scaleMultiplier, Path path) throws IOException {
         int size = redMask.getSize();
         if (size != greenMask.getSize() || size != blueMask.getSize()) {

@@ -8,7 +8,7 @@ import neroxis.util.Vector3f;
 public strictfp class Decal {
     private final String path;
     private final Vector3f rotation;
-    private final Vector3f scale;
+    private Vector3f scale;
     private final DecalType type;
     private final float cutOffLOD;
     private Vector3f position;
