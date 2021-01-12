@@ -379,12 +379,20 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void resize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent) {
+    public void resize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent, float heightMultiplier) {
         int oldSize = getSize();
         Vector2f locToPutTopLeftOfCurrentMapContent = new Vector2f(locToPutCenterOfCurrentMapContent.x - (float) resizeCurrentMapContentTo / 2, locToPutCenterOfCurrentMapContent.y - (float) resizeCurrentMapContentTo / 2);
         float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;
         float boundsScaler = (float) newMapBoundsSize / (float) oldSize / contentScaler;
         SymmetrySettings symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
+        FloatMask scaledHeightmap = getHeightMask(symmetrySettings);
+        scaledHeightmap.multiply(heightMultiplier);
+        setHeightImage(scaledHeightmap);
+
+        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * heightMultiplier);
+        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * heightMultiplier);
+        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * heightMultiplier);
+
         heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScaler / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * contentScaler / 64) * 64 + 1);
         heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScaler) / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * boundsScaler / 64) * 64 + 1, locToPutTopLeftOfCurrentMapContent);
         normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScaler),  StrictMath.round(normalMap.getHeight() * contentScaler));

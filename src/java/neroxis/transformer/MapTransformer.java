@@ -43,6 +43,7 @@ public strictfp class MapTransformer {
     private int shiftZ;
     private boolean shiftXSet = false;
     private boolean shiftZSet = false;
+    private float heightmapMultiplier = 1f;
 
     public static void main(String[] args) throws IOException {
 
@@ -93,6 +94,7 @@ public strictfp class MapTransformer {
                     "--map-size arg         optional, resize the map bounds to arg size (256 = 5 km x 5 km map)\n" +
                     "--x arg                optional, set arg x-coordinate for the center of the map's placement of features/details\n" +
                     "--z arg                optional, set arg z-coordinate for the center of the map's placement of features/details\n" +
+                    "--multiply-height arg  optional, multiply the height of the terrain throughout the map by arg\n" +
                     "--debug                optional, turn on debugging options\n");
             return;
         }
@@ -139,6 +141,10 @@ public strictfp class MapTransformer {
         if (arguments.containsKey("z")) {
             shiftZ = Integer.parseInt(arguments.get("z"));
             shiftZSet = true;
+        }
+
+        if (arguments.containsKey("multiply-height")) {
+            heightmapMultiplier = Float.parseFloat(arguments.get("multiply-height"));
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -342,7 +348,7 @@ public strictfp class MapTransformer {
             shiftZ = mapSize / 2;
         }
         if (mapSize != oldMapSize || resize != oldMapSize) {
-            map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ));
+            map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ), heightmapMultiplier);
         }
     }
 
