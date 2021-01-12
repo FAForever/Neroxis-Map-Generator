@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Random;
 
 import static neroxis.brushes.Brushes.loadBrush;
 
@@ -820,6 +821,12 @@ public strictfp class FloatMask extends Mask<Float> {
         return innerCount;
     }
 
+    public FloatMask getDistanceFieldForRange(float minValue, float maxValue) {
+        convertToBinaryMask(minValue, maxValue).getDistanceField();
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public FloatMask enlarge2(int size) {
         return enlarge2(size, false, SymmetryType.SPAWN);
     }
@@ -829,7 +836,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask enlarge2(int size, boolean smooth, SymmetryType symmetryType) {
-        FloatMask largeMask = new FloatMask(size, random.nextLong(), symmetrySettings);
+        Float[][] largeMask = new Float[size][size];
         int smallX;
         int smallY;
         int oldSize = getSize();
@@ -838,18 +845,14 @@ public strictfp class FloatMask extends Mask<Float> {
             smallX = StrictMath.min(StrictMath.round(x / scaler), oldSize - 1);
             for (int y = 0; y < size; y++) {
                 smallY = StrictMath.min(StrictMath.round(y / scaler), oldSize - 1);
-                largeMask.setValueAt(x, y, getValueAt(smallX, smallY));
+                largeMask[x][y] = getValueAt(smallX, smallY);
             }
         }
+        this.mask = largeMask;
         if(smooth) {
-            largeMask.smooth((int) scaler);
+            smooth(StrictMath.round(scaler));
         }
-        largeMask.applySymmetry(symmetryType);
-        return largeMask;
-    }
-
-    public FloatMask getDistanceFieldForRange(float minValue, float maxValue) {
-        convertToBinaryMask(minValue, maxValue).getDistanceField();
+        applySymmetry(symmetryType);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -859,25 +862,27 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask shrink2 (int size, SymmetryType symmetryType) {
-        FloatMask smallMask = new FloatMask(size, random.nextLong(), symmetrySettings);
+        Float[][] smallMask = new Float[size][size];
         int oldSize = getSize();
         float scaler = (float) oldSize / (float) size;
         float sum = 0;
         for (int x = 0; x < size; x++) {
-            int a = (int) (x * scaler);
+            int a = StrictMath.min(StrictMath.round((x + scaler / 2) * scaler), StrictMath.round(oldSize - scaler));
             for (int y = 0; y < size; y++) {
-                int b = (int) (y * scaler);
-                for (int z = 0; z < (int) scaler; z++) {
-                    for (int w = 0; w < (int) scaler; w++) {
+                int b = StrictMath.min(StrictMath.round((y + scaler / 2) * scaler), StrictMath.round(oldSize - scaler));
+                for (int z = 0; z < StrictMath.round(scaler); z++) {
+                    for (int w = 0; w < StrictMath.round(scaler); w++) {
                         sum += getValueAt(a + z, b + w);
                     }
                 }
-                smallMask.setValueAt(x, y, sum / scaler / scaler);
+                smallMask[x][y] = sum / 4;
                 sum = 0;
             }
         }
-        smallMask.applySymmetry(symmetryType);
-        return smallMask;
+        this.mask = smallMask;
+        applySymmetry(symmetryType);
+        VisualDebugger.visualizeMask(this);
+        return this;
     }
 
     public FloatMask setSize2(int size) {
@@ -886,11 +891,12 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask setSize2(int size, boolean smoothedEnlarge) {
         if (size > getSize()) {
-           return enlarge2(size, smoothedEnlarge);
+           enlarge2(size, smoothedEnlarge);
         }
         if(size < getSize()) {
-           return shrink2(size);
+           shrink2(size);
         }
+        VisualDebugger.visualizeMask(this);
         return this;
     }
 
