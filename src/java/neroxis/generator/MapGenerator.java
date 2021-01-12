@@ -1255,62 +1255,33 @@ public strictfp class MapGenerator {
 
     private void generateExclusionMasks() {
         noProps = new BinaryMask(unbuildable.getFinalMask(), null);
-
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
-        }
-        for (int i = 0; i < map.getMexCount(); i++) {
-            noProps.fillCircle(map.getMex(i).getPosition(), 1, true);
-        }
-        for (int i = 0; i < map.getHydroCount(); i++) {
-            noProps.fillCircle(map.getHydro(i).getPosition(), 8, true);
-        }
-
-        noProps.combine(allBaseMask.getFinalMask());
-
         noBases = new BinaryMask(unbuildable.getFinalMask(), null);
-
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            noBases.fillCircle(map.getSpawn(i).getPosition(), 128, true);
-        }
-        for (int i = 0; i < map.getMexCount(); i++) {
-            noBases.fillCircle(map.getMex(i).getPosition(), 32, true);
-        }
-        for (int i = 0; i < map.getHydroCount(); i++) {
-            noBases.fillCircle(map.getHydro(i).getPosition(), 32, true);
-        }
-
         noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
-
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            noCivs.fillCircle(map.getSpawn(i).getPosition(), 96, true);
-        }
-        for (int i = 0; i < map.getMexCount(); i++) {
-            noCivs.fillCircle(map.getMex(i).getPosition(), 32, true);
-        }
-        for (int i = 0; i < map.getHydroCount(); i++) {
-            noCivs.fillCircle(map.getHydro(i).getPosition(), 32, true);
-        }
-
         noWrecks = new BinaryMask(unbuildable.getFinalMask(), null);
-
-        noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
-
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            noWrecks.fillCircle(map.getSpawn(i).getPosition(), 128, true);
-        }
-        for (int i = 0; i < map.getMexCount(); i++) {
-            noWrecks.fillCircle(map.getMex(i).getPosition(), 8, true);
-        }
-        for (int i = 0; i < map.getHydroCount(); i++) {
-            noWrecks.fillCircle(map.getHydro(i).getPosition(), 32, true);
-        }
-
         noDecals = new BinaryMask(mapSize + 1, null, symmetrySettings);
 
-        for (int i = 0; i < map.getSpawnCount(); i++) {
-            noDecals.fillCircle(map.getSpawn(i).getPosition(), 24, true);
-        }
+        noProps.combine(allBaseMask.getFinalMask());
+        noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
+
+        map.getSpawns().forEach(spawn -> {
+            noProps.fillCircle(spawn.getPosition(), 30, true);
+            noBases.fillCircle(spawn.getPosition(), 128, true);
+            noCivs.fillCircle(spawn.getPosition(), 96, true);
+            noWrecks.fillCircle(spawn.getPosition(), 128, true);
+            noDecals.fillCircle(spawn.getPosition(), 24, true);
+        });
+        map.getMexes().forEach(mex -> {
+            noProps.fillCircle(mex.getPosition(), 1, true);
+            noBases.fillCircle(mex.getPosition(), 32, true);
+            noCivs.fillCircle(mex.getPosition(), 32, true);
+            noWrecks.fillCircle(mex.getPosition(), 8, true);
+        });
+        map.getHydros().forEach(hydro -> {
+            noProps.fillCircle(hydro.getPosition(), 8, true);
+            noBases.fillCircle(hydro.getPosition(), 32, true);
+            noCivs.fillCircle(hydro.getPosition(), 32, true);
+            noWrecks.fillCircle(hydro.getPosition(), 32, true);
+        });
     }
 
     public void toFile(Path path) throws IOException {
