@@ -319,14 +319,14 @@ public strictfp class MapPopulator {
             map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
-            oldLayer1.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer2.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer3.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer4.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer5.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer6.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer7.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer8.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer1.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer2.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer3.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer4.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer5.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer6.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer7.min(0f).max(1f).setSize2(mapImageSize, true);
+            oldLayer8.min(0f).max(1f).setSize2(mapImageSize, true);
 
             BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();

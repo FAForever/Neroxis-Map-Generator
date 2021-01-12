@@ -413,25 +413,14 @@ public strictfp class SCMap {
         setTextureMasksLow(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
         setTextureMasksHigh(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
 
-        oldLayer1.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer2.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer3.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer4.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer5.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer6.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer7.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-        oldLayer8.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
-
-        if (contentScaler > 1) {
-            oldLayer1.smooth((int)contentScaler);
-            oldLayer2.smooth((int)contentScaler);
-            oldLayer3.smooth((int)contentScaler);
-            oldLayer4.smooth((int)contentScaler);
-            oldLayer5.smooth((int)contentScaler);
-            oldLayer6.smooth((int)contentScaler);
-            oldLayer7.smooth((int)contentScaler);
-            oldLayer8.smooth((int)contentScaler);
-        }
+        oldLayer1.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer2.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer3.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer4.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer5.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer6.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer7.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
+        oldLayer8.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
 
         FloatMask layer1 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
         layer1.addWithOffset(oldLayer1, locToPutCenterOfCurrentMapContent, true);
