@@ -422,6 +422,17 @@ public strictfp class SCMap {
         oldLayer7.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
         oldLayer8.min(0f).max(1f).setSize(resizeCurrentMapContentTo);
 
+        if (contentScaler > 1) {
+            oldLayer1.smooth((int)contentScaler);
+            oldLayer2.smooth((int)contentScaler);
+            oldLayer3.smooth((int)contentScaler);
+            oldLayer4.smooth((int)contentScaler);
+            oldLayer5.smooth((int)contentScaler);
+            oldLayer6.smooth((int)contentScaler);
+            oldLayer7.smooth((int)contentScaler);
+            oldLayer8.smooth((int)contentScaler);
+        }
+
         FloatMask layer1 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
         layer1.addWithOffset(oldLayer1, locToPutCenterOfCurrentMapContent, true);
         FloatMask layer2 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
@@ -581,6 +592,7 @@ public strictfp class SCMap {
             getDecal(i).setPosition(new Vector3f(x, y, z));
             Vector3f scale = getDecal(i).getScale();
             getDecal(i).setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
+            getDecal(i).setCutOffLOD(getDecal(i).getCutOffLOD() * contentScaler);
         }
         for (int i = 0; i < getHydroCount(); i++) {
             float x = (float) (StrictMath.round((contentScaler * getHydro(i).getPosition().x + shiftX) + 0.5) - 0.5);

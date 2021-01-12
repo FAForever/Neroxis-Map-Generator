@@ -10,7 +10,7 @@ public strictfp class Decal {
     private final Vector3f rotation;
     private Vector3f scale;
     private final DecalType type;
-    private final float cutOffLOD;
+    private float cutOffLOD;
     private Vector3f position;
 
     public Decal(String path, Vector2f position, Vector3f rotation, float scale, float cutOffLOD) {
