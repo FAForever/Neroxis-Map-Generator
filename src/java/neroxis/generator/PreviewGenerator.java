@@ -1,6 +1,7 @@
 package neroxis.generator;
 
-import neroxis.map.*;
+import neroxis.map.SCMap;
+import neroxis.map.TerrainMaterials;
 import neroxis.util.serialized.LightingSettings;
 import neroxis.util.serialized.WaterSettings;
 
@@ -44,33 +45,27 @@ public strictfp class PreviewGenerator {
         BufferedImage massImage = scaleImage(readImage(MASS_IMAGE), resourceImageSize, resourceImageSize);
         BufferedImage hydroImage = scaleImage(readImage(HYDRO_IMAGE), resourceImageSize, resourceImageSize);
         BufferedImage armyImage = scaleImage(readImage(ARMY_IMAGE), resourceImageSize, resourceImageSize);
-        for (Mex mex : map.getMexes()) {
-            if (mex != null) {
-                int x = (int) (mex.getPosition().x / map.getSize() * 256 - massImage.getWidth(null) / 2);
-                int y = (int) (mex.getPosition().z / map.getSize() * 256 - massImage.getHeight(null) / 2);
-                x = StrictMath.min(Math.max(0, x), image.getWidth() - massImage.getWidth(null));
-                y = StrictMath.min(Math.max(0, y), image.getHeight() - massImage.getHeight(null));
-                image.getGraphics().drawImage(massImage, x, y, null);
-            }
-        }
-        for (Hydro hydro : map.getHydros()) {
-            if (hydro != null) {
-                int x = (int) (hydro.getPosition().x / map.getSize() * 256 - hydroImage.getWidth(null) / 2);
-                int y = (int) (hydro.getPosition().z / map.getSize() * 256 - hydroImage.getHeight(null) / 2);
-                x = StrictMath.min(Math.max(0, x), image.getWidth() - hydroImage.getWidth(null));
-                y = StrictMath.min(Math.max(0, y), image.getHeight() - hydroImage.getHeight(null));
-                image.getGraphics().drawImage(hydroImage, x, y, null);
-            }
-        }
-        for (Spawn spawn : map.getSpawns()) {
-            if (spawn != null) {
-                int x = (int) (spawn.getPosition().x / map.getSize() * 256 - armyImage.getWidth(null) / 2);
-                int y = (int) (spawn.getPosition().z / map.getSize() * 256 - armyImage.getHeight(null) / 2);
-                x = StrictMath.min(Math.max(0, x), image.getWidth() - armyImage.getWidth(null));
-                y = StrictMath.min(Math.max(0, y), image.getHeight() - armyImage.getHeight(null));
-                image.getGraphics().drawImage(armyImage, x, y, null);
-            }
-        }
+        map.getMexes().forEach(mex -> {
+            int x = (int) (mex.getPosition().x / map.getSize() * 256 - massImage.getWidth(null) / 2);
+            int y = (int) (mex.getPosition().z / map.getSize() * 256 - massImage.getHeight(null) / 2);
+            x = StrictMath.min(Math.max(0, x), image.getWidth() - massImage.getWidth(null));
+            y = StrictMath.min(Math.max(0, y), image.getHeight() - massImage.getHeight(null));
+            image.getGraphics().drawImage(massImage, x, y, null);
+        });
+        map.getHydros().forEach(hydro -> {
+            int x = (int) (hydro.getPosition().x / map.getSize() * 256 - hydroImage.getWidth(null) / 2);
+            int y = (int) (hydro.getPosition().z / map.getSize() * 256 - hydroImage.getHeight(null) / 2);
+            x = StrictMath.min(Math.max(0, x), image.getWidth() - hydroImage.getWidth(null));
+            y = StrictMath.min(Math.max(0, y), image.getHeight() - hydroImage.getHeight(null));
+            image.getGraphics().drawImage(hydroImage, x, y, null);
+        });
+        map.getSpawns().forEach(spawn -> {
+            int x = (int) (spawn.getPosition().x / map.getSize() * 256 - armyImage.getWidth(null) / 2);
+            int y = (int) (spawn.getPosition().z / map.getSize() * 256 - armyImage.getHeight(null) / 2);
+            x = StrictMath.min(Math.max(0, x), image.getWidth() - armyImage.getWidth(null));
+            y = StrictMath.min(Math.max(0, y), image.getHeight() - armyImage.getHeight(null));
+            image.getGraphics().drawImage(armyImage, x, y, null);
+        });
         return image;
     }
 

@@ -28,15 +28,11 @@ public strictfp class HydroGenerator {
         spawnable.limitToSymmetryRegion();
         spawnable.fillCenter(64, false);
 
-        for (int i = 0; i < map.getMexCount(); i++) {
-            spawnable.fillCircle(map.getMex(i).getPosition(), 10, false);
-        }
+        map.getMexes().forEach(mex -> spawnable.fillCircle(mex.getPosition(), 10, false));
 
         generateBaseHydros(spawnable);
 
-        for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
-            spawnable.fillCircle(map.getSpawn(i).getPosition(), 30f, false);
-        }
+        map.getSpawns().forEach(spawn -> spawnable.fillCircle(spawn.getPosition(), 30f, false));
 
         int numHydrosLeft = (map.getHydroCountInit() - map.getHydroCount()) / numSymPoints;
 
@@ -45,19 +41,14 @@ public strictfp class HydroGenerator {
 
     public void generateBaseHydros(BinaryMask spawnable) {
         boolean spawnHydro = random.nextBoolean();
-        int numSymPoints = spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
         if (spawnHydro) {
-            for (int i = 0; i < map.getSpawnCount(); i += numSymPoints) {
+            map.getSpawns().forEach(spawn -> {
                 BinaryMask baseHydro = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-                baseHydro.fillCircle(map.getSpawn(i).getPosition(), 30f, true).fillCircle(map.getSpawn(i).getPosition(), 10f, false).intersect(spawnable);
-                for (int j = 0; j < map.getSpawnCount(); j += numSymPoints) {
-                    baseHydro.fillCircle(map.getSpawn(j).getPosition(), 16, false);
-                }
-                for (Hydro hydro : map.getHydros()) {
-                    baseHydro.fillCircle(hydro.getPosition(), 16, false);
-                }
+                baseHydro.fillCircle(spawn.getPosition(), 30f, true).fillCircle(spawn.getPosition(), 10f, false).intersect(spawnable);
+                map.getSpawns().forEach(otherSpawn -> baseHydro.fillCircle(otherSpawn.getPosition(), 16, false));
+                map.getHydros().forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
                 generateIndividualHydros(baseHydro, 1, hydroSpacing);
-            }
+            });
         }
     }
 
@@ -74,8 +65,6 @@ public strictfp class HydroGenerator {
     }
 
     public void setMarkerHeights() {
-        for (Hydro hydro : map.getHydros()) {
-            hydro.setPosition(placeOnHeightmap(map, hydro.getPosition()));
-        }
+        map.getHydros().forEach(hydro -> hydro.setPosition(placeOnHeightmap(map, hydro.getPosition())));
     }
 }

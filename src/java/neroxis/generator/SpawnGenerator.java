@@ -135,8 +135,6 @@ public strictfp class SpawnGenerator {
     }
 
     public void setMarkerHeights() {
-        for (Spawn spawn : map.getSpawns()) {
-            spawn.setPosition(placeOnHeightmap(map, spawn.getPosition()));
-        }
+        map.getSpawns().forEach(spawn -> spawn.setPosition(placeOnHeightmap(map, spawn.getPosition())));
     }
 }
