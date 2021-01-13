@@ -43,7 +43,8 @@ public strictfp class MapTransformer {
     private int shiftZ;
     private boolean shiftXSet = false;
     private boolean shiftZSet = false;
-    private float heightmapMultiplier = 1f;
+    private float heightmapMultiplier;
+    private boolean heightmapMultiplierSet = false;
 
     public static void main(String[] args) throws IOException {
 
@@ -145,6 +146,7 @@ public strictfp class MapTransformer {
 
         if (arguments.containsKey("multiply-height")) {
             heightmapMultiplier = Float.parseFloat(arguments.get("multiply-height"));
+            heightmapMultiplierSet = true;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -341,11 +343,17 @@ public strictfp class MapTransformer {
                 mapSize = oldMapSize;
             }
         }
+        if (!resizeSet) {
+            resize = oldMapSize;
+        }
         if (!shiftXSet) {
             shiftX = mapSize / 2;
         }
         if (!shiftZSet) {
             shiftZ = mapSize / 2;
+        }
+        if (!heightmapMultiplierSet) {
+            heightmapMultiplier = (float) resize / (float) oldMapSize;
         }
         if (mapSize != oldMapSize || resize != oldMapSize) {
             map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ), heightmapMultiplier);
