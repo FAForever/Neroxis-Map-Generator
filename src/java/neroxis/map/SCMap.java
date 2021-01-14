@@ -60,7 +60,7 @@ public strictfp class SCMap {
     private final ArrayList<AIMarker> expansionAIMarkers;
     private final ArrayList<AIMarker> largeExpansionAIMarkers;
     private final ArrayList<AIMarker> navalAreaAIMarkers;
-    private final ArrayList<AIMarker> NavyRallyMarkers;
+    private final ArrayList<AIMarker> navyRallyMarkers;
     private final ArrayList<CubeMap> cubeMaps;
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
@@ -106,7 +106,7 @@ public strictfp class SCMap {
         expansionAIMarkers = new ArrayList<>();
         largeExpansionAIMarkers = new ArrayList<>();
         navalAreaAIMarkers = new ArrayList<>();
-        NavyRallyMarkers = new ArrayList<>();
+        navyRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
         cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
@@ -347,15 +347,15 @@ public strictfp class SCMap {
     }
 
     public int getNavyRallyMarkerCount() {
-        return NavyRallyMarkers.size();
+        return navyRallyMarkers.size();
     }
 
     public AIMarker getNavyRallyMarker(int i) {
-        return NavyRallyMarkers.get(i);
+        return navyRallyMarkers.get(i);
     }
 
     public void addNavyRallyMarker(AIMarker aiMarker) {
-        NavyRallyMarkers.add(aiMarker);
+        navyRallyMarkers.add(aiMarker);
     }
 
     public int getWaveGeneratorCount() {
@@ -462,21 +462,21 @@ public strictfp class SCMap {
         int shiftZ = (int) locToPutCenterOfCurrentMapContent.y - resizeCurrentMapContentTo / 2;
         Vector2f shiftXAndZ = new Vector2f(shiftX, shiftZ);
 
-        repositionEachItemInAnArrayList(heightmapBase, getSpawns(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getAirAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getNavyAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getLandAIMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getNavyRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getBlankMarkers(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getHydros(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getMexes(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getProps(), contentScaler, shiftXAndZ);
-        repositionEachItemInAnArrayList(heightmapBase, getDecals(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getSpawns(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getAirAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getNavyAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getLandAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getNavyRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getBlankMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getHydros(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getMexes(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getProps(), contentScaler, shiftXAndZ);
+        repositionItems(heightmapBase, getDecals(), contentScaler, shiftXAndZ);
 
         for (int i = 0; i < getDecalCount(); i++) {
             Vector3f scale = getDecal(i).getScale();
@@ -488,12 +488,12 @@ public strictfp class SCMap {
             Army army = getArmy(i);
             for (int a = 0; a < army.getGroupCount(); a++) {
                 Group group = army.getGroup(a);
-                repositionEachItemInAnArrayList(heightmapBase, group.getUnits(), contentScaler, shiftXAndZ);
+                repositionItems(heightmapBase, group.getUnits(), contentScaler, shiftXAndZ);
             }
         }
     }
 
-    public void repositionEachItemInAnArrayList(FloatMask heightmapBase, ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
+    public void repositionItems(FloatMask heightmapBase, ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
         for (PositionedObject positionedObject : arrayListOfPositionedObjects) {
             float x = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().x + shiftXAndZ.x) + 0.5) - 0.5);
             float z = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().z + shiftXAndZ.y) + 0.5) - 0.5);
