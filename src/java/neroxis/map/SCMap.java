@@ -476,16 +476,9 @@ public strictfp class SCMap {
         repositionEachItemInAnArrayList(heightmapBase, getHydros(), contentScaler, shiftXAndZ);
         repositionEachItemInAnArrayList(heightmapBase, getMexes(), contentScaler, shiftXAndZ);
         repositionEachItemInAnArrayList(heightmapBase, getProps(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getDecals(), contentScaler, shiftXAndZ);
 
         for (int i = 0; i < getDecalCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getDecal(i).setPosition(new Vector3f(x, y, z));
             Vector3f scale = getDecal(i).getScale();
             getDecal(i).setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
             getDecal(i).setCutOffLOD(getDecal(i).getCutOffLOD() * contentScaler);
