@@ -415,10 +415,10 @@ public strictfp class SCMap {
     public void setTextureMasksLowScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
-                int val0 = mask0.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.getValueAt(x, y)) * 127 + 128) : 0;
-                int val1 = mask1.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.getValueAt(x, y)) * 127 + 128) : 0;
-                int val2 = mask2.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.getValueAt(x, y)) * 127 + 128) : 0;
-                int val3 = mask3.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.getValueAt(x, y)) * 127 + 128) : 0;
+                int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
+                int val1 = convertToRawTextureValue(mask1.getValueAt(x, y));
+                int val2 = convertToRawTextureValue(mask2.getValueAt(x, y));
+                int val3 = convertToRawTextureValue(mask3.getValueAt(x, y));
                 textureMasksLow.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
@@ -427,10 +427,10 @@ public strictfp class SCMap {
     public void setTextureMasksHighScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
-                int val0 = mask0.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask0.getValueAt(x, y)) * 127 + 128) : 0;
-                int val1 = mask1.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask1.getValueAt(x, y)) * 127 + 128) : 0;
-                int val2 = mask2.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask2.getValueAt(x, y)) * 127 + 128) : 0;
-                int val3 = mask3.getValueAt(x, y) > 0f ? StrictMath.round(StrictMath.min(1f, mask3.getValueAt(x, y)) * 127 + 128) : 0;
+                int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
+                int val1 = convertToRawTextureValue(mask1.getValueAt(x, y));
+                int val2 = convertToRawTextureValue(mask2.getValueAt(x, y));
+                int val3 = convertToRawTextureValue(mask3.getValueAt(x, y));
                 textureMasksHigh.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
@@ -469,10 +469,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksLow.getHeight(); x++) {
                 int[] valsLow = new int[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                mask0.setValueAt(x, y, valsLow[0] > 0 ? (valsLow[0] - 128) / 127f : 0f);
-                mask1.setValueAt(x, y, valsLow[1] > 0 ? (valsLow[1] - 128) / 127f : 0f);
-                mask2.setValueAt(x, y, valsLow[2] > 0 ? (valsLow[2] - 128) / 127f : 0f);
-                mask3.setValueAt(x, y, valsLow[3] > 0 ? (valsLow[3] - 128) / 127f : 0f);
+                mask0.setValueAt(x, y, convertToScaledTextureValue(valsLow[0]));
+                mask1.setValueAt(x, y, convertToScaledTextureValue(valsLow[1]));
+                mask2.setValueAt(x, y, convertToScaledTextureValue(valsLow[2]));
+                mask3.setValueAt(x, y, convertToScaledTextureValue(valsLow[3]));
             }
         }
         FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
@@ -483,10 +483,10 @@ public strictfp class SCMap {
             for (int x = 0; x < textureMasksHigh.getHeight(); x++) {
                 int[] valsHigh = new int[4];
                 textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
-                mask4.setValueAt(x, y, valsHigh[0] > 0 ? (valsHigh[0] - 128) / 127f : 0f);
-                mask5.setValueAt(x, y, valsHigh[1] > 0 ? (valsHigh[1] - 128) / 127f : 0f);
-                mask6.setValueAt(x, y, valsHigh[2] > 0 ? (valsHigh[2] - 128) / 127f : 0f);
-                mask7.setValueAt(x, y, valsHigh[3] > 0 ? (valsHigh[3] - 128) / 127f : 0f);
+                mask4.setValueAt(x, y, convertToScaledTextureValue(valsHigh[0]));
+                mask5.setValueAt(x, y, convertToScaledTextureValue(valsHigh[1]));
+                mask6.setValueAt(x, y, convertToScaledTextureValue(valsHigh[2]));
+                mask7.setValueAt(x, y, convertToScaledTextureValue(valsHigh[3]));
             }
         }
         return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
@@ -522,6 +522,14 @@ public strictfp class SCMap {
             }
         }
         return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
+    }
+
+    private float convertToScaledTextureValue(float value) {
+        return value > 0 ? (value - 128) / 127f : 0f;
+    }
+
+    private int convertToRawTextureValue(float value) {
+        return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
     }
 
     @SneakyThrows
