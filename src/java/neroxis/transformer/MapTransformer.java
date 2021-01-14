@@ -302,9 +302,9 @@ public strictfp class MapTransformer {
             aiMarkers = new ArrayList<>(map.getNavalAreaAIMarkers());
             map.getNavalAreaAIMarkers().clear();
             map.getNavalAreaAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
-            aiMarkers = new ArrayList<>(map.getNavalRallyMarkers());
-            map.getNavalRallyMarkers().clear();
-            map.getNavalRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getNavyRallyMarkers());
+            map.getNavyRallyMarkers().clear();
+            map.getNavyRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
         }
 
         if (transformResources) {

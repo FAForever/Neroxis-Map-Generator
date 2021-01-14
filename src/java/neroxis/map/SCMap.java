@@ -5,6 +5,9 @@ import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
 import neroxis.util.Vector2f;
 
+import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
+import static neroxis.util.ImageUtils.scaleImage;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,7 +60,7 @@ public strictfp class SCMap {
     private final ArrayList<AIMarker> expansionAIMarkers;
     private final ArrayList<AIMarker> largeExpansionAIMarkers;
     private final ArrayList<AIMarker> navalAreaAIMarkers;
-    private final ArrayList<AIMarker> navalRallyMarkers;
+    private final ArrayList<AIMarker> NavyRallyMarkers;
     private final ArrayList<CubeMap> cubeMaps;
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
@@ -103,7 +106,7 @@ public strictfp class SCMap {
         expansionAIMarkers = new ArrayList<>();
         largeExpansionAIMarkers = new ArrayList<>();
         navalAreaAIMarkers = new ArrayList<>();
-        navalRallyMarkers = new ArrayList<>();
+        NavyRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
         cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
@@ -344,15 +347,15 @@ public strictfp class SCMap {
     }
 
     public int getNavyRallyMarkerCount() {
-        return navalRallyMarkers.size();
+        return NavyRallyMarkers.size();
     }
 
     public AIMarker getNavyRallyMarker(int i) {
-        return navalRallyMarkers.get(i);
+        return NavyRallyMarkers.get(i);
     }
 
     public void addNavyRallyMarker(AIMarker aiMarker) {
-        navalRallyMarkers.add(aiMarker);
+        NavyRallyMarkers.add(aiMarker);
     }
 
     public int getWaveGeneratorCount() {
@@ -457,127 +460,23 @@ public strictfp class SCMap {
         heightmapBase.addWithOffset(smallHeightmapBase, locToPutCenterOfCurrentMapContent, true);
         int shiftX = (int) locToPutCenterOfCurrentMapContent.x - resizeCurrentMapContentTo / 2;
         int shiftZ = (int) locToPutCenterOfCurrentMapContent.y - resizeCurrentMapContentTo / 2;
+        Vector2f shiftXAndZ = new Vector2f(shiftX, shiftZ);
 
-        for (int i = 0; i < getSpawnCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getSpawn(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getSpawn(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getSpawn(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getAirMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getAirMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getAirMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getAirMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getAmphibiousMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getAmphibiousMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getAmphibiousMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getAmphibiousMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getLandMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getLandMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getExpansionMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getExpansionMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getExpansionMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getExpansionMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getLargeExpansionMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getLargeExpansionMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getLargeExpansionMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getLargeExpansionMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getNavalAreaMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getNavalAreaMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getNavalAreaMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getNavalAreaMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getNavyMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getNavyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getNavyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getNavyMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getLandMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getLandMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getLandMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getNavyRallyMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getNavyRallyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getNavyRallyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getNavyRallyMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getRallyMarkerCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getRallyMarker(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getRallyMarker(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getRallyMarker(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getBlankCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getBlank(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getBlank(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getBlank(i).setPosition(new Vector3f(x, y, z));
-        }
+        repositionEachItemInAnArrayList(heightmapBase, getSpawns(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getAirAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getNavyAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getLandAIMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getNavyRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getBlankMarkers(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getHydros(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getMexes(), contentScaler, shiftXAndZ);
+        repositionEachItemInAnArrayList(heightmapBase, getProps(), contentScaler, shiftXAndZ);
+
         for (int i = 0; i < getDecalCount(); i++) {
             float x = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().x + shiftX) + 0.5) - 0.5);
             float z = (float) (StrictMath.round((contentScaler * getDecal(i).getPosition().z + shiftZ) + 0.5) - 0.5);
@@ -591,51 +490,27 @@ public strictfp class SCMap {
             getDecal(i).setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
             getDecal(i).setCutOffLOD(getDecal(i).getCutOffLOD() * contentScaler);
         }
-        for (int i = 0; i < getHydroCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getHydro(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getHydro(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getHydro(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getMexCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getMex(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getMex(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getMex(i).setPosition(new Vector3f(x, y, z));
-        }
-        for (int i = 0; i < getPropCount(); i++) {
-            float x = (float) (StrictMath.round((contentScaler * getProp(i).getPosition().x + shiftX) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((contentScaler * getProp(i).getPosition().z + shiftZ) + 0.5) - 0.5);
-            float y;
-            if(heightmapBase.inBounds((int) x,  (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0; }
-            getProp(i).setPosition(new Vector3f(x, y, z));
-        }
+
         for (int i = 0; i < getArmyCount(); i++) {
             Army army = getArmy(i);
             for (int a = 0; a < army.getGroupCount(); a++) {
                 Group group = army.getGroup(a);
-                for (int b = 0; b < group.getUnitCount(); b++) {
-                    float x = (float) (StrictMath.round((contentScaler * group.getUnit(b).getPosition().x + shiftX) + 0.5) - 0.5);
-                    float z = (float) (StrictMath.round((contentScaler * group.getUnit(b).getPosition().z + shiftZ) + 0.5) - 0.5);
-                    float y;
-                    if(heightmapBase.inBounds((int) x,  (int) z)) {
-                        y = heightmapBase.getValueAt((int) x, (int) z);
-                    } else {
-                        y = 0; }
-                    group.getUnit(b).setPosition(new Vector3f(x, y, z));
-                }
+                repositionEachItemInAnArrayList(heightmapBase, group.getUnits(), contentScaler, shiftXAndZ);
             }
+        }
+    }
+
+    public void repositionEachItemInAnArrayList(FloatMask heightmapBase, ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
+        for (PositionedObject positionedObject : arrayListOfPositionedObjects) {
+            float x = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().x + shiftXAndZ.x) + 0.5) - 0.5);
+            float z = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().z + shiftXAndZ.y) + 0.5) - 0.5);
+            float y;
+            if (heightmapBase.inBounds((int) x, (int) z)) {
+                y = heightmapBase.getValueAt((int) x, (int) z);
+            } else {
+                y = 0;
+            }
+            positionedObject.setPosition(new Vector3f(x, y, z));
         }
     }
 
