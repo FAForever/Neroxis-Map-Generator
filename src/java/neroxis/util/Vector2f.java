@@ -81,6 +81,12 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f multiply(float multiplier) {
+        this.x *= multiplier;
+        this.y *= multiplier;
+        return this;
+    }
+
     public Vector2f clampMin(float x, float y) {
         this.x = StrictMath.max(x, this.x);
         this.y = StrictMath.max(y, this.y);

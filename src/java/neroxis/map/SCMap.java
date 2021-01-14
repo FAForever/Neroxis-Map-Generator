@@ -16,6 +16,7 @@ import java.util.Random;
 
 import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
 import static neroxis.util.ImageUtils.scaleImage;
+import static neroxis.util.Placement.placeOnHeightmap;
 
 @Data
 public strictfp class SCMap {
@@ -464,21 +465,21 @@ public strictfp class SCMap {
         int shiftZ = (int) locToPutCenterOfCurrentMapContent.y - resizeCurrentMapContentTo / 2;
         Vector2f shiftXAndZ = new Vector2f(shiftX, shiftZ);
 
-        repositionItems(heightmapBase, getSpawns(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getAirAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getNavyAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getLandAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getNavyRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getBlankMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getHydros(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getMexes(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getProps(), contentScaler, shiftXAndZ);
-        repositionItems(heightmapBase, getDecals(), contentScaler, shiftXAndZ);
+        repositionItems(getSpawns(), contentScaler, shiftXAndZ);
+        repositionItems(getAirAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getNavyAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getLandAIMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getNavyRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getRallyMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getBlankMarkers(), contentScaler, shiftXAndZ);
+        repositionItems(getHydros(), contentScaler, shiftXAndZ);
+        repositionItems(getMexes(), contentScaler, shiftXAndZ);
+        repositionItems(getProps(), contentScaler, shiftXAndZ);
+        repositionItems(getDecals(), contentScaler, shiftXAndZ);
 
         for (int i = 0; i < getDecalCount(); i++) {
             Vector3f scale = getDecal(i).getScale();
@@ -490,22 +491,16 @@ public strictfp class SCMap {
             Army army = getArmy(i);
             for (int a = 0; a < army.getGroupCount(); a++) {
                 Group group = army.getGroup(a);
-                repositionItems(heightmapBase, group.getUnits(), contentScaler, shiftXAndZ);
+                repositionItems(group.getUnits(), contentScaler, shiftXAndZ);
             }
         }
     }
 
-    public void repositionItems(FloatMask heightmapBase, ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
+    public void repositionItems(ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
         for (PositionedObject positionedObject : arrayListOfPositionedObjects) {
-            float x = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().x + shiftXAndZ.x) + 0.5) - 0.5);
-            float z = (float) (StrictMath.round((distanceScaler * positionedObject.getPosition().z + shiftXAndZ.y) + 0.5) - 0.5);
-            float y;
-            if (heightmapBase.inBounds((int) x, (int) z)) {
-                y = heightmapBase.getValueAt((int) x, (int) z);
-            } else {
-                y = 0;
-            }
-            positionedObject.setPosition(new Vector3f(x, y, z));
+            Vector2f newPosition = new Vector2f(positionedObject.getPosition().x, positionedObject.getPosition().z);
+            newPosition.multiply(distanceScaler).add(shiftXAndZ).roundToNearestHalfPoint();
+            positionedObject.setPosition(placeOnHeightmap(this, newPosition));
         }
     }
 

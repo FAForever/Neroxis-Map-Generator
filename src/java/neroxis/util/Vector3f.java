@@ -22,6 +22,24 @@ public strictfp class Vector3f {
         this.z = z;
     }
 
+    public Vector3f add(float value) {
+        this.x += value;
+        this.y += value;
+        this.z += value;
+        return this;
+    }
+
+    public Vector3f subtract(float value) {
+        return  add(value * -1);
+    }
+
+    public Vector3f multiply(float multiplier) {
+        this.x *= multiplier;
+        this.y *= multiplier;
+        this.z *= multiplier;
+        return this;
+    }
+
     public float getXZDistance(Vector2f location) {
         return getXZDistance(new Vector3f(location));
     }
