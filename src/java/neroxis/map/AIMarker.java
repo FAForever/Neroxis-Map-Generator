@@ -1,16 +1,16 @@
 package neroxis.map;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public strictfp class AIMarker {
-    private String id;
-    private Vector3f position;
+public strictfp class AIMarker extends Marker {
     private LinkedHashSet<String> neighbors;
 
     public AIMarker(String id, Vector2f position, LinkedHashSet<String> neighbors) {
@@ -18,8 +18,7 @@ public strictfp class AIMarker {
     }
 
     public AIMarker(String id, Vector3f position, LinkedHashSet<String> neighbors) {
-        this.id = id;
-        this.position = position;
+        super(id, position);
         this.neighbors = neighbors;
     }
 

@@ -1,13 +1,11 @@
 package neroxis.evaluator;
 
-import neroxis.importer.SCMapImporter;
-import neroxis.importer.SaveImporter;
+import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
 import neroxis.util.FileUtils;
 import neroxis.util.Vector3f;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -144,21 +142,10 @@ public strictfp class MapEvaluator {
 
     public void importMap() {
         try {
-            File dir = inMapPath.toFile();
-
-            File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-            if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in map folder");
-                return;
-            }
-            File scmapFile = mapFiles[0];
-            String mapFolder = inMapPath.getFileName().toString();
-            String mapName = scmapFile.getName().replace(".scmap", "");
-            map = SCMapImporter.loadSCMAP(inMapPath);
-            SaveImporter.importSave(inMapPath, map);
+            map = MapImporter.importMap(inMapPath);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the map.");
+            System.err.println("Error while importing the map.");
         }
     }
 
@@ -215,7 +202,7 @@ public strictfp class MapEvaluator {
 
     public void evaluateMexes() {
         long sTime = System.currentTimeMillis();
-        mexScore = getLocationListScore(map.getMexes().stream().map(Mex::getPosition).collect(Collectors.toList()));
+        mexScore = getLocationListScore(map.getMexes().stream().map(Marker::getPosition).collect(Collectors.toList()));
         System.out.println(String.format("Mex Score: %.2f", mexScore));
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateMexes\n",
@@ -225,7 +212,7 @@ public strictfp class MapEvaluator {
 
     public void evaluateHydros() {
         long sTime = System.currentTimeMillis();
-        hydroScore = getLocationListScore(map.getHydros().stream().map(Hydro::getPosition).collect(Collectors.toList()));
+        hydroScore = getLocationListScore(map.getHydros().stream().map(Marker::getPosition).collect(Collectors.toList()));
         System.out.println(String.format("Hydro Score: %.2f", hydroScore));
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateHydros\n",

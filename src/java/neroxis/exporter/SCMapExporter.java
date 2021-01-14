@@ -22,8 +22,8 @@ public strictfp class SCMapExporter {
 
     private static DataOutputStream out;
 
-    public static void exportSCMAP(Path folderPath, String mapName, SCMap map) throws IOException {
-        file = folderPath.resolve(mapName + ".scmap").toFile();
+    public static void exportSCMAP(Path folderPath, SCMap map) throws IOException {
+        file = folderPath.resolve(map.getFilePrefix() + ".scmap").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 
@@ -197,9 +197,9 @@ public strictfp class SCMapExporter {
         map.writeToFile(folderPath.resolve(mapname).resolve("debug").resolve(mapname + ".txt"));
     }
 
-    public static void exportPreview(Path folderPath, String mapname, SCMap map) throws IOException {
+    public static void exportPreview(Path folderPath, SCMap map) throws IOException {
         final String fileFormat = "png";
-        File previewFile = folderPath.resolve(mapname + "_preview." + fileFormat).toFile();
+        File previewFile = folderPath.resolve(map.getFilePrefix() + "_preview." + fileFormat).toFile();
         RenderedImage renderedImage = PreviewGenerator.addMarkers(map.getPreview(), map);
         try {
             ImageIO.write(renderedImage, fileFormat, previewFile);

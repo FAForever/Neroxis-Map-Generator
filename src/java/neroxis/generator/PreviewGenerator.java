@@ -19,8 +19,9 @@ public strictfp class PreviewGenerator {
     private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
 
-    public static void generate(BufferedImage image, SCMap map) {
-        Graphics2D graphics = image.createGraphics();
+    public static void generatePreview(SCMap map) {
+        BufferedImage previewImage = map.getPreview();
+        Graphics2D graphics = previewImage.createGraphics();
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
@@ -31,13 +32,13 @@ public strictfp class PreviewGenerator {
                 BufferedImage shadedLayer = getShadedImage(layer, map, i, true);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
                 graphics.setPaint(layerPaint);
-                graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
+                graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
             }
         }
         BufferedImage waterLayer = getWaterLayer(map);
         TexturePaint layerPaint = new TexturePaint(waterLayer, new Rectangle2D.Float(0, 0, 256, 256));
         graphics.setPaint(layerPaint);
-        graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
+        graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
     }
 
     public static BufferedImage addMarkers(BufferedImage image, SCMap map) throws IOException {
@@ -69,7 +70,7 @@ public strictfp class PreviewGenerator {
         return image;
     }
 
-    static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex, boolean useAlpha) {
+    private static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex, boolean useAlpha) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         BufferedImage heightMap = map.getHeightmap();
         BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
@@ -145,7 +146,7 @@ public strictfp class PreviewGenerator {
         return image;
     }
 
-    static BufferedImage getWaterLayer(SCMap map) {
+    private static BufferedImage getWaterLayer(SCMap map) {
         Color shallowColor = new Color(134, 233, 233);
         Color abyssColor = new Color(35, 49, 162);
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();

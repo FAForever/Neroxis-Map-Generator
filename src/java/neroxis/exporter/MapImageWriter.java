@@ -1,6 +1,6 @@
 package neroxis.exporter;
 
-import neroxis.importer.SCMapImporter;
+import neroxis.importer.MapImporter;
 import neroxis.importer.SaveImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
@@ -120,7 +120,7 @@ public strictfp class MapImageWriter {
                 System.out.println("No scmap file in map folder");
                 return;
             }
-            map = SCMapImporter.loadSCMAP(inMapPath);
+            map = MapImporter.importMap(inMapPath);
             SaveImporter.importSave(inMapPath, map);
         } catch (IOException e) {
             e.printStackTrace();

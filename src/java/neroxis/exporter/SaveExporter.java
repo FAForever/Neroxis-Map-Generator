@@ -12,8 +12,8 @@ public strictfp class SaveExporter {
     public static File file;
     private static DataOutputStream out;
 
-    public static void exportSave(Path folderPath, String mapName, SCMap map) throws IOException {
-        file = folderPath.resolve(mapName + "_save.lua").toFile();
+    public static void exportSave(Path folderPath, SCMap map) throws IOException {
+        file = folderPath.resolve(map.getFilePrefix() + "_save.lua").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("Scenario = {\n");
@@ -34,7 +34,7 @@ public strictfp class SaveExporter {
             out.writeBytes("        },\n");
         }
         if (!map.isUnexplored()) {
-            for (Mex mex : map.getMexes()) {
+            for (Marker mex : map.getMexes()) {
                 out.writeBytes(String.format("        ['%s'] = {\n", mex.getId()));
                 out.writeBytes("          ['size'] = FLOAT( 1.000000 ),\n");
                 out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
@@ -47,7 +47,7 @@ public strictfp class SaveExporter {
                 out.writeBytes(String.format("          ['position'] = VECTOR3( %f, %f, %f),\n", v.x, v.y, v.z));
                 out.writeBytes("        },\n");
             }
-            for (Hydro hydro : map.getHydros()) {
+            for (Marker hydro : map.getHydros()) {
                 out.writeBytes(String.format("        ['%s'] = {\n", hydro.getId()));
                 out.writeBytes("          ['size'] = FLOAT( 3.00 ),\n");
                 out.writeBytes("          ['resource'] = BOOLEAN( true ),\n");
@@ -61,7 +61,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("        },\n");
             }
         }
-        for (BlankMarker blankMarker : map.getBlankMarkers()) {
+        for (Marker blankMarker : map.getBlankMarkers()) {
             out.writeBytes("        ['" + blankMarker.getId() + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
             Vector3f v = blankMarker.getPosition();

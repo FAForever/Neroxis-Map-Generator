@@ -617,12 +617,14 @@ public strictfp class MapGenerator {
     public void save() {
         try {
             map.setName(mapName);
+            map.setFolderName(mapName);
+            map.setFilePrefix(mapName);
             Path folderPath = Paths.get(pathToFolder);
 
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
 
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(folderPath.resolve(mapName), mapName, map, tournamentStyle);
+            MapExporter.exportMap(folderPath, map, !tournamentStyle);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             startTime = System.currentTimeMillis();
@@ -837,7 +839,7 @@ public strictfp class MapGenerator {
             map.setMiniMapLandEndColor(1);
         }
         if (!blind) {
-            PreviewGenerator.generate(map.getPreview(), map);
+            PreviewGenerator.generatePreview(map);
         } else {
             BufferedImage blindPreview = readImage(BLANK_PREVIEW);
             map.getPreview().setData(blindPreview.getData());
@@ -857,10 +859,11 @@ public strictfp class MapGenerator {
                     System.currentTimeMillis() - sTime,
                     Util.getStackTraceLineInClass(MapGenerator.class));
         }
+        ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
-        map.addBlank(new BlankMarker(mapName, new Vector2f(0, 0)));
+        map.addBlank(new Marker(mapName, new Vector2f(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
 
         if (!generationComplete) {

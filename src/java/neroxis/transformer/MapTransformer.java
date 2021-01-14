@@ -1,13 +1,10 @@
 package neroxis.transformer;
 
 import neroxis.exporter.MapExporter;
-import neroxis.importer.SCMapImporter;
-import neroxis.importer.SaveImporter;
-import neroxis.importer.ScenarioImporter;
+import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -174,31 +171,18 @@ public strictfp class MapTransformer {
 
     public void importMap() {
         try {
-            File dir = inMapPath.toFile();
-
-            File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-            if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in map folder");
-                return;
-            }
-            File scmapFile = mapFiles[0];
-            mapFolder = inMapPath.getFileName().toString();
-            mapName = scmapFile.getName().replace(".scmap", "");
-            map = SCMapImporter.loadSCMAP(inMapPath);
-            SaveImporter.importSave(inMapPath, map);
-            ScenarioImporter.importScenario(inMapPath, map);
+            map = MapImporter.importMap(inMapPath);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the map.");
+            System.err.println("Error while importing the map.");
         }
     }
 
     public void exportMap() {
         try {
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(outFolderPath.resolve(mapFolder), mapName, map, true);
+            MapExporter.exportMap(outFolderPath, map, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
-
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while saving the map.");
@@ -245,9 +229,14 @@ public strictfp class MapTransformer {
                 texture8.applySymmetry(angle);
             }
 
-            ArrayList<BlankMarker> blankMarkers = new ArrayList<>(map.getBlankMarkers());
+            map.setPreviewImage(previewMask);
+            map.setHeightImage(heightmapBase);
+            map.setTextureMasksLowRaw(texture1, texture2, texture3, texture4);
+            map.setTextureMasksHighRaw(texture5, texture6, texture7, texture8);
+
+            ArrayList<Marker> blankMarkers = new ArrayList<>(map.getBlankMarkers());
             map.getBlankMarkers().clear();
-            map.getBlankMarkers().addAll(getTransformedBlankMarkers(blankMarkers));
+            map.getBlankMarkers().addAll(getTransformedMarkers(blankMarkers));
             ArrayList<AIMarker> aiMarkers = new ArrayList<>(map.getAirAIMarkers());
             map.getAirAIMarkers().clear();
             map.getAirAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
@@ -275,22 +264,18 @@ public strictfp class MapTransformer {
             aiMarkers = new ArrayList<>(map.getNavalRallyMarkers());
             map.getNavalRallyMarkers().clear();
             map.getNavalRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
-
-            map.setPreviewImage(previewMask);
-            map.setHeightImage(heightmapBase);
-            map.setTextureMasksLowRaw(texture1, texture2, texture3, texture4);
-            map.setTextureMasksHighRaw(texture5, texture6, texture7, texture8);
         }
+
         if (transformResources) {
-            ArrayList<Spawn> spawns = new ArrayList<>(map.getSpawns());
-            ArrayList<Mex> mexes = new ArrayList<>(map.getMexes());
-            ArrayList<Hydro> hydros = new ArrayList<>(map.getHydros());
+            List<Spawn> spawns = new ArrayList<>(map.getSpawns());
+            List<Marker> mexes = new ArrayList<>(map.getMexes());
+            List<Marker> hydros = new ArrayList<>(map.getHydros());
             map.getSpawns().clear();
             map.getSpawns().addAll(getTransformedSpawns(spawns));
             map.getMexes().clear();
-            map.getMexes().addAll(getTransformedMexes(mexes));
+            map.getMexes().addAll(getTransformedMarkers(mexes));
             map.getHydros().clear();
-            map.getHydros().addAll(getTransformedHydros(hydros));
+            map.getHydros().addAll(getTransformedMarkers(hydros));
         }
 
         if (transformUnits) {
@@ -310,10 +295,10 @@ public strictfp class MapTransformer {
         }
     }
 
-    public ArrayList<Spawn> getTransformedSpawns(ArrayList<Spawn> spawns) {
+    public List<Spawn> getTransformedSpawns(List<Spawn> spawns) {
         ArrayList<Spawn> transformedSpawns = new ArrayList<>();
         spawns.forEach(spawn -> {
-            if ((!useAngle && heightmapBase.inTeam(spawn.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(spawn.getPosition(), angle))) {
+            if (inSourceRegion(spawn.getPosition())) {
                 transformedSpawns.add(new Spawn("", Placement.placeOnHeightmap(map, spawn.getPosition()), spawn.getNoRushOffset()));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(spawn.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> {
@@ -339,41 +324,40 @@ public strictfp class MapTransformer {
                 spawn.setId("ARMY_" + transformedSpawns.indexOf(spawn));
             }
         });
+        transformedSpawns.sort(Comparator.comparing(Marker::getId));
         return transformedSpawns;
     }
 
-    public ArrayList<Mex> getTransformedMexes(ArrayList<Mex> mexes) {
-        ArrayList<Mex> transformedMexes = new ArrayList<>();
-        mexes.forEach(mex -> {
-            if ((!useAngle && heightmapBase.inTeam(mex.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(mex.getPosition(), angle))) {
-                transformedMexes.add(new Mex(mex.getId(), Placement.placeOnHeightmap(map, mex.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(mex.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> {
-                    transformedMexes.add(new Mex(mex.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
-                });
+    public List<Marker> getTransformedMarkers(Collection<Marker> markers) {
+        List<Marker> transformedMarkers = new ArrayList<>();
+        markers.forEach(marker -> {
+            if (inSourceRegion(marker.getPosition())) {
+                transformedMarkers.add(new Marker(marker.getId(), Placement.placeOnHeightmap(map, marker.getPosition())));
+                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(marker.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> transformedMarkers.add(new Marker(marker.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation()))));
             }
         });
-        return transformedMexes;
-    }
-
-    public ArrayList<Hydro> getTransformedHydros(ArrayList<Hydro> hydros) {
-        ArrayList<Hydro> transformedHydros = new ArrayList<>();
-        hydros.forEach(hydro -> {
-            if ((!useAngle && heightmapBase.inTeam(hydro.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(hydro.getPosition(), angle))) {
-                transformedHydros.add(new Hydro(hydro.getId(), Placement.placeOnHeightmap(map, hydro.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> {
-                    transformedHydros.add(new Hydro(hydro.getId() + " sym", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
+        transformedMarkers.forEach(marker -> {
+            if (markers.size() == transformedMarkers.size()) {
+                Marker[] closestMarker = {null};
+                float[] minDistance = {Float.POSITIVE_INFINITY};
+                markers.forEach(s -> {
+                    float distance = marker.getPosition().getXZDistance(s.getPosition());
+                    if (distance < minDistance[0]) {
+                        closestMarker[0] = s;
+                        minDistance[0] = distance;
+                    }
                 });
+                marker.setId(closestMarker[0].getId());
             }
         });
-        return transformedHydros;
+        return transformedMarkers;
     }
 
-    public ArrayList<AIMarker> getTransformedAIMarkers(ArrayList<AIMarker> aiMarkers) {
+    public List<AIMarker> getTransformedAIMarkers(List<AIMarker> aiMarkers) {
         ArrayList<AIMarker> transformedAImarkers = new ArrayList<>();
         aiMarkers.forEach(aiMarker -> {
-            if ((!useAngle && heightmapBase.inTeam(aiMarker.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(aiMarker.getPosition(), angle))) {
+            if (inSourceRegion(aiMarker.getPosition())) {
                 transformedAImarkers.add(new AIMarker(aiMarker.getId(), Placement.placeOnHeightmap(map, aiMarker.getPosition()), aiMarker.getNeighbors()));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> {
@@ -386,20 +370,6 @@ public strictfp class MapTransformer {
         return transformedAImarkers;
     }
 
-    public ArrayList<BlankMarker> getTransformedBlankMarkers(ArrayList<BlankMarker> blankMarkers) {
-        ArrayList<BlankMarker> transformedBlanks = new ArrayList<>();
-        blankMarkers.forEach(blank -> {
-            if ((!useAngle && heightmapBase.inTeam(blank.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(blank.getPosition(), angle))) {
-                transformedBlanks.add(new BlankMarker(blank.getId(), Placement.placeOnHeightmap(map, blank.getPosition())));
-                ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(blank.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> {
-                    transformedBlanks.add(new BlankMarker(blank.getId() + "s", Placement.placeOnHeightmap(map, symmetryPoint.getLocation())));
-                });
-            }
-        });
-        return transformedBlanks;
-    }
-
     public void transformArmies() {
         map.getArmies().forEach(this::transformArmy);
     }
@@ -409,15 +379,15 @@ public strictfp class MapTransformer {
     }
 
     public void transformGroup(Group group) {
-        ArrayList<Unit> units = new ArrayList<>(group.getUnits());
+        List<Unit> units = new ArrayList<>(group.getUnits());
         group.getUnits().clear();
         group.getUnits().addAll(getTransformedUnits(units));
     }
 
-    public ArrayList<Unit> getTransformedUnits(ArrayList<Unit> units) {
+    public List<Unit> getTransformedUnits(List<Unit> units) {
         ArrayList<Unit> transformedUnits = new ArrayList<>();
         units.forEach(unit -> {
-            if ((!useAngle && heightmapBase.inTeam(unit.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(unit.getPosition(), angle))) {
+            if (inSourceRegion(unit.getPosition())) {
                 transformedUnits.add(new Unit(unit.getId(), unit.getType(), Placement.placeOnHeightmap(map, unit.getPosition()), unit.getRotation()));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(unit.getRotation());
@@ -429,10 +399,10 @@ public strictfp class MapTransformer {
         return transformedUnits;
     }
 
-    public ArrayList<Prop> getTransformedProps(ArrayList<Prop> props) {
+    public List<Prop> getTransformedProps(List<Prop> props) {
         ArrayList<Prop> transformedProps = new ArrayList<>();
         props.forEach(prop -> {
-            if ((!useAngle && heightmapBase.inTeam(prop.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(prop.getPosition(), angle))) {
+            if (inSourceRegion(prop.getPosition())) {
                 transformedProps.add(new Prop(prop.getPath(), Placement.placeOnHeightmap(map, prop.getPosition()), prop.getRotation()));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(prop.getRotation());
@@ -444,10 +414,10 @@ public strictfp class MapTransformer {
         return transformedProps;
     }
 
-    public ArrayList<Decal> getTransformedDecals(ArrayList<Decal> decals) {
+    public List<Decal> getTransformedDecals(List<Decal> decals) {
         ArrayList<Decal> transformedDecals = new ArrayList<>();
         decals.forEach(decal -> {
-            if ((!useAngle && heightmapBase.inTeam(decal.getPosition(), reverseSide)) || (useAngle && heightmapBase.inHalf(decal.getPosition(), angle))) {
+            if (inSourceRegion(decal.getPosition())) {
                 transformedDecals.add(new Decal(decal.getPath(), Placement.placeOnHeightmap(map, decal.getPosition()), decal.getRotation(), decal.getScale(), decal.getCutOffLOD()));
                 ArrayList<SymmetryPoint> symmetryPoints = heightmapBase.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(decal.getRotation().y);
@@ -458,5 +428,9 @@ public strictfp class MapTransformer {
             }
         });
         return transformedDecals;
+    }
+
+    public boolean inSourceRegion(Vector3f position) {
+        return (!useAngle && heightmapBase.inTeam(position, reverseSide)) || (useAngle && heightmapBase.inHalf(position, angle));
     }
 }

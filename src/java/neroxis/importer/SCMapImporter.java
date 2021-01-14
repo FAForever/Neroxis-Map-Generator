@@ -23,7 +23,7 @@ public strictfp class SCMapImporter {
 
     private static DataInputStream in;
 
-    public static SCMap loadSCMAP(Path folderPath) throws IOException {
+    public static SCMap importSCMAP(Path folderPath) throws IOException {
         File dir = folderPath.toFile();
 
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
@@ -183,6 +183,7 @@ public strictfp class SCMapImporter {
         in.close();
 
         SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), mapWaterSettings, mapLightingSettings));
+        map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);
         map.setBackgroundPath(backgroundPath);

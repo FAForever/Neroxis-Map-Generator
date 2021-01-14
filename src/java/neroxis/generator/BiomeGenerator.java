@@ -1,7 +1,7 @@
 package neroxis.generator;
 
 import neroxis.exporter.BiomeExporter;
-import neroxis.importer.SCMapImporter;
+import neroxis.importer.MapImporter;
 import neroxis.map.SCMap;
 import neroxis.util.ArgumentParser;
 
@@ -31,17 +31,7 @@ public class BiomeGenerator {
         }
 
         System.out.println("Generating biome " + generator.biomeName + " from " + generator.mapPath);
-
-        File dir = generator.mapPath.toFile();
-
-        File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-        if (mapFiles == null || mapFiles.length == 0) {
-            System.out.println("No scmap file in map folder");
-            return;
-        }
-        File scmapFile = mapFiles[0];
-        SCMap map = SCMapImporter.loadSCMAP(generator.mapPath);
-
+        SCMap map = MapImporter.importMap(generator.mapPath);
         System.out.println("Saving biome to " + generator.folderPath + File.separator + generator.biomeName);
         BiomeExporter.exportBiome(generator.envPath, generator.folderPath, generator.biomeName, map.getBiome());
         System.out.println("Done");

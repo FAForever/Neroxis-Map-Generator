@@ -27,8 +27,11 @@ public strictfp class SCMap {
 
     private final ArrayList<Spawn> spawns;
     private String name = "";
+    private final ArrayList<Marker> mexes;
+    private final ArrayList<Marker> hydros;
     private final int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
+    private final ArrayList<Marker> blankMarkers;
     private String description = "";
     private String terrainShaderPath = "TTerrainXP";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
@@ -39,13 +42,13 @@ public strictfp class SCMap {
     private boolean generatePreview;
     private boolean isUnexplored;
     private float noRushRadius = 50;
-    private final ArrayList<Mex> mexes;
-    private final ArrayList<Hydro> hydros;
+    private String folderName = "";
+    private String filePrefix = "";
     private final ArrayList<Decal> decals;
     private final ArrayList<WaveGenerator> waveGenerators;
     private final ArrayList<Prop> props;
     private final ArrayList<Army> armies;
-    private final ArrayList<BlankMarker> blankMarkers;
+    private String script = "";
     private final ArrayList<AIMarker> landAIMarkers;
     private final ArrayList<AIMarker> amphibiousAIMarkers;
     private final ArrayList<AIMarker> navyAIMarkers;
@@ -140,11 +143,11 @@ public strictfp class SCMap {
         return mexes.size();
     }
 
-    public Mex getMex(int i) {
+    public Marker getMex(int i) {
         return mexes.get(i);
     }
 
-    public void addMex(Mex mex) {
+    public void addMex(Marker mex) {
         mexes.add(mex);
     }
 
@@ -152,11 +155,11 @@ public strictfp class SCMap {
         return hydros.size();
     }
 
-    public Hydro getHydro(int i) {
+    public Marker getHydro(int i) {
         return hydros.get(i);
     }
 
-    public void addHydro(Hydro hydro) {
+    public void addHydro(Marker hydro) {
         hydros.add(hydro);
     }
 
@@ -216,15 +219,15 @@ public strictfp class SCMap {
         return blankMarkers.size();
     }
 
-    public BlankMarker getBlank(int i) {
+    public Marker getBlank(int i) {
         return blankMarkers.get(i);
     }
 
-    public BlankMarker getBlank(String id) {
+    public Marker getBlank(String id) {
         return blankMarkers.stream().filter(blankMarker -> blankMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
-    public void addBlank(BlankMarker blank) {
+    public void addBlank(Marker blank) {
         blankMarkers.add(blank);
     }
 

@@ -59,12 +59,12 @@ public strictfp class SaveImporter {
             case "Mass":
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addMex(new Mex(id, location));
+                map.addMex(new Marker(id, location));
                 break;
             case "Hydrocarbon":
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addHydro(new Hydro(id, location));
+                map.addHydro(new Marker(id, location));
                 break;
             case "Blank Marker":
                 locTable = marker.get("position").checktable();
@@ -72,7 +72,7 @@ public strictfp class SaveImporter {
                 if (id.contains("ARMY")) {
                     map.addSpawn(new Spawn(id, location, new Vector2f(0, 0)));
                 } else {
-                    map.addBlank(new BlankMarker(id, location));
+                    map.addBlank(new Marker(id, location));
                 }
                 break;
             case "Air Path Node":

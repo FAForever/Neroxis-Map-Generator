@@ -2,14 +2,12 @@ package neroxis.populator;
 
 import neroxis.exporter.MapExporter;
 import neroxis.generator.*;
-import neroxis.importer.SCMapImporter;
-import neroxis.importer.SaveImporter;
+import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
 import neroxis.util.FileUtils;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -202,28 +200,17 @@ public strictfp class MapPopulator {
 
     public void importMap() {
         try {
-            File dir = inMapPath.toFile();
-
-            File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-            if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in map folder");
-                return;
-            }
-            File scmapFile = mapFiles[0];
-            mapFolder = inMapPath.getFileName().toString();
-            mapName = scmapFile.getName().replace(".scmap", "");
-            map = SCMapImporter.loadSCMAP(inMapPath);
-            SaveImporter.importSave(inMapPath, map);
+            map = MapImporter.importMap(inMapPath);
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Error while saving the map.");
+            System.err.println("Error while importing the map.");
         }
     }
 
     public void exportMap() {
         try {
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(outFolderPath.resolve(mapFolder), mapName, map, true);
+            MapExporter.exportMap(outFolderPath, map, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
         } catch (IOException e) {
