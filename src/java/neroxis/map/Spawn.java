@@ -1,6 +1,7 @@
 package neroxis.map;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 

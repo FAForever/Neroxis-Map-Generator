@@ -4,9 +4,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
 import neroxis.util.Vector2f;
-
-import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
-import static neroxis.util.ImageUtils.scaleImage;
+import neroxis.util.Vector3f;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,6 +12,10 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Random;
+
+import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
+import static neroxis.util.ImageUtils.scaleImage;
 
 @Data
 public strictfp class SCMap {
