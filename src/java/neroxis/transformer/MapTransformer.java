@@ -18,8 +18,6 @@ public strictfp class MapTransformer {
 
     private Path inMapPath;
     private Path outFolderPath;
-    private String mapFolder;
-    private String mapName;
     private SCMap map;
 
     //masks used in transformation
@@ -38,13 +36,10 @@ public strictfp class MapTransformer {
     private int mapSize;
     private boolean resizeSet = false;
     private boolean mapSizeSet = false;
-    private int oldMapSize;
     private int shiftX;
     private int shiftZ;
     private boolean shiftXSet = false;
     private boolean shiftZSet = false;
-    private float heightmapMultiplier;
-    private boolean heightmapMultiplierSet = false;
 
     public static void main(String[] args) throws IOException {
 
@@ -95,7 +90,6 @@ public strictfp class MapTransformer {
                     "--map-size arg         optional, resize the map bounds to arg size (256 = 5 km x 5 km map)\n" +
                     "--x arg                optional, set arg x-coordinate for the center of the map's placement of features/details\n" +
                     "--z arg                optional, set arg z-coordinate for the center of the map's placement of features/details\n" +
-                    "--multiply-height arg  optional, multiply the height of the terrain throughout the map by arg\n" +
                     "--debug                optional, turn on debugging options\n");
             return;
         }
@@ -142,11 +136,6 @@ public strictfp class MapTransformer {
         if (arguments.containsKey("z")) {
             shiftZ = Integer.parseInt(arguments.get("z"));
             shiftZSet = true;
-        }
-
-        if (arguments.containsKey("multiply-height")) {
-            heightmapMultiplier = Float.parseFloat(arguments.get("multiply-height"));
-            heightmapMultiplierSet = true;
         }
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
@@ -302,9 +291,9 @@ public strictfp class MapTransformer {
             aiMarkers = new ArrayList<>(map.getNavalAreaAIMarkers());
             map.getNavalAreaAIMarkers().clear();
             map.getNavalAreaAIMarkers().addAll(getTransformedAIMarkers(aiMarkers));
-            aiMarkers = new ArrayList<>(map.getNavyRallyMarkers());
-            map.getNavyRallyMarkers().clear();
-            map.getNavyRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
+            aiMarkers = new ArrayList<>(map.getNavalRallyMarkers());
+            map.getNavalRallyMarkers().clear();
+            map.getNavalRallyMarkers().addAll(getTransformedAIMarkers(aiMarkers));
         }
 
         if (transformResources) {
@@ -335,7 +324,7 @@ public strictfp class MapTransformer {
             map.getDecals().addAll(getTransformedDecals(decals));
         }
 
-        oldMapSize = map.getSize();
+        int oldMapSize = map.getSize();
         if (!mapSizeSet) {
             if (resizeSet) {
                 mapSize = resize;
@@ -352,11 +341,8 @@ public strictfp class MapTransformer {
         if (!shiftZSet) {
             shiftZ = mapSize / 2;
         }
-        if (!heightmapMultiplierSet) {
-            heightmapMultiplier = (float) resize / (float) oldMapSize;
-        }
         if (mapSize != oldMapSize || resize != oldMapSize) {
-            map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ), heightmapMultiplier);
+            map.resize(resize, mapSize, new Vector2f(shiftX, shiftZ));
         }
     }
 

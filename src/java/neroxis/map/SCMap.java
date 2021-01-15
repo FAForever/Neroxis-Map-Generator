@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Random;
 
 import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
 import static neroxis.util.ImageUtils.scaleImage;
@@ -28,33 +27,15 @@ public strictfp class SCMap {
     public static final float[] WAVE_NORMAL_REPEATS = {0.0009f, 0.009f, 0.05f, 0.5f};
     public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
-
-    private float heightMapScale = 1f / 128f;
-
     private final ArrayList<Spawn> spawns;
-    private String name = "";
     private final ArrayList<Marker> mexes;
     private final ArrayList<Marker> hydros;
-    private int size; // must be a power of 2. 512 equals a 10x10km Map
-    private int minorVersion = 56;
     private final ArrayList<Marker> blankMarkers;
-    private String description = "";
-    private String terrainShaderPath = "TTerrainXP";
-    private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private final ArrayList<DecalGroup> decalGroups;
-    private int spawnCountInit;
-    private int mexCountInit;
-    private int hydroCountInit;
-    private boolean generatePreview;
-    private boolean isUnexplored;
-    private float noRushRadius = 50;
-    private String folderName = "";
-    private String filePrefix = "";
     private final ArrayList<Decal> decals;
     private final ArrayList<WaveGenerator> waveGenerators;
     private final ArrayList<Prop> props;
     private final ArrayList<Army> armies;
-    private String script = "";
     private final ArrayList<AIMarker> landAIMarkers;
     private final ArrayList<AIMarker> amphibiousAIMarkers;
     private final ArrayList<AIMarker> navyAIMarkers;
@@ -63,8 +44,24 @@ public strictfp class SCMap {
     private final ArrayList<AIMarker> expansionAIMarkers;
     private final ArrayList<AIMarker> largeExpansionAIMarkers;
     private final ArrayList<AIMarker> navalAreaAIMarkers;
-    private final ArrayList<AIMarker> navyRallyMarkers;
+    private final ArrayList<AIMarker> navalRallyMarkers;
     private final ArrayList<CubeMap> cubeMaps;
+    private float heightMapScale = 1f / 128f;
+    private String name = "";
+    private int size; // must be a power of 2. 512 equals a 10x10km Map
+    private int minorVersion = 56;
+    private String description = "";
+    private String terrainShaderPath = "TTerrainXP";
+    private String backgroundPath = "/textures/environment/defaultbackground.dds";
+    private int spawnCountInit;
+    private int mexCountInit;
+    private int hydroCountInit;
+    private boolean generatePreview;
+    private boolean isUnexplored;
+    private float noRushRadius = 50;
+    private String folderName = "";
+    private String filePrefix = "";
+    private String script = "";
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
     private SkyBox skyBox;
@@ -79,6 +76,7 @@ public strictfp class SCMap {
     private BufferedImage waterFlatnessMask;
     private BufferedImage waterDepthBiasMask;
     private BufferedImage terrainType;
+    private BufferedImage oldTerrainType;
 
     private int miniMapContourInterval = 0;
     private int miniMapDeepWaterColor = 0;
@@ -109,7 +107,7 @@ public strictfp class SCMap {
         expansionAIMarkers = new ArrayList<>();
         largeExpansionAIMarkers = new ArrayList<>();
         navalAreaAIMarkers = new ArrayList<>();
-        navyRallyMarkers = new ArrayList<>();
+        navalRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
         cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
@@ -350,15 +348,15 @@ public strictfp class SCMap {
     }
 
     public int getNavyRallyMarkerCount() {
-        return navyRallyMarkers.size();
+        return navalRallyMarkers.size();
     }
 
     public AIMarker getNavyRallyMarker(int i) {
-        return navyRallyMarkers.get(i);
+        return navalRallyMarkers.get(i);
     }
 
     public void addNavyRallyMarker(AIMarker aiMarker) {
-        navyRallyMarkers.add(aiMarker);
+        navalRallyMarkers.add(aiMarker);
     }
 
     public int getWaveGeneratorCount() {
@@ -385,118 +383,73 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void resize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f locToPutCenterOfCurrentMapContent, float heightMultiplier) {
-        int oldSize = getSize();
-        Vector2f locToPutTopLeftOfCurrentMapContent = new Vector2f(locToPutCenterOfCurrentMapContent.x - (float) resizeCurrentMapContentTo / 2, locToPutCenterOfCurrentMapContent.y - (float) resizeCurrentMapContentTo / 2);
+    public void resize(int resizeCurrentMapContentTo, int newMapBoundsSize, Vector2f centerOffset) {
+        int oldSize = size;
+        Vector2f topLeftOffset = new Vector2f(centerOffset.x - (float) resizeCurrentMapContentTo / 2, centerOffset.y - (float) resizeCurrentMapContentTo / 2);
         float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;
         float boundsScaler = (float) newMapBoundsSize / (float) oldSize / contentScaler;
+        float heightMultiplier = (float) oldSize / resizeCurrentMapContentTo;
+        float normalMapScale = (float) normalMap.getWidth() / size;
+        float waterMapScale = (float) waterMap.getWidth() / size;
+        float terrainTypeScale = (float) terrainType.getWidth() / size;
+        float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
+        float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
         SymmetrySettings symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
-        FloatMask scaledHeightmap = getHeightMask(symmetrySettings);
-        scaledHeightmap.multiply(heightMultiplier);
-        setHeightImage(scaledHeightmap);
+        setHeightImage(getHeightMask(symmetrySettings).multiply(heightMultiplier));
 
         this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * heightMultiplier);
         this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * heightMultiplier);
         this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * heightMultiplier);
 
-        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScaler / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * contentScaler / 64) * 64 + 1);
-        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScaler) / 64) * 64 + 1,  StrictMath.round((heightmap.getHeight() - 1) * boundsScaler / 64) * 64 + 1, locToPutTopLeftOfCurrentMapContent);
-        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScaler),  StrictMath.round(normalMap.getHeight() * contentScaler));
-        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScaler),  StrictMath.round(normalMap.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScaler),  StrictMath.round(waterMap.getHeight() * contentScaler));
-        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScaler),  StrictMath.round(waterMap.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-        waterFoamMask = scaleImage(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * contentScaler),  StrictMath.round(waterFoamMask.getHeight() * contentScaler));
-        waterFoamMask = insertImageIntoNewImageOfSize(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * boundsScaler),  StrictMath.round(waterFoamMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-        waterFlatnessMask = scaleImage(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * contentScaler),  StrictMath.round(waterFlatnessMask.getHeight() * contentScaler));
-        waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScaler),  StrictMath.round(waterFlatnessMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-        waterDepthBiasMask = scaleImage(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * contentScaler),  StrictMath.round(waterDepthBiasMask.getHeight() * contentScaler));
-        waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScaler),  StrictMath.round(waterDepthBiasMask.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScaler),  StrictMath.round(terrainType.getHeight() * contentScaler));
-        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScaler),  StrictMath.round(terrainType.getHeight() * boundsScaler), locToPutTopLeftOfCurrentMapContent);
-
-        FloatMask[] texturesMasks = getTextureMasksScaled(symmetrySettings);
-        FloatMask oldLayer1 = texturesMasks[0];
-        FloatMask oldLayer2 = texturesMasks[1];
-        FloatMask oldLayer3 = texturesMasks[2];
-        FloatMask oldLayer4 = texturesMasks[3];
-        FloatMask oldLayer5 = texturesMasks[4];
-        FloatMask oldLayer6 = texturesMasks[5];
-        FloatMask oldLayer7 = texturesMasks[6];
-        FloatMask oldLayer8 = texturesMasks[7];
-
-        setTextureMasksLow(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
-        setTextureMasksHigh(new BufferedImage(newMapBoundsSize, newMapBoundsSize, BufferedImage.TYPE_INT_ARGB));
-
-        oldLayer1.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer2.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer3.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer4.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer5.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer6.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer7.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-        oldLayer8.min(0f).max(1f).setSize2(resizeCurrentMapContentTo, true);
-
-        FloatMask layer1 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer1.addWithOffset(oldLayer1, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer2 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer2.addWithOffset(oldLayer2, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer3 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer3.addWithOffset(oldLayer3, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer4 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer4.addWithOffset(oldLayer4, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer5 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer5.addWithOffset(oldLayer5, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer6 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer6.addWithOffset(oldLayer6, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer7 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer7.addWithOffset(oldLayer7, locToPutCenterOfCurrentMapContent, true);
-        FloatMask layer8 =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        layer8.addWithOffset(oldLayer8, locToPutCenterOfCurrentMapContent, true);
-
-        setTextureMasksLowScaled(layer1, layer2, layer3, layer4);
-        setTextureMasksHighScaled(layer5, layer6, layer7, layer8);
+        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScaler) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScaler) + 1);
+        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScaler)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScaler) + 1, topLeftOffset);
+        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScaler), StrictMath.round(normalMap.getHeight() * contentScaler));
+        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScaler), StrictMath.round(normalMap.getHeight() * boundsScaler), new Vector2f(topLeftOffset).multiply(normalMapScale));
+        Vector2f waterMapTopLeftOffset = new Vector2f(topLeftOffset).multiply(waterMapScale);
+        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScaler), StrictMath.round(waterMap.getHeight() * contentScaler));
+        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScaler), StrictMath.round(waterMap.getHeight() * boundsScaler), waterMapTopLeftOffset);
+        waterFoamMask = scaleImage(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * contentScaler), StrictMath.round(waterFoamMask.getHeight() * contentScaler));
+        waterFoamMask = insertImageIntoNewImageOfSize(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * boundsScaler), StrictMath.round(waterFoamMask.getHeight() * boundsScaler), waterMapTopLeftOffset);
+        waterFlatnessMask = scaleImage(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * contentScaler), StrictMath.round(waterFlatnessMask.getHeight() * contentScaler));
+        waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScaler), StrictMath.round(waterFlatnessMask.getHeight() * boundsScaler), waterMapTopLeftOffset);
+        waterDepthBiasMask = scaleImage(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * contentScaler), StrictMath.round(waterDepthBiasMask.getHeight() * contentScaler));
+        waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScaler), StrictMath.round(waterDepthBiasMask.getHeight() * boundsScaler), waterMapTopLeftOffset);
+        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScaler), StrictMath.round(terrainType.getHeight() * contentScaler));
+        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScaler), StrictMath.round(terrainType.getHeight() * boundsScaler), new Vector2f(topLeftOffset).multiply(terrainTypeScale));
+        textureMasksHigh = scaleImage(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * contentScaler), StrictMath.round(textureMasksHigh.getHeight() * contentScaler));
+        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScaler), StrictMath.round(textureMasksHigh.getHeight() * boundsScaler), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
+        textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScaler), StrictMath.round(textureMasksLow.getHeight() * contentScaler));
+        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScaler), StrictMath.round(textureMasksLow.getHeight() * boundsScaler), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
 
         this.size = newMapBoundsSize;
 
-        FloatMask smallHeightmapBase = getHeightMask(symmetrySettings);
-        FloatMask heightmapBase =  new FloatMask(newMapBoundsSize, new Random().nextLong(), symmetrySettings);
-        heightmapBase.addWithOffset(smallHeightmapBase, locToPutCenterOfCurrentMapContent, true);
-        int shiftX = (int) locToPutCenterOfCurrentMapContent.x - resizeCurrentMapContentTo / 2;
-        int shiftZ = (int) locToPutCenterOfCurrentMapContent.y - resizeCurrentMapContentTo / 2;
-        Vector2f shiftXAndZ = new Vector2f(shiftX, shiftZ);
+        repositionItems(getSpawns(), contentScaler, topLeftOffset);
+        repositionItems(getAirAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getAmphibiousAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getExpansionAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getLargeExpansionAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getNavalAreaAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getNavyAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getLandAIMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getNavalRallyMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getRallyMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getBlankMarkers(), contentScaler, topLeftOffset);
+        repositionItems(getHydros(), contentScaler, topLeftOffset);
+        repositionItems(getMexes(), contentScaler, topLeftOffset);
+        repositionItems(getProps(), contentScaler, topLeftOffset);
+        repositionItems(getDecals(), contentScaler, topLeftOffset);
+        repositionItems(getWaveGenerators(), contentScaler, topLeftOffset);
 
-        repositionItems(getSpawns(), contentScaler, shiftXAndZ);
-        repositionItems(getAirAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getAmphibiousAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getLargeExpansionAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getNavalAreaAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getNavyAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getLandAIMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getNavyRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getRallyMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getBlankMarkers(), contentScaler, shiftXAndZ);
-        repositionItems(getHydros(), contentScaler, shiftXAndZ);
-        repositionItems(getMexes(), contentScaler, shiftXAndZ);
-        repositionItems(getProps(), contentScaler, shiftXAndZ);
-        repositionItems(getDecals(), contentScaler, shiftXAndZ);
+        decals.forEach(decal -> {
+            Vector3f scale = decal.getScale();
+            decal.setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
+            decal.setCutOffLOD(decal.getCutOffLOD() * contentScaler);
+        });
 
-        for (int i = 0; i < getDecalCount(); i++) {
-            Vector3f scale = getDecal(i).getScale();
-            getDecal(i).setScale(new Vector3f(scale.x * contentScaler, scale.y, scale.z * contentScaler));
-            getDecal(i).setCutOffLOD(getDecal(i).getCutOffLOD() * contentScaler);
-        }
-
-        for (int i = 0; i < getArmyCount(); i++) {
-            Army army = getArmy(i);
-            for (int a = 0; a < army.getGroupCount(); a++) {
-                Group group = army.getGroup(a);
-                repositionItems(group.getUnits(), contentScaler, shiftXAndZ);
-            }
-        }
+        armies.forEach(army -> army.getGroups().forEach(group -> repositionItems(group.getUnits(), contentScaler, topLeftOffset)));
     }
 
-    public void repositionItems(ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
+    private void repositionItems(ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
         for (PositionedObject positionedObject : arrayListOfPositionedObjects) {
             Vector2f newPosition = new Vector2f(positionedObject.getPosition().x, positionedObject.getPosition().z);
             newPosition.multiply(distanceScaler).add(shiftXAndZ).roundToNearestHalfPoint();
