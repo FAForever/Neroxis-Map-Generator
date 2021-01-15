@@ -53,15 +53,17 @@ public strictfp class HydroGenerator {
     }
 
     public void generateIndividualHydros(BinaryMask spawnable, int numHydros, int hydroSpacing) {
-        LinkedList<Vector2f> hydroLocations = spawnable.getRandomCoordinates(hydroSpacing);
-        hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
-            int hydroId = map.getHydroCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-            Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
-            map.addHydro(hydro);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Marker(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
-        });
+        if (numHydros > 0) {
+            LinkedList<Vector2f> hydroLocations = spawnable.getRandomCoordinates(hydroSpacing);
+            hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
+                int hydroId = map.getHydroCount() / spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+                Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
+                map.addHydro(hydro);
+                ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Marker(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
+            });
+        }
     }
 
     public void setMarkerHeights() {
