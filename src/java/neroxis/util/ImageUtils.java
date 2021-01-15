@@ -6,7 +6,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -44,14 +43,14 @@ public class ImageUtils {
         AffineTransform at = new AffineTransform();
         at.scale((double) width / image.getWidth(), (double) height / image.getHeight());
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        imageScaled = scaleOp.filter(image, imageScaled);
-
+        scaleOp.filter(image, imageScaled);
         return imageScaled;
     }
 
     public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height, Vector2f locToInsertTopLeft) {
         BufferedImage newImage = new BufferedImage(width, height, image.getType());
-        newImage.createGraphics().drawImage(image, StrictMath.round(locToInsertTopLeft.x), StrictMath.round(locToInsertTopLeft.y), null);
+        int[] imagePixels = image.getData().getPixels(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight() * image.getColorModel().getNumComponents()]);
+        newImage.getRaster().setPixels(StrictMath.round(locToInsertTopLeft.x), StrictMath.round(locToInsertTopLeft.y), image.getWidth(), image.getHeight(), imagePixels);
         return newImage;
     }
 
@@ -80,7 +79,7 @@ public class ImageUtils {
         DataBuffer buffer = new DataBufferByte(byteArray, byteArray.length);
         WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2}, new Point(0, 0));
         ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-        RenderedImage image = (RenderedImage) new BufferedImage(colorModel, raster, true, null);
+        RenderedImage image = new BufferedImage(colorModel, raster, true, null);
         ImageIO.write(image, "png", path.toFile());
         System.out.println("PNG created at " + path.toString());
     }
