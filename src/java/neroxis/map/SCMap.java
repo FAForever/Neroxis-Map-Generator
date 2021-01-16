@@ -388,7 +388,7 @@ public strictfp class SCMap {
         Vector2f topLeftOffset = new Vector2f(centerOffset.x - (float) resizeCurrentMapContentTo / 2, centerOffset.y - (float) resizeCurrentMapContentTo / 2);
         float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;
         float boundsScaler = (float) newMapBoundsSize / (float) oldSize / contentScaler;
-        float heightMultiplier = (float) oldSize / resizeCurrentMapContentTo;
+        float heightMultiplier = (float) resizeCurrentMapContentTo / (float) oldSize;
         float normalMapScale = (float) normalMap.getWidth() / size;
         float waterMapScale = (float) waterMap.getWidth() / size;
         float terrainTypeScale = (float) terrainType.getWidth() / size;
