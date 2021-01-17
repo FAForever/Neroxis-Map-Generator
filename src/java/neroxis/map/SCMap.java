@@ -122,8 +122,8 @@ public strictfp class SCMap {
         preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
         normalMap = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        textureMasksLow = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        textureMasksHigh = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        textureMasksLow = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
+        textureMasksHigh = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
 
         waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
         waterFoamMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
