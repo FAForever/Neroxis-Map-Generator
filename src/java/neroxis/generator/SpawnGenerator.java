@@ -6,8 +6,6 @@ import neroxis.util.Vector2f;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class SpawnGenerator {
     private final SCMap map;
     private final Random random;
@@ -132,9 +130,5 @@ public strictfp class SpawnGenerator {
             symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint.getLocation(), null)));
             location = spawnableCopy.getRandomPosition();
         }
-    }
-
-    public void setMarkerHeights() {
-        map.getSpawns().forEach(spawn -> spawn.setPosition(placeOnHeightmap(map, spawn.getPosition())));
     }
 }

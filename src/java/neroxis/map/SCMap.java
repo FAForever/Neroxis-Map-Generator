@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
 import neroxis.util.ImageUtils;
+import neroxis.util.Placement;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
@@ -515,6 +516,32 @@ public strictfp class SCMap {
         });
         positionedObjects.clear();
         positionedObjects.addAll(repositionedObjects);
+    }
+
+    public void setHeights() {
+        setObjectHeights(getSpawns());
+        setObjectHeights(getAirAIMarkers());
+        setObjectHeights(getAmphibiousAIMarkers());
+        setObjectHeights(getExpansionAIMarkers());
+        setObjectHeights(getLargeExpansionAIMarkers());
+        setObjectHeights(getNavalAreaAIMarkers());
+        setObjectHeights(getNavyAIMarkers());
+        setObjectHeights(getLandAIMarkers());
+        setObjectHeights(getNavalRallyMarkers());
+        setObjectHeights(getRallyMarkers());
+        setObjectHeights(getBlankMarkers());
+        setObjectHeights(getHydros());
+        setObjectHeights(getMexes());
+        setObjectHeights(getProps());
+        setObjectHeights(getDecals());
+        setObjectHeights(getWaveGenerators());
+        armies.forEach(army -> army.getGroups().forEach(group -> setObjectHeights(group.getUnits())));
+    }
+
+    private void setObjectHeights(Collection<? extends PositionedObject> positionedObjects) {
+        positionedObjects.forEach(positionedObject -> {
+            positionedObject.setPosition(Placement.placeOnHeightmap(this, positionedObject.getPosition()));
+        });
     }
 
     public void setHeightImage(FloatMask heightmap) {

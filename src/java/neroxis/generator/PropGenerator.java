@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class PropGenerator {
 
     private final SCMap map;
@@ -41,9 +39,4 @@ public strictfp class PropGenerator {
         });
     }
 
-    public void setPropHeights() {
-        for (Prop prop : map.getProps()) {
-            prop.setPosition(placeOnHeightmap(map, prop.getPosition()));
-        }
-    }
 }

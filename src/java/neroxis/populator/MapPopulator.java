@@ -259,7 +259,6 @@ public strictfp class MapPopulator {
                 BinaryMask spawns = land.copy();
                 spawns.intersect(passable).minus(ramps).deflate(16);
                 spawnGenerator.generateSpawns(spawns, spawnSeparation);
-                spawnGenerator.setMarkerHeights();
             } else {
                 map.getSpawns().clear();
             }
@@ -280,7 +279,6 @@ public strictfp class MapPopulator {
                 MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), map.getSize() / 8);
 
                 mexGenerator.generateMexes(resourceMask, waterResourceMask);
-                mexGenerator.setMarkerHeights();
             } else {
                 map.getMexes().clear();
             }
@@ -292,7 +290,6 @@ public strictfp class MapPopulator {
                 HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
 
                 hydroGenerator.generateHydros(resourceMask.deflate(4));
-                hydroGenerator.setMarkerHeights();
             } else {
                 map.getHydros().clear();
             }
@@ -551,8 +548,6 @@ public strictfp class MapPopulator {
             if (propMaterials.getBoulders() != null && propMaterials.getBoulders().length > 0) {
                 propGenerator.generateProps(fieldStoneMask.minus(noProps), propMaterials.getBoulders(), 30f);
             }
-
-            propGenerator.setPropHeights();
         }
 
         if (populateDecals) {
@@ -587,7 +582,8 @@ public strictfp class MapPopulator {
             aiMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
             aiMarkerGenerator.generateAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");
             aiMarkerGenerator.generateAirAIMarkers();
-            aiMarkerGenerator.setMarkerHeights();
         }
+
+        map.setHeights();
     }
 }

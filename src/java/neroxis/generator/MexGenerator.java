@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class MexGenerator {
     private final SCMap map;
     private final Random random;
@@ -172,9 +170,5 @@ public strictfp class MexGenerator {
             valid = false;
         }
         return valid;
-    }
-
-    public void setMarkerHeights() {
-        map.getMexes().forEach(mex -> mex.setPosition(placeOnHeightmap(map, mex.getPosition())));
     }
 }

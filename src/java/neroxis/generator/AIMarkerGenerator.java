@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class AIMarkerGenerator {
     private final SCMap map;
 
@@ -71,24 +69,4 @@ public strictfp class AIMarkerGenerator {
         }));
     }
 
-    public void setMarkerHeights() {
-        for (AIMarker aiMarker : map.getAirAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-        for (AIMarker aiMarker : map.getLandAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-        for (AIMarker aiMarker : map.getAmphibiousAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-        for (AIMarker aiMarker : map.getNavyAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-        for (AIMarker aiMarker : map.getLargeExpansionAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-        for (AIMarker aiMarker : map.getExpansionAIMarkers()) {
-            aiMarker.setPosition(placeOnHeightmap(map, aiMarker.getPosition()));
-        }
-    }
 }

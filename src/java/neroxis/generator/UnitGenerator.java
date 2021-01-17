@@ -7,8 +7,6 @@ import neroxis.util.Vector2f;
 import java.io.IOException;
 import java.util.*;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class UnitGenerator {
     public static final String[] T1_Land = {
             "UEL0201",
@@ -107,13 +105,4 @@ public strictfp class UnitGenerator {
         });
     }
 
-    public void setUnitHeights() {
-        for (Army army : map.getArmies()) {
-            for (Group group : army.getGroups()) {
-                for (Unit unit : group.getUnits()) {
-                    unit.setPosition(placeOnHeightmap(map, unit.getPosition()));
-                }
-            }
-        }
-    }
 }

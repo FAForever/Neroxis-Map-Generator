@@ -810,13 +810,7 @@ public strictfp class MapGenerator {
 
         CompletableFuture<Void> placementFuture = CompletableFuture.runAsync(() -> {
             long sTime = System.currentTimeMillis();
-            spawnGenerator.setMarkerHeights();
-            mexGenerator.setMarkerHeights();
-            hydroGenerator.setMarkerHeights();
-            propGenerator.setPropHeights();
-            decalGenerator.setDecalHeights();
-            unitGenerator.setUnitHeights();
-            aiMarkerGenerator.setMarkerHeights();
+            map.setHeights();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, setPlacements\n",
                         System.currentTimeMillis() - sTime,

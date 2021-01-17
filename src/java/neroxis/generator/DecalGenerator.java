@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class DecalGenerator {
     public static final String[] EROSION = {
             "/env/Common/decals/erosion_normals.dds",
@@ -109,9 +107,4 @@ public strictfp class DecalGenerator {
         });
     }
 
-    public void setDecalHeights() {
-        for (Decal decal : map.getDecals()) {
-            decal.setPosition(placeOnHeightmap(map, decal.getPosition()));
-        }
-    }
 }

@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static neroxis.util.Placement.placeOnHeightmap;
-
 public strictfp class HydroGenerator {
     private final SCMap map;
     private final Random random;
@@ -66,7 +64,4 @@ public strictfp class HydroGenerator {
         }
     }
 
-    public void setMarkerHeights() {
-        map.getHydros().forEach(hydro -> hydro.setPosition(placeOnHeightmap(map, hydro.getPosition())));
-    }
 }
