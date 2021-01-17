@@ -98,9 +98,9 @@ public strictfp class DecalGenerator {
             map.addDecal(decal);
             ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(decal.getRotation().y);
+            ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(decal.getRotation().getY());
             for (int i = 0; i < symmetryPoints.size(); i++) {
-                Vector3f symVectorRotation = new Vector3f(decal.getRotation().x, symmetryRotation.get(i), decal.getRotation().z);
+                Vector3f symVectorRotation = new Vector3f(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
                 Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i).getLocation(), symVectorRotation, scale, decal.getCutOffLOD());
                 map.addDecal(symDecal);
             }

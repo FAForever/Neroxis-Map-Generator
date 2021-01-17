@@ -542,7 +542,7 @@ public strictfp class SCMapImporter {
         Vector3f rotationY = readVector3f();
         Vector3f rotationZ = readVector3f();
         Vector3f scale = readVector3f();
-        float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
+        float rotation = (float) StrictMath.atan2(rotationX.getZ(), rotationX.getX());
         return new Prop(path, position, rotation);
     }
 

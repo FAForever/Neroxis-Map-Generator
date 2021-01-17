@@ -91,7 +91,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public void addValueAt(Vector2f loc, float value) {
-        addValueAt((int) loc.x, (int) loc.y, value);
+        addValueAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
     public void addValueAt(int x, int y, float value) {
@@ -103,7 +103,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public void multiplyValueAt(Vector2f loc, float value) {
-        multiplyValueAt((int) loc.x, (int) loc.y, value);
+        multiplyValueAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
     public void multiplyValueAt(int x, int y, float value) {
@@ -313,13 +313,13 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask addWithOffsetWrapEdges(FloatMask other, Vector2f loc, boolean centered) {
-        addWithOffsetWrapEdges(other, (int) loc.x, (int) loc.y, centered);
+        addWithOffsetWrapEdges(other, (int) loc.getX(), (int) loc.getY(), centered);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered) {
-        return addWithOffset(other, (int) loc.x, (int) loc.y, centered);
+        return addWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered);
     }
 
     public FloatMask addWithOffset(FloatMask other, int offsetX, int offsetY, boolean center) {
@@ -400,7 +400,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask multiplyWithOffset(FloatMask other, Vector2f loc, boolean centered) {
-        return multiplyWithOffset(other, (int) loc.x, (int) loc.y, centered);
+        return multiplyWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered);
     }
 
     public FloatMask multiplyWithOffset(FloatMask other, int offsetX, int offsetY, boolean centered) {

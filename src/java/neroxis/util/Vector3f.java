@@ -1,19 +1,19 @@
 package neroxis.util;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 
 import java.util.LinkedHashSet;
 
-@EqualsAndHashCode
+@Data
 public strictfp class Vector3f {
-    public float x;
-    public float y;
-    public float z;
+    private float x;
+    private float y;
+    private float z;
 
     public Vector3f(Vector2f location) {
-        this.x = location.x;
+        this.x = location.getX();
         this.y = 0;
-        this.z = location.y;
+        this.z = location.getY();
     }
 
     public Vector3f(float x, float y, float z) {
@@ -57,7 +57,7 @@ public strictfp class Vector3f {
         while (currentPoint.getDistance(targetPoint) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.getAngle(location);
-            currentPoint = new Vector2f(StrictMath.round(currentPoint.x + StrictMath.cos(angle)), StrictMath.round(currentPoint.y + StrictMath.sin(angle)));
+            currentPoint = new Vector2f(StrictMath.round(currentPoint.getX() + StrictMath.cos(angle)), StrictMath.round(currentPoint.getY() + StrictMath.sin(angle)));
         }
         return line;
     }
@@ -81,6 +81,6 @@ public strictfp class Vector3f {
 
     @Override
     public String toString() {
-        return String.format("(%f, %f, %f)", x, y, z);
+        return String.format("%f, %f, %f", x, y, z);
     }
 }

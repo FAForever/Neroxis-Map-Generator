@@ -57,8 +57,8 @@ public strictfp class PreviewGenerator {
 
     private static void addMarkerImages(Collection<? extends Marker> markers, BufferedImage markerImage, BufferedImage preview, SCMap map) {
         markers.forEach(marker -> {
-            int x = (int) (marker.getPosition().x / map.getSize() * 256 - markerImage.getWidth(null) / 2);
-            int y = (int) (marker.getPosition().z / map.getSize() * 256 - markerImage.getHeight(null) / 2);
+            int x = (int) (marker.getPosition().getX() / map.getSize() * 256 - markerImage.getWidth(null) / 2);
+            int y = (int) (marker.getPosition().getZ() / map.getSize() * 256 - markerImage.getHeight(null) / 2);
             if (ImageUtils.inImageBounds(x, y, preview)) {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
             }
@@ -120,9 +120,9 @@ public strictfp class PreviewGenerator {
                     float diffuseTerm = (float) (StrictMath.max(StrictMath.cos(StrictMath.toRadians(normalAngle - elevation)) * landDiffuseCoefficient, 0));
                     float specularTerm = (float) (StrictMath.max(StrictMath.pow(StrictMath.cos(StrictMath.toRadians(90 - reflectedAngle)), landShininess) * landSpecularCoefficient, 0));
 
-                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().x * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().x);
-                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().y * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().y);
-                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().z * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().z);
+                    newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().getX() * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().getX());
+                    newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().getY() * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().getY());
+                    newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().getZ() * (ambientCoefficient + diffuseTerm + specularTerm)) + lightingSettings.getSunAmbience().getZ());
                 } else {
                     newRGBA = origRGBA.clone();
                 }
@@ -174,9 +174,9 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
                 newRGBA[2] = (int) (shallowColor.getBlue() * (1 - weight) + abyssColor.getBlue() * weight);
-                newRGBA[0] *= (lightingSettings.getSunColor().x + waterSettings.getSurfaceColor().x) * (ambientCoefficient + diffuseTerm + specularTerm);
-                newRGBA[1] *= (lightingSettings.getSunColor().y + waterSettings.getSurfaceColor().y) * (ambientCoefficient + diffuseTerm + specularTerm);
-                newRGBA[2] *= (lightingSettings.getSunColor().z + waterSettings.getSurfaceColor().z) * (ambientCoefficient + diffuseTerm + specularTerm);
+                newRGBA[0] *= (lightingSettings.getSunColor().getX() + waterSettings.getSurfaceColor().getX()) * (ambientCoefficient + diffuseTerm + specularTerm);
+                newRGBA[1] *= (lightingSettings.getSunColor().getY() + waterSettings.getSurfaceColor().getY()) * (ambientCoefficient + diffuseTerm + specularTerm);
+                newRGBA[2] *= (lightingSettings.getSunColor().getZ() + waterSettings.getSurfaceColor().getZ()) * (ambientCoefficient + diffuseTerm + specularTerm);
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);

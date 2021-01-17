@@ -53,8 +53,8 @@ public class ImageUtils {
         Raster imageRaster = image.getData();
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                int newX = x + (int) locToInsertTopLeft.x;
-                int newY = y + (int) locToInsertTopLeft.y;
+                int newX = x + (int) locToInsertTopLeft.getX();
+                int newY = y + (int) locToInsertTopLeft.getY();
                 if (inImageBounds(newX, newY, newImage)) {
                     newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
                 }
@@ -108,7 +108,7 @@ public class ImageUtils {
     }
 
     public static boolean inImageBounds(Vector2f position, BufferedImage image) {
-        return inImageBounds((int) position.x, (int) position.y, image);
+        return inImageBounds((int) position.getX(), (int) position.getY(), image);
     }
 
     public static boolean inImageBounds(int x, int y, BufferedImage image) {

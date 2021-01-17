@@ -256,21 +256,21 @@ public strictfp class SCMapExporter {
     }
 
     private static void writeVector3f(Vector3f v) throws IOException {
-        writeFloat(v.x);
-        writeFloat(v.y);
-        writeFloat(v.z);
+        writeFloat(v.getX());
+        writeFloat(v.getY());
+        writeFloat(v.getZ());
     }
 
     private static void writeVector4f(Vector4f v) throws IOException {
-        writeFloat(v.x);
-        writeFloat(v.y);
-        writeFloat(v.z);
-        writeFloat(v.w);
+        writeFloat(v.getX());
+        writeFloat(v.getY());
+        writeFloat(v.getZ());
+        writeFloat(v.getW());
     }
 
     private static void writeVector2f(Vector2f v) throws IOException {
-        writeFloat(v.x);
-        writeFloat(v.y);
+        writeFloat(v.getX());
+        writeFloat(v.getY());
     }
 
     private static void writeProp(Prop prop) throws IOException {

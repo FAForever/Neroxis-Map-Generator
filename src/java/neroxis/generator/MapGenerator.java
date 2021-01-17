@@ -1055,8 +1055,8 @@ public strictfp class MapGenerator {
         map.getSpawns().forEach(spawn -> {
             for (int i = 0; i < numPathsPerPlayer; i++) {
                 Vector2f start = new Vector2f(spawn.getPosition());
-                Vector2f end = new Vector2f(random.nextInt(mapSize * 3 / 4) + start.x - mapSize * 3 / 4f,
-                        random.nextInt(mapSize * 3 / 4) + start.y - mapSize * 3 / 8f);
+                Vector2f end = new Vector2f(random.nextInt(mapSize * 3 / 4) + start.getX() - mapSize * 3 / 4f,
+                        random.nextInt(mapSize * 3 / 4) + start.getY() - mapSize * 3 / 8f);
                 int numMiddlePoints = random.nextInt(maxMiddlePoints) + 2;
                 ramps.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.TERRAIN);
             }

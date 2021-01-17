@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 public class FileUtils {
 
-    private static final String DIRECTORY_PATTERN = "%s/[^/]+/";
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).setPrettyPrinting().create();
 
     @SneakyThrows
@@ -66,8 +65,8 @@ public class FileUtils {
      * @param path the file to be read
      * @return the deserialized object
      */
-    public static <T> T deserialize(String path, Class<?> clazz) throws IOException {
-        return (T) gson.fromJson(readFile(path), clazz);
+    public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
+        return gson.fromJson(readFile(path), clazz);
     }
 
     public static <T> void serialize(String filename, T obj, Class<?> clazz) throws IOException {

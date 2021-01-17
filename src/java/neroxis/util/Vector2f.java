@@ -1,14 +1,14 @@
 package neroxis.util;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 import neroxis.map.Symmetry;
 
 import java.util.LinkedHashSet;
 
-@EqualsAndHashCode
+@Data
 public strictfp class Vector2f {
-    public float x;
-    public float y;
+    private float x;
+    private float y;
 
     public Vector2f(float x, float y) {
         this.x = x;
@@ -20,8 +20,8 @@ public strictfp class Vector2f {
     }
 
     public Vector2f(Vector3f location) {
-        this.x = location.x;
-        this.y = location.z;
+        this.x = location.getX();
+        this.y = location.getZ();
     }
 
     public float getDistance(Vector3f location) {

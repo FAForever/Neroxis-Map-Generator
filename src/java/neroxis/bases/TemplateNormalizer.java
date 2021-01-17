@@ -79,7 +79,7 @@ public strictfp class TemplateNormalizer {
             out.writeBytes(String.format("\t\ttype = '%s',\n", unit.getID()));
             out.writeBytes("\t\torders = '',\n");
             out.writeBytes("\t\tplatoon = '',\n");
-            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", unit.getPos().x - scUnitSet.getCenter().x, unit.getPos().z - scUnitSet.getCenter().z));
+            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", unit.getPos().getX() - scUnitSet.getCenter().getX(), unit.getPos().getZ() - scUnitSet.getCenter().getZ()));
             out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
             out.writeBytes("\t},\n");
             count++;

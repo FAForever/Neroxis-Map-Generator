@@ -28,11 +28,11 @@ public strictfp abstract class Mask<T> {
     public abstract Mask<T> interpolate();
 
     public T getValueAt(Vector3f location) {
-        return getValueAt((int) location.x, (int) location.z);
+        return getValueAt((int) location.getX(), (int) location.getZ());
     }
 
     public T getValueAt(Vector2f location) {
-        return getValueAt((int) location.x, (int) location.y);
+        return getValueAt((int) location.getX(), (int) location.getY());
     }
 
     public T getValueAt(int x, int y) {
@@ -40,11 +40,11 @@ public strictfp abstract class Mask<T> {
     }
 
     protected void setValueAt(Vector3f location, T value) {
-        setValueAt((int) location.x, (int) location.z, value);
+        setValueAt((int) location.getX(), (int) location.getZ(), value);
     }
 
     protected void setValueAt(Vector2f location, T value) {
-        setValueAt((int) location.x, (int) location.y, value);
+        setValueAt((int) location.getX(), (int) location.getY(), value);
     }
 
     protected void setValueAt(int x, int y, T value) {
@@ -70,7 +70,7 @@ public strictfp abstract class Mask<T> {
     }
 
     public boolean inBounds(Vector2f location) {
-        return inBounds((int) location.x, (int) location.y);
+        return inBounds((int) location.getX(), (int) location.getY());
     }
 
     public boolean inBounds(int x, int y) {
@@ -82,7 +82,7 @@ public strictfp abstract class Mask<T> {
     }
 
     public ArrayList<SymmetryPoint> getSymmetryPoints(Vector2f v, SymmetryType symmetryType) {
-        return getSymmetryPoints(v.x, v.y, symmetryType);
+        return getSymmetryPoints(v.getX(), v.getY(), symmetryType);
     }
 
     public ArrayList<SymmetryPoint> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
@@ -370,7 +370,7 @@ public strictfp abstract class Mask<T> {
     }
 
     public boolean inTeam(Vector2f pos, boolean reverse) {
-        return inTeam((int) pos.x, (int) pos.y, reverse);
+        return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
     }
 
     public boolean inTeam(int x, int y, boolean reverse) {

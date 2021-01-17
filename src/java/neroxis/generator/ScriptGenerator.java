@@ -32,19 +32,19 @@ public strictfp class ScriptGenerator {
         stringBuilder.append("local mexLocations = {");
         for (Marker mex : map.getMexes()) {
             Vector3f v = mex.getPosition();
-            stringBuilder.append(String.format("{position = VECTOR3( %f, %f, %f), marked = false},", v.x, v.y, v.z));
+            stringBuilder.append(String.format("{position = VECTOR3( %s ), marked = false},", v.toString()));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local hydroLocations = {");
         for (Marker hydro : map.getHydros()) {
             Vector3f v = hydro.getPosition();
-            stringBuilder.append(String.format("{position = VECTOR3( %f, %f, %f), marked = false},", v.x, v.y, v.z));
+            stringBuilder.append(String.format("{position = VECTOR3( %s ), marked = false},", v.toString()));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local propLocations = {");
         for (Prop prop : map.getProps()) {
             Vector3f v = prop.getPosition();
-            stringBuilder.append(String.format("{position = VECTOR3( %f, %f, %f), bp = '%s', heading = %f, marked = false},", v.x, v.y, v.z, prop.getPath(), prop.getRotation()));
+            stringBuilder.append(String.format("{position = VECTOR3( %s ), bp = '%s', heading = %f, marked = false},", v.toString(), prop.getPath(), prop.getRotation()));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local ScenarioFramework = import('/lua/ScenarioFramework.lua')\n" +

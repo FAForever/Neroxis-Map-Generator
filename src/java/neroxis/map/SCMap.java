@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
 import neroxis.util.ImageUtils;
-import neroxis.util.Placement;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
@@ -22,7 +21,6 @@ import java.util.List;
 
 import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
 import static neroxis.util.ImageUtils.scaleImage;
-import static neroxis.util.Placement.placeOnHeightmap;
 
 @Data
 public strictfp class SCMap {
@@ -423,7 +421,7 @@ public strictfp class SCMap {
 
     public void changeMapSize(int contentSize, int boundsSize, Vector2f centerOffset) {
         int oldSize = size;
-        Vector2f topLeftOffset = new Vector2f(centerOffset.x - (float) contentSize / 2, centerOffset.y - (float) contentSize / 2);
+        Vector2f topLeftOffset = new Vector2f(centerOffset.getX() - (float) contentSize / 2, centerOffset.getY() - (float) contentSize / 2);
         float contentScale = (float) contentSize / (float) oldSize;
         float boundsScale = (float) boundsSize / (float) contentSize;
 
@@ -461,9 +459,11 @@ public strictfp class SCMap {
 
         decals.forEach(decal -> {
             Vector3f scale = decal.getScale();
-            decal.setScale(new Vector3f(scale.x * contentScale, scale.y, scale.z * contentScale));
+            decal.setScale(new Vector3f(scale.getX() * contentScale, scale.getY(), scale.getZ() * contentScale));
             decal.setCutOffLOD(decal.getCutOffLOD() * contentScale);
         });
+
+        setHeights();
     }
 
     private void scaleMapContent(float contentScale) {
@@ -509,7 +509,7 @@ public strictfp class SCMap {
         positionedObjects.forEach(positionedObject -> {
             Vector2f newPosition = new Vector2f(positionedObject.getPosition());
             newPosition.multiply(distanceScale).add(offset).roundToNearestHalfPoint();
-            positionedObject.setPosition(placeOnHeightmap(this, newPosition));
+            positionedObject.setPosition(new Vector3f(newPosition));
             if (ImageUtils.inImageBounds(newPosition, heightmap)) {
                 repositionedObjects.add(positionedObject);
             }
@@ -540,7 +540,10 @@ public strictfp class SCMap {
 
     private void setObjectHeights(Collection<? extends PositionedObject> positionedObjects) {
         positionedObjects.forEach(positionedObject -> {
-            positionedObject.setPosition(Placement.placeOnHeightmap(this, positionedObject.getPosition()));
+            Vector2f position = new Vector2f(positionedObject.getPosition());
+            if (ImageUtils.inImageBounds(position, heightmap)) {
+                positionedObject.getPosition().setY(heightmap.getRaster().getPixel((int) position.getX(), (int) position.getY(), new int[]{0})[0] * heightMapScale);
+            }
         });
     }
 

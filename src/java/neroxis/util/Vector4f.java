@@ -1,13 +1,13 @@
 package neroxis.util;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 
-@EqualsAndHashCode
+@Data
 public strictfp class Vector4f {
-    public float x;
-    public float y;
-    public float z;
-    public float w;
+    private float x;
+    private float y;
+    private float z;
+    private float w;
 
     public Vector4f(float x, float y, float z, float w) {
         this.x = x;
