@@ -2,18 +2,25 @@ package neroxis.map;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public strictfp class Marker {
+public strictfp class Marker extends PositionedObject {
     private String id;
-    private Vector3f position;
+
+    public Marker(String id, Vector3f position) {
+        super(position);
+        this.id = id;
+    }
 
     public Marker(String id, Vector2f position) {
-        this(id, new Vector3f(position));
+        super(position);
+        this.id = id;
     }
 }

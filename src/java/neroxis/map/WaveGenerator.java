@@ -1,13 +1,14 @@
 package neroxis.map;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import neroxis.util.Vector3f;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public strictfp class WaveGenerator {
+public strictfp class WaveGenerator extends PositionedObject {
     private final String textureName;
     private final String rampName;
-    private final Vector3f position;
     private final float rotation;
     private final Vector3f velocity;
 
@@ -22,4 +23,12 @@ public strictfp class WaveGenerator {
     private float frameRateFirst;
     private float frameRateSecond;
     private float stripCount;
+
+    public WaveGenerator(String textureName, String rampName, Vector3f position, float rotation, Vector3f velocity) {
+        super(position);
+        this.textureName = textureName;
+        this.rampName = rampName;
+        this.rotation = rotation;
+        this.velocity = velocity;
+    }
 }

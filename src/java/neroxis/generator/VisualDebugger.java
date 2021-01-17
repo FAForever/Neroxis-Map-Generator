@@ -5,6 +5,7 @@ import neroxis.map.BinaryMask;
 import neroxis.map.FloatMask;
 import neroxis.map.Mask;
 import neroxis.populator.MapPopulator;
+import neroxis.transformer.MapTransformer;
 import neroxis.util.Util;
 
 import java.awt.*;
@@ -18,7 +19,7 @@ import java.util.Map;
 
 public class VisualDebugger {
 
-    public static boolean ENABLED = MapGenerator.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG || ImageGenerator.DEBUG;
+    public static boolean ENABLED = MapGenerator.DEBUG || MapTransformer.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG || ImageGenerator.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.

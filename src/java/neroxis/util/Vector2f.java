@@ -81,6 +81,12 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f multiply(float multiplier) {
+        this.x *= multiplier;
+        this.y *= multiplier;
+        return this;
+    }
+
     public Vector2f clampMin(float x, float y) {
         this.x = StrictMath.max(x, this.x);
         this.y = StrictMath.max(y, this.y);
@@ -117,8 +123,8 @@ public strictfp class Vector2f {
     }
 
     public void roundToNearestHalfPoint() {
-        x = StrictMath.round(x * 2) / 2f;
-        y = StrictMath.round(y * 2) / 2f;
+        x = StrictMath.round(x - .5f) + .5f;
+        y = StrictMath.round(y - .5f) + .5f;
     }
 
     @Override

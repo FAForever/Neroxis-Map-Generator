@@ -319,14 +319,14 @@ public strictfp class MapPopulator {
             map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
-            oldLayer1.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer2.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer3.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer4.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer5.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer6.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer7.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer8.min(0f).max(1f).setSize(mapImageSize);
+            oldLayer1.min(0f).max(1f).resample(mapImageSize);
+            oldLayer2.min(0f).max(1f).resample(mapImageSize);
+            oldLayer3.min(0f).max(1f).resample(mapImageSize);
+            oldLayer4.min(0f).max(1f).resample(mapImageSize);
+            oldLayer5.min(0f).max(1f).resample(mapImageSize);
+            oldLayer6.min(0f).max(1f).resample(mapImageSize);
+            oldLayer7.min(0f).max(1f).resample(mapImageSize);
+            oldLayer8.min(0f).max(1f).resample(mapImageSize);
 
             BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
@@ -582,7 +582,7 @@ public strictfp class MapPopulator {
             BinaryMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
             passableLand.intersect(passableAI);
             passableWater.deflate(16).intersect(passableAI).fillEdge(8, false);
-            AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, 0);
+            AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map);
             aiMarkerGenerator.generateAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
             aiMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
             aiMarkerGenerator.generateAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");

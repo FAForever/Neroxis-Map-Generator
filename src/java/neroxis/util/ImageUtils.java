@@ -6,7 +6,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -44,9 +43,24 @@ public class ImageUtils {
         AffineTransform at = new AffineTransform();
         at.scale((double) width / image.getWidth(), (double) height / image.getHeight());
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        imageScaled = scaleOp.filter(image, imageScaled);
-
+        scaleOp.filter(image, imageScaled);
         return imageScaled;
+    }
+
+    public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height, Vector2f locToInsertTopLeft) {
+        BufferedImage newImage = new BufferedImage(width, height, image.getType());
+        WritableRaster newImageRaster = newImage.getRaster();
+        Raster imageRaster = image.getData();
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int newX = x + (int) locToInsertTopLeft.x;
+                int newY = y + (int) locToInsertTopLeft.y;
+                if (inImageBounds(newX, newY, newImage)) {
+                    newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
+                }
+            }
+        }
+        return newImage;
     }
 
     public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, float scaleMultiplier, Path path) throws IOException {
@@ -74,7 +88,7 @@ public class ImageUtils {
         DataBuffer buffer = new DataBufferByte(byteArray, byteArray.length);
         WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2}, new Point(0, 0));
         ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-        RenderedImage image = (RenderedImage) new BufferedImage(colorModel, raster, true, null);
+        BufferedImage image = new BufferedImage(colorModel, raster, true, null);
         ImageIO.write(image, "png", path.toFile());
         System.out.println("PNG created at " + path.toString());
     }
@@ -91,6 +105,14 @@ public class ImageUtils {
     public static void writeAutoScaledPNGFromMask(FloatMask mask, Path path) throws IOException {
         float scaleMultiplier = 255 / mask.getMax();
         writePNGFromMasks(mask, mask, mask, scaleMultiplier, path);
+    }
+
+    public static boolean inImageBounds(Vector2f position, BufferedImage image) {
+        return inImageBounds((int) position.x, (int) position.y, image);
+    }
+
+    public static boolean inImageBounds(int x, int y, BufferedImage image) {
+        return x >= 0 && x < image.getWidth() && y >= 0 && y < image.getHeight();
     }
 
 }

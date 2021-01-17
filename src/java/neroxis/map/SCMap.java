@@ -1,16 +1,27 @@
 package neroxis.map;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
+import neroxis.util.ImageUtils;
 import neroxis.util.Vector2f;
+import neroxis.util.Vector3f;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
+import static neroxis.util.ImageUtils.scaleImage;
+import static neroxis.util.Placement.placeOnHeightmap;
 
 @Data
 public strictfp class SCMap {
@@ -22,20 +33,33 @@ public strictfp class SCMap {
     public static final float[] WAVE_NORMAL_REPEATS = {0.0009f, 0.009f, 0.05f, 0.5f};
     public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
-
+    private final List<Spawn> spawns;
+    private final List<Marker> mexes;
+    private final List<Marker> hydros;
+    private final List<Marker> blankMarkers;
+    private final List<DecalGroup> decalGroups;
+    private final List<Decal> decals;
+    private final List<WaveGenerator> waveGenerators;
+    private final List<Prop> props;
+    private final List<Army> armies;
+    private final List<AIMarker> landAIMarkers;
+    private final List<AIMarker> amphibiousAIMarkers;
+    private final List<AIMarker> navyAIMarkers;
+    private final List<AIMarker> airAIMarkers;
+    private final List<AIMarker> rallyMarkers;
+    private final List<AIMarker> expansionAIMarkers;
+    private final List<AIMarker> largeExpansionAIMarkers;
+    private final List<AIMarker> navalAreaAIMarkers;
+    private final List<AIMarker> navalRallyMarkers;
+    private final List<CubeMap> cubeMaps;
     private float heightMapScale = 1f / 128f;
-
-    private final ArrayList<Spawn> spawns;
     private String name = "";
-    private final ArrayList<Marker> mexes;
-    private final ArrayList<Marker> hydros;
-    private final int size; // must be a power of 2. 512 equals a 10x10km Map
+    @Setter(AccessLevel.NONE)
+    private int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
-    private final ArrayList<Marker> blankMarkers;
     private String description = "";
     private String terrainShaderPath = "TTerrainXP";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
-    private final ArrayList<DecalGroup> decalGroups;
     private int spawnCountInit;
     private int mexCountInit;
     private int hydroCountInit;
@@ -44,21 +68,7 @@ public strictfp class SCMap {
     private float noRushRadius = 50;
     private String folderName = "";
     private String filePrefix = "";
-    private final ArrayList<Decal> decals;
-    private final ArrayList<WaveGenerator> waveGenerators;
-    private final ArrayList<Prop> props;
-    private final ArrayList<Army> armies;
     private String script = "";
-    private final ArrayList<AIMarker> landAIMarkers;
-    private final ArrayList<AIMarker> amphibiousAIMarkers;
-    private final ArrayList<AIMarker> navyAIMarkers;
-    private final ArrayList<AIMarker> airAIMarkers;
-    private final ArrayList<AIMarker> rallyMarkers;
-    private final ArrayList<AIMarker> expansionAIMarkers;
-    private final ArrayList<AIMarker> largeExpansionAIMarkers;
-    private final ArrayList<AIMarker> navalAreaAIMarkers;
-    private final ArrayList<AIMarker> navalRallyMarkers;
-    private final ArrayList<CubeMap> cubeMaps;
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
     private SkyBox skyBox;
@@ -112,10 +122,10 @@ public strictfp class SCMap {
         preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
         normalMap = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        textureMasksLow = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        textureMasksHigh = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        textureMasksLow = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
+        textureMasksHigh = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
 
-        waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
         waterFoamMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         waterFlatnessMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         for (int y = 0; y < size / 2; y++) {
@@ -124,7 +134,38 @@ public strictfp class SCMap {
             }
         }
         waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
-        terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
+
+        terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+    }
+
+    public void setPreview(BufferedImage preview) {
+        checkImageSize(preview, 256);
+        this.preview = preview;
+    }
+
+    public void setHeightmap(BufferedImage heightmap) {
+        checkImageSize(heightmap, size + 1);
+        this.heightmap = heightmap;
+    }
+
+    public void setWaterFoamMask(BufferedImage waterFoamMask) {
+        checkImageSize(waterFoamMask, size / 2);
+        this.waterFoamMask = waterFoamMask;
+    }
+
+    public void setWaterFlatnessMask(BufferedImage waterFlatnessMask) {
+        checkImageSize(waterFlatnessMask, size / 2);
+        this.waterFlatnessMask = waterFlatnessMask;
+    }
+
+    public void setWaterDepthBiasMask(BufferedImage waterDepthBiasMask) {
+        checkImageSize(waterDepthBiasMask, size / 2);
+        this.waterDepthBiasMask = waterDepthBiasMask;
+    }
+
+    public void setTerrainType(BufferedImage terrainType) {
+        checkImageSize(terrainType, size);
+        this.terrainType = terrainType;
     }
 
     public int getSpawnCount() {
@@ -379,7 +420,105 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
+    public void changeMapSize(int contentSize, int boundsSize, Vector2f centerOffset) {
+        int oldSize = size;
+        Vector2f topLeftOffset = new Vector2f(centerOffset.x - (float) contentSize / 2, centerOffset.y - (float) contentSize / 2);
+        float contentScale = (float) contentSize / (float) oldSize;
+        float boundsScale = (float) boundsSize / (float) contentSize;
+
+        if (contentScale != 1) {
+            scaleMapContent(contentScale);
+        }
+
+        if (boundsScale != 1) {
+            scaleMapBounds(boundsScale, topLeftOffset);
+        }
+
+        moveObjects(contentScale, topLeftOffset);
+
+        this.size = boundsSize;
+    }
+
+    private void moveObjects(float contentScale, Vector2f offset) {
+        repositionObjects(getSpawns(), contentScale, offset);
+        repositionObjects(getAirAIMarkers(), contentScale, offset);
+        repositionObjects(getAmphibiousAIMarkers(), contentScale, offset);
+        repositionObjects(getExpansionAIMarkers(), contentScale, offset);
+        repositionObjects(getLargeExpansionAIMarkers(), contentScale, offset);
+        repositionObjects(getNavalAreaAIMarkers(), contentScale, offset);
+        repositionObjects(getNavyAIMarkers(), contentScale, offset);
+        repositionObjects(getLandAIMarkers(), contentScale, offset);
+        repositionObjects(getNavalRallyMarkers(), contentScale, offset);
+        repositionObjects(getRallyMarkers(), contentScale, offset);
+        repositionObjects(getBlankMarkers(), contentScale, offset);
+        repositionObjects(getHydros(), contentScale, offset);
+        repositionObjects(getMexes(), contentScale, offset);
+        repositionObjects(getProps(), contentScale, offset);
+        repositionObjects(getDecals(), contentScale, offset);
+        repositionObjects(getWaveGenerators(), contentScale, offset);
+        armies.forEach(army -> army.getGroups().forEach(group -> repositionObjects(group.getUnits(), contentScale, offset)));
+
+        decals.forEach(decal -> {
+            Vector3f scale = decal.getScale();
+            decal.setScale(new Vector3f(scale.x * contentScale, scale.y, scale.z * contentScale));
+            decal.setCutOffLOD(decal.getCutOffLOD() * contentScale);
+        });
+    }
+
+    private void scaleMapContent(float contentScale) {
+        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * contentScale);
+        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * contentScale);
+        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * contentScale);
+
+        RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
+        heightRescale.filter(heightmap, heightmap);
+        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScale) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScale) + 1);
+        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScale), StrictMath.round(normalMap.getHeight() * contentScale));
+        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScale), StrictMath.round(waterMap.getHeight() * contentScale));
+        waterFoamMask = scaleImage(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * contentScale), StrictMath.round(waterFoamMask.getHeight() * contentScale));
+        waterFlatnessMask = scaleImage(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * contentScale), StrictMath.round(waterFlatnessMask.getHeight() * contentScale));
+        waterDepthBiasMask = scaleImage(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * contentScale), StrictMath.round(waterDepthBiasMask.getHeight() * contentScale));
+        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScale), StrictMath.round(terrainType.getHeight() * contentScale));
+        textureMasksHigh = scaleImage(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * contentScale), StrictMath.round(textureMasksHigh.getHeight() * contentScale));
+        textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale), StrictMath.round(textureMasksLow.getHeight() * contentScale));
+    }
+
+    private void scaleMapBounds(float boundsScale, Vector2f topLeftOffset) {
+        float normalMapScale = (float) normalMap.getWidth() / size;
+        float waterMapScale = (float) waterMap.getWidth() / size;
+        float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
+        float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
+        preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
+        Vector2f previewOffset = boundsScale > 1 ? new Vector2f(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2f(-64 / boundsScale, -64 / boundsScale);
+        preview = insertImageIntoNewImageOfSize(preview, 256, 256, previewOffset);
+        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScale)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScale) + 1, topLeftOffset);
+        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale), StrictMath.round(normalMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(normalMapScale));
+        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale), StrictMath.round(waterMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(waterMapScale));
+        Vector2f halvedTopLeftOffset = new Vector2f(topLeftOffset).multiply(.5f);
+        waterFoamMask = insertImageIntoNewImageOfSize(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * boundsScale), StrictMath.round(waterFoamMask.getHeight() * boundsScale), halvedTopLeftOffset);
+        waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScale), StrictMath.round(waterFlatnessMask.getHeight() * boundsScale), halvedTopLeftOffset);
+        waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScale), StrictMath.round(waterDepthBiasMask.getHeight() * boundsScale), halvedTopLeftOffset);
+        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScale), StrictMath.round(terrainType.getHeight() * boundsScale), topLeftOffset);
+        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
+        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
+    }
+
+    private <T extends PositionedObject> void repositionObjects(Collection<T> positionedObjects, float distanceScale, Vector2f offset) {
+        Collection<T> repositionedObjects = new ArrayList<>();
+        positionedObjects.forEach(positionedObject -> {
+            Vector2f newPosition = new Vector2f(positionedObject.getPosition());
+            newPosition.multiply(distanceScale).add(offset).roundToNearestHalfPoint();
+            positionedObject.setPosition(placeOnHeightmap(this, newPosition));
+            if (ImageUtils.inImageBounds(newPosition, heightmap)) {
+                repositionedObjects.add(positionedObject);
+            }
+        });
+        positionedObjects.clear();
+        positionedObjects.addAll(repositionedObjects);
+    }
+
     public void setHeightImage(FloatMask heightmap) {
+        checkMaskSize(heightmap, size + 1);
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
                 this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.getValueAt(x, y) / heightMapScale)});
@@ -398,6 +537,7 @@ public strictfp class SCMap {
     }
 
     public void setPreviewImage(FloatMask previewMask) {
+        checkMaskSize(previewMask, 256);
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
                 this.preview.setRGB(x, y, previewMask.getValueAt(x, y).intValue());
@@ -416,6 +556,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksLowScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksLow.getWidth());
+        checkMaskSize(mask1, textureMasksLow.getWidth());
+        checkMaskSize(mask2, textureMasksLow.getWidth());
+        checkMaskSize(mask3, textureMasksLow.getWidth());
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
@@ -428,6 +572,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksHighScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksHigh.getWidth());
+        checkMaskSize(mask1, textureMasksHigh.getWidth());
+        checkMaskSize(mask2, textureMasksHigh.getWidth());
+        checkMaskSize(mask3, textureMasksHigh.getWidth());
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
@@ -440,6 +588,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksLowRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksLow.getWidth());
+        checkMaskSize(mask1, textureMasksLow.getWidth());
+        checkMaskSize(mask2, textureMasksLow.getWidth());
+        checkMaskSize(mask3, textureMasksLow.getWidth());
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 float val0 = mask0.getValueAt(x, y);
@@ -452,6 +604,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksHighRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksHigh.getWidth());
+        checkMaskSize(mask1, textureMasksHigh.getWidth());
+        checkMaskSize(mask2, textureMasksHigh.getWidth());
+        checkMaskSize(mask3, textureMasksHigh.getWidth());
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 float val0 = mask0.getValueAt(x, y);
@@ -533,6 +689,20 @@ public strictfp class SCMap {
 
     private int convertToRawTextureValue(float value) {
         return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
+    }
+
+    private void checkImageSize(BufferedImage image, int size) {
+        if (image.getWidth() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + image.getWidth() +
+                    " required size is " + size);
+        }
+    }
+
+    private void checkMaskSize(Mask<?> mask, int size) {
+        if (mask.getSize() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + mask.getSize() +
+                    " required size is " + size);
+        }
     }
 
     @SneakyThrows

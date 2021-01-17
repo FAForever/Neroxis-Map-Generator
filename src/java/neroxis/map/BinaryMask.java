@@ -498,7 +498,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask replace(BinaryMask other) {
-        checkSize(other);
+        checkMatchingSize(other);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = other.getValueAt(x, y);
@@ -509,7 +509,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask combine(BinaryMask other) {
-        checkSize(other);
+        checkMatchingSize(other);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = getValueAt(x, y) || other.getValueAt(x, y);
@@ -600,7 +600,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask intersect(BinaryMask other) {
-        checkSize(other);
+        checkMatchingSize(other);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = getValueAt(x, y) && other.getValueAt(x, y);
@@ -611,7 +611,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask minus(BinaryMask other) {
-        checkSize(other);
+        checkMatchingSize(other);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 mask[x][y] = getValueAt(x, y) && !other.getValueAt(x, y);
@@ -1240,7 +1240,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         out.close();
     }
 
-    public void checkSize(Mask<?> other) {
+    public void checkMatchingSize(Mask<?> other) {
         if (other.getSize() != getSize()) {
             throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
         }

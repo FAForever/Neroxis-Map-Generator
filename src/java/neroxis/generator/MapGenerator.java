@@ -658,7 +658,7 @@ public strictfp class MapGenerator {
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
         UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
-        AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map, random.nextLong());
+        AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map);
 
         switch (terrainSymmetry) {
             case Z:

@@ -495,6 +495,12 @@ public strictfp abstract class Mask<T> {
         return this;
     }
 
+    public void checkMatchingSize(Mask<?> other) {
+        if (other.getSize() != getSize()) {
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
+        }
+    }
+
     public Mask<T> startVisualDebugger(String maskName) {
         return startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }

@@ -5,7 +5,7 @@ import neroxis.util.Vector3f;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.List;
 
 public strictfp class SaveExporter {
 
@@ -99,7 +99,7 @@ public strictfp class SaveExporter {
         out.close();
     }
 
-    private static void savePathMarkers(ArrayList<AIMarker> aiMarkers, String type, String color, String graph) throws IOException {
+    private static void savePathMarkers(List<AIMarker> aiMarkers, String type, String color, String graph) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             if (aiMarker.getNeighborCount() > 0) {
                 out.writeBytes(String.format("        ['%s'] = {\n", aiMarker.getId()));
@@ -125,7 +125,7 @@ public strictfp class SaveExporter {
         }
     }
 
-    private static void saveAIMarkers(ArrayList<AIMarker> aiMarkers, String type, String color, String prop) throws IOException {
+    private static void saveAIMarkers(List<AIMarker> aiMarkers, String type, String color, String prop) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             out.writeBytes("        ['" + aiMarker.getId() + "'] = {\n");
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");

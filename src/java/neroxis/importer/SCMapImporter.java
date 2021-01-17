@@ -1,6 +1,7 @@
 package neroxis.importer;
 
 import neroxis.biomes.Biome;
+import neroxis.jsquish.Squish;
 import neroxis.map.*;
 import neroxis.util.DDSHeader;
 import neroxis.util.Vector2f;
@@ -13,8 +14,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 
+import static neroxis.jsquish.Squish.decompressImage;
 import static neroxis.util.Swapper.swap;
 
 public strictfp class SCMapImporter {
@@ -146,26 +150,24 @@ public strictfp class SCMapImporter {
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        int[] normalMapData = readImageData();
+        byte[] normalMapData = readCompressedImage();
 
         // texture maps
-        int[] textureMaskLowData = readImageData();
-        int[] textureMaskHighData = readImageData();
+        int[] textureMaskLowData = readRawImage();
+        int[] textureMaskHighData = readRawImage();
 
         // water maps
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        int waterMapByteCount = readInt() - 128;
-        DDSHeader waterMapDDSHeader = DDSHeader.parseHeader(readBytes(128));
-        byte[] waterMapData = readBytes(waterMapByteCount);
+        byte[] waterMapData = readCompressedImage();
         int halfSize = (heightInt / 2) * (widthInt / 2);
         byte[] waterFoamMaskData = readBytes(halfSize);
         byte[] waterFlatnessData = readBytes(halfSize);
         byte[] waterDepthBiasMaskData = readBytes(halfSize);
 
         // terrain type
-        int[] terrainTypeData = readInts(widthInt * heightInt / 4);
+        byte[] terrainTypeData = readBytes(widthInt * heightInt);
 
         // Additional Skybox
         SkyBox skyBox = null;
@@ -213,11 +215,12 @@ public strictfp class SCMapImporter {
         }
         map.setHeightmap(heightmap);
 
-        int normalMapSize = (int) StrictMath.sqrt(normalMapData.length);
+        int normalMapSize = (int) StrictMath.sqrt(normalMapData.length / 4f);
         BufferedImage normalMap = new BufferedImage(normalMapSize, normalMapSize, BufferedImage.TYPE_INT_ARGB);
         DataBuffer normalMapDataBuffer = normalMap.getRaster().getDataBuffer();
+        IntBuffer normalMapInts = ByteBuffer.wrap(normalMapData).asIntBuffer();
         for (int i = 0; i < normalMapDataBuffer.getSize(); i++) {
-            normalMapDataBuffer.setElem(i, normalMapData[i]);
+            normalMapDataBuffer.setElem(i, normalMapInts.get(i));
         }
         map.setNormalMap(normalMap);
 
@@ -237,11 +240,12 @@ public strictfp class SCMapImporter {
         }
         map.setTextureMasksHigh(textureMasksHigh);
 
-        int waterMapSize = (int) StrictMath.sqrt(waterMapData.length);
-        BufferedImage waterMap = new BufferedImage(waterMapSize, waterMapSize, BufferedImage.TYPE_BYTE_GRAY);
+        int waterMapSize = (int) StrictMath.sqrt(waterMapData.length / 4f);
+        BufferedImage waterMap = new BufferedImage(waterMapSize, waterMapSize, BufferedImage.TYPE_INT_ARGB);
         DataBuffer waterMapDataBuffer = waterMap.getRaster().getDataBuffer();
+        IntBuffer waterMapInts = ByteBuffer.wrap(waterMapData).asIntBuffer();
         for (int i = 0; i < waterMapDataBuffer.getSize(); i++) {
-            waterMapDataBuffer.setElem(i, waterMapData[i]);
+            waterMapDataBuffer.setElem(i, waterMapInts.get(i));
         }
         map.setWaterMap(waterMap);
 
@@ -269,7 +273,7 @@ public strictfp class SCMapImporter {
         }
 
         int terrainTypeSize = (int) StrictMath.sqrt(terrainTypeData.length);
-        BufferedImage terrainType = new BufferedImage(terrainTypeSize, terrainTypeSize, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage terrainType = new BufferedImage(terrainTypeSize, terrainTypeSize, BufferedImage.TYPE_BYTE_GRAY);
         DataBuffer terrainTypeMaskDataBuffer = terrainType.getRaster().getDataBuffer();
         for (int i = 0; i < terrainTypeMaskDataBuffer.getSize(); i++) {
             terrainTypeMaskDataBuffer.setElem(i, terrainTypeData[i]);
@@ -469,10 +473,16 @@ public strictfp class SCMapImporter {
         return new DecalGroup(name, data);
     }
 
-    private static int[] readImageData() throws IOException {
+    private static int[] readRawImage() throws IOException {
         int byteCount = readInt() - 128;
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
         return readInts(byteCount / 4);
+    }
+
+    private static byte[] readCompressedImage() throws IOException {
+        int byteCount = readInt() - 128;
+        DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
+        return decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount), Squish.CompressionType.DXT5);
     }
 
     private static SkyBox readSkyBox() throws IOException {
@@ -533,9 +543,6 @@ public strictfp class SCMapImporter {
         Vector3f rotationZ = readVector3f();
         Vector3f scale = readVector3f();
         float rotation = (float) StrictMath.atan2(rotationX.z, rotationX.x);
-        if ((rotation - StrictMath.atan2(-rotationZ.x, rotationZ.z)) % (StrictMath.PI * 2) > StrictMath.PI / 180) {
-//                System.out.println(String.format("Prop %d: Rotation inconsistent\n", i));
-        }
         return new Prop(path, position, rotation);
     }
 
