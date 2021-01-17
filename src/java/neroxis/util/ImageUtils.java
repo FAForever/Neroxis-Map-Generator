@@ -88,7 +88,7 @@ public class ImageUtils {
         DataBuffer buffer = new DataBufferByte(byteArray, byteArray.length);
         WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2}, new Point(0, 0));
         ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-        RenderedImage image = new BufferedImage(colorModel, raster, true, null);
+        BufferedImage image = new BufferedImage(colorModel, raster, true, null);
         ImageIO.write(image, "png", path.toFile());
         System.out.println("PNG created at " + path.toString());
     }
