@@ -136,6 +136,36 @@ public strictfp class SCMap {
         terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
     }
 
+    public void setPreview(BufferedImage preview) {
+        checkImageSize(preview, 256);
+        this.preview = preview;
+    }
+
+    public void setHeightmap(BufferedImage heightmap) {
+        checkImageSize(heightmap, size + 1);
+        this.heightmap = heightmap;
+    }
+
+    public void setWaterFoamMask(BufferedImage waterFoamMask) {
+        checkImageSize(waterFoamMask, size / 2);
+        this.waterFoamMask = waterFoamMask;
+    }
+
+    public void setWaterFlatnessMask(BufferedImage waterFlatnessMask) {
+        checkImageSize(waterFlatnessMask, size / 2);
+        this.waterFlatnessMask = waterFlatnessMask;
+    }
+
+    public void setWaterDepthBiasMask(BufferedImage waterDepthBiasMask) {
+        checkImageSize(waterDepthBiasMask, size / 2);
+        this.waterDepthBiasMask = waterDepthBiasMask;
+    }
+
+    public void setTerrainType(BufferedImage terrainType) {
+        checkImageSize(terrainType, size);
+        this.terrainType = terrainType;
+    }
+
     public int getSpawnCount() {
         return spawns.size();
     }
@@ -463,6 +493,7 @@ public strictfp class SCMap {
     }
 
     public void setHeightImage(FloatMask heightmap) {
+        checkMaskSize(heightmap, size + 1);
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
                 this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.getValueAt(x, y) / heightMapScale)});
@@ -481,6 +512,7 @@ public strictfp class SCMap {
     }
 
     public void setPreviewImage(FloatMask previewMask) {
+        checkMaskSize(previewMask, 256);
         for (int y = 0; y < previewMask.getSize(); y++) {
             for (int x = 0; x < previewMask.getSize(); x++) {
                 this.preview.setRGB(x, y, previewMask.getValueAt(x, y).intValue());
@@ -499,6 +531,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksLowScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksLow.getWidth());
+        checkMaskSize(mask1, textureMasksLow.getWidth());
+        checkMaskSize(mask2, textureMasksLow.getWidth());
+        checkMaskSize(mask3, textureMasksLow.getWidth());
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
@@ -511,6 +547,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksHighScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksHigh.getWidth());
+        checkMaskSize(mask1, textureMasksHigh.getWidth());
+        checkMaskSize(mask2, textureMasksHigh.getWidth());
+        checkMaskSize(mask3, textureMasksHigh.getWidth());
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
@@ -523,6 +563,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksLowRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksLow.getWidth());
+        checkMaskSize(mask1, textureMasksLow.getWidth());
+        checkMaskSize(mask2, textureMasksLow.getWidth());
+        checkMaskSize(mask3, textureMasksLow.getWidth());
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
             for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 float val0 = mask0.getValueAt(x, y);
@@ -535,6 +579,10 @@ public strictfp class SCMap {
     }
 
     public void setTextureMasksHighRaw(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+        checkMaskSize(mask0, textureMasksHigh.getWidth());
+        checkMaskSize(mask1, textureMasksHigh.getWidth());
+        checkMaskSize(mask2, textureMasksHigh.getWidth());
+        checkMaskSize(mask3, textureMasksHigh.getWidth());
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
             for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 float val0 = mask0.getValueAt(x, y);
@@ -616,6 +664,20 @@ public strictfp class SCMap {
 
     private int convertToRawTextureValue(float value) {
         return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
+    }
+
+    private void checkImageSize(BufferedImage image, int size) {
+        if (image.getWidth() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + image.getWidth() +
+                    " required size is " + size);
+        }
+    }
+
+    private void checkMaskSize(Mask<?> mask, int size) {
+        if (mask.getSize() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + mask.getSize() +
+                    " required size is " + size);
+        }
     }
 
     @SneakyThrows
