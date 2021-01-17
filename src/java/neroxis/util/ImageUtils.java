@@ -49,8 +49,17 @@ public class ImageUtils {
 
     public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height, Vector2f locToInsertTopLeft) {
         BufferedImage newImage = new BufferedImage(width, height, image.getType());
-        int[] imagePixels = image.getData().getPixels(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight() * image.getColorModel().getNumComponents()]);
-        newImage.getRaster().setPixels(StrictMath.round(locToInsertTopLeft.x), StrictMath.round(locToInsertTopLeft.y), image.getWidth(), image.getHeight(), imagePixels);
+        WritableRaster newImageRaster = newImage.getRaster();
+        Raster imageRaster = image.getData();
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int newX = x + (int) locToInsertTopLeft.x;
+                int newY = y + (int) locToInsertTopLeft.y;
+                if (newX >= 0 && newX < newImage.getWidth() && newY >= 0 && newY < newImage.getHeight()) {
+                    newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
+                }
+            }
+        }
         return newImage;
     }
 

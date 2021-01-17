@@ -1,6 +1,7 @@
 package neroxis.exporter;
 
 import neroxis.generator.PreviewGenerator;
+import neroxis.jsquish.Squish;
 import neroxis.map.*;
 import neroxis.util.DDSHeader;
 import neroxis.util.Vector2f;
@@ -12,8 +13,11 @@ import neroxis.util.serialized.WaterSettings;
 import javax.imageio.ImageIO;
 import java.awt.image.*;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 
+import static neroxis.jsquish.Squish.compressImage;
 import static neroxis.util.Swapper.swap;
 
 public strictfp class SCMapExporter {
@@ -46,7 +50,7 @@ public strictfp class SCMapExporter {
         previewDDSHeader.setBBitMask(0x000000FF);
         previewDDSHeader.setABitMask(0xFF000000);
 
-        writeImageData(map.getPreview(), previewDDSHeader);
+        writeRawImageData(map.getPreview(), previewDDSHeader);
 
         writeInt(map.getMinorVersion());
 
@@ -131,7 +135,7 @@ public strictfp class SCMapExporter {
 
         // normal maps
         writeInt(1); // normal map count
-        writeImageData(map.getNormalMap(), normalDDSHeader);
+        writeCompressedImage(map.getNormalMap(), normalDDSHeader);
 
         DDSHeader textureMaskLowDDSHeader = new DDSHeader();
         textureMaskLowDDSHeader.setWidth(map.getTextureMasksLow().getWidth());
@@ -142,7 +146,7 @@ public strictfp class SCMapExporter {
         textureMaskLowDDSHeader.setBBitMask(0x000000FF);
         textureMaskLowDDSHeader.setABitMask(0xFF000000);
 
-        writeImageData(map.getTextureMasksLow(), textureMaskLowDDSHeader);
+        writeRawImageData(map.getTextureMasksLow(), textureMaskLowDDSHeader);
 
         DDSHeader textureMaskHighDDSHeader = new DDSHeader();
         textureMaskHighDDSHeader.setWidth(map.getTextureMasksHigh().getWidth());
@@ -153,25 +157,22 @@ public strictfp class SCMapExporter {
         textureMaskHighDDSHeader.setBBitMask(0x000000FF);
         textureMaskHighDDSHeader.setABitMask(0xFF000000);
 
-        writeImageData(map.getTextureMasksHigh(), textureMaskHighDDSHeader);
+        writeRawImageData(map.getTextureMasksHigh(), textureMaskHighDDSHeader);
 
         DDSHeader waterDDSHeader = new DDSHeader();
         waterDDSHeader.setWidth(map.getWaterMap().getWidth());
         waterDDSHeader.setHeight(map.getWaterMap().getHeight());
         waterDDSHeader.setFourCC("DXT5");
-        byte[] waterHeaderBytes = waterDDSHeader.toBytes();
 
         // water maps
         writeInt(1); // unknown
-        writeInt(waterHeaderBytes.length + map.getWaterMap().getWidth() * map.getWaterMap().getHeight()); // watermap byte count
-        writeBytes(waterHeaderBytes); // dds header
-        writeBytes(((DataBufferByte) map.getWaterMap().getData().getDataBuffer()).getData()); // watermap data
+        writeCompressedImage(map.getWaterMap(), waterDDSHeader); // watermap data
         writeBytes(((DataBufferByte) map.getWaterFoamMask().getData().getDataBuffer()).getData()); // water foam mask data
         writeBytes(((DataBufferByte) map.getWaterFlatnessMask().getData().getDataBuffer()).getData()); // water flatness mask data
         writeBytes(((DataBufferByte) map.getWaterDepthBiasMask().getData().getDataBuffer()).getData()); // water depth bias mask data
 
         // terrain type
-        writeInts(((DataBufferInt) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
+        writeBytes(((DataBufferByte) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
 
         // additional skybox
         if (map.getMinorVersion() >= 60) {
@@ -410,10 +411,22 @@ public strictfp class SCMapExporter {
         writeFloat(skyBox.getClouds7());
     }
 
-    private static void writeImageData(BufferedImage image, DDSHeader ddsHeader) throws IOException {
+    private static void writeRawImageData(BufferedImage image, DDSHeader ddsHeader) throws IOException {
         byte[] headerBytes = ddsHeader.toBytes();
         writeInt(headerBytes.length + image.getWidth() * image.getHeight() * 4); // image byte count
         writeBytes(headerBytes);
         writeInts(((DataBufferInt) image.getData().getDataBuffer()).getData()); // image data
+    }
+
+    private static void writeCompressedImage(BufferedImage image, DDSHeader ddsHeader) throws IOException {
+        int[] imageData = ((DataBufferInt) image.getData().getDataBuffer()).getData();
+        byte[] headerBytes = ddsHeader.toBytes();
+        ByteBuffer imageBytes = ByteBuffer.allocate(imageData.length * 4).order(ByteOrder.LITTLE_ENDIAN);
+        imageBytes.asIntBuffer().put(imageData);
+        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+
+        writeInt(headerBytes.length + compressedData.length); // image byte count
+        writeBytes(headerBytes);
+        writeBytes(compressedData); // image data
     }
 }

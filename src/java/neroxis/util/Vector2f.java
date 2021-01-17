@@ -123,8 +123,8 @@ public strictfp class Vector2f {
     }
 
     public void roundToNearestHalfPoint() {
-        x = StrictMath.round(x * 2) / 2f;
-        y = StrictMath.round(y * 2) / 2f;
+        x = StrictMath.round(x - .5f) + .5f;
+        y = StrictMath.round(y - .5f) + .5f;
     }
 
     @Override

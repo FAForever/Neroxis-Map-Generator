@@ -1,12 +1,15 @@
 package neroxis.map;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import neroxis.biomes.Biome;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
@@ -48,6 +51,7 @@ public strictfp class SCMap {
     private final ArrayList<CubeMap> cubeMaps;
     private float heightMapScale = 1f / 128f;
     private String name = "";
+    @Setter(AccessLevel.NONE)
     private int size; // must be a power of 2. 512 equals a 10x10km Map
     private int minorVersion = 56;
     private String description = "";
@@ -119,7 +123,7 @@ public strictfp class SCMap {
         textureMasksLow = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         textureMasksHigh = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 
-        waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
         waterFoamMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         waterFlatnessMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         for (int y = 0; y < size / 2; y++) {
@@ -128,7 +132,8 @@ public strictfp class SCMap {
             }
         }
         waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
-        terrainType = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
+
+        terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
     }
 
     public int getSpawnCount() {
@@ -388,19 +393,19 @@ public strictfp class SCMap {
         Vector2f topLeftOffset = new Vector2f(centerOffset.x - (float) resizeCurrentMapContentTo / 2, centerOffset.y - (float) resizeCurrentMapContentTo / 2);
         float contentScaler = (float) resizeCurrentMapContentTo / (float) oldSize;
         float boundsScaler = (float) newMapBoundsSize / (float) oldSize / contentScaler;
-        float heightMultiplier = (float) resizeCurrentMapContentTo / (float) oldSize;
+        float heightMultiplier = (float) resizeCurrentMapContentTo / oldSize;
         float normalMapScale = (float) normalMap.getWidth() / size;
         float waterMapScale = (float) waterMap.getWidth() / size;
         float terrainTypeScale = (float) terrainType.getWidth() / size;
         float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
         float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
-        SymmetrySettings symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
-        setHeightImage(getHeightMask(symmetrySettings).multiply(heightMultiplier));
 
         this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * heightMultiplier);
         this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * heightMultiplier);
         this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * heightMultiplier);
 
+        RescaleOp heightRescale = new RescaleOp(heightMultiplier, 0, null);
+        heightRescale.filter(heightmap, heightmap);
         heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScaler) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScaler) + 1);
         heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScaler)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScaler) + 1, topLeftOffset);
         normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScaler), StrictMath.round(normalMap.getHeight() * contentScaler));
@@ -449,12 +454,12 @@ public strictfp class SCMap {
         armies.forEach(army -> army.getGroups().forEach(group -> repositionItems(group.getUnits(), contentScaler, topLeftOffset)));
     }
 
-    private void repositionItems(ArrayList<? extends PositionedObject> arrayListOfPositionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
-        for (PositionedObject positionedObject : arrayListOfPositionedObjects) {
+    private void repositionItems(ArrayList<? extends PositionedObject> positionedObjects, float distanceScaler, Vector2f shiftXAndZ) {
+        positionedObjects.forEach(positionedObject -> {
             Vector2f newPosition = new Vector2f(positionedObject.getPosition().x, positionedObject.getPosition().z);
             newPosition.multiply(distanceScaler).add(shiftXAndZ).roundToNearestHalfPoint();
             positionedObject.setPosition(placeOnHeightmap(this, newPosition));
-        }
+        });
     }
 
     public void setHeightImage(FloatMask heightmap) {
