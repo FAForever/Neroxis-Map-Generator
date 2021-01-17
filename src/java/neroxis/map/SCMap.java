@@ -83,7 +83,6 @@ public strictfp class SCMap {
     private BufferedImage waterFlatnessMask;
     private BufferedImage waterDepthBiasMask;
     private BufferedImage terrainType;
-    private BufferedImage oldTerrainType;
 
     private int miniMapContourInterval = 0;
     private int miniMapDeepWaterColor = 0;
