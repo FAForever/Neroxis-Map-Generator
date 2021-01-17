@@ -28,7 +28,7 @@ package neroxis.jsquish;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-final class AlphaBlock {
+final strictfp class AlphaBlock {
 
     private static final int[] swapped = new int[16];
 

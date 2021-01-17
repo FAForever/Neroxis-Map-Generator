@@ -28,17 +28,17 @@ package neroxis.jsquish;
 import neroxis.jsquish.Squish.CompressionMetric;
 import neroxis.jsquish.Squish.CompressionType;
 
-final class CompressorCluster extends CompressorColourFit {
+final strictfp class CompressorCluster extends CompressorColourFit {
 
-    private static final int MAX_ITERATIONS = 8;
+	private static final int MAX_ITERATIONS = 8;
 
-    private static final float TWO_THIRDS = 2.0f / 3.0f;
-    private static final float ONE_THIRD = 1.0f / 3.0f;
-    private static final float HALF = 0.5f;
-    private static final float ZERO = 0.0f;
-    private static final float[] dps = new float[16];
-    private static final float[] weighted = new float[16 * 3];
-    private static final float[] weights = new float[16];
+	private static final float TWO_THIRDS = 2.0f / 3.0f;
+	private static final float ONE_THIRD = 1.0f / 3.0f;
+	private static final float HALF = 0.5f;
+	private static final float ZERO = 0.0f;
+	private static final float[] dps = new float[16];
+	private static final float[] weighted = new float[16 * 3];
+	private static final float[] weights = new float[16];
     private static final int[] indices = new int[16];
     private static final int[] bestIndices = new int[16];
     private static final float[] alpha = new float[16];

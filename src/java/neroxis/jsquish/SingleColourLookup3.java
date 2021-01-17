@@ -25,7 +25,7 @@
 
 package neroxis.jsquish;
 
-final class SingleColourLookup3 {
+final strictfp class SingleColourLookup3 {
 
     static final int[][][] LOOKUP_5_3 = {
             {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}},

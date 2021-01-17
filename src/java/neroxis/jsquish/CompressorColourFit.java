@@ -27,17 +27,17 @@ package neroxis.jsquish;
 
 import neroxis.jsquish.Squish.CompressionType;
 
-abstract class CompressorColourFit {
+abstract strictfp class CompressorColourFit {
 
-    protected static final Vec ONE_V = new Vec(1.0f);
-    protected static final Vec ZERO_V = new Vec(0.0f);
+	protected static final Vec ONE_V = new Vec(1.0f);
+	protected static final Vec ZERO_V = new Vec(0.0f);
 
-    protected static final float GRID_X = 31.0f;
-    protected static final float GRID_Y = 63.0f;
-    protected static final float GRID_Z = 31.0f;
+	protected static final float GRID_X = 31.0f;
+	protected static final float GRID_Y = 63.0f;
+	protected static final float GRID_Z = 31.0f;
 
-    protected static final float GRID_X_RCP = 1.0f / GRID_X;
-    protected static final float GRID_Y_RCP = 1.0f / GRID_Y;
+	protected static final float GRID_X_RCP = 1.0f / GRID_X;
+	protected static final float GRID_Y_RCP = 1.0f / GRID_Y;
     protected static final float GRID_Z_RCP = 1.0f / GRID_Z;
 
     protected static final Matrix covariance = new Matrix();

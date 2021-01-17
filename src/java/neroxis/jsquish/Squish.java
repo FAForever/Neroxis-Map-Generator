@@ -27,7 +27,7 @@ package neroxis.jsquish;
 
 import lombok.Getter;
 
-public final class Squish {
+public strictfp final class Squish {
 
 
     private static final ColourSet colours = new ColourSet();

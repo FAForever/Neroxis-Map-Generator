@@ -35,16 +35,16 @@ import static neroxis.jsquish.SingleColourLookup3.LOOKUP_6_3;
 import static neroxis.jsquish.SingleColourLookup4.LOOKUP_5_4;
 import static neroxis.jsquish.SingleColourLookup4.LOOKUP_6_4;
 
-final class CompressorSingleColour extends CompressorColourFit {
+final strictfp class CompressorSingleColour extends CompressorColourFit {
 
-    private static final int[] indices = new int[16];
+	private static final int[] indices = new int[16];
 
-    private static final int[][][][] lookups = new int[3][][][];
+	private static final int[][][][] lookups = new int[3][][][];
 
-    private static final int[][] sources = new int[3][];
+	private static final int[][] sources = new int[3][];
 
-    private static final Vec start = new Vec();
-    private static final Vec end = new Vec();
+	private static final Vec start = new Vec();
+	private static final Vec end = new Vec();
 
     private static final int[] index = new int[1];
 

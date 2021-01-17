@@ -30,7 +30,7 @@ import java.util.Arrays;
 import static java.lang.Math.round;
 import static neroxis.jsquish.CompressorColourFit.*;
 
-final class ColourBlock {
+final strictfp class ColourBlock {
 
     private static final int[] remapped = new int[16];
 

@@ -27,7 +27,7 @@ package neroxis.jsquish;
 
 import neroxis.jsquish.Squish.CompressionType;
 
-final class ColourSet {
+final strictfp class ColourSet {
 
     private final Vec[] points = new Vec[16];
     private final float[] weights = new float[16];

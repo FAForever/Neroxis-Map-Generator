@@ -28,7 +28,7 @@ package neroxis.jsquish;
 import neroxis.jsquish.Squish.CompressionMetric;
 import neroxis.jsquish.Squish.CompressionType;
 
-final class CompressorRange extends CompressorColourFit {
+final strictfp class CompressorRange extends CompressorColourFit {
 
     private static final int[] closest = new int[16];
 

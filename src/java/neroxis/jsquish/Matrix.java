@@ -29,7 +29,7 @@ import java.util.Arrays;
 
 import static java.lang.Math.*;
 
-final class Matrix {
+final strictfp class Matrix {
 
     private static final float FLT_EPSILON = 0.00001f;
 
