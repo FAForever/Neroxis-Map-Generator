@@ -50,7 +50,7 @@ public strictfp class SCMapExporter {
         previewDDSHeader.setBBitMask(0x000000FF);
         previewDDSHeader.setABitMask(0xFF000000);
 
-        writeRawImageData(map.getPreview(), previewDDSHeader);
+        writeRawImage(map.getPreview(), previewDDSHeader);
 
         writeInt(map.getMinorVersion());
 
@@ -146,7 +146,7 @@ public strictfp class SCMapExporter {
         textureMaskLowDDSHeader.setBBitMask(0x000000FF);
         textureMaskLowDDSHeader.setABitMask(0xFF000000);
 
-        writeRawImageData(map.getTextureMasksLow(), textureMaskLowDDSHeader);
+        writeRawImage(map.getTextureMasksLow(), textureMaskLowDDSHeader);
 
         DDSHeader textureMaskHighDDSHeader = new DDSHeader();
         textureMaskHighDDSHeader.setWidth(map.getTextureMasksHigh().getWidth());
@@ -157,7 +157,7 @@ public strictfp class SCMapExporter {
         textureMaskHighDDSHeader.setBBitMask(0x000000FF);
         textureMaskHighDDSHeader.setABitMask(0xFF000000);
 
-        writeRawImageData(map.getTextureMasksHigh(), textureMaskHighDDSHeader);
+        writeRawImage(map.getTextureMasksHigh(), textureMaskHighDDSHeader);
 
         DDSHeader waterDDSHeader = new DDSHeader();
         waterDDSHeader.setWidth(map.getWaterMap().getWidth());
@@ -411,7 +411,7 @@ public strictfp class SCMapExporter {
         writeFloat(skyBox.getClouds7());
     }
 
-    private static void writeRawImageData(BufferedImage image, DDSHeader ddsHeader) throws IOException {
+    private static void writeRawImage(BufferedImage image, DDSHeader ddsHeader) throws IOException {
         byte[] headerBytes = ddsHeader.toBytes();
         writeInt(headerBytes.length + image.getWidth() * image.getHeight() * 4); // image byte count
         writeBytes(headerBytes);

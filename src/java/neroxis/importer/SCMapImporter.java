@@ -150,17 +150,17 @@ public strictfp class SCMapImporter {
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        byte[] normalMapData = readCompressedImageData();
+        byte[] normalMapData = readCompressedImage();
 
         // texture maps
-        int[] textureMaskLowData = readRawImageData();
-        int[] textureMaskHighData = readRawImageData();
+        int[] textureMaskLowData = readRawImage();
+        int[] textureMaskHighData = readRawImage();
 
         // water maps
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        byte[] waterMapData = readCompressedImageData();
+        byte[] waterMapData = readCompressedImage();
         int halfSize = (heightInt / 2) * (widthInt / 2);
         byte[] waterFoamMaskData = readBytes(halfSize);
         byte[] waterFlatnessData = readBytes(halfSize);
@@ -473,13 +473,13 @@ public strictfp class SCMapImporter {
         return new DecalGroup(name, data);
     }
 
-    private static int[] readRawImageData() throws IOException {
+    private static int[] readRawImage() throws IOException {
         int byteCount = readInt() - 128;
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
         return readInts(byteCount / 4);
     }
 
-    private static byte[] readCompressedImageData() throws IOException {
+    private static byte[] readCompressedImage() throws IOException {
         int byteCount = readInt() - 128;
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
         return decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount), Squish.CompressionType.DXT5);
