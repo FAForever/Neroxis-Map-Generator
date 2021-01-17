@@ -55,7 +55,7 @@ public class ImageUtils {
             for (int y = 0; y < image.getHeight(); y++) {
                 int newX = x + (int) locToInsertTopLeft.x;
                 int newY = y + (int) locToInsertTopLeft.y;
-                if (newX >= 0 && newX < newImage.getWidth() && newY >= 0 && newY < newImage.getHeight()) {
+                if (inImageBounds(newX, newY, newImage)) {
                     newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
                 }
             }
@@ -105,6 +105,14 @@ public class ImageUtils {
     public static void writeAutoScaledPNGFromMask(FloatMask mask, Path path) throws IOException {
         float scaleMultiplier = 255 / mask.getMax();
         writePNGFromMasks(mask, mask, mask, scaleMultiplier, path);
+    }
+
+    public static boolean inImageBounds(Vector2f position, BufferedImage image) {
+        return inImageBounds((int) position.x, (int) position.y, image);
+    }
+
+    public static boolean inImageBounds(int x, int y, BufferedImage image) {
+        return x >= 0 && x < image.getWidth() && y >= 0 && y < image.getHeight();
     }
 
 }
