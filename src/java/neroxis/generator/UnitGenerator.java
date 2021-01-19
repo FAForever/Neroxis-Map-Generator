@@ -56,11 +56,9 @@ public strictfp class UnitGenerator {
             "/base_template/UEFMediumReclaim.lua"
     };
 
-    private final SCMap map;
     private final Random random;
 
-    public UnitGenerator(SCMap map, long seed) {
-        this.map = map;
+    public UnitGenerator(long seed) {
         random = new Random(seed);
     }
 

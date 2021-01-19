@@ -577,11 +577,10 @@ public strictfp class MapPopulator {
             BinaryMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
             passableLand.intersect(passableAI);
             passableWater.deflate(16).intersect(passableAI).fillEdge(8, false);
-            AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map);
-            aiMarkerGenerator.generateAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
-            aiMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
-            aiMarkerGenerator.generateAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");
-            aiMarkerGenerator.generateAirAIMarkers();
+            AIMarkerGenerator.generateAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
+            AIMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
+            AIMarkerGenerator.generateAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");
+            AIMarkerGenerator.generateAirAIMarkers(map);
         }
 
         map.setHeights();

@@ -83,7 +83,7 @@ public strictfp class MexGenerator {
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() * .45f, true)
                 .fillCenter(96, false).fillEdge(32, false).intersect(spawnable);
 
-        map.getSpawns().forEach(spawn -> expansionSpawnable.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
+        map.getSpawns().forEach(spawn -> expansionSpawnable.fillCircle(spawn.getPosition(), map.getSize() / 4f, false));
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
         int expSpacing = map.getSize() / 4;

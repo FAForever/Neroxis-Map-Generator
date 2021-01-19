@@ -8,13 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public strictfp class AIMarkerGenerator {
-    private final SCMap map;
 
-    public AIMarkerGenerator(SCMap map) {
-        this.map = map;
-    }
-
-    public void generateAIMarkers(BinaryMask passable, List<AIMarker> markers, String nameFormat) {
+    public static void generateAIMarkers(BinaryMask passable, List<AIMarker> markers, String nameFormat) {
         LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
         coordinates.addAll(passable.getDistanceField().getLocalMaximums(8, passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
@@ -57,7 +52,7 @@ public strictfp class AIMarkerGenerator {
         }));
     }
 
-    public void generateAirAIMarkers() {
+    public static void generateAirAIMarkers(SCMap map) {
         float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
         List<Vector2f> airCoordinates = new BinaryMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);

@@ -84,7 +84,6 @@ public strictfp class MapGenerator {
     private Biome biome;
 
     private SCMap map;
-    private int spawnSeparation;
     private float waterHeight;
     private boolean optionsUsed = false;
 
@@ -179,7 +178,6 @@ public strictfp class MapGenerator {
         System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
         System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
         System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
-        System.out.println("Spawn Separation: " + generator.spawnSeparation);
         System.out.println("Done");
     }
 
@@ -657,20 +655,9 @@ public strictfp class MapGenerator {
         HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
-        UnitGenerator unitGenerator = new UnitGenerator(map, random.nextLong());
-        AIMarkerGenerator aiMarkerGenerator = new AIMarkerGenerator(map);
+        UnitGenerator unitGenerator = new UnitGenerator(random.nextLong());
 
-        switch (terrainSymmetry) {
-            case Z:
-            case X:
-                spawnSeparation = StrictMath.max(StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, map.getSize() / spawnCount), 48);
-                break;
-            case NONE:
-                spawnSeparation = mapSize / spawnCount * 2;
-                break;
-            default:
-                spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 32) + map.getSize() / 32, 48);
-        }
+        int spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16;
 
         BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, plateauDensity);
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
@@ -684,10 +671,10 @@ public strictfp class MapGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() -> {
             Pipeline.await(passable, passableLand, passableWater);
             long sTime = System.currentTimeMillis();
-            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> aiMarkerGenerator.generateAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
-            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> aiMarkerGenerator.generateAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
-            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> aiMarkerGenerator.generateAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
-            CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(aiMarkerGenerator::generateAirAIMarkers);
+            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerGenerator.generateAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
+            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerGenerator.generateAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
+            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerGenerator.generateAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
+            CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(() -> AIMarkerGenerator.generateAirAIMarkers(map));
             AmphibiousMarkers.join();
             LandMarkers.join();
             NavyMarkers.join();
@@ -999,15 +986,14 @@ public strictfp class MapGenerator {
             map.getSpawns().forEach(startSpawn -> {
                 ArrayList<Spawn> otherSpawns = new ArrayList<>(map.getSpawns());
                 otherSpawns.remove(startSpawn);
-                for (int i = 0; i < 1; i++) {
-                    Spawn endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
-                    Vector2f start = new Vector2f(startSpawn.getPosition());
-                    Vector2f end = new Vector2f(endSpawn.getPosition());
-                    int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                    connections.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.TERRAIN);
-                }
+                Spawn endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
+                Vector2f start = new Vector2f(startSpawn.getPosition());
+                Vector2f end = new Vector2f(endSpawn.getPosition());
+                int numMiddlePoints = random.nextInt(maxMiddlePoints);
+                connections.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.TERRAIN);
+
             });
-            connections.grow(.5f, SymmetryType.SPAWN, 8).smooth(6, SymmetryType.TERRAIN);
+            connections.grow(.5f, SymmetryType.SPAWN, 12).smooth(6, SymmetryType.TERRAIN);
 
             mountains.minus(connections);
         }
@@ -1049,7 +1035,7 @@ public strictfp class MapGenerator {
         float distanceThreshold = maxStepSize / 2f;
         int maxMiddlePoints = 4;
         int numPathsPerPlayer = (int) (rampDensity * 4 + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-        int numPaths = (int) (rampDensity * 20 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount;
+        int numPaths = (int) (rampDensity * 20 + 4 + 8 * plateauDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount;
         int bound = mapSize / 4;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
         map.getSpawns().forEach(spawn -> {
