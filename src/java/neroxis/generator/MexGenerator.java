@@ -42,8 +42,6 @@ public strictfp class MexGenerator {
         }
 
         int numPlayerMexes = numMexesLeft / map.getSpawnCount() / numSymPoints;
-        map.getSpawns().forEach(spawn -> {
-        });
         for (Spawn spawn : map.getSpawns()) {
             BinaryMask playerSpawnable = new BinaryMask(spawnable.getSize(), 0L, spawnable.getSymmetrySettings());
             playerSpawnable.fillCircle(spawn.getPosition(), map.getSize(), true).intersect(spawnable);
@@ -65,11 +63,12 @@ public strictfp class MexGenerator {
 
     public void generateBaseMexes(BinaryMask spawnable) {
         int numBaseMexes = (random.nextInt(2) + 3);
-        map.getSpawns().forEach(spawn -> {
+        for (int i = 0; i < map.getSpawnCount(); i += spawnable.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
+            Spawn spawn = map.getSpawn(i);
             BinaryMask baseMexes = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
             baseMexes.fillCircle(spawn.getPosition(), 15, true).fillCircle(spawn.getPosition(), 5, false).intersect(spawnable);
             generateIndividualMexes(baseMexes, numBaseMexes, 10);
-        });
+        }
     }
 
     public void generateMexExpansions(BinaryMask spawnable, int possibleExpMexCount) {
@@ -83,7 +82,7 @@ public strictfp class MexGenerator {
         expansionSpawnable.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() * .45f, true)
                 .fillCenter(96, false).fillEdge(32, false).intersect(spawnable);
 
-        map.getSpawns().forEach(spawn -> expansionSpawnable.fillCircle(spawn.getPosition(), map.getSize() / 4f, false));
+        map.getSpawns().forEach(spawn -> expansionSpawnable.fillCircle(spawn.getPosition(), map.getSize() / 3f, false));
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
         int expSpacing = map.getSize() / 4;

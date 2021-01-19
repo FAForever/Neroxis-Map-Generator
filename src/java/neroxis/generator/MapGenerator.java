@@ -1034,7 +1034,7 @@ public strictfp class MapGenerator {
         float maxStepSize = mapSize / 128f;
         float distanceThreshold = maxStepSize / 2f;
         int maxMiddlePoints = 4;
-        int numPathsPerPlayer = (int) (rampDensity * 4 + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numPathsPerPlayer = (int) (rampDensity * 4 + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int numPaths = (int) (rampDensity * 20 + 4 + 8 * plateauDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount;
         int bound = mapSize / 4;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
