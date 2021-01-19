@@ -90,8 +90,8 @@ public strictfp class ScriptGenerator {
                 "\tlocal decalInfo = {decal = decal, position = position}\n" +
                 "\tcount = count + 1\n" +
                 "\ttable.insert(decals, decalInfo)\n" +
-                "\tfor i=decalSize / 2,ScenarioInfo.size[1] + decalSize / 2,decalSpacing do\n" +
-                "\t\tfor j=decalSize / 2,ScenarioInfo.size[2] + decalSize / 2,decalSpacing do\n" +
+                "\tfor i=decalSize / 2,ScenarioInfo.size[1],decalSpacing do\n" +
+                "\t\tfor j=decalSize / 2,ScenarioInfo.size[2],decalSpacing do\n" +
                 "\t\t\tlocal decal = CreateDecal({i, 0, j}, 0, \"/env/Common/decals/NoSpec_spec.dds\", \"\", \"Water Albedo\", decalSize * 1.125, decalSize * 1.125, 10000, 0, -1, -1)\n" +
                 "\t\t\tlocal position = {i,0,j}\n" +
                 "\t\t\tlocal decalInfo = {decal = decal, position = position}\n" +
