@@ -516,8 +516,8 @@ public strictfp class MapGenerator {
                 teams = new ArrayList<>(Arrays.asList(Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
                 break;
             default:
-                spawns = new ArrayList<>(Arrays.asList(terrainSymmetry));
-                teams = new ArrayList<>(Arrays.asList(terrainSymmetry));
+                spawns = new ArrayList<>(Collections.singletonList(terrainSymmetry));
+                teams = new ArrayList<>(Collections.singletonList(terrainSymmetry));
                 break;
         }
         if (numTeams != 0) {
@@ -1048,27 +1048,27 @@ public strictfp class MapGenerator {
         float maxStepSize = mapSize / 128f;
         float distanceThreshold = maxStepSize / 2f;
         int maxMiddlePoints = 4;
-        int numPathsPerPlayer = (int) (rampDensity * 8 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
-        int numPaths = (int) (rampDensity * 12 + 8) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount / 4;
-        int bound = mapSize / 32;
+        int numPathsPerPlayer = (int) (rampDensity * 4 + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numPaths = (int) (rampDensity * 20 + 4) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount;
+        int bound = mapSize / 4;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
         map.getSpawns().forEach(spawn -> {
             for (int i = 0; i < numPathsPerPlayer; i++) {
                 Vector2f start = new Vector2f(spawn.getPosition());
-                Vector2f end = new Vector2f(random.nextInt(mapSize * 3 / 4) + start.getX() - mapSize * 3 / 4f,
-                        random.nextInt(mapSize * 3 / 4) + start.getY() - mapSize * 3 / 8f);
+                Vector2f end = new Vector2f(random.nextInt(mapSize / 2) + start.getX() - mapSize / 4f,
+                        random.nextInt(mapSize / 2) + start.getY() - mapSize / 4f);
                 int numMiddlePoints = random.nextInt(maxMiddlePoints) + 2;
-                ramps.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.TERRAIN);
+                ramps.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.SPAWN);
             }
         });
         for (int i = 0; i < numPaths; i++) {
-            Vector2f start = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
-            Vector2f end = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
+            Vector2f start = new Vector2f(random.nextInt(mapSize + 1), random.nextInt(mapSize + 1));
+            Vector2f end = new Vector2f(random.nextInt(bound * 2) - bound + start.getX(), random.nextInt(bound * 2) - bound + start.getY());
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             ramps.path(start, end, maxStepSize, numMiddlePoints, SymmetryType.TERRAIN);
         }
         ramps.inflate(distanceThreshold).intersect(plateaus.copy().outline())
-                .minus(mountains.copy().inflate(8)).inflate(12).smooth(8, .5f, SymmetryType.SPAWN);
+                .minus(mountains.copy().inflate(16)).inflate(12).smooth(8, .5f, SymmetryType.SPAWN);
     }
 
     private void setupHeightmapPipeline() {
@@ -1127,7 +1127,7 @@ public strictfp class MapGenerator {
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(LAND_HEIGHT)
                 .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
                 .smooth(1, spawnPlateauMask.copy().inflate(4)).smooth(18, ramps).smooth(12, ramps.copy().inflate(8))
-                .smooth(4, ramps.copy().inflate(12));
+                .smooth(6, ramps.copy().inflate(12)).smooth(2, ramps.copy().inflate(16));
 
         heightmapBase.add(heightmapOcean).smooth(1).add(heightmapLand);
 
