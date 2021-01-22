@@ -467,11 +467,17 @@ public strictfp class SCMap {
     }
 
     private void scaleMapContent(float contentScale) {
-        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * contentScale);
-        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * contentScale);
-        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * contentScale);
+        float maxHeightScale = getHeightMask(new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE)).getMax() * contentScale;
+        if (maxHeightScale > 255) {
+            maxHeightScale = contentScale / maxHeightScale * 255;
+        } else {
+            maxHeightScale = contentScale;
+        }
+        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * maxHeightScale);
+        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * maxHeightScale);
+        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * maxHeightScale);
 
-        RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
+        RescaleOp heightRescale = new RescaleOp(maxHeightScale, 0, null);
         heightRescale.filter(heightmap, heightmap);
         heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScale) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScale) + 1);
         normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScale), StrictMath.round(normalMap.getHeight() * contentScale));
