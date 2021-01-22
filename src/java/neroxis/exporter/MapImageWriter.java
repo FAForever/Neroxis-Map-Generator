@@ -136,53 +136,45 @@ public strictfp class MapImageWriter {
         map.setHeightImage(heightmapBase);
 
         FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
-        FloatMask oldLayer1 = texturesMasks[0];
-        FloatMask oldLayer2 = texturesMasks[1];
-        FloatMask oldLayer3 = texturesMasks[2];
-        FloatMask oldLayer4 = texturesMasks[3];
-        FloatMask oldLayer5 = texturesMasks[4];
-        FloatMask oldLayer6 = texturesMasks[5];
-        FloatMask oldLayer7 = texturesMasks[6];
-        FloatMask oldLayer8 = texturesMasks[7];
         if(writeLayerh) {
             neroxis.util.ImageUtils.writePNGFromMask(heightmapBase, 1, Paths.get(writeImagesPath + "\\Heightmap.png"));
         }
         if(writeLayer1) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer1, 255, Paths.get(writeImagesPath + "\\Layer 1.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[0], 255, Paths.get(writeImagesPath + "\\Layer 1.png"));
         }
         if(writeLayer2) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer2, 255, Paths.get(writeImagesPath + "\\Layer 2.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[1], 255, Paths.get(writeImagesPath + "\\Layer 2.png"));
         }
         if(writeLayer3) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer3, 255, Paths.get(writeImagesPath + "\\Layer 3.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[2], 255, Paths.get(writeImagesPath + "\\Layer 3.png"));
         }
         if(writeLayer4) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer4, 255, Paths.get(writeImagesPath + "\\Layer 4.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[3], 255, Paths.get(writeImagesPath + "\\Layer 4.png"));
         }
         if(writeLayer5) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer5, 255, Paths.get(writeImagesPath + "\\Layer 5.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[4], 255, Paths.get(writeImagesPath + "\\Layer 5.png"));
         }
         if(writeLayer6) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer6, 255, Paths.get(writeImagesPath + "\\Layer 6.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[5], 255, Paths.get(writeImagesPath + "\\Layer 6.png"));
         }
         if(writeLayer7) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer7, 255, Paths.get(writeImagesPath + "\\Layer 7.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[6], 255, Paths.get(writeImagesPath + "\\Layer 7.png"));
         }
         if(writeLayer8) {
-            neroxis.util.ImageUtils.writePNGFromMask(oldLayer8, 255, Paths.get(writeImagesPath + "\\Layer 8.png"));
+            neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[7], 255, Paths.get(writeImagesPath + "\\Layer 8.png"));
         }
         if(writeLayer0) {
-            int mapImageSize = oldLayer1.getSize();
-            oldLayer1.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer2.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer3.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer4.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer5.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer6.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer7.min(0f).max(1f).setSize(mapImageSize);
-            oldLayer8.min(0f).max(1f).setSize(mapImageSize);
+            int mapImageSize = texturesMasks[0].getSize();
+            texturesMasks[0].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[1].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[2].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[3].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[4].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[5].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[6].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[7].min(0f).max(1f).setSize(mapImageSize);
             FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1).min(0f);
+            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).min(0f);
             neroxis.util.ImageUtils.writePNGFromMask(oldLayer0, 255, Paths.get(writeImagesPath + "\\Layer 0.png"));
         }
     }

@@ -304,17 +304,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask inflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
 
-        float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (isEdge(x, y) && getValueAt(x, y)) {
-                    for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
-                        for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
-                            if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                                maskCopy[x2][y2] = true;
-                            }
-                        }
-                    }
+                    markTrueInRadius(radius, maskCopy, x, y);
                 }
             }
         }
@@ -335,17 +328,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask deflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
 
-        float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (isEdge(x, y) && !getValueAt(x, y)) {
-                    for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
-                        for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
-                            if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                                maskCopy[x2][y2] = true;
-                            }
-                        }
-                    }
+                    markTrueInRadius(radius, maskCopy, x, y);
                 }
             }
         }
@@ -361,6 +347,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    private void markTrueInRadius(float radius, Boolean[][] maskCopy, int x, int y) {
+        float radius2 = (radius + 0.5f) * (radius + 0.5f);
+        for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
+            for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
+                if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                    maskCopy[x2][y2] = true;
+                }
+            }
+        }
     }
 
     public BinaryMask cutCorners() {
@@ -415,7 +412,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     if (isEdge(x, y)) {
                         boolean value = random.nextFloat() < strength || getValueAt(x, y);
                         maskCopy.setValueAt(x, y, value);
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                     }
                 }
             }
@@ -442,7 +438,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     if (isEdge(x, y)) {
                         boolean value = random.nextFloat() > strength && getValueAt(x, y);
                         maskCopy.setValueAt(x, y, value);
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                     }
                 }
             }
@@ -467,29 +462,20 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask interpolate() {
-        return smooth(1, .35f, SymmetryType.SPAWN);
+        return smooth(1, .35f);
     }
 
-    public BinaryMask smooth(int radius, SymmetryType symmetryType) {
-        return smooth(radius, .5f, symmetryType);
+    public BinaryMask smooth(int radius) {
+        return smooth(radius, .5f);
     }
 
-    public BinaryMask smooth(int radius, float density, SymmetryType symmetryType) {
+    public BinaryMask smooth(int radius, float density) {
         int[][] innerCount = getInnerCount();
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
-                int xLeft = StrictMath.max(0, x - radius);
-                int xRight = StrictMath.min(getSize() - 1, x + radius);
-                int yUp = StrictMath.max(0, y - radius);
-                int yDown = StrictMath.min(getSize() - 1, y + radius);
-                int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                int countD = innerCount[xRight][yDown];
-                int count = countD + countA - countB - countC;
-                int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                setValueAt(x, y, count >= area * density);
+                float areaDensity = calculateAreaAverage(radius, x, y, innerCount);
+                setValueAt(x, y, areaDensity >= density);
             }
         }
 
@@ -829,32 +815,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillShape(Vector2f location) {
-        LinkedHashSet<Vector2f> area = new LinkedHashSet<>();
-        LinkedHashSet<Vector2f> edge = new LinkedHashSet<>();
-        LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
-        LinkedList<Vector2f> queue = new LinkedList<>();
-        List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
-        boolean value = getValueAt(location);
-        queue.add(location);
-        queueHash.add(location);
-        while (queue.size() > 0) {
-            Vector2f next = queue.get(0);
-            queue.remove(next);
-            queueHash.remove(next);
-            if (getValueAt(next) == value && !area.contains(next)) {
-                setValueAt(next, !value);
-                area.add(next);
-                edges.forEach((e) -> {
-                    Vector2f newLocation = new Vector2f(next.getX() + e[0], next.getY() + e[1]);
-                    if (!queueHash.contains(newLocation) && !area.contains(newLocation) && !edge.contains(newLocation) && inBounds(newLocation)) {
-                        queue.add(newLocation);
-                        queueHash.add(newLocation);
-                    }
-                });
-            } else if (mask[(int) next.getX()][(int) next.getY()] != value) {
-                edge.add(next);
-            }
-        }
+        fillCoordinates(getShapeCoordinates(location), !getValueAt(location));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -960,16 +921,14 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return copy().inflate(edgeDistance).minus(copy().deflate(edgeDistance));
     }
 
+    @Override
     public int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 int val = getValueAt(x, y) ? 1 : 0;
-                innerCount[x][y] = val;
-                innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
-                innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
-                innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+                calculateInnerValue(innerCount, x, y, val);
             }
         }
         return innerCount;
@@ -978,15 +937,33 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public FloatMask getDistanceField() {
         FloatMask distanceField = new FloatMask(getSize(), random.nextLong(), symmetrySettings);
         distanceField.init(this, getSize() * getSize(), 0f);
+        addCalculatedParabolicDistance(distanceField, false);
+        addCalculatedParabolicDistance(distanceField, true);
+        distanceField.sqrt();
+        return distanceField;
+    }
+
+    private void addCalculatedParabolicDistance(FloatMask distanceField, boolean useColumns) {
         for (int i = 0; i < getSize(); i++) {
             ArrayList<Vector2f> vertices = new ArrayList<>();
             ArrayList<Vector2f> intersections = new ArrayList<>();
             int index = 0;
-            vertices.add(new Vector2f(0, distanceField.getValueAt(i, 0)));
+            float value;
+            if (!useColumns) {
+                value = distanceField.getValueAt(i, 0);
+            } else {
+                value = distanceField.getValueAt(0, i);
+            }
+            vertices.add(new Vector2f(0, value));
             intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
             intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
             for (int j = 1; j < getSize(); j++) {
-                Vector2f current = new Vector2f(j, distanceField.getValueAt(i, j));
+                if (!useColumns) {
+                    value = distanceField.getValueAt(i, j);
+                } else {
+                    value = distanceField.getValueAt(j, i);
+                }
+                Vector2f current = new Vector2f(j, value);
                 Vector2f vertex = vertices.get(index);
                 float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
                 while (xIntersect <= intersections.get(index).getX()) {
@@ -1018,48 +995,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 distanceField.setValueAt(i, j, dx * dx + vertex.getY());
             }
         }
-        for (int i = 0; i < getSize(); i++) {
-            ArrayList<Vector2f> vertices = new ArrayList<>();
-            ArrayList<Vector2f> intersections = new ArrayList<>();
-            int index = 0;
-            vertices.add(new Vector2f(0, distanceField.getValueAt(0, i)));
-            intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.MAX_VALUE));
-            intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.MAX_VALUE));
-            for (int j = 1; j < getSize(); j++) {
-                Vector2f current = new Vector2f(j, distanceField.getValueAt(j, i));
-                Vector2f vertex = vertices.get(index);
-                float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
-                while (xIntersect <= intersections.get(index).getX()) {
-                    index -= 1;
-                    vertex = vertices.get(index);
-                    xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
-                }
-                index += 1;
-                if (index < vertices.size()) {
-                    vertices.set(index, current);
-                } else {
-                    vertices.add(current);
-                }
-                if (index < intersections.size() - 1) {
-                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.set(index + 1, new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-                } else {
-                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-                }
-            }
-            index = 0;
-            for (int j = 0; j < getSize(); j++) {
-                while (intersections.get(index + 1).getX() < j) {
-                    index += 1;
-                }
-                Vector2f vertex = vertices.get(index);
-                float dx = j - vertex.getX();
-                distanceField.setValueAt(j, i, dx * dx + vertex.getY());
-            }
-        }
-        distanceField.sqrt();
-        return distanceField;
     }
 
     public int getCount() {
@@ -1099,17 +1034,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public LinkedList<Vector2f> getSpacedCoordinates(float radius, int spacing) {
         LinkedList<Vector2f> coordinateList = getAllCoordinates(spacing);
-        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
-        while (coordinateList.size() > 0) {
-            Vector2f location = coordinateList.removeFirst();
-            chosenCoordinates.add(location);
-            coordinateList.removeIf((loc) -> location.getDistance(loc) < radius);
-        }
-        return new LinkedList<>(chosenCoordinates);
+        return spaceCoordinates(radius, coordinateList);
     }
 
     public LinkedList<Vector2f> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
         LinkedList<Vector2f> coordinateList = getAllCoordinatesEqualTo(value, spacing);
+        return spaceCoordinates(radius, coordinateList);
+    }
+
+    private LinkedList<Vector2f> spaceCoordinates(float radius, LinkedList<Vector2f> coordinateList) {
         LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
         while (coordinateList.size() > 0) {
             Vector2f location = coordinateList.removeFirst();
@@ -1154,15 +1087,19 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         Vector2f end = symLocationList.get(0).getLocation();
         int maskSize = getSize();
         while (location.getDistance(end) > distanceThreshold) {
-            for (int i = 0; i < usesBatchSize; i++) {
-                int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                location.add(dx, dy).clampMax(maskSize, maskSize).clampMin(0, 0);
-                combineWithOffset(brush, location, true);
-            }
+            useBrushRandomly(usesBatchSize, maxDistanceBetweenBrushUse, brush, location, maskSize);
         }
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    private void useBrushRandomly(int batchSize, int maxDistanceBetweenBrushUse, BinaryMask brush, Vector2f location, int maskSize) {
+        for (int i = 0; i < batchSize; i++) {
+            int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+            int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
+            location.add(dx, dy).clampMax(maskSize, maskSize).clampMin(0, 0);
+            combineWithOffset(brush, location, true);
+        }
     }
 
     public BinaryMask connectLocationToLocationFromList(Vector2f start, ArrayList<Vector2f> targetLocations, String brushName, int size, int batchSize,
@@ -1172,12 +1109,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         int maskSize = getSize();
         Vector2f location = new Vector2f(start);
         while (targetLocations.stream().noneMatch(target -> location.getDistance(target) < distanceThreshold)) {
-            for (int i = 0; i < batchSize; i++) {
-                int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-                location.add(dx, dy).clampMax(maskSize, maskSize).clampMin(0, 0);
-                combineWithOffset(brush, location, true);
-            }
+            useBrushRandomly(batchSize, maxDistanceBetweenBrushUse, brush, location, maskSize);
         }
         VisualDebugger.visualizeMask(this);
         return this;

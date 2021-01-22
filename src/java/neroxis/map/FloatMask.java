@@ -44,9 +44,9 @@ public strictfp class FloatMask extends Mask<Float> {
         this.symmetrySettings = symmetrySettings;
         for (int y = 0; y < this.getSize(); y++) {
             for (int x = 0; x < this.getSize(); x++) {
-                int[] vals = new int[1];
-                imageData.getPixel(x, y, vals);
-                this.mask[x][y] = vals[0] / 255f;
+                int[] value = new int[1];
+                imageData.getPixel(x, y, value);
+                this.mask[x][y] = value[0] / 255f;
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -570,17 +570,7 @@ public strictfp class FloatMask extends Mask<Float> {
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
-                int xLeft = StrictMath.max(0, x - radius);
-                int xRight = StrictMath.min(getSize() - 1, x + radius);
-                int yUp = StrictMath.max(0, y - radius);
-                int yDown = StrictMath.min(getSize() - 1, y + radius);
-                int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                int countD = innerCount[xRight][yDown];
-                float count = (countD + countA - countB - countC) / 1000f;
-                int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                setValueAt(x, y, count / area);
+                setValueAt(x, y, calculateAreaAverage(radius, x, y, innerCount) / 1000);
             }
         }
 
@@ -595,17 +585,7 @@ public strictfp class FloatMask extends Mask<Float> {
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (limiter.getValueAt(x, y)) {
-                    int xLeft = StrictMath.max(0, x - radius);
-                    int xRight = StrictMath.min(getSize() - 1, x + radius);
-                    int yUp = StrictMath.max(0, y - radius);
-                    int yDown = StrictMath.min(getSize() - 1, y + radius);
-                    int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                    int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                    int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                    int countD = innerCount[xRight][yDown];
-                    float count = (countD + countA - countB - countC) / 1000f;
-                    int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                    setValueAt(x, y, count / area);
+                    setValueAt(x, y, calculateAreaAverage(radius, x, y, innerCount) / 1000);
                 }
             }
         }
@@ -619,17 +599,8 @@ public strictfp class FloatMask extends Mask<Float> {
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
-                int xLeft = StrictMath.max(0, x - radius);
-                int xRight = StrictMath.min(getSize() - 1, x + radius);
-                int yUp = StrictMath.max(0, y - radius);
-                int yDown = StrictMath.min(getSize() - 1, y + radius);
-                int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                int countD = innerCount[xRight][yDown];
-                float count = (countD + countA - countB - countC) / 1000f;
-                int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                setValueAt(x, y, count / area * count / area);
+                float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
+                setValueAt(x, y, value * value);
             }
         }
 
@@ -644,17 +615,8 @@ public strictfp class FloatMask extends Mask<Float> {
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 if (limiter.getValueAt(x, y)) {
-                    int xLeft = StrictMath.max(0, x - radius);
-                    int xRight = StrictMath.min(getSize() - 1, x + radius);
-                    int yUp = StrictMath.max(0, y - radius);
-                    int yDown = StrictMath.min(getSize() - 1, y + radius);
-                    int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-                    int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-                    int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-                    int countD = innerCount[xRight][yDown];
-                    float count = (countD + countA - countB - countC) / 1000f;
-                    int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-                    setValueAt(x, y, count / area * count / area);
+                    float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
+                    setValueAt(x, y, value * value);
                 }
             }
         }
@@ -746,10 +708,10 @@ public strictfp class FloatMask extends Mask<Float> {
     public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
         checkMatchingSize(avoidMakingZonesHere);
         avoidMakingZonesHere = avoidMakingZonesHere.copy();
-        FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, 1f * floatMax);
-        BinaryMask zones = newMaskInZones.copy().zeroInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, 1f * floatMax).inflate(34);
-        BinaryMask newMaskInZonesBase = convertToBinaryMask(1f * floatMax, 1f * floatMax).deflate(3).minus(zones.copy().invert());
-        newMaskInZones.init(newMaskInZonesBase, 0, 1).smooth(4).max(0.35f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(2).max(0.65f * floatMax).add(newMaskInZonesBase, 1f * floatMax).smooth(1).add(newMaskInZonesBase, 1f * floatMax).max(1f * floatMax);
+        FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, floatMax);
+        BinaryMask zones = newMaskInZones.copy().zeroInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, floatMax).inflate(34);
+        BinaryMask newMaskInZonesBase = convertToBinaryMask(floatMax, floatMax).deflate(3).minus(zones.copy().invert());
+        newMaskInZones.init(newMaskInZonesBase, 0, 1).smooth(4).max(0.35f * floatMax).add(newMaskInZonesBase, floatMax).smooth(2).max(0.65f * floatMax).add(newMaskInZonesBase, floatMax).smooth(1).add(newMaskInZonesBase, floatMax).max(floatMax);
         replaceValues(zones, newMaskInZones).smoothWithinEdgeDistance(zones, 30);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -770,9 +732,9 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
         for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), 1f * floatMax);
+            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
         }
-        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, 1f * floatMax);
+        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -805,16 +767,14 @@ public strictfp class FloatMask extends Mask<Float> {
         return localMaxima;
     }
 
+    @Override
     public int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
 
         for (int x = 0; x < getSize(); x++) {
             for (int y = 0; y < getSize(); y++) {
                 int val = StrictMath.round(getValueAt(x, y) * 1000);
-                innerCount[x][y] = val;
-                innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
-                innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
-                innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+                calculateInnerValue(innerCount, x, y, val);
             }
         }
         return innerCount;

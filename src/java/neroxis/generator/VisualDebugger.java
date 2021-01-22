@@ -28,7 +28,6 @@ public class VisualDebugger {
      */
     public static boolean ignoreNegativeRange = false;
 
-    private static boolean isDrawAllMasks = false;
     private static Map<Integer, String[]> drawMasksWhitelist = null;
 
     public static void whitelistMask(Mask<?> binaryOrFloatMask, String name, String parentClass) {
@@ -45,14 +44,6 @@ public class VisualDebugger {
         }
     }
 
-    public static void startRecordAll() {
-        isDrawAllMasks = true;
-    }
-
-    public static void stopRecordAll() {
-        isDrawAllMasks = false;
-    }
-
     public static void visualizeMask(Mask<?> mask) {
         if (mask instanceof FloatMask) {
             visualizeMask((FloatMask) mask);
@@ -62,14 +53,14 @@ public class VisualDebugger {
     }
 
     public static void visualizeMask(BinaryMask mask) {
-        if (!shouldRecord(mask)) {
+        if (dontRecord(mask)) {
             return;
         }
         visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask.getClass());
     }
 
     public static void visualizeMask(FloatMask mask) {
-        if (!shouldRecord(mask)) {
+        if (dontRecord(mask)) {
             return;
         }
         ImageSource checkerBoard = (x, y) -> (x + y) % 2 == 0 ? 0xFF_66_66_66 : 0xDD_DD_DD_DD;
@@ -118,12 +109,11 @@ public class VisualDebugger {
         }, mask.getSize(), mask.hashCode(), mask.getClass());
     }
 
-    private static boolean shouldRecord(Mask<?> mask) {
+    private static boolean dontRecord(Mask<?> mask) {
         if (!ENABLED) {
-            return false;
+            return true;
         }
-        return (drawMasksWhitelist == null && isDrawAllMasks)
-                || (drawMasksWhitelist != null && drawMasksWhitelist.containsKey(mask.hashCode()));
+        return drawMasksWhitelist == null || !drawMasksWhitelist.containsKey(mask.hashCode());
     }
 
     /**

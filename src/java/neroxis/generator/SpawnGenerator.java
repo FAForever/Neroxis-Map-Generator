@@ -20,12 +20,12 @@ public strictfp class SpawnGenerator {
     public BinaryMask[] generateSpawns(float separation, SymmetrySettings symmetrySettings, float plateauDensity) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BinaryMask spawnable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
-        BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
-        BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnable.getSymmetrySettings());
+        BinaryMask spawnMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
+        BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
+        BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         int centerFill = StrictMath.min(map.getSize() * 3 / 8, 256);
-        spawnable.limitToSymmetryRegion().fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(centerFill, false).fillEdge(map.getSize() / 16, false);
-        Vector2f location = spawnable.getRandomPosition();
+        spawnMask.limitToSymmetryRegion().fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(centerFill, false).fillEdge(map.getSize() / 16, false);
+        Vector2f location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
             if (location == null) {
                 if (separation - 4 >= 10) {
@@ -35,10 +35,10 @@ public strictfp class SpawnGenerator {
                 }
             }
             location.add(.5f, .5f);
-            spawnable.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(location, SymmetryType.SPAWN);
+            spawnMask.fillCircle(location, separation, false);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> spawnable.fillCircle(symmetryPoint.getLocation(), centerFill, false));
+            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint.getLocation(), centerFill, false));
 
             spawnLandMask.fillCircle(location, spawnSize, true);
             symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
@@ -66,69 +66,60 @@ public strictfp class SpawnGenerator {
                 symmetryPoints.forEach(symmetryPoint -> spawnPlateauMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
             }
 
-            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0)));
-            Group initial = new Group("INITIAL", new ArrayList<>());
-            Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
-            army.addGroup(initial);
-            map.addArmy(army);
-            symmetryPoints.forEach(symmetryPoint -> {
-                map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint.getLocation(), new Vector2f(0, 0)));
-                Group initialSym = new Group("INITIAL", new ArrayList<>());
-                Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
-                armySym.addGroup(initialSym);
-                map.addArmy(armySym);
-            });
-
-            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
-            symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint.getLocation(), null)));
-            BinaryMask nextSpawn = new BinaryMask(spawnable.getSize(), random.nextLong(), spawnable.getSymmetrySettings());
-            nextSpawn.fillCircle(location, separation * 4, true).intersect(spawnable);
+            addSpawn(location, symmetryPoints);
+            BinaryMask nextSpawn = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+            nextSpawn.fillCircle(location, separation * 4, true).intersect(spawnMask);
             location = nextSpawn.getRandomPosition();
             if (location == null) {
-                location = spawnable.getRandomPosition();
+                location = spawnMask.getRandomPosition();
             }
         }
         return new BinaryMask[]{spawnLandMask, spawnPlateauMask};
     }
 
-    public void generateSpawns(BinaryMask spawnable, float separation) {
+    public void generateSpawns(BinaryMask spawnMask, float separation) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BinaryMask spawnableCopy = spawnable.copy();
-        spawnableCopy.limitToSymmetryRegion().fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 3 / 8, false).fillEdge(map.getSize() / 32, false);
-        Vector2f location = spawnableCopy.getRandomPosition();
+        BinaryMask spawnMaskCopy = spawnMask.copy();
+        spawnMaskCopy.limitToSymmetryRegion().fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 3 / 8, false).fillEdge(map.getSize() / 32, false);
+        Vector2f location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
             if (location == null) {
                 if (separation - 4 >= 10) {
-                    generateSpawns(spawnable, separation - 8);
+                    generateSpawns(spawnMask, separation - 8);
                     break;
                 } else {
                     return;
                 }
             }
-            spawnableCopy.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnableCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
+            spawnMaskCopy.fillCircle(location, separation, false);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> spawnableCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
+            symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
 
-            if (spawnableCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
-                symmetryPoints.forEach(symmetryPoint -> spawnableCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
+            if (spawnMaskCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
+                symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
             }
-            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0)));
-            Group initial = new Group("INITIAL", new ArrayList<>());
-            Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
-            army.addGroup(initial);
-            map.addArmy(army);
-            symmetryPoints.forEach(symmetryPoint -> {
-                map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint.getLocation(), new Vector2f(0, 0)));
-                Group initialSym = new Group("INITIAL", new ArrayList<>());
-                Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
-                armySym.addGroup(initialSym);
-                map.addArmy(armySym);
-            });
-            map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
-            symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint.getLocation(), null)));
-            location = spawnableCopy.getRandomPosition();
+            addSpawn(location, symmetryPoints);
+            location = spawnMaskCopy.getRandomPosition();
         }
+    }
+
+    private void addSpawn(Vector2f location, ArrayList<SymmetryPoint> symmetryPoints) {
+        map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0)));
+        Group initial = new Group("INITIAL", new ArrayList<>());
+        Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
+        army.addGroup(initial);
+        map.addArmy(army);
+        symmetryPoints.forEach(symmetryPoint -> {
+            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint.getLocation(), new Vector2f(0, 0)));
+            Group initialSym = new Group("INITIAL", new ArrayList<>());
+            Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
+            armySym.addGroup(initialSym);
+            map.addArmy(armySym);
+        });
+
+        map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
+        symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint.getLocation(), null)));
     }
 }

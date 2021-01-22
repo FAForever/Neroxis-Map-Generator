@@ -27,6 +27,29 @@ public strictfp abstract class Mask<T> {
 
     public abstract Mask<T> interpolate();
 
+    public abstract int[][] getInnerCount();
+
+    protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
+        innerCount[x][y] = val;
+        innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
+        innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
+        innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+    }
+
+    protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
+        int xLeft = StrictMath.max(0, x - radius);
+        int xRight = StrictMath.min(getSize() - 1, x + radius);
+        int yUp = StrictMath.max(0, y - radius);
+        int yDown = StrictMath.min(getSize() - 1, y + radius);
+        int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
+        int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
+        int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
+        int countD = innerCount[xRight][yDown];
+        int count = countD + countA - countB - countC;
+        int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
+        return (float) count / area;
+    }
+
     public T getValueAt(Vector3f location) {
         return getValueAt((int) location.getX(), (int) location.getZ());
     }

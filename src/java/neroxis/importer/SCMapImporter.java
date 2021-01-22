@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.nio.file.Path;
 
 import static neroxis.jsquish.Squish.decompressImage;
@@ -33,7 +32,7 @@ public strictfp class SCMapImporter {
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
         assert mapFiles != null;
         if (mapFiles.length == 0) {
-            System.out.println("No scmap file in map folder");
+            System.out.println("No SCMap file in map folder");
             return null;
         }
         file = mapFiles[0];
@@ -53,17 +52,15 @@ public strictfp class SCMapImporter {
         if (readInt() != 2) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        float width = readFloat(); // width
-        float height = readFloat(); // height
+        readFloat(); // width as float
+        readFloat(); // height as float
         if (readInt() != 0) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
         if (readShort() != 0) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        int previewImageSize = readInt() - 128;
-        DDSHeader previewHeader = DDSHeader.parseHeader(readBytes(128));
-        int[] previewImageData = readInts(previewImageSize / 4);
+        int[] previewImageData = readRawImage();
         int version = readInt();
         if (version != 56 && version != 60) {
             throw new UnsupportedEncodingException(String.format("SCMap version %d not supported", version));
@@ -113,7 +110,7 @@ public strictfp class SCMapImporter {
         int miniMapLandEndColor = readInt();
 
         if (version > 56) {
-            float unknown14 = readFloat();
+            readFloat(); //unknown
         }
 
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
@@ -125,8 +122,8 @@ public strictfp class SCMapImporter {
             mapTerrainMaterials.getNormalScales()[i] = readFloat();
         }
 
-        int unknown1 = readInt();
-        int unknown2 = readInt();
+        readInt(); // unknown
+        readInt(); // unknown
 
         // decals
         int decalCount = readInt();
@@ -142,15 +139,15 @@ public strictfp class SCMapImporter {
             decalGroups[i] = readDecalGroup();
         }
 
-        int widthInt2 = readInt();
-        int heightInt2 = readInt();
+        readInt(); // width as int
+        readInt(); // height as int
 
         // normal maps
         // normal map count
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        byte[] normalMapData = readCompressedImage();
+        int[] normalMapData = readCompressedImage();
 
         // texture maps
         int[] textureMaskLowData = readRawImage();
@@ -160,7 +157,7 @@ public strictfp class SCMapImporter {
         if (readInt() != 1) {
             throw new UnsupportedEncodingException("File not valid SCMap");
         }
-        byte[] waterMapData = readCompressedImage();
+        int[] waterMapData = readCompressedImage();
         int halfSize = (heightInt / 2) * (widthInt / 2);
         byte[] waterFoamMaskData = readBytes(halfSize);
         byte[] waterFlatnessData = readBytes(halfSize);
@@ -192,93 +189,32 @@ public strictfp class SCMapImporter {
         map.setSkyCubePath(skyCubePath);
         map.setHeightMapScale(heightMapScale);
         map.setSkyBox(skyBox);
-        map.setMiniMapContourInterval(miniMapContourInterval);
-        map.setMiniMapDeepWaterColor(miniMapDeepWaterColor);
-        map.setMiniMapContourColor(miniMapContourColor);
-        map.setMiniMapShoreColor(miniMapShoreColor);
-        map.setMiniMapLandStartColor(miniMapLandStartColor);
-        map.setMiniMapLandEndColor(miniMapLandEndColor);
+        map.setCartographicContourInterval(miniMapContourInterval);
+        map.setCartographicDeepWaterColor(miniMapDeepWaterColor);
+        map.setCartographicMapContourColor(miniMapContourColor);
+        map.setCartographicMapShoreColor(miniMapShoreColor);
+        map.setCartographicMapLandStartColor(miniMapLandStartColor);
+        map.setCartographicMapLandEndColor(miniMapLandEndColor);
 
-        int previewSize = (int) StrictMath.sqrt(previewImageData.length);
-        BufferedImage preview = new BufferedImage(previewSize, previewSize, BufferedImage.TYPE_INT_ARGB);
-        DataBuffer previewDataBuffer = preview.getRaster().getDataBuffer();
-        for (int i = 0; i < previewDataBuffer.getSize(); i++) {
-            previewDataBuffer.setElem(i, previewImageData[i]);
-        }
-        map.setPreview(preview);
+        map.setPreview(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, previewImageData));
 
-        int heightmapSize = (int) StrictMath.sqrt(heightMapData.length);
-        BufferedImage heightmap = new BufferedImage(heightmapSize, heightmapSize, BufferedImage.TYPE_USHORT_GRAY);
-        DataBuffer heightmapDataBuffer = heightmap.getRaster().getDataBuffer();
-        for (int i = 0; i < heightmapDataBuffer.getSize(); i++) {
-            heightmapDataBuffer.setElem(i, heightMapData[i]);
-        }
-        map.setHeightmap(heightmap);
+        map.setHeightmap(getBufferedImageFromRawData(BufferedImage.TYPE_USHORT_GRAY, getIntegerArray(heightMapData)));
 
-        int normalMapSize = (int) StrictMath.sqrt(normalMapData.length / 4f);
-        BufferedImage normalMap = new BufferedImage(normalMapSize, normalMapSize, BufferedImage.TYPE_INT_ARGB);
-        DataBuffer normalMapDataBuffer = normalMap.getRaster().getDataBuffer();
-        IntBuffer normalMapInts = ByteBuffer.wrap(normalMapData).asIntBuffer();
-        for (int i = 0; i < normalMapDataBuffer.getSize(); i++) {
-            normalMapDataBuffer.setElem(i, normalMapInts.get(i));
-        }
-        map.setNormalMap(normalMap);
+        map.setNormalMap(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, normalMapData));
 
-        int textureLowSize = (int) StrictMath.sqrt(textureMaskLowData.length);
-        BufferedImage textureMasksLow = new BufferedImage(textureLowSize, textureLowSize, BufferedImage.TYPE_INT_ARGB);
-        DataBuffer textureMasksLowDataBuffer = textureMasksLow.getRaster().getDataBuffer();
-        for (int i = 0; i < textureMasksLowDataBuffer.getSize(); i++) {
-            textureMasksLowDataBuffer.setElem(i, textureMaskLowData[i]);
-        }
-        map.setTextureMasksLow(textureMasksLow);
+        map.setTextureMasksLow(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, textureMaskLowData));
 
-        int textureHighSize = (int) StrictMath.sqrt(textureMaskHighData.length);
-        BufferedImage textureMasksHigh = new BufferedImage(textureHighSize, textureHighSize, BufferedImage.TYPE_INT_ARGB);
-        DataBuffer textureMasksHighDataBuffer = textureMasksHigh.getRaster().getDataBuffer();
-        for (int i = 0; i < textureMasksHighDataBuffer.getSize(); i++) {
-            textureMasksHighDataBuffer.setElem(i, textureMaskHighData[i]);
-        }
-        map.setTextureMasksHigh(textureMasksHigh);
+        map.setTextureMasksHigh(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, textureMaskHighData));
 
-        int waterMapSize = (int) StrictMath.sqrt(waterMapData.length / 4f);
-        BufferedImage waterMap = new BufferedImage(waterMapSize, waterMapSize, BufferedImage.TYPE_INT_ARGB);
-        DataBuffer waterMapDataBuffer = waterMap.getRaster().getDataBuffer();
-        IntBuffer waterMapInts = ByteBuffer.wrap(waterMapData).asIntBuffer();
-        for (int i = 0; i < waterMapDataBuffer.getSize(); i++) {
-            waterMapDataBuffer.setElem(i, waterMapInts.get(i));
-        }
-        map.setWaterMap(waterMap);
+        map.setWaterMap(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, waterMapData));
 
-        int waterFoamSize = (int) StrictMath.sqrt(waterFoamMaskData.length);
-        BufferedImage waterFoamMask = new BufferedImage(waterFoamSize, waterFoamSize, BufferedImage.TYPE_BYTE_GRAY);
-        DataBuffer waterFoamMaskDataBuffer = waterFoamMask.getRaster().getDataBuffer();
-        for (int i = 0; i < waterFoamMaskDataBuffer.getSize(); i++) {
-            waterFoamMaskDataBuffer.setElem(i, waterFoamMaskData[i]);
-        }
-        map.setWaterFoamMask(waterFoamMask);
+        map.setWaterFoamMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
 
-        int waterFlatSize = (int) StrictMath.sqrt(waterFoamMaskData.length);
-        BufferedImage waterFlatnessMask = new BufferedImage(waterFlatSize, waterFlatSize, BufferedImage.TYPE_BYTE_GRAY);
-        DataBuffer waterFlatnessMaskDataBuffer = waterFlatnessMask.getRaster().getDataBuffer();
-        for (int i = 0; i < waterFlatnessMaskDataBuffer.getSize(); i++) {
-            waterFlatnessMaskDataBuffer.setElem(i, waterFlatnessData[i]);
-        }
-        map.setWaterFlatnessMask(waterFlatnessMask);
+        map.setWaterFlatnessMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
 
-        int waterDepthSize = (int) StrictMath.sqrt(waterDepthBiasMaskData.length);
-        BufferedImage waterDepthBiasMask = new BufferedImage(waterDepthSize, waterDepthSize, BufferedImage.TYPE_BYTE_GRAY);
-        DataBuffer waterDepthBiasMaskDataBuffer = waterDepthBiasMask.getRaster().getDataBuffer();
-        for (int i = 0; i < waterDepthBiasMaskDataBuffer.getSize(); i++) {
-            waterDepthBiasMaskDataBuffer.setElem(i, waterDepthBiasMaskData[i]);
-        }
+        map.setWaterDepthBiasMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterDepthBiasMaskData)));
 
-        int terrainTypeSize = (int) StrictMath.sqrt(terrainTypeData.length);
-        BufferedImage terrainType = new BufferedImage(terrainTypeSize, terrainTypeSize, BufferedImage.TYPE_BYTE_GRAY);
-        DataBuffer terrainTypeMaskDataBuffer = terrainType.getRaster().getDataBuffer();
-        for (int i = 0; i < terrainTypeMaskDataBuffer.getSize(); i++) {
-            terrainTypeMaskDataBuffer.setElem(i, terrainTypeData[i]);
-        }
-        map.setTerrainType(terrainType);
+        map.setTerrainType(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(terrainTypeData)));
 
         for (WaveGenerator waveGenerator : waveGenerators) {
             map.addWaveGenerator(waveGenerator);
@@ -445,7 +381,7 @@ public strictfp class SCMapImporter {
     }
 
     private static Decal readDecal() throws IOException {
-        int id = readInt();
+        readInt(); // id
         int type = readInt();
         int textureCount = readInt();
         String[] texturePaths = new String[textureCount];
@@ -457,13 +393,13 @@ public strictfp class SCMapImporter {
         Vector3f position = readVector3f();
         Vector3f rotation = readVector3f();
         float cutOffLOD = readFloat();
-        float nearCutOffLOD = readFloat();
-        int ownerArmy = readInt();
+        readFloat(); // nearCutOffLOD
+        readInt(); // ownerArmy
         return new Decal(texturePaths[0], position, rotation, scale, cutOffLOD, DecalType.of(type));
     }
 
     private static DecalGroup readDecalGroup() throws IOException {
-        int id = readInt();
+        readInt(); // id
         String name = readStringNull();
         int length = readInt();
         int[] data = new int[length];
@@ -476,13 +412,18 @@ public strictfp class SCMapImporter {
     private static int[] readRawImage() throws IOException {
         int byteCount = readInt() - 128;
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
+        if (ddsHeader.getWidth() * ddsHeader.getHeight() * 4 != byteCount) {
+            throw new UnsupportedEncodingException("Not a recognized dds image format");
+        }
         return readInts(byteCount / 4);
     }
 
-    private static byte[] readCompressedImage() throws IOException {
+    private static int[] readCompressedImage() throws IOException {
         int byteCount = readInt() - 128;
+        int[] data = new int[byteCount / 4];
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
-        return decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount), Squish.CompressionType.DXT5);
+        ByteBuffer.wrap(decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount), Squish.CompressionType.DXT5)).asIntBuffer().get(data);
+        return data;
     }
 
     private static SkyBox readSkyBox() throws IOException {
@@ -539,21 +480,39 @@ public strictfp class SCMapImporter {
         String path = readStringNull();
         Vector3f position = readVector3f();
         Vector3f rotationX = readVector3f();
-        Vector3f rotationY = readVector3f();
-        Vector3f rotationZ = readVector3f();
-        Vector3f scale = readVector3f();
+        readVector3f(); // Y rotation
+        readVector3f(); // Z rotation
+        readVector3f(); // scale
         float rotation = (float) StrictMath.atan2(rotationX.getZ(), rotationX.getX());
         return new Prop(path, position, rotation);
     }
 
-    private static <T> BufferedImage getBufferedImageFromData(int bufferedImageType, T[] imageData) {
+    private static BufferedImage getBufferedImageFromRawData(int bufferedImageType, int[] imageData) {
         int imageSize = (int) StrictMath.sqrt(imageData.length);
         BufferedImage image = new BufferedImage(imageSize, imageSize, bufferedImageType);
         DataBuffer imageDataBuffer = image.getRaster().getDataBuffer();
         for (int i = 0; i < imageDataBuffer.getSize(); i++) {
-            imageDataBuffer.setElem(i, (Integer) imageData[i]);
+            imageDataBuffer.setElem(i, imageData[i]);
         }
         return image;
+    }
+
+    private static int[] getIntegerArray(byte[] bytes) {
+        int[] intArray = new int[bytes.length];
+        int i = 0;
+        for (int value : bytes) {
+            intArray[i++] = value;
+        }
+        return intArray;
+    }
+
+    private static int[] getIntegerArray(short[] shorts) {
+        int[] intArray = new int[shorts.length];
+        int i = 0;
+        for (int value : shorts) {
+            intArray[i++] = value;
+        }
+        return intArray;
     }
 }
 

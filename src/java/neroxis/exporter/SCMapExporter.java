@@ -88,12 +88,12 @@ public strictfp class SCMapExporter {
 
         // terrain textures
         TerrainMaterials mapTerrainMaterials = map.getBiome().getTerrainMaterials();
-        writeInt(map.getMiniMapContourInterval());
-        writeInt(map.getMiniMapDeepWaterColor());
-        writeInt(map.getMiniMapContourColor());
-        writeInt(map.getMiniMapShoreColor());
-        writeInt(map.getMiniMapLandStartColor());
-        writeInt(map.getMiniMapLandEndColor());
+        writeInt(map.getCartographicContourInterval());
+        writeInt(map.getCartographicDeepWaterColor());
+        writeInt(map.getCartographicMapContourColor());
+        writeInt(map.getCartographicMapShoreColor());
+        writeInt(map.getCartographicMapLandStartColor());
+        writeInt(map.getCartographicMapLandEndColor());
 
         if (map.getMinorVersion() > 56) {
             writeFloat(0);

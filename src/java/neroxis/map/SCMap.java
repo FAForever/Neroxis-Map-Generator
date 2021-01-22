@@ -83,12 +83,12 @@ public strictfp class SCMap {
     private BufferedImage waterDepthBiasMask;
     private BufferedImage terrainType;
 
-    private int miniMapContourInterval = 0;
-    private int miniMapDeepWaterColor = 0;
-    private int miniMapContourColor = 0;
-    private int miniMapShoreColor = 0;
-    private int miniMapLandStartColor = 0;
-    private int miniMapLandEndColor = 0;
+    private int cartographicContourInterval = 0;
+    private int cartographicDeepWaterColor = 0;
+    private int cartographicMapContourColor = 0;
+    private int cartographicMapShoreColor = 0;
+    private int cartographicMapLandStartColor = 0;
+    private int cartographicMapLandEndColor = 0;
 
     public SCMap(int size, int spawnCount, int mexCount, int hydroCount, Biome biome) {
         this.size = size;
@@ -650,12 +650,12 @@ public strictfp class SCMap {
     }
 
     public FloatMask[] getTextureMasksScaled(SymmetrySettings symmetrySettings) {
-        FloatMask mask0 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask1 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask2 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask3 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
+        FloatMask mask0 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask1 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask2 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask3 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
-            for (int x = 0; x < textureMasksLow.getHeight(); x++) {
+            for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 int[] valsLow = new int[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
                 mask0.setValueAt(x, y, convertToScaledTextureValue(valsLow[0]));
@@ -664,12 +664,12 @@ public strictfp class SCMap {
                 mask3.setValueAt(x, y, convertToScaledTextureValue(valsLow[3]));
             }
         }
-        FloatMask mask4 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
-        FloatMask mask5 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
-        FloatMask mask6 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
-        FloatMask mask7 = new FloatMask(this.textureMasksHigh.getHeight(), null, symmetrySettings);
+        FloatMask mask4 = new FloatMask(this.textureMasksHigh.getWidth(), null, symmetrySettings);
+        FloatMask mask5 = new FloatMask(this.textureMasksHigh.getWidth(), null, symmetrySettings);
+        FloatMask mask6 = new FloatMask(this.textureMasksHigh.getWidth(), null, symmetrySettings);
+        FloatMask mask7 = new FloatMask(this.textureMasksHigh.getWidth(), null, symmetrySettings);
         for (int y = 0; y < textureMasksHigh.getHeight(); y++) {
-            for (int x = 0; x < textureMasksHigh.getHeight(); x++) {
+            for (int x = 0; x < textureMasksHigh.getWidth(); x++) {
                 int[] valsHigh = new int[4];
                 textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
                 mask4.setValueAt(x, y, convertToScaledTextureValue(valsHigh[0]));
@@ -682,12 +682,12 @@ public strictfp class SCMap {
     }
 
     public FloatMask[] getTextureMasksRaw(SymmetrySettings symmetrySettings) {
-        FloatMask mask0 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask1 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask2 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
-        FloatMask mask3 = new FloatMask(this.textureMasksLow.getHeight(), null, symmetrySettings);
+        FloatMask mask0 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask1 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask2 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
+        FloatMask mask3 = new FloatMask(this.textureMasksLow.getWidth(), null, symmetrySettings);
         for (int y = 0; y < textureMasksLow.getHeight(); y++) {
-            for (int x = 0; x < textureMasksLow.getHeight(); x++) {
+            for (int x = 0; x < textureMasksLow.getWidth(); x++) {
                 float[] valsLow = new float[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
                 mask0.setValueAt(x, y, valsLow[0]);

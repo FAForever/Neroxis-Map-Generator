@@ -281,43 +281,35 @@ public strictfp class MapTransformer {
     private void transformTerrain() {
         FloatMask previewMask = map.getPreviewMask(symmetrySettings);
         FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
-        FloatMask texture1 = texturesMasks[0];
-        FloatMask texture2 = texturesMasks[1];
-        FloatMask texture3 = texturesMasks[2];
-        FloatMask texture4 = texturesMasks[3];
-        FloatMask texture5 = texturesMasks[4];
-        FloatMask texture6 = texturesMasks[5];
-        FloatMask texture7 = texturesMasks[6];
-        FloatMask texture8 = texturesMasks[7];
 
         if (!useAngle) {
             previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
             heightmapBase.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture1.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture2.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture3.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture4.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture5.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture6.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture7.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texture8.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[0].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[1].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[2].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[3].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[4].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[5].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[6].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            texturesMasks[7].applySymmetry(SymmetryType.SPAWN, reverseSide);
         } else {
             previewMask.applySymmetry(angle);
             heightmapBase.applySymmetry(angle);
-            texture1.applySymmetry(angle);
-            texture2.applySymmetry(angle);
-            texture3.applySymmetry(angle);
-            texture4.applySymmetry(angle);
-            texture5.applySymmetry(angle);
-            texture6.applySymmetry(angle);
-            texture7.applySymmetry(angle);
-            texture8.applySymmetry(angle);
+            texturesMasks[0].applySymmetry(angle);
+            texturesMasks[1].applySymmetry(angle);
+            texturesMasks[2].applySymmetry(angle);
+            texturesMasks[3].applySymmetry(angle);
+            texturesMasks[4].applySymmetry(angle);
+            texturesMasks[5].applySymmetry(angle);
+            texturesMasks[6].applySymmetry(angle);
+            texturesMasks[7].applySymmetry(angle);
         }
 
         map.setPreviewImage(previewMask);
         map.setHeightImage(heightmapBase);
-        map.setTextureMasksLowRaw(texture1, texture2, texture3, texture4);
-        map.setTextureMasksHighRaw(texture5, texture6, texture7, texture8);
+        map.setTextureMasksLowRaw(texturesMasks[0], texturesMasks[1], texturesMasks[2], texturesMasks[3]);
+        map.setTextureMasksHighRaw(texturesMasks[4], texturesMasks[5], texturesMasks[6], texturesMasks[7]);
     }
 
     private void transformSpawns(Collection<Spawn> spawns) {
@@ -333,22 +325,11 @@ public strictfp class MapTransformer {
                 });
             }
         });
-        transformedSpawns.forEach(spawn -> {
-            if (spawns.size() == transformedSpawns.size()) {
-                Spawn[] closestSpawn = {null};
-                float[] minDistance = {Float.POSITIVE_INFINITY};
-                spawns.forEach(s -> {
-                    float distance = spawn.getPosition().getXZDistance(s.getPosition());
-                    if (distance < minDistance[0]) {
-                        closestSpawn[0] = s;
-                        minDistance[0] = distance;
-                    }
-                });
-                spawn.setId(closestSpawn[0].getId());
-            } else {
-                spawn.setId("ARMY_" + transformedSpawns.indexOf(spawn));
-            }
-        });
+        if (spawns.size() == transformedSpawns.size()) {
+            transformedSpawns.forEach(spawn -> matchToClosestMarker(spawn, spawns));
+        } else {
+            transformedSpawns.forEach(spawn -> spawn.setId("ARMY_" + transformedSpawns.indexOf(spawn)));
+        }
         transformedSpawns.sort(Comparator.comparingInt(spawn -> Integer.parseInt(spawn.getId().replace("ARMY_", ""))));
         spawns.clear();
         spawns.addAll(transformedSpawns);
@@ -363,20 +344,9 @@ public strictfp class MapTransformer {
                 symmetryPoints.forEach(symmetryPoint -> transformedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint.getLocation())));
             }
         });
-        transformedMarkers.forEach(marker -> {
-            if (markers.size() == transformedMarkers.size()) {
-                Marker[] closestMarker = {null};
-                float[] minDistance = {Float.POSITIVE_INFINITY};
-                markers.forEach(s -> {
-                    float distance = marker.getPosition().getXZDistance(s.getPosition());
-                    if (distance < minDistance[0]) {
-                        closestMarker[0] = s;
-                        minDistance[0] = distance;
-                    }
-                });
-                marker.setId(closestMarker[0].getId());
-            }
-        });
+        if (markers.size() == transformedMarkers.size()) {
+            transformedMarkers.forEach(marker -> matchToClosestMarker(marker, markers));
+        }
         markers.clear();
         markers.addAll(transformedMarkers);
     }
@@ -457,6 +427,19 @@ public strictfp class MapTransformer {
         });
         decals.clear();
         decals.addAll(transformedDecals);
+    }
+
+    private void matchToClosestMarker(Marker marker, Collection<? extends Marker> markers) {
+        Marker[] closestMarker = {null};
+        float[] minDistance = {Float.POSITIVE_INFINITY};
+        markers.forEach(s -> {
+            float distance = marker.getPosition().getXZDistance(s.getPosition());
+            if (distance < minDistance[0]) {
+                closestMarker[0] = s;
+                minDistance[0] = distance;
+            }
+        });
+        marker.setId(closestMarker[0].getId());
     }
 
     private boolean inSourceRegion(Vector3f position) {

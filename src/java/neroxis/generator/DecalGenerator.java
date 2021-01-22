@@ -9,28 +9,6 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public strictfp class DecalGenerator {
-    public static final String[] EROSION = {
-            "/env/Common/decals/erosion_normals.dds",
-            "/env/Common/decals/erosion000_normals.dds",
-            "/env/Common/decals/erosion002_normals.dds",
-            "/env/Common/decals/erosion006_normals.dds",
-            "/env/Common/decals/erosion007_normals.dds",
-            "/env/Common/decals/erosion008_normals.dds",
-            "/env/Common/decals/erosion009_normals.dds",
-            "/env/Common/decals/erosion011_normals.dds",
-            "/env/Common/decals/erosion011a_normals.dds",
-            "/env/Common/decals/erosion011b_normals.dds",
-            "/env/Common/decals/erosion011c_normals.dds",
-            "/env/Common/decals/erosion016_normals.dds",
-            "/env/Common/decals/erosion017_normals.dds",
-            "/env/Common/decals/erosion018_normals.dds",
-            "/env/Common/decals/erosion018a_normals.dds",
-            "/env/Common/decals/erosion018b_normals.dds",
-            "/env/Common/decals/erosion018c_normals.dds",
-            "/env/Common/decals/erosion018d_normals.dds",
-            "/env/Common/decals/erosion021a_normals.dds"
-
-    };
     public static final String[] ROCKS = {
             "/env/Common/decals/Rock001_normals.dds",
             "/env/Common/decals/Rock002_normals.dds",
@@ -66,39 +44,18 @@ public strictfp class DecalGenerator {
         random = new Random(seed);
     }
 
-    public void generateDecals(BinaryMask spawnable, String[] paths, float separation, float scale) {
-        BinaryMask spawnableCopy = new BinaryMask(spawnable, random.nextLong());
-        spawnableCopy.limitToSymmetryRegion();
-        LinkedList<Vector2f> coordinates = spawnableCopy.getRandomCoordinates(separation);
-        boolean flipX;
-        boolean flipZ;
-        switch (spawnable.getSymmetrySettings().getTeamSymmetry()) {
-            case XZ:
-            case ZX:
-                flipX = true;
-                flipZ = true;
-                break;
-            case X:
-                flipZ = true;
-                flipX = false;
-                break;
-            case Z:
-                flipZ = false;
-                flipX = true;
-                break;
-            default:
-                flipZ = false;
-                flipX = false;
-                break;
-        }
+    public void generateDecals(BinaryMask spawnMask, String[] paths, float separation, float scale) {
+        BinaryMask spawnMaskCopy = new BinaryMask(spawnMask, random.nextLong());
+        spawnMaskCopy.limitToSymmetryRegion();
+        LinkedList<Vector2f> coordinates = spawnMaskCopy.getRandomCoordinates(separation);
         coordinates.forEach((location) -> {
             location.add(.5f, .5f);
             Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
             Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 2400);
             map.addDecal(decal);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnable.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
+            ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            ArrayList<Float> symmetryRotation = spawnable.getSymmetryRotation(decal.getRotation().getY());
+            ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().getY());
             for (int i = 0; i < symmetryPoints.size(); i++) {
                 Vector3f symVectorRotation = new Vector3f(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
                 Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i).getLocation(), symVectorRotation, scale, decal.getCutOffLOD());

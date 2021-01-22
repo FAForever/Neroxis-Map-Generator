@@ -93,9 +93,7 @@ public class VisualDebuggerGui {
      * Call {@link JPanel#revalidate()} to resize panel when image size changes.
      * Call {@link JPanel#repaint()} to update when image content changes.
      */
-    @SuppressWarnings("serial")
     public static class ImagePanel extends JPanel {
-        private final int padding = 10;
 
         private BufferedImage image;
         private int imageSize;
@@ -123,6 +121,7 @@ public class VisualDebuggerGui {
         @Override
         public Dimension getPreferredSize() {
             BufferedImage currentImage = image;
+            int padding = 10;
             return new Dimension(currentImage.getWidth() + padding, currentImage.getHeight() + padding);
         }
 

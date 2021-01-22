@@ -300,14 +300,6 @@ public strictfp class MapPopulator {
             int smallWaterSizeLimit = 9000;
 
             FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
-            FloatMask oldLayer1 = texturesMasks[0];
-            FloatMask oldLayer2 = texturesMasks[1];
-            FloatMask oldLayer3 = texturesMasks[2];
-            FloatMask oldLayer4 = texturesMasks[3];
-            FloatMask oldLayer5 = texturesMasks[4];
-            FloatMask oldLayer6 = texturesMasks[5];
-            FloatMask oldLayer7 = texturesMasks[6];
-            FloatMask oldLayer8 = texturesMasks[7];
 
             if (mapImageSize == 0 || mapImageSize > map.getSize()) {
                 mapImageSize = map.getSize();
@@ -316,14 +308,14 @@ public strictfp class MapPopulator {
             map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
-            oldLayer1.min(0f).max(1f).resample(mapImageSize);
-            oldLayer2.min(0f).max(1f).resample(mapImageSize);
-            oldLayer3.min(0f).max(1f).resample(mapImageSize);
-            oldLayer4.min(0f).max(1f).resample(mapImageSize);
-            oldLayer5.min(0f).max(1f).resample(mapImageSize);
-            oldLayer6.min(0f).max(1f).resample(mapImageSize);
-            oldLayer7.min(0f).max(1f).resample(mapImageSize);
-            oldLayer8.min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[0].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[1].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[2].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[3].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[4].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[5].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[6].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[7].min(0f).max(1f).resample(mapImageSize);
 
             BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
@@ -343,7 +335,7 @@ public strictfp class MapPopulator {
             flatAboveCoast.intersect(flat);
             higherFlatAboveCoast.intersect(flat);
             lowWaterBeach.invert().minus(smallWater).inflate(6).minus(aboveBeach);
-            smallWaterBeach.minus(flatAboveCoast).smooth(2, 0.5f, SymmetryType.SPAWN).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(1, SymmetryType.SPAWN);
+            smallWaterBeach.minus(flatAboveCoast).smooth(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(1);
             smallWaterBeach.setSize(mapImageSize);
 
             smallWaterBeachTexture.init(smallWaterBeach, 0, 1).smooth(8).max(0.35f).add(smallWaterBeach, 1f).smooth(4).max(0.65f).add(smallWaterBeach, 1f).smooth(1).add(smallWaterBeach, 1f).max(1f);
@@ -365,17 +357,17 @@ public strictfp class MapPopulator {
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
-            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f, SymmetryType.SPAWN).acid(.45f, 0);
-            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f, SymmetryType.SPAWN).acid(.45f, 0);
+            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
+            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
             slopes.intersect(land).flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f, SymmetryType.SPAWN).acid(.55f, 0);
+            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f).acid(.55f, 0);
             steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
             if (waterPresent) {
-                waterBeach.invert().minus(smallWater).minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f, SymmetryType.SPAWN).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2, SymmetryType.SPAWN).smooth(1, SymmetryType.SPAWN);
+                waterBeach.invert().minus(smallWater).minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(2).smooth(1);
             } else {
                 waterBeach.clear();
             }
-            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f, SymmetryType.SPAWN).intersect(rock);
+            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
             accentGround.setSize(mapImageSize);
             accentPlateau.setSize(mapImageSize);
@@ -406,32 +398,32 @@ public strictfp class MapPopulator {
             accentRockTexture.init(accentRock, 0, 1).min(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).max(1f);
 
             if (keepLayer1) {
-                accentGroundTexture = new FloatMask(oldLayer1, null);
+                accentGroundTexture = new FloatMask(texturesMasks[0], null);
             }
             if (keepLayer2) {
-                accentPlateauTexture = new FloatMask(oldLayer2, null);
+                accentPlateauTexture = new FloatMask(texturesMasks[1], null);
             }
             if (keepLayer3) {
-                slopesTexture = new FloatMask(oldLayer3, null);
+                slopesTexture = new FloatMask(texturesMasks[2], null);
             }
             if (keepLayer4) {
-                accentSlopesTexture = new FloatMask(oldLayer4, null);
+                accentSlopesTexture = new FloatMask(texturesMasks[3], null);
             }
             if (keepLayer5) {
-                steepHillsTexture = new FloatMask(oldLayer5, null);
+                steepHillsTexture = new FloatMask(texturesMasks[4], null);
             }
             if (keepLayer6) {
-                waterBeachTexture = new FloatMask(oldLayer6, null);
+                waterBeachTexture = new FloatMask(texturesMasks[5], null);
             }
             if (keepLayer7) {
-                rockTexture = new FloatMask(oldLayer7, null);
+                rockTexture = new FloatMask(texturesMasks[6], null);
             }
             if (keepLayer8) {
-                accentRockTexture = new FloatMask(oldLayer8, null);
+                accentRockTexture = new FloatMask(texturesMasks[7], null);
             }
             if (keepLayer0) {
                 FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-                oldLayer0.init(wholeMap, 0f, 1f).subtract(oldLayer8).subtract(oldLayer7).subtract(oldLayer6).subtract(oldLayer5).subtract(oldLayer4).subtract(oldLayer3).subtract(oldLayer2).subtract(oldLayer1).min(0f);
+                oldLayer0.init(wholeMap, 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).min(0f);
                 FloatMask oldLayer0Texture = new FloatMask(oldLayer0, null);
                 if (moveLayer0ToAndSmooth >= 10) {
                     oldLayer0Texture.smooth(8).max(0.35f).add(oldLayer0).smooth(4).max(0.65f).add(oldLayer0).smooth(1).add(oldLayer0).max(1f);
@@ -479,14 +471,14 @@ public strictfp class MapPopulator {
                 } else {
                     textureBox.fillRectFromPoints(x1, x2, z1, z2, false);
                 }
-                accentGroundTexture.replaceValues(textureBox, oldLayer1);
-                accentPlateauTexture.replaceValues(textureBox, oldLayer2);
-                slopesTexture.replaceValues(textureBox, oldLayer3);
-                accentSlopesTexture.replaceValues(textureBox, oldLayer4);
-                steepHillsTexture.replaceValues(textureBox, oldLayer5);
-                waterBeachTexture.replaceValues(textureBox, oldLayer6);
-                rockTexture.replaceValues(textureBox, oldLayer7);
-                accentRockTexture.replaceValues(textureBox, oldLayer8);
+                accentGroundTexture.replaceValues(textureBox, texturesMasks[0]);
+                accentPlateauTexture.replaceValues(textureBox, texturesMasks[1]);
+                slopesTexture.replaceValues(textureBox, texturesMasks[2]);
+                accentSlopesTexture.replaceValues(textureBox, texturesMasks[3]);
+                steepHillsTexture.replaceValues(textureBox, texturesMasks[4]);
+                waterBeachTexture.replaceValues(textureBox, texturesMasks[5]);
+                rockTexture.replaceValues(textureBox, texturesMasks[6]);
+                accentRockTexture.replaceValues(textureBox, texturesMasks[7]);
             }
 
             map.setTextureMasksLowScaled(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
@@ -519,7 +511,7 @@ public strictfp class MapPopulator {
             BinaryMask largeRockFieldMask = new BinaryMask(land, random.nextLong());
             BinaryMask smallRockFieldMask = new BinaryMask(land, random.nextLong());
 
-            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f, SymmetryType.SPAWN).acid(.45f, 0));
+            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).intersect(flatEnoughNearRock);
             fieldStoneMask.randomize(.00145f).intersect(flatEnoughNearRock.copy().deflate(1));
             largeRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);

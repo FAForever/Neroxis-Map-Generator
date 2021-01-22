@@ -32,7 +32,7 @@ public strictfp class PreviewGenerator {
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(materials.getPreviewColors()[i]);
                 layerGraphics.fillRect(0, 0, 256, 256);
-                BufferedImage shadedLayer = getShadedImage(layer, map, i, true);
+                BufferedImage shadedLayer = getShadedImage(layer, map, i);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
                 graphics.setPaint(layerPaint);
                 graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
@@ -65,7 +65,7 @@ public strictfp class PreviewGenerator {
         });
     }
 
-    private static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex, boolean useAlpha) {
+    private static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         BufferedImage heightMap = map.getHeightmap();
         BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
@@ -130,7 +130,7 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
                 newRGBA[1] = StrictMath.max(StrictMath.min(newRGBA[1], 255), 0);
                 newRGBA[2] = StrictMath.max(StrictMath.min(newRGBA[2], 255), 0);
-                if (relativeLayerIndex > 0 && useAlpha) {
+                if (relativeLayerIndex > 0) {
                     newRGBA[3] = StrictMath.max(StrictMath.min((int) ((textureAlphas[relativeLayerIndex - 1] - 128) / 127f * 255f), 255), 0);
                 } else {
                     newRGBA[3] = 255;
