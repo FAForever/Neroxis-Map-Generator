@@ -354,6 +354,14 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
+    public FloatMask subtractAvg() {
+        return subtract(getAvg());
+    }
+
+    public FloatMask subtract(float val) {
+        return add(-val);
+    }
+
     public FloatMask subtract(FloatMask other) {
         checkMatchingSize(other);
         add(other.copy().multiply(-1));

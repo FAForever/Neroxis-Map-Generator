@@ -56,6 +56,18 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         return new ConcurrentFloatMask(this, this.mask.getRandom().nextLong(), name + "Copy");
     }
 
+    public ConcurrentFloatMask setSize(int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.setSize(size)
+        );
+    }
+
+    public ConcurrentFloatMask resample(int size) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.resample(size)
+        );
+    }
+
     public ConcurrentFloatMask add(ConcurrentFloatMask other) {
         return Pipeline.add(this, Arrays.asList(this, other), res ->
                 this.mask.add(((ConcurrentFloatMask) res.get(1)).getFloatMask())
@@ -71,6 +83,18 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     public ConcurrentFloatMask add(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.add(value)
+        );
+    }
+
+    public ConcurrentFloatMask subtract(float value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.subtract(value)
+        );
+    }
+
+    public ConcurrentFloatMask subtractAvg() {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.subtractAvg()
         );
     }
 

@@ -992,7 +992,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
                 Vector2f vertex = vertices.get(index);
                 float dx = j - vertex.getX();
-                distanceField.setValueAt(i, j, dx * dx + vertex.getY());
+                float height = dx * dx + vertex.getY();
+                if (!useColumns) {
+                    distanceField.setValueAt(i, j, height);
+                } else {
+                    distanceField.setValueAt(j, i, height);
+                }
             }
         }
     }
