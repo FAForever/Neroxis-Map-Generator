@@ -1064,7 +1064,7 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapLand");
         ConcurrentFloatMask heightmapOcean = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapOcean");
 
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 32, 1f, 2.5f);
+        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 48, .25f, 7.5f);
 
         ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
 
@@ -1102,7 +1102,7 @@ public strictfp class MapGenerator {
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(LAND_HEIGHT)
                 .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
-                .smooth(1, spawnPlateauMask.copy().inflate(4)).smooth(18, ramps).smooth(12, ramps.copy().inflate(8))
+                .smooth(1, spawnPlateauMask.copy().inflate(4)).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4)).smooth(12, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(6, ramps.copy().inflate(12)).smooth(2, ramps.copy().inflate(16));
 
         heightmapBase.add(heightmapOcean).smooth(1).add(heightmapLand);
