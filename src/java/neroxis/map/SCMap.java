@@ -493,8 +493,6 @@ public strictfp class SCMap {
     private void scaleMapBounds(float boundsScale, Vector2f topLeftOffset) {
         float normalMapScale = (float) normalMap.getWidth() / size;
         float waterMapScale = (float) waterMap.getWidth() / size;
-        float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
-        float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
         preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
         Vector2f previewOffset = boundsScale > 1 ? new Vector2f(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2f(-64 / boundsScale, -64 / boundsScale);
         preview = insertImageIntoNewImageOfSize(preview, 256, 256, previewOffset);
@@ -506,8 +504,8 @@ public strictfp class SCMap {
         waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScale), StrictMath.round(waterFlatnessMask.getHeight() * boundsScale), halvedTopLeftOffset);
         waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScale), StrictMath.round(waterDepthBiasMask.getHeight() * boundsScale), halvedTopLeftOffset);
         terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScale), StrictMath.round(terrainType.getHeight() * boundsScale), topLeftOffset);
-        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
-        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
+        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), halvedTopLeftOffset);
+        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), halvedTopLeftOffset);
     }
 
     private <T extends PositionedObject> void repositionObjects(Collection<T> positionedObjects, float distanceScale, Vector2f offset) {
