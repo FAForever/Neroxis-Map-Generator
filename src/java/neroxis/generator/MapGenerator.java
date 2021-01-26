@@ -466,10 +466,10 @@ public strictfp class MapGenerator {
                     break;
                 case 8:
                 case 10:
-                    mexMultiplier = 1.25f;
+                    mexMultiplier = 1.35f;
                     break;
                 default:
-                    mexMultiplier = 1f;
+                    mexMultiplier = 1.25f;
                     break;
             }
         }
