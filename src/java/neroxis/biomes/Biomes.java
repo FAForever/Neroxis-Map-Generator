@@ -2,6 +2,7 @@ package neroxis.biomes;
 
 import com.google.gson.JsonParseException;
 import lombok.Data;
+import neroxis.map.DecalMaterials;
 import neroxis.map.PropMaterials;
 import neroxis.map.TerrainMaterials;
 import neroxis.util.FileUtils;
@@ -27,7 +28,6 @@ public strictfp class Biomes {
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(String folderPath) throws Exception {
-        TerrainMaterials terrainMaterials = null;
         if (Biomes.class.getResourceAsStream(CUSTOM_BIOMES_DIR + folderPath) != null) {
             folderPath = CUSTOM_BIOMES_DIR + folderPath;
             if (!folderPath.endsWith("/")) {
@@ -40,10 +40,11 @@ public strictfp class Biomes {
             }
         }
 
+        TerrainMaterials terrainMaterials;
         try {
             terrainMaterials = FileUtils.deserialize(folderPath + "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %s materials.json\n", folderPath), e);
+            throw new Exception(String.format("An error occurred while loading %smaterials.json\n", folderPath), e);
         } catch (JsonParseException e) {
             throw new Exception(String.format("An error occurred while parsing materials.json from the following biome:%s\n", folderPath), e);
         }
@@ -52,9 +53,18 @@ public strictfp class Biomes {
         try {
             propMaterials = FileUtils.deserialize(folderPath + "props.json", PropMaterials.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %s props.json\n", folderPath), e);
+            throw new Exception(String.format("An error occurred while loading %sprops.json\n", folderPath), e);
         } catch (JsonParseException e) {
             throw new Exception(String.format("An error occurred while parsing props.json from the following biome:%s\n", folderPath), e);
+        }
+
+        DecalMaterials decalMaterials;
+        try {
+            decalMaterials = FileUtils.deserialize(folderPath + "decals.json", DecalMaterials.class);
+        } catch (IOException e) {
+            throw new Exception(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
+        } catch (JsonParseException e) {
+            throw new Exception(String.format("An error occurred while parsing decals.json from the following biome:%s\n", folderPath), e);
         }
 
         // Water parameters
@@ -77,6 +87,6 @@ public strictfp class Biomes {
             throw new Exception(String.format("An error occurred while parsing LightingSettings from the following biome:%s\n", folderPath), e);
         }
 
-        return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, waterSettings, lightingSettings);
+        return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, decalMaterials, waterSettings, lightingSettings);
     }
 }

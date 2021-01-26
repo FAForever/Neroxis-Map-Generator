@@ -110,8 +110,9 @@ public strictfp class MapGenerator {
     private ConcurrentFloatMask steepHillsTexture;
     private ConcurrentFloatMask rockTexture;
     private ConcurrentFloatMask accentRockTexture;
-    private ConcurrentBinaryMask rockDecal;
-    private ConcurrentBinaryMask intDecal;
+    private ConcurrentBinaryMask fieldDecal;
+    private ConcurrentBinaryMask slopeDecal;
+    private ConcurrentBinaryMask mountainDecal;
     private ConcurrentBinaryMask allWreckMask;
     private ConcurrentBinaryMask spawnLandMask;
     private ConcurrentBinaryMask spawnPlateauMask;
@@ -132,7 +133,6 @@ public strictfp class MapGenerator {
     private ConcurrentBinaryMask allBaseMask;
     private BinaryMask noProps;
     private BinaryMask noWrecks;
-    private BinaryMask noDecals;
     private BinaryMask noBases;
     private BinaryMask noCivs;
 
@@ -145,7 +145,7 @@ public strictfp class MapGenerator {
 
     public static void main(String[] args) throws Exception {
 
-        Locale.setDefault(Locale.US);
+        Locale.setDefault(Locale.ENGLISH);
         if (DEBUG) {
             Path debugDir = Paths.get(".", "debug");
             FileUtils.deleteRecursiveIfExists(debugDir);
@@ -712,6 +712,22 @@ public strictfp class MapGenerator {
             }
         });
 
+        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
+            Pipeline.await(fieldDecal, slopeDecal, mountainDecal);
+            long sTime = System.currentTimeMillis();
+            decalGenerator.generateDecals(fieldDecal.getFinalMask(), biome.getDecalMaterials().getFieldNormals(), 32, 32, 32, 64);
+            decalGenerator.generateDecals(fieldDecal.getFinalMask(), biome.getDecalMaterials().getFieldAlbedos(), 64, 128, 24, 48);
+            decalGenerator.generateDecals(slopeDecal.getFinalMask(), biome.getDecalMaterials().getSlopeNormals(), 16, 32, 16, 32);
+            decalGenerator.generateDecals(slopeDecal.getFinalMask(), biome.getDecalMaterials().getSlopeAlbedos(), 64, 128, 32, 48);
+            decalGenerator.generateDecals(mountainDecal.getFinalMask(), biome.getDecalMaterials().getMountainNormals(), 32, 32, 32, 64);
+            decalGenerator.generateDecals(mountainDecal.getFinalMask(), biome.getDecalMaterials().getMountainAlbedos(), 64, 128, 16, 24);
+            if (DEBUG) {
+                System.out.printf("Done: %4d ms, %s, generateDecals\n",
+                        System.currentTimeMillis() - sTime,
+                        Util.getStackTraceLineInClass(MapGenerator.class));
+            }
+        });
+
         resourcesFuture.join();
 
         CompletableFuture<Void> propsFuture = CompletableFuture.runAsync(() -> {
@@ -725,18 +741,6 @@ public strictfp class MapGenerator {
             propGenerator.generateProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateProps\n",
-                        System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(MapGenerator.class));
-            }
-        });
-
-        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(() -> {
-            Pipeline.await(intDecal, rockDecal);
-            long sTime = System.currentTimeMillis();
-            decalGenerator.generateDecals(intDecal.getFinalMask().minus(noDecals), DecalGenerator.INT, 64f, 18f);
-            decalGenerator.generateDecals(rockDecal.getFinalMask().minus(noDecals), DecalGenerator.ROCKS, 32f, 8f);
-            if (DEBUG) {
-                System.out.printf("Done: %4d ms, %s, generateDecals\n",
                         System.currentTimeMillis() - sTime,
                         Util.getStackTraceLineInClass(MapGenerator.class));
             }
@@ -861,6 +865,7 @@ public strictfp class MapGenerator {
         setupPropPipeline();
         setupWreckPipeline();
         setupResourcePipeline();
+        setupDecalPipeline();
     }
 
     private void setupTerrainPipeline() {
@@ -1001,7 +1006,7 @@ public strictfp class MapGenerator {
         float maxStepSize = mapSize / 128f;
         float distanceThreshold = maxStepSize / 2f;
         int maxMiddlePoints = 4;
-        int numPathsPerPlayer = (int) (rampDensity * 4 + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numPathsPerPlayer = (int) (rampDensity * 4 + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints() + 1;
         int numPaths = (int) (rampDensity * 20 + 4 + 8 * plateauDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + spawnCount;
         int bound = mapSize / 4;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
@@ -1065,12 +1070,14 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapOcean = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapOcean");
         ConcurrentFloatMask noise = new ConcurrentFloatMask(mapSize / 128, random.nextLong(), symmetrySettings, "noise");
 
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 48, .25f, 5f);
+        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 64, .05f, 14f);
 
         ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
 
         mountains.replace(paintedMountains);
         land.combine(paintedMountains);
+
+        heightmapMountains.smooth(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, 32, .64f, 8f).clampMax(PLATEAU_HEIGHT);
 
@@ -1137,6 +1144,14 @@ public strictfp class MapGenerator {
         passableWater.deflate(16).fillEdge(8, false);
     }
 
+    private void setupDecalPipeline() {
+        fieldDecal = new ConcurrentBinaryMask(land, random.nextLong(), "fieldDecal");
+        slopeDecal = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopeDecal");
+        mountainDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "mountainDecal");
+
+        fieldDecal.minus(slopeDecal).minus(mountainDecal).deflate(24);
+    }
+
     private void setupResourcePipeline() {
         resourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "resource");
         waterResourceMask = new ConcurrentBinaryMask(land, random.nextLong(), "waterResource").invert();
@@ -1156,8 +1171,6 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
         ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rock");
         ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentRock");
-        intDecal = new ConcurrentBinaryMask(land, random.nextLong(), "intDecal");
-        rockDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "rockDecal");
         waterBeachTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "waterBeachTexture");
         accentGroundTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "accentGroundTexture");
         accentPlateauTexture = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "accentPlateauTexture");
@@ -1237,7 +1250,6 @@ public strictfp class MapGenerator {
         noBases = new BinaryMask(unbuildable.getFinalMask(), null);
         noCivs = new BinaryMask(unbuildable.getFinalMask(), null);
         noWrecks = new BinaryMask(unbuildable.getFinalMask(), null);
-        noDecals = new BinaryMask(mapSize + 1, null, symmetrySettings);
 
         noProps.combine(allBaseMask.getFinalMask());
         noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
@@ -1247,7 +1259,6 @@ public strictfp class MapGenerator {
             noBases.fillCircle(spawn.getPosition(), 128, true);
             noCivs.fillCircle(spawn.getPosition(), 96, true);
             noWrecks.fillCircle(spawn.getPosition(), 128, true);
-            noDecals.fillCircle(spawn.getPosition(), 24, true);
         });
         map.getMexes().forEach(mex -> {
             noProps.fillCircle(mex.getPosition(), 1, true);

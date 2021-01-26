@@ -31,12 +31,10 @@ public strictfp class MapPopulator {
     private boolean populateHydros;
     private boolean populateProps;
     private boolean populateAI;
-    private boolean populateDecals;
     private int spawnCount;
     private int mexCountPerPlayer;
     private int hydroCountPerPlayer;
     private boolean populateTextures;
-    private boolean keepCurrentDecals;
     private boolean keepLayer0;
     private boolean smallWaterTexturesOnLayer5;
     private int moveLayer0ToAndSmooth;
@@ -193,9 +191,7 @@ public strictfp class MapPopulator {
             restrictTextures = true;
         }
         smallWaterTexturesOnLayer5 = arguments.containsKey("lakes");
-        populateDecals = arguments.containsKey("decals");
         populateAI = arguments.containsKey("ai");
-        keepCurrentDecals = arguments.containsKey("keep-current-decals");
     }
 
     public void importMap() {
@@ -540,25 +536,6 @@ public strictfp class MapPopulator {
             if (propMaterials.getBoulders() != null && propMaterials.getBoulders().length > 0) {
                 propGenerator.generateProps(fieldStoneMask.minus(noProps), propMaterials.getBoulders(), 30f);
             }
-        }
-
-        if (populateDecals) {
-            if (!keepCurrentDecals) {
-                map.getDecals().clear();
-            }
-            DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
-
-            BinaryMask intDecal = new BinaryMask(land, random.nextLong());
-            BinaryMask rockDecal = new BinaryMask(slope, 1.25f, random.nextLong());
-
-            BinaryMask noDecals = new BinaryMask(map.getSize() + 1, null, symmetrySettings);
-
-            for (int i = 0; i < map.getSpawnCount(); i++) {
-                noDecals.fillCircle(map.getSpawn(i).getPosition(), 24, true);
-            }
-
-            decalGenerator.generateDecals(intDecal.minus(noDecals), DecalGenerator.INT, 96f, 64f);
-            decalGenerator.generateDecals(rockDecal.minus(noDecals), DecalGenerator.ROCKS, 8f, 16f);
         }
 
         if (populateAI) {

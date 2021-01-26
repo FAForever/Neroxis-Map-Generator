@@ -1,0 +1,28 @@
+{
+  "fieldNormals": [
+    "/env/Common/decals/Int001_normals.dds",
+    "/env/Common/decals/Int002_normals.dds",
+    "/env/Common/decals/Int003_normals.dds",
+    "/env/Common/decals/Int004_normals.dds",
+    "/env/Common/decals/Int005_normals.dds",
+    "/env/Common/decals/Int006_normals.dds",
+    "/env/Common/decals/Int007_normals.dds",
+    "/env/Common/decals/Int008_normals.dds",
+    "/env/Common/decals/Int009_normals.dds",
+    "/env/Common/decals/fractal_normals.dds",
+    "/env/Common/decals/noise002_normals.dds",
+    "/env/Common/decals/noise003_normals.dds",
+    "/env/Common/decals/noise004_normals.dds"
+  ],
+  "fieldAlbedos": [
+    "/env/Evergreen/decals/E_MUD005_albedo.dds",
+    "/env/Evergreen/decals/E_MUD006_albedo.dds",
+    "/env/Evergreen2/Decals/EG_ground001_albedo.dds",
+    "/env/Evergreen2/Decals/EG_ground002_albedo.dds",
+    "/env/Evergreen2/Decals/EG_mudder01_albedo.dds",
+    "/env/Evergreen2/Decals/EG_mudder03_albedo.dds",
+    "/env/Evergreen2/Decals/EG_mudder05_albedo.dds",
+    "/env/Evergreen2/Decals/EG_Tracks01_albedo.dds",
+    "/env/Evergreen2/Decals/EG_Tracks03_albedo.dds"
+  ]
+}

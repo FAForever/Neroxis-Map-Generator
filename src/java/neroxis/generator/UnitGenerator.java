@@ -63,21 +63,23 @@ public strictfp class UnitGenerator {
     }
 
     public void generateBases(BinaryMask spawnMask, String[] templates, Army army, Group group, float separation) throws IOException {
-        String luaFile = templates[random.nextInt(templates.length)];
-        spawnMask.limitToSymmetryRegion();
-        LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(separation);
-        LinkedHashMap<String, LinkedHashSet<Vector2f>> units = BaseTemplate.loadUnits(luaFile);
-        coordinates.forEach((location) -> {
-            BaseTemplate base = new BaseTemplate(location, army, group, units);
-            base.addUnits();
-            ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> {
-                BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
-                symBase.flip(symmetryPoint.getSymmetry());
-                symBase.addUnits();
+        if (templates != null && templates.length > 0) {
+            String luaFile = templates[random.nextInt(templates.length)];
+            spawnMask.limitToSymmetryRegion();
+            LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(separation);
+            LinkedHashMap<String, LinkedHashSet<Vector2f>> units = BaseTemplate.loadUnits(luaFile);
+            coordinates.forEach((location) -> {
+                BaseTemplate base = new BaseTemplate(location, army, group, units);
+                base.addUnits();
+                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                symmetryPoints.forEach(symmetryPoint -> {
+                    BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
+                    symBase.flip(symmetryPoint.getSymmetry());
+                    symBase.addUnits();
+                });
             });
-        });
+        }
     }
 
     public void generateUnits(BinaryMask spawnMask, String[] types, Army army, Group group, float separation) {
@@ -85,22 +87,24 @@ public strictfp class UnitGenerator {
     }
 
     public void generateUnits(BinaryMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
-        spawnMask.limitToSymmetryRegion();
-        LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
-        String type = types[random.nextInt(types.length)];
-        float rot = random.nextFloat() * 3.14159f;
-        coordinates.forEach((location) -> {
-            location.add(.5f, .5f);
-            int groupID = group.getUnitCount();
-            Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
-            group.addUnit(unit);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
-            for (int i = 0; i < symmetryPoints.size(); i++) {
-                group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
-            }
-        });
+        if (types != null && types.length > 0) {
+            spawnMask.limitToSymmetryRegion();
+            LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
+            String type = types[random.nextInt(types.length)];
+            float rot = random.nextFloat() * 3.14159f;
+            coordinates.forEach((location) -> {
+                location.add(.5f, .5f);
+                int groupID = group.getUnitCount();
+                Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
+                group.addUnit(unit);
+                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
+                }
+            });
+        }
     }
 
 }

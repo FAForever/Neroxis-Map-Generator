@@ -25,7 +25,7 @@ public strictfp class Decal extends PositionedObject {
     public Decal(String path, Vector3f position, Vector3f rotation, Vector3f scale, float cutOffLOD) {
         super(position);
         this.path = path;
-        if (path.contains("normal")) {
+        if (path.toLowerCase().contains("normal")) {
             this.type = DecalType.NORMALS;
         } else {
             this.type = DecalType.ALBEDO;
