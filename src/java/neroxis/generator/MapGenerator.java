@@ -135,6 +135,7 @@ public strictfp class MapGenerator {
     private BinaryMask noWrecks;
     private BinaryMask noBases;
     private BinaryMask noCivs;
+
     private String brush1;
     private String brush2;
     private String brush3;
@@ -249,13 +250,6 @@ public strictfp class MapGenerator {
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +
-                    "--brushes arg          optional, set all unspecified brushes to arg brush name\n" +
-                    "--brush1 arg           optional, set brush1 to arg brush name\n" +
-                    "--brush2 arg           optional, set brush2 to arg brush name\n" +
-                    "--brush3 arg           optional, set brush3 to arg brush name\n" +
-                    "--brush4 arg           optional, set brush4 to arg brush name\n" +
-                    "--brush5 arg           optional, set brush5 to arg brush name\n" +
-                    "--generate-brush-maps  optional, generate one map for each generator brush (each map will use its brush for all of its brushes)\n" +
                     "--generate arg         optional, generate arg number of maps\n" +
                     "--debug                optional, turn on debugging options\n" +
                     "--no-hash              optional, turn off pipeline hashing of masks");
@@ -362,41 +356,8 @@ public strictfp class MapGenerator {
                 optionsUsed = true;
             }
 
-            if (arguments.containsKey("generate-brush-maps")) {
-                generateBrushMaps = true;
-                numToGenerate = Brushes.GENERATOR_BRUSHES.size();
-            }
-
             if (arguments.containsKey("generate")) {
                 numToGenerate = Integer.parseInt(arguments.get("generate"));
-            }
-
-            if (arguments.containsKey("brushes") && arguments.get("brushes") != null) {
-                brush1 = arguments.get("brushes");
-                brush2 = brush1;
-                brush3 = brush1;
-                brush4 = brush1;
-                brush5 = brush1;
-            }
-
-            if (arguments.containsKey("brush1") && arguments.get("brush1") != null) {
-                brush1 = arguments.get("brush1");
-            }
-
-            if (arguments.containsKey("brush2") && arguments.get("brush2") != null) {
-                brush2 = arguments.get("brush2");
-            }
-
-            if (arguments.containsKey("brush3") && arguments.get("brush3") != null) {
-                brush3 = arguments.get("brush3");
-            }
-
-            if (arguments.containsKey("brush4") && arguments.get("brush4") != null) {
-                brush4 = arguments.get("brush4");
-            }
-
-            if (arguments.containsKey("brush5") && arguments.get("brush5") != null) {
-                brush5 = arguments.get("brush5");
             }
         }
 
