@@ -135,6 +135,14 @@ public strictfp class MapGenerator {
     private BinaryMask noWrecks;
     private BinaryMask noBases;
     private BinaryMask noCivs;
+    private String brush1;
+    private String brush2;
+    private String brush3;
+    private String brush4;
+    private String brush5;
+    private boolean generateBrushMaps = false;
+    private int mapNumber = 0;
+    private int numToGenerate = 1;
 
     private SymmetrySettings symmetrySettings;
     private boolean hasCivilians;
@@ -154,31 +162,34 @@ public strictfp class MapGenerator {
 
         MapGenerator generator = new MapGenerator();
 
-        generator.interpretArguments(args);
         if (!generator.validArgs) {
             return;
         }
 
-        System.out.println(generator.mapName);
-        generator.generate();
-        if (generator.map == null) {
-            System.out.println("Map Generation Failed see stack trace for details");
-            return;
+        for (int i = 0; i < generator.numToGenerate; i++) {
+            generator.interpretArguments(args);
+            System.out.println(generator.mapName);
+            generator.generate();
+            if (generator.map == null) {
+                System.out.println("Map Generation Failed see stack trace for details");
+                return;
+            }
+            generator.save();
+            System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
+            System.out.println("Seed: " + generator.seed);
+            System.out.println("Biome: " + generator.biome.getName());
+            System.out.println("Land Density: " + generator.landDensity);
+            System.out.println("Plateau Density: " + generator.plateauDensity);
+            System.out.println("Mountain Density: " + generator.mountainDensity);
+            System.out.println("Ramp Density: " + generator.rampDensity);
+            System.out.println("Reclaim Density: " + generator.reclaimDensity);
+            System.out.println("Mex Count: " + generator.mexCount);
+            System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
+            System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
+            System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
+            System.out.println("Done");
+            generator.prepareForNextMap();
         }
-        generator.save();
-        System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
-        System.out.println("Seed: " + generator.seed);
-        System.out.println("Biome: " + generator.biome.getName());
-        System.out.println("Land Density: " + generator.landDensity);
-        System.out.println("Plateau Density: " + generator.plateauDensity);
-        System.out.println("Mountain Density: " + generator.mountainDensity);
-        System.out.println("Ramp Density: " + generator.rampDensity);
-        System.out.println("Reclaim Density: " + generator.reclaimDensity);
-        System.out.println("Mex Count: " + generator.mexCount);
-        System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
-        System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
-        System.out.println("Done");
     }
 
     public void interpretArguments(String[] args) throws Exception {
@@ -238,6 +249,14 @@ public strictfp class MapGenerator {
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +
+                    "--brushes arg          optional, set all unspecified brushes to arg brush name\n" +
+                    "--brush1 arg           optional, set brush1 to arg brush name\n" +
+                    "--brush2 arg           optional, set brush2 to arg brush name\n" +
+                    "--brush3 arg           optional, set brush3 to arg brush name\n" +
+                    "--brush4 arg           optional, set brush4 to arg brush name\n" +
+                    "--brush5 arg           optional, set brush5 to arg brush name\n" +
+                    "--generate-brush-maps  optional, generate one map for each generator brush (each map will use its brush for all of its brushes)\n" +
+                    "--generate arg         optional, generate arg number of maps\n" +
                     "--debug                optional, turn on debugging options\n" +
                     "--no-hash              optional, turn off pipeline hashing of masks");
             validArgs = false;
@@ -341,6 +360,43 @@ public strictfp class MapGenerator {
             if (arguments.containsKey("biome") && arguments.get("biome") != null) {
                 biome = Biomes.loadBiome(arguments.get("biome"));
                 optionsUsed = true;
+            }
+
+            if (arguments.containsKey("generate-brush-maps")) {
+                generateBrushMaps = true;
+                numToGenerate = Brushes.GENERATOR_BRUSHES.size();
+            }
+
+            if (arguments.containsKey("generate")) {
+                numToGenerate = Integer.parseInt(arguments.get("generate"));
+            }
+
+            if (arguments.containsKey("brushes") && arguments.get("brushes") != null) {
+                brush1 = arguments.get("brushes");
+                brush2 = brush1;
+                brush3 = brush1;
+                brush4 = brush1;
+                brush5 = brush1;
+            }
+
+            if (arguments.containsKey("brush1") && arguments.get("brush1") != null) {
+                brush1 = arguments.get("brush1");
+            }
+
+            if (arguments.containsKey("brush2") && arguments.get("brush2") != null) {
+                brush2 = arguments.get("brush2");
+            }
+
+            if (arguments.containsKey("brush3") && arguments.get("brush3") != null) {
+                brush3 = arguments.get("brush3");
+            }
+
+            if (arguments.containsKey("brush4") && arguments.get("brush4") != null) {
+                brush4 = arguments.get("brush4");
+            }
+
+            if (arguments.containsKey("brush5") && arguments.get("brush5") != null) {
+                brush5 = arguments.get("brush5");
             }
         }
 
@@ -855,7 +911,20 @@ public strictfp class MapGenerator {
             map = null;
         }
 
+        if (generateBrushMaps) {
+            map.setDescription(map.getDescription() + " - Used brush " + brush1);
+        }
+
         return map;
+    }
+
+    public void prepareForNextMap() {
+        if (numToGenerate > mapNumber) {
+            Pipeline.reset();
+            mapNumber += 1;
+            System.out.println("Finished map " + mapNumber);
+            seed = new Random().nextLong();
+        }
     }
 
     private void setupPipeline() {
@@ -1055,11 +1124,30 @@ public strictfp class MapGenerator {
     private void setupHeightmapPipeline() {
         int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int numBrushes = Brushes.GENERATOR_BRUSHES.size();
-        String brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+
+        if (generateBrushMaps) {
+            brush1 = Brushes.GENERATOR_BRUSHES.get(mapNumber);
+            brush2 = brush1;
+            brush3 = brush1;
+            brush4 = brush1;
+            brush5 = brush1;
+        } else {
+            if (!Brushes.GENERATOR_BRUSHES.contains(brush1)) {
+                brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+            }
+            if (!Brushes.GENERATOR_BRUSHES.contains(brush2)) {
+                brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+            }
+            if (!Brushes.GENERATOR_BRUSHES.contains(brush3)) {
+                brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+            }
+            if (!Brushes.GENERATOR_BRUSHES.contains(brush4)) {
+                brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+            }
+            if (!Brushes.GENERATOR_BRUSHES.contains(brush5)) {
+                brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+            }
+        }
 
         heightmapBase = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapBase");
         ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapValleys");
