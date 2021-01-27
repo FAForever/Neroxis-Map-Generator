@@ -163,12 +163,12 @@ public strictfp class MapGenerator {
 
         MapGenerator generator = new MapGenerator();
 
+        generator.interpretArguments(args);
         if (!generator.validArgs) {
             return;
         }
 
         for (int i = 0; i < generator.numToGenerate; i++) {
-            generator.interpretArguments(args);
             System.out.println(generator.mapName);
             generator.generate();
             if (generator.map == null) {
@@ -189,7 +189,7 @@ public strictfp class MapGenerator {
             System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
             System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
             System.out.println("Done");
-            generator.prepareForNextMap();
+            generator.prepareForNextMap(args);
         }
     }
 
@@ -879,12 +879,13 @@ public strictfp class MapGenerator {
         return map;
     }
 
-    public void prepareForNextMap() {
+    public void prepareForNextMap(String[] args) throws Exception {
         if (numToGenerate > mapNumber) {
             Pipeline.reset();
             mapNumber += 1;
             System.out.println("Finished map " + mapNumber);
             seed = new Random().nextLong();
+            interpretArguments(args);
         }
     }
 
