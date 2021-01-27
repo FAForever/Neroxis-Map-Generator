@@ -32,6 +32,7 @@ public strictfp class ImageGenerator {
     private float blueStrength = -1;
     private int levelOfDetail = 100;
     private int maxFeatureSize = 100;
+    private boolean recursiveGenerationFlag = false;
 
     private FloatMask redMask;
     private FloatMask greenMask;
@@ -63,7 +64,7 @@ public strictfp class ImageGenerator {
             System.out.println("image-generator usage:\n" +
                     "--help                 produce help message\n" +
                     "--folder-path arg      required, set the folder where the images will appear\n" +
-                    "--brushes              optional, generate brushes\n" +
+                    "--brushes arg          optional, generate brushes - optional arg - if arg is 'recursive', brush generation will be recursive\n" +
                     "--textures             optional, generate textures\n" +
                     "--size arg             optional, set the size (side length) of images that will be generated\n" +
                     "--num arg              optional, set the number of images to generate\n" +
@@ -101,6 +102,12 @@ public strictfp class ImageGenerator {
 
         if (arguments.containsKey("brushes")) {
             brushes = true;
+            String brushesArg = arguments.get("brushes");
+            if (brushesArg != null) {
+                if (brushesArg.equals("recursive")) {
+                    recursiveGenerationFlag = true;
+                }
+            }
         }
 
         if (arguments.containsKey("textures")) {
@@ -132,7 +139,21 @@ public strictfp class ImageGenerator {
         }
     }
 
-    public void generateCustomBrushes(int size, int numberToGenerate) throws IOException {
+    public void generateCustomBrushes(int size, int numberToGenerate, boolean recursiveGeneration) throws IOException {
+
+        String brush1 = null;
+        String brush2 = null;
+        String brush3 = null;
+        String brush4 = null;
+        String brush5 = null;
+
+        FloatMask recursiveBrush1 = null;
+        FloatMask recursiveBrush2 = null;
+        FloatMask recursiveBrush3 = null;
+        FloatMask recursiveBrush4 = null;
+        FloatMask recursiveBrush5 = null;
+        FloatMask secondNewestBrush = null;
+        FloatMask newestBrush = null;
 
         for (int i = 0; i < numberToGenerate; i++) {
             int brushListLength = Brushes.GENERATOR_BRUSHES.size();
@@ -142,24 +163,26 @@ public strictfp class ImageGenerator {
             int mountainsBrushSize = size / 10;
             Random random = new Random();
 
-            String brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
-            String brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
-            String brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
-            String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
-            String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            if (!recursiveGeneration || i < 5) {
+                brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+                brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+                brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+                brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+                brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
+            }
 
             BinaryMask base = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
-                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, recursiveBrush1, random.nextFloat(), 1f, reducedSize);
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
-                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, random.nextFloat(), 1f, reducedSize);
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, recursiveBrush2, random.nextFloat(), 1f, reducedSize);
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
-                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, random.nextFloat(), 1f, reducedSize);
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, recursiveBrush3, random.nextFloat(), 1f, reducedSize);
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
-                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, random.nextFloat(), 1f, reducedSize);
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, recursiveBrush4, random.nextFloat(), 1f, reducedSize);
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
-                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
+                    center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, recursiveBrush5, random.nextFloat(), 1f, reducedSize);
 
             BinaryMask mountains = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
@@ -167,21 +190,47 @@ public strictfp class ImageGenerator {
                 if(loc == null) {
                     loc = new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance));
                 }
-                mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2);
+                mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, secondNewestBrush, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2);
             }
             mountains.intersect(base);
             BinaryMask mountainsBase = mountains.copy().inflate(15);
             BinaryMask mountainsBaseEdge = mountainsBase.copy().inflate(15).minus(mountainsBase);
 
             FloatMask newBrush = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-            newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30));
-            newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30));
-            newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)));
+            newBrush.useBrushWithinAreaWithDensity(mountains, brush2, newestBrush, variationDistance, 0.05f, (float) 5 + random.nextInt(30));
+            newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, newestBrush, variationDistance, 0.005f, (float) 5 + random.nextInt(30));
+            newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, newestBrush, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)));
             newBrush.min(0);
             if(newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
-                neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
+                if (recursiveGeneration){
+                    FloatMask newBrushSmoothed = newBrush.copy().smooth(8).min(0);
+                    if(newBrushSmoothed.areAnyEdgesGreaterThan(0f)) {
+                        i = i - 1;
+                    } else {
+                        newBrush = newBrush.resizeContentToFillVoidBelowThreshold(0f, true);
+                        neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
+                        newBrushSmoothed.resizeContentToFillVoidBelowThreshold(0f, true);
+                        switch (i % 5) {
+                            case 0:
+                                recursiveBrush1 = newBrushSmoothed;
+                            case 1:
+                                recursiveBrush2 = newBrushSmoothed;
+                            case 2:
+                                recursiveBrush3 = newBrushSmoothed;
+                            case 3:
+                                recursiveBrush4 = newBrushSmoothed;
+                            case 4:
+                                recursiveBrush5 = newBrushSmoothed;
+                        }
+                        secondNewestBrush = newestBrush;
+                        newestBrush = newBrushSmoothed;
+                    }
+                } else {
+                    newBrush = newBrush.resizeContentToFillVoidBelowThreshold(0f, true);
+                    neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
+                }
             }
         }
     }
@@ -279,7 +328,7 @@ public strictfp class ImageGenerator {
 
     public void generate() throws IOException {
         if(brushes) {
-            generateCustomBrushes(size, numberToGenerate);
+            generateCustomBrushes(size, numberToGenerate, recursiveGenerationFlag);
         }
         if(textures) {
             generateCustomTextures(size, numberToGenerate, colorVariation);

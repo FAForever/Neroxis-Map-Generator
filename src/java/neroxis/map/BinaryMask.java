@@ -177,11 +177,26 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
                                           float minValue, float maxValue, int maxStepSize) {
+        return guidedWalkWithBrush(start, target, brushName, null, size, numberOfUses,
+        minValue, maxValue, maxStepSize);
+    }
+
+    public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, FloatMask brush, int size, int numberOfUses,
+                                          float minValue, float maxValue, int maxStepSize) {
+        return guidedWalkWithBrush(start, target, null, brush, size, numberOfUses,
+                minValue, maxValue, maxStepSize);
+    }
+
+    public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, FloatMask brush, int size, int numberOfUses,
+                                          float minValue, float maxValue, int maxStepSize) {
         Vector2f location = new Vector2f(start);
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
-                .setSize(size)).convertToBinaryMask(minValue, maxValue);
+        if (brush == null) {
+            brush = loadBrush(brushName, random.nextLong());
+        }
+        brush.setSize(size);
+        BinaryMask binaryBrush = brush.convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffset(brush, location, true);
+            combineWithOffset(binaryBrush, location, true);
             int dx = (target.getX() > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
             int dy = (target.getY() > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
             location.add(dx, dy);
@@ -579,7 +594,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
-        FloatMask brush = (FloatMask) loadBrush(brushName, random.nextLong()).setSize(size);
+        return combineBrush(location, brushName, null, minValue, maxValue, size);
+    }
+
+    public BinaryMask combineBrush(Vector2f location, FloatMask brush, float minValue, float maxValue, int size) {
+        return combineBrush(location, null, brush, minValue, maxValue, size);
+    }
+
+    public BinaryMask combineBrush(Vector2f location, String brushName, FloatMask brush, float minValue, float maxValue, int size) {
+        if (brush == null) {
+            brush = (FloatMask) loadBrush(brushName, random.nextLong()).setSize(size);
+        }
         combineWithOffset(brush, minValue, maxValue, location);
         VisualDebugger.visualizeMask(this);
         return this;

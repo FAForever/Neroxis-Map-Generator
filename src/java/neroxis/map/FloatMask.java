@@ -832,7 +832,17 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
-        FloatMask brush = loadBrush(brushName, random.nextLong());
+        return useBrush(location, brushName, null, intensity, size);
+    }
+
+    public FloatMask useBrush(Vector2f location, FloatMask brush, float intensity, int size) {
+        return useBrush(location, null, brush, intensity, size);
+    }
+
+    public FloatMask useBrush(Vector2f location, String brushName, FloatMask brush, float intensity, int size) {
+        if (brush == null) {
+            brush = loadBrush(brushName, random.nextLong());
+        }
         brush.multiply(intensity / brush.getMax()).setSize(size);
         addWithOffset(brush, location, true);
         VisualDebugger.visualizeMask(this);
@@ -840,18 +850,29 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity) {
+        return useBrushWithinArea(area, brushName, null, size, numUses, intensity);
+    }
+
+    public FloatMask useBrushWithinArea(BinaryMask area, FloatMask brush, int size, int numUses, float intensity) {
+        return useBrushWithinArea(area, null, brush, size, numUses, intensity);
+    }
+
+    public FloatMask useBrushWithinArea(BinaryMask area, String brushName, FloatMask brush, int size, int numUses, float intensity) {
         checkSmallerSize(size);
         boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, random.nextLong());
+        if (brush == null){
+            brush = loadBrush(brushName, random.nextLong());
+        }
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
             Vector2f location = possibleLocations.get(random.nextInt(length));
             addWithOffset(brush, location, true);
             if (!symmetric) {
                 ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> addWithOffset(brush, symmetryPoint.getLocation(), true));
+                FloatMask finalBrush = brush;
+                symmetryPoints.forEach(symmetryPoint -> addWithOffset(finalBrush, symmetryPoint.getLocation(), true));
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -859,18 +880,29 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrushWithinAreaWrapEdges(BinaryMask area, String brushName, int size, int numUses, float intensity) {
+        return useBrushWithinAreaWrapEdges(area, brushName, null, size, numUses, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWrapEdges(BinaryMask area, FloatMask brush, int size, int numUses, float intensity) {
+        return useBrushWithinAreaWrapEdges(area, null, brush, size, numUses, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWrapEdges(BinaryMask area, String brushName, FloatMask brush, int size, int numUses, float intensity) {
         checkSmallerSize(size);
         boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
         int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, random.nextLong());
+        if (brush == null) {
+            brush = loadBrush(brushName, random.nextLong());
+        }
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
             Vector2f location = possibleLocations.get(random.nextInt(length));
             addWithOffsetWrapEdges(brush, location, true);
             if (!symmetric) {
                 ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> addWithOffsetWrapEdges(brush, symmetryPoint.getLocation(), true));
+                FloatMask finalBrush = brush;
+                symmetryPoints.forEach(symmetryPoint -> addWithOffsetWrapEdges(finalBrush, symmetryPoint.getLocation(), true));
             }
         }
         VisualDebugger.visualizeMask(this);
@@ -878,15 +910,31 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity) {
+        return useBrushWithinAreaWithDensity(area, brushName, null, size, density, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, FloatMask brush, int size, float density, float intensity) {
+        return useBrushWithinAreaWithDensity(area, null, brush, size, density, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, FloatMask brush, int size, float density, float intensity) {
         int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinArea(area, brushName, size, frequency, intensity);
+        useBrushWithinArea(area, brushName, brush, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public FloatMask useBrushWithinAreaWithDensityWrapEdges(BinaryMask area, String brushName, int size, float density, float intensity) {
+        return useBrushWithinAreaWithDensityWrapEdges(area, brushName, null, size, density, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWithDensityWrapEdges(BinaryMask area, FloatMask brush, int size, float density, float intensity) {
+        return useBrushWithinAreaWithDensityWrapEdges(area, null, brush, size, density, intensity);
+    }
+
+    public FloatMask useBrushWithinAreaWithDensityWrapEdges(BinaryMask area, String brushName, FloatMask brush, int size, float density, float intensity) {
         int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinAreaWrapEdges(area, brushName, size, frequency, intensity);
+        useBrushWithinAreaWrapEdges(area, brushName, brush, size, frequency, intensity);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -902,7 +950,132 @@ public strictfp class FloatMask extends Mask<Float> {
                 }
             }
         }
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x += farEdge) {
+                if(getValueAt(x, y) > value || getValueAt(farEdge - x, farEdge - y) > value
+                        || getValueAt(x, farEdge - y)  > value || getValueAt(farEdge - x, y) > value) {
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    public FloatMask trimSizeToContentAboveThreshold(float threshold) {
+        int size = getSize();
+        int minX = 0;
+        int minY = 0;
+        int maxX = 0;
+        int maxY = 0;
+        boolean minXSet = false;
+        boolean minYSet = false;
+        float value;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                value = getValueAt(x, y);
+                if ((!minXSet) && value > threshold) {
+                    minX = x;
+                    minXSet = true;
+                }
+                if (maxX < x && value > threshold) {
+                    maxX = x;
+                }
+                if ((!minYSet) && value > threshold) {
+                    minY = y;
+                    minYSet = true;
+                }
+                if (maxY < y && value > threshold) {
+                    maxY = y;
+                }
+            }
+        }
+        int min = StrictMath.min(minX, minY);
+        int newSize = StrictMath.max(maxX, maxY) - min;
+        Float[][] newMask = getEmptyMask(newSize);
+        for (int x = 0; x < newSize; x++) {
+            for (int y = 0; y < newSize; y++) {
+                newMask[x][y] = getValueAt(x + min, y + min);
+            }
+        }
+        mask = newMask;
+        return this;
+    }
+
+    public FloatMask resizeContentToFillVoidBelowThreshold(float threshold) {
+        return resizeContentToFillVoidBelowThreshold(threshold, false);
+    }
+
+    public FloatMask resizeContentToFillVoidBelowThreshold(float threshold, boolean smoothed) {
+        int size = getSize();
+        return trimSizeToContentAboveThreshold(threshold).setSize2(size, smoothed);
+    }
+
+    public FloatMask shrink2(int size) {
+        return shrink2(size, SymmetryType.SPAWN);
+    }
+
+    public FloatMask enlarge2(int size) {
+        return enlarge2(size, false, SymmetryType.SPAWN);
+    }
+
+    public FloatMask enlarge2(int size, boolean smooth) {
+        return enlarge2(size, smooth, SymmetryType.SPAWN);
+    }
+
+    public FloatMask enlarge2(int size, boolean smooth, SymmetryType symmetryType) {
+        FloatMask largeMask = new FloatMask(size, random.nextLong(), symmetrySettings);
+        int smallX;
+        int smallY;
+        int oldSize = getSize();
+        float scaler = (float) size / (float) oldSize;
+        for (int x = 0; x < size; x++) {
+            smallX = StrictMath.min(StrictMath.round(x / scaler), oldSize - 1);
+            for (int y = 0; y < size; y++) {
+                smallY = StrictMath.min(StrictMath.round(y / scaler), oldSize - 1);
+                largeMask.setValueAt(x, y, getValueAt(smallX, smallY));
+            }
+        }
+        if(smooth) {
+            largeMask.smooth((int) scaler);
+        }
+        largeMask.applySymmetry(symmetryType);
+        return largeMask;
+    }
+
+    public FloatMask shrink2 (int size, SymmetryType symmetryType) {
+        FloatMask smallMask = new FloatMask(size, random.nextLong(), symmetrySettings);
+        int oldSize = getSize();
+        float scaler = (float) oldSize / (float) size;
+        float sum = 0;
+        for (int x = 0; x < size; x++) {
+            int a = (int) (x * scaler);
+            for (int y = 0; y < size; y++) {
+                int b = (int) (y * scaler);
+                for (int z = 0; z < (int) scaler; z++) {
+                    for (int w = 0; w < (int) scaler; w++) {
+                        sum += getValueAt(a + z, b + w);
+                    }
+                }
+                smallMask.setValueAt(x, y, sum / scaler / scaler);
+                sum = 0;
+            }
+        }
+        smallMask.applySymmetry(symmetryType);
+        return smallMask;
+    }
+
+    public FloatMask setSize2(int size) {
+        return setSize2(size, false);
+    }
+
+    public FloatMask setSize2(int size, boolean smoothedEnlarge) {
+        if (size > getSize()) {
+            return enlarge2(size, smoothedEnlarge);
+        }
+        if(size < getSize()) {
+            return shrink2(size);
+        }
+        return this;
     }
 
     // -------------------------------------------
