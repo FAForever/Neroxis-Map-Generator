@@ -164,21 +164,21 @@ public strictfp class ImageGenerator {
             BinaryMask mountains = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
                 Vector2f loc = base.getRandomPosition();
-                if(loc == null) {
+                if (loc == null) {
                     loc = new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance));
                 }
-                mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2);
+                mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2, false);
             }
             mountains.intersect(base);
             BinaryMask mountainsBase = mountains.copy().inflate(15);
             BinaryMask mountainsBaseEdge = mountainsBase.copy().inflate(15).minus(mountainsBase);
 
             FloatMask newBrush = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-            newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30));
-            newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30));
-            newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)));
+            newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30), false);
+            newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30), false);
+            newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)), false);
             newBrush.min(0);
-            if(newBrush.areAnyEdgesGreaterThan(0f)) {
+            if (newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
                 neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
@@ -239,17 +239,17 @@ public strictfp class ImageGenerator {
                 int numPossibleLocations = possibleLocations.size();
                 for (int x = 0; x < 5; x++) {
                     Vector2f loc = possibleLocations.get(random.nextInt(numPossibleLocations));
-                    while(loc == null) {
+                    while (loc == null) {
                         loc = wholeImage.getRandomPosition();
                     }
                     Vector2f target = possibleLocations.get(random.nextInt(numPossibleLocations));
-                    while(target == null) {
+                    while (target == null) {
                         target = wholeImage.getRandomPosition();
                     }
-                    chain.guidedWalkWithBrushWrapEdges(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
-                            random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2);
+                    chain.guidedWalkWithBrush(loc, target, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainBrushSize,
+                            random.nextInt(15) + 1, 0.1f, 1f, chainBrushSize / 2, true);
                 }
-                chainTexture.useBrushWithinAreaWithDensityWrapEdges(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat());
+                chainTexture.useBrushWithinAreaWithDensity(chain, Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength)), chainTextureBrushSize, 0.05f, 5 * random.nextFloat(), true);
 
                 float redWeight = redLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);
                 float greenWeight = greenLocus + ((random.nextBoolean() ? 1 : - 1) * random.nextFloat() * colorVariation / 100);

@@ -1070,7 +1070,7 @@ public strictfp class MapGenerator {
         ConcurrentFloatMask heightmapOcean = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapOcean");
         ConcurrentFloatMask noise = new ConcurrentFloatMask(mapSize / 128, random.nextLong(), symmetrySettings, "noise");
 
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 64, .05f, 14f);
+        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, 64, .05f, 14f, false);
 
         ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, PLATEAU_HEIGHT / 2, random.nextLong(), "paintedMountains");
 
@@ -1079,7 +1079,7 @@ public strictfp class MapGenerator {
 
         heightmapMountains.smooth(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
 
-        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, 32, .64f, 8f).clampMax(PLATEAU_HEIGHT);
+        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, 32, .64f, 8f, false).clampMax(PLATEAU_HEIGHT);
 
         ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT - 1f, random.nextLong(), "paintedPlateaus");
 
@@ -1098,17 +1098,17 @@ public strictfp class MapGenerator {
         valleys.randomWalk(random.nextInt(4), random.nextInt(mapSize / 2) / numSymPoints).grow(.5f, SymmetryType.SPAWN, 4)
                 .setSize(mapSize + 1).intersect(plateaus.copy().deflate(8)).minus(spawnPlateauMask);
 
-        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, 24, .72f, -0.35f)
+        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, 24, .72f, -0.35f, false)
                 .clampMin(VALLEY_FLOOR);
-        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(4).acid(.01f, 4)), brush4, 24, .72f, 0.5f);
+        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(4).acid(.01f, 4)), brush4, 24, .72f, 0.5f, false);
 
         initRamps();
 
         ConcurrentBinaryMask water = land.copy().invert();
         ConcurrentBinaryMask deepWater = water.copy().deflate(32);
 
-        heightmapOcean.addDistance(land, -.45f).clampMin(OCEAN_FLOOR).useBrushWithinAreaWithDensity(water.minus(deepWater), brush5, 16, 1f, .5f)
-                .useBrushWithinAreaWithDensity(deepWater, brush5, 64, .065f, 1f).clampMax(0).smooth(4, deepWater);
+        heightmapOcean.addDistance(land, -.45f).clampMin(OCEAN_FLOOR).useBrushWithinAreaWithDensity(water.minus(deepWater), brush5, 16, 1f, .5f, false)
+                .useBrushWithinAreaWithDensity(deepWater, brush5, 64, .065f, 1f, false).clampMax(0).smooth(4, deepWater);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(LAND_HEIGHT)
                 .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)

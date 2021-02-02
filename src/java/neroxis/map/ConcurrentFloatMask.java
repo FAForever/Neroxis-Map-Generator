@@ -164,21 +164,21 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
+    public ConcurrentFloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.useBrush(location, brushName, intensity, size)
+                this.mask.useBrush(location, brushName, intensity, size, wrapEdges)
         );
     }
 
-    public ConcurrentFloatMask useBrushRepeatedlyCenteredWithinArea(ConcurrentBinaryMask area, String brushName, int size, int frequency, float intensity) {
+    public ConcurrentFloatMask useBrushWithinArea(ConcurrentBinaryMask area, String brushName, int size, int frequency, float intensity, boolean wrapEdges) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
-                this.mask.useBrushWithinArea(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, frequency, intensity)
+                this.mask.useBrushWithinArea(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, frequency, intensity, wrapEdges)
         );
     }
 
-    public ConcurrentFloatMask useBrushWithinAreaWithDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity) {
+    public ConcurrentFloatMask useBrushWithinAreaWithDensity(ConcurrentBinaryMask area, String brushName, int size, float density, float intensity, boolean wrapEdges) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
-                this.mask.useBrushWithinAreaWithDensity(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, density, intensity)
+                this.mask.useBrushWithinAreaWithDensity(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), brushName, size, density, intensity, wrapEdges)
         );
     }
 

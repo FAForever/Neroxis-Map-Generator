@@ -166,7 +166,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffset(brush, location, true);
+            combineWithOffset(brush, location, true, false);
             int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxStepSize + 1);
             int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxStepSize + 1);
             location.add(dx, dy);
@@ -176,46 +176,14 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
-                                          float minValue, float maxValue, int maxStepSize) {
+                                          float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
         Vector2f location = new Vector2f(start);
         BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                 .setSize(size)).convertToBinaryMask(minValue, maxValue);
         for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffset(brush, location, true);
+            combineWithOffset(brush, location, true, wrapEdges);
             int dx = (target.getX() > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
             int dy = (target.getY() > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
-            location.add(dx, dy);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public BinaryMask guidedWalkWithBrushWrapEdges(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
-                                                   float minValue, float maxValue, int maxStepSize) {
-        int maskSize = getSize();
-        Vector2f location = new Vector2f(start);
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
-                .setSize(size)).convertToBinaryMask(minValue, maxValue);
-        for (int i = 0; i < numberOfUses; i++) {
-            combineWithOffsetWrapEdges(brush, location, true);
-            float positiveToroidalXDistance = target.getX() + maskSize - location.getX();
-            float negativeToroidalXDistance = location.getX() + maskSize - target.getX();
-            if (positiveToroidalXDistance < 0) {
-                positiveToroidalXDistance = maskSize;
-            }
-            if (negativeToroidalXDistance < 0) {
-                negativeToroidalXDistance = maskSize;
-            }
-            int dx = (StrictMath.min(positiveToroidalXDistance, target.getX() - location.getX()) < StrictMath.min(negativeToroidalXDistance, location.getX() - target.getX()) ? 1 : -1) * random.nextInt(maxStepSize + 1);
-            float positiveToroidalYDistance = target.getY() + maskSize - location.getY();
-            float negativeToroidalYDistance = location.getY() + maskSize - target.getY();
-            if (positiveToroidalYDistance < 0) {
-                positiveToroidalYDistance = maskSize;
-            }
-            if (negativeToroidalYDistance < 0) {
-                negativeToroidalYDistance = maskSize;
-            }
-            int dy = (StrictMath.min(positiveToroidalYDistance, target.getY() - location.getY()) < StrictMath.min(negativeToroidalYDistance, location.getY() - target.getY()) ? 1 : -1) * random.nextInt(maxStepSize + 1);
             location.add(dx, dy);
         }
         VisualDebugger.visualizeMask(this);
@@ -511,11 +479,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered) {
-        return combineWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered);
+    public BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+        return combineWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public BinaryMask combineWithOffset(BinaryMask other, int offsetX, int offsetY, boolean center) {
+    public BinaryMask combineWithOffset(BinaryMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
         int size = StrictMath.min(getSize(), other.getSize());
         if (center) {
             offsetX -= size / 2;
@@ -523,8 +491,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         }
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                int shiftX = x + offsetX - 1;
-                int shiftY = y + offsetY - 1;
+                int shiftX;
+                int shiftY;
+                if (wrapEdges) {
+                    shiftX = (x + offsetX + size) % size;
+                    shiftY = (y + offsetY + size) % size;
+                } else {
+                    shiftX = x + offsetX - 1;
+                    shiftY = y + offsetY - 1;
+                }
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
                         setValueAt(shiftX, shiftY, true);
@@ -544,43 +519,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location) {
-        combineWithOffset(other.convertToBinaryMask(minValue, maxValue), location, true);
+    public BinaryMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location, boolean wrapEdges) {
+        combineWithOffset(other.convertToBinaryMask(minValue, maxValue), location, true, wrapEdges);
         VisualDebugger.visualizeMask(this);
         return this;
-    }
-
-    public BinaryMask combineWithOffsetWrapEdges(BinaryMask other, int offsetX, int offsetY, boolean centered) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        if (centered) {
-            offsetX = offsetX - otherSize / 2;
-            offsetY = offsetY - otherSize / 2;
-        }
-        for (int y = 0; y < otherSize; y++) {
-            for (int x = 0; x < otherSize; x++) {
-                int setXLocation = x + offsetX;
-                while (setXLocation < 0) {
-                    setXLocation += size;
-                }
-                int setYLocation = y + offsetY;
-                while (setYLocation < 0) {
-                    setYLocation += size;
-                }
-                setValueAt(setXLocation % size, setYLocation % size, other.getValueAt(x, y));
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public BinaryMask combineWithOffsetWrapEdges(BinaryMask other, Vector2f loc, boolean centered) {
-        return combineWithOffsetWrapEdges(other, (int) loc.getX(), (int) loc.getY(), centered);
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
         FloatMask brush = (FloatMask) loadBrush(brushName, random.nextLong()).setSize(size);
-        combineWithOffset(brush, minValue, maxValue, location);
+        combineWithOffset(brush, minValue, maxValue, location, false);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -869,15 +816,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask removeAreasOutsideRange(int minSize, int maxSize) {
+    public BinaryMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
         removeAreasSmallerThan(minSize);
         removeAreasBiggerThan(maxSize);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public BinaryMask removeAreasInRange(int minSize, int maxSize) {
-        minus(this.copy().removeAreasOutsideRange(minSize, maxSize));
+    public BinaryMask removeAreasInSizeRange(int minSize, int maxSize) {
+        minus(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -1103,7 +1050,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
             int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
             location.add(dx, dy).clampMax(maskSize, maskSize).clampMin(0, 0);
-            combineWithOffset(brush, location, true);
+            combineWithOffset(brush, location, true, false);
         }
     }
 

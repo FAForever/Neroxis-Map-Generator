@@ -272,57 +272,11 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addWrapEdges(FloatMask other) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        for (int y = 0; y < otherSize; y++) {
-            for (int x = 0; x < otherSize; x++) {
-                addValueAt(x % size, y % size, other.getValueAt(x, y));
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
+    public FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+        return addWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public FloatMask addWeightedWrapEdges(FloatMask other, float weight) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        for (int y = 0; y < otherSize; y++) {
-            for (int x = 0; x < otherSize; x++) {
-                addValueAt(x % size, y % size, other.getValueAt(x, y) * weight);
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask addWithOffsetWrapEdges(FloatMask other, int offsetX, int offsetY, boolean centered) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        if (centered) {
-            offsetX = offsetX - otherSize / 2;
-            offsetY = offsetY - otherSize / 2;
-        }
-        for (int y = 0; y < otherSize; y++) {
-            for (int x = 0; x < otherSize; x++) {
-                addValueAt((x + offsetX + size) % size, (y + offsetY + size) % size, other.getValueAt(x, y));
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask addWithOffsetWrapEdges(FloatMask other, Vector2f loc, boolean centered) {
-        addWithOffsetWrapEdges(other, (int) loc.getX(), (int) loc.getY(), centered);
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered) {
-        return addWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered);
-    }
-
-    public FloatMask addWithOffset(FloatMask other, int offsetX, int offsetY, boolean center) {
+    public FloatMask addWithOffset(FloatMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
         int size = StrictMath.min(getSize(), other.getSize());
         if (center) {
             offsetX -= size / 2;
@@ -331,8 +285,15 @@ public strictfp class FloatMask extends Mask<Float> {
         boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                int shiftX = x + offsetX - 1;
-                int shiftY = y + offsetY - 1;
+                int shiftX;
+                int shiftY;
+                if (wrapEdges) {
+                    shiftX = (x + offsetX + size) % size;
+                    shiftY = (y + offsetY + size) % size;
+                } else {
+                    shiftX = x + offsetX - 1;
+                    shiftY = y + offsetY - 1;
+                }
                 if (getSize() != size) {
                     if (inBounds(shiftX, shiftY)) {
                         addValueAt(shiftX, shiftY, other.getValueAt(x, y));
@@ -378,12 +339,12 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center) {
-        return addWithOffset(other.copy().multiply(-1f), loc, center);
+    public FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center, boolean wrapEdges) {
+        return addWithOffset(other.copy().multiply(-1f), loc, center, wrapEdges);
     }
 
-    public FloatMask subtractWithOffset(FloatMask other, int offsetX, int offsetY, boolean center) {
-        return addWithOffset(other.copy().multiply(-1f), offsetX, offsetY, center);
+    public FloatMask subtractWithOffset(FloatMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
+        return addWithOffset(other.copy().multiply(-1f), offsetX, offsetY, center, wrapEdges);
     }
 
     public FloatMask multiply(FloatMask other) {
@@ -704,29 +665,8 @@ public strictfp class FloatMask extends Mask<Float> {
         return newMask;
     }
 
-    public FloatMask smoothWithinEdgeDistance(BinaryMask other, int edgeDistance) {
-        checkMatchingSize(other);
-        for (int x = 0; x < edgeDistance; x = x + 2) {
-            replaceValues(other.getAreasWithinEdgeDistance(x + 1), copy().smooth(1));
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask reduceValuesOnIntersectingSmoothingZones(BinaryMask avoidMakingZonesHere, float floatMax) {
-        checkMatchingSize(avoidMakingZonesHere);
-        avoidMakingZonesHere = avoidMakingZonesHere.copy();
-        FloatMask newMaskInZones = copy().smooth(34).subtract(copy()).subtract(avoidMakingZonesHere, floatMax);
-        BinaryMask zones = newMaskInZones.copy().zeroInRange(0f * floatMax, 0.5f * floatMax).smooth(2).convertToBinaryMask(0.5f * floatMax, floatMax).inflate(34);
-        BinaryMask newMaskInZonesBase = convertToBinaryMask(floatMax, floatMax).deflate(3).minus(zones.copy().invert());
-        newMaskInZones.init(newMaskInZonesBase, 0, 1).smooth(4).max(0.35f * floatMax).add(newMaskInZonesBase, floatMax).smooth(2).max(0.65f * floatMax).add(newMaskInZonesBase, floatMax).smooth(1).add(newMaskInZonesBase, floatMax).max(floatMax);
-        replaceValues(zones, newMaskInZones).smoothWithinEdgeDistance(zones, 30);
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideRange(minSize, maxSize).invert(), 0f, 1f);
+        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
         this.subtract(tempMask2).min(0f);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -794,52 +734,15 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask interpolate(int size) {
-        return interpolate(size, SymmetryType.SPAWN);
-    }
-
-    public FloatMask interpolate(int size, SymmetryType symmetryType) {
-        int oldSize = getSize();
-        float scale = (float) size / (float) oldSize;
-        enlarge(size, symmetryType);
-        smooth(StrictMath.round(scale / 2));
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask decimate(int size) {
-        return decimate(size, SymmetryType.SPAWN);
-    }
-
-    public FloatMask decimate(int size, SymmetryType symmetryType) {
-        int oldSize = getSize();
-        float scale = (float) oldSize / (float) size;
-        smooth(StrictMath.round(scale / 2));
-        shrink(size, symmetryType);
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask resample(int size) {
-        if (size > getSize()) {
-            interpolate(size);
-        }
-        if (size < getSize()) {
-            decimate(size);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size) {
+    public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
         FloatMask brush = loadBrush(brushName, random.nextLong());
         brush.multiply(intensity / brush.getMax()).setSize(size);
-        addWithOffset(brush, location, true);
+        addWithOffset(brush, location, true, wrapEdges);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity) {
+    public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
         checkSmallerSize(size);
         boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
         ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
@@ -848,45 +751,19 @@ public strictfp class FloatMask extends Mask<Float> {
         brush.multiply(intensity / brush.getMax()).setSize(size);
         for (int i = 0; i < numUses; i++) {
             Vector2f location = possibleLocations.get(random.nextInt(length));
-            addWithOffset(brush, location, true);
+            addWithOffset(brush, location, true, wrapEdges);
             if (!symmetric) {
                 ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> addWithOffset(brush, symmetryPoint.getLocation(), true));
+                symmetryPoints.forEach(symmetryPoint -> addWithOffset(brush, symmetryPoint.getLocation(), true, wrapEdges));
             }
         }
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public FloatMask useBrushWithinAreaWrapEdges(BinaryMask area, String brushName, int size, int numUses, float intensity) {
-        checkSmallerSize(size);
-        boolean symmetric = symmetrySettings.getSpawnSymmetry().isPerfectSymmetry();
-        ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
-        int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, random.nextLong());
-        brush.multiply(intensity / brush.getMax()).setSize(size);
-        for (int i = 0; i < numUses; i++) {
-            Vector2f location = possibleLocations.get(random.nextInt(length));
-            addWithOffsetWrapEdges(brush, location, true);
-            if (!symmetric) {
-                ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> addWithOffsetWrapEdges(brush, symmetryPoint.getLocation(), true));
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity) {
+    public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity, boolean wrapEdges) {
         int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinArea(area, brushName, size, frequency, intensity);
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public FloatMask useBrushWithinAreaWithDensityWrapEdges(BinaryMask area, String brushName, int size, float density, float intensity) {
-        int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinAreaWrapEdges(area, brushName, size, frequency, intensity);
+        useBrushWithinArea(area, brushName, size, frequency, intensity, wrapEdges);
         VisualDebugger.visualizeMask(this);
         return this;
     }
