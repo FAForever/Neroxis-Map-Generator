@@ -1,9 +1,11 @@
 package neroxis.util;
 
+import lombok.Getter;
 import neroxis.generator.MapGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.ConcurrentFloatMask;
 import neroxis.map.ConcurrentMask;
+import neroxis.map.Mask;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,33 +32,29 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
-    public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, ?> function) {
+    public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, Mask<?>> function) {
         addInternal(executingMask, dep, function);
         return executingMask;
     }
 
-    public static ConcurrentFloatMask add(ConcurrentFloatMask executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, ?> function) {
+    public static ConcurrentFloatMask add(ConcurrentFloatMask executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, Mask<?>> function) {
         addInternal(executingMask, dep, function);
         return executingMask;
     }
 
-    private static void addInternal(ConcurrentMask<?> executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, ?> function) {
+    private static void addInternal(ConcurrentMask<?> executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, Mask<?>> function) {
         int index = pipeline.size();
-        boolean addedAfterPipelineStart = Pipeline.isStarted();
+        if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
+            throw new UnsupportedOperationException("Mask added after pipeline started");
+        }
         final String callingLine = Util.getStackTraceLineInClass(MapGenerator.class);
         final String callingMethod = Util.getStackTraceMethod(executingMask.getClass());
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
-        CompletableFuture<?> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
-                .thenApply(res -> {
-                    if (addedAfterPipelineStart && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
-                        System.err.println("Running non deterministic task added after pipeline start!  " + executingMask.getName());
-                    }
-                    return res;
-                })
-                .thenApplyAsync(m -> {
+        CompletableFuture<Mask<?>> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
+                .thenApply(m -> {
                     long startTime = System.currentTimeMillis();
-                    Object res = function.apply(m);
+                    Mask<?> res = function.apply(m);
                     long functionTime = System.currentTimeMillis() - startTime;
                     startTime = System.currentTimeMillis();
                     if (HASH_MASK) {
@@ -78,14 +76,10 @@ public strictfp class Pipeline {
                         );
                     }
                     return res;
-                })
-                .thenRun(() -> {
-
                 });
         Entry entry = new Entry(index, executingMask, dependencies, newFuture);
 
         entry.dependencies.forEach(d -> d.dependants.add(entry));
-        entry.index = pipeline.size();
         pipeline.add(entry);
 
         if (MapGenerator.DEBUG) {
@@ -115,7 +109,6 @@ public strictfp class Pipeline {
     }
 
     public static void await(ConcurrentMask<?>... masks) {
-        getDependencyList(Arrays.asList(masks)).get(0).getFuture().join();
         getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
     }
 
@@ -177,15 +170,16 @@ public strictfp class Pipeline {
         out.close();
     }
 
+    @Getter
     public static strictfp class Entry {
         private final ConcurrentMask<?> executingMask;
         private final Set<Entry> dependencies;
-        private final CompletableFuture<?> future;
+        private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
         private final List<ConcurrentMask<?>> maskBackups = new ArrayList<>();
-        private int index;
+        private final int index;
 
-        public Entry(int index, ConcurrentMask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<?> future) {
+        public Entry(int index, ConcurrentMask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Mask<?>> future) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies = new HashSet<>(dependencies);
@@ -203,35 +197,13 @@ public strictfp class Pipeline {
         public synchronized ConcurrentMask<?> getResult(ConcurrentMask<?> requestingMask) {
             if (requestingMask == executingMask) {
                 return executingMask;
-            } /*else if(dependants.size() == 1) {
-				return executingMask;
-			} */ else {
+            } else {
                 if (maskBackups.isEmpty()) {
                     new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName())).printStackTrace();
                     return null;
                 }
                 return maskBackups.remove(0);
             }
-        }
-
-        public CompletableFuture<?> getFuture() {
-            return future;
-        }
-
-        public ConcurrentMask<?> getExecutingMask() {
-            return executingMask;
-        }
-
-        public Set<Entry> getDependencies() {
-            return dependencies;
-        }
-
-        public Set<Entry> getDependants() {
-            return dependants;
-        }
-
-        public int getIndex() {
-            return index;
         }
     }
 }

@@ -19,7 +19,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         this.mask = new BinaryMask(size, seed, symmetrySettings);
         this.symmetrySettings = this.mask.getSymmetrySettings();
 
-        Pipeline.add(this, Collections.emptyList(), Arrays::asList);
+        Pipeline.add(this, Collections.emptyList(), res -> this.mask);
     }
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, Long seed, String name) {
