@@ -2,8 +2,7 @@
   "fieldNormals": [
     "/env/Crystalline/decals/Cryst014_normals.dds",
     "/env/Crystalline/decals/Cryst018_normals.dds",
-    "/env/Crystalline/decals/crystcrack01_normals.dds",
-    "/env/Crystalline/decals/crys_surface01_normals.dds"
+    "/env/Crystalline/decals/crystcrack01_normals.dds"
   ],
   "fieldAlbedos": [
     "/env/Crystalline/decals/crystcrack01_albedo.dds",
