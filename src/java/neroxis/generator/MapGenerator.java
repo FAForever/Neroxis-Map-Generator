@@ -893,9 +893,6 @@ public strictfp class MapGenerator {
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
-
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (!landPathed && mapSize > 512) {
             land.combine(spawnLandMask).combine(spawnPlateauMask).setSize(mapSize / 4)
                     .erode(.5f, SymmetryType.SPAWN, 20).setSize(mapSize + 1).smooth(8);
@@ -954,7 +951,7 @@ public strictfp class MapGenerator {
         plateaus = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "plateaus");
 
         pathInBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound);
-        plateaus.inflate(mapSize / 256f).setSize(mapSize / 4).grow(.5f, SymmetryType.TERRAIN, 4).smooth(4).setSize(mapSize + 1).smooth(12);
+        plateaus.inflate(mapSize / 256f).setSize(mapSize / 4).grow(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1).smooth(12);
     }
 
     private void walkMountainInit() {
@@ -1088,7 +1085,7 @@ public strictfp class MapGenerator {
 
         heightmapPlateaus.smooth(1, plateaus);
 
-        plateaus.combine(spawnLandMask).combine(spawnPlateauMask);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
         hills = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "hills");
         valleys = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "valleys");
@@ -1111,14 +1108,14 @@ public strictfp class MapGenerator {
                 .useBrushWithinAreaWithDensity(deepWater, brush5, 64, .065f, 1f, false).clampMax(0).smooth(4, deepWater);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(LAND_HEIGHT)
-                .setValueInArea(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setValueInArea(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
+                .setToValue(LAND_HEIGHT, spawnLandMask).add(heightmapPlateaus).setToValue(PLATEAU_HEIGHT + LAND_HEIGHT, spawnPlateauMask)
                 .smooth(1, spawnPlateauMask.copy().inflate(4)).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4)).smooth(12, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(6, ramps.copy().inflate(12)).smooth(2, ramps.copy().inflate(16));
 
         heightmapBase.add(heightmapOcean).smooth(1).add(heightmapLand);
 
         noise.addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1)
-                .subtractAvg().clampMin(0f).setValueInArea(0f, land.copy().invert()).smooth(8);
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert()).smooth(8);
 
         heightmapBase.add(waterHeight).add(noise).clampMin(0f).clampMax(256f);
 

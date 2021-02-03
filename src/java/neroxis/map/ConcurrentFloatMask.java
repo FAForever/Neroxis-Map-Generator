@@ -2,7 +2,6 @@ package neroxis.map;
 
 import lombok.Getter;
 import neroxis.util.Pipeline;
-import neroxis.util.Util;
 import neroxis.util.Vector2f;
 
 import java.nio.file.Path;
@@ -128,33 +127,33 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask setValueInArea(float value, ConcurrentBinaryMask area) {
+    public ConcurrentFloatMask setToValue(float value, ConcurrentBinaryMask area) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
-                this.mask.setValues(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+                this.mask.setToValue(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
         );
     }
 
     public ConcurrentFloatMask clampMax(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.max(value)
+                this.mask.clampMax(value)
         );
     }
 
-    public ConcurrentFloatMask clampMaxInArea(float value, ConcurrentBinaryMask area) {
+    public ConcurrentFloatMask clampMax(float value, ConcurrentBinaryMask area) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
-                this.mask.max(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+                this.mask.clampMax(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
         );
     }
 
     public ConcurrentFloatMask clampMin(float value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.min(value)
+                this.mask.clampMin(value)
         );
     }
 
-    public ConcurrentFloatMask clampMinInArea(float value, ConcurrentBinaryMask area) {
+    public ConcurrentFloatMask clampMin(float value, ConcurrentBinaryMask area) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
-                this.mask.min(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+                this.mask.clampMin(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
         );
     }
 
@@ -252,15 +251,5 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public void show() {
         this.mask.show();
-    }
-
-    public ConcurrentFloatMask startVisualDebugger() {
-        this.mask.startVisualDebugger(name, Util.getStackTraceParentClass());
-        return this;
-    }
-
-    public ConcurrentFloatMask startVisualDebugger(String maskName) {
-        this.mask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
-        return this;
     }
 }

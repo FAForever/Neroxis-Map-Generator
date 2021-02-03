@@ -2,7 +2,6 @@ package neroxis.map;
 
 import lombok.Getter;
 import neroxis.util.Pipeline;
-import neroxis.util.Util;
 import neroxis.util.Vector2f;
 
 import java.nio.file.Path;
@@ -274,23 +273,10 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask connectSymSpawnWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectSymSpawnWithRandomBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
     public ConcurrentBinaryMask connectLocationToLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize, float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.connectLocationToLocationFromList(startLocation, targetLocations, brushName, size, usesBatchSize,
                         minValue, maxValue, maxDistanceBetweenBrushUse, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-
-    public ConcurrentBinaryMask connectSymSpawnsWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToAttemptConnectionPerOddNumberedSpawn, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectSymSpawnWithRandomBrushUse(spawns, numberOfTeams, probabilityToAttemptConnectionPerOddNumberedSpawn, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
         );
     }
 
@@ -341,15 +327,5 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     public void show() {
         this.mask.show();
-    }
-
-    public ConcurrentBinaryMask startVisualDebugger() {
-        this.mask.startVisualDebugger(name, Util.getStackTraceParentClass());
-        return this;
-    }
-
-    public ConcurrentBinaryMask startVisualDebugger(String maskName) {
-        this.mask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
-        return this;
     }
 }

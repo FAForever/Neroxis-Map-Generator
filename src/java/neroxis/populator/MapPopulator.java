@@ -304,14 +304,14 @@ public strictfp class MapPopulator {
             map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
-            texturesMasks[0].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[1].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[2].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[3].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[4].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[5].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[6].min(0f).max(1f).resample(mapImageSize);
-            texturesMasks[7].min(0f).max(1f).resample(mapImageSize);
+            texturesMasks[0].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[1].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[2].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[3].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[4].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[5].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[6].clampMin(0f).clampMax(1f).resample(mapImageSize);
+            texturesMasks[7].clampMin(0f).clampMax(1f).resample(mapImageSize);
 
             BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
             BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
@@ -334,7 +334,7 @@ public strictfp class MapPopulator {
             smallWaterBeach.minus(flatAboveCoast).smooth(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).smooth(1);
             smallWaterBeach.setSize(mapImageSize);
 
-            smallWaterBeachTexture.init(smallWaterBeach, 0, 1).smooth(8).max(0.35f).add(smallWaterBeach, 1f).smooth(4).max(0.65f).add(smallWaterBeach, 1f).smooth(1).add(smallWaterBeach, 1f).max(1f);
+            smallWaterBeachTexture.init(smallWaterBeach, 0, 1).smooth(8).clampMax(0.35f).add(smallWaterBeach, 1f).smooth(4).clampMax(0.65f).add(smallWaterBeach, 1f).smooth(1).add(smallWaterBeach, 1f).clampMax(1f);
 
             BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight + 1f, random.nextLong());
             BinaryMask accentGround = new BinaryMask(land, random.nextLong());
@@ -375,23 +375,23 @@ public strictfp class MapPopulator {
             rock.setSize(mapImageSize);
             accentRock.setSize(mapImageSize);
             smallWater.setSize(mapImageSize);
-            accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).max(1f);
-            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).max(1f);
-            slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).max(1f);
-            accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).max(1f);
-            steepHillsTexture.init(steepHills, 0, 1).smooth(8).max(0.35f).add(steepHills, .65f).smooth(4).max(0.65f).add(steepHills, .5f).smooth(1).add(steepHills, 1f).max(1f);
-            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).min(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-            waterBeachTexture.subtract(aboveBeachEdge, .9f).min(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).min(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
-            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).min(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).min(0).smooth(2, rock.copy().invert());
-            waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).min(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).max(1f);
+            accentGroundTexture.init(accentGround, 0, 1).smooth(8).add(accentGround, .65f).smooth(4).add(accentGround, .5f).smooth(1).clampMax(1f);
+            accentPlateauTexture.init(accentPlateau, 0, 1).smooth(8).add(accentPlateau, .65f).smooth(4).add(accentPlateau, .5f).smooth(1).clampMax(1f);
+            slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .65f).smooth(4).add(slopes, .5f).smooth(1).clampMax(1f);
+            accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f);
+            steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).add(steepHills, 1f).clampMax(1f);
+            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
+            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
+            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
+            waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
             waterBeachTexture.removeAreasOfSpecifiedSizeWithLocalMaximums(0, smallWaterSizeLimit, 15, 1f).smooth(1).smooth(1);
             if (smallWaterTexturesOnLayer5) {
-                steepHillsTexture.add(smallWaterBeachTexture).max(1f);
+                steepHillsTexture.add(smallWaterBeachTexture).clampMax(1f);
             } else {
-                waterBeachTexture.add(smallWaterBeachTexture).max(1f);
+                waterBeachTexture.add(smallWaterBeachTexture).clampMax(1f);
             }
-            rockTexture.init(rock, 0, 1).smooth(8).max(0.2f).add(rock, .65f).smooth(4).max(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).max(1f);
-            accentRockTexture.init(accentRock, 0, 1).min(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).max(1f);
+            rockTexture.init(rock, 0, 1).smooth(8).clampMax(0.2f).add(rock, .65f).smooth(4).clampMax(0.3f).add(rock, .5f).smooth(1).add(rock, 1f).clampMax(1f);
+            accentRockTexture.init(accentRock, 0, 1).clampMin(0).smooth(8).add(accentRock, .65f).smooth(4).add(accentRock, .5f).smooth(1).clampMax(1f);
 
             if (keepLayer1) {
                 accentGroundTexture = new FloatMask(texturesMasks[0], null);
@@ -419,10 +419,10 @@ public strictfp class MapPopulator {
             }
             if (keepLayer0) {
                 FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-                oldLayer0.init(wholeMap, 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).min(0f);
+                oldLayer0.init(wholeMap, 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).clampMin(0f);
                 FloatMask oldLayer0Texture = new FloatMask(oldLayer0, null);
                 if (moveLayer0ToAndSmooth >= 10) {
-                    oldLayer0Texture.smooth(8).max(0.35f).add(oldLayer0).smooth(4).max(0.65f).add(oldLayer0).smooth(1).add(oldLayer0).max(1f);
+                    oldLayer0Texture.smooth(8).clampMax(0.35f).add(oldLayer0).smooth(4).clampMax(0.65f).add(oldLayer0).smooth(1).add(oldLayer0).clampMax(1f);
                 }
                 switch (moveLayer0ToAndSmooth) {
                     case 1:

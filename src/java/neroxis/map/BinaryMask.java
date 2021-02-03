@@ -3,7 +3,6 @@ package neroxis.map;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import neroxis.generator.VisualDebugger;
-import neroxis.util.Util;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
@@ -16,6 +15,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static neroxis.brushes.Brushes.loadBrush;
 
@@ -25,47 +25,30 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         super(seed);
         this.mask = getEmptyMask(size);
         this.symmetrySettings = symmetrySettings;
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                this.mask[x][y] = false;
-            }
-        }
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(BinaryMask binaryMask, Long seed) {
+    public BinaryMask(BinaryMask sourceMask, Long seed) {
         super(seed);
-        this.mask = getEmptyMask(binaryMask.getSize());
-        this.symmetrySettings = binaryMask.getSymmetrySettings();
-        for (int x = 0; x < binaryMask.getSize(); x++) {
-            for (int y = 0; y < binaryMask.getSize(); y++) {
-                this.mask[x][y] = binaryMask.getValueAt(x, y);
-            }
-        }
+        this.mask = getEmptyMask(sourceMask.getSize());
+        this.symmetrySettings = sourceMask.getSymmetrySettings();
+        modify(sourceMask::getValueAt);
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(FloatMask floatMask, float minValue, Long seed) {
+    public BinaryMask(FloatMask sourceMask, float minValue, Long seed) {
         super(seed);
-        this.mask = getEmptyMask(floatMask.getSize());
-        this.symmetrySettings = floatMask.getSymmetrySettings();
-        for (int x = 0; x < floatMask.getSize(); x++) {
-            for (int y = 0; y < floatMask.getSize(); y++) {
-                setValueAt(x, y, floatMask.getValueAt(x, y) >= minValue);
-            }
-        }
+        this.mask = getEmptyMask(sourceMask.getSize());
+        this.symmetrySettings = sourceMask.getSymmetrySettings();
+        modify((x, y) -> sourceMask.getValueAt(x, y) >= minValue);
         VisualDebugger.visualizeMask(this);
     }
 
-    public BinaryMask(FloatMask floatMask, float minValue, float maxValue, Long seed) {
+    public BinaryMask(FloatMask sourceMask, float minValue, float maxValue, Long seed) {
         super(seed);
-        this.mask = getEmptyMask(floatMask.getSize());
-        this.symmetrySettings = floatMask.getSymmetrySettings();
-        for (int x = 0; x < floatMask.getSize(); x++) {
-            for (int y = 0; y < floatMask.getSize(); y++) {
-                setValueAt(x, y, floatMask.getValueAt(x, y) >= minValue && floatMask.getValueAt(x, y) < maxValue);
-            }
-        }
+        this.mask = getEmptyMask(sourceMask.getSize());
+        this.symmetrySettings = sourceMask.getSymmetrySettings();
+        modify((x, y) -> sourceMask.getValueAt(x, y) >= minValue && sourceMask.getValueAt(x, y) < maxValue);
         VisualDebugger.visualizeMask(this);
     }
 
@@ -97,35 +80,23 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask clear() {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                setValueAt(x, y, false);
-            }
-        }
+        apply((x, y) -> setValueAt(x, y, false));
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask randomize(float density) {
-        for (int x = getMinXBound(SymmetryType.TERRAIN); x < getMaxXBound(SymmetryType.TERRAIN); x++) {
-            for (int y = getMinYBound(x, SymmetryType.TERRAIN); y < getMaxYBound(x, SymmetryType.TERRAIN); y++) {
-                setValueAt(x, y, random.nextFloat() < density);
-            }
-        }
-        applySymmetry(SymmetryType.TERRAIN);
+        return randomize(density, SymmetryType.TERRAIN);
+    }
+
+    public BinaryMask randomize(float density, SymmetryType symmetryType) {
+        modifyWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask flipValues(float density) {
-        for (int x = getMinXBound(SymmetryType.SPAWN); x < getMaxXBound(SymmetryType.SPAWN); x++) {
-            for (int y = getMinYBound(x, SymmetryType.SPAWN); y < getMaxYBound(x, SymmetryType.SPAWN); y++) {
-                if (getValueAt(x, y)) {
-                    setValueAt(x, y, random.nextFloat() < density);
-                }
-            }
-        }
-        applySymmetry(SymmetryType.SPAWN);
+        modifyWithSymmetry(SymmetryType.SPAWN, (x, y) -> getValueAt(x, y) && random.nextFloat() < density);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -133,8 +104,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask randomWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
-            int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN)) + getMinXBound(SymmetryType.TERRAIN);
-            int y = random.nextInt(getMaxYBound(x, SymmetryType.TERRAIN) - getMinYBound(x, SymmetryType.TERRAIN) + 1) + getMinYBound(x, SymmetryType.TERRAIN);
+            int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
+            int minXBound = getMinXBound(SymmetryType.TERRAIN);
+            int x = random.nextInt(maxXBound - minXBound) + minXBound;
+            int maxYBound = getMaxYBound(x, SymmetryType.TERRAIN);
+            int minYBound = getMinYBound(x, SymmetryType.TERRAIN);
+            int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
             for (int j = 0; j < numSteps; j++) {
                 if (inBounds(x, y)) {
                     setValueAt(x, y, true);
@@ -260,69 +235,42 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask invert() {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                setValueAt(x, y, !getValueAt(x, y));
-            }
-        }
+        modify((x, y) -> !getValueAt(x, y));
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask inflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (isEdge(x, y) && getValueAt(x, y)) {
-                    markTrueInRadius(radius, maskCopy, x, y);
-                }
+        apply((x, y) -> {
+            if (isEdge(x, y) && getValueAt(x, y)) {
+                markInRadius(radius, maskCopy, x, y, true);
             }
-        }
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (maskCopy[x][y]) {
-                    setValueAt(x, y, true);
-                }
-            }
-        }
-
-        applySymmetry(SymmetryType.SPAWN);
+        });
+        modify((x, y) -> maskCopy[x][y] || getValueAt(x, y));
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask deflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (isEdge(x, y) && !getValueAt(x, y)) {
-                    markTrueInRadius(radius, maskCopy, x, y);
-                }
+        apply((x, y) -> {
+            if (isEdge(x, y) && !getValueAt(x, y)) {
+                markInRadius(radius, maskCopy, x, y, true);
             }
-        }
+        });
+        modify((x, y) -> !maskCopy[x][y] && getValueAt(x, y));
 
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (maskCopy[x][y]) {
-                    setValueAt(x, y, false);
-                }
-            }
-        }
-
-        applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    private void markTrueInRadius(float radius, Boolean[][] maskCopy, int x, int y) {
+    private void markInRadius(float radius, Boolean[][] maskCopy, int x, int y, boolean value) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x2 = (int) (x - radius); x2 < x + radius + 1; x2++) {
             for (int y2 = (int) (y - radius); y2 < y + radius + 1; y2++) {
                 if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                    maskCopy[x2][y2] = true;
+                    maskCopy[x2][y2] = value;
                 }
             }
         }
@@ -330,33 +278,30 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask cutCorners() {
         int size = getSize();
-        Boolean[][] maskCopy = getEmptyMask(getSize());
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                int count = 0;
-                if (x > 0 && !getValueAt(x - 1, y))
-                    count++;
-                if (y > 0 && !getValueAt(x, y - 1))
-                    count++;
-                if (x < size - 1 && !getValueAt(x + 1, y))
-                    count++;
-                if (y < size - 1 && !getValueAt(x, y + 1))
-                    count++;
-                if (count > 1)
-                    maskCopy[x][y] = false;
-                else
-                    maskCopy[x][y] = getValueAt(x, y);
-            }
-        }
+        Boolean[][] maskCopy = getEmptyMask(size);
+        apply((x, y) -> {
+            int count = 0;
+            if (x > 0 && !getValueAt(x - 1, y))
+                count++;
+            if (y > 0 && !getValueAt(x, y - 1))
+                count++;
+            if (x < size - 1 && !getValueAt(x + 1, y))
+                count++;
+            if (y < size - 1 && !getValueAt(x, y + 1))
+                count++;
+            if (count > 1)
+                maskCopy[x][y] = false;
+            else
+                maskCopy[x][y] = getValueAt(x, y);
+        });
         mask = maskCopy;
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask acid(float strength, float size) {
-        Symmetry spawnSymmetry = symmetrySettings.getSpawnSymmetry();
-        BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), new SymmetrySettings(spawnSymmetry, spawnSymmetry, spawnSymmetry));
-        holes.randomize(strength).inflate(size);
+        BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
+        holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         BinaryMask maskCopy = this.copy();
         maskCopy.minus(holes);
         mask = maskCopy.getMask();
@@ -375,17 +320,19 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask grow(float strength, SymmetryType symmetryType, int count) {
         BinaryMask maskCopy = new BinaryMask(this, null);
         for (int i = 0; i < count; i++) {
-            for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-                for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
-                    if (isEdge(x, y)) {
-                        boolean value = random.nextFloat() < strength || getValueAt(x, y);
-                        maskCopy.setValueAt(x, y, value);
-                    }
+            applyWithSymmetry(symmetryType, (x, y) -> {
+                if (isEdge(x, y)) {
+                    boolean value = random.nextFloat() < strength || getValueAt(x, y);
+                    maskCopy.setValueAt(x, y, value);
+                    List<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+                    symmetryPoints.forEach(symmetryPoint -> {
+                        Vector2f location = symmetryPoint.getLocation();
+                        maskCopy.setValueAt(location, value);
+                    });
                 }
-            }
+            });
             combine(maskCopy);
         }
-        applySymmetry(symmetryType);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -401,29 +348,26 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask erode(float strength, SymmetryType symmetryType, int count) {
         BinaryMask maskCopy = new BinaryMask(this, null);
         for (int i = 0; i < count; i++) {
-            for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-                for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
-                    if (isEdge(x, y)) {
-                        boolean value = random.nextFloat() > strength && getValueAt(x, y);
-                        maskCopy.setValueAt(x, y, value);
-                    }
+            applyWithSymmetry(symmetryType, (x, y) -> {
+                if (isEdge(x, y)) {
+                    boolean value = random.nextFloat() > strength && getValueAt(x, y);
+                    maskCopy.setValueAt(x, y, value);
+                    List<SymmetryPoint> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+                    symmetryPoints.forEach(symmetryPoint -> {
+                        Vector2f location = symmetryPoint.getLocation();
+                        maskCopy.setValueAt(location, value);
+                    });
                 }
-            }
+            });
             intersect(maskCopy);
         }
-        applySymmetry(symmetryType);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask outline() {
         Boolean[][] maskCopy = getEmptyMask(getSize());
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                maskCopy[x][y] = isEdge(x, y);
-            }
-        }
+        apply((x, y) -> maskCopy[x][y] = isEdge(x, y));
         mask = maskCopy;
         VisualDebugger.visualizeMask(this);
         return this;
@@ -439,36 +383,21 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask smooth(int radius, float density) {
         int[][] innerCount = getInnerCount();
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                float areaDensity = calculateAreaAverage(radius, x, y, innerCount);
-                setValueAt(x, y, areaDensity >= density);
-            }
-        }
-
+        modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public BinaryMask replace(BinaryMask other) {
-        checkMatchingSize(other);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                mask[x][y] = other.getValueAt(x, y);
-            }
-        }
+    public BinaryMask replace(BinaryMask sourceMask) {
+        checkCompatibleMask(sourceMask);
+        modify(sourceMask::getValueAt);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask combine(BinaryMask other) {
-        checkMatchingSize(other);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                mask[x][y] = getValueAt(x, y) || other.getValueAt(x, y);
-            }
-        }
+        checkCompatibleMask(other);
+        modify((x, y) -> getValueAt(x, y) || other.getValueAt(x, y));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -483,37 +412,39 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return combineWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public BinaryMask combineWithOffset(BinaryMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
-        int size = StrictMath.min(getSize(), other.getSize());
+    public BinaryMask combineWithOffset(BinaryMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+        int size = getSize();
+        int otherSize = other.getSize();
+        int smallerSize = StrictMath.min(size, otherSize);
+        int offsetX;
+        int offsetY;
         if (center) {
-            offsetX -= size / 2;
-            offsetY -= size / 2;
+            offsetX = xCoordinate - smallerSize / 2;
+            offsetY = yCoordinate - smallerSize / 2;
+        } else {
+            offsetX = xCoordinate;
+            offsetY = yCoordinate;
         }
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                int shiftX;
-                int shiftY;
-                if (wrapEdges) {
-                    shiftX = (x + offsetX + size) % size;
-                    shiftY = (y + offsetY + size) % size;
-                } else {
-                    shiftX = x + offsetX - 1;
-                    shiftY = y + offsetY - 1;
-                }
-                if (getSize() != size) {
-                    if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
-                        setValueAt(shiftX, shiftY, true);
-                        ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
-                        for (SymmetryPoint symmetryPoint : symmetryPoints) {
-                            setValueAt(symmetryPoint.getLocation(), true);
-                        }
-                    }
-                } else {
-                    if (other.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
-                        setValueAt(x, y, true);
+        if (size >= otherSize) {
+            apply((x, y) -> {
+                int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
+                int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
+                if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
+                    setValueAt(shiftX, shiftY, true);
+                    ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                    for (SymmetryPoint symmetryPoint : symmetryPoints) {
+                        setValueAt(symmetryPoint.getLocation(), true);
                     }
                 }
-            }
+            });
+        } else {
+            other.apply((x, y) -> {
+                int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
+                int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
+                if (other.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
+                    setValueAt(x, y, true);
+                }
+            });
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -533,23 +464,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask intersect(BinaryMask other) {
-        checkMatchingSize(other);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                mask[x][y] = getValueAt(x, y) && other.getValueAt(x, y);
-            }
-        }
+        checkCompatibleMask(other);
+        modify((x, y) -> getValueAt(x, y) && other.getValueAt(x, y));
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask minus(BinaryMask other) {
-        checkMatchingSize(other);
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                mask[x][y] = getValueAt(x, y) && !other.getValueAt(x, y);
-            }
-        }
+        checkCompatibleMask(other);
+        modify((x, y) -> getValueAt(x, y) && !other.getValueAt(x, y));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -559,16 +482,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask limitToSymmetryRegion(SymmetryType symmetryType) {
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                if (x < getMinXBound(symmetryType)
-                        || x >= getMaxXBound(symmetryType)
-                        || y < getMinYBound(x, symmetryType)
-                        || y >= getMaxYBound(x, symmetryType)) {
-                    setValueAt(x, y, false);
-                }
-            }
-        }
+        int minXBound = getMinXBound(symmetryType);
+        int maxXBound = getMaxXBound(symmetryType);
+        modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -674,11 +590,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         float dx;
         float dy;
         float radius2 = radius * radius;
+        float radiansToDegreeFactor = (float) (180 / StrictMath.PI);
         for (int cx = StrictMath.round(StrictMath.max(0, x - radius)); cx < ex; cx++) {
             for (int cy = StrictMath.round(StrictMath.max(0, y - radius)); cy < ey; cy++) {
                 dx = x - cx;
                 dy = y - cy;
-                float angle = (float) (StrictMath.atan2(dy, dx) / StrictMath.PI * 180 + 360) % 360;
+                float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
                 if (dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
                     setValueAt(cx, cy, value);
                 }
@@ -791,19 +708,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask removeAreasSmallerThan(int minArea) {
         Set<Vector2f> seen = new HashSet<>(getSize() * getSize() * 2);
-        for (int x = getMinXBound(SymmetryType.SPAWN); x < getMaxXBound(SymmetryType.SPAWN); x++) {
-            for (int y = getMinYBound(x, SymmetryType.SPAWN); y < getMaxYBound(x, SymmetryType.SPAWN); y++) {
-                Vector2f location = new Vector2f(x, y);
-                if (!seen.contains(location)) {
-                    boolean value = getValueAt(location);
-                    Set<Vector2f> coordinates = getShapeCoordinates(location, minArea);
-                    seen.addAll(coordinates);
-                    if (coordinates.size() < minArea) {
-                        fillCoordinates(coordinates, !value);
-                    }
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            Vector2f location = new Vector2f(x, y);
+            if (!seen.contains(location)) {
+                boolean value = getValueAt(location);
+                Set<Vector2f> coordinates = getShapeCoordinates(location, minArea);
+                seen.addAll(coordinates);
+                if (coordinates.size() < minArea) {
+                    fillCoordinates(coordinates, !value);
                 }
             }
-        }
+        });
         applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
@@ -811,7 +726,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask removeAreasBiggerThan(int maxArea) {
         minus(copy().removeAreasSmallerThan(maxArea));
-        applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -871,13 +785,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     @Override
     public int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                int val = getValueAt(x, y) ? 1 : 0;
-                calculateInnerValue(innerCount, x, y, val);
-            }
-        }
+        apply((x, y) -> calculateInnerValue(innerCount, x, y, getValueAt(x, y) ? 1 : 0));
         return innerCount;
     }
 
@@ -950,38 +858,37 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public int getCount() {
-        int cellCount = 0;
-        for (int y = 0; y < getSize(); y++) {
-            for (int x = 0; x < getSize(); x++) {
-                if (getValueAt(x, y))
-                    cellCount++;
+        AtomicInteger cellCount = new AtomicInteger();
+        apply((x, y) -> {
+            if (getValueAt(x, y)) {
+                cellCount.incrementAndGet();
             }
-        }
-        return cellCount;
+        });
+        return cellCount.get();
     }
 
     public LinkedList<Vector2f> getAllCoordinates(int spacing) {
-        LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>();
+        LinkedList<Vector2f> coordinates = new LinkedList<>();
         for (int x = 0; x < getSize(); x += spacing) {
             for (int y = 0; y < getSize(); y += spacing) {
                 Vector2f location = new Vector2f(x, y);
-                coordinates.add(location);
+                coordinates.addLast(location);
             }
         }
-        return new LinkedList<>(coordinates);
+        return coordinates;
     }
 
     public LinkedList<Vector2f> getAllCoordinatesEqualTo(boolean value, int spacing) {
-        LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>();
+        LinkedList<Vector2f> coordinates = new LinkedList<>();
         for (int x = 0; x < getSize(); x += spacing) {
             for (int y = 0; y < getSize(); y += spacing) {
                 if (getValueAt(x, y) == value) {
                     Vector2f location = new Vector2f(x, y);
-                    coordinates.add(location);
+                    coordinates.addLast(location);
                 }
             }
         }
-        return new LinkedList<>(coordinates);
+        return coordinates;
     }
 
     public LinkedList<Vector2f> getSpacedCoordinates(float radius, int spacing) {
@@ -995,13 +902,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     private LinkedList<Vector2f> spaceCoordinates(float radius, LinkedList<Vector2f> coordinateList) {
-        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
+        LinkedList<Vector2f> chosenCoordinates = new LinkedList<>();
         while (coordinateList.size() > 0) {
             Vector2f location = coordinateList.removeFirst();
-            chosenCoordinates.add(location);
+            chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < radius);
         }
-        return new LinkedList<>(chosenCoordinates);
+        return chosenCoordinates;
     }
 
     public LinkedList<Vector2f> getRandomCoordinates(float spacing) {
@@ -1010,16 +917,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public LinkedList<Vector2f> getRandomCoordinates(float minSpacing, float maxSpacing) {
         LinkedList<Vector2f> coordinateList = getAllCoordinatesEqualTo(true, 1);
-        LinkedHashSet<Vector2f> chosenCoordinates = new LinkedHashSet<>();
+        LinkedList<Vector2f> chosenCoordinates = new LinkedList<>();
         while (coordinateList.size() > 0) {
             Vector2f location = coordinateList.remove(random.nextInt(coordinateList.size()));
             float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
-            chosenCoordinates.add(location);
+            chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
             ArrayList<SymmetryPoint> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getLocation().getDistance(loc) < minSpacing));
         }
-        return new LinkedList<>(chosenCoordinates);
+        return chosenCoordinates;
     }
 
     public Vector2f getRandomPosition() {
@@ -1067,36 +974,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask connectSpawnsWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToConnectTeamAtSpawn,
-                                                      String brushName, int size, int batchSize, float minIntensity, float maxIntensity,
-                                                      int maxDistanceBrushUse, int distanceThreshold) {
-        ArrayList<Vector2f> targetSpawns = new ArrayList<>();
-        for (int z = spawns.size() / numberOfTeams; z < spawns.size(); z++) {
-            targetSpawns.add(new Vector2f(spawns.get(z).getPosition().getX(), spawns.get(z).getPosition().getZ()));
-        }
-        for (int z = 0; z < spawns.size() / numberOfTeams; z += numberOfTeams) {
-            if (probabilityToConnectTeamAtSpawn > random.nextFloat()) {
-                Vector2f spawn = new Vector2f(spawns.get(z).getPosition().getX(), spawns.get(z).getPosition().getZ());
-                connectLocationToLocationFromList(spawn, targetSpawns, brushName, size, batchSize, minIntensity, maxIntensity, maxDistanceBrushUse, distanceThreshold);
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public BinaryMask connectSymSpawnWithRandomBrushUse(ArrayList<Spawn> spawns, int numberOfTeams, float probabilityToConnectSpawn,
-                                                        String brushName, int size, int batchSize, float minIntensity, float maxIntensity,
-                                                        int maxDistanceBetweenBrushstrokes, int distanceThreshold) {
-        for (int z = 0; z < spawns.size() / numberOfTeams; z += numberOfTeams) {
-            if (probabilityToConnectSpawn > random.nextFloat()) {
-                Vector2f spawn = new Vector2f(spawns.get(z).getPosition().getX(), spawns.get(z).getPosition().getZ());
-                connectLocationToNearItsSymLocation(spawn, brushName, size, batchSize, minIntensity, maxIntensity, maxDistanceBetweenBrushstrokes, distanceThreshold);
-            }
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
     public BinaryMask connectToCenterWithBrush(Vector2f location, String brushName, int size, int usesBatchSize,
                                                float minIntensity, float maxIntensity, int maxDistanceBetweenBrushstroke) {
         int halfSize = getSize() / 2;
@@ -1115,8 +992,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         Files.createFile(path);
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
 
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
+        int size = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 out.writeBoolean(getValueAt(x, y));
             }
         }
@@ -1124,20 +1002,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         out.close();
     }
 
-    public void checkMatchingSize(Mask<?> other) {
-        if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
-        }
-    }
-
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize());
-        for (int x = getMinXBound(SymmetryType.SPAWN); x < getMaxXBound(SymmetryType.SPAWN); x++) {
-            for (int y = getMinYBound(x, SymmetryType.SPAWN); y < getMaxYBound(x, SymmetryType.SPAWN); y++) {
-                byte b = getValueAt(x, y) ? (byte) 1 : 0;
-                bytes.put(b);
-            }
-        }
+        apply((x, y) -> bytes.put(getValueAt(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {
@@ -1148,19 +1015,5 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public void show() {
         VisualDebugger.visualizeMask(this);
-    }
-
-    public BinaryMask startVisualDebugger() {
-        return startVisualDebugger(toString(), Util.getStackTraceParentClass());
-    }
-
-    public BinaryMask startVisualDebugger(String maskName) {
-        return startVisualDebugger(maskName, Util.getStackTraceParentClass());
-    }
-
-    public BinaryMask startVisualDebugger(String maskName, String parentClass) {
-        VisualDebugger.whitelistMask(this, maskName, parentClass);
-        show();
-        return this;
     }
 }

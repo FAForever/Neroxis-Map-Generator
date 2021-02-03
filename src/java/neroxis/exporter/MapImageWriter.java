@@ -165,16 +165,16 @@ public strictfp class MapImageWriter {
         }
         if(writeLayer0) {
             int mapImageSize = texturesMasks[0].getSize();
-            texturesMasks[0].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[1].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[2].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[3].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[4].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[5].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[6].min(0f).max(1f).setSize(mapImageSize);
-            texturesMasks[7].min(0f).max(1f).setSize(mapImageSize);
+            texturesMasks[0].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[1].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[2].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[3].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[4].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[5].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[6].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            texturesMasks[7].clampMin(0f).clampMax(1f).setSize(mapImageSize);
             FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).min(0f);
+            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).clampMin(0f);
             neroxis.util.ImageUtils.writePNGFromMask(oldLayer0, 255, Paths.get(writeImagesPath + "\\Layer 0.png"));
         }
     }

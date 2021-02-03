@@ -177,7 +177,7 @@ public strictfp class ImageGenerator {
             newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30), false);
             newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30), false);
             newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)), false);
-            newBrush.min(0);
+            newBrush.clampMin(0);
             if (newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {

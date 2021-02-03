@@ -1,6 +1,7 @@
 package neroxis.map;
 
 import lombok.Getter;
+import neroxis.util.Util;
 
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -31,4 +32,14 @@ public strictfp abstract class ConcurrentMask<T extends Mask<?>> {
     abstract public void writeToFile(Path path);
 
     abstract public String toHash() throws NoSuchAlgorithmException;
+
+    public ConcurrentMask<T> startVisualDebugger() {
+        this.mask.startVisualDebugger(name, Util.getStackTraceParentClass());
+        return this;
+    }
+
+    public ConcurrentMask<T> startVisualDebugger(String maskName) {
+        this.mask.startVisualDebugger(maskName, Util.getStackTraceParentClass());
+        return this;
+    }
 }
