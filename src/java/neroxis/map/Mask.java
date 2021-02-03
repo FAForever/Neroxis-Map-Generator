@@ -7,6 +7,7 @@ import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -121,8 +122,8 @@ public strictfp abstract class Mask<T> {
     }
 
     public ArrayList<SymmetryPoint> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
-        ArrayList<SymmetryPoint> symmetryPoints = new ArrayList<>();
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        ArrayList<SymmetryPoint> symmetryPoints = new ArrayList<>(symmetry.getNumSymPoints() - 1);
         int size = getSize();
         int numSymPoints = symmetry.getNumSymPoints();
         switch (symmetry) {
@@ -568,7 +569,7 @@ public strictfp abstract class Mask<T> {
                 T value = valueFunction.apply(x, y);
                 setValueAt(x, y, value);
                 Vector2f location = new Vector2f(x, y);
-                ArrayList<SymmetryPoint> symPoints = getSymmetryPoints(location, symmetryType);
+                List<SymmetryPoint> symPoints = getSymmetryPoints(location, symmetryType);
                 symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint.getLocation(), value));
             }
         }
