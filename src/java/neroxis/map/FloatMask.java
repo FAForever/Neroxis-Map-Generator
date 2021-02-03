@@ -428,10 +428,6 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask interpolate() {
-        return smooth(1);
-    }
-
 
     public FloatMask smooth(int radius) {
         int[][] innerCount = getInnerCount();
@@ -555,7 +551,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     @Override
-    public int[][] getInnerCount() {
+    protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
         apply((x, y) -> calculateInnerValue(innerCount, x, y, StrictMath.round(getValueAt(x, y) * 1000)));
         return innerCount;

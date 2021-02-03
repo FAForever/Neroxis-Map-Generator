@@ -373,10 +373,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask interpolate() {
-        return smooth(1, .35f);
-    }
-
     public BinaryMask smooth(int radius) {
         return smooth(radius, .5f);
     }
@@ -783,7 +779,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     @Override
-    public int[][] getInnerCount() {
+    protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
         apply((x, y) -> calculateInnerValue(innerCount, x, y, getValueAt(x, y) ? 1 : 0));
         return innerCount;
