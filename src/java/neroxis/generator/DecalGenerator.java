@@ -1,6 +1,9 @@
 package neroxis.generator;
 
-import neroxis.map.*;
+import neroxis.map.BinaryMask;
+import neroxis.map.Decal;
+import neroxis.map.SCMap;
+import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
@@ -28,12 +31,12 @@ public strictfp class DecalGenerator {
                 Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
                 Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000 * map.getSize() / 512f);
                 map.addDecal(decal);
-                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().getY());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     Vector3f symVectorRotation = new Vector3f(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
-                    Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i).getLocation(), symVectorRotation, scale, decal.getCutOffLOD());
+                    Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i), symVectorRotation, scale, decal.getCutOffLOD());
                     map.addDecal(symDecal);
                 }
             });

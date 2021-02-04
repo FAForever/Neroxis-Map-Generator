@@ -58,9 +58,9 @@ public strictfp class HydroGenerator {
                 int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
                 map.addHydro(hydro);
-                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-                symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Marker(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint.getLocation()))));
+                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.roundToNearestHalfPoint());
+                symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Marker(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint))));
             });
         }
     }

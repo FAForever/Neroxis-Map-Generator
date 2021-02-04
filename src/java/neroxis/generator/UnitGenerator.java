@@ -71,11 +71,13 @@ public strictfp class UnitGenerator {
             coordinates.forEach((location) -> {
                 BaseTemplate base = new BaseTemplate(location, army, group, units);
                 base.addUnits();
-                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> {
-                    BaseTemplate symBase = new BaseTemplate(symmetryPoint.getLocation(), army, group, base.getUnits());
-                    symBase.flip(symmetryPoint.getSymmetry());
+                    BaseTemplate symBase = new BaseTemplate(symmetryPoint, army, group, base.getUnits());
+                    if (!spawnMask.inTeam(symmetryPoint, false)) {
+                        symBase.flip(spawnMask.getSymmetrySettings().getSpawnSymmetry());
+                    }
                     symBase.addUnits();
                 });
             });
@@ -97,11 +99,11 @@ public strictfp class UnitGenerator {
                 int groupID = group.getUnitCount();
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
                 group.addUnit(unit);
-                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i).getLocation(), symmetryRotation.get(i)));
+                    group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i), symmetryRotation.get(i)));
                 }
             });
         }

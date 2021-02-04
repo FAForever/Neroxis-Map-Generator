@@ -70,7 +70,7 @@ public strictfp class SaveImporter {
                 locTable = marker.get("position").checktable();
                 location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 if (id.contains("ARMY")) {
-                    map.addSpawn(new Spawn(id, location, new Vector2f(0, 0)));
+                    map.addSpawn(new Spawn(id, location, new Vector2f(0, 0), 0));
                 } else {
                     map.addBlank(new Marker(id, location));
                 }

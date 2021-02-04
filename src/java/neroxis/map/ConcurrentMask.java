@@ -1,5 +1,6 @@
 package neroxis.map;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import neroxis.util.Util;
 
@@ -11,8 +12,9 @@ import java.util.Random;
 public strictfp abstract class ConcurrentMask<T extends Mask<?>> {
     protected final String name;
     protected final Random random;
-    protected T mask;
     protected SymmetrySettings symmetrySettings;
+    @Getter(AccessLevel.PROTECTED)
+    protected T mask;
 
     public ConcurrentMask(Long seed, String name) {
         this.name = name;

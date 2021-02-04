@@ -1,6 +1,9 @@
 package neroxis.generator;
 
-import neroxis.map.*;
+import neroxis.map.AIMarker;
+import neroxis.map.BinaryMask;
+import neroxis.map.SCMap;
+import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
 
 import java.util.ArrayList;
@@ -38,8 +41,8 @@ public strictfp class AIMarkerGenerator {
         coordinates.forEach((location) -> {
             AIMarker aiMarker = new AIMarker(String.format(nameFormat, coordinatesList.indexOf(location)), location, new LinkedHashSet<>());
             markers.add(aiMarker);
-            ArrayList<SymmetryPoint> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> markers.add(new AIMarker(String.format(nameFormat + "s%d", coordinatesList.indexOf(location), symmetryPoints.indexOf(symmetryPoint)), symmetryPoint.getLocation(), new LinkedHashSet<>())));
+            ArrayList<Vector2f> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
+            symmetryPoints.forEach(symmetryPoint -> markers.add(new AIMarker(String.format(nameFormat + "s%d", coordinatesList.indexOf(location), symmetryPoints.indexOf(symmetryPoint)), symmetryPoint, new LinkedHashSet<>())));
         });
         markers.forEach(aiMarker -> markers.forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) <= 128) {

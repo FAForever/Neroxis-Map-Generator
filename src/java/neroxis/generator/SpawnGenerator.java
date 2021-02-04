@@ -36,12 +36,12 @@ public strictfp class SpawnGenerator {
             }
             location.add(.5f, .5f);
             spawnMask.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint.getLocation(), centerFill, false));
+            ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, centerFill, false));
 
             spawnLandMask.fillCircle(location, spawnSize, true);
-            symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
+            symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint, spawnSize, true));
 
             boolean valid;
             if (random.nextFloat() < plateauDensity) {
@@ -63,7 +63,7 @@ public strictfp class SpawnGenerator {
             }
             if (valid) {
                 spawnPlateauMask.fillCircle(location, spawnSize, true);
-                symmetryPoints.forEach(symmetryPoint -> spawnPlateauMask.fillCircle(symmetryPoint.getLocation(), spawnSize, true));
+                symmetryPoints.forEach(symmetryPoint -> spawnPlateauMask.fillCircle(symmetryPoint, spawnSize, true));
             }
 
             addSpawn(location, symmetryPoints);
@@ -93,33 +93,34 @@ public strictfp class SpawnGenerator {
                 }
             }
             spawnMaskCopy.fillCircle(location, separation, false);
-            ArrayList<SymmetryPoint> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
-            symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
+            ArrayList<Vector2f> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+            symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
 
             if (spawnMaskCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
-                symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint.getLocation(), separation, false));
+                symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
             }
             addSpawn(location, symmetryPoints);
             location = spawnMaskCopy.getRandomPosition();
         }
     }
 
-    private void addSpawn(Vector2f location, ArrayList<SymmetryPoint> symmetryPoints) {
-        map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0)));
+    private void addSpawn(Vector2f location, ArrayList<Vector2f> symmetryPoints) {
+        map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0), 0));
         Group initial = new Group("INITIAL", new ArrayList<>());
         Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
         army.addGroup(initial);
         map.addArmy(army);
-        symmetryPoints.forEach(symmetryPoint -> {
-            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint.getLocation(), new Vector2f(0, 0)));
+        for (int i = 0; i < symmetryPoints.size(); ++i) {
+            Vector2f symmetryPoint = symmetryPoints.get(i);
+            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint, new Vector2f(0, 0), i + 1));
             Group initialSym = new Group("INITIAL", new ArrayList<>());
             Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
             armySym.addGroup(initialSym);
             map.addArmy(armySym);
-        });
+        }
 
         map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), location, null));
-        symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint.getLocation(), null)));
+        symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", map.getLargeExpansionMarkerCount()), symmetryPoint, null)));
     }
 }

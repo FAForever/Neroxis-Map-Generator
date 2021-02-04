@@ -1,6 +1,9 @@
 package neroxis.generator;
 
-import neroxis.map.*;
+import neroxis.map.BinaryMask;
+import neroxis.map.Prop;
+import neroxis.map.SCMap;
+import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
 
 import java.util.ArrayList;
@@ -29,11 +32,11 @@ public strictfp class PropGenerator {
                 location.add(.5f, .5f);
                 Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
-                ArrayList<SymmetryPoint> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.getLocation().roundToNearestHalfPoint());
+                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.roundToNearestHalfPoint());
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i).getLocation(), symmetryRotation.get(i));
+                    Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i));
                     map.addProp(symProp);
                 }
             });

@@ -127,6 +127,11 @@ public strictfp class Vector2f {
         y = StrictMath.round(y - .5f) + .5f;
     }
 
+    public void round() {
+        x = StrictMath.round(x);
+        y = StrictMath.round(y);
+    }
+
     @Override
     public String toString() {
         return String.format("(%f, %f)", x, y);
