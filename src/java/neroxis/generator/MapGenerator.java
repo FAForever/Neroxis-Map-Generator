@@ -411,10 +411,18 @@ public strictfp class MapGenerator {
         reclaimDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
         setMexCount(RandomUtils.averageRandomFloat(random, 3));
         List<Symmetry> terrainSymmetries;
-        if (spawnCount == 2) {
-            terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
-        } else {
-            terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
+        switch (spawnCount) {
+            case 2:
+                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
+                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
+                break;
+            case 4:
+                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
+                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG, Symmetry.XZ, Symmetry.ZX));
+                break;
+            default:
+                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
+                break;
         }
         if (numTeams != 0) {
             terrainSymmetries.remove(Symmetry.NONE);
@@ -530,9 +538,6 @@ public strictfp class MapGenerator {
         spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
         teamSymmetry = teams.get(random.nextInt(teams.size()));
         symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
-        if (spawnCount == 2) {
-            symmetrySettings.setSpawnSymmetry(Symmetry.POINT2);
-        }
     }
 
     private void parseOptions(byte[] optionBytes) throws Exception {
@@ -877,12 +882,12 @@ public strictfp class MapGenerator {
         teamConnectionsInit();
 
         boolean landPathed = false;
-        if (landDensity >= .75f && random.nextBoolean() && random.nextFloat() < mountainDensity) {
+        if (landDensity >= .75f && random.nextFloat() < mountainDensity && RandomUtils.andRandomBoolean(random, 2)) {
             allLandInit();
             inversePathMountainInit();
         } else {
-            if (RandomUtils.andRandomBoolean(random, 2) && random.nextFloat() > landDensity) {
-                if (random.nextBoolean() || mapSize < 1024) {
+            if (random.nextFloat() > landDensity && RandomUtils.andRandomBoolean(random, 2)) {
+                if (mapSize < 1024 || random.nextBoolean()) {
                     pathLandInit();
                 } else {
                     inversePathLandInit();
