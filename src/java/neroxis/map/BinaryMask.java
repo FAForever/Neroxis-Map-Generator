@@ -179,12 +179,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             checkPoints.add(nextLoc);
         }
         checkPoints.add(end);
+        int size = getSize();
         int numSteps = 0;
         for (int i = 0; i < checkPoints.size() - 1; i++) {
             Vector2f location = checkPoints.get(i);
             Vector2f nextLoc = checkPoints.get(i + 1);
             float oldAngle = (float) (location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * (StrictMath.PI / 2));
-            while (location.getDistance(nextLoc) > maxStepSize && numSteps < getSize() * getSize()) {
+            while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
                 List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
                 if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
                     setValueAt(location, true);
@@ -196,7 +197,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 oldAngle = angle;
                 numSteps++;
             }
-            if (numSteps == getSize() * getSize()) {
+            if (numSteps >= size * size) {
                 break;
             }
         }
@@ -327,8 +328,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     maskCopy.setValueAt(x, y, value);
                     List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                     symmetryPoints.forEach(symmetryPoint -> {
-                        Vector2f location = symmetryPoint;
-                        maskCopy.setValueAt(location, value);
+                        maskCopy.setValueAt(symmetryPoint, value);
                     });
                 }
             });
@@ -355,8 +355,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     maskCopy.setValueAt(x, y, value);
                     List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                     symmetryPoints.forEach(symmetryPoint -> {
-                        Vector2f location = symmetryPoint;
-                        maskCopy.setValueAt(location, value);
+                        maskCopy.setValueAt(symmetryPoint, value);
                     });
                 }
             });
