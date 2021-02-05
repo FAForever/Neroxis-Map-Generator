@@ -49,7 +49,7 @@ public strictfp class MapGenerator {
     public static final float RECLAIM_DENSITY_MIN = 0f;
     public static final float RECLAIM_DENSITY_MAX = 1f;
     public static final float RECLAIM_DENSITY_RANGE = RECLAIM_DENSITY_MAX - RECLAIM_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 7.5f;
+    public static final float PLATEAU_HEIGHT = 8.5f;
     public static final float OCEAN_FLOOR = -16f;
     public static final float VALLEY_FLOOR = -5f;
     public static final float LAND_HEIGHT = .25f;
