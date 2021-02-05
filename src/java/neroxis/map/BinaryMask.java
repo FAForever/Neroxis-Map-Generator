@@ -320,19 +320,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask grow(float strength, SymmetryType symmetryType, int count) {
-        BinaryMask maskCopy = new BinaryMask(this, null);
         for (int i = 0; i < count; i++) {
+            Boolean[][] newMask = getEmptyMask(getSize());
             applyWithSymmetry(symmetryType, (x, y) -> {
-                if (isEdge(x, y)) {
-                    boolean value = random.nextFloat() < strength || getValueAt(x, y);
-                    maskCopy.setValueAt(x, y, value);
-                    List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                    symmetryPoints.forEach(symmetryPoint -> {
-                        maskCopy.setValueAt(symmetryPoint, value);
-                    });
-                }
+                boolean value = getValueAt(x, y) || (isEdge(x, y) && random.nextFloat() < strength);
+                newMask[x][y] = value;
+                List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
+                symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
             });
-            combine(maskCopy);
+            mask = newMask;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -347,19 +343,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask erode(float strength, SymmetryType symmetryType, int count) {
-        BinaryMask maskCopy = new BinaryMask(this, null);
         for (int i = 0; i < count; i++) {
+            Boolean[][] newMask = getEmptyMask(getSize());
             applyWithSymmetry(symmetryType, (x, y) -> {
-                if (isEdge(x, y)) {
-                    boolean value = random.nextFloat() > strength && getValueAt(x, y);
-                    maskCopy.setValueAt(x, y, value);
-                    List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                    symmetryPoints.forEach(symmetryPoint -> {
-                        maskCopy.setValueAt(symmetryPoint, value);
-                    });
-                }
+                boolean value = getValueAt(x, y) && (!isEdge(x, y) || random.nextFloat() > strength);
+                newMask[x][y] = value;
+                List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
+                symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
             });
-            intersect(maskCopy);
+            mask = newMask;
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -1002,9 +994,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         out.close();
     }
 
+    @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize());
-        apply((x, y) -> bytes.put(getValueAt(x, y) ? (byte) 1 : 0));
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(getValueAt(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

@@ -655,13 +655,10 @@ public strictfp class FloatMask extends Mask<Float> {
         out.close();
     }
 
+    @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        for (int x = getMinXBound(SymmetryType.SPAWN); x < getMaxXBound(SymmetryType.SPAWN); x++) {
-            for (int y = getMinYBound(x, SymmetryType.SPAWN); y < getMaxYBound(x, SymmetryType.SPAWN); y++) {
-                bytes.putFloat(getValueAt(x, y));
-            }
-        }
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getValueAt(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

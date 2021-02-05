@@ -4,7 +4,6 @@ import lombok.Getter;
 import neroxis.util.Pipeline;
 import neroxis.util.Vector2f;
 
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +12,7 @@ import java.util.Collections;
 public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public ConcurrentFloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(seed, name);
+        super(seed, name, size);
         this.mask = new FloatMask(size, seed, symmetrySettings);
         this.symmetrySettings = this.mask.getSymmetrySettings();
 
@@ -21,27 +20,27 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     }
 
     public ConcurrentFloatMask(ConcurrentFloatMask mask, Long seed, String name) {
-        super(seed, name);
-        this.mask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
+        super(seed, name, mask.getPlannedSize());
+        this.mask = new FloatMask(mask.getPlannedSize(), seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
             this.mask = new FloatMask(mask.getFloatMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    ((FloatMask) this.mask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize())).add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.mask.getRandom().nextLong())));
+                    this.mask.add(new FloatMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), this.mask.getRandom().nextLong())));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentFloatMask(ConcurrentBinaryMask mask, float low, float high, Long seed, String name) {
-        super(seed, name);
-        this.mask = new FloatMask(mask.getSize(), seed, mask.getSymmetrySettings());
+        super(seed, name, mask.getPlannedSize());
+        this.mask = new FloatMask(mask.getPlannedSize(), seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
             this.mask = new FloatMask(mask.getBinaryMask(), low, high, seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    ((FloatMask) this.mask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize())).add(new FloatMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), low, high, this.mask.getRandom().nextLong())));
+                    this.mask.add(new FloatMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), low, high, this.mask.getRandom().nextLong())));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
@@ -53,12 +52,6 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public ConcurrentFloatMask copy() {
         return new ConcurrentFloatMask(this, this.mask.getRandom().nextLong(), name + "Copy");
-    }
-
-    public ConcurrentFloatMask setSize(int size) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.setSize(size)
-        );
     }
 
     public ConcurrentFloatMask resample(int size) {
@@ -218,17 +211,8 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     }
 
     @Override
-    public void writeToFile(Path path) {
-        mask.writeToFile(path);
-    }
-
-    @Override
     public String toHash() throws NoSuchAlgorithmException {
         return mask.toHash();
-    }
-
-    public String getName() {
-        return name;
     }
 
     protected FloatMask getFloatMask() {
@@ -242,11 +226,6 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public ConcurrentFloatMask mockClone() {
         return new ConcurrentFloatMask(this, 0L, "mocked");
-    }
-
-    @Override
-    int getSize() {
-        return mask.getSize();
     }
 
     public void show() {

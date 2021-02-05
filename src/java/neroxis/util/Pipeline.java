@@ -32,6 +32,11 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
+    public static ConcurrentMask<?> add(ConcurrentMask<?> executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, Mask<?>> function) {
+        addInternal(executingMask, dep, function);
+        return executingMask;
+    }
+
     public static ConcurrentBinaryMask add(ConcurrentBinaryMask executingMask, List<ConcurrentMask<?>> dep, Function<List<ConcurrentMask<?>>, Mask<?>> function) {
         addInternal(executingMask, dep, function);
         return executingMask;

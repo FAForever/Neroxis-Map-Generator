@@ -6,6 +6,7 @@ import neroxis.util.Util;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,6 +26,8 @@ public strictfp abstract class Mask<T> {
             this.random = null;
         }
     }
+
+    public abstract String toHash() throws NoSuchAlgorithmException;
 
     protected abstract T[][] getEmptyMask(int size);
 
@@ -436,10 +439,6 @@ public strictfp abstract class Mask<T> {
         return StrictMath.max(StrictMath.min(y, getSize()), 0);
     }
 
-    public void applySymmetry(SymmetryType symmetryType) {
-        applySymmetry(symmetryType, false);
-    }
-
     public boolean inHalf(Vector2f pos, float angle) {
         float halfSize = getSize() / 2f;
         float vectorAngle = (float) ((new Vector2f(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
@@ -449,6 +448,10 @@ public strictfp abstract class Mask<T> {
         } else {
             return (vectorAngle >= angle && vectorAngle < adjustedAngle) && inBounds(pos);
         }
+    }
+
+    public void applySymmetry(SymmetryType symmetryType) {
+        applySymmetry(symmetryType, false);
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
@@ -468,10 +471,6 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    public Mask<T> enlarge(int size) {
-        return enlarge(size, SymmetryType.SPAWN);
-    }
-
     public void applySymmetry(float angle) {
         if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
             System.out.println("Spawn Symmetry must equal POINT2");
@@ -483,6 +482,10 @@ public strictfp abstract class Mask<T> {
                 symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
             }
         });
+    }
+
+    public Mask<T> enlarge(int size) {
+        return enlarge(size, SymmetryType.SPAWN);
     }
 
     public Mask<T> shrink(int size) {
@@ -571,8 +574,7 @@ public strictfp abstract class Mask<T> {
             for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
                 T value = valueFunction.apply(x, y);
                 setValueAt(x, y, value);
-                Vector2f location = new Vector2f(x, y);
-                List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
+                List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
                 symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, value));
             }
         }

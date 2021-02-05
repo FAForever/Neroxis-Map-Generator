@@ -4,7 +4,6 @@ import lombok.Getter;
 import neroxis.util.Pipeline;
 import neroxis.util.Vector2f;
 
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,7 @@ import java.util.Collections;
 public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     public ConcurrentBinaryMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(seed, name);
+        super(seed, name, size);
         this.mask = new BinaryMask(size, seed, symmetrySettings);
         this.symmetrySettings = this.mask.getSymmetrySettings();
 
@@ -22,33 +21,33 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     }
 
     public ConcurrentBinaryMask(ConcurrentBinaryMask mask, Long seed, String name) {
-        super(seed, name);
-        this.mask = new BinaryMask(1, seed, mask.getSymmetrySettings());
+        super(seed, name, mask.getPlannedSize());
+        this.mask = new BinaryMask(mask.getPlannedSize(), seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
             this.mask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    ((BinaryMask) this.mask.setSize(((ConcurrentBinaryMask) res.get(0)).getBinaryMask().getSize())).combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
+                    this.mask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask(BinaryMask mask, Long seed, String name) {
-        super(seed, name);
+        super(seed, name, mask.getSize());
         this.mask = new BinaryMask(mask, seed);
         this.symmetrySettings = mask.getSymmetrySettings();
     }
 
     public ConcurrentBinaryMask(ConcurrentFloatMask mask, float threshold, Long seed, String name) {
-        super(seed, name);
-        this.mask = new BinaryMask(1, seed, mask.getSymmetrySettings());
+        super(seed, name, mask.getPlannedSize());
+        this.mask = new BinaryMask(mask.getPlannedSize(), seed, mask.getSymmetrySettings());
 
         if (name.equals("mocked")) {
             this.mask = new BinaryMask(mask.getFloatMask(), threshold, seed);
         } else {
             Pipeline.add(this, Collections.singletonList(mask), res ->
-                    ((BinaryMask) this.mask.setSize(((ConcurrentFloatMask) res.get(0)).getFloatMask().getSize())).combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
+                    this.mask.combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
     }
@@ -287,11 +286,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     }
 
     @Override
-    public void writeToFile(Path path) {
-        mask.writeToFile(path);
-    }
-
-    @Override
     public String toHash() throws NoSuchAlgorithmException {
         return mask.toHash();
     }
@@ -300,24 +294,9 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         return mask;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public BinaryMask getFinalMask() {
         Pipeline.await(this);
         return mask.copy();
-    }
-
-    @Override
-    int getSize() {
-        return mask.getSize();
-    }
-
-    public ConcurrentBinaryMask setSize(int size) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.setSize(size)
-        );
     }
 
     @Override
