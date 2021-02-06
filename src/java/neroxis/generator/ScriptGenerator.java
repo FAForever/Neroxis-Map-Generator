@@ -53,8 +53,8 @@ public strictfp class ScriptGenerator {
                 "local decals = {}\n");
         stringBuilder.append(String.format("local decalSpacing = %d;\n", decalSize));
         stringBuilder.append(String.format("local decalSize = %d;\n", decalSize));
-        stringBuilder.append(String.format("local checkDecalRange = %d;\n", (int) (decalDiagonal * 1.5f)));
-        stringBuilder.append(String.format("local checkRange = %d;\n", (int) (decalDiagonal * 1.25f)));
+        stringBuilder.append(String.format("local checkDecalRange = %d;\n", (int) (decalDiagonal * 1.75f)));
+        stringBuilder.append(String.format("local checkRange = %d;\n", (int) (decalDiagonal * 1.5f)));
         stringBuilder.append("\n" +
                 "function OnPopulate()\n" +
                 "\t\n" +

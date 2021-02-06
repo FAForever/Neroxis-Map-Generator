@@ -172,8 +172,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         checkPoints.add(start);
         for (int i = 0; i < numMiddlePoints; i++) {
             Vector2f previousLoc = checkPoints.get(checkPoints.size() - 1);
-            float angle = (float) (previousLoc.getAngle(end) + (random.nextFloat() - .5f) * 2f * StrictMath.PI / 2);
-            float magnitude = (random.nextFloat() + .5f) * distance / numMiddlePoints;
+            float angle = (float) (random.nextFloat() * StrictMath.PI * 2f);
+            if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4 && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
+                angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f;
+            }
+            float magnitude = random.nextFloat() * distance / numMiddlePoints * 2f;
             Vector2f nextLoc = new Vector2f(previousLoc).addPolar(angle, magnitude);
             nextLoc.round();
             checkPoints.add(nextLoc);

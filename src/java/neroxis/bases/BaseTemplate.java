@@ -29,13 +29,6 @@ public class BaseTemplate {
         this.units = units;
     }
 
-    public BaseTemplate(Vector2f center, Army army, Group group, String luaFile) throws IOException {
-        this.center = center;
-        this.army = army;
-        this.group = group;
-        this.units = new LinkedHashMap<>(loadUnits(luaFile));
-    }
-
     public static LinkedHashMap<String, LinkedHashSet<Vector2f>> loadUnits(String luaFile) throws IOException {
         LinkedHashMap<String, LinkedHashSet<Vector2f>> units = new LinkedHashMap<>();
         LuaValue lua = LuaLoader.load(BaseTemplate.class.getResourceAsStream(luaFile));
