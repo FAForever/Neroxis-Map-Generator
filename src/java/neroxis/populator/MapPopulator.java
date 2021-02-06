@@ -250,7 +250,7 @@ public strictfp class MapPopulator {
         if (populateSpawns) {
             if (spawnCount > 0) {
                 map.setSpawnCountInit(spawnCount);
-                SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), 48);
+                SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong());
                 float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BinaryMask spawns = land.copy();
                 spawns.intersect(passable).minus(ramps).deflate(16);

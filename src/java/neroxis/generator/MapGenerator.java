@@ -661,7 +661,7 @@ public strictfp class MapGenerator {
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
 
-        SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong(), spawnSize);
+        SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong());
         MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), mexSpacing);
         HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
@@ -670,7 +670,7 @@ public strictfp class MapGenerator {
 
         int spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16;
 
-        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, plateauDensity);
+        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, plateauDensity, spawnSize);
         spawnLandMask = new ConcurrentBinaryMask(spawnMasks[0], random.nextLong(), "spawnsLand");
         spawnPlateauMask = new ConcurrentBinaryMask(spawnMasks[1], random.nextLong(), "spawnsPlateau");
 
@@ -1047,18 +1047,13 @@ public strictfp class MapGenerator {
     }
 
     private void addSpawnTerrain() {
-        int spawnSize = 16;
-        if (mapSize < 512) {
-            spawnSize = 8;
-        }
-
         spawnPlateauMask.setSize(mapSize / 4);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, spawnSize);
+        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 8);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
         spawnPlateauMask.smooth(4);
 
         spawnLandMask.setSize(mapSize / 4);
-        spawnLandMask.erode(.25f, SymmetryType.SPAWN, mapSize / 128).grow(.5f, SymmetryType.SPAWN, spawnSize - 4);
+        spawnLandMask.erode(.25f, SymmetryType.SPAWN, mapSize / 128).grow(.5f, SymmetryType.SPAWN, 4);
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
         spawnLandMask.smooth(4);
 

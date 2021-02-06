@@ -9,15 +9,13 @@ import java.util.Random;
 public strictfp class SpawnGenerator {
     private final SCMap map;
     private final Random random;
-    private final int spawnSize;
 
-    public SpawnGenerator(SCMap map, long seed, int spawnSize) {
+    public SpawnGenerator(SCMap map, long seed) {
         this.map = map;
-        this.spawnSize = spawnSize;
         random = new Random(seed);
     }
 
-    public BinaryMask[] generateSpawns(float separation, SymmetrySettings symmetrySettings, float plateauDensity) {
+    public BinaryMask[] generateSpawns(float separation, SymmetrySettings symmetrySettings, float plateauDensity, int spawnSize) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BinaryMask spawnMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
@@ -29,7 +27,7 @@ public strictfp class SpawnGenerator {
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
             if (location == null) {
                 if (separation - 4 >= 10) {
-                    return generateSpawns(separation - 8, symmetrySettings, plateauDensity);
+                    return generateSpawns(separation - 8, symmetrySettings, plateauDensity, spawnSize);
                 } else {
                     return null;
                 }
