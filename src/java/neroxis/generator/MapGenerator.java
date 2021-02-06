@@ -1054,7 +1054,7 @@ public strictfp class MapGenerator {
         land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (!landPathed && mapSize > 512) {
             land.combine(spawnLandMask).combine(spawnPlateauMask).setSize(mapSize / 8);
-            land.erode(.5f, SymmetryType.SPAWN, 10).setSize(mapSize + 1);
+            land.erode(.5f, SymmetryType.SPAWN, 12).setSize(mapSize + 1);
             land.smooth(8);
         } else if (!landPathed) {
             land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
