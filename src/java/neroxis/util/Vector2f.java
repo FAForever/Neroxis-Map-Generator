@@ -50,7 +50,7 @@ public strictfp class Vector2f {
         while (currentPoint.getDistance(location) > .1) {
             line.add(currentPoint);
             float angle = currentPoint.getAngle(location);
-            currentPoint = new Vector2f(StrictMath.round(currentPoint.x + StrictMath.cos(angle)), StrictMath.round(currentPoint.y + StrictMath.sin(angle)));
+            currentPoint = new Vector2f((float) (currentPoint.x + StrictMath.cos(angle)), (float) (currentPoint.y + StrictMath.sin(angle))).round();
         }
         return line;
     }
@@ -122,14 +122,16 @@ public strictfp class Vector2f {
         }
     }
 
-    public void roundToNearestHalfPoint() {
+    public Vector2f roundToNearestHalfPoint() {
         x = StrictMath.round(x - .5f) + .5f;
         y = StrictMath.round(y - .5f) + .5f;
+        return this;
     }
 
-    public void round() {
+    public Vector2f round() {
         x = StrictMath.round(x);
         y = StrictMath.round(y);
+        return this;
     }
 
     @Override

@@ -166,7 +166,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, SymmetryType symmetryType) {
+    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, SymmetryType symmetryType) {
         float distance = start.getDistance(end);
         List<Vector2f> checkPoints = new ArrayList<>();
         checkPoints.add(start);
@@ -178,7 +178,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             }
             float magnitude = random.nextFloat() * distance / numMiddlePoints * 2f;
             Vector2f nextLoc = new Vector2f(previousLoc).addPolar(angle, magnitude);
-            nextLoc.round();
+            nextLoc.round().clampMin(0, 0).clampMax(getSize() - 1, getSize() - 1);
             checkPoints.add(nextLoc);
         }
         checkPoints.add(end);
@@ -919,7 +919,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
             List<Vector2f> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getDistance(loc) < minSpacing));
+            symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getDistance(loc) < spacing));
         }
         return chosenCoordinates;
     }

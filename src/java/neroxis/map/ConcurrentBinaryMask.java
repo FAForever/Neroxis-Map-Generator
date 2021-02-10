@@ -86,9 +86,9 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, SymmetryType symmetryType) {
+    public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.path(start, end, maxStepSize, numMiddlePoints, symmetryType)
+                this.mask.path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, symmetryType)
         );
     }
 

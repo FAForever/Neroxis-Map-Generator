@@ -469,6 +469,7 @@ public strictfp abstract class Mask<T> {
         if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
             fixNonPerfectSymmetry();
         }
+        VisualDebugger.visualizeMask(this);
     }
 
     public void applySymmetry(float angle) {

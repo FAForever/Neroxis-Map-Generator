@@ -33,7 +33,7 @@ public strictfp class PropGenerator {
                 Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
                 ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> symmetryPoint.roundToNearestHalfPoint());
+                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i));
