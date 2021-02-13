@@ -49,7 +49,7 @@ public strictfp class MapGenerator {
     public static final float RECLAIM_DENSITY_MIN = 0f;
     public static final float RECLAIM_DENSITY_MAX = 1f;
     public static final float RECLAIM_DENSITY_RANGE = RECLAIM_DENSITY_MAX - RECLAIM_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 5f;
+    public static final float PLATEAU_HEIGHT = 6f;
     public static final float OCEAN_FLOOR = -16f;
     public static final float VALLEY_FLOOR = -5f;
     public static final float LAND_HEIGHT = .05f;
@@ -954,7 +954,7 @@ public strictfp class MapGenerator {
         float maxStepSize = mapSize / 128f;
         land = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "land");
 
-        pathInBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound);
+        pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound);
         land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - landDensity) + mapSize / 8), false)
                 .inflate(mapSize / 64f).smooth(12, .125f));
         connectTeams(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
@@ -972,7 +972,7 @@ public strictfp class MapGenerator {
         land = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "land").invert();
         ConcurrentBinaryMask noLand = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand");
 
-        pathInBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound);
+        pathInCenterBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound);
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.grow(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
         noLand.smooth(mapSize / 64, .5f);
@@ -996,7 +996,7 @@ public strictfp class MapGenerator {
         int bound = 0;
         plateaus = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "plateaus");
 
-        pathInBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound);
+        pathInCenterBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound);
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
         plateaus.grow(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1);
         plateaus.smooth(12);
@@ -1028,7 +1028,7 @@ public strictfp class MapGenerator {
         mountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "mountains");
         ConcurrentBinaryMask noMountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains");
 
-        pathInBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound);
+        pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound);
         noMountains.setSize(mapSize / 4);
         noMountains.grow(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
         noMountains.smooth(mapSize / 64);
@@ -1076,15 +1076,11 @@ public strictfp class MapGenerator {
         ramps.combine(connections);
 
         if (mapSize >= 512) {
-            for (int i = 0; i < numPaths; i++) {
-                int startX = random.nextInt(mapSize / 4) + (random.nextBoolean() ? 0 : mapSize * 3 / 4);
-                int startY = random.nextInt(mapSize / 4) + (random.nextBoolean() ? 0 : mapSize * 3 / 4);
-                Vector2f start = new Vector2f(startX, startY);
-                Vector2f end = new Vector2f(random.nextInt(bound * 2) - bound + start.getX(), random.nextInt(bound * 2) - bound + start.getY());
-                int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                ramps.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
-            }
+            pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
+        } else {
+            ramps.fillCenter(mapSize / 4, false);
+            pathInCenterBounds(ramps, maxStepSize, StrictMath.max(numPaths / 8, 1), maxMiddlePoints, bound);
+            pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound);
         }
         ramps.inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()).inflate(12);
     }
@@ -1132,10 +1128,24 @@ public strictfp class MapGenerator {
         }
     }
 
-    private void pathInBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound) {
+    private void pathInCenterBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound) {
         for (int i = 0; i < numPaths; i++) {
             Vector2f start = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
             Vector2f end = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
+            int numMiddlePoints = random.nextInt(maxMiddlePoints);
+            float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
+            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
+        }
+    }
+
+    private void pathInEdgeBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound) {
+        for (int i = 0; i < numPaths; i++) {
+            int startX = random.nextInt(bound) + (random.nextBoolean() ? 0 : mapSize - bound);
+            int startY = random.nextInt(bound) + (random.nextBoolean() ? 0 : mapSize - bound);
+            int endX = random.nextInt(bound * 2) - bound + startX;
+            int endY = random.nextInt(bound * 2) - bound + startY;
+            Vector2f start = new Vector2f(startX, startY);
+            Vector2f end = new Vector2f(endX, endY);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
             maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
@@ -1173,12 +1183,12 @@ public strictfp class MapGenerator {
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, plateauBrushSize, .64f, 8f, false).clampMax(PLATEAU_HEIGHT);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT - 1f, random.nextLong(), "paintedPlateaus");
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, PLATEAU_HEIGHT - 2f, random.nextLong(), "paintedPlateaus");
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
 
-        heightmapPlateaus.add(plateaus, 1f).clampMax(PLATEAU_HEIGHT);
+        heightmapPlateaus.add(plateaus, 2f).clampMax(PLATEAU_HEIGHT);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
