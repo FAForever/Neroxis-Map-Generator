@@ -888,7 +888,7 @@ public strictfp class MapGenerator {
             allLandInit();
             inversePathMountainInit();
         } else {
-            if (random.nextFloat() > landDensity && (mapSize > 512 ? random.nextBoolean() : RandomUtils.andRandomBoolean(random, 2))) {
+            if (mapSize >= 512 && random.nextFloat() > landDensity && (mapSize > 512 ? random.nextBoolean() : RandomUtils.andRandomBoolean(random, 2))) {
                 if (random.nextBoolean()) {
                     pathLandInit();
                 } else {
@@ -916,6 +916,10 @@ public strictfp class MapGenerator {
         int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 3 + 2);
         int numTeammateConnections = 1;
         connections = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "connections");
+
+        if (mapSize < 512) {
+            numTeamConnections /= 2;
+        }
 
         connectTeams(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
         connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
@@ -1048,7 +1052,7 @@ public strictfp class MapGenerator {
         if (!landPathed && mapSize > 512) {
             land.combine(spawnLandMask).combine(spawnPlateauMask).setSize(mapSize / 8);
             land.erode(.5f, SymmetryType.SPAWN, 10).setSize(mapSize + 1);
-            land.smooth(8);
+            land.smooth(8, .75f);
         } else if (!landPathed) {
             land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
         }
@@ -1082,8 +1086,7 @@ public strictfp class MapGenerator {
                 ramps.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
             }
         }
-        ramps.inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
-                .minus(mountains.copy().inflate(16)).inflate(12);
+        ramps.inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()).inflate(12);
     }
 
     private void connectTeams(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
@@ -1198,7 +1201,7 @@ public strictfp class MapGenerator {
         ConcurrentBinaryMask water = land.copy().invert();
         ConcurrentBinaryMask deepWater = water.copy().deflate(32);
 
-        heightmapOcean.addDistance(land, -.45f).clampMin(OCEAN_FLOOR).useBrushWithinAreaWithDensity(water.minus(deepWater), brush5, 16, 1f, .5f, false)
+        heightmapOcean.addDistance(land, -.45f).clampMin(OCEAN_FLOOR).useBrushWithinAreaWithDensity(water.deflate(8).minus(deepWater), brush5, 24, 1f, .5f, false)
                 .useBrushWithinAreaWithDensity(deepWater, brush5, 64, .065f, 1f, false).clampMax(0).smooth(4, deepWater).smooth(1);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(LAND_HEIGHT)
@@ -1207,8 +1210,8 @@ public strictfp class MapGenerator {
 
         heightmapBase.add(heightmapLand);
 
-        noise.addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert()).smooth(mapSize / 16);
+        noise.addWhiteNoise(PLATEAU_HEIGHT * 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1)
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(8)).smooth(mapSize / 16);
 
         heightmapBase.add(waterHeight).add(noise).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(12, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
@@ -1323,9 +1326,9 @@ public strictfp class MapGenerator {
         treeMask.inflate(2).erode(.5f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
         treeMask.setSize(mapSize + 1);
         treeMask.intersect(land.copy().deflate(8)).minus(impassable.copy().inflate(2)).deflate(2).fillEdge(8, false).minus(notFlat);
-        largeRockFieldMask.randomize(reclaimDensity * .0015f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
+        largeRockFieldMask.randomize(reclaimDensity * .001f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
         largeRockFieldMask.minus(unbuildable).intersect(land).minus(impassable.copy().inflate(8));
-        smallRockFieldMask.randomize(reclaimDensity * .0035f).fillEdge(16, false).grow(.5f, SymmetryType.SPAWN, 4).setSize(mapSize + 1);
+        smallRockFieldMask.randomize(reclaimDensity * .0025f).fillEdge(16, false).grow(.5f, SymmetryType.SPAWN, 4).setSize(mapSize + 1);
         smallRockFieldMask.minus(unbuildable).intersect(land).minus(impassable.copy().inflate(8));
     }
 
