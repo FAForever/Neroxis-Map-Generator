@@ -403,7 +403,7 @@ public strictfp class MapGenerator {
         if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
         }
-        random = new Random(seed ^ generationTime);
+        random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
         landDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
         plateauDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
