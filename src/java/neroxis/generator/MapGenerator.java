@@ -714,7 +714,7 @@ public strictfp class MapGenerator {
             Pipeline.await(resourceMask, plateaus, land, ramps, impassable, unbuildable, allWreckMask, waterResourceMask);
             long sTime = System.currentTimeMillis();
             mexGenerator.generateMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(4));
+            hydroGenerator.generateHydros(resourceMask.getFinalMask().deflate(8));
             generateExclusionMasks();
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateResources\n",
@@ -1221,7 +1221,8 @@ public strictfp class MapGenerator {
         heightmapBase.add(heightmapLand);
 
         noise.addWhiteNoise(PLATEAU_HEIGHT * 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(8)).smooth(mapSize / 16);
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(8)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
+                .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
 
         heightmapBase.add(waterHeight).add(noise).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(12, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
@@ -1234,7 +1235,7 @@ public strictfp class MapGenerator {
         slope = heightmapBase.copy().supcomGradient();
 
         impassable = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "impassable");
-        unbuildable = new ConcurrentBinaryMask(slope, .2f, random.nextLong(), "unbuildable");
+        unbuildable = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "unbuildable");
         notFlat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "notFlat");
 
         unbuildable.combine(ramps.copy().intersect(notFlat));
