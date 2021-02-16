@@ -138,62 +138,66 @@ public strictfp class MapTransformer {
 
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-        Symmetry teamSymmetry;
-        if (pattern.matcher(arguments.get("source")).matches()) {
-            teamSymmetry = null;
-            angle = (360f - Float.parseFloat(arguments.get("source"))) % 360f;
-            useAngle = true;
-        } else {
-            useAngle = false;
-            switch (SymmetrySource.valueOf(arguments.get("source"))) {
-                case TOP:
-                    teamSymmetry = Symmetry.Z;
-                    reverseSide = false;
-                    break;
-                case BOTTOM:
-                    teamSymmetry = Symmetry.Z;
-                    reverseSide = true;
-                    break;
-                case LEFT:
-                    teamSymmetry = Symmetry.X;
-                    reverseSide = false;
-                    break;
-                case RIGHT:
-                    teamSymmetry = Symmetry.X;
-                    reverseSide = true;
-                    break;
-                case TOP_LEFT:
-                    teamSymmetry = Symmetry.ZX;
-                    reverseSide = false;
-                    break;
-                case TOP_RIGHT:
-                    teamSymmetry = Symmetry.XZ;
-                    reverseSide = false;
-                    break;
-                case BOTTOM_LEFT:
-                    teamSymmetry = Symmetry.XZ;
-                    reverseSide = true;
-                    break;
-                case BOTTOM_RIGHT:
-                    teamSymmetry = Symmetry.ZX;
-                    reverseSide = true;
-                    break;
-                default:
-                    teamSymmetry = Symmetry.NONE;
-                    reverseSide = false;
-                    break;
+        if (arguments.containsKey("symmetry")) {
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+            Symmetry teamSymmetry;
+            if (pattern.matcher(arguments.get("source")).matches()) {
+                teamSymmetry = null;
+                angle = (360f - Float.parseFloat(arguments.get("source"))) % 360f;
+                useAngle = true;
+            } else {
+                useAngle = false;
+                switch (SymmetrySource.valueOf(arguments.get("source"))) {
+                    case TOP:
+                        teamSymmetry = Symmetry.Z;
+                        reverseSide = false;
+                        break;
+                    case BOTTOM:
+                        teamSymmetry = Symmetry.Z;
+                        reverseSide = true;
+                        break;
+                    case LEFT:
+                        teamSymmetry = Symmetry.X;
+                        reverseSide = false;
+                        break;
+                    case RIGHT:
+                        teamSymmetry = Symmetry.X;
+                        reverseSide = true;
+                        break;
+                    case TOP_LEFT:
+                        teamSymmetry = Symmetry.ZX;
+                        reverseSide = false;
+                        break;
+                    case TOP_RIGHT:
+                        teamSymmetry = Symmetry.XZ;
+                        reverseSide = false;
+                        break;
+                    case BOTTOM_LEFT:
+                        teamSymmetry = Symmetry.XZ;
+                        reverseSide = true;
+                        break;
+                    case BOTTOM_RIGHT:
+                        teamSymmetry = Symmetry.ZX;
+                        reverseSide = true;
+                        break;
+                    default:
+                        teamSymmetry = Symmetry.NONE;
+                        reverseSide = false;
+                        break;
+                }
             }
-        }
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry, Symmetry.valueOf(arguments.get("symmetry")));
-        transformResources = arguments.containsKey("resources") || arguments.containsKey("all");
-        transformProps = arguments.containsKey("props") || arguments.containsKey("all");
-        transformDecals = arguments.containsKey("decals") || arguments.containsKey("all");
-        transformUnits = arguments.containsKey("units") || arguments.containsKey("all");
-        transformTerrain = arguments.containsKey("terrain") || arguments.containsKey("all");
+            symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry, Symmetry.valueOf(arguments.get("symmetry")));
+            transformResources = arguments.containsKey("resources") || arguments.containsKey("all");
+            transformProps = arguments.containsKey("props") || arguments.containsKey("all");
+            transformDecals = arguments.containsKey("decals") || arguments.containsKey("all");
+            transformUnits = arguments.containsKey("units") || arguments.containsKey("all");
+            transformTerrain = arguments.containsKey("terrain") || arguments.containsKey("all");
 
-        if (transformDecals && !symmetrySettings.getSpawnSymmetry().equals(Symmetry.POINT2)) {
-            System.out.println("This tool does not yet mirror decals");
+            if (transformDecals && !symmetrySettings.getSpawnSymmetry().equals(Symmetry.POINT2)) {
+                System.out.println("This tool does not yet mirror decals");
+            }
+        } else {
+            symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
         }
     }
 
