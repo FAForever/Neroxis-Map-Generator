@@ -484,7 +484,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillSides(int extent, boolean value) {
-        return fillSides(extent, value, SymmetryType.SPAWN);
+        return fillSides(extent, value, SymmetryType.TEAM);
     }
 
     public BinaryMask fillSides(int extent, boolean value, SymmetryType symmetryType) {

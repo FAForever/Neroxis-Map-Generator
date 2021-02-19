@@ -23,8 +23,7 @@ public strictfp class HydroGenerator {
         map.getHydros().clear();
         int numSymPoints = spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
 
-        spawnMask.limitToSymmetryRegion();
-        spawnMask.fillCenter(64, false);
+        spawnMask.fillCenter(64, false).limitToSymmetryRegion();
 
         map.getMexes().forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
 

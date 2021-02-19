@@ -44,8 +44,12 @@ public strictfp class MexGenerator {
         int numPlayerMexes = numMexesLeft / map.getSpawnCount() / numSymPoints;
         for (Spawn spawn : map.getSpawns()) {
             BinaryMask playerSpawnMask = new BinaryMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
-            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).intersect(spawnMask);
-            generateIndividualMexes(playerSpawnMask, numPlayerMexes);
+            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).intersect(spawnMask).fillEdge(map.getSize() / 16, false);
+            if (map.getSpawnCountInit() < 6) {
+                generateIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing * 2);
+            } else {
+                generateIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing);
+            }
             map.getMexes().stream().skip(previousMexCount)
                     .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
             previousMexCount = map.getMexCount();
@@ -80,9 +84,9 @@ public strictfp class MexGenerator {
 
         BinaryMask expansionSpawnMask = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
         expansionSpawnMask.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() * .45f, true)
-                .fillCenter(96, false).fillEdge(32, false).intersect(spawnMask);
+                .fillCenter(64, false).fillEdge(32, false).intersect(spawnMask);
 
-        map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 3f, false));
+        map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 4f, false));
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
         int expSpacing = map.getSize() / 4;
@@ -101,7 +105,7 @@ public strictfp class MexGenerator {
                     expLocation = null;
                     break;
                 }
-                expLocation = expansionLocations.remove(random.nextInt(expansionLocations.size()));
+                expLocation = expansionLocations.removeFirst();
             }
 
             if (expLocation == null) {
