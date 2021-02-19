@@ -1,25 +1,25 @@
 {
   "name": "Syrtis",
   "texturePaths": [
-    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sandwet.dds",
     "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
     "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
   ],
   "textureScales": [
-    12.0,
+    16.0,
     0.0,
     0.0,
     32.0,
     0.0,
     8.0,
-    0.0,
+    12.0,
     12.0,
     8.0,
     128.0
@@ -48,7 +48,7 @@
   ],
   "previewColors": [
     {
-      "value": -12970227,
+      "value": -9490404,
       "falpha": 0.0
     },
     {
@@ -72,7 +72,7 @@
       "falpha": 0.0
     },
     {
-      "value": -9490404,
+      "value": -12774645,
       "falpha": 0.0
     },
     {

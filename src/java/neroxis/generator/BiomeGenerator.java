@@ -64,7 +64,7 @@ public class BiomeGenerator {
         }
 
         biomeName = arguments.get("biome-name");
-        mapPath = Paths.get(arguments.get("neroxis.map-path"));
+        mapPath = Paths.get(arguments.get("map-path"));
         envPath = Paths.get(arguments.get("env-path"));
 
         if (arguments.containsKey("folder-path")) {
