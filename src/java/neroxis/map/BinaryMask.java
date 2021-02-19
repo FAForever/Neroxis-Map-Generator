@@ -236,7 +236,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
         }
-        applySymmetry(SymmetryType.TERRAIN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -485,11 +484,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillSides(int extent, boolean value) {
-        return fillSides(extent, value, symmetrySettings.getSpawnSymmetry());
+        return fillSides(extent, value, SymmetryType.SPAWN);
     }
 
-    public BinaryMask fillSides(int extent, boolean value, Symmetry symmetry) {
-        switch (symmetry) {
+    public BinaryMask fillSides(int extent, boolean value, SymmetryType symmetryType) {
+        switch (symmetrySettings.getSymmetry(symmetryType)) {
             case Z:
                 fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
                 break;
@@ -503,16 +502,17 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
                 break;
         }
+        applySymmetry(symmetryType);
         VisualDebugger.visualizeMask(this);
         return this;
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {
-        return fillCenter(extent, value, symmetrySettings.getSpawnSymmetry());
+        return fillCenter(extent, value, SymmetryType.SPAWN);
     }
 
-    public BinaryMask fillCenter(int extent, boolean value, Symmetry symmetry) {
-        switch (symmetry) {
+    public BinaryMask fillCenter(int extent, boolean value, SymmetryType symmetryType) {
+        switch (symmetrySettings.getSymmetry(symmetryType)) {
             case POINT2:
             case POINT3:
             case POINT4:
@@ -544,25 +544,26 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 break;
             case DIAG:
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.DIAG) {
-                    fillCenter(extent / 2, value, Symmetry.XZ);
-                    fillCenter(extent / 2, value, Symmetry.ZX);
+                    fillDiagonal(extent * 3 / 8, false, value);
+                    fillDiagonal(extent * 3 / 8, true, value);
                 } else {
-                    fillCenter(extent / 4, value, Symmetry.XZ);
-                    fillCenter(extent / 4, value, Symmetry.ZX);
-                    fillCenter(extent, value, symmetrySettings.getTeamSymmetry());
+                    fillDiagonal(extent * 3 / 16, false, value);
+                    fillDiagonal(extent * 3 / 16, true, value);
+                    fillCenter(extent, value, SymmetryType.TEAM);
                 }
                 break;
             case QUAD:
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
-                    fillCenter(extent / 2, value, Symmetry.X);
-                    fillCenter(extent / 2, value, Symmetry.Z);
+                    fillRect(getSize() / 2 - extent / 4, 0, extent / 2, getSize(), value);
+                    fillRect(0, getSize() / 2 - extent / 4, getSize(), extent / 2, value);
                 } else {
-                    fillCenter(extent / 4, value, Symmetry.X);
-                    fillCenter(extent / 4, value, Symmetry.Z);
-                    fillCenter(extent, value, symmetrySettings.getTeamSymmetry());
+                    fillRect(getSize() / 2 - extent / 8, 0, extent / 4, getSize(), value);
+                    fillRect(0, getSize() / 2 - extent / 8, getSize(), extent / 4, value);
+                    fillCenter(extent, value, SymmetryType.TEAM);
                 }
                 break;
         }
+        applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -580,18 +581,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillArc(float x, float y, float startAngle, float endAngle, float radius, boolean value) {
-        int ex = StrictMath.round(StrictMath.min(getSize(), x + radius + 1));
-        int ey = StrictMath.round(StrictMath.min(getSize(), y + radius + 1));
         float dx;
         float dy;
-        float radius2 = radius * radius;
+        float radius2 = (radius + .5f) * (radius + .5f);
         float radiansToDegreeFactor = (float) (180 / StrictMath.PI);
-        for (int cx = StrictMath.round(StrictMath.max(0, x - radius)); cx < ex; cx++) {
-            for (int cy = StrictMath.round(StrictMath.max(0, y - radius)); cy < ey; cy++) {
+        for (int cx = StrictMath.round(x - radius); cx < StrictMath.round(x + radius + 1); cx++) {
+            for (int cy = StrictMath.round(y - radius); cy < StrictMath.round(y + radius + 1); cy++) {
                 dx = x - cx;
                 dy = y - cy;
                 float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
-                if (dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
+                if (inBounds(cx, cy) && dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
                     setValueAt(cx, cy, value);
                 }
             }
