@@ -653,7 +653,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
 
         final int spawnSize = 36;
-        final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : spawnCount;
+        final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
         int mexSpacing = mapSize / 10;
         mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.5f);
         hasCivilians = random.nextBoolean() && !unexplored;
@@ -939,7 +939,7 @@ public strictfp class MapGenerator {
         land.setSize(mapSize + 1);
         land.smooth(8, .75f);
 
-        if (mapSize < 1024) {
+        if (mapSize <= 512) {
             land.combine(connections.copy().inflate(mountainBrushSize / 8f).smooth(12, .125f));
         }
     }
@@ -1050,8 +1050,9 @@ public strictfp class MapGenerator {
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (!landPathed && mapSize > 512) {
-            land.combine(spawnLandMask).combine(spawnPlateauMask).setSize(mapSize / 8);
-            land.erode(.5f, SymmetryType.SPAWN, 10).setSize(mapSize + 1);
+            land.combine(spawnLandMask).combine(spawnPlateauMask).inflate(16).deflate(16).setSize(mapSize / 8);
+            land.erode(.5f, SymmetryType.SPAWN, 12).combine((ConcurrentBinaryMask) spawnLandMask.copy().setSize(mapSize / 8)).combine((ConcurrentBinaryMask) spawnPlateauMask.copy().setSize(mapSize / 8))
+                    .smooth(4, .75f).grow(.5f, SymmetryType.SPAWN, 4).setSize(mapSize + 1);
             land.smooth(8, .75f);
         } else if (!landPathed) {
             land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
@@ -1076,7 +1077,12 @@ public strictfp class MapGenerator {
         ramps.combine(connections);
 
         if (mapSize >= 512) {
-            pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
+            if (landPathed) {
+                pathInEdgeBounds(ramps, maxStepSize, numPaths * 2, maxMiddlePoints, bound);
+            } else {
+                pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
+                pathInCenterBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
+            }
         } else {
             ramps.fillCenter(mapSize / 4, false);
             pathInCenterBounds(ramps, maxStepSize, StrictMath.max(numPaths / 8, 1), maxMiddlePoints, bound);
@@ -1220,8 +1226,8 @@ public strictfp class MapGenerator {
 
         heightmapBase.add(heightmapLand);
 
-        noise.addWhiteNoise(PLATEAU_HEIGHT * 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(8)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
+        noise.addWhiteNoise(PLATEAU_HEIGHT * 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1).addWhiteNoise(1)
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
                 .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
 
         heightmapBase.add(waterHeight).add(noise).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
