@@ -86,15 +86,27 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
-    public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, SymmetryType symmetryType) {
+    public ConcurrentBinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, symmetryType)
+                this.mask.path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType)
+        );
+    }
+
+    public ConcurrentBinaryMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.connect(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType)
         );
     }
 
     public ConcurrentBinaryMask progressiveWalk(int numWalkers, int numSteps) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.progressiveWalk(numWalkers, numSteps)
+        );
+    }
+
+    public ConcurrentBinaryMask space(float minSpacing, float maxSpacing) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.space(minSpacing, maxSpacing)
         );
     }
 

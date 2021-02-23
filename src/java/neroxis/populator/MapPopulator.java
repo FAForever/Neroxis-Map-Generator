@@ -272,7 +272,7 @@ public strictfp class MapPopulator {
         if (populateMexes) {
             if (mexCountPerPlayer > 0) {
                 map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
-                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), map.getSize() / 8);
+                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong());
 
                 mexGenerator.generateMexes(resourceMask, waterResourceMask);
             } else {

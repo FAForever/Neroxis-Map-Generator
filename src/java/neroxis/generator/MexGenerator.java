@@ -11,16 +11,15 @@ import java.util.Random;
 public strictfp class MexGenerator {
     private final SCMap map;
     private final Random random;
-    private final int mexSpacing;
 
-    public MexGenerator(SCMap map, long seed, int mexSpacing) {
+    public MexGenerator(SCMap map, long seed) {
         this.map = map;
-        this.mexSpacing = mexSpacing;
         random = new Random(seed);
     }
 
     public void generateMexes(BinaryMask spawnMask, BinaryMask spawnMaskWater) {
         map.getMexes().clear();
+        int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(36f / (map.getMexCountInit() * map.getSpawnCountInit()), .5f), 1.5f));
         spawnMask.limitToSymmetryRegion();
         spawnMaskWater.limitToSymmetryRegion();
         int numSymPoints = spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
@@ -33,7 +32,7 @@ public strictfp class MexGenerator {
         previousMexCount = map.getMexCount();
         if (numMexesLeft > 8 && numMexesLeft > map.getSpawnCount()) {
             int possibleExpMexCount = (random.nextInt(numMexesLeft / 2) + numMexesLeft / 2);
-            generateMexExpansions(spawnMask, possibleExpMexCount);
+            generateMexExpansions(spawnMask, possibleExpMexCount, mexSpacing);
 
             map.getMexes().stream().skip(previousMexCount)
                     .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
@@ -56,13 +55,13 @@ public strictfp class MexGenerator {
         }
 
         numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
-        generateIndividualMexes(spawnMask, numMexesLeft);
+        generateIndividualMexes(spawnMask, numMexesLeft, mexSpacing);
         map.getMexes().stream().skip(previousMexCount)
                 .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
 
         numMexesLeft = (map.getMexCountInit() - map.getMexCount()) / numSymPoints;
 
-        generateIndividualMexes(spawnMaskWater, StrictMath.min(numMexesLeft, 10));
+        generateIndividualMexes(spawnMaskWater, StrictMath.min(numMexesLeft, 10), mexSpacing);
     }
 
     public void generateBaseMexes(BinaryMask spawnMask) {
@@ -75,21 +74,20 @@ public strictfp class MexGenerator {
         }
     }
 
-    public void generateMexExpansions(BinaryMask spawnMask, int possibleExpMexCount) {
+    public void generateMexExpansions(BinaryMask spawnMask, int possibleExpMexCount, int mexSpacing) {
         Vector2f expLocation;
         int expMexCount;
         int expMexCountLeft = possibleExpMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
+        int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .5f), 1.5f));
 
         BinaryMask expansionSpawnMask = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-        expansionSpawnMask.fillCircle(map.getSize() / 2f, map.getSize() / 2f, map.getSize() * .45f, true)
-                .fillCenter(64, false).fillEdge(32, false).intersect(spawnMask);
+        expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).intersect(spawnMask);
 
-        map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 4f, false));
+        map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
-        int expSpacing = map.getSize() / 4;
 
         LinkedList<Vector2f> expansionLocations = expansionSpawnMask.getRandomCoordinates(expSpacing);
 
@@ -116,14 +114,13 @@ public strictfp class MexGenerator {
             expansion.fillCircle(expLocation, expSize, true);
             expansion.intersect(spawnMask);
 
+            int expID = map.getLargeExpansionMarkerCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             if (expMexCount >= 3) {
-                int expID = map.getLargeExpansionMarkerCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", expID), expLocation, null));
                 ArrayList<Vector2f> symmetryPoints = expansionSpawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d sym %d", expID, symmetryPoints.indexOf(symmetryPoint)), symmetryPoint, null)));
             } else {
-                int expID = map.getLargeExpansionMarkerCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 map.addExpansionMarker(new AIMarker(String.format("Expansion Area %d", expID), expLocation, null));
                 ArrayList<Vector2f> symmetryPoints = expansionSpawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
@@ -137,10 +134,6 @@ public strictfp class MexGenerator {
             symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, mexSpacing * 2f * expMexCount / 4f, false));
             expMexCountLeft -= expMexCount;
         }
-    }
-
-    public void generateIndividualMexes(BinaryMask spawnMask, int numMexes) {
-        generateIndividualMexes(spawnMask, numMexes, mexSpacing);
     }
 
     public void generateIndividualMexes(BinaryMask spawnMask, int numMexes, int mexSpacing) {

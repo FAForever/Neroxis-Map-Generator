@@ -117,9 +117,5 @@ public strictfp class SpawnGenerator {
             armySym.addGroup(initialSym);
             map.addArmy(armySym);
         }
-
-        int expID = map.getLargeExpansionMarkerCount();
-        map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d", expID), location, null));
-        symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(String.format("Large Expansion Area %d sym % d", expID, symmetryPoints.indexOf(symmetryPoint)), symmetryPoint, null)));
     }
 }

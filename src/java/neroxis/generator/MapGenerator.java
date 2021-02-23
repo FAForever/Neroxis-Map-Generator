@@ -405,12 +405,12 @@ public strictfp class MapGenerator {
         }
         random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
-        landDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
-        plateauDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
-        mountainDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
-        rampDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
-        reclaimDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 3) * 127) / 127f;
-        setMexCount(RandomUtils.averageRandomFloat(random, 3));
+        landDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
+        plateauDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
+        mountainDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
+        rampDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
+        reclaimDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
+        setMexCount(RandomUtils.averageRandomFloat(random, 2));
         List<Symmetry> terrainSymmetries;
         switch (spawnCount) {
             case 2:
@@ -425,6 +425,8 @@ public strictfp class MapGenerator {
                 terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
                 break;
         }
+        terrainSymmetries.remove(Symmetry.X);
+        terrainSymmetries.remove(Symmetry.Z);
         if (numTeams != 0) {
             terrainSymmetries.remove(Symmetry.NONE);
             terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 || symmetry.getNumSymPoints() > spawnCount * 4);
@@ -442,7 +444,7 @@ public strictfp class MapGenerator {
     private void setMexCount(float mexDensity) {
         switch (spawnCount) {
             case 2:
-                mexCount = (int) (10 + 15 * mexDensity);
+                mexCount = (int) (10 + 20 * mexDensity);
                 break;
             case 4:
                 mexCount = (int) (9 + 8 * mexDensity);
@@ -472,8 +474,6 @@ public strictfp class MapGenerator {
         } else if (mapSize > 512) {
             switch (spawnCount) {
                 case 2:
-                    mexMultiplier = 1.75f;
-                    break;
                 case 4:
                 case 6:
                     mexMultiplier = 1.5f;
@@ -517,15 +517,15 @@ public strictfp class MapGenerator {
                 teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
                         Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
                         Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16,
-                        Symmetry.X, Symmetry.Z, Symmetry.XZ, Symmetry.ZX, Symmetry.QUAD, Symmetry.DIAG));
+                        Symmetry.XZ, Symmetry.ZX, Symmetry.QUAD, Symmetry.DIAG));
                 break;
             case QUAD:
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.QUAD));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
                 break;
             case DIAG:
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
                 break;
             default:
                 spawns = new ArrayList<>(Collections.singletonList(terrainSymmetry));
@@ -654,15 +654,13 @@ public strictfp class MapGenerator {
 
         final int spawnSize = 36;
         final int hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
-        int mexSpacing = mapSize / 10;
-        mexSpacing *= StrictMath.min(StrictMath.max(36f / (mexCount * spawnCount), .5f), 1.5f);
         hasCivilians = random.nextBoolean() && !unexplored;
         enemyCivilians = random.nextBoolean();
         map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
         waterHeight = biome.getWaterSettings().getElevation();
 
         SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong());
-        MexGenerator mexGenerator = new MexGenerator(map, random.nextLong(), mexSpacing);
+        MexGenerator mexGenerator = new MexGenerator(map, random.nextLong());
         HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
         PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
         DecalGenerator decalGenerator = new DecalGenerator(map, random.nextLong());
@@ -911,15 +909,11 @@ public strictfp class MapGenerator {
 
     private void teamConnectionsInit() {
         float maxStepSize = mapSize / 128f;
-        int minMiddlePoints = 4;
-        int maxMiddlePoints = 8;
-        int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 3 + 2);
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 1;
+        int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 2 + 1 + spawnCount / 4);
         int numTeammateConnections = 1;
         connections = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "connections");
-
-        if (mapSize < 512) {
-            numTeamConnections /= 2;
-        }
 
         connectTeams(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
         connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
@@ -945,8 +939,8 @@ public strictfp class MapGenerator {
     }
 
     private void pathLandInit() {
-        int minMiddlePoints = 4;
-        int maxMiddlePoints = 8;
+        int minMiddlePoints = 2;
+        int maxMiddlePoints = 4;
         int numTeamConnections = (int) (2 * landDensity + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int numTeammateConnections = (int) (2 * landDensity + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int numWalkers = (int) (8 * landDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
@@ -954,7 +948,7 @@ public strictfp class MapGenerator {
         float maxStepSize = mapSize / 128f;
         land = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "land");
 
-        pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound);
+        pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - landDensity) + mapSize / 8), false)
                 .inflate(mapSize / 64f).smooth(12, .125f));
         connectTeams(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
@@ -972,7 +966,7 @@ public strictfp class MapGenerator {
         land = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "land").invert();
         ConcurrentBinaryMask noLand = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand");
 
-        pathInCenterBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound);
+        pathInCenterBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.grow(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
         noLand.smooth(mapSize / 64, .5f);
@@ -996,7 +990,7 @@ public strictfp class MapGenerator {
         int bound = 0;
         plateaus = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "plateaus");
 
-        pathInCenterBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound);
+        pathInCenterBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
         plateaus.grow(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1);
         plateaus.smooth(12);
@@ -1004,9 +998,6 @@ public strictfp class MapGenerator {
 
     private void walkMountainInit() {
         float scaledMountainDensity = mountainDensity * MOUNTAIN_DENSITY_RANGE + MOUNTAIN_DENSITY_MIN;
-        if (mapSize < 512) {
-            scaledMountainDensity = StrictMath.max(scaledMountainDensity - .25f, 0);
-        }
 
         mountains = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "mountains");
 
@@ -1028,7 +1019,7 @@ public strictfp class MapGenerator {
         mountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "mountains");
         ConcurrentBinaryMask noMountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains");
 
-        pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound);
+        pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noMountains.setSize(mapSize / 4);
         noMountains.grow(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
         noMountains.smooth(mapSize / 64);
@@ -1058,8 +1049,8 @@ public strictfp class MapGenerator {
             land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
         }
 
-        mountains.minus(connections.copy().inflate(mountainBrushSize / 4f).smooth(12, .125f));
-        mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
+        mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).smooth(12, .125f));
+        mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
 
         plateaus.intersect(land).minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
@@ -1069,26 +1060,20 @@ public strictfp class MapGenerator {
 
     private void initRamps() {
         float maxStepSize = mapSize / 128f;
-        int maxMiddlePoints = 4;
-        int numPaths = (int) (rampDensity * 40) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
+        int maxMiddlePoints = 2;
+        int numPaths = (int) (rampDensity * 20) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
         int bound = mapSize / 4;
         ramps = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "ramps");
 
-        ramps.combine(connections);
-
         if (mapSize >= 512) {
-            if (landPathed) {
-                pathInEdgeBounds(ramps, maxStepSize, numPaths * 2, maxMiddlePoints, bound);
-            } else {
-                pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
-                pathInCenterBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound);
-            }
+            pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         } else {
-            ramps.fillCenter(mapSize / 4, false);
-            pathInCenterBounds(ramps, maxStepSize, StrictMath.max(numPaths / 8, 1), maxMiddlePoints, bound);
-            pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound);
+            pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         }
-        ramps.inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()).inflate(12);
+
+        ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
+                .space(6, 12).combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
+                .inflate(24);
     }
 
     private void connectTeams(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
@@ -1096,10 +1081,8 @@ public strictfp class MapGenerator {
             return;
         }
         List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
-        List<Spawn> endTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 1).collect(Collectors.toList());
         for (int i = 0; i < numConnections; ++i) {
             Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
-            Spawn endSpawn = endTeamSpawns.get(random.nextInt(endTeamSpawns.size()));
             int numMiddlePoints;
             if (maxMiddlePoints > minMiddlePoints) {
                 numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
@@ -1107,9 +1090,13 @@ public strictfp class MapGenerator {
                 numMiddlePoints = maxMiddlePoints;
             }
             Vector2f start = new Vector2f(startSpawn.getPosition());
-            Vector2f end = new Vector2f(endSpawn.getPosition());
+            Vector2f end = new Vector2f(start);
+            float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
+            offCenterAngle *= random.nextBoolean() ? 1 : -1;
+            offCenterAngle += start.getAngle(new Vector2f(mapSize / 2f, mapSize / 2f));
+            end.addPolar(offCenterAngle, random.nextFloat() * mapSize / 4f + mapSize / 4f);
             float maxMiddleDistance = start.getDistance(end);
-            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.SPAWN);
+            maskToUse.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
     }
 
@@ -1128,23 +1115,23 @@ public strictfp class MapGenerator {
                     Vector2f start = new Vector2f(startSpawn.getPosition());
                     Vector2f end = new Vector2f(endSpawn.getPosition());
                     float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                    maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
+                    maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
                 }
             });
         }
     }
 
-    private void pathInCenterBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound) {
+    private void pathInCenterBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             Vector2f start = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
             Vector2f end = new Vector2f(random.nextInt(mapSize + 1 - bound * 2) + bound, random.nextInt(mapSize + 1 - bound * 2) + bound);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
+            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
         }
     }
 
-    private void pathInEdgeBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound) {
+    private void pathInEdgeBounds(ConcurrentBinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             int startX = random.nextInt(bound) + (random.nextBoolean() ? 0 : mapSize - bound);
             int startY = random.nextInt(bound) + (random.nextBoolean() ? 0 : mapSize - bound);
@@ -1154,7 +1141,7 @@ public strictfp class MapGenerator {
             Vector2f end = new Vector2f(endX, endY);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, SymmetryType.TERRAIN);
+            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
         }
     }
 
@@ -1194,7 +1181,7 @@ public strictfp class MapGenerator {
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
 
-        heightmapPlateaus.add(plateaus, 2f).clampMax(PLATEAU_HEIGHT);
+        heightmapPlateaus.add(plateaus, 2f).clampMax(PLATEAU_HEIGHT).smooth(1, plateaus);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
@@ -1226,13 +1213,13 @@ public strictfp class MapGenerator {
 
         heightmapBase.add(heightmapLand);
 
-        noise.addWhiteNoise(PLATEAU_HEIGHT * 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT).resample(mapSize + 1).addWhiteNoise(1)
+        noise.addWhiteNoise(PLATEAU_HEIGHT / 2).resample(mapSize / 64).addWhiteNoise(PLATEAU_HEIGHT / 2).resample(mapSize + 1).addWhiteNoise(1)
                 .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
                 .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
 
-        heightmapBase.add(waterHeight).add(noise).smooth(18, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(12, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(6, ramps.copy().inflate(12)).smooth(2, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
+        heightmapBase.add(waterHeight).add(noise).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
 
         ConcurrentBinaryMask paintedLand = new ConcurrentBinaryMask(heightmapBase, waterHeight, random.nextLong(), "paintedLand");
 
@@ -1240,11 +1227,10 @@ public strictfp class MapGenerator {
 
         slope = heightmapBase.copy().supcomGradient();
 
-        impassable = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "impassable");
-        unbuildable = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "unbuildable");
+        impassable = new ConcurrentBinaryMask(slope, .7f, random.nextLong(), "impassable");
+        unbuildable = new ConcurrentBinaryMask(slope, .1f, random.nextLong(), "unbuildable");
         notFlat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "notFlat");
 
-        unbuildable.combine(ramps.copy().intersect(notFlat));
         impassable.inflate(2).combine(paintedMountains);
 
         passable = new ConcurrentBinaryMask(impassable, random.nextLong(), "passable").invert();
@@ -1261,7 +1247,7 @@ public strictfp class MapGenerator {
         slopeDecal = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopeDecal");
         mountainDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "mountainDecal");
 
-        fieldDecal.minus(slopeDecal).minus(mountainDecal).deflate(24);
+        fieldDecal.minus(slopeDecal.copy().inflate(16)).minus(mountainDecal).deflate(24);
     }
 
     private void setupResourcePipeline() {
@@ -1323,11 +1309,11 @@ public strictfp class MapGenerator {
             if (!enemyCivilians) {
                 baseMask.setSize(mapSize + 1);
                 civReclaimMask.randomize(.005f).setSize(mapSize + 1);
-                civReclaimMask.intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).fillEdge(64, false);
+                civReclaimMask.intersect(land.copy().minus(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(64, false);
             } else {
                 civReclaimMask.setSize(mapSize + 1);
                 baseMask.randomize(.005f).setSize(mapSize + 1);
-                baseMask.intersect(land.copy().minus(unbuildable).minus(ramps).deflate(24)).fillCenter(32, false).fillEdge(32, false).minus(civReclaimMask.copy().inflate(16));
+                baseMask.intersect(land.copy().minus(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(32, false).minus(civReclaimMask.copy().inflate(16));
             }
         } else {
             civReclaimMask.setSize(mapSize + 1);

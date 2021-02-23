@@ -166,28 +166,27 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, SymmetryType symmetryType) {
-        float distance = start.getDistance(end);
+    public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         List<Vector2f> checkPoints = new ArrayList<>();
-        checkPoints.add(start);
+        checkPoints.add(new Vector2f(start));
         for (int i = 0; i < numMiddlePoints; i++) {
             Vector2f previousLoc = checkPoints.get(checkPoints.size() - 1);
-            float angle = (float) (random.nextFloat() * StrictMath.PI * 2f);
+            float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.getAngle(end);
             if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4 && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
                 angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f;
             }
-            float magnitude = random.nextFloat() * distance / numMiddlePoints * 2f;
+            float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
             Vector2f nextLoc = new Vector2f(previousLoc).addPolar(angle, magnitude);
             nextLoc.round().clampMin(0, 0).clampMax(getSize() - 1, getSize() - 1);
             checkPoints.add(nextLoc);
         }
-        checkPoints.add(end);
+        checkPoints.add(new Vector2f(end));
         int size = getSize();
         int numSteps = 0;
         for (int i = 0; i < checkPoints.size() - 1; i++) {
             Vector2f location = checkPoints.get(i);
             Vector2f nextLoc = checkPoints.get(i + 1);
-            float oldAngle = (float) (location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * (StrictMath.PI / 2));
+            float oldAngle = location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
             while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
                 List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
                 if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
@@ -195,7 +194,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     symmetryPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, true));
                 }
                 float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-                float angle = (float) (oldAngle * .5f + location.getAngle(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * (StrictMath.PI / 2));
+                float angle = oldAngle * .5f + location.getAngle(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * maxAngleError;
                 location.addPolar(angle, magnitude).round();
                 oldAngle = angle;
                 numSteps++;
@@ -203,6 +202,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             if (numSteps >= size * size) {
                 break;
             }
+        }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
+        path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
+        if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
+            List<Vector2f> symmetryPoints = getSymmetryPoints(end, symmetryType);
+            path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
         }
         VisualDebugger.visualizeMask(this);
         return this;
@@ -236,6 +245,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
         }
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask space(float minSpacing, float maxSpacing) {
+        List<Vector2f> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
+        clear();
+        limitToSymmetryRegion(SymmetryType.SPAWN);
+        fillCoordinates(coordinates, true);
+        applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
     }
