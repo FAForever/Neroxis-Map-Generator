@@ -1244,10 +1244,10 @@ public strictfp class MapGenerator {
 
     private void setupDecalPipeline() {
         fieldDecal = new ConcurrentBinaryMask(land, random.nextLong(), "fieldDecal");
-        slopeDecal = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopeDecal");
+        slopeDecal = new ConcurrentBinaryMask(slope, .25f, random.nextLong(), "slopeDecal");
         mountainDecal = new ConcurrentBinaryMask(mountains, random.nextLong(), "mountainDecal");
 
-        fieldDecal.minus(slopeDecal.copy().inflate(16)).minus(mountainDecal).deflate(24);
+        fieldDecal.minus(slopeDecal.copy().inflate(16)).minus(mountainDecal);
     }
 
     private void setupResourcePipeline() {
