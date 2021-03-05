@@ -135,8 +135,17 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
+        setSize(other.getSize());
         checkCompatibleMask(other);
         modify((x, y) -> other.getValueAt(x, y) ? high : low);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public FloatMask init(FloatMask other) {
+        setSize(other.getSize());
+        checkCompatibleMask(other);
+        modify(other::getValueAt);
         VisualDebugger.visualizeMask(this);
         return this;
     }

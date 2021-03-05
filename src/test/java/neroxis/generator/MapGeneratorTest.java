@@ -340,6 +340,42 @@ public class MapGeneratorTest {
     }
 
     @Test
+    public void TestEqualityStyle() throws Exception {
+        instance.interpretArguments(new String[]{"--style", "DEFAULT"});
+        SCMap map1 = instance.generate();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getSeed();
+
+        Pipeline.reset();
+
+        instance.interpretArguments(new String[]{"--map-name", mapName});
+        SCMap map2 = instance.generate();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getSeed();
+
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getArmies(), map2.getArmies());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
+        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    @Test
     public void TestEqualityMapNameNameKeyword() throws Exception {
         String[] args;
         args = new String[]{"--map-name", b32MapName};

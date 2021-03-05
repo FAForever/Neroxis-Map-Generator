@@ -62,6 +62,27 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         );
     }
 
+    public ConcurrentBinaryMask init(BinaryMask other) {
+        plannedSize = other.getSize();
+        return Pipeline.add(this, Arrays.asList(this), res ->
+                this.mask.init(other)
+        );
+    }
+
+    public ConcurrentBinaryMask init(ConcurrentBinaryMask other) {
+        plannedSize = other.getPlannedSize();
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.mask.init(((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
+        );
+    }
+
+    public ConcurrentBinaryMask init(ConcurrentFloatMask other, float threshold) {
+        plannedSize = other.getPlannedSize();
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.mask.init(((ConcurrentFloatMask) res.get(1)).getFloatMask(), threshold)
+        );
+    }
+
     public ConcurrentBinaryMask randomize(float density) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.randomize(density)
