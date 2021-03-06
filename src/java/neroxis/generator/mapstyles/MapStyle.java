@@ -19,10 +19,11 @@ import java.util.Random;
 public enum MapStyle {
     DEFAULT(DefaultStyleGenerator.class, Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
     BIG_ISLAND(BigIslandStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
+    ISLANDS(IslandsStyleGenerator.class, Range.of(0f, .75f), Range.of(0, 1), Range.of(0, .75f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
     BIG_LAKE(BigLakeStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
     VALLEY(ValleyStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
-    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1);
+    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, Range.of(.5f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, Range.of(.5f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1);
 
     private final Class<? extends DefaultStyleGenerator> generatorClass;
     private final Range landDensityRange;

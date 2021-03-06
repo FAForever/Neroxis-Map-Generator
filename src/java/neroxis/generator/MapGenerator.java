@@ -145,9 +145,9 @@ public strictfp class MapGenerator {
     private int mountainBrushSize = 64;
     private int plateauBrushSize = 32;
     private int smallFeatureBrushSize = 24;
-    private boolean validArgs = true;
-    private boolean generationComplete = true;
-    private boolean styleSpecified = false;
+    private boolean validArgs;
+    private boolean generationComplete;
+    private boolean styleSpecified;
     private MapStyle mapStyle;
     private MapParameters mapParameters;
     private int numToGen = 1;
@@ -376,6 +376,9 @@ public strictfp class MapGenerator {
     }
 
     public void interpretArguments(String[] args) throws Exception {
+        styleSpecified = false;
+        validArgs = true;
+        generationComplete = true;
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
@@ -642,6 +645,7 @@ public strictfp class MapGenerator {
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
             mapStyle = MapStyle.values()[optionBytes[4]];
+            styleSpecified = true;
         }
     }
 
@@ -695,9 +699,6 @@ public strictfp class MapGenerator {
 
     public void save() {
         try {
-            map.setName(mapName);
-            map.setFolderName(mapName);
-            map.setFilePrefix(mapName);
             Path folderPath = Paths.get(pathToFolder);
 
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
@@ -769,8 +770,12 @@ public strictfp class MapGenerator {
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
 
         if (!generationComplete) {
-            map = null;
+            return null;
         }
+
+        map.setName(mapName);
+        map.setFolderName(mapName);
+        map.setFilePrefix(mapName);
 
         return map;
     }

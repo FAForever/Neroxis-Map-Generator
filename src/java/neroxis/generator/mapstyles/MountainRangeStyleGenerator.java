@@ -9,7 +9,7 @@ public class MountainRangeStyleGenerator extends DefaultStyleGenerator {
 
     public MountainRangeStyleGenerator(MapParameters mapParameters, Random random) {
         super(mapParameters, random);
-        mountainBrushSize = 32;
+        mountainBrushSize = mapSize / 16;
         mountainBrushDensity = 2f;
         mountainBrushIntensity = 2;
     }
@@ -28,7 +28,6 @@ public class MountainRangeStyleGenerator extends DefaultStyleGenerator {
     }
 
     protected void mountainInit() {
-        mountains.startVisualDebugger();
         mountains.setSize(mapSize / 4);
 
         mountains.progressiveWalk((int) (mountainDensity * 25 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()), mapSize / 4);

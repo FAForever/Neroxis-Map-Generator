@@ -614,6 +614,17 @@ public strictfp class DefaultStyleGenerator {
         }
     }
 
+    protected void pathAroundPoint(ConcurrentBinaryMask maskToUse, Vector2f start, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+        for (int i = 0; i < numPaths; i++) {
+            int endX = (int) (random.nextFloat() * bound + start.getX());
+            int endY = (int) (random.nextFloat() * bound + start.getY());
+            Vector2f end = new Vector2f(endX, endY);
+            int numMiddlePoints = random.nextInt(maxMiddlePoints);
+            float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
+            maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
+        }
+    }
+
     protected void generateExclusionZones(BinaryMask mask, float spawnSpacing, float mexSpacing, float hydroSpacing) {
         map.getSpawns().forEach(spawn -> mask.fillCircle(spawn.getPosition(), spawnSpacing, true));
         map.getMexes().forEach(mex -> mask.fillCircle(mex.getPosition(), mexSpacing, true));
