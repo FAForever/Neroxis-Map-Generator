@@ -2,7 +2,6 @@ package neroxis.generator.mapstyles;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import neroxis.biomes.Biome;
 import neroxis.generator.MapGenerator;
 import neroxis.map.MapParameters;
@@ -16,13 +15,16 @@ import java.util.List;
 import java.util.Random;
 
 @RequiredArgsConstructor
+@Getter
 public enum MapStyle {
     DEFAULT(DefaultStyleGenerator.class, Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
     BIG_ISLAND(BigIslandStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
     BIG_LAKE(BigLakeStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
-    VALLEY(ValleyStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1);
+    VALLEY(ValleyStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
+    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1),
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), Range.of(0, 1000), 1);
 
-    private final Class<? extends BaseStyleGenerator> generatorClass;
+    private final Class<? extends DefaultStyleGenerator> generatorClass;
     private final Range landDensityRange;
     private final Range mountainDensityRange;
     private final Range plateauDensityRange;
@@ -33,11 +35,7 @@ public enum MapStyle {
     private final Range numTeamsRange;
     private final Range mexCountRange;
     private final Range hydroCountRange;
-    @Getter
-    private final int weight;
-    @Getter
-    @Setter
-    private float probability;
+    private final float weight;
 
     public boolean matches(MapParameters mapParameters) {
         return landDensityRange.contains(mapParameters.getLandDensity())
@@ -58,14 +56,13 @@ public enum MapStyle {
                 .generate();
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, Biome biome) {
+    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Biome biome) {
         float landDensity = landDensityRange.getRandomFloat(random);
         float mountainDensity = mountainDensityRange.getRandomFloat(random);
         float plateauDensity = plateauDensityRange.getRandomFloat(random);
         float rampDensity = rampDensityRange.getRandomFloat(random);
         float reclaimDensity = reclaimDensityRange.getRandomFloat(random);
         int mexCount = MapGenerator.getMexCount(RandomUtils.averageRandomFloat(random, 2), spawnCount, mapSize);
-        int numTeams = 2;
         int hydroCount = spawnCount;
         SymmetrySettings symmetrySettings = MapGenerator.initSymmetrySettings(MapGenerator.getValidSymmetry(spawnCount, numTeams, random), spawnCount, numTeams, random);
         return new MapParameters(spawnCount, landDensity, plateauDensity, mountainDensity, rampDensity, reclaimDensity, mapSize, numTeams, mexCount, hydroCount, false, symmetrySettings, biome);

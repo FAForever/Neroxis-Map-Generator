@@ -62,8 +62,8 @@ public strictfp class MapGenerator {
 
     //read from cli args
     private String pathToFolder = ".";
-    private String mapName = "debugMap";
-    private long seed = new Random().nextLong();
+    private String mapName = "";
+    private long seed;
     private Random random;
     private boolean tournamentStyle = false;
     private boolean blind = false;
@@ -150,45 +150,50 @@ public strictfp class MapGenerator {
     private boolean styleSpecified = false;
     private MapStyle mapStyle;
     private MapParameters mapParameters;
+    private int numToGen = 1;
+    private String previewFolder;
 
     public static void main(String[] args) throws Exception {
 
+        int count = 0;
         Locale.setDefault(Locale.ENGLISH);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
 
         MapGenerator generator = new MapGenerator();
 
-        generator.interpretArguments(args);
-        if (!generator.validArgs) {
-            return;
-        }
+        while (count < generator.numToGen) {
+            generator.seed = new Random().nextLong();
+            generator.interpretArguments(args);
+            if (!generator.validArgs) {
+                return;
+            }
 
-        System.out.println(generator.mapName);
-        generator.generate();
-        if (generator.map == null) {
-            System.out.println("Map Generation Failed see stack trace for details");
-            return;
+            System.out.println(generator.mapName);
+            generator.generate();
+            if (generator.map == null) {
+                System.out.println("Map Generation Failed see stack trace for details");
+                return;
+            }
+            generator.save();
+            System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
+            System.out.println("Seed: " + generator.seed);
+            System.out.println("Biome: " + generator.biome.getName());
+            System.out.println("Land Density: " + generator.landDensity);
+            System.out.println("Plateau Density: " + generator.plateauDensity);
+            System.out.println("Mountain Density: " + generator.mountainDensity);
+            System.out.println("Ramp Density: " + generator.rampDensity);
+            System.out.println("Reclaim Density: " + generator.reclaimDensity);
+            System.out.println("Mex Count: " + generator.mexCount);
+            System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
+            System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
+            System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
+            System.out.println("Style: " + generator.mapStyle);
+            System.out.println("Size: " + generator.mapSize);
+            System.out.println("Done");
+            if (generator.previewFolder != null) {
+                SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);
+            }
+            count++;
         }
-        generator.save();
-        System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
-        System.out.println("Seed: " + generator.seed);
-        System.out.println("Biome: " + generator.biome.getName());
-        System.out.println("Land Density: " + generator.landDensity);
-        System.out.println("Plateau Density: " + generator.plateauDensity);
-        System.out.println("Mountain Density: " + generator.mountainDensity);
-        System.out.println("Ramp Density: " + generator.rampDensity);
-        System.out.println("Reclaim Density: " + generator.reclaimDensity);
-        System.out.println("Mex Count: " + generator.mexCount);
-        System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
-        System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
-        System.out.println("Style: " + generator.mapStyle);
-        System.out.println("Size: " + generator.mapSize);
-        System.out.println("Done");
     }
 
     public static Symmetry getValidSymmetry(int spawnCount, int numTeams, Random random) {
@@ -408,20 +413,20 @@ public strictfp class MapGenerator {
                     reclaimDensity, mapSize, numTeams, mexCount, hydroCount, unexplored, symmetrySettings, biome);
             List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
             possibleStyles.removeIf(style -> !style.matches(mapParameters));
-            List<Integer> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
-            List<Integer> cumulativeWeights = new ArrayList<>();
-            int sum = 0;
-            for (int weight : weights) {
+            List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
+            List<Float> cumulativeWeights = new ArrayList<>();
+            float sum = 0;
+            for (float weight : weights) {
                 sum += weight;
                 cumulativeWeights.add(sum);
             }
-            int value = random.nextInt(cumulativeWeights.get(cumulativeWeights.size() - 1));
-            mapStyle = cumulativeWeights.stream().filter(weight -> weight <= value)
-                    .reduce((first, second) -> second)
+            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
+            mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
+                    .reduce((first, second) -> first)
                     .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
                     .orElse(MapStyle.DEFAULT);
         } else {
-            mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, biome);
+            mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome);
         }
         generateMapName();
     }
@@ -430,6 +435,8 @@ public strictfp class MapGenerator {
         if (arguments.containsKey("help")) {
             System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
+                    "--styles                 list styles\n" +
+                    "--biomes                 list biomes\n" +
                     "--folder-path arg      optional, set the target folder for the generated map\n" +
                     "--seed arg             optional, set the seed for the generated map\n" +
                     "--map-name arg         optional, set the map name for the generated map\n" +
@@ -449,7 +456,27 @@ public strictfp class MapGenerator {
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options\n" +
-                    "--no-hash              optional, turn off pipeline hashing of masks");
+                    "--no-hash              optional, turn off pipeline hashing of masks\n" +
+                    "--num-to-gen           optional, number of maps to generate\n" +
+                    "--preview-path         optional, path to dump previews to\n");
+            validArgs = false;
+            return;
+        }
+
+        if (arguments.containsKey("styles")) {
+            System.out.println("Valid Styles:\n" + Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
+            validArgs = false;
+            return;
+        }
+
+        if (arguments.containsKey("symmetries")) {
+            System.out.println("Valid Symmetries:\n" + Arrays.stream(Symmetry.values()).map(Symmetry::toString).collect(Collectors.joining("\n")));
+            validArgs = false;
+            return;
+        }
+
+        if (arguments.containsKey("biomes")) {
+            System.out.println("Valid Biomes:\n" + String.join("\n", Biomes.BIOMES_LIST));
             validArgs = false;
             return;
         }
@@ -462,8 +489,16 @@ public strictfp class MapGenerator {
             DEBUG = true;
         }
 
+        if (arguments.containsKey("num-to-gen")) {
+            numToGen = Integer.parseInt(arguments.get("num-to-gen"));
+        }
+
         if (arguments.containsKey("folder-path")) {
             pathToFolder = arguments.get("folder-path");
+        }
+
+        if (arguments.containsKey("preview-path")) {
+            previewFolder = arguments.get("preview-path");
         }
 
         if (arguments.containsKey("map-name") && arguments.get("map-name") != null) {
@@ -473,9 +508,8 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("style") && arguments.get("style") != null) {
-            mapStyle = MapStyle.valueOf(arguments.get("style"));
+            mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase(Locale.ROOT));
             styleSpecified = true;
-            optionsUsed = true;
         }
 
         tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind") || arguments.containsKey("unexplored");
@@ -507,7 +541,7 @@ public strictfp class MapGenerator {
 
         randomizeOptions();
 
-        if (!tournamentStyle) {
+        if (!tournamentStyle && !styleSpecified) {
             if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
                 float inLandDensity = Float.parseFloat(arguments.get("land-density"));
                 landDensity = StrictMath.round(inLandDensity * 127f) / 127f;
@@ -550,7 +584,7 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
-                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry"));
+                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry").toUpperCase(Locale.ROOT));
                 optionsUsed = true;
             }
 
@@ -587,41 +621,27 @@ public strictfp class MapGenerator {
         if (optionBytes.length > 1) {
             mapSize = (int) optionBytes[1] * 64;
         }
-        if (optionBytes.length > 9) {
-            numTeams = optionBytes[9];
+        if (optionBytes.length > 2) {
+            numTeams = optionBytes[2];
         }
 
         randomizeOptions();
 
-        if (optionBytes.length > 2) {
-            landDensity = optionBytes[2] / 127f;
-        }
         if (optionBytes.length > 3) {
-            plateauDensity = optionBytes[3] / 127f;
+            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
         }
-        if (optionBytes.length > 4) {
-            mountainDensity = optionBytes[4] / 127f;
-        }
-        if (optionBytes.length > 5) {
-            rampDensity = optionBytes[5] / 127f;
-        }
-        if (optionBytes.length > 6) {
-            reclaimDensity = optionBytes[6] / 127f;
-        }
-        if (optionBytes.length > 7) {
-            mexCount = optionBytes[7];
-        }
-        if (optionBytes.length > 8) {
-            hydroCount = optionBytes[8];
-        }
-        if (optionBytes.length > 10) {
-            terrainSymmetry = Symmetry.values()[optionBytes[10]];
-        }
-        if (optionBytes.length > 11) {
-            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[11]));
-        }
-        if (optionBytes.length > 12) {
-            mapStyle = MapStyle.values()[optionBytes[12]];
+
+        if (optionBytes.length == 12) {
+            landDensity = optionBytes[4] / 127f;
+            plateauDensity = optionBytes[5] / 127f;
+            mountainDensity = optionBytes[6] / 127f;
+            rampDensity = optionBytes[7] / 127f;
+            reclaimDensity = optionBytes[8] / 127f;
+            mexCount = optionBytes[9];
+            hydroCount = optionBytes[10];
+            terrainSymmetry = Symmetry.values()[optionBytes[11]];
+        } else if (optionBytes.length == 5) {
+            mapStyle = MapStyle.values()[optionBytes[4]];
         }
     }
 
@@ -641,6 +661,8 @@ public strictfp class MapGenerator {
         if (optionsUsed) {
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64),
+                    (byte) numTeams,
+                    (byte) Biomes.BIOMES_LIST.indexOf(biome.getName()),
                     (byte) StrictMath.round(landDensity * 127f),
                     (byte) StrictMath.round(plateauDensity * 127f),
                     (byte) StrictMath.round(mountainDensity * 127f),
@@ -648,8 +670,11 @@ public strictfp class MapGenerator {
                     (byte) StrictMath.round(reclaimDensity * 127f),
                     (byte) mexCount,
                     (byte) hydroCount,
+                    (byte) terrainSymmetry.ordinal()};
+        } else if (styleSpecified) {
+            optionArray = new byte[]{(byte) spawnCount,
+                    (byte) (mapSize / 64),
                     (byte) numTeams,
-                    (byte) terrainSymmetry.ordinal(),
                     (byte) Biomes.BIOMES_LIST.indexOf(biome.getName()),
                     (byte) mapStyle.ordinal()};
         } else {

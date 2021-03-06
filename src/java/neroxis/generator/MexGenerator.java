@@ -31,7 +31,7 @@ public strictfp class MexGenerator {
 
         previousMexCount = map.getMexCount();
         if (numMexesLeft > 8 && numMexesLeft > map.getSpawnCount()) {
-            int possibleExpMexCount = (random.nextInt(numMexesLeft / 2) + numMexesLeft / 2);
+            int possibleExpMexCount = (random.nextInt(numMexesLeft / 2) + numMexesLeft / map.getSpawnCount());
             generateMexExpansions(spawnMask, possibleExpMexCount, mexSpacing);
 
             map.getMexes().stream().skip(previousMexCount)
