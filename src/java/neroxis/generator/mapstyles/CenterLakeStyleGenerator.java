@@ -17,7 +17,7 @@ public strictfp class CenterLakeStyleGenerator extends PathedStyleGenerator {
     }
 
     protected void landInit() {
-        float normalizedLandDensity = MapStyle.CENTER_LAKE.getLandDensityRange().normalize(landDensity);
+        float normalizedLandDensity = MapStyle.CENTER_LAKE.getStyleConstraints().getLandDensityRange().normalize(landDensity);
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - normalizedLandDensity) + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();

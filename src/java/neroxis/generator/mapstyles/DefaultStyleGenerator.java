@@ -141,7 +141,7 @@ public strictfp class DefaultStyleGenerator {
         unexplored = mapParameters.isUnexplored();
         biome = mapParameters.getBiome();
         waterHeight = biome.getWaterSettings().getElevation();
-        plateauHeight = 6f;
+        plateauHeight = 4f;
         oceanFloor = -16f;
         valleyFloor = -5f;
         landHeight = .05f;
@@ -216,7 +216,7 @@ public strictfp class DefaultStyleGenerator {
         }
         hillBrushIntensity = 0.5f;
         mountainBrushIntensity = 10f;
-        plateauBrushIntensity = 8f;
+        plateauBrushIntensity = 6f;
         mountainBrushDensity = mapSize < 512 ? .1f : .05f;
         shallowWaterBrushIntensity = .5f;
         deepWaterBrushIntensity = 1f;
@@ -327,7 +327,7 @@ public strictfp class DefaultStyleGenerator {
         plateaus.randomize(scaledPlateauDensity).smooth(2, .75f).setSize(mapSize / 4);
         plateaus.grow(.5f, SymmetryType.TERRAIN, mapSize / 128);
         plateaus.setSize(mapSize + 1);
-        plateaus.smooth(8, .75f);
+        plateaus.smooth(16, .25f);
     }
 
     protected void mountainInit() {
@@ -421,12 +421,12 @@ public strictfp class DefaultStyleGenerator {
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - 2f, random.nextLong(), "paintedPlateaus");
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - plateauHeight * 3f / 4f, random.nextLong(), "paintedPlateaus");
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
 
-        heightmapPlateaus.add(plateaus, 2f).clampMax(plateauHeight).smooth(1, plateaus);
+        heightmapPlateaus.add(plateaus, plateauHeight * 3f / 4f).clampMax(plateauHeight).smooth(1, plateaus);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 

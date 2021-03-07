@@ -16,7 +16,7 @@ public strictfp class BigIslandsStyleGenerator extends PathedStyleGenerator {
     }
 
     protected void landInit() {
-        float normalizedLandDensity = MapStyle.BIG_ISLANDS.getLandDensityRange().normalize(landDensity);
+        float normalizedLandDensity = MapStyle.BIG_ISLANDS.getStyleConstraints().getLandDensityRange().normalize(landDensity);
         int maxMiddlePoints = 4;
         int numPaths = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 8);

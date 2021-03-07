@@ -16,7 +16,7 @@ public strictfp class OneIslandStyleGenerator extends PathedStyleGenerator {
     }
 
     protected void landInit() {
-        float normalizedLandDensity = MapStyle.CENTER_LAKE.getLandDensityRange().normalize(landDensity);
+        float normalizedLandDensity = MapStyle.CENTER_LAKE.getStyleConstraints().getLandDensityRange().normalize(landDensity);
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();

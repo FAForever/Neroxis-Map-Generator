@@ -362,8 +362,9 @@ public strictfp class MapGenerator {
                 mapStyle = MapStyle.DEFAULT;
             }
         } else {
-            if (!mapStyle.getMapSizes().contains(mapSize)) {
-                mapSize = mapStyle.getMapSizes().get(random.nextInt(mapStyle.getMapSizes().size()));
+            List<Integer> validSizes = mapStyle.getStyleConstraints().getMapSizes();
+            if (!validSizes.contains(mapSize)) {
+                mapSize = validSizes.get(random.nextInt(validSizes.size()));
             }
             mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
         }

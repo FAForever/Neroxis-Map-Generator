@@ -15,7 +15,7 @@ public strictfp class DropPlateauStyleGenerator extends PathedStyleGenerator {
     }
 
     protected void plateausInit() {
-        float normalizedPlateauDensity = MapStyle.LITTLE_MOUNTAIN.getPlateauDensityRange().normalize(mountainDensity);
+        float normalizedPlateauDensity = MapStyle.LITTLE_MOUNTAIN.getStyleConstraints().getPlateauDensityRange().normalize(mountainDensity);
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 

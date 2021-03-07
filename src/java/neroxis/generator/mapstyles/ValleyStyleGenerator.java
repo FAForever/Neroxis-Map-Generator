@@ -18,7 +18,7 @@ public strictfp class ValleyStyleGenerator extends PathedPlateauStyleGenerator {
     }
 
     protected void mountainInit() {
-        float normalizedMountainDensity = MapStyle.LITTLE_MOUNTAIN.getMountainDensityRange().normalize(mountainDensity);
+        float normalizedMountainDensity = MapStyle.LITTLE_MOUNTAIN.getStyleConstraints().getMountainDensityRange().normalize(mountainDensity);
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numPaths = (int) (8 + 8 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints());
