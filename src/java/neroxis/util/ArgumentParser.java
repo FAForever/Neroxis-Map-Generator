@@ -3,7 +3,7 @@ package neroxis.util;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ArgumentParser {
+public strictfp class ArgumentParser {
 
     /**
      * Parses command line arguments

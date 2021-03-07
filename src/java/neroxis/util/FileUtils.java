@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-public class FileUtils {
+public strictfp class FileUtils {
 
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).setPrettyPrinting().create();
 

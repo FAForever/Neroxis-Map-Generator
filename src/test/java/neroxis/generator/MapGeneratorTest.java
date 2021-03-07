@@ -29,7 +29,7 @@ public class MapGeneratorTest {
     float roundedMountainDensity = StrictMath.round(mountainDensity * 127f) / 127f;
     float roundedRampDensity = StrictMath.round(rampDensity * 127f) / 127f;
     float roundedReclaimDensity = StrictMath.round(reclaimDensity * 127f) / 127f;
-    int mexCount = 16;
+    float roundedMexDensity = StrictMath.round(mexDensity * 127f) / 127f;
     int mapSize = 512;
     int numTeams = 2;
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
@@ -41,7 +41,7 @@ public class MapGeneratorTest {
             "--mountain-density", Float.toString(mountainDensity),
             "--ramp-density", Float.toString(rampDensity),
             "--reclaim-density", Float.toString(reclaimDensity),
-            "--mex-count", Integer.toString(mexCount),
+            "--mex-density", Float.toString(mexDensity),
             "--map-size", Integer.toString(mapSize),
             "--num-teams", Integer.toString(numTeams)};
     private MapGenerator instance;
@@ -97,7 +97,7 @@ public class MapGeneratorTest {
         assertEquals(instance.getMountainDensity(), roundedMountainDensity, 0);
         assertEquals(instance.getRampDensity(), roundedRampDensity, 0);
         assertEquals(instance.getReclaimDensity(), roundedReclaimDensity, 0);
-        assertEquals(instance.getMexCount(), mexCount);
+        assertEquals(instance.getMexDensity(), roundedMexDensity, 0);
         assertEquals(instance.getMapSize(), mapSize);
     }
 

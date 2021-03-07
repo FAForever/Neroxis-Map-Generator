@@ -33,25 +33,6 @@ public strictfp class MapGenerator {
 
     public static final String VERSION;
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
-    public static final float LAND_DENSITY_MIN = .8f;
-    public static final float LAND_DENSITY_MAX = .9f;
-    public static final float LAND_DENSITY_RANGE = LAND_DENSITY_MAX - LAND_DENSITY_MIN;
-    public static final float MOUNTAIN_DENSITY_MIN = 0f;
-    public static final float MOUNTAIN_DENSITY_MAX = 1f;
-    public static final float MOUNTAIN_DENSITY_RANGE = MOUNTAIN_DENSITY_MAX - MOUNTAIN_DENSITY_MIN;
-    public static final float RAMP_DENSITY_MIN = 0f;
-    public static final float RAMP_DENSITY_MAX = 1f;
-    public static final float RAMP_DENSITY_RANGE = RAMP_DENSITY_MAX - RAMP_DENSITY_MIN;
-    public static final float PLATEAU_DENSITY_MIN = .6f;
-    public static final float PLATEAU_DENSITY_MAX = .7f;
-    public static final float PLATEAU_DENSITY_RANGE = PLATEAU_DENSITY_MAX - PLATEAU_DENSITY_MIN;
-    public static final float RECLAIM_DENSITY_MIN = 0f;
-    public static final float RECLAIM_DENSITY_MAX = 1f;
-    public static final float RECLAIM_DENSITY_RANGE = RECLAIM_DENSITY_MAX - RECLAIM_DENSITY_MIN;
-    public static final float PLATEAU_HEIGHT = 6f;
-    public static final float OCEAN_FLOOR = -16f;
-    public static final float VALLEY_FLOOR = -5f;
-    public static final float LAND_HEIGHT = .05f;
     private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     public static boolean DEBUG = false;
 
@@ -79,7 +60,7 @@ public strictfp class MapGenerator {
     private int mapSize = 512;
     private int numTeams = 2;
     private float reclaimDensity;
-    private int mexCount;
+    private float mexDensity;
     private int hydroCount;
     private Symmetry terrainSymmetry;
     private Biome biome;
@@ -176,18 +157,8 @@ public strictfp class MapGenerator {
             generator.save();
             System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
             System.out.println("Seed: " + generator.seed);
-            System.out.println("Biome: " + generator.biome.getName());
-            System.out.println("Land Density: " + generator.landDensity);
-            System.out.println("Plateau Density: " + generator.plateauDensity);
-            System.out.println("Mountain Density: " + generator.mountainDensity);
-            System.out.println("Ramp Density: " + generator.rampDensity);
-            System.out.println("Reclaim Density: " + generator.reclaimDensity);
-            System.out.println("Mex Count: " + generator.mexCount);
-            System.out.println("Terrain Symmetry: " + generator.terrainSymmetry);
-            System.out.println("Team Symmetry: " + generator.symmetrySettings.getTeamSymmetry());
-            System.out.println("Spawn Symmetry: " + generator.symmetrySettings.getSpawnSymmetry());
+            System.out.println(generator.mapParameters.toString());
             System.out.println("Style: " + generator.mapStyle);
-            System.out.println("Size: " + generator.mapSize);
             System.out.println("Done");
             if (generator.previewFolder != null) {
                 SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);
@@ -224,58 +195,6 @@ public strictfp class MapGenerator {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
         return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
-    }
-
-    public static int getMexCount(float mexDensity, int spawnCount, int mapSize) {
-        int mexCount;
-        float mexMultiplier = 1f;
-        switch (spawnCount) {
-            case 2:
-                mexCount = (int) (10 + 20 * mexDensity);
-                break;
-            case 4:
-                mexCount = (int) (9 + 8 * mexDensity);
-                break;
-            case 6:
-            case 8:
-                mexCount = (int) (8 + 5 * mexDensity);
-                break;
-            case 10:
-                mexCount = (int) (8 + 3 * mexDensity);
-                break;
-            case 12:
-                mexCount = (int) (6 + 4 * mexDensity);
-                break;
-            case 14:
-                mexCount = (int) (6 + 3 * mexDensity);
-                break;
-            case 16:
-                mexCount = (int) (6 + 2 * mexDensity);
-                break;
-            default:
-                mexCount = (int) (8 + 8 * mexDensity);
-                break;
-        }
-        if (mapSize < 512) {
-            mexMultiplier = .75f;
-        } else if (mapSize > 512) {
-            switch (spawnCount) {
-                case 2:
-                case 4:
-                case 6:
-                    mexMultiplier = 1.5f;
-                    break;
-                case 8:
-                case 10:
-                    mexMultiplier = 1.35f;
-                    break;
-                default:
-                    mexMultiplier = 1.25f;
-                    break;
-            }
-        }
-        mexCount *= mexMultiplier;
-        return mexCount;
     }
 
     private void parseMapName() throws Exception {
@@ -412,8 +331,21 @@ public strictfp class MapGenerator {
         }
         symmetrySettings = initSymmetrySettings(terrainSymmetry, spawnCount, numTeams, random);
         if (!styleSpecified || mapStyle == null) {
-            mapParameters = new MapParameters(spawnCount, landDensity, plateauDensity, mountainDensity, rampDensity,
-                    reclaimDensity, mapSize, numTeams, mexCount, hydroCount, unexplored, symmetrySettings, biome);
+            mapParameters = MapParameters.builder()
+                    .spawnCount(spawnCount)
+                    .landDensity(landDensity)
+                    .plateauDensity(plateauDensity)
+                    .mountainDensity(mountainDensity)
+                    .rampDensity(rampDensity)
+                    .reclaimDensity(reclaimDensity)
+                    .mexDensity(mexDensity)
+                    .mapSize(mapSize)
+                    .numTeams(numTeams)
+                    .hydroCount(spawnCount)
+                    .unexplored(false)
+                    .symmetrySettings(symmetrySettings)
+                    .biome(biome)
+                    .build();
             List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
             possibleStyles.removeIf(style -> !style.matches(mapParameters));
             List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
@@ -429,7 +361,10 @@ public strictfp class MapGenerator {
                     .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
                     .orElse(MapStyle.DEFAULT);
         } else {
-            mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome);
+            if (!mapStyle.getMapSizes().contains(mapSize)) {
+                mapSize = mapStyle.getMapSizes().get(random.nextInt(mapStyle.getMapSizes().size()));
+            }
+            mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
         }
         generateMapName();
     }
@@ -576,13 +511,7 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                float mexDensity = Float.parseFloat(arguments.get("mex-density"));
-                mexCount = getMexCount(mexDensity, spawnCount, mapSize);
-                optionsUsed = true;
-            }
-
-            if (arguments.containsKey("mex-count") && arguments.get("mex-count") != null) {
-                mexCount = Integer.parseInt(arguments.get("mex-count"));
+                mexDensity = Float.parseFloat(arguments.get("mex-density"));
                 optionsUsed = true;
             }
 
@@ -609,7 +538,7 @@ public strictfp class MapGenerator {
         mountainDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
         rampDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
         reclaimDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
-        mexCount = getMexCount(RandomUtils.averageRandomFloat(random, 2), spawnCount, mapSize);
+        mexDensity = StrictMath.round(RandomUtils.averageRandomFloat(random, 2) * 127) / 127f;
         hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
         terrainSymmetry = getValidSymmetry(spawnCount, numTeams, random);
         biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
@@ -640,7 +569,7 @@ public strictfp class MapGenerator {
             mountainDensity = optionBytes[6] / 127f;
             rampDensity = optionBytes[7] / 127f;
             reclaimDensity = optionBytes[8] / 127f;
-            mexCount = optionBytes[9];
+            mexDensity = optionBytes[9];
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
@@ -672,7 +601,7 @@ public strictfp class MapGenerator {
                     (byte) StrictMath.round(mountainDensity * 127f),
                     (byte) StrictMath.round(rampDensity * 127f),
                     (byte) StrictMath.round(reclaimDensity * 127f),
-                    (byte) mexCount,
+                    (byte) StrictMath.round(mexDensity * 127f),
                     (byte) hydroCount,
                     (byte) terrainSymmetry.ordinal()};
         } else if (styleSpecified) {
@@ -788,16 +717,7 @@ public strictfp class MapGenerator {
         if (status) {
             FileOutputStream out = new FileOutputStream(outFile);
             String summaryString = "Seed: " + seed +
-                    "\nBiome: " + biome.getName() +
-                    "\nLand Density: " + landDensity +
-                    "\nPlateau Density: " + plateauDensity +
-                    "\nMountain Density: " + mountainDensity +
-                    "\nRamp Density: " + rampDensity +
-                    "\nReclaim Density: " + reclaimDensity +
-                    "\nMex Count: " + mexCount +
-                    "\nTerrain Symmetry: " + terrainSymmetry +
-                    "\nTeam Symmetry: " + symmetrySettings.getTeamSymmetry() +
-                    "\nSpawn Symmetry: " + symmetrySettings.getSpawnSymmetry() +
+                    "\n" + mapParameters.toString() +
                     "\nStyle: " + mapStyle.toString();
             out.write(summaryString.getBytes());
             out.flush();

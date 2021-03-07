@@ -33,7 +33,7 @@ public strictfp class DefaultStyleGenerator {
     protected final int mapSize;
     protected final int numTeams;
     protected final float reclaimDensity;
-    protected final int mexCount;
+    protected final float mexDensity;
     protected final int hydroCount;
     protected final SymmetrySettings symmetrySettings;
     protected final Biome biome;
@@ -121,6 +121,8 @@ public strictfp class DefaultStyleGenerator {
     protected float valleyBrushIntensity;
     protected float hillBrushIntensity;
     protected float mountainBrushDensity;
+    protected float spawnSeparation;
+    protected int teamSeparation;
 
     public DefaultStyleGenerator(MapParameters mapParameters, Random random) {
         this.mapParameters = mapParameters;
@@ -130,7 +132,7 @@ public strictfp class DefaultStyleGenerator {
         plateauDensity = mapParameters.getPlateauDensity();
         rampDensity = mapParameters.getRampDensity();
         reclaimDensity = mapParameters.getReclaimDensity();
-        mexCount = mapParameters.getMexCount();
+        mexDensity = mapParameters.getMexDensity();
         hydroCount = mapParameters.getHydroCount();
         spawnCount = mapParameters.getSpawnCount();
         mapSize = mapParameters.getMapSize();
@@ -143,8 +145,11 @@ public strictfp class DefaultStyleGenerator {
         oceanFloor = -16f;
         valleyFloor = -5f;
         landHeight = .05f;
-        map = new SCMap(mapSize, spawnCount, mexCount * spawnCount, hydroCount, biome);
 
+        map = new SCMap(mapSize, spawnCount, getMexCount() * spawnCount, hydroCount, biome);
+
+        spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
+        teamSeparation = StrictMath.min(map.getSize() * 3 / 8, 256);
         spawnGenerator = new SpawnGenerator(map, random.nextLong());
         mexGenerator = new MexGenerator(map, random.nextLong());
         hydroGenerator = new HydroGenerator(map, random.nextLong());
@@ -228,9 +233,7 @@ public strictfp class DefaultStyleGenerator {
         hasCivilians = random.nextBoolean() && !unexplored;
         enemyCivilians = random.nextBoolean() && hasCivilians;
 
-        int spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16;
-
-        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, symmetrySettings, plateauDensity, spawnSize);
+        BinaryMask[] spawnMasks = spawnGenerator.generateSpawns(spawnSeparation, teamSeparation, symmetrySettings, plateauDensity, spawnSize);
         spawnLandMask.init(spawnMasks[0]);
         spawnPlateauMask.init(spawnMasks[1]);
 
@@ -705,7 +708,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateAIMarkers\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -717,7 +720,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateTextures\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -730,7 +733,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateResources\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -746,7 +749,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateDecals\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -761,7 +764,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateProps\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -795,7 +798,7 @@ public strictfp class DefaultStyleGenerator {
             if (DEBUG) {
                 System.out.printf("Done: %4d ms, %s, generateBases\n",
                         System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                        Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
             }
         }
     }
@@ -808,7 +811,7 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, setHeightmap\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
     }
 
@@ -818,8 +821,60 @@ public strictfp class DefaultStyleGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, setPlacements\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.MapGenerator.class));
+                    Util.getStackTraceLineInClass(neroxis.generator.mapstyles.DefaultStyleGenerator.class));
         }
+    }
+
+    protected int getMexCount() {
+        int mexCount;
+        float mexMultiplier = 1f;
+        switch (spawnCount) {
+            case 2:
+                mexCount = (int) (10 + 20 * mexDensity);
+                break;
+            case 4:
+                mexCount = (int) (9 + 8 * mexDensity);
+                break;
+            case 6:
+            case 8:
+                mexCount = (int) (8 + 5 * mexDensity);
+                break;
+            case 10:
+                mexCount = (int) (8 + 3 * mexDensity);
+                break;
+            case 12:
+                mexCount = (int) (6 + 4 * mexDensity);
+                break;
+            case 14:
+                mexCount = (int) (6 + 3 * mexDensity);
+                break;
+            case 16:
+                mexCount = (int) (6 + 2 * mexDensity);
+                break;
+            default:
+                mexCount = (int) (8 + 8 * mexDensity);
+                break;
+        }
+        if (mapSize < 512) {
+            mexMultiplier = .75f;
+        } else if (mapSize > 512) {
+            switch (spawnCount) {
+                case 2:
+                case 4:
+                case 6:
+                    mexMultiplier = 1.5f;
+                    break;
+                case 8:
+                case 10:
+                    mexMultiplier = 1.35f;
+                    break;
+                default:
+                    mexMultiplier = 1.25f;
+                    break;
+            }
+        }
+        mexCount *= mexMultiplier;
+        return mexCount;
     }
 }
 

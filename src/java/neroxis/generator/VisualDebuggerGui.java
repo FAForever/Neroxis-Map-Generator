@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VisualDebuggerGui {
+public strictfp class VisualDebuggerGui {
 
     private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
     private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
