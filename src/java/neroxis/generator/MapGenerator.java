@@ -345,18 +345,22 @@ public strictfp class MapGenerator {
                     .build();
             List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
             possibleStyles.removeIf(style -> !style.matches(mapParameters));
-            List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
-            List<Float> cumulativeWeights = new ArrayList<>();
-            float sum = 0;
-            for (float weight : weights) {
-                sum += weight;
-                cumulativeWeights.add(sum);
+            if (possibleStyles.size() > 0) {
+                List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
+                List<Float> cumulativeWeights = new ArrayList<>();
+                float sum = 0;
+                for (float weight : weights) {
+                    sum += weight;
+                    cumulativeWeights.add(sum);
+                }
+                float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
+                mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
+                        .reduce((first, second) -> first)
+                        .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
+                        .orElse(MapStyle.DEFAULT);
+            } else {
+                mapStyle = MapStyle.DEFAULT;
             }
-            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
-            mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
-                    .reduce((first, second) -> first)
-                    .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
-                    .orElse(MapStyle.DEFAULT);
         } else {
             if (!mapStyle.getMapSizes().contains(mapSize)) {
                 mapSize = mapStyle.getMapSizes().get(random.nextInt(mapStyle.getMapSizes().size()));
@@ -567,7 +571,7 @@ public strictfp class MapGenerator {
             mountainDensity = optionBytes[6] / 127f;
             rampDensity = optionBytes[7] / 127f;
             reclaimDensity = optionBytes[8] / 127f;
-            mexDensity = optionBytes[9];
+            mexDensity = optionBytes[9] / 127f;
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
