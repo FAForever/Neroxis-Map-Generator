@@ -21,6 +21,7 @@ public strictfp enum MapStyle {
     SMALL_ISLANDS(SmallIslandsStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, .25f), Range.of(0, 1), Range.of(0, 1), Range.of(.5f, 1), Range.of(0, 16), Arrays.asList(1024), Range.of(0, 16), Range.of(0, 1000), 1),
     CENTER_LAKE(CenterLakeStyleGenerator.class, Range.of(0f, .5f), Range.of(0, 1), Range.of(0, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(.25f, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), 1),
     VALLEY(ValleyStyleGenerator.class, Range.of(.75f, 1f), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), 1),
+    DROP_PLATEAU(DropPlateauStyleGenerator.class, Range.of(.75f, 1f), Range.of(0, 1), Range.of(.5f, 1), Range.of(0, 1), Range.of(0, 1), Range.of(.25f, 1), Range.of(0, 16), Arrays.asList(512, 1024), Range.of(0, 16), Range.of(0, 1000), 1),
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, Range.of(.5f, 1f), Range.of(.5f, 1), Range.of(0, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512, 1024), Range.of(0, 16), Range.of(0, 1000), 1),
     MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, Range.of(.5f, 1f), Range.of(.5f, 1), Range.of(0, .5f), Range.of(0, 1), Range.of(0, 1), Range.of(0, 1), Range.of(0, 16), Arrays.asList(256, 512), Range.of(0, 16), Range.of(0, 1000), 1);
 

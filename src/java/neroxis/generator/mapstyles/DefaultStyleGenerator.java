@@ -271,6 +271,7 @@ public strictfp class DefaultStyleGenerator {
         setupTerrainPipeline();
         setupHeightmapPipeline();
         setupTexturePipeline();
+        setupCivilianPipeline();
         setupPropPipeline();
         setupWreckPipeline();
         setupResourcePipeline();
@@ -290,7 +291,7 @@ public strictfp class DefaultStyleGenerator {
         float maxStepSize = mapSize / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 2 + 1 + spawnCount / 4);
+        int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 2 + 1);
         int numTeammateConnections = 1;
         connections.setSize(mapSize + 1);
 
@@ -487,15 +488,10 @@ public strictfp class DefaultStyleGenerator {
         passableWater.deflate(16).fillEdge(8, false);
     }
 
-    protected void setupPropPipeline() {
+    protected void setupCivilianPipeline() {
         baseMask.setSize(mapSize / 4);
         civReclaimMask.setSize(mapSize / 4);
         allBaseMask.setSize(mapSize + 1);
-        treeMask.setSize(mapSize / 16);
-        cliffRockMask.setSize(mapSize / 16);
-        fieldStoneMask.setSize(mapSize / 4);
-        largeRockFieldMask.setSize(mapSize / 4);
-        smallRockFieldMask.setSize(mapSize / 4);
 
         if (hasCivilians) {
             if (!enemyCivilians) {
@@ -512,6 +508,14 @@ public strictfp class DefaultStyleGenerator {
             baseMask.setSize(mapSize + 1);
         }
         allBaseMask.combine(baseMask.copy().inflate(24)).combine(civReclaimMask.copy().inflate(24));
+    }
+
+    protected void setupPropPipeline() {
+        treeMask.setSize(mapSize / 16);
+        cliffRockMask.setSize(mapSize / 16);
+        fieldStoneMask.setSize(mapSize / 4);
+        largeRockFieldMask.setSize(mapSize / 4);
+        smallRockFieldMask.setSize(mapSize / 4);
 
         cliffRockMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .5f + .1f).setSize(mapSize + 1);
         cliffRockMask.intersect(impassable).grow(.5f, SymmetryType.SPAWN, 6).minus(plateaus.copy().outline().inflate(2)).minus(impassable).intersect(land);
@@ -685,6 +689,9 @@ public strictfp class DefaultStyleGenerator {
         noCivs.init(unbuildable.getFinalMask());
         noWrecks.init(unbuildable.getFinalMask());
 
+        noBases.inflate(12);
+        noCivs.inflate(12);
+
         noProps.combine(allBaseMask.getFinalMask());
         noWrecks.combine(allBaseMask.getFinalMask()).fillCenter(16, true);
 
@@ -837,19 +844,19 @@ public strictfp class DefaultStyleGenerator {
                 break;
             case 6:
             case 8:
-                mexCount = (int) (8 + 5 * mexDensity);
+                mexCount = (int) (8 + 6 * mexDensity);
                 break;
             case 10:
-                mexCount = (int) (8 + 3 * mexDensity);
+                mexCount = (int) (8 + 4 * mexDensity);
                 break;
             case 12:
-                mexCount = (int) (6 + 4 * mexDensity);
+                mexCount = (int) (6 + 5 * mexDensity);
                 break;
             case 14:
-                mexCount = (int) (6 + 3 * mexDensity);
+                mexCount = (int) (6 + 4 * mexDensity);
                 break;
             case 16:
-                mexCount = (int) (6 + 2 * mexDensity);
+                mexCount = (int) (6 + 3 * mexDensity);
                 break;
             default:
                 mexCount = (int) (8 + 8 * mexDensity);

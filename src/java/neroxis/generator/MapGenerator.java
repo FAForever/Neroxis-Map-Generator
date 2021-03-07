@@ -171,12 +171,9 @@ public strictfp class MapGenerator {
         List<Symmetry> terrainSymmetries;
         switch (spawnCount) {
             case 2:
-                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
-                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
-                break;
             case 4:
                 terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
-                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG, Symmetry.XZ, Symmetry.ZX));
+                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
                 break;
             default:
                 terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
@@ -511,7 +508,8 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                mexDensity = Float.parseFloat(arguments.get("mex-density"));
+                float inMexDensity = Float.parseFloat(arguments.get("mex-density"));
+                mexDensity = StrictMath.round(inMexDensity * 127f) / 127f;
                 optionsUsed = true;
             }
 
