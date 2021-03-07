@@ -2,6 +2,7 @@ package neroxis.generator;
 
 import neroxis.map.SCMap;
 import neroxis.util.FileUtils;
+import neroxis.util.ParseUtils;
 import neroxis.util.Pipeline;
 import org.junit.After;
 import org.junit.Before;
@@ -24,12 +25,12 @@ public class MapGeneratorTest {
     float rampDensity = .5649f;
     float reclaimDensity = .1354f;
     float mexDensity = .7325f;
-    float roundedLandDensity = StrictMath.round(landDensity * 127f) / 127f;
-    float roundedPlateauDensity = StrictMath.round(plateauDensity * 127f) / 127f;
-    float roundedMountainDensity = StrictMath.round(mountainDensity * 127f) / 127f;
-    float roundedRampDensity = StrictMath.round(rampDensity * 127f) / 127f;
-    float roundedReclaimDensity = StrictMath.round(reclaimDensity * 127f) / 127f;
-    float roundedMexDensity = StrictMath.round(mexDensity * 127f) / 127f;
+    float roundedLandDensity = ParseUtils.binPercentage(landDensity, 127);
+    float roundedPlateauDensity = ParseUtils.binPercentage(plateauDensity, 127);
+    float roundedMountainDensity = ParseUtils.binPercentage(mountainDensity, 127);
+    float roundedRampDensity = ParseUtils.binPercentage(rampDensity, 127);
+    float roundedReclaimDensity = ParseUtils.binPercentage(reclaimDensity, 127);
+    float roundedMexDensity = ParseUtils.binPercentage(mexDensity, 127);
     int mapSize = 512;
     int numTeams = 2;
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
@@ -87,11 +88,6 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(0, (instance.getLandDensity() * 127) % 1, 0);
-        assertEquals(0, (instance.getPlateauDensity() * 127) % 1, 0);
-        assertEquals(0, (instance.getMountainDensity() * 127) % 1, 0);
-        assertEquals(0, (instance.getRampDensity() * 127) % 1, 0);
-        assertEquals(0, (instance.getReclaimDensity() * 127) % 1, 0);
         assertEquals(instance.getLandDensity(), roundedLandDensity, 0);
         assertEquals(instance.getPlateauDensity(), roundedPlateauDensity, 0);
         assertEquals(instance.getMountainDensity(), roundedMountainDensity, 0);
