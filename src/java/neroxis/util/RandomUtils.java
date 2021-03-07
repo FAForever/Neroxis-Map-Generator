@@ -2,7 +2,7 @@ package neroxis.util;
 
 import java.util.Random;
 
-public class RandomUtils {
+public strictfp class RandomUtils {
 
     public static boolean andRandomBoolean(Random random, int numToAnd) {
         for (int i = 0; i < numToAnd; i++) {

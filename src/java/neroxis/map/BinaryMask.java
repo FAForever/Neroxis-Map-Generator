@@ -86,6 +86,22 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
+    public BinaryMask init(BinaryMask other) {
+        setSize(other.getSize());
+        checkCompatibleMask(other);
+        combine(other);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask init(FloatMask other, float threshold) {
+        setSize(other.getSize());
+        checkCompatibleMask(other);
+        combine(other, threshold);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask randomize(float density) {
         return randomize(density, SymmetryType.TERRAIN);
     }
@@ -415,8 +431,14 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
+    public BinaryMask combine(FloatMask other, float minValue) {
+        modify((x, y) -> other.getValueAt(x, y) >= minValue);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
     public BinaryMask combine(FloatMask other, float minValue, float maxValue) {
-        combine(other.convertToBinaryMask(minValue, maxValue));
+        modify((x, y) -> other.getValueAt(x, y) >= minValue && other.getValueAt(x, y) <= maxValue);
         VisualDebugger.visualizeMask(this);
         return this;
     }

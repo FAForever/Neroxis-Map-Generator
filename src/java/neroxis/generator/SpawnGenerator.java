@@ -15,28 +15,27 @@ public strictfp class SpawnGenerator {
         random = new Random(seed);
     }
 
-    public BinaryMask[] generateSpawns(float separation, SymmetrySettings symmetrySettings, float plateauDensity, int spawnSize) {
+    public BinaryMask[] generateSpawns(float teammateSeparation, int teamSeparation, SymmetrySettings symmetrySettings, float plateauDensity, int spawnSize) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BinaryMask spawnMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
-        int centerFill = StrictMath.min(map.getSize() * 3 / 8, 256);
-        spawnMask.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(centerFill, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
+        spawnMask.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
         Vector2f location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
             if (location == null) {
-                if (separation - 4 >= 10) {
-                    return generateSpawns(separation - 8, symmetrySettings, plateauDensity, spawnSize);
+                if (teammateSeparation - 4 >= 10) {
+                    return generateSpawns(teammateSeparation - 8, teamSeparation, symmetrySettings, plateauDensity, spawnSize);
                 } else {
                     return null;
                 }
             }
             location.add(.5f, .5f);
-            spawnMask.fillCircle(location, separation, false);
+            spawnMask.fillCircle(location, teammateSeparation, false);
             ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
-            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, centerFill, false));
+            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, teamSeparation, false));
 
             spawnLandMask.fillCircle(location, spawnSize, true);
             symmetryPoints.forEach(symmetryPoint -> spawnLandMask.fillCircle(symmetryPoint, spawnSize, true));
@@ -66,7 +65,7 @@ public strictfp class SpawnGenerator {
 
             addSpawn(location, symmetryPoints);
             BinaryMask nextSpawn = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-            nextSpawn.fillCircle(location, separation * 4, true).intersect(spawnMask);
+            nextSpawn.fillCircle(location, teammateSeparation * 2, true).intersect(spawnMask);
             location = nextSpawn.getRandomPosition();
             if (location == null) {
                 location = spawnMask.getRandomPosition();

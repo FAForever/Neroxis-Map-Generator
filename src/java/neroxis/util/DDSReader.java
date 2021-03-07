@@ -1,6 +1,6 @@
 package neroxis.util;
 
-public final class DDSReader {
+public final strictfp class DDSReader {
 
     public static final Order ARGB = new Order(16, 8, 0, 24);
     public static final Order ABGR = new Order(0, 8, 16, 24);

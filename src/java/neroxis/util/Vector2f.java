@@ -76,15 +76,17 @@ public strictfp class Vector2f {
     }
 
     public Vector2f subtract(float x, float y) {
-        this.x -= x;
-        this.y -= y;
-        return this;
+        return add(-x, -y);
     }
 
     public Vector2f multiply(float multiplier) {
         this.x *= multiplier;
         this.y *= multiplier;
         return this;
+    }
+
+    public Vector2f divide(float divisor) {
+        return multiply(1 / divisor);
     }
 
     public Vector2f clampMin(float x, float y) {

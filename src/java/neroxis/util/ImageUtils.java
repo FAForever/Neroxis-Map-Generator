@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class ImageUtils {
+public strictfp class ImageUtils {
 
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
         if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {

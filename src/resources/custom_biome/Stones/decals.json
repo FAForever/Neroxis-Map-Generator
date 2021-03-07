@@ -15,8 +15,6 @@
     "/env/Evergreen2/Decals/EG_slide004_normals.dds"
   ],
   "fieldAlbedos": [
-    "/env/Tropical/Decals/TrRawGround01_albedo.dds",
-    "/env/Tropical/Decals/TrRawGround03_albedo.dds",
     "/env/Swamp/decals/SW_Scum01_albedo.dds",
     "/env/Swamp/decals/SW_Scum02_albedo.dds",
     "/env/Swamp/decals/SW_Scum03_albedo.dds"

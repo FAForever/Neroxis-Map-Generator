@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 @Value
-public class BaseTemplate {
+public strictfp class BaseTemplate {
     Vector2f center;
     Army army;
     Group group;

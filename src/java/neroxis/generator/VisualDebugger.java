@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-public class VisualDebugger {
+public strictfp class VisualDebugger {
 
     public static boolean ENABLED = MapGenerator.DEBUG || MapTransformer.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG || ImageGenerator.DEBUG;
 

@@ -2,7 +2,7 @@ package neroxis.util;
 
 import java.util.LinkedHashSet;
 
-public class Util {
+public strictfp class Util {
 
     public static String getStackTraceLineInClass(Class<?> clazz) {
         return getStackTraceLineInClass(clazz.getCanonicalName());
@@ -12,7 +12,7 @@ public class Util {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         for (StackTraceElement ste : stackTrace) {
             if (ste.getClassName().equals(className)) {
-                return ste.getFileName() + ".java:" + ste.getLineNumber();
+                return ste.getFileName() + ":" + ste.getLineNumber();
             }
         }
         return "not found";

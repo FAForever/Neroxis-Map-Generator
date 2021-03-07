@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 @Data
-public class DDSHeader {
+public strictfp class DDSHeader {
     final public static int CAPS_FLAG = 0x1;
     final public static int HEIGHT_FLAG = 0x2;
     final public static int WIDTH_FLAG = 0x4;

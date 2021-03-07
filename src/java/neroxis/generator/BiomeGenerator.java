@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 
-public class BiomeGenerator {
+public strictfp class BiomeGenerator {
 
     Path folderPath = Paths.get(".");
     Path mapPath;
