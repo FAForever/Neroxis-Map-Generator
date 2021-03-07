@@ -139,7 +139,7 @@ public strictfp class MapGenerator {
     public static void main(String[] args) throws Exception {
 
         int count = 0;
-        Locale.setDefault(Locale.ENGLISH);
+        Locale.setDefault(Locale.ROOT);
 
         MapGenerator generator = new MapGenerator();
 
@@ -169,7 +169,7 @@ public strictfp class MapGenerator {
         }
     }
 
-    public static Symmetry getValidSymmetry(int spawnCount, int numTeams, Random random) {
+    public void setValidTerrainSymmetry() {
         List<Symmetry> terrainSymmetries;
         switch (spawnCount) {
             case 2:
@@ -193,7 +193,7 @@ public strictfp class MapGenerator {
         if (random.nextFloat() < .75f) {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
-        return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
+        terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
     }
 
     private void parseMapName() throws Exception {
@@ -242,7 +242,7 @@ public strictfp class MapGenerator {
         parseOptions(optionBytes);
     }
 
-    public static SymmetrySettings initSymmetrySettings(Symmetry terrainSymmetry, int spawnCount, int numTeams, Random random) {
+    public void setSymmetrySettings() {
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
         List<Symmetry> spawns;
@@ -290,7 +290,43 @@ public strictfp class MapGenerator {
         }
         spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
         teamSymmetry = teams.get(random.nextInt(teams.size()));
-        return new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
+        symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
+    }
+
+    private void setMapStyle() {
+        mapParameters = MapParameters.builder()
+                .spawnCount(spawnCount)
+                .landDensity(landDensity)
+                .plateauDensity(plateauDensity)
+                .mountainDensity(mountainDensity)
+                .rampDensity(rampDensity)
+                .reclaimDensity(reclaimDensity)
+                .mexDensity(mexDensity)
+                .mapSize(mapSize)
+                .numTeams(numTeams)
+                .hydroCount(spawnCount)
+                .unexplored(false)
+                .symmetrySettings(symmetrySettings)
+                .biome(biome)
+                .build();
+        List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
+        possibleStyles.removeIf(style -> !style.matches(mapParameters));
+        if (possibleStyles.size() > 0) {
+            List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
+            List<Float> cumulativeWeights = new ArrayList<>();
+            float sum = 0;
+            for (float weight : weights) {
+                sum += weight;
+                cumulativeWeights.add(sum);
+            }
+            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
+            mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
+                    .reduce((first, second) -> first)
+                    .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
+                    .orElse(MapStyle.DEFAULT);
+        } else {
+            mapStyle = MapStyle.DEFAULT;
+        }
     }
 
     public void interpretArguments(String[] args) throws Exception {
@@ -328,41 +364,9 @@ public strictfp class MapGenerator {
         if (!validArgs) {
             return;
         }
-        symmetrySettings = initSymmetrySettings(terrainSymmetry, spawnCount, numTeams, random);
+        setSymmetrySettings();
         if (!styleSpecified || mapStyle == null) {
-            mapParameters = MapParameters.builder()
-                    .spawnCount(spawnCount)
-                    .landDensity(landDensity)
-                    .plateauDensity(plateauDensity)
-                    .mountainDensity(mountainDensity)
-                    .rampDensity(rampDensity)
-                    .reclaimDensity(reclaimDensity)
-                    .mexDensity(mexDensity)
-                    .mapSize(mapSize)
-                    .numTeams(numTeams)
-                    .hydroCount(spawnCount)
-                    .unexplored(false)
-                    .symmetrySettings(symmetrySettings)
-                    .biome(biome)
-                    .build();
-            List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
-            possibleStyles.removeIf(style -> !style.matches(mapParameters));
-            if (possibleStyles.size() > 0) {
-                List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
-                List<Float> cumulativeWeights = new ArrayList<>();
-                float sum = 0;
-                for (float weight : weights) {
-                    sum += weight;
-                    cumulativeWeights.add(sum);
-                }
-                float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
-                mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
-                        .reduce((first, second) -> first)
-                        .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
-                        .orElse(MapStyle.DEFAULT);
-            } else {
-                mapStyle = MapStyle.DEFAULT;
-            }
+            setMapStyle();
         } else {
             List<Integer> validSizes = mapStyle.getStyleConstraints().getMapSizes();
             if (!validSizes.contains(mapSize)) {
@@ -450,7 +454,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("style") && arguments.get("style") != null) {
-            mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase(Locale.ROOT));
+            mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase());
             styleSpecified = true;
         }
 
@@ -515,7 +519,7 @@ public strictfp class MapGenerator {
             }
 
             if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
-                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry").toUpperCase(Locale.ROOT));
+                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry").toUpperCase());
                 optionsUsed = true;
             }
 
@@ -539,7 +543,7 @@ public strictfp class MapGenerator {
         reclaimDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
         mexDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
         hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
-        terrainSymmetry = getValidSymmetry(spawnCount, numTeams, random);
+        setValidTerrainSymmetry();
         biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
     }
 
