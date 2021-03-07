@@ -3,7 +3,7 @@ package neroxis.util;
 public strictfp class ParseUtils {
 
     public static float discretePercentage(float percent, int numBins) {
-        return StrictMath.max(StrictMath.min(StrictMath.round(percent * numBins) / (float) numBins, 1), 0);
+        return binPercentage(percent, numBins) / (float) numBins;
     }
 
     public static int binPercentage(float percent, int numBins) {
