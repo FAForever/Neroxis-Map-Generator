@@ -36,7 +36,7 @@ public strictfp class DropPlateauStyleGenerator extends PathedStyleGenerator {
 
         if (!unexplored) {
             baseMask.setSize(mapSize + 1);
-            civReclaimMask.init(plateaus.copy().deflate(12));
+            civReclaimMask.init(plateaus.copy().deflate(16));
             civReclaimMask.fillCenter(32, false).fillEdge(32, false);
         } else {
             baseMask.setSize(mapSize + 1);

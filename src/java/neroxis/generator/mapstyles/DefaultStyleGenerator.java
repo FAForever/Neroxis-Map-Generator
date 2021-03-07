@@ -421,12 +421,12 @@ public strictfp class DefaultStyleGenerator {
 
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - plateauHeight * 3f / 4f, random.nextLong(), "paintedPlateaus");
+        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
 
-        heightmapPlateaus.add(plateaus, plateauHeight * 3f / 4f).clampMax(plateauHeight).smooth(1, plateaus);
+        heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).smooth(1, plateaus);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
