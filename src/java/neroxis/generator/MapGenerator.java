@@ -45,7 +45,7 @@ public strictfp class MapGenerator {
 
     //read from cli args
     private String pathToFolder = ".";
-    private String mapName = "";
+    private String mapName;
     private long seed;
     private Random random;
     private boolean tournamentStyle = false;
@@ -374,7 +374,9 @@ public strictfp class MapGenerator {
             }
             mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
         }
-        generateMapName();
+        if (mapName == null) {
+            generateMapName();
+        }
     }
 
     private void interpretArguments(Map<String, String> arguments) throws Exception {
@@ -453,21 +455,12 @@ public strictfp class MapGenerator {
             return;
         }
 
-        if (arguments.containsKey("style") && arguments.get("style") != null) {
-            mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase());
-            styleSpecified = true;
-        }
-
         tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind") || arguments.containsKey("unexplored");
         blind = arguments.containsKey("blind") || arguments.containsKey("unexplored");
         unexplored = arguments.containsKey("unexplored");
 
         if (tournamentStyle) {
             generationTime = Instant.now().getEpochSecond();
-        }
-
-        if (arguments.containsKey("seed") && arguments.get("seed") != null) {
-            seed = Long.parseLong(arguments.get("seed"));
         }
 
         if (arguments.containsKey("spawn-count") && arguments.get("spawn-count") != null) {
@@ -485,47 +478,59 @@ public strictfp class MapGenerator {
             }
         }
 
+        if (arguments.containsKey("seed") && arguments.get("seed") != null) {
+            seed = Long.parseLong(arguments.get("seed"));
+        }
+
         randomizeOptions();
 
-        if (!tournamentStyle && !styleSpecified) {
-            if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
-                landDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
-                optionsUsed = true;
+        if (!tournamentStyle) {
+
+            if (arguments.containsKey("style") && arguments.get("style") != null) {
+                mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase());
+                styleSpecified = true;
             }
 
-            if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
-                plateauDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
-                optionsUsed = true;
-            }
+            if (!styleSpecified) {
+                if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
+                    landDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
-                mountainDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
-                optionsUsed = true;
-            }
+                if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
+                    plateauDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
-                rampDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
-                optionsUsed = true;
-            }
+                if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
+                    mountainDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
-                reclaimDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
-                optionsUsed = true;
-            }
+                if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
+                    rampDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                mexDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
-                optionsUsed = true;
-            }
+                if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
+                    reclaimDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
-                terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry").toUpperCase());
-                optionsUsed = true;
-            }
+                if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
+                    mexDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
+                    optionsUsed = true;
+                }
 
-            if (arguments.containsKey("biome") && arguments.get("biome") != null) {
-                biome = Biomes.loadBiome(arguments.get("biome"));
-                optionsUsed = true;
+                if (arguments.containsKey("symmetry") && arguments.get("symmetry") != null) {
+                    terrainSymmetry = Symmetry.valueOf(arguments.get("symmetry").toUpperCase());
+                    optionsUsed = true;
+                }
+
+                if (arguments.containsKey("biome") && arguments.get("biome") != null) {
+                    biome = Biomes.loadBiome(arguments.get("biome"));
+                    optionsUsed = true;
+                }
             }
         }
     }

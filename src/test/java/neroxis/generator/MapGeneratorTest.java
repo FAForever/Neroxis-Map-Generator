@@ -68,6 +68,7 @@ public class MapGeneratorTest {
 
         instance.interpretArguments(args);
 
+        assertEquals(instance.getMapName(), numericMapName);
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getPathToFolder(), folderPath);
     }
@@ -112,6 +113,7 @@ public class MapGeneratorTest {
             String[] hashArray2 = Pipeline.hashArray.clone();
 
             assertArrayEquals(hashArray1, hashArray2);
+            assertEquals(map1.getName(), map2.getName());
             assertEquals(map1.toString(), map2.toString());
             assertEquals(map1.getSpawns(), map2.getSpawns());
             assertEquals(map1.getMexes(), map2.getMexes());
@@ -146,6 +148,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());
         assertEquals(map1.getHydros(), map2.getHydros());
@@ -166,8 +169,8 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestEqualityMapDensityKeyword() throws Exception {
-        instance.interpretArguments(new String[]{"--map-density", Float.toString(mexDensity)});
+    public void TestEqualityMexDensityKeyword() throws Exception {
+        instance.interpretArguments(new String[]{"--mex-density", Float.toString(mexDensity)});
         SCMap map1 = instance.generate();
 
         Pipeline.reset();
@@ -177,6 +180,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());
         assertEquals(map1.getHydros(), map2.getHydros());
@@ -212,6 +216,7 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
         assertEquals(map1.getSpawns(), map2.getSpawns());
@@ -249,6 +254,7 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
         assertEquals(map1.getSpawns(), map2.getSpawns());
@@ -286,6 +292,7 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
         assertEquals(map1.getSpawns(), map2.getSpawns());
@@ -323,6 +330,7 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
         assertEquals(map1.getSpawns(), map2.getSpawns());
@@ -359,6 +367,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
+        assertEquals(map1.getName(), map2.getName());
         assertEquals(map1.getSpawns(), map2.getSpawns());
         assertEquals(map1.getMexes(), map2.getMexes());
         assertEquals(map1.getHydros(), map2.getHydros());
