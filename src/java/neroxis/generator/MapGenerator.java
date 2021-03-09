@@ -249,7 +249,7 @@ public strictfp class MapGenerator {
                 .mapSize(mapSize)
                 .numTeams(numTeams)
                 .hydroCount(spawnCount)
-                .unexplored(false)
+                .unexplored(unexplored)
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
@@ -327,8 +327,8 @@ public strictfp class MapGenerator {
         if (arguments.containsKey("help")) {
             System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
-                    "--styles                 list styles\n" +
-                    "--biomes                 list biomes\n" +
+                    "--styles               list styles\n" +
+                    "--biomes               list biomes\n" +
                     "--folder-path arg      optional, set the target folder for the generated map\n" +
                     "--seed arg             optional, set the seed for the generated map\n" +
                     "--map-name arg         optional, set the map name for the generated map\n" +
@@ -342,8 +342,8 @@ public strictfp class MapGenerator {
                     "--reclaim-density arg  optional, set the reclaim density for the generated map\n" +
                     "--mex-density arg      optional, set the mex density for the generated map\n" +
                     "--mex-count arg        optional, set the mex count per player for the generated map\n" +
-                    "--map-size arg		    optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
-                    "--biome arg		    optional, set the biome\n" +
+                    "--map-size arg         optional, set the map size (5km = 256, 10km = 512, 20km = 1024)\n" +
+                    "--biome arg            optional, set the biome\n" +
                     "--tournament-style     optional, set map to tournament style which will remove the preview.png and add time of original generation to map\n" +
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +

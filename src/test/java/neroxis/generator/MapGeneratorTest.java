@@ -239,6 +239,36 @@ public class MapGeneratorTest {
     }
 
     @Test
+    public void TestInequalityTournamentStyle() throws Exception {
+        instance.interpretArguments(new String[]{"--tournament-style"});
+        SCMap map1 = instance.generate();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getSeed();
+
+        Pipeline.reset();
+        instance = new MapGenerator();
+
+        instance.interpretArguments(new String[]{"--tournament-style", "--seed", String.valueOf(seed1)});
+        SCMap map2 = instance.generate();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getSeed();
+
+        assertNotEquals(map1.getName(), map2.getName());
+        assertNotEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+        assertNotEquals(map1.getSpawns(), map2.getSpawns());
+        assertNotEquals(map1.getMexes(), map2.getMexes());
+        assertNotEquals(map1.getHydros(), map2.getHydros());
+        assertNotEquals(map1.getProps(), map2.getProps());
+        assertNotEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertFalse(compareImages(map1.getPreview(), map2.getPreview()));
+        assertFalse(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertFalse(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertFalse(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+    }
+
+    @Test
     public void TestEqualityBlind() throws Exception {
         instance.interpretArguments(new String[]{"--blind"});
         SCMap map1 = instance.generate();
