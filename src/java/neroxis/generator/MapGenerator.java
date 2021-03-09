@@ -68,66 +68,9 @@ public strictfp class MapGenerator {
     private Biome biome;
 
     private SCMap map;
-    private float waterHeight;
     private boolean optionsUsed = false;
 
-    //masks used in generation
-    private ConcurrentBinaryMask land;
-    private ConcurrentBinaryMask mountains;
-    private ConcurrentBinaryMask hills;
-    private ConcurrentBinaryMask valleys;
-    private ConcurrentBinaryMask plateaus;
-    private ConcurrentBinaryMask ramps;
-    private ConcurrentBinaryMask connections;
-    private ConcurrentBinaryMask impassable;
-    private ConcurrentBinaryMask unbuildable;
-    private ConcurrentBinaryMask notFlat;
-    private ConcurrentBinaryMask passable;
-    private ConcurrentBinaryMask passableLand;
-    private ConcurrentBinaryMask passableWater;
-    private ConcurrentFloatMask slope;
-    private ConcurrentFloatMask heightmapBase;
-    private ConcurrentFloatMask accentGroundTexture;
-    private ConcurrentFloatMask waterBeachTexture;
-    private ConcurrentFloatMask accentSlopesTexture;
-    private ConcurrentFloatMask accentPlateauTexture;
-    private ConcurrentFloatMask slopesTexture;
-    private ConcurrentFloatMask steepHillsTexture;
-    private ConcurrentFloatMask rockTexture;
-    private ConcurrentFloatMask accentRockTexture;
-    private ConcurrentBinaryMask fieldDecal;
-    private ConcurrentBinaryMask slopeDecal;
-    private ConcurrentBinaryMask mountainDecal;
-    private ConcurrentBinaryMask allWreckMask;
-    private ConcurrentBinaryMask spawnLandMask;
-    private ConcurrentBinaryMask spawnPlateauMask;
-    private ConcurrentBinaryMask resourceMask;
-    private ConcurrentBinaryMask waterResourceMask;
-    private ConcurrentBinaryMask t1LandWreckMask;
-    private ConcurrentBinaryMask t2LandWreckMask;
-    private ConcurrentBinaryMask t3LandWreckMask;
-    private ConcurrentBinaryMask t2NavyWreckMask;
-    private ConcurrentBinaryMask navyFactoryWreckMask;
-    private ConcurrentBinaryMask treeMask;
-    private ConcurrentBinaryMask cliffRockMask;
-    private ConcurrentBinaryMask fieldStoneMask;
-    private ConcurrentBinaryMask largeRockFieldMask;
-    private ConcurrentBinaryMask smallRockFieldMask;
-    private ConcurrentBinaryMask baseMask;
-    private ConcurrentBinaryMask civReclaimMask;
-    private ConcurrentBinaryMask allBaseMask;
-    private BinaryMask noProps;
-    private BinaryMask noWrecks;
-    private BinaryMask noBases;
-    private BinaryMask noCivs;
-
     private SymmetrySettings symmetrySettings;
-    private boolean hasCivilians;
-    private boolean enemyCivilians;
-    private boolean landPathed;
-    private int mountainBrushSize = 64;
-    private int plateauBrushSize = 32;
-    private int smallFeatureBrushSize = 24;
     private boolean validArgs;
     private boolean generationComplete;
     private boolean styleSpecified;
@@ -144,6 +87,7 @@ public strictfp class MapGenerator {
         MapGenerator generator = new MapGenerator();
 
         while (count < generator.numToGen) {
+            generator.mapName = null;
             generator.seed = new Random().nextLong();
             generator.interpretArguments(args);
             if (!generator.validArgs) {
