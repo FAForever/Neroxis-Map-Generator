@@ -1,5 +1,7 @@
 package neroxis.generator;
 
+import neroxis.map.Army;
+import neroxis.map.Group;
 import neroxis.map.SCMap;
 import neroxis.util.FileUtils;
 import neroxis.util.ParseUtils;
@@ -415,6 +417,22 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
         assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    @Test
+    public void TestUnexploredNoUnits() throws Exception {
+        for (int i = 0; i < 5; ++i) {
+            Pipeline.reset();
+            instance = new MapGenerator();
+            instance.interpretArguments(new String[]{"--unexplored"});
+            SCMap map = instance.generate();
+
+            for (Army army : map.getArmies()) {
+                for (Group group : army.getGroups()) {
+                    assertEquals(0, group.getUnits().size());
+                }
+            }
+        }
     }
 
     @After

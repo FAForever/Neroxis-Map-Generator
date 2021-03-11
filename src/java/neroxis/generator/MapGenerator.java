@@ -134,7 +134,7 @@ public strictfp class MapGenerator {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
         }
-        if (random.nextFloat() < .75f) {
+        if (numTeams == 2 && random.nextFloat() < .75f) {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
         terrainSymmetry = terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
@@ -417,9 +417,6 @@ public strictfp class MapGenerator {
 
         if (arguments.containsKey("num-teams") && arguments.get("num-teams") != null) {
             numTeams = Integer.parseInt(arguments.get("num-teams"));
-            if (numTeams != 2) {
-                optionsUsed = true;
-            }
         }
 
         if (arguments.containsKey("seed") && arguments.get("seed") != null) {
@@ -561,7 +558,8 @@ public strictfp class MapGenerator {
                     (byte) mapStyle.ordinal()};
         } else {
             optionArray = new byte[]{(byte) spawnCount,
-                    (byte) (mapSize / 64)};
+                    (byte) (mapSize / 64),
+                    (byte) numTeams};
         }
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
