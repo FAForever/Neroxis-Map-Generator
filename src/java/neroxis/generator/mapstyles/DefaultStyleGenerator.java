@@ -68,6 +68,13 @@ public strictfp class DefaultStyleGenerator {
     protected final ConcurrentBinaryMask civReclaimMask;
     protected final ConcurrentBinaryMask allBaseMask;
     protected final ConcurrentFloatMask slope;
+    protected final ConcurrentFloatMask heightmapValleys;
+    protected final ConcurrentFloatMask heightmapHills;
+    protected final ConcurrentFloatMask heightmapPlateaus;
+    protected final ConcurrentFloatMask heightmapMountains;
+    protected final ConcurrentFloatMask heightmapLand;
+    protected final ConcurrentFloatMask heightmapOcean;
+    protected final ConcurrentFloatMask noise;
     protected final ConcurrentFloatMask heightmapBase;
     protected final ConcurrentBinaryMask spawnLandMask;
     protected final ConcurrentBinaryMask spawnPlateauMask;
@@ -202,6 +209,13 @@ public strictfp class DefaultStyleGenerator {
         rockTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "rockTexture");
         accentRockTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture");
         slope = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "slope");
+        heightmapValleys = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys");
+        heightmapHills = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills");
+        heightmapPlateaus = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
+        heightmapMountains = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains");
+        heightmapLand = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
+        heightmapOcean = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
+        noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
         heightmapBase = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapBase");
         noProps = new BinaryMask(1, random.nextLong(), symmetrySettings);
         noWrecks = new BinaryMask(1, random.nextLong(), symmetrySettings);
@@ -290,12 +304,12 @@ public strictfp class DefaultStyleGenerator {
     protected void teamConnectionsInit() {
         float maxStepSize = mapSize / 128f;
         int minMiddlePoints = 0;
-        int maxMiddlePoints = 1;
+        int maxMiddlePoints = 2;
         int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 2 + 1);
         int numTeammateConnections = 1;
         connections.setSize(mapSize + 1);
 
-        connectTeams(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
         connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 
@@ -391,26 +405,11 @@ public strictfp class DefaultStyleGenerator {
                 .inflate(24);
     }
 
-    protected void setupHeightmapPipeline() {
-        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-        int numBrushes = Brushes.GENERATOR_BRUSHES.size();
-        float waterHeight = biome.getWaterSettings().getElevation();
-        String brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush3 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
-        String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+    protected void setupMountainHeightmapPipeline() {
+        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 
-        heightmapBase.setSize(mapSize + 1);
-        ConcurrentFloatMask heightmapValleys = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapValleys");
-        ConcurrentFloatMask heightmapHills = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapHills");
-        ConcurrentFloatMask heightmapPlateaus = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
-        ConcurrentFloatMask heightmapMountains = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapMountains");
-        ConcurrentFloatMask heightmapLand = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapLand");
-        ConcurrentFloatMask heightmapOcean = new ConcurrentFloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "heightmapOcean");
-        ConcurrentFloatMask noise = new ConcurrentFloatMask(mapSize / 128, random.nextLong(), symmetrySettings, "noise");
-
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush3, mountainBrushSize, mountainBrushDensity, mountainBrushIntensity, false);
+        heightmapMountains.setSize(mapSize + 1);
+        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity, mountainBrushIntensity, false);
 
         ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
 
@@ -418,8 +417,13 @@ public strictfp class DefaultStyleGenerator {
         land.combine(paintedMountains);
 
         heightmapMountains.smooth(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
+    }
 
-        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush1, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
+    protected void setupPlateauHeightmapPipeline() {
+        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+
+        heightmapPlateaus.setSize(mapSize + 1);
+        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
 
         ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
 
@@ -427,8 +431,16 @@ public strictfp class DefaultStyleGenerator {
         plateaus.replace(paintedPlateaus);
 
         heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).smooth(1, plateaus);
-
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+    }
+
+    protected void setupSmallFeatureHeightmapPipeline() {
+        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        String brushValley = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+        String brushHill = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+
+        heightmapValleys.setSize(mapSize + 1);
+        heightmapHills.setSize(mapSize + 1);
 
         hills.setSize(mapSize / 4);
         valleys.setSize(mapSize / 4);
@@ -441,32 +453,12 @@ public strictfp class DefaultStyleGenerator {
         valleys.intersect(plateaus.copy().deflate(8)).minus(spawnPlateauMask);
 
         valleyBrushIntensity = -0.35f;
-        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brush2, smallFeatureBrushSize, valleyBrushDensity, valleyBrushIntensity, false)
+        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brushValley, smallFeatureBrushSize, valleyBrushDensity, valleyBrushIntensity, false)
                 .clampMin(valleyFloor);
-        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(4).acid(.01f, 4)), brush4, smallFeatureBrushSize, hillBrushDensity, hillBrushIntensity, false);
+        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(4).acid(.01f, 4)), brushHill, smallFeatureBrushSize, hillBrushDensity, hillBrushIntensity, false);
+    }
 
-        initRamps();
-
-        ConcurrentBinaryMask water = land.copy().invert();
-        ConcurrentBinaryMask deepWater = water.copy().deflate(32);
-
-        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).minus(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
-                .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0).smooth(4, deepWater).smooth(1);
-
-        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
-                .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
-                .smooth(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
-
-        heightmapBase.add(heightmapLand);
-
-        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64).addWhiteNoise(plateauHeight / 2).resample(mapSize + 1).addWhiteNoise(1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
-                .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
-
-        heightmapBase.add(waterHeight).add(noise).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
-
+    protected void setupPassablePipeline() {
         ConcurrentBinaryMask paintedLand = new ConcurrentBinaryMask(heightmapBase, waterHeight, random.nextLong(), "paintedLand");
 
         land.replace(paintedLand);
@@ -477,7 +469,7 @@ public strictfp class DefaultStyleGenerator {
         unbuildable.init(slope, .1f);
         notFlat.init(slope, .05f);
 
-        impassable.inflate(2).combine(paintedMountains);
+        impassable.inflate(4);
 
         passable.init(impassable).invert();
         passableLand.init(land);
@@ -486,6 +478,44 @@ public strictfp class DefaultStyleGenerator {
         passable.fillEdge(8, false);
         passableLand.intersect(passable);
         passableWater.deflate(16).fillEdge(8, false);
+    }
+
+    protected void setupHeightmapPipeline() {
+
+        int numBrushes = Brushes.GENERATOR_BRUSHES.size();
+        float waterHeight = biome.getWaterSettings().getElevation();
+
+        String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+
+        setupMountainHeightmapPipeline();
+        setupPlateauHeightmapPipeline();
+        setupSmallFeatureHeightmapPipeline();
+        initRamps();
+
+        ConcurrentBinaryMask water = land.copy().invert();
+        ConcurrentBinaryMask deepWater = water.copy().deflate(32);
+
+        heightmapBase.setSize(mapSize + 1);
+        heightmapLand.setSize(mapSize + 1);
+        heightmapOcean.setSize(mapSize + 1);
+        noise.setSize(mapSize / 128);
+
+        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).minus(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
+                .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0).smooth(4, deepWater).smooth(1);
+
+        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
+                .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
+                .smooth(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
+
+        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64).addWhiteNoise(plateauHeight / 2).resample(mapSize + 1).addWhiteNoise(1)
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
+                .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
+
+        heightmapBase.add(heightmapLand).add(waterHeight).add(noise).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
+
+        setupPassablePipeline();
     }
 
     protected void setupCivilianPipeline() {
@@ -553,6 +583,26 @@ public strictfp class DefaultStyleGenerator {
     }
 
     protected void connectTeams(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
+        if (numTeams == 0) {
+            return;
+        }
+        List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
+        for (int i = 0; i < numConnections; ++i) {
+            Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
+            int numMiddlePoints;
+            if (maxMiddlePoints > minMiddlePoints) {
+                numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
+            } else {
+                numMiddlePoints = maxMiddlePoints;
+            }
+            Vector2f start = new Vector2f(startSpawn.getPosition());
+            Vector2f end = new Vector2f(start);
+            float maxMiddleDistance = start.getDistance(end);
+            maskToUse.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+        }
+    }
+
+    protected void connectTeamsAroundCenter(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
         if (numTeams == 0) {
             return;
         }

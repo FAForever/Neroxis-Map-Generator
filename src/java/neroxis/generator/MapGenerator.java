@@ -213,11 +213,11 @@ public strictfp class MapGenerator {
                 teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
                         Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
                         Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16,
-                        Symmetry.XZ, Symmetry.ZX, Symmetry.QUAD, Symmetry.DIAG));
+                        Symmetry.XZ, Symmetry.ZX, Symmetry.X, Symmetry.Z, Symmetry.QUAD, Symmetry.DIAG));
                 break;
             case QUAD:
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.X, Symmetry.Z, Symmetry.QUAD));
                 break;
             case DIAG:
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));

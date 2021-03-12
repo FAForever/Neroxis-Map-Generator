@@ -813,10 +813,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return areaHash;
     }
 
-    public BinaryMask getAreasWithinEdgeDistance(int edgeDistance) {
-        return copy().inflate(edgeDistance).minus(copy().deflate(edgeDistance));
-    }
-
     @Override
     protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
@@ -970,53 +966,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             return null;
         int cell = random.nextInt(coordinates.size());
         return coordinates.get(cell);
-    }
-
-    public BinaryMask connectLocationToNearItsSymLocation(Vector2f start, String brushName, int size, int usesBatchSize,
-                                                          float minValue, float maxValue, int maxDistanceBetweenBrushUse, int distanceThreshold) {
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
-                .setSize(size)).convertToBinaryMask(minValue, maxValue);
-        List<Vector2f> symLocationList = getSymmetryPoints(start, SymmetryType.SPAWN);
-        Vector2f location = new Vector2f(start);
-        Vector2f end = symLocationList.get(0);
-        int maskSize = getSize();
-        while (location.getDistance(end) > distanceThreshold) {
-            useBrushRandomly(usesBatchSize, maxDistanceBetweenBrushUse, brush, location, maskSize);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    private void useBrushRandomly(int batchSize, int maxDistanceBetweenBrushUse, BinaryMask brush, Vector2f location, int maskSize) {
-        for (int i = 0; i < batchSize; i++) {
-            int dx = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-            int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxDistanceBetweenBrushUse + 1);
-            location.add(dx, dy).clampMax(maskSize, maskSize).clampMin(0, 0);
-            combineWithOffset(brush, location, true, false);
-        }
-    }
-
-    public BinaryMask connectLocationToLocationFromList(Vector2f start, List<Vector2f> targetLocations, String brushName, int size, int batchSize,
-                                                        float minValue, float maxValue, int maxDistanceBetweenBrushUse, int distanceThreshold) {
-        BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
-                .setSize(size)).convertToBinaryMask(minValue, maxValue);
-        int maskSize = getSize();
-        Vector2f location = new Vector2f(start);
-        while (targetLocations.stream().noneMatch(target -> location.getDistance(target) < distanceThreshold)) {
-            useBrushRandomly(batchSize, maxDistanceBetweenBrushUse, brush, location, maskSize);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
-    }
-
-    public BinaryMask connectToCenterWithBrush(Vector2f location, String brushName, int size, int usesBatchSize,
-                                               float minIntensity, float maxIntensity, int maxDistanceBetweenBrushstroke) {
-        int halfSize = getSize() / 2;
-        while (!getValueAt(halfSize, halfSize)) {
-            randomWalkWithBrush(location, brushName, size, usesBatchSize, minIntensity, maxIntensity, maxDistanceBetweenBrushstroke);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
     }
 
     // --------------------------------------------------

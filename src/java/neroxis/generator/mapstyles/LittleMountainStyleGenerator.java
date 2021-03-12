@@ -17,7 +17,7 @@ public strictfp class LittleMountainStyleGenerator extends PathedPlateauStyleGen
         float normalizedMountainDensity = MapStyle.LITTLE_MOUNTAIN.getStyleConstraints().getMountainDensityRange().normalize(mountainDensity);
         mountains.setSize(mapSize / 4);
 
-        mountains.randomWalk((int) (normalizedMountainDensity * 200 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 20), mapSize / 32);
+        mountains.randomWalk((int) (normalizedMountainDensity * 150 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 20), mapSize / 64);
 
         mountains.setSize(mapSize + 1);
     }

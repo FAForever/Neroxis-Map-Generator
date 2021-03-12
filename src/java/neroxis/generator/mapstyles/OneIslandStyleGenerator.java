@@ -16,7 +16,7 @@ public strictfp class OneIslandStyleGenerator extends PathedStyleGenerator {
     }
 
     protected void landInit() {
-        float normalizedLandDensity = MapStyle.CENTER_LAKE.getStyleConstraints().getLandDensityRange().normalize(landDensity);
+        float normalizedLandDensity = MapStyle.ONE_ISLAND.getStyleConstraints().getLandDensityRange().normalize(landDensity);
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
@@ -29,7 +29,7 @@ public strictfp class OneIslandStyleGenerator extends PathedStyleGenerator {
         pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
                 .inflate(mapSize / 64f).smooth(12, .125f));
-        connectTeams(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
         connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
         land.grow(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);

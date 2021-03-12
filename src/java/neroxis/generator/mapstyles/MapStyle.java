@@ -17,14 +17,15 @@ import java.util.Random;
 @Getter
 public strictfp enum MapStyle {
     DEFAULT(DefaultStyleGenerator.class, StyleConstraints.builder().build(), 1),
-    ONE_ISLAND(OneIslandStyleGenerator.class, StyleConstraints.builder().landDensity(0f, .75f).mapSizes(512, 1024).build(), 2),
+    ONE_ISLAND(OneIslandStyleGenerator.class, StyleConstraints.builder().landDensity(0f, .75f).mapSizes(512, 1024).build(), 1),
     BIG_ISLANDS(BigIslandsStyleGenerator.class, StyleConstraints.builder().landDensity(0f, .75f).plateauDensity(0, .5f).mapSizes(1024).build(), 2),
     SMALL_ISLANDS(SmallIslandsStyleGenerator.class, StyleConstraints.builder().landDensity(0f, .5f).plateauDensity(0, .5f).mexDensity(.5f, 1).mapSizes(1024).build(), 2),
     CENTER_LAKE(CenterLakeStyleGenerator.class, StyleConstraints.builder().landDensity(0f, .5f).plateauDensity(0, .5f).mexDensity(.25f, 1).mapSizes(512, 1024).build(), 1),
     VALLEY(ValleyStyleGenerator.class, StyleConstraints.builder().landDensity(.75f, 1f).mountainDensity(.5f, 1).mapSizes(512, 1024).build(), 2),
-    DROP_PLATEAU(DropPlateauStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).plateauDensity(.5f, 1).mexDensity(.25f, 1).build(), 2),
+    DROP_PLATEAU(DropPlateauStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).plateauDensity(.5f, 1).mexDensity(.25f, 1).build(), 1),
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).mountainDensity(.25f, 1).plateauDensity(0, .5f).build(), 2),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).mountainDensity(.5f, 1).plateauDensity(0, .5f).mapSizes(256, 512).build(), 2);
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, StyleConstraints.builder().landDensity(.75f, 1f).mountainDensity(.5f, 1).plateauDensity(0, .5f).mexDensity(.375f, 1).mapSizes(256, 512).build(), 2),
+    LAND_BRIDGE(LandBridgeStyleGenerator.class, StyleConstraints.builder().landDensity(.25f, .75f).mexDensity(.25f, .75f).mapSizes(1024).build(), 1);
 
     private final Class<? extends DefaultStyleGenerator> generatorClass;
     private final StyleConstraints styleConstraints;
@@ -128,7 +129,7 @@ public strictfp enum MapStyle {
             }
 
             public StyleConstraintsBuilder mexDensity(float min, float max) {
-                landDensityRange = Range.of(min, max);
+                mexDensityRange = Range.of(min, max);
                 return this;
             }
 

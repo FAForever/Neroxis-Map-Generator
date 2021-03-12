@@ -14,16 +14,29 @@ public strictfp class DropPlateauStyleGenerator extends PathedStyleGenerator {
         spawnSize = 32;
     }
 
+    protected void teamConnectionsInit() {
+        float maxStepSize = mapSize / 128f;
+        int minMiddlePoints = 2;
+        int maxMiddlePoints = 4;
+        int numTeamConnections = 2;
+        int numTeammateConnections = 1;
+
+        connections.setSize(mapSize + 1);
+
+        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
+    }
+
     protected void plateausInit() {
-        float normalizedPlateauDensity = MapStyle.LITTLE_MOUNTAIN.getStyleConstraints().getPlateauDensityRange().normalize(mountainDensity);
+        float normalizedPlateauDensity = MapStyle.DROP_PLATEAU.getStyleConstraints().getPlateauDensityRange().normalize(mountainDensity);
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 
-        plateaus.randomWalk((int) (normalizedPlateauDensity * 10 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 2), mapSize * 4);
+        plateaus.randomWalk((int) (normalizedPlateauDensity * 4 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 4), mapSize * 4);
         plateaus.grow(.5f, SymmetryType.SPAWN, 4);
 
         plateaus.setSize(mapSize + 1);
-        plateaus.minus(connections.copy().inflate(plateauBrushSize / 2f).smooth(12, .125f));
+        plateaus.minus(connections.copy().inflate(plateauBrushSize * 5f / 8f).smooth(12, .125f));
     }
 
     protected void initRamps() {
@@ -36,7 +49,7 @@ public strictfp class DropPlateauStyleGenerator extends PathedStyleGenerator {
 
         if (!unexplored) {
             baseMask.setSize(mapSize + 1);
-            civReclaimMask.init(plateaus.copy().deflate(16));
+            civReclaimMask.init(plateaus.copy().deflate(20));
             civReclaimMask.fillCenter(32, false).fillEdge(32, false);
         } else {
             baseMask.setSize(mapSize + 1);

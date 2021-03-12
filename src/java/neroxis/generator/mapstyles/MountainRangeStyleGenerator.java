@@ -14,10 +14,11 @@ public strictfp class MountainRangeStyleGenerator extends PathedPlateauStyleGene
     }
 
     protected void mountainInit() {
-        float normalizedMountainDensity = MapStyle.LITTLE_MOUNTAIN.getStyleConstraints().getMountainDensityRange().normalize(mountainDensity);
-        mountains.setSize(mapSize / 4);
+        float normalizedMountainDensity = MapStyle.MOUNTAIN_RANGE.getStyleConstraints().getMountainDensityRange().normalize(mountainDensity);
+        mountains.setSize(mapSize / 2);
 
-        mountains.progressiveWalk((int) (normalizedMountainDensity * 25 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 4, mapSize / 4);
+        mountains.progressiveWalk((int) (normalizedMountainDensity * 2 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 6, mapSize / 4);
+        mountains.inflate(2);
 
         mountains.setSize(mapSize + 1);
     }

@@ -5,7 +5,6 @@ import neroxis.util.Pipeline;
 import neroxis.util.Vector2f;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -296,25 +295,6 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask widenGaps(int minDistance) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.widenGaps(minDistance)
-        );
-    }
-
-    public ConcurrentBinaryMask connectLocationToNearItsSymLocation(Vector2f startingLocation, String brushName, int size, int numberOfUses, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters, int minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToNearItsSymLocation(startingLocation, brushName, size, numberOfUses, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters, minimumDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-    public ConcurrentBinaryMask connectLocationToLocationFromList(Vector2f startLocation, ArrayList<Vector2f> targetLocations, String brushName, int size, int usesBatchSize, float minValue, float maxValue, int maxDistanceBetweenBrushUse, int minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectLocationToLocationFromList(startLocation, targetLocations, brushName, size, usesBatchSize,
-                        minValue, maxValue, maxDistanceBetweenBrushUse, minDistanceFromBrushCenterToSymLocationRequiredToCompleteFunction)
-        );
-    }
-
-    public ConcurrentBinaryMask connectToCenterWithBrush(Vector2f location, String brushName, int size, int numberOfUsesBatchSize, float minIntensityForTrue, float maxIntensityForTrue, int maxDistanceBetweenBrushstrokeCenters) {
-        return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.connectToCenterWithBrush(location, brushName, size, numberOfUsesBatchSize, minIntensityForTrue, maxIntensityForTrue, maxDistanceBetweenBrushstrokeCenters)
         );
     }
 
