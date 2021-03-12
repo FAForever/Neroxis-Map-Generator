@@ -25,7 +25,7 @@ public strictfp enum MapStyle {
     DROP_PLATEAU(DropPlateauStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).plateauDensity(.5f, 1).mexDensity(.25f, 1).build(), 1),
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, StyleConstraints.builder().landDensity(.5f, 1f).mountainDensity(.25f, 1).plateauDensity(0, .5f).build(), 2),
     MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, StyleConstraints.builder().landDensity(.75f, 1f).mountainDensity(.5f, 1).plateauDensity(0, .5f).mexDensity(.375f, 1).mapSizes(256, 512).build(), 2),
-    LAND_BRIDGE(LandBridgeStyleGenerator.class, StyleConstraints.builder().landDensity(.25f, .75f).mexDensity(.25f, .75f).mapSizes(1024).build(), 1);
+    LAND_BRIDGE(LandBridgeStyleGenerator.class, StyleConstraints.builder().landDensity(.25f, .75f).mexDensity(.5f, 1f).mapSizes(1024).build(), 1);
 
     private final Class<? extends DefaultStyleGenerator> generatorClass;
     private final StyleConstraints styleConstraints;

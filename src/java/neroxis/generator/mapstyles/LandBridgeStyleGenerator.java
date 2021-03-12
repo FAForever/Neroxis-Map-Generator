@@ -22,7 +22,7 @@ public strictfp class LandBridgeStyleGenerator extends PathedStyleGenerator {
         connectTeammates(land, 8, 2, maxStepSize);
         connectTeams(land, 0, 2, 1, maxStepSize);
         map.getSpawns().forEach(spawn -> {
-            pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, 196, (float) (StrictMath.PI / 2f));
+            pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f));
         });
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
