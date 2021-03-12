@@ -262,7 +262,6 @@ public class MapGeneratorTest {
         assertNotEquals(map1.getMexes(), map2.getMexes());
         assertNotEquals(map1.getHydros(), map2.getHydros());
         assertNotEquals(map1.getProps(), map2.getProps());
-        assertNotEquals(map1.getBiome(), map2.getBiome());
         assertEquals(map1.getSize(), map2.getSize());
         assertFalse(compareImages(map1.getPreview(), map2.getPreview()));
         assertFalse(compareImages(map1.getHeightmap(), map2.getHeightmap()));
