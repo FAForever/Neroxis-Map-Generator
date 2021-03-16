@@ -9,6 +9,7 @@ import neroxis.util.ImageUtils;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -83,12 +84,12 @@ public strictfp class SCMap {
     private BufferedImage waterDepthBiasMask;
     private BufferedImage terrainType;
 
-    private int cartographicContourInterval = 0;
-    private int cartographicDeepWaterColor = 0;
-    private int cartographicMapContourColor = 0;
-    private int cartographicMapShoreColor = 0;
-    private int cartographicMapLandStartColor = 0;
-    private int cartographicMapLandEndColor = 0;
+    private int cartographicContourInterval = 1000;
+    private int cartographicDeepWaterColor = new Color(0, 34, 255).getRGB();
+    private int cartographicMapContourColor = new Color(255, 0, 0).getRGB();
+    private int cartographicMapShoreColor = new Color(161, 192, 255).getRGB();
+    private int cartographicMapLandStartColor = new Color(255, 255, 255).getRGB();
+    private int cartographicMapLandEndColor = new Color(0, 0, 0).getRGB();
 
     public SCMap(int size, int spawnCount, int mexCount, int hydroCount, Biome biome) {
         this.size = size;
