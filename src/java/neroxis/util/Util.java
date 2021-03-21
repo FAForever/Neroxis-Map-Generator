@@ -1,8 +1,21 @@
 package neroxis.util;
 
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public strictfp class Util {
+
+    public static String getStackTraceLineInOneOfClasses(List<Class<?>> classes) {
+        List<String> classNames = classes.stream().map(Class::getCanonicalName).collect(Collectors.toList());
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (classNames.contains(ste.getClassName())) {
+                return ste.getFileName() + ":" + ste.getLineNumber();
+            }
+        }
+        return "not found";
+    }
 
     public static String getStackTraceLineInClass(Class<?> clazz) {
         return getStackTraceLineInClass(clazz.getCanonicalName());

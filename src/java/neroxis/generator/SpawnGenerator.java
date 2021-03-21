@@ -19,6 +19,7 @@ public strictfp class SpawnGenerator {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BinaryMask spawnMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
+        spawnMask.startVisualDebugger("sp");
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         spawnMask.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
@@ -64,10 +65,14 @@ public strictfp class SpawnGenerator {
             }
 
             addSpawn(location, symmetryPoints);
-            BinaryMask nextSpawn = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-            nextSpawn.fillCircle(location, teammateSeparation * 2, true).intersect(spawnMask);
-            location = nextSpawn.getRandomPosition();
-            if (location == null) {
+            if (spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() != 1) {
+                BinaryMask nextSpawn = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+                nextSpawn.fillCircle(location, teammateSeparation * 2, true).intersect(spawnMask);
+                location = nextSpawn.getRandomPosition();
+                if (location == null) {
+                    location = spawnMask.getRandomPosition();
+                }
+            } else {
                 location = spawnMask.getRandomPosition();
             }
         }

@@ -2,6 +2,7 @@ package neroxis.util;
 
 import lombok.Getter;
 import neroxis.generator.MapGenerator;
+import neroxis.generator.mapstyles.MapStyle;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.ConcurrentFloatMask;
 import neroxis.map.ConcurrentMask;
@@ -52,7 +53,7 @@ public strictfp class Pipeline {
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        final String callingLine = Util.getStackTraceLineInClass(MapGenerator.class);
+        final String callingLine = Util.getStackTraceLineInOneOfClasses(Arrays.stream(MapStyle.values()).map(MapStyle::getGeneratorClass).collect(Collectors.toList()));
         final String callingMethod = Util.getStackTraceMethod(executingMask.getClass());
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);

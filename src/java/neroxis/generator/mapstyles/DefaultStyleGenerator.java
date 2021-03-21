@@ -155,7 +155,7 @@ public strictfp class DefaultStyleGenerator {
 
         map = new SCMap(mapSize, spawnCount, getMexCount() * spawnCount, hydroCount, biome);
 
-        spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
+        spawnSeparation = numTeams > 0 ? random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f : (float) mapSize / spawnCount;
         teamSeparation = StrictMath.min(map.getSize() * 3 / 8, 256);
         spawnGenerator = new SpawnGenerator(map, random.nextLong());
         mexGenerator = new MexGenerator(map, random.nextLong());
@@ -627,9 +627,6 @@ public strictfp class DefaultStyleGenerator {
     }
 
     protected void connectTeammates(ConcurrentBinaryMask maskToUse, int maxMiddlePoints, int numConnections, float maxStepSize) {
-        if (numTeams == 0) {
-            return;
-        }
         List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
         if (startTeamSpawns.size() > 1) {
             startTeamSpawns.forEach(startSpawn -> {
