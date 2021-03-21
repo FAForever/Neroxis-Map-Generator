@@ -499,10 +499,13 @@ public strictfp class MapGenerator {
             mapSize = (int) optionBytes[1] * 64;
         }
 
+        if (optionBytes.length > 2) {
+            numTeams = optionBytes[2];
+        }
+
         randomizeOptions();
 
         if (optionBytes.length == 12) {
-            numTeams = optionBytes[2];
             biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
             landDensity = ParseUtils.normalizeBin(optionBytes[4], numBins);
             plateauDensity = ParseUtils.normalizeBin(optionBytes[5], numBins);
@@ -513,7 +516,6 @@ public strictfp class MapGenerator {
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
-            numTeams = optionBytes[2];
             biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
             mapStyle = MapStyle.values()[optionBytes[4]];
             styleSpecified = true;
