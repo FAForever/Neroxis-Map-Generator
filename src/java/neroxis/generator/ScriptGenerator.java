@@ -27,7 +27,8 @@ public strictfp class ScriptGenerator {
     private static String generateUnexploredScript(SCMap map) {
         int mapSize = map.getSize();
         int decalSize = mapSize * mapSize / 8192;
-        double decalDiagonal = StrictMath.sqrt(2 * decalSize / 2f * decalSize / 2f);
+        int checkDecalRange = decalSize / 2 + 24;
+        int checkResourceRange = 32;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("local mexLocations = {");
         for (Marker mex : map.getMexes()) {
@@ -53,8 +54,8 @@ public strictfp class ScriptGenerator {
                 "local decals = {}\n");
         stringBuilder.append(String.format("local decalSpacing = %d;\n", decalSize));
         stringBuilder.append(String.format("local decalSize = %d;\n", decalSize));
-        stringBuilder.append(String.format("local checkDecalRange = %d;\n", (int) (decalDiagonal * 1.75f)));
-        stringBuilder.append(String.format("local checkRange = %d;\n", (int) (decalDiagonal * 1.5f)));
+        stringBuilder.append(String.format("local checkDecalRange = %d;\n", checkDecalRange));
+        stringBuilder.append(String.format("local checkRange = %d;\n", checkResourceRange));
         stringBuilder.append("\n" +
                 "function OnPopulate()\n" +
                 "\t\n" +
