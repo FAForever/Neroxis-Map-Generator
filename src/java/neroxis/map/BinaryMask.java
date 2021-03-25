@@ -284,7 +284,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask inflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
         apply((x, y) -> {
-            if (isEdge(x, y) && getValueAt(x, y)) {
+            if (getValueAt(x, y) && isEdge(x, y)) {
                 markInRadius(radius, maskCopy, x, y, true);
             }
         });
@@ -296,7 +296,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask deflate(float radius) {
         Boolean[][] maskCopy = getEmptyMask(getSize());
         apply((x, y) -> {
-            if (isEdge(x, y) && !getValueAt(x, y)) {
+            if (!getValueAt(x, y) && isEdge(x, y)) {
                 markInRadius(radius, maskCopy, x, y, true);
             }
         });
@@ -310,7 +310,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         for (int x2 = StrictMath.round(x - radius); x2 < StrictMath.round(x + radius + 1); x2++) {
             for (int y2 = StrictMath.round(y - radius); y2 < StrictMath.round(y + radius + 1); y2++) {
-                if (inBounds(x2, y2) && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                if (inBounds(x2, y2) && maskCopy[x2][y2] != value && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     maskCopy[x2][y2] = value;
                 }
             }

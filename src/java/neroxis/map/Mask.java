@@ -130,9 +130,9 @@ public strictfp abstract class Mask<T> {
 
     public ArrayList<Vector2f> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        ArrayList<Vector2f> symmetryPoints = new ArrayList<>(symmetry.getNumSymPoints() - 1);
-        int size = getSize();
         int numSymPoints = symmetry.getNumSymPoints();
+        ArrayList<Vector2f> symmetryPoints = new ArrayList<>(numSymPoints - 1);
+        int size = getSize();
         switch (symmetry) {
             case POINT2:
                 symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
@@ -333,9 +333,7 @@ public strictfp abstract class Mask<T> {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
         switch (symmetry) {
-            case POINT2:
             case POINT3:
-            case POINT4:
             case POINT5:
             case POINT6:
             case POINT7:
@@ -349,6 +347,7 @@ public strictfp abstract class Mask<T> {
             case POINT15:
             case POINT16:
                 return StrictMath.max(getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
+            case POINT4:
             case X:
             case QUAD:
             case DIAG:
@@ -362,9 +361,7 @@ public strictfp abstract class Mask<T> {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
         switch (symmetry) {
-            case POINT2:
             case POINT3:
-            case POINT4:
             case POINT5:
             case POINT6:
             case POINT7:
@@ -382,6 +379,8 @@ public strictfp abstract class Mask<T> {
             case DIAG:
                 return size - x;
             case Z:
+            case POINT2:
+            case POINT4:
             case QUAD:
                 return size / 2 + 1;
             default:
@@ -600,16 +599,16 @@ public strictfp abstract class Mask<T> {
 
     protected void checkCompatibleMask(Mask<?> other) {
         if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and BinaryMask is " + getSize());
+            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and Mask is " + getSize());
         }
         if (!getSymmetrySettings().equals(other.getSymmetrySettings())) {
-            throw new IllegalArgumentException("Masks not the same symmetry: other is " + other.getSymmetrySettings() + " and BinaryMask is " + getSymmetrySettings());
+            throw new IllegalArgumentException("Masks not the same symmetry: other is " + other.getSymmetrySettings() + " and Mask is " + getSymmetrySettings());
         }
     }
 
     protected void checkSmallerSize(int size) {
         if (size > getSize()) {
-            throw new IllegalArgumentException("Intended mask size is larger than base mask size: FloatMask is " + getSize() + " and size is " + size);
+            throw new IllegalArgumentException("Intended mask size is larger than base mask size: Mask is " + getSize() + " and size is " + size);
         }
     }
 
