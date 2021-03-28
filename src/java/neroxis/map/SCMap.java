@@ -79,9 +79,9 @@ public strictfp class SCMap {
     private BufferedImage textureMasksHigh;
 
     private BufferedImage waterMap;
-    private BufferedImage waterFoamMask;
-    private BufferedImage waterFlatnessMask;
-    private BufferedImage waterDepthBiasMask;
+    private BufferedImage waterFoamMap;
+    private BufferedImage waterFlatnessMap;
+    private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
 
     private int cartographicContourInterval = 1000;
@@ -126,14 +126,14 @@ public strictfp class SCMap {
         textureMasksHigh = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
 
         waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
-        waterFoamMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
-        waterFlatnessMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterFoamMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterFlatnessMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                waterFlatnessMask.getRaster().setPixel(x, y, new int[]{255});
+                waterFlatnessMap.getRaster().setPixel(x, y, new int[]{255});
             }
         }
-        waterDepthBiasMask = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterDepthBiasMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
 
         terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
     }
@@ -148,19 +148,23 @@ public strictfp class SCMap {
         this.heightmap = heightmap;
     }
 
-    public void setWaterFoamMask(BufferedImage waterFoamMask) {
-        checkImageSize(waterFoamMask, size / 2);
-        this.waterFoamMask = waterFoamMask;
+    private static void checkImageSize(BufferedImage image, int size) {
+        if (image.getWidth() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + image.getWidth() +
+                    " required size is " + size);
+        }
     }
 
-    public void setWaterFlatnessMask(BufferedImage waterFlatnessMask) {
-        checkImageSize(waterFlatnessMask, size / 2);
-        this.waterFlatnessMask = waterFlatnessMask;
+    private static void checkMaskSize(Mask<?> mask, int size) {
+        if (mask.getSize() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " + mask.getSize() +
+                    " required size is " + size);
+        }
     }
 
-    public void setWaterDepthBiasMask(BufferedImage waterDepthBiasMask) {
-        checkImageSize(waterDepthBiasMask, size / 2);
-        this.waterDepthBiasMask = waterDepthBiasMask;
+    public void setWaterFoamMap(BufferedImage waterFoamMap) {
+        checkImageSize(waterFoamMap, size / 2);
+        this.waterFoamMap = waterFoamMap;
     }
 
     public void setTerrainType(BufferedImage terrainType) {
@@ -467,42 +471,14 @@ public strictfp class SCMap {
         setHeights();
     }
 
-    private void scaleMapContent(float contentScale) {
-        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * contentScale);
-        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * contentScale);
-        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * contentScale);
-
-        RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
-        heightRescale.filter(heightmap, heightmap);
-        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScale) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScale) + 1);
-        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScale), StrictMath.round(normalMap.getHeight() * contentScale));
-        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScale), StrictMath.round(waterMap.getHeight() * contentScale));
-        waterFoamMask = scaleImage(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * contentScale), StrictMath.round(waterFoamMask.getHeight() * contentScale));
-        waterFlatnessMask = scaleImage(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * contentScale), StrictMath.round(waterFlatnessMask.getHeight() * contentScale));
-        waterDepthBiasMask = scaleImage(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * contentScale), StrictMath.round(waterDepthBiasMask.getHeight() * contentScale));
-        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScale), StrictMath.round(terrainType.getHeight() * contentScale));
-        textureMasksHigh = scaleImage(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * contentScale), StrictMath.round(textureMasksHigh.getHeight() * contentScale));
-        textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale), StrictMath.round(textureMasksLow.getHeight() * contentScale));
+    public void setWaterFlatnessMap(BufferedImage waterFlatnessMap) {
+        checkImageSize(waterFlatnessMap, size / 2);
+        this.waterFlatnessMap = waterFlatnessMap;
     }
 
-    private void scaleMapBounds(float boundsScale, Vector2f topLeftOffset) {
-        float normalMapScale = (float) normalMap.getWidth() / size;
-        float waterMapScale = (float) waterMap.getWidth() / size;
-        float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
-        float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
-        preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
-        Vector2f previewOffset = boundsScale > 1 ? new Vector2f(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2f(-64 / boundsScale, -64 / boundsScale);
-        preview = insertImageIntoNewImageOfSize(preview, 256, 256, previewOffset);
-        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScale)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScale) + 1, topLeftOffset);
-        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale), StrictMath.round(normalMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(normalMapScale));
-        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale), StrictMath.round(waterMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(waterMapScale));
-        Vector2f halvedTopLeftOffset = new Vector2f(topLeftOffset).multiply(.5f);
-        waterFoamMask = insertImageIntoNewImageOfSize(waterFoamMask, StrictMath.round(waterFoamMask.getWidth() * boundsScale), StrictMath.round(waterFoamMask.getHeight() * boundsScale), halvedTopLeftOffset);
-        waterFlatnessMask = insertImageIntoNewImageOfSize(waterFlatnessMask, StrictMath.round(waterFlatnessMask.getWidth() * boundsScale), StrictMath.round(waterFlatnessMask.getHeight() * boundsScale), halvedTopLeftOffset);
-        waterDepthBiasMask = insertImageIntoNewImageOfSize(waterDepthBiasMask, StrictMath.round(waterDepthBiasMask.getWidth() * boundsScale), StrictMath.round(waterDepthBiasMask.getHeight() * boundsScale), halvedTopLeftOffset);
-        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScale), StrictMath.round(terrainType.getHeight() * boundsScale), topLeftOffset);
-        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
-        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
+    public void setWaterDepthBiasMap(BufferedImage waterDepthBiasMap) {
+        checkImageSize(waterDepthBiasMap, size / 2);
+        this.waterDepthBiasMap = waterDepthBiasMap;
     }
 
     private <T extends PositionedObject> void repositionObjects(Collection<T> positionedObjects, float distanceScale, Vector2f offset) {
@@ -567,23 +543,42 @@ public strictfp class SCMap {
         return heightMask;
     }
 
-    public void setPreviewImage(FloatMask previewMask) {
-        checkMaskSize(previewMask, 256);
-        for (int y = 0; y < previewMask.getSize(); y++) {
-            for (int x = 0; x < previewMask.getSize(); x++) {
-                this.preview.setRGB(x, y, previewMask.getValueAt(x, y).intValue());
-            }
-        }
+    private void scaleMapContent(float contentScale) {
+        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * contentScale);
+        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * contentScale);
+        this.biome.getWaterSettings().setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * contentScale);
+
+        RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
+        heightRescale.filter(heightmap, heightmap);
+        heightmap = scaleImage(heightmap, StrictMath.round((heightmap.getWidth() - 1) * contentScale) + 1, StrictMath.round((heightmap.getHeight() - 1) * contentScale) + 1);
+        normalMap = scaleImage(normalMap, StrictMath.round(normalMap.getWidth() * contentScale), StrictMath.round(normalMap.getHeight() * contentScale));
+        waterMap = scaleImage(waterMap, StrictMath.round(waterMap.getWidth() * contentScale), StrictMath.round(waterMap.getHeight() * contentScale));
+        waterFoamMap = scaleImage(waterFoamMap, StrictMath.round(waterFoamMap.getWidth() * contentScale), StrictMath.round(waterFoamMap.getHeight() * contentScale));
+        waterFlatnessMap = scaleImage(waterFlatnessMap, StrictMath.round(waterFlatnessMap.getWidth() * contentScale), StrictMath.round(waterFlatnessMap.getHeight() * contentScale));
+        waterDepthBiasMap = scaleImage(waterDepthBiasMap, StrictMath.round(waterDepthBiasMap.getWidth() * contentScale), StrictMath.round(waterDepthBiasMap.getHeight() * contentScale));
+        terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScale), StrictMath.round(terrainType.getHeight() * contentScale));
+        textureMasksHigh = scaleImage(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * contentScale), StrictMath.round(textureMasksHigh.getHeight() * contentScale));
+        textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale), StrictMath.round(textureMasksLow.getHeight() * contentScale));
     }
 
-    public FloatMask getPreviewMask(SymmetrySettings symmetrySettings) {
-        FloatMask previewMask = new FloatMask(this.preview.getHeight(), null, symmetrySettings);
-        for (int y = 0; y < previewMask.getSize(); y++) {
-            for (int x = 0; x < previewMask.getSize(); x++) {
-                previewMask.setValueAt(x, y, (float) this.preview.getRGB(x, y));
-            }
-        }
-        return previewMask;
+    private void scaleMapBounds(float boundsScale, Vector2f topLeftOffset) {
+        float normalMapScale = (float) normalMap.getWidth() / size;
+        float waterMapScale = (float) waterMap.getWidth() / size;
+        float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
+        float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
+        preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
+        Vector2f previewOffset = boundsScale > 1 ? new Vector2f(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2f(-64 / boundsScale, -64 / boundsScale);
+        preview = insertImageIntoNewImageOfSize(preview, 256, 256, previewOffset);
+        heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScale)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScale) + 1, topLeftOffset);
+        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale), StrictMath.round(normalMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(normalMapScale));
+        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale), StrictMath.round(waterMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(waterMapScale));
+        Vector2f halvedTopLeftOffset = new Vector2f(topLeftOffset).multiply(.5f);
+        waterFoamMap = insertImageIntoNewImageOfSize(waterFoamMap, StrictMath.round(waterFoamMap.getWidth() * boundsScale), StrictMath.round(waterFoamMap.getHeight() * boundsScale), halvedTopLeftOffset);
+        waterFlatnessMap = insertImageIntoNewImageOfSize(waterFlatnessMap, StrictMath.round(waterFlatnessMap.getWidth() * boundsScale), StrictMath.round(waterFlatnessMap.getHeight() * boundsScale), halvedTopLeftOffset);
+        waterDepthBiasMap = insertImageIntoNewImageOfSize(waterDepthBiasMap, StrictMath.round(waterDepthBiasMap.getWidth() * boundsScale), StrictMath.round(waterDepthBiasMap.getHeight() * boundsScale), halvedTopLeftOffset);
+        terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScale), StrictMath.round(terrainType.getHeight() * boundsScale), topLeftOffset);
+        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
+        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
     }
 
     public void setTextureMasksLowScaled(FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
@@ -722,18 +717,23 @@ public strictfp class SCMap {
         return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
     }
 
-    private void checkImageSize(BufferedImage image, int size) {
-        if (image.getWidth() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is " + image.getWidth() +
-                    " required size is " + size);
+    public void setImageFromMask(BufferedImage image, FloatMask mask) {
+        checkMaskSize(mask, image.getHeight());
+        for (int y = 0; y < mask.getSize(); y++) {
+            for (int x = 0; x < mask.getSize(); x++) {
+                image.setRGB(x, y, StrictMath.round(mask.getValueAt(x, y)));
+            }
         }
     }
 
-    private void checkMaskSize(Mask<?> mask, int size) {
-        if (mask.getSize() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is " + mask.getSize() +
-                    " required size is " + size);
+    public FloatMask getMaskFromImage(BufferedImage image, SymmetrySettings symmetrySettings) {
+        FloatMask mask = new FloatMask(image.getHeight(), null, symmetrySettings);
+        for (int y = 0; y < mask.getSize(); y++) {
+            for (int x = 0; x < mask.getSize(); x++) {
+                mask.setValueAt(x, y, (float) image.getRGB(x, y));
+            }
         }
+        return mask;
     }
 
     @SneakyThrows

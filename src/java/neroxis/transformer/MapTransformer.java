@@ -22,6 +22,7 @@ public strictfp class MapTransformer {
     private Path inMapPath;
     private Path outFolderPath;
     private SCMap map;
+    private String source;
 
     //masks used in transformation
     private FloatMask heightmapBase;
@@ -65,9 +66,8 @@ public strictfp class MapTransformer {
         transformer.transform();
         transformer.exportMap();
         System.out.println("Saving map to " + transformer.outFolderPath.toAbsolutePath());
-        System.out.println("Terrain Symmetry: " + transformer.symmetrySettings.getTerrainSymmetry());
-        System.out.println("Team Symmetry: " + transformer.symmetrySettings.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + transformer.symmetrySettings.getSpawnSymmetry());
+        System.out.println("Symmetry: " + transformer.symmetrySettings.getTerrainSymmetry());
+        System.out.println("Source: " + transformer.source);
         System.out.println("Done");
     }
 
@@ -140,53 +140,56 @@ public strictfp class MapTransformer {
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
         if (arguments.containsKey("symmetry")) {
             Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-            Symmetry teamSymmetry;
-            if (pattern.matcher(arguments.get("source")).matches()) {
-                teamSymmetry = null;
+            Symmetry symmetry = Symmetry.valueOf(arguments.get("symmetry"));
+            source = arguments.get("source");
+            if (pattern.matcher(source).matches()) {
                 angle = (360f - Float.parseFloat(arguments.get("source"))) % 360f;
                 useAngle = true;
             } else {
-                useAngle = false;
-                switch (SymmetrySource.valueOf(arguments.get("source"))) {
-                    case TOP:
-                        teamSymmetry = Symmetry.Z;
-                        reverseSide = false;
-                        break;
-                    case BOTTOM:
-                        teamSymmetry = Symmetry.Z;
-                        reverseSide = true;
-                        break;
-                    case LEFT:
-                        teamSymmetry = Symmetry.X;
-                        reverseSide = false;
-                        break;
-                    case RIGHT:
-                        teamSymmetry = Symmetry.X;
-                        reverseSide = true;
-                        break;
-                    case TOP_LEFT:
-                        teamSymmetry = Symmetry.ZX;
-                        reverseSide = false;
-                        break;
-                    case TOP_RIGHT:
-                        teamSymmetry = Symmetry.XZ;
-                        reverseSide = false;
-                        break;
-                    case BOTTOM_LEFT:
-                        teamSymmetry = Symmetry.XZ;
-                        reverseSide = true;
-                        break;
-                    case BOTTOM_RIGHT:
-                        teamSymmetry = Symmetry.ZX;
-                        reverseSide = true;
-                        break;
-                    default:
-                        teamSymmetry = Symmetry.NONE;
-                        reverseSide = false;
-                        break;
+                if (symmetry == Symmetry.POINT2) {
+                    useAngle = true;
+                    switch (SymmetrySource.valueOf(source)) {
+                        case TOP:
+                            angle = 270;
+                            break;
+                        case BOTTOM:
+                            angle = 90;
+                            break;
+                        case LEFT:
+                            angle = 180;
+                            break;
+                        case TOP_LEFT:
+                            angle = 225;
+                            break;
+                        case TOP_RIGHT:
+                            angle = 315;
+                            break;
+                        case BOTTOM_LEFT:
+                            angle = 135;
+                            break;
+                        case BOTTOM_RIGHT:
+                            angle = 45;
+                            break;
+                        default:
+                            angle = 0;
+                            break;
+                    }
+                } else {
+                    useAngle = false;
+                    switch (SymmetrySource.valueOf(arguments.get("source"))) {
+                        case BOTTOM:
+                        case BOTTOM_RIGHT:
+                        case BOTTOM_LEFT:
+                        case RIGHT:
+                            reverseSide = true;
+                            break;
+                        default:
+                            reverseSide = false;
+                            break;
+                    }
                 }
             }
-            symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("symmetry")), teamSymmetry, Symmetry.valueOf(arguments.get("symmetry")));
+            symmetrySettings = new SymmetrySettings(symmetry, symmetry, symmetry);
             transformResources = arguments.containsKey("resources") || arguments.containsKey("all");
             transformProps = arguments.containsKey("props") || arguments.containsKey("all");
             transformDecals = arguments.containsKey("decals") || arguments.containsKey("all");
@@ -246,9 +249,11 @@ public strictfp class MapTransformer {
 
     private void transformSymmetry() {
         heightmapBase = map.getHeightMask(symmetrySettings);
+        heightmapBase.startVisualDebugger("hmb");
 
         if (transformTerrain) {
             transformTerrain();
+            transformWaveGenerators(map.getWaveGenerators());
             transformMarkers(map.getBlankMarkers());
             transformAIMarkers(map.getAirAIMarkers());
             transformAIMarkers(map.getLandAIMarkers());
@@ -283,11 +288,23 @@ public strictfp class MapTransformer {
     }
 
     private void transformTerrain() {
-        FloatMask previewMask = map.getPreviewMask(symmetrySettings);
+        FloatMask previewMask = map.getMaskFromImage(map.getPreview(), symmetrySettings);
+        FloatMask normalMask = map.getMaskFromImage(map.getNormalMap(), symmetrySettings);
+        FloatMask waterMask = map.getMaskFromImage(map.getWaterMap(), symmetrySettings);
+        FloatMask waterFoamMask = map.getMaskFromImage(map.getWaterFoamMap(), symmetrySettings);
+        FloatMask waterFlatnessMask = map.getMaskFromImage(map.getWaterFlatnessMap(), symmetrySettings);
+        FloatMask waterDepthBiasMask = map.getMaskFromImage(map.getWaterDepthBiasMap(), symmetrySettings);
+        FloatMask terrainTypeMask = map.getMaskFromImage(map.getTerrainType(), symmetrySettings);
         FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
 
         if (!useAngle) {
             previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            normalMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            waterMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            waterFoamMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            waterFlatnessMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            waterDepthBiasMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            terrainTypeMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
             heightmapBase.applySymmetry(SymmetryType.SPAWN, reverseSide);
             texturesMasks[0].applySymmetry(SymmetryType.SPAWN, reverseSide);
             texturesMasks[1].applySymmetry(SymmetryType.SPAWN, reverseSide);
@@ -299,6 +316,12 @@ public strictfp class MapTransformer {
             texturesMasks[7].applySymmetry(SymmetryType.SPAWN, reverseSide);
         } else {
             previewMask.applySymmetry(angle);
+            normalMask.applySymmetry(angle);
+            waterMask.applySymmetry(angle);
+            waterFoamMask.applySymmetry(angle);
+            waterFlatnessMask.applySymmetry(angle);
+            waterDepthBiasMask.applySymmetry(angle);
+            terrainTypeMask.applySymmetry(angle);
             heightmapBase.applySymmetry(angle);
             texturesMasks[0].applySymmetry(angle);
             texturesMasks[1].applySymmetry(angle);
@@ -309,8 +332,13 @@ public strictfp class MapTransformer {
             texturesMasks[6].applySymmetry(angle);
             texturesMasks[7].applySymmetry(angle);
         }
-
-        map.setPreviewImage(previewMask);
+        map.setImageFromMask(map.getPreview(), previewMask);
+        map.setImageFromMask(map.getNormalMap(), normalMask);
+        map.setImageFromMask(map.getWaterMap(), waterMask);
+        map.setImageFromMask(map.getWaterFoamMap(), waterFoamMask);
+        map.setImageFromMask(map.getWaterFlatnessMap(), waterFlatnessMask);
+        map.setImageFromMask(map.getWaterDepthBiasMap(), waterDepthBiasMask);
+        map.setImageFromMask(map.getTerrainType(), terrainTypeMask);
         map.setHeightImage(heightmapBase);
         map.setTextureMasksLowRaw(texturesMasks[0], texturesMasks[1], texturesMasks[2], texturesMasks[3]);
         map.setTextureMasksHighRaw(texturesMasks[4], texturesMasks[5], texturesMasks[6], texturesMasks[7]);
@@ -417,6 +445,24 @@ public strictfp class MapTransformer {
         });
         props.clear();
         props.addAll(transformedProps);
+    }
+
+    private void transformWaveGenerators(Collection<WaveGenerator> waveGenerators) {
+        Collection<WaveGenerator> transformedWaveGenerators = new ArrayList<>();
+        waveGenerators.forEach(waveGenerator -> {
+            if (inSourceRegion(waveGenerator.getPosition())) {
+                transformedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), waveGenerator.getPosition(), waveGenerator.getRotation(), waveGenerator.getVelocity()));
+                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(waveGenerator.getPosition(), SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightmapBase.getSymmetryRotation(waveGenerator.getRotation());
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    Vector3f newPosition = new Vector3f(symmetryPoints.get(i));
+                    newPosition.setY(waveGenerator.getPosition().getY());
+                    transformedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), newPosition, symmetryRotation.get(i), waveGenerator.getVelocity()));
+                }
+            }
+        });
+        waveGenerators.clear();
+        waveGenerators.addAll(transformedWaveGenerators);
     }
 
     private void transformDecals(Collection<Decal> decals) {

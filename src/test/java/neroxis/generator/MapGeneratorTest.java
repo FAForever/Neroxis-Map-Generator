@@ -131,9 +131,9 @@ public class MapGeneratorTest {
             assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
             assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
             assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-            assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-            assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-            assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+            assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+            assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+            assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
             assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
         }
     }
@@ -164,9 +164,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -196,9 +196,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -234,9 +234,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -301,9 +301,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -339,9 +339,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -377,9 +377,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
@@ -412,9 +412,9 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMask(), map2.getWaterFoamMask()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMask(), map2.getWaterDepthBiasMask()));
-        assertTrue(compareImages(map1.getWaterFlatnessMask(), map2.getWaterFlatnessMask()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 

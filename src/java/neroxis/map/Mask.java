@@ -482,6 +482,7 @@ public strictfp abstract class Mask<T> {
                 symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
             }
         });
+        VisualDebugger.visualizeMask(this);
     }
 
     public Mask<T> enlarge(int size) {

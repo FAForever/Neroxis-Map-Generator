@@ -208,11 +208,11 @@ public strictfp class SCMapImporter {
 
         map.setWaterMap(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, waterMapData));
 
-        map.setWaterFoamMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
+        map.setWaterFoamMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
 
-        map.setWaterFlatnessMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
+        map.setWaterFlatnessMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
 
-        map.setWaterDepthBiasMask(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterDepthBiasMaskData)));
+        map.setWaterDepthBiasMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterDepthBiasMaskData)));
 
         map.setTerrainType(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(terrainTypeData)));
 

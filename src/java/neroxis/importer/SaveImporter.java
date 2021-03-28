@@ -4,6 +4,7 @@ import com.faforever.commons.lua.LuaLoader;
 import neroxis.map.*;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -149,11 +150,15 @@ public strictfp class SaveImporter {
             key = unitsTable.next(key).checkvalue(1);
             String id = key.checkjstring();
             LuaTable unitTable = unitsTable.get(key).checktable();
-            String type = unitTable.get("type").checkjstring();
-            float rotation = unitTable.get("Orientation").checktable().get(2).tofloat();
-            LuaTable locTable = unitTable.get("Position").checktable();
-            Vector3f location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-            group.addUnit(new Unit(id, type, location, rotation));
+            try {
+                String type = unitTable.get("type").checkjstring();
+                float rotation = unitTable.get("Orientation").checktable().get(2).tofloat();
+                LuaTable locTable = unitTable.get("Position").checktable();
+                Vector3f location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                group.addUnit(new Unit(id, type, location, rotation));
+            } catch (LuaError e) {
+                System.out.printf("Could not read unit %s%n", id);
+            }
         }
     }
 }

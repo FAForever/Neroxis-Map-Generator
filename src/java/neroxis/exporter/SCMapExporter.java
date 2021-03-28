@@ -167,9 +167,9 @@ public strictfp class SCMapExporter {
         // water maps
         writeInt(1); // unknown
         writeCompressedImage(map.getWaterMap(), waterDDSHeader); // watermap data
-        writeBytes(((DataBufferByte) map.getWaterFoamMask().getData().getDataBuffer()).getData()); // water foam mask data
-        writeBytes(((DataBufferByte) map.getWaterFlatnessMask().getData().getDataBuffer()).getData()); // water flatness mask data
-        writeBytes(((DataBufferByte) map.getWaterDepthBiasMask().getData().getDataBuffer()).getData()); // water depth bias mask data
+        writeBytes(((DataBufferByte) map.getWaterFoamMap().getData().getDataBuffer()).getData()); // water foam mask data
+        writeBytes(((DataBufferByte) map.getWaterFlatnessMap().getData().getDataBuffer()).getData()); // water flatness mask data
+        writeBytes(((DataBufferByte) map.getWaterDepthBiasMap().getData().getDataBuffer()).getData()); // water depth bias mask data
 
         // terrain type
         writeBytes(((DataBufferByte) map.getTerrainType().getData().getDataBuffer()).getData()); // terrain type data
