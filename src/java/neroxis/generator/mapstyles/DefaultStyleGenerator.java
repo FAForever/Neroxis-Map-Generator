@@ -891,19 +891,15 @@ public strictfp class DefaultStyleGenerator {
                 break;
             case 6:
             case 8:
+            case 10:
                 mexCount = (int) (8 + 6 * mexDensity);
                 break;
-            case 10:
-                mexCount = (int) (8 + 4 * mexDensity);
-                break;
             case 12:
-                mexCount = (int) (6 + 5 * mexDensity);
+                mexCount = (int) (6 + 7 * mexDensity);
                 break;
             case 14:
-                mexCount = (int) (6 + 4 * mexDensity);
-                break;
             case 16:
-                mexCount = (int) (6 + 3 * mexDensity);
+                mexCount = (int) (6 + 6 * mexDensity);
                 break;
             default:
                 mexCount = (int) (8 + 8 * mexDensity);
