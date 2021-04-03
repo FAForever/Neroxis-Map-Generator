@@ -1,4 +1,4 @@
-package neroxis.generator;
+package neroxis.util;
 
 import lombok.Value;
 

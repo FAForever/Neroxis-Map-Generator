@@ -8,6 +8,7 @@ import neroxis.util.Vector2f;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public strictfp class PropGenerator {
@@ -32,7 +33,7 @@ public strictfp class PropGenerator {
                 location.add(.5f, .5f);
                 Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
-                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {

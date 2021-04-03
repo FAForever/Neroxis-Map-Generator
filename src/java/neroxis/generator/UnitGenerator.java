@@ -65,6 +65,9 @@ public strictfp class UnitGenerator {
     public void generateBases(BinaryMask spawnMask, String[] templates, Army army, Group group, float separation) throws IOException {
         if (templates != null && templates.length > 0) {
             String luaFile = templates[random.nextInt(templates.length)];
+            if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+                spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
+            }
             spawnMask.limitToSymmetryRegion();
             LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(separation);
             LinkedHashMap<String, LinkedHashSet<Vector2f>> units = BaseTemplate.loadUnits(luaFile);
@@ -99,7 +102,7 @@ public strictfp class UnitGenerator {
                 int groupID = group.getUnitCount();
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
                 group.addUnit(unit);
-                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {

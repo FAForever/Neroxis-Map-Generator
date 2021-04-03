@@ -1,10 +1,10 @@
 package neroxis.map;
 
 import lombok.Getter;
-import neroxis.generator.VisualDebugger;
 import neroxis.util.Util;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
+import neroxis.util.VisualDebugger;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 @Getter
 public strictfp abstract class Mask<T> {
@@ -120,18 +121,32 @@ public strictfp abstract class Mask<T> {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
-    public ArrayList<Vector2f> getSymmetryPoints(Vector3f v, SymmetryType symmetryType) {
+    public List<Vector2f> getSymmetryPoints(Vector3f v, SymmetryType symmetryType) {
         return getSymmetryPoints(new Vector2f(v), symmetryType);
     }
 
-    public ArrayList<Vector2f> getSymmetryPoints(Vector2f v, SymmetryType symmetryType) {
+    public List<Vector2f> getSymmetryPoints(Vector2f v, SymmetryType symmetryType) {
         return getSymmetryPoints(v.getX(), v.getY(), symmetryType);
     }
 
-    public ArrayList<Vector2f> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
+    public List<Vector2f> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(x, y, symmetryType).stream()
+                .filter(this::inBounds)
+                .collect(Collectors.toList());
+    }
+
+    public List<Vector2f> getSymmetryPointsWithOutOfBounds(Vector3f v, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(new Vector2f(v), symmetryType);
+    }
+
+    public List<Vector2f> getSymmetryPointsWithOutOfBounds(Vector2f v, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(v.getX(), v.getY(), symmetryType);
+    }
+
+    public List<Vector2f> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int numSymPoints = symmetry.getNumSymPoints();
-        ArrayList<Vector2f> symmetryPoints = new ArrayList<>(numSymPoints - 1);
+        List<Vector2f> symmetryPoints = new ArrayList<>(numSymPoints - 1);
         int size = getSize();
         switch (symmetry) {
             case POINT2:
@@ -152,13 +167,9 @@ public strictfp abstract class Mask<T> {
                 for (int i = 1; i < numSymPoints / 2; i++) {
                     float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
                     Vector2f rotated = getRotatedPoint(x, y, angle);
-                    if (inBounds(rotated)) {
-                        symmetryPoints.add(rotated);
-                    }
+                    symmetryPoints.add(rotated);
                     Vector2f antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
-                    if (inBounds(antiRotated)) {
-                        symmetryPoints.add(antiRotated);
-                    }
+                    symmetryPoints.add(antiRotated);
                 }
                 break;
             case POINT3:
@@ -170,9 +181,7 @@ public strictfp abstract class Mask<T> {
             case POINT15:
                 for (int i = 1; i < numSymPoints; i++) {
                     Vector2f rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
-                    if (inBounds(rotated)) {
-                        symmetryPoints.add(rotated);
-                    }
+                    symmetryPoints.add(rotated);
                 }
                 break;
             case X:
@@ -456,7 +465,7 @@ public strictfp abstract class Mask<T> {
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
         applyWithSymmetry(symmetryType, (x, y) -> {
             Vector2f location = new Vector2f(x, y);
-            ArrayList<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
+            List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
             symPoints.forEach(symmetryPoint -> {
                 if (reverse) {
                     setValueAt(location, getValueAt(symmetryPoint));
@@ -478,7 +487,7 @@ public strictfp abstract class Mask<T> {
         apply((x, y) -> {
             if (inHalf(x, y, angle)) {
                 Vector2f location = new Vector2f(x, y);
-                ArrayList<Vector2f> symPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
+                List<Vector2f> symPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
                 symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
             }
         });
@@ -553,7 +562,7 @@ public strictfp abstract class Mask<T> {
         int size = getSize();
         T[][] newMask = getEmptyMask(size);
         apply((x, y) -> {
-            ArrayList<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+            List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
             newMask[x][y] = getValueAt(symmetryPoints.get(0));
         });
         this.mask = newMask;

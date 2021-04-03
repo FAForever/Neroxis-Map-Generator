@@ -26,7 +26,7 @@ public strictfp class AIMarkerGenerator {
                     if (location != location1) {
                         if (location.getDistance(location1) < 64) {
                             LinkedHashSet<Vector2f> lineCoordinates = location.getLine(location1);
-                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.getValueAt(loc));
+                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.inBounds(loc) || !passable.getValueAt(loc));
                             if (connected) {
                                 unusedCoordinates.add(location1);
                             }
@@ -41,13 +41,13 @@ public strictfp class AIMarkerGenerator {
         coordinates.forEach((location) -> {
             AIMarker aiMarker = new AIMarker(String.format(nameFormat, coordinatesList.indexOf(location)), location, new LinkedHashSet<>());
             markers.add(aiMarker);
-            ArrayList<Vector2f> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
+            List<Vector2f> symmetryPoints = passable.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> markers.add(new AIMarker(String.format(nameFormat + "s%d", coordinatesList.indexOf(location), symmetryPoints.indexOf(symmetryPoint)), symmetryPoint, new LinkedHashSet<>())));
         });
         markers.forEach(aiMarker -> markers.forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) <= 128) {
                 LinkedHashSet<Vector2f> lineCoordinates = aiMarker.getPosition().getXZLine(aiMarker1.getPosition());
-                boolean connected = !lineCoordinates.removeIf(location -> !passable.getValueAt(location));
+                boolean connected = !lineCoordinates.removeIf(location -> !passable.inBounds(location) || !passable.getValueAt(location));
                 if (connected) {
                     aiMarker.addNeighbor(aiMarker1.getId());
                 }

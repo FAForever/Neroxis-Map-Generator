@@ -2,9 +2,9 @@ package neroxis.map;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import neroxis.generator.VisualDebugger;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
+import neroxis.util.VisualDebugger;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -193,10 +193,10 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             }
             float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
             Vector2f nextLoc = new Vector2f(previousLoc).addPolar(angle, magnitude);
-            nextLoc.round().clampMin(0, 0).clampMax(getSize() - 1, getSize() - 1);
             checkPoints.add(nextLoc);
         }
         checkPoints.add(new Vector2f(end));
+        checkPoints.forEach(point -> point.round().clampMin(0, 0).clampMax(getSize() - 1, getSize() - 1));
         int size = getSize();
         int numSteps = 0;
         for (int i = 0; i < checkPoints.size() - 1; i++) {
@@ -226,7 +226,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     public BinaryMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
         if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
-            List<Vector2f> symmetryPoints = getSymmetryPoints(end, symmetryType);
+            List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
             path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
         }
         VisualDebugger.visualizeMask(this);
@@ -520,6 +520,14 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         int minXBound = getMinXBound(symmetryType);
         int maxXBound = getMaxXBound(symmetryType);
         modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public BinaryMask limitToCenteredCircle(float circleRadius) {
+        BinaryMask symmetryLimit = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
+        symmetryLimit.fillCircle(getSize() / 2f, getSize() / 2f, circleRadius, true);
+        intersect(symmetryLimit);
         VisualDebugger.visualizeMask(this);
         return this;
     }

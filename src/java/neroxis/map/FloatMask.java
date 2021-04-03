@@ -2,8 +2,8 @@ package neroxis.map;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import neroxis.generator.VisualDebugger;
 import neroxis.util.Vector2f;
+import neroxis.util.VisualDebugger;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
@@ -236,7 +237,7 @@ public strictfp class FloatMask extends Mask<Float> {
                 if (inBounds(shiftX, shiftY)) {
                     float value = other.getValueAt(x, y);
                     addValueAt(shiftX, shiftY, value);
-                    ArrayList<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                    List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                     for (Vector2f symmetryPoint : symmetryPoints) {
                         addValueAt(symmetryPoint, value);
                     }
@@ -322,7 +323,7 @@ public strictfp class FloatMask extends Mask<Float> {
                 if (inBounds(shiftX, shiftY)) {
                     float value = other.getValueAt(x, y);
                     multiplyValueAt(shiftX, shiftY, value);
-                    ArrayList<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                    List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                     for (Vector2f symmetryPoint : symmetryPoints) {
                         multiplyValueAt(symmetryPoint, value);
                     }
@@ -533,7 +534,7 @@ public strictfp class FloatMask extends Mask<Float> {
             float value = getValueAt(x, y);
             if (value >= minValue && value < maxValue && isLocalMax(x, y)) {
                 localMaxima.setValueAt(x, y, true);
-                ArrayList<Vector2f> symmetryPoints = getSymmetryPoints(x, y, SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> localMaxima.setValueAt(symmetryPoint, true));
             }
         });
@@ -546,7 +547,7 @@ public strictfp class FloatMask extends Mask<Float> {
             float value = getValueAt(x, y);
             if (value > minValue && value < maxValue && isLocal1DMax(x, y)) {
                 localMaxima.setValueAt(x, y, true);
-                ArrayList<Vector2f> symmetryPoints = getSymmetryPoints(x, y, SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> localMaxima.setValueAt(symmetryPoint, true));
             }
         });
@@ -619,8 +620,8 @@ public strictfp class FloatMask extends Mask<Float> {
                 Float value = valueFunction.apply(x, y);
                 addValueAt(x, y, value);
                 Vector2f location = new Vector2f(x, y);
-                ArrayList<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
-                symPoints.forEach(symmetryPoint -> addValueAt(symmetryPoint, value));
+                List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                symmetryPoints.forEach(symmetryPoint -> addValueAt(symmetryPoint, value));
             }
         }
     }
@@ -640,8 +641,8 @@ public strictfp class FloatMask extends Mask<Float> {
                 Float value = valueFunction.apply(x, y);
                 multiplyValueAt(x, y, value);
                 Vector2f location = new Vector2f(x, y);
-                ArrayList<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
-                symPoints.forEach(symmetryPoint -> multiplyValueAt(symmetryPoint, value));
+                List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                symmetryPoints.forEach(symmetryPoint -> multiplyValueAt(symmetryPoint, value));
             }
         }
     }

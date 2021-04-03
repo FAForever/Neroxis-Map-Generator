@@ -4,6 +4,7 @@ import neroxis.map.*;
 import neroxis.util.Vector2f;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public strictfp class SpawnGenerator {
@@ -22,18 +23,17 @@ public strictfp class SpawnGenerator {
         BinaryMask spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         BinaryMask spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings());
         spawnMask.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
+        if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
+        }
         Vector2f location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {
             if (location == null) {
-                if (teammateSeparation - 4 >= 10) {
-                    return generateSpawns(teammateSeparation - 8, teamSeparation, symmetrySettings, plateauDensity, spawnSize);
-                } else {
-                    return null;
-                }
+                return generateSpawns(StrictMath.max(teammateSeparation - 4, 0), teamSeparation, symmetrySettings, plateauDensity, spawnSize);
             }
             location.add(.5f, .5f);
             spawnMask.fillCircle(location, teammateSeparation, false);
-            ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+            List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
             symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, teamSeparation, false));
 
@@ -94,7 +94,7 @@ public strictfp class SpawnGenerator {
                 }
             }
             spawnMaskCopy.fillCircle(location, separation, false);
-            ArrayList<Vector2f> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
+            List<Vector2f> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
             symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
 
@@ -106,7 +106,7 @@ public strictfp class SpawnGenerator {
         }
     }
 
-    private void addSpawn(Vector2f location, ArrayList<Vector2f> symmetryPoints) {
+    private void addSpawn(Vector2f location, List<Vector2f> symmetryPoints) {
         map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0), 0));
         Group initial = new Group("INITIAL", new ArrayList<>());
         Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());

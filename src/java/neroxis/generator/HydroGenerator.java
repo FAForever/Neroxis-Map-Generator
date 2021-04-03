@@ -4,8 +4,8 @@ import neroxis.map.*;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public strictfp class HydroGenerator {
@@ -23,6 +23,9 @@ public strictfp class HydroGenerator {
         map.getHydros().clear();
         int numSymPoints = spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
 
+        if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
+        }
         spawnMask.fillCenter(64, false).limitToSymmetryRegion();
 
         map.getMexes().forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
@@ -57,7 +60,7 @@ public strictfp class HydroGenerator {
                 int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3f(location.add(.5f, .5f)));
                 map.addHydro(hydro);
-                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> map.addHydro(new Marker(String.format("Hydro %d sym %d", hydroId, symmetryPoints.indexOf(symmetryPoint)), new Vector3f(symmetryPoint))));
             });

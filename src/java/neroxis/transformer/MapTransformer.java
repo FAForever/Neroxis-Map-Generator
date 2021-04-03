@@ -375,7 +375,7 @@ public strictfp class MapTransformer {
         markers.forEach(marker -> {
             if (inSourceRegion(marker.getPosition())) {
                 transformedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
-                ArrayList<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(marker.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(marker.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> transformedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
             }
         });
@@ -391,7 +391,7 @@ public strictfp class MapTransformer {
         aiMarkers.forEach(aiMarker -> {
             if (inSourceRegion(aiMarker.getPosition())) {
                 transformedAImarkers.add(new AIMarker(aiMarker.getId(), aiMarker.getPosition(), aiMarker.getNeighbors()));
-                ArrayList<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(aiMarker.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> {
                     LinkedHashSet<String> newNeighbors = new LinkedHashSet<>();
                     aiMarker.getNeighbors().forEach(marker -> newNeighbors.add(String.format(marker + "s%d", symmetryPoints.indexOf(symmetryPoint))));
@@ -420,7 +420,7 @@ public strictfp class MapTransformer {
         units.forEach(unit -> {
             if (inSourceRegion(unit.getPosition())) {
                 transformedUnits.add(new Unit(unit.getId(), unit.getType(), unit.getPosition(), unit.getRotation()));
-                ArrayList<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     transformedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), symmetryPoints.get(i), symmetryRotation.get(i)));

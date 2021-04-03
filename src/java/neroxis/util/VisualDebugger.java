@@ -1,12 +1,13 @@
-package neroxis.generator;
+package neroxis.util;
 
 import neroxis.evaluator.MapEvaluator;
+import neroxis.generator.ImageGenerator;
+import neroxis.generator.MapGenerator;
 import neroxis.map.BinaryMask;
 import neroxis.map.FloatMask;
 import neroxis.map.Mask;
 import neroxis.populator.MapPopulator;
 import neroxis.transformer.MapTransformer;
-import neroxis.util.Util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;

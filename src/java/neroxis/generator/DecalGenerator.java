@@ -9,6 +9,7 @@ import neroxis.util.Vector3f;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public strictfp class DecalGenerator {
@@ -31,7 +32,7 @@ public strictfp class DecalGenerator {
                 Vector3f rotation = new Vector3f(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
                 Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000 * map.getSize() / 512f);
                 map.addDecal(decal);
-                ArrayList<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
+                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().getY());
                 for (int i = 0; i < symmetryPoints.size(); i++) {

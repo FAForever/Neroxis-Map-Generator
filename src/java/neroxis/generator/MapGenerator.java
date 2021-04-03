@@ -229,8 +229,8 @@ public strictfp class MapGenerator {
                 break;
         }
         if (numTeams != 0) {
-            spawns.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || numTeams % symmetry.getNumSymPoints() != 0);
-            teams.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || numTeams % symmetry.getNumSymPoints() != 0);
+            spawns.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || symmetry.getNumSymPoints() % numTeams != 0);
+            teams.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || symmetry.getNumSymPoints() % numTeams != 0);
         }
         spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
         teamSymmetry = teams.get(random.nextInt(teams.size()));
