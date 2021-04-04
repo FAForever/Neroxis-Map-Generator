@@ -28,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract strictfp class StyleGenerator extends ElementGenerator {
 
-    public static boolean DEBUG = MapGenerator.DEBUG;
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
     protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
@@ -116,10 +115,10 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
         CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAirAIMarkers(map));
         CompletableFuture.allOf(AmphibiousMarkers, LandMarkers, NavyMarkers, AirMarkers).join();
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, placeAIMarkers\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 
@@ -158,10 +157,10 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected void setHeights() {
         long sTime = System.currentTimeMillis();
         map.setHeights();
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, setPlacements\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 }

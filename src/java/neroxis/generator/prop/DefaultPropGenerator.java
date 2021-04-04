@@ -1,6 +1,7 @@
 package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
+import neroxis.generator.MapGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
@@ -61,10 +62,10 @@ public class DefaultPropGenerator extends PropGenerator {
     public void placeProps() {
         long sTime = System.currentTimeMillis();
         generatePropExclusionMasks();
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, exclusionMasks\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
         placePropsWithExclusion();
     }
@@ -76,10 +77,10 @@ public class DefaultPropGenerator extends PropGenerator {
         propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
         propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 2f);
         propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, placeProps\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 

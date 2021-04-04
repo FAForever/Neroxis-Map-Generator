@@ -31,6 +31,16 @@ public strictfp class Util {
         return "not found";
     }
 
+    public static String getStackTraceLineInPackage(String packageName) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().contains(packageName)) {
+                return ste.getFileName() + ":" + ste.getLineNumber();
+            }
+        }
+        return "not found";
+    }
+
     public static String getStackTraceMethod(Class<?> clazz) {
         return getStackTraceMethod(clazz.getCanonicalName());
     }
@@ -39,6 +49,16 @@ public strictfp class Util {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         for (StackTraceElement ste : stackTrace) {
             if (ste.getClassName().equals(className)) {
+                return ste.getMethodName();
+            }
+        }
+        return "not found";
+    }
+
+    public static String getStackTraceMethodInPackage(String packageName) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().contains(packageName)) {
                 return ste.getMethodName();
             }
         }

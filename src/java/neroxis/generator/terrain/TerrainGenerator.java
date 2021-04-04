@@ -2,6 +2,7 @@ package neroxis.generator.terrain;
 
 import lombok.Getter;
 import neroxis.generator.ElementGenerator;
+import neroxis.generator.MapGenerator;
 import neroxis.generator.style.DefaultStyleGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
@@ -41,7 +42,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         long sTime = System.currentTimeMillis();
         map.setHeightImage(heightmap.getFinalMask());
         map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, setHeightmap\n",
                     System.currentTimeMillis() - sTime,
                     Util.getStackTraceLineInClass(DefaultStyleGenerator.class));

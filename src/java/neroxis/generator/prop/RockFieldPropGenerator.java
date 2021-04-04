@@ -1,6 +1,7 @@
 package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
+import neroxis.generator.MapGenerator;
 import neroxis.generator.ParameterConstraints;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
@@ -48,10 +49,10 @@ public class RockFieldPropGenerator extends DefaultPropGenerator {
         propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
         propPlacer.placeProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
         propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, placeProps\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 }

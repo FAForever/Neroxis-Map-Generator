@@ -1,5 +1,6 @@
 package neroxis.generator.prop;
 
+import neroxis.generator.MapGenerator;
 import neroxis.generator.ParameterConstraints;
 import neroxis.generator.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
@@ -70,10 +71,10 @@ public class SmallBattlePropGenerator extends DefaultPropGenerator {
             map.addArmy(army17);
             unitPlacer.placeUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T1_Land, army17, army17Wreckage, 1f, 4f);
             unitPlacer.placeUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T2_Land, army17, army17Wreckage, 30f);
-            if (DEBUG) {
+            if (MapGenerator.DEBUG) {
                 System.out.printf("Done: %4d ms, %s, placeUnits\n",
                         System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                        Util.getStackTraceLineInPackage("neroxis.generator"));
             }
         }
     }

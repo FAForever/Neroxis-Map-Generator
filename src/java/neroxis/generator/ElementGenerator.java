@@ -8,8 +8,6 @@ import java.util.Random;
 
 @Getter
 public abstract strictfp class ElementGenerator {
-    public static boolean DEBUG = MapGenerator.DEBUG;
-
     protected SCMap map;
     protected Random random;
     protected MapParameters mapParameters;

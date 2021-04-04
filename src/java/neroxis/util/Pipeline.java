@@ -52,8 +52,8 @@ public strictfp class Pipeline {
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        final String callingLine = Util.getStackTraceLineInOneOfClasses(Collections.emptyList());
-        final String callingMethod = Util.getStackTraceMethod(executingMask.getClass());
+        final String callingLine = Util.getStackTraceLineInPackage("neroxis.generator");
+        final String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map");
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
         CompletableFuture<Mask<?>> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)

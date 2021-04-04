@@ -1,5 +1,6 @@
 package neroxis.generator.decal;
 
+import neroxis.generator.MapGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.MapParameters;
@@ -35,10 +36,10 @@ public class DefaultDecalGenerator extends DecalGenerator {
         decalPlacer.placeDecals(fieldDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getFieldAlbedos(), 64, 128, 24, 48);
         decalPlacer.placeDecals(slopeDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getSlopeNormals(), 16, 32, 16, 32);
         decalPlacer.placeDecals(slopeDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getSlopeAlbedos(), 64, 128, 32, 48);
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, placeDecals\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 }

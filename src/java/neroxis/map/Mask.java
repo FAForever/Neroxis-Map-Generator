@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 @Getter
 public strictfp abstract class Mask<T> {
@@ -130,9 +129,9 @@ public strictfp abstract class Mask<T> {
     }
 
     public List<Vector2f> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
-        return getSymmetryPointsWithOutOfBounds(x, y, symmetryType).stream()
-                .filter(this::inBounds)
-                .collect(Collectors.toList());
+        List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
+        symmetryPoints.removeIf(point -> !inBounds(point));
+        return symmetryPoints;
     }
 
     public List<Vector2f> getSymmetryPointsWithOutOfBounds(Vector3f v, SymmetryType symmetryType) {

@@ -1,5 +1,6 @@
 package neroxis.generator.texture;
 
+import neroxis.generator.MapGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
@@ -47,10 +48,10 @@ public class DefaultTextureGenerator extends TextureGenerator {
         long sTime = System.currentTimeMillis();
         map.setTextureMasksLowScaled(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
         map.setTextureMasksHighScaled(steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, generateTextures\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 

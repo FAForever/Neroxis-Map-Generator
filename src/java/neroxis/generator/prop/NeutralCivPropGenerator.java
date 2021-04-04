@@ -1,5 +1,6 @@
 package neroxis.generator.prop;
 
+import neroxis.generator.MapGenerator;
 import neroxis.generator.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
@@ -66,10 +67,10 @@ public class NeutralCivPropGenerator extends DefaultPropGenerator {
                 System.out.println("Could not generate bases due to lua parsing error");
                 e.printStackTrace();
             }
-            if (DEBUG) {
+            if (MapGenerator.DEBUG) {
                 System.out.printf("Done: %4d ms, %s, placeCivs\n",
                         System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                        Util.getStackTraceLineInPackage("neroxis.generator"));
             }
         }
     }

@@ -1,5 +1,6 @@
 package neroxis.generator.prop;
 
+import neroxis.generator.MapGenerator;
 import neroxis.generator.ParameterConstraints;
 import neroxis.generator.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
@@ -73,10 +74,10 @@ public class NavyWrecksPropGenerator extends DefaultPropGenerator {
             map.addArmy(army17);
             unitPlacer.placeUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T2_Navy, army17, army17Wreckage, 128f);
             unitPlacer.placeUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.Navy_Factory, army17, army17Wreckage, 256f);
-            if (DEBUG) {
+            if (MapGenerator.DEBUG) {
                 System.out.printf("Done: %4d ms, %s, placeUnits\n",
                         System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                        Util.getStackTraceLineInPackage("neroxis.generator"));
             }
         }
     }

@@ -107,7 +107,7 @@ public strictfp class MapGenerator {
             System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
             System.out.println("Seed: " + generator.seed);
             System.out.println(generator.mapParameters.toString());
-            System.out.println("Style: " + generator.mapStyle);
+            System.out.println("Style: " + generator.mapStyle.getName());
             System.out.println("Done");
             if (generator.previewFolder != null) {
                 SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);

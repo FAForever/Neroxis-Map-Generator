@@ -1,6 +1,7 @@
 package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
+import neroxis.generator.MapGenerator;
 import neroxis.generator.ParameterConstraints;
 import neroxis.generator.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
@@ -73,10 +74,10 @@ public class LargeBattlePropGenerator extends DefaultPropGenerator {
         propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
         propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
         propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
-        if (DEBUG) {
+        if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, placeProps\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 
@@ -95,10 +96,10 @@ public class LargeBattlePropGenerator extends DefaultPropGenerator {
             unitPlacer.placeUnits(t1LandWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T1_Land, army17, army17Wreckage, 1f, 4f);
             unitPlacer.placeUnits(t2LandWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T2_Land, army17, army17Wreckage, 30f);
             unitPlacer.placeUnits(t3LandWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T3_Land, army17, army17Wreckage, 192f);
-            if (DEBUG) {
+            if (MapGenerator.DEBUG) {
                 System.out.printf("Done: %4d ms, %s, placeUnits\n",
                         System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInClass(neroxis.generator.style.DefaultStyleGenerator.class));
+                        Util.getStackTraceLineInPackage("neroxis.generator"));
             }
         }
     }
