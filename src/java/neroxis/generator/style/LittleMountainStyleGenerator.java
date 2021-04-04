@@ -18,7 +18,8 @@ public strictfp class LittleMountainStyleGenerator extends StyleGenerator {
                 .build();
     }
 
-    public void initialize(MapParameters mapParameters, long seed) {
+    @Override
+    protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
         terrainGenerators.add(new LittleMountainTerrainGenerator());
         propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),

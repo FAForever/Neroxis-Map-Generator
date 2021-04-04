@@ -14,7 +14,7 @@ public strictfp class DefaultStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    public void initialize(MapParameters mapParameters, long seed) {
+    protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
         propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
                 new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));

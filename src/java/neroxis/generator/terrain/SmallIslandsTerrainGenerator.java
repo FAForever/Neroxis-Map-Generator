@@ -15,11 +15,13 @@ public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerato
                 .build();
     }
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         spawnSize = 64;
     }
 
+    @Override
     protected void landSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

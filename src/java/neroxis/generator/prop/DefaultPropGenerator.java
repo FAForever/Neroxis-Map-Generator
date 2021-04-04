@@ -46,6 +46,7 @@ public class DefaultPropGenerator extends PropGenerator {
         treeMask.intersect(passableLand.copy().deflate(8)).fillEdge(8, false);
     }
 
+
     protected void generatePropExclusionMasks() {
         noProps.init(unbuildable.getFinalMask());
 

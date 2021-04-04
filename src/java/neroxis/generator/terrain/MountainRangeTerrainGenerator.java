@@ -17,6 +17,7 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
                 .build();
     }
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         mountainBrushSize = map.getSize() / 16;
@@ -24,6 +25,7 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
         mountainBrushIntensity = 2;
     }
 
+    @Override
     protected void mountainSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

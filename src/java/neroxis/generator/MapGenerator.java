@@ -42,7 +42,7 @@ public strictfp class MapGenerator {
     }
 
     private final int numBins = 127;
-    private final List<StyleGenerator> possibleStyles = new ArrayList<>(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
+    private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
             new DefaultStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
             new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator()));
 
@@ -256,23 +256,7 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        possibleStyles.removeIf(style -> !style.getParameterConstraints().matches(mapParameters));
-        if (possibleStyles.size() > 0) {
-            List<Float> weights = possibleStyles.stream().map(StyleGenerator::getWeight).collect(Collectors.toList());
-            List<Float> cumulativeWeights = new ArrayList<>();
-            float sum = 0;
-            for (float weight : weights) {
-                sum += weight;
-                cumulativeWeights.add(sum);
-            }
-            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
-            mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
-                    .reduce((first, second) -> first)
-                    .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
-                    .orElse(new DefaultStyleGenerator());
-        } else {
-            mapStyle = new DefaultStyleGenerator();
-        }
+        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, mapStyles, mapParameters, new DefaultStyleGenerator());
     }
 
     public void interpretArguments(String[] args) throws Exception {
@@ -354,7 +338,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("styles")) {
-            System.out.println("Valid Styles:\n" + possibleStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
+            System.out.println("Valid Styles:\n" + mapStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
             validArgs = false;
             return;
         }
@@ -426,7 +410,7 @@ public strictfp class MapGenerator {
         if (!tournamentStyle) {
 
             if (arguments.containsKey("style") && arguments.get("style") != null) {
-                mapStyle = possibleStyles.stream().filter(style -> style.getName().equals(arguments.get("style").toUpperCase(Locale.ROOT)))
+                mapStyle = mapStyles.stream().filter(style -> style.getName().equals(arguments.get("style").toUpperCase(Locale.ROOT)))
                         .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style"));
                 styleSpecified = true;
             }
@@ -522,7 +506,7 @@ public strictfp class MapGenerator {
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
-            mapStyle = possibleStyles.get(optionBytes[4]);
+            mapStyle = mapStyles.get(optionBytes[4]);
             styleSpecified = true;
         }
     }
@@ -554,7 +538,7 @@ public strictfp class MapGenerator {
                     (byte) hydroCount,
                     (byte) terrainSymmetry.ordinal()};
         } else if (styleSpecified) {
-            int styleIndex = possibleStyles.indexOf(possibleStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
+            int styleIndex = mapStyles.indexOf(mapStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64),
@@ -609,8 +593,7 @@ public strictfp class MapGenerator {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 
-        mapStyle.initialize(mapParameters, random.nextLong());
-        map = mapStyle.generate();
+        map = mapStyle.generate(mapParameters, random.nextLong());
 
         sTime = System.currentTimeMillis();
         map.setGeneratePreview(!blind);
@@ -642,7 +625,7 @@ public strictfp class MapGenerator {
         if (DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(MapGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
         ScriptGenerator.generateScript(map);
 

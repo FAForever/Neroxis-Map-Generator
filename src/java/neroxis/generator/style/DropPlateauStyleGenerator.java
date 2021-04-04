@@ -4,7 +4,6 @@ import neroxis.generator.ParameterConstraints;
 import neroxis.generator.prop.*;
 import neroxis.generator.terrain.DropPlateauTerrainGenerator;
 import neroxis.map.MapParameters;
-import neroxis.map.SCMap;
 
 import java.util.Arrays;
 
@@ -19,8 +18,9 @@ public strictfp class DropPlateauStyleGenerator extends StyleGenerator {
                 .build();
     }
 
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    @Override
+    protected void initialize(MapParameters mapParameters, long seed) {
+        super.initialize(mapParameters, seed);
         terrainGenerators.add(new DropPlateauTerrainGenerator());
         propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
                 new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));

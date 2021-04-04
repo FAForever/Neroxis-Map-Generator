@@ -3,7 +3,6 @@ package neroxis.generator.terrain;
 import lombok.Getter;
 import neroxis.generator.ElementGenerator;
 import neroxis.generator.MapGenerator;
-import neroxis.generator.style.DefaultStyleGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
@@ -25,6 +24,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
 
     protected abstract void terrainSetup();
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
@@ -45,10 +45,11 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         if (MapGenerator.DEBUG) {
             System.out.printf("Done: %4d ms, %s, setHeightmap\n",
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInClass(DefaultStyleGenerator.class));
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
         }
     }
 
+    @Override
     public void setupPipeline() {
         terrainSetup();
         passableSetup();

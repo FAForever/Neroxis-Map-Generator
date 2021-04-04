@@ -18,7 +18,8 @@ public strictfp class ValleyStyleGenerator extends StyleGenerator {
                 .build();
     }
 
-    public void initialize(MapParameters mapParameters, long seed) {
+    @Override
+    protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
         teamSeparation = mapParameters.getMapSize() / 2;
         terrainGenerators.add(new ValleyTerrainGenerator());

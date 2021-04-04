@@ -18,7 +18,8 @@ public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
                 .build();
     }
 
-    public void initialize(MapParameters mapParameters, long seed) {
+    @Override
+    protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
         terrainGenerators.add(new LandBridgeTerrainGenerator());
         propGenerators.addAll(Arrays.asList(new LargeBattlePropGenerator(), new NavyWrecksPropGenerator(),

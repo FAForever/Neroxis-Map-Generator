@@ -46,6 +46,7 @@ public class DefaultTerrainGenerator extends TerrainGenerator {
     protected float hillBrushIntensity;
     protected float mountainBrushDensity;
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
@@ -201,13 +202,17 @@ public class DefaultTerrainGenerator extends TerrainGenerator {
             land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
         }
 
+        ensureSpawnTerrain();
+
+        mountains.intersect(mapParameters.getLandDensity() < .25f ? land.copy().deflate(24) : land);
+    }
+
+    protected void ensureSpawnTerrain() {
         mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).smooth(12, .125f));
         mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
 
         plateaus.intersect(land).minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
-
-        mountains.intersect(mapParameters.getLandDensity() < .25f ? land.copy().deflate(24) : land);
     }
 
     protected void setupHeightmapPipeline() {
@@ -288,11 +293,7 @@ public class DefaultTerrainGenerator extends TerrainGenerator {
                 .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
                 .smooth(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
-        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64).addWhiteNoise(plateauHeight / 2).resample(mapSize + 1).addWhiteNoise(1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
-                .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
-
-        heightmap.add(heightmapLand).add(waterHeight).add(noise).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+        heightmap.add(heightmapLand).add(waterHeight).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
     }

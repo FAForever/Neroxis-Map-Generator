@@ -15,11 +15,13 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
                 .build();
     }
 
+    @Override
     protected void landSetup() {
         land.setSize(map.getSize() + 1);
         land.invert();
     }
 
+    @Override
     protected void mountainSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

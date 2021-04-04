@@ -15,6 +15,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
                 .build();
     }
 
+    @Override
     protected void landSetup() {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
@@ -23,9 +24,8 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
         land.setSize(mapSize + 1);
         connectTeammates(land, 8, 2, maxStepSize);
         connectTeams(land, 0, 2, 1, maxStepSize);
-        map.getSpawns().forEach(spawn -> {
-            pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f));
-        });
+        map.getSpawns().forEach(spawn ->
+                pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
         land.grow(.5f, SymmetryType.SPAWN, 8);
@@ -33,6 +33,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
         land.smooth(8);
     }
 
+    @Override
     protected void plateausSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

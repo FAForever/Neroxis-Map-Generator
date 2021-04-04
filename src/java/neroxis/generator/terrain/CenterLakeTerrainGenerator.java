@@ -14,6 +14,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
                 .build();
     }
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         mountainBrushSize = 32;
@@ -22,6 +23,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         spawnSize = 48;
     }
 
+    @Override
     protected void landSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

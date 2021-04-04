@@ -18,6 +18,7 @@ public class DefaultTextureGenerator extends TextureGenerator {
     protected ConcurrentFloatMask rockTexture;
     protected ConcurrentFloatMask accentRockTexture;
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();

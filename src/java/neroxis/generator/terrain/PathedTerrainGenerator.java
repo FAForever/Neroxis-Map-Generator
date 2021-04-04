@@ -44,11 +44,7 @@ public strictfp abstract class PathedTerrainGenerator extends DefaultTerrainGene
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
 
-        mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).smooth(12, .125f));
-        mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
-
-        plateaus.intersect(land).minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
+        ensureSpawnTerrain();
 
         mountains.intersect(land.copy().deflate(24));
     }

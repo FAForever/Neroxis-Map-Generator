@@ -5,6 +5,7 @@ import neroxis.map.SymmetryType;
 
 public strictfp abstract class PathedPlateauTerrainGenerator extends DefaultTerrainGenerator {
 
+    @Override
     protected void plateausSetup() {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();

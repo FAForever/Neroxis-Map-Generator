@@ -13,6 +13,7 @@ public class DefaultResourceGenerator extends ResourceGenerator {
     protected ConcurrentBinaryMask resourceMask;
     protected ConcurrentBinaryMask waterResourceMask;
 
+    @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();

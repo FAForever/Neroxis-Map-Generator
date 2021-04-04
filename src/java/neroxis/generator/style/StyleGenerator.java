@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
+import static neroxis.util.RandomUtils.selectRandomMatchingGenerator;
+
 public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
@@ -39,7 +41,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected int teamSeparation;
     private SpawnPlacer spawnPlacer;
 
-    public void initialize(MapParameters mapParameters, long seed) {
+    protected void initialize(MapParameters mapParameters, long seed) {
         this.mapParameters = mapParameters;
         random = new Random(seed);
         map = new SCMap(mapParameters.getMapSize(), mapParameters.getSpawnCount(),
@@ -53,20 +55,28 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
-    public SCMap generate() {
+    public SCMap generate(MapParameters mapParameters, long seed) {
+        initialize(mapParameters, seed);
+
+        long sTime = System.currentTimeMillis();
         spawnPlacer.placeSpawns(spawnSeparation, teamSeparation, mapParameters.getSymmetrySettings());
+        if (MapGenerator.DEBUG) {
+            System.out.printf("Done: %4d ms, %s, placeSpawns\n",
+                    System.currentTimeMillis() - sTime,
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
+        }
 
-        terrainGenerators.removeIf(terrainGenerator -> !terrainGenerator.getParameterConstraints().matches(mapParameters));
-        textureGenerators.removeIf(textureGenerator -> !textureGenerator.getParameterConstraints().matches(mapParameters));
-        resourceGenerators.removeIf(resourceGenerator -> !resourceGenerator.getParameterConstraints().matches(mapParameters));
-        propGenerators.removeIf(propGenerator -> !propGenerator.getParameterConstraints().matches(mapParameters));
-        decalGenerators.removeIf(decalGenerator -> !decalGenerator.getParameterConstraints().matches(mapParameters));
-
-        TerrainGenerator terrainGenerator = terrainGenerators.size() >= 1 ? terrainGenerators.get(random.nextInt(terrainGenerators.size())) : new DefaultTerrainGenerator();
-        TextureGenerator textureGenerator = textureGenerators.size() >= 1 ? textureGenerators.get(random.nextInt(textureGenerators.size())) : new DefaultTextureGenerator();
-        ResourceGenerator resourceGenerator = resourceGenerators.size() >= 1 ? resourceGenerators.get(random.nextInt(resourceGenerators.size())) : new DefaultResourceGenerator();
-        PropGenerator propGenerator = propGenerators.size() >= 1 ? propGenerators.get(random.nextInt(propGenerators.size())) : new DefaultPropGenerator();
-        DecalGenerator decalGenerator = decalGenerators.size() >= 1 ? decalGenerators.get(random.nextInt(decalGenerators.size())) : new DefaultDecalGenerator();
+        sTime = System.currentTimeMillis();
+        TerrainGenerator terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, mapParameters, new DefaultTerrainGenerator());
+        TextureGenerator textureGenerator = selectRandomMatchingGenerator(random, textureGenerators, mapParameters, new DefaultTextureGenerator());
+        ResourceGenerator resourceGenerator = selectRandomMatchingGenerator(random, resourceGenerators, mapParameters, new DefaultResourceGenerator());
+        PropGenerator propGenerator = selectRandomMatchingGenerator(random, propGenerators, mapParameters, new DefaultPropGenerator());
+        DecalGenerator decalGenerator = selectRandomMatchingGenerator(random, decalGenerators, mapParameters, new DefaultDecalGenerator());
+        if (MapGenerator.DEBUG) {
+            System.out.printf("Done: %4d ms, %s, selectGenerators\n",
+                    System.currentTimeMillis() - sTime,
+                    Util.getStackTraceLineInPackage("neroxis.generator"));
+        }
 
         terrainGenerator.initialize(map, random.nextLong(), mapParameters);
         terrainGenerator.setupPipeline();
@@ -104,6 +114,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         return map;
     }
 
+    @Override
     public void setupPipeline() {
     }
 
