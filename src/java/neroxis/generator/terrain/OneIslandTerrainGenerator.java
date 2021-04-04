@@ -1,0 +1,54 @@
+package neroxis.generator.terrain;
+
+import neroxis.generator.ParameterConstraints;
+import neroxis.map.MapParameters;
+import neroxis.map.SCMap;
+import neroxis.map.SymmetrySettings;
+import neroxis.map.SymmetryType;
+
+public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
+
+    public OneIslandTerrainGenerator() {
+        parameterConstraints = ParameterConstraints.builder()
+                .landDensity(0f, .75f)
+                .mapSizes(512, 1024)
+                .build();
+    }
+
+    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
+        super.initialize(map, seed, mapParameters);
+        mountainBrushSize = 32;
+        mountainBrushDensity = .1f;
+        mountainBrushIntensity = 10;
+        spawnSize = 48;
+    }
+
+    protected void landSetup() {
+        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+        int mapSize = map.getSize();
+        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(mapParameters.getLandDensity());
+        int minMiddlePoints = 2;
+        int maxMiddlePoints = 4;
+        int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numTeammateConnections = (int) (2 * normalizedLandDensity + 2) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numWalkers = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - normalizedLandDensity) * .75f))) + mapSize / 8;
+        float maxStepSize = mapSize / 128f;
+        land.setSize(mapSize + 1);
+
+        pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
+                .inflate(mapSize / 64f).smooth(12, .125f));
+        connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        land.inflate(mapSize / 128f).setSize(mapSize / 8);
+        land.grow(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);
+        if (mapSize > 512) {
+            land.erode(.5f, SymmetryType.SPAWN, 4);
+        }
+        land.setSize(mapSize + 1);
+        land.smooth(mapSize / 64, .75f);
+    }
+}
+
+

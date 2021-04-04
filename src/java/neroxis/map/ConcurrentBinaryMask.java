@@ -3,6 +3,7 @@ package neroxis.map;
 import lombok.Getter;
 import neroxis.util.Pipeline;
 import neroxis.util.Vector2f;
+import neroxis.util.Vector3f;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         if (name.equals("mocked")) {
             this.mask = new BinaryMask(mask.getBinaryMask(), seed);
         } else {
-            Pipeline.add(this, Collections.singletonList(mask), res ->
+            Pipeline.add(this, Arrays.asList(this, mask), res ->
                     this.mask.combine(new BinaryMask(((ConcurrentBinaryMask) res.get(0)).getBinaryMask(), seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
@@ -45,7 +46,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
         if (name.equals("mocked")) {
             this.mask = new BinaryMask(mask.getFloatMask(), threshold, seed);
         } else {
-            Pipeline.add(this, Collections.singletonList(mask), res ->
+            Pipeline.add(this, Arrays.asList(this, mask), res ->
                     this.mask.combine(new BinaryMask(((ConcurrentFloatMask) res.get(0)).getFloatMask(), threshold, seed)));
         }
         this.symmetrySettings = mask.getSymmetrySettings();
@@ -253,6 +254,18 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
     public ConcurrentBinaryMask fillCenter(int extent, boolean value) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.fillCenter(extent, value)
+        );
+    }
+
+    public ConcurrentBinaryMask fillCircle(Vector3f location, float radius, boolean value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.fillCircle(location, radius, value)
+        );
+    }
+
+    public ConcurrentBinaryMask fillCircle(Vector2f location, float radius, boolean value) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.fillCircle(location, radius, value)
         );
     }
 

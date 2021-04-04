@@ -23,7 +23,8 @@ public strictfp class MapParameters {
 
     public String toString() {
         return "Spawns: " + spawnCount +
-                "\nMapSize: " + mapSize +
+                "\nMap Size: " + mapSize +
+                "\nNum Teams: " + numTeams +
                 "\nBiome: " + biome.getName() +
                 "\nLand Density: " + landDensity +
                 "\nPlateau Density: " + plateauDensity +

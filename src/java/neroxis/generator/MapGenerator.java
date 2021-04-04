@@ -7,7 +7,7 @@ import neroxis.biomes.Biome;
 import neroxis.biomes.Biomes;
 import neroxis.exporter.MapExporter;
 import neroxis.exporter.SCMapExporter;
-import neroxis.generator.mapstyles.MapStyle;
+import neroxis.generator.style.*;
 import neroxis.map.*;
 import neroxis.util.*;
 
@@ -42,6 +42,9 @@ public strictfp class MapGenerator {
     }
 
     private final int numBins = 127;
+    private final List<StyleGenerator> possibleStyles = new ArrayList<>(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
+            new DefaultStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
+            new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator()));
 
     //read from cli args
     private String pathToFolder = ".";
@@ -74,7 +77,7 @@ public strictfp class MapGenerator {
     private boolean validArgs;
     private boolean generationComplete;
     private boolean styleSpecified;
-    private MapStyle mapStyle;
+    private StyleGenerator mapStyle;
     private MapParameters mapParameters;
     private int numToGen = 1;
     private String previewFolder;
@@ -253,10 +256,9 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        List<MapStyle> possibleStyles = new ArrayList<>(Arrays.asList(MapStyle.values()));
-        possibleStyles.removeIf(style -> !style.matches(mapParameters));
+        possibleStyles.removeIf(style -> !style.getParameterConstraints().matches(mapParameters));
         if (possibleStyles.size() > 0) {
-            List<Float> weights = possibleStyles.stream().map(MapStyle::getWeight).collect(Collectors.toList());
+            List<Float> weights = possibleStyles.stream().map(StyleGenerator::getWeight).collect(Collectors.toList());
             List<Float> cumulativeWeights = new ArrayList<>();
             float sum = 0;
             for (float weight : weights) {
@@ -267,9 +269,9 @@ public strictfp class MapGenerator {
             mapStyle = cumulativeWeights.stream().filter(weight -> value <= weight)
                     .reduce((first, second) -> first)
                     .map(weight -> possibleStyles.get(cumulativeWeights.indexOf(weight)))
-                    .orElse(MapStyle.DEFAULT);
+                    .orElse(new DefaultStyleGenerator());
         } else {
-            mapStyle = MapStyle.DEFAULT;
+            mapStyle = new DefaultStyleGenerator();
         }
     }
 
@@ -312,7 +314,7 @@ public strictfp class MapGenerator {
         if (!styleSpecified || mapStyle == null) {
             setMapStyle();
         } else {
-            mapParameters = mapStyle.initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
         }
         if (mapName == null) {
             generateMapName();
@@ -352,7 +354,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("styles")) {
-            System.out.println("Valid Styles:\n" + Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
+            System.out.println("Valid Styles:\n" + possibleStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
             validArgs = false;
             return;
         }
@@ -424,7 +426,8 @@ public strictfp class MapGenerator {
         if (!tournamentStyle) {
 
             if (arguments.containsKey("style") && arguments.get("style") != null) {
-                mapStyle = MapStyle.valueOf(arguments.get("style").toUpperCase());
+                mapStyle = possibleStyles.stream().filter(style -> style.getName().equals(arguments.get("style").toUpperCase(Locale.ROOT)))
+                        .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style"));
                 styleSpecified = true;
             }
 
@@ -503,10 +506,13 @@ public strictfp class MapGenerator {
             numTeams = optionBytes[2];
         }
 
+        if (optionBytes.length > 3) {
+            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
+        }
+
         randomizeOptions();
 
         if (optionBytes.length == 12) {
-            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
             landDensity = ParseUtils.normalizeBin(optionBytes[4], numBins);
             plateauDensity = ParseUtils.normalizeBin(optionBytes[5], numBins);
             mountainDensity = ParseUtils.normalizeBin(optionBytes[6], numBins);
@@ -516,8 +522,7 @@ public strictfp class MapGenerator {
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
         } else if (optionBytes.length == 5) {
-            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
-            mapStyle = MapStyle.values()[optionBytes[4]];
+            mapStyle = possibleStyles.get(optionBytes[4]);
             styleSpecified = true;
         }
     }
@@ -549,11 +554,13 @@ public strictfp class MapGenerator {
                     (byte) hydroCount,
                     (byte) terrainSymmetry.ordinal()};
         } else if (styleSpecified) {
+            int styleIndex = possibleStyles.indexOf(possibleStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64),
                     (byte) numTeams,
                     (byte) Biomes.BIOMES_LIST.indexOf(biome.getName()),
-                    (byte) mapStyle.ordinal()};
+                    (byte) styleIndex};
         } else {
             optionArray = new byte[]{(byte) spawnCount,
                     (byte) (mapSize / 64),
@@ -602,7 +609,8 @@ public strictfp class MapGenerator {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 
-        map = mapStyle.generate(mapParameters, random);
+        mapStyle.initialize(mapParameters, random.nextLong());
+        map = mapStyle.generate();
 
         sTime = System.currentTimeMillis();
         map.setGeneratePreview(!blind);

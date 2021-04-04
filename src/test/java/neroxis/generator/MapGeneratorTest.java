@@ -104,7 +104,7 @@ public class MapGeneratorTest {
     public void TestDeterminism() throws Exception {
         instance.interpretArguments(keywordArgs);
         SCMap map1 = instance.generate();
-        String[] hashArray1 = Pipeline.hashArray.clone();
+        String[] hashArray1 = Pipeline.getHashArray().clone();
 
         for (int i = 0; i < 10; i++) {
             Pipeline.reset();
@@ -112,7 +112,7 @@ public class MapGeneratorTest {
 
             instance.interpretArguments(keywordArgs);
             SCMap map2 = instance.generate();
-            String[] hashArray2 = Pipeline.hashArray.clone();
+            String[] hashArray2 = Pipeline.getHashArray().clone();
 
             assertArrayEquals(hashArray1, hashArray2);
             assertEquals(map1.getName(), map2.getName());

@@ -14,10 +14,9 @@ public strictfp abstract class ConcurrentMask<T extends Mask<?>> {
     protected final String name;
     protected final Random random;
     protected SymmetrySettings symmetrySettings;
+    protected int plannedSize;
     @Getter(AccessLevel.PROTECTED)
     protected T mask;
-    @Getter(AccessLevel.PROTECTED)
-    protected int plannedSize;
 
     public ConcurrentMask(Long seed, String name, int plannedSize) {
         this.name = name;

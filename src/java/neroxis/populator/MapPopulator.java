@@ -250,11 +250,11 @@ public strictfp class MapPopulator {
         if (populateSpawns) {
             if (spawnCount > 0) {
                 map.setSpawnCountInit(spawnCount);
-                SpawnGenerator spawnGenerator = new SpawnGenerator(map, random.nextLong());
+                SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
                 float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BinaryMask spawns = land.copy();
                 spawns.intersect(passable).minus(ramps).deflate(16);
-                spawnGenerator.generateSpawns(spawns, spawnSeparation);
+                spawnPlacer.placeSpawns(spawns, spawnSeparation);
             } else {
                 map.getSpawns().clear();
             }
@@ -272,9 +272,9 @@ public strictfp class MapPopulator {
         if (populateMexes) {
             if (mexCountPerPlayer > 0) {
                 map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
-                MexGenerator mexGenerator = new MexGenerator(map, random.nextLong());
+                MexPlacer mexPlacer = new MexPlacer(map, random.nextLong());
 
-                mexGenerator.generateMexes(resourceMask, waterResourceMask);
+                mexPlacer.placeMexes(resourceMask, waterResourceMask);
             } else {
                 map.getMexes().clear();
             }
@@ -283,9 +283,9 @@ public strictfp class MapPopulator {
         if (populateHydros) {
             if (hydroCountPerPlayer > 0) {
                 map.setMexCountInit(hydroCountPerPlayer * map.getSpawnCount());
-                HydroGenerator hydroGenerator = new HydroGenerator(map, random.nextLong());
+                HydroPlacer hydroPlacer = new HydroPlacer(map, random.nextLong());
 
-                hydroGenerator.generateHydros(resourceMask.deflate(4));
+                hydroPlacer.placeHydros(resourceMask.deflate(4));
             } else {
                 map.getHydros().clear();
             }
@@ -483,7 +483,7 @@ public strictfp class MapPopulator {
 
         if (populateProps) {
             map.getProps().clear();
-            PropGenerator propGenerator = new PropGenerator(map, random.nextLong());
+            PropPlacer propPlacer = new PropPlacer(map, random.nextLong());
             PropMaterials propMaterials;
 
             try {
@@ -526,15 +526,15 @@ public strictfp class MapPopulator {
             }
 
             if (propMaterials.getTreeGroups() != null && propMaterials.getTreeGroups().length > 0) {
-                propGenerator.generateProps(treeMask.minus(noProps), propMaterials.getTreeGroups(), 3f);
+                propPlacer.placeProps(treeMask.minus(noProps), propMaterials.getTreeGroups(), 3f);
             }
             if (propMaterials.getRocks() != null && propMaterials.getRocks().length > 0) {
-                propGenerator.generateProps(cliffRockMask.minus(noProps), propMaterials.getRocks(), 1.5f);
-                propGenerator.generateProps(largeRockFieldMask.minus(noProps), propMaterials.getRocks(), 1.5f);
-                propGenerator.generateProps(smallRockFieldMask.minus(noProps), propMaterials.getRocks(), 1.5f);
+                propPlacer.placeProps(cliffRockMask.minus(noProps), propMaterials.getRocks(), 1.5f);
+                propPlacer.placeProps(largeRockFieldMask.minus(noProps), propMaterials.getRocks(), 1.5f);
+                propPlacer.placeProps(smallRockFieldMask.minus(noProps), propMaterials.getRocks(), 1.5f);
             }
             if (propMaterials.getBoulders() != null && propMaterials.getBoulders().length > 0) {
-                propGenerator.generateProps(fieldStoneMask.minus(noProps), propMaterials.getBoulders(), 30f);
+                propPlacer.placeProps(fieldStoneMask.minus(noProps), propMaterials.getBoulders(), 30f);
             }
         }
 
@@ -546,10 +546,10 @@ public strictfp class MapPopulator {
             BinaryMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
             passableLand.intersect(passableAI);
             passableWater.deflate(16).intersect(passableAI).fillEdge(8, false);
-            AIMarkerGenerator.generateAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
-            AIMarkerGenerator.generateAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
-            AIMarkerGenerator.generateAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");
-            AIMarkerGenerator.generateAirAIMarkers(map);
+            AIMarkerPlacer.placeAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");
+            AIMarkerPlacer.placeAIMarkers(passableLand, map.getLandAIMarkers(), "LandPN%d");
+            AIMarkerPlacer.placeAIMarkers(passableWater, map.getNavyAIMarkers(), "NavyPN%d");
+            AIMarkerPlacer.placeAirAIMarkers(map);
         }
 
         map.setHeights();

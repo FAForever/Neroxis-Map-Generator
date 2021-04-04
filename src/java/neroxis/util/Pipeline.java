@@ -2,7 +2,6 @@ package neroxis.util;
 
 import lombok.Getter;
 import neroxis.generator.MapGenerator;
-import neroxis.generator.mapstyles.MapStyle;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.ConcurrentFloatMask;
 import neroxis.map.ConcurrentMask;
@@ -25,8 +24,8 @@ public strictfp class Pipeline {
     public static boolean HASH_MASK = true;
 
     private static final List<Entry> pipeline = new ArrayList<>();
-    public static CompletableFuture<List<ConcurrentMask<?>>> started = new CompletableFuture<>();
-    public static String[] hashArray;
+    private static CompletableFuture<List<ConcurrentMask<?>>> started = new CompletableFuture<>();
+    private static String[] hashArray;
 
     public static void reset() {
         started = new CompletableFuture<>();
@@ -53,7 +52,7 @@ public strictfp class Pipeline {
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        final String callingLine = Util.getStackTraceLineInOneOfClasses(Arrays.stream(MapStyle.values()).map(MapStyle::getGeneratorClass).collect(Collectors.toList()));
+        final String callingLine = Util.getStackTraceLineInOneOfClasses(Collections.emptyList());
         final String callingMethod = Util.getStackTraceMethod(executingMask.getClass());
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
@@ -105,9 +104,9 @@ public strictfp class Pipeline {
         started.complete(null);
     }
 
-    public static void stop() {
+    public static void join() {
         pipeline.forEach(e -> e.getFuture().join());
-        System.out.println("pipeline stopped!");
+        System.out.println("Pipeline completed!");
     }
 
     public static boolean isStarted() {
@@ -174,6 +173,10 @@ public strictfp class Pipeline {
         }
         out.flush();
         out.close();
+    }
+
+    public static String[] getHashArray() {
+        return hashArray.clone();
     }
 
     @Getter
