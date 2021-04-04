@@ -579,8 +579,12 @@ public strictfp abstract class Mask<T> {
     }
 
     protected void modifyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-            for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
+        int minX = getMinXBound(symmetryType);
+        int maxX = getMaxXBound(symmetryType);
+        for (int x = minX; x < maxX; x++) {
+            int minY = getMinYBound(x, symmetryType);
+            int maxY = getMaxYBound(x, symmetryType);
+            for (int y = minY; y < maxY; y++) {
                 T value = valueFunction.apply(x, y);
                 setValueAt(x, y, value);
                 List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
@@ -599,8 +603,12 @@ public strictfp abstract class Mask<T> {
     }
 
     protected void applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
-        for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-            for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
+        int minX = getMinXBound(symmetryType);
+        int maxX = getMaxXBound(symmetryType);
+        for (int x = minX; x < maxX; x++) {
+            int minY = getMinYBound(x, symmetryType);
+            int maxY = getMaxYBound(x, symmetryType);
+            for (int y = minY; y < maxY; y++) {
                 maskAction.accept(x, y);
             }
         }

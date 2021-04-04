@@ -615,8 +615,12 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     protected void addWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-            for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
+        int minX = getMinXBound(symmetryType);
+        int maxX = getMaxXBound(symmetryType);
+        for (int x = minX; x < maxX; x++) {
+            int minY = getMinYBound(x, symmetryType);
+            int maxY = getMaxYBound(x, symmetryType);
+            for (int y = minY; y < maxY; y++) {
                 Float value = valueFunction.apply(x, y);
                 addValueAt(x, y, value);
                 Vector2f location = new Vector2f(x, y);
@@ -636,8 +640,12 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     protected void multiplyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        for (int x = getMinXBound(symmetryType); x < getMaxXBound(symmetryType); x++) {
-            for (int y = getMinYBound(x, symmetryType); y < getMaxYBound(x, symmetryType); y++) {
+        int minX = getMinXBound(symmetryType);
+        int maxX = getMaxXBound(symmetryType);
+        for (int x = minX; x < maxX; x++) {
+            int minY = getMinYBound(x, symmetryType);
+            int maxY = getMaxYBound(x, symmetryType);
+            for (int y = minY; y < maxY; y++) {
                 Float value = valueFunction.apply(x, y);
                 multiplyValueAt(x, y, value);
                 Vector2f location = new Vector2f(x, y);
