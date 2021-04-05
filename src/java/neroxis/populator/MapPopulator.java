@@ -9,7 +9,6 @@ import neroxis.util.FileUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -61,12 +60,7 @@ public strictfp class MapPopulator {
 
     public static void main(String[] args) throws Exception {
 
-        Locale.setDefault(Locale.US);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
+        Locale.setDefault(Locale.ROOT);
 
         MapPopulator populator = new MapPopulator();
 

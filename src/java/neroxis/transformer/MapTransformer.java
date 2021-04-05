@@ -4,20 +4,17 @@ import neroxis.exporter.MapExporter;
 import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
-import neroxis.util.FileUtils;
+import neroxis.util.Util;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public strictfp class MapTransformer {
-
-    public static boolean DEBUG = false;
 
     private Path inMapPath;
     private Path outFolderPath;
@@ -47,12 +44,7 @@ public strictfp class MapTransformer {
 
     public static void main(String[] args) throws IOException {
 
-        Locale.setDefault(Locale.US);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
+        Locale.setDefault(Locale.ROOT);
 
         MapTransformer transformer = new MapTransformer();
 
@@ -98,7 +90,7 @@ public strictfp class MapTransformer {
         }
 
         if (arguments.containsKey("debug")) {
-            DEBUG = true;
+            Util.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {
@@ -249,7 +241,6 @@ public strictfp class MapTransformer {
 
     private void transformSymmetry() {
         heightmapBase = map.getHeightMask(symmetrySettings);
-        heightmapBase.startVisualDebugger("hmb");
 
         if (transformTerrain) {
             transformTerrain();

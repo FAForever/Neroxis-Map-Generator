@@ -1,13 +1,8 @@
 package neroxis.util;
 
-import neroxis.evaluator.MapEvaluator;
-import neroxis.generator.ImageGenerator;
-import neroxis.generator.MapGenerator;
 import neroxis.map.BinaryMask;
 import neroxis.map.FloatMask;
 import neroxis.map.Mask;
-import neroxis.populator.MapPopulator;
-import neroxis.transformer.MapTransformer;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -15,12 +10,11 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 public strictfp class VisualDebugger {
 
-    public static boolean ENABLED = MapGenerator.DEBUG || MapTransformer.DEBUG || MapEvaluator.DEBUG || MapPopulator.DEBUG || ImageGenerator.DEBUG;
+    public static boolean ENABLED = Util.DEBUG;
 
     /**
      * If false, color representation of float masks is scaled to include negative ranges.
@@ -57,7 +51,7 @@ public strictfp class VisualDebugger {
         if (dontRecord(mask)) {
             return;
         }
-        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask.getClass());
+        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode());
     }
 
     public static void visualizeMask(FloatMask mask) {
@@ -107,7 +101,7 @@ public strictfp class VisualDebugger {
             } else {
                 return 0xFF_00_00_00;
             }
-        }, mask.getSize(), mask.hashCode(), mask.getClass());
+        }, mask.getSize(), mask.hashCode());
     }
 
     private static boolean dontRecord(Mask<?> mask) {
@@ -140,26 +134,10 @@ public strictfp class VisualDebugger {
     }
 
 
-    private static void visualize(ImageSource imageSource, int size, int maskHash, Class<? extends Mask<?>> clazz) {
+    private static void visualize(ImageSource imageSource, int size, int maskHash) {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);
         String maskName = maskDetails[0];
-        String parentClass = maskDetails[1];
-        LinkedHashSet<String> methods = Util.getStackTraceMethods(clazz);
-        methods.addAll(Util.getStackTraceMethods("neroxis.map.Mask"));
-        String function;
-        if (clazz.getCanonicalName().equals(parentClass)) {
-            function = methods.iterator().next();
-        } else if (methods.size() == 1) {
-            function = methods.iterator().next();
-        } else if (methods.contains("fillParallelogram")) {
-            function = methods.iterator().next();
-        } else if (methods.contains("fillArc")) {
-            function = methods.iterator().next();
-        } else if (methods.contains("show")) {
-            function = "show";
-        } else {
-            return;
-        }
+        String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map");
         float perPixelSize = calculateAutoZoom(size);
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels
@@ -174,7 +152,7 @@ public strictfp class VisualDebugger {
         at.scale(perPixelSize, perPixelSize);
         AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         scaleOp.filter(currentImage, scaledImage);
-        VisualDebuggerGui.update(maskName + " " + function, scaledImage, size);
+        VisualDebuggerGui.update(maskName + " " + callingMethod, scaledImage, size);
     }
 
     private static float calculateAutoZoom(int imageSize) {

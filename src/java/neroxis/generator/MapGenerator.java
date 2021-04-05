@@ -34,7 +34,8 @@ public strictfp class MapGenerator {
     public static final String VERSION;
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
     private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
-    public static boolean DEBUG = false;
+
+    private static int NUM_TO_GEN = 1;
 
     static {
         String version = MapGenerator.class.getPackage().getImplementationVersion();
@@ -43,8 +44,9 @@ public strictfp class MapGenerator {
 
     private final int numBins = 127;
     private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
-            new DefaultStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
-            new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator()));
+            new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
+            new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
+            new TestStyleGenerator()));
 
     //read from cli args
     private String pathToFolder = ".";
@@ -75,11 +77,9 @@ public strictfp class MapGenerator {
 
     private SymmetrySettings symmetrySettings;
     private boolean validArgs;
-    private boolean generationComplete;
     private boolean styleSpecified;
     private StyleGenerator mapStyle;
     private MapParameters mapParameters;
-    private int numToGen = 1;
     private String previewFolder;
 
     public static void main(String[] args) throws Exception {
@@ -87,10 +87,9 @@ public strictfp class MapGenerator {
         int count = 0;
         Locale.setDefault(Locale.ROOT);
 
-        MapGenerator generator = new MapGenerator();
-
-        while (count < generator.numToGen) {
-            generator.mapName = null;
+        while (count < MapGenerator.NUM_TO_GEN) {
+            Pipeline.reset();
+            MapGenerator generator = new MapGenerator();
             generator.seed = new Random().nextLong();
             generator.interpretArguments(args);
             if (!generator.validArgs) {
@@ -106,7 +105,7 @@ public strictfp class MapGenerator {
             generator.save();
             System.out.println("Saving map to " + Paths.get(generator.pathToFolder).toAbsolutePath() + File.separator + generator.mapName.replace('/', '^'));
             System.out.println("Seed: " + generator.seed);
-            System.out.println(generator.mapParameters.toString());
+            System.out.println(generator.mapStyle.mapParameters.toString());
             System.out.println("Style: " + generator.mapStyle.getName());
             System.out.println("Done");
             if (generator.previewFolder != null) {
@@ -256,13 +255,14 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, mapStyles, mapParameters, new DefaultStyleGenerator());
+        List<StyleGenerator> productionStyles = mapStyles.stream().filter(style -> !style.getName().equals("TEST")).collect(Collectors.toList());
+        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, mapParameters, new BasicStyleGenerator());
     }
 
     public void interpretArguments(String[] args) throws Exception {
         styleSpecified = false;
         validArgs = true;
-        generationComplete = true;
+        seed = new Random().nextLong();
         if (args.length == 0 || args[0].startsWith("--")) {
             interpretArguments(ArgumentParser.parse(args));
         } else if (args.length == 2) {
@@ -299,6 +299,7 @@ public strictfp class MapGenerator {
             setMapStyle();
         } else {
             mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
+            biome = mapParameters.getBiome();
         }
         if (mapName == null) {
             generateMapName();
@@ -360,11 +361,11 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("debug")) {
-            DEBUG = true;
+            Util.DEBUG = true;
         }
 
         if (arguments.containsKey("num-to-gen")) {
-            numToGen = Integer.parseInt(arguments.get("num-to-gen"));
+            NUM_TO_GEN = Integer.parseInt(arguments.get("num-to-gen"));
         }
 
         if (arguments.containsKey("folder-path")) {
@@ -490,11 +491,11 @@ public strictfp class MapGenerator {
             numTeams = optionBytes[2];
         }
 
+        randomizeOptions();
+
         if (optionBytes.length > 3) {
             biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
         }
-
-        randomizeOptions();
 
         if (optionBytes.length == 12) {
             landDensity = ParseUtils.normalizeBin(optionBytes[4], numBins);
@@ -525,30 +526,30 @@ public strictfp class MapGenerator {
         String seedString = NAME_ENCODER.encode(seedBuffer.array());
         byte[] optionArray;
         if (optionsUsed) {
-            optionArray = new byte[]{(byte) spawnCount,
-                    (byte) (mapSize / 64),
-                    (byte) numTeams,
-                    (byte) Biomes.BIOMES_LIST.indexOf(biome.getName()),
-                    (byte) ParseUtils.binPercentage(landDensity, numBins),
-                    (byte) ParseUtils.binPercentage(plateauDensity, numBins),
-                    (byte) ParseUtils.binPercentage(mountainDensity, numBins),
-                    (byte) ParseUtils.binPercentage(rampDensity, numBins),
-                    (byte) ParseUtils.binPercentage(reclaimDensity, numBins),
-                    (byte) ParseUtils.binPercentage(mexDensity, numBins),
-                    (byte) hydroCount,
-                    (byte) terrainSymmetry.ordinal()};
+            optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),
+                    (byte) (mapParameters.getMapSize() / 64),
+                    (byte) mapParameters.getNumTeams(),
+                    (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
+                    (byte) ParseUtils.binPercentage(mapParameters.getLandDensity(), numBins),
+                    (byte) ParseUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
+                    (byte) ParseUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
+                    (byte) ParseUtils.binPercentage(mapParameters.getRampDensity(), numBins),
+                    (byte) ParseUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
+                    (byte) ParseUtils.binPercentage(mapParameters.getMexDensity(), numBins),
+                    (byte) mapParameters.getHydroCount(),
+                    (byte) mapParameters.getSymmetrySettings().getTerrainSymmetry().ordinal()};
         } else if (styleSpecified) {
             int styleIndex = mapStyles.indexOf(mapStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
-            optionArray = new byte[]{(byte) spawnCount,
-                    (byte) (mapSize / 64),
-                    (byte) numTeams,
-                    (byte) Biomes.BIOMES_LIST.indexOf(biome.getName()),
+            optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),
+                    (byte) (mapParameters.getMapSize() / 64),
+                    (byte) mapParameters.getNumTeams(),
+                    (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
                     (byte) styleIndex};
         } else {
-            optionArray = new byte[]{(byte) spawnCount,
-                    (byte) (mapSize / 64),
-                    (byte) numTeams};
+            optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),
+                    (byte) (mapParameters.getMapSize() / 64),
+                    (byte) mapParameters.getNumTeams()};
         }
         BitSet parameters = new BitSet();
         parameters.set(0, tournamentStyle);
@@ -589,7 +590,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
-        if (DEBUG) {
+        if (Util.DEBUG) {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 
@@ -622,7 +623,7 @@ public strictfp class MapGenerator {
             descriptionBuilder.append("Use with the Unexplored Maps Mod for best experience");
         }
         map.setDescription(descriptionBuilder.toString());
-        if (DEBUG) {
+        if (Util.DEBUG) {
             System.out.printf("Done: %4d ms, %s, generatePreview\n",
                     System.currentTimeMillis() - sTime,
                     Util.getStackTraceLineInPackage("neroxis.generator"));
@@ -633,11 +634,6 @@ public strictfp class MapGenerator {
 
         map.addBlank(new Marker(mapName, new Vector2f(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
-
-        if (!generationComplete) {
-            return null;
-        }
-
         map.setName(mapName);
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);

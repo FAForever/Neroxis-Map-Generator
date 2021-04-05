@@ -21,7 +21,7 @@ public strictfp class BiomeExtractor {
 
     public static void main(String[] args) throws IOException {
 
-        Locale.setDefault(Locale.US);
+        Locale.setDefault(Locale.ROOT);
 
         BiomeExtractor generator = new BiomeExtractor();
 

@@ -4,7 +4,7 @@ import neroxis.brushes.Brushes;
 import neroxis.map.*;
 import neroxis.util.Vector3f;
 
-public class DefaultTerrainGenerator extends TerrainGenerator {
+public class BasicTerrainGenerator extends TerrainGenerator {
     protected ConcurrentBinaryMask spawnLandMask;
     protected ConcurrentBinaryMask spawnPlateauMask;
     protected ConcurrentBinaryMask land;
@@ -66,7 +66,6 @@ public class DefaultTerrainGenerator extends TerrainGenerator {
         heightmapLand = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
         heightmapOcean = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
         noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
-
         spawnSize = 36;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
         plateauHeight = 4f;

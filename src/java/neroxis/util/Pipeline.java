@@ -1,7 +1,6 @@
 package neroxis.util;
 
 import lombok.Getter;
-import neroxis.generator.MapGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.ConcurrentFloatMask;
 import neroxis.map.ConcurrentMask;
@@ -52,8 +51,8 @@ public strictfp class Pipeline {
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        final String callingLine = Util.getStackTraceLineInPackage("neroxis.generator");
-        final String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map");
+        String callingLine = Util.getStackTraceLineInPackage("neroxis.generator");
+        String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map");
 
         List<Pipeline.Entry> dependencies = Pipeline.getDependencyList(dep);
         CompletableFuture<Mask<?>> newFuture = Pipeline.getDependencyFuture(dependencies, executingMask)
@@ -70,7 +69,7 @@ public strictfp class Pipeline {
                         }
                     }
                     long hashTime = System.currentTimeMillis() - startTime;
-                    if (MapGenerator.DEBUG) {
+                    if (Util.DEBUG) {
                         System.out.printf("Done: function time %4d ms, hash time %4d ms, %s, %s(%d)->%s\n",
                                 functionTime,
                                 hashTime,
@@ -87,7 +86,7 @@ public strictfp class Pipeline {
         entry.dependencies.forEach(d -> d.dependants.add(entry));
         pipeline.add(entry);
 
-        if (MapGenerator.DEBUG) {
+        if (Util.DEBUG) {
             System.out.printf("%d: New pipeline entry:   %s,  %s,  deps:[%s]\n",
                     index,
                     executingMask.getName(),

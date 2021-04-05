@@ -2,10 +2,12 @@ package neroxis.generator;
 
 import lombok.Value;
 import neroxis.biomes.Biome;
+import neroxis.biomes.Biomes;
 import neroxis.map.MapParameters;
 import neroxis.map.SymmetrySettings;
 import neroxis.util.Range;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +24,7 @@ public strictfp class ParameterConstraints {
     List<Integer> mapSizes;
     Range numTeamsRange;
     Range hydroCountRange;
+    List<String> biomes;
 
     public static ParameterConstraintsBuilder builder() {
         return new ParameterConstraintsBuilder();
@@ -37,10 +40,47 @@ public strictfp class ParameterConstraints {
                 && hydroCountRange.contains(mapParameters.getHydroCount())
                 && numTeamsRange.contains(mapParameters.getNumTeams())
                 && spawnCountRange.contains(mapParameters.getSpawnCount())
-                && mapSizes.contains(mapParameters.getMapSize());
+                && mapSizes.contains(mapParameters.getMapSize())
+                && biomes.contains(mapParameters.getBiome().getName());
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Biome biome, SymmetrySettings symmetrySettings) {
+    public MapParameters randomizeParameters(Random random, MapParameters mapParameters) throws Exception {
+        return MapParameters.builder()
+                .spawnCount(mapParameters.getSpawnCount())
+                .landDensity(landDensityRange.getRandomFloat(random))
+                .plateauDensity(plateauDensityRange.getRandomFloat(random))
+                .mountainDensity(mountainDensityRange.getRandomFloat(random))
+                .rampDensity(rampDensityRange.getRandomFloat(random))
+                .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
+                .mexDensity(mexDensityRange.getRandomFloat(random))
+                .mapSize(mapParameters.getMapSize())
+                .numTeams(mapParameters.getNumTeams())
+                .hydroCount(mapParameters.getHydroCount())
+                .unexplored(false)
+                .symmetrySettings(mapParameters.getSymmetrySettings())
+                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                .build();
+    }
+
+    public MapParameters mapToLevel(float level, MapParameters mapParameters, Random random) throws Exception {
+        return MapParameters.builder()
+                .spawnCount(mapParameters.getSpawnCount())
+                .landDensity(landDensityRange.map(level))
+                .plateauDensity(plateauDensityRange.map(level))
+                .mountainDensity(mountainDensityRange.map(level))
+                .rampDensity(rampDensityRange.map(level))
+                .reclaimDensity(reclaimDensityRange.map(level))
+                .mexDensity(mexDensityRange.map(level))
+                .mapSize(mapParameters.getMapSize())
+                .numTeams(mapParameters.getNumTeams())
+                .hydroCount(mapParameters.getHydroCount())
+                .unexplored(false)
+                .symmetrySettings(mapParameters.getSymmetrySettings())
+                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                .build();
+    }
+
+    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Biome biome, SymmetrySettings symmetrySettings) throws Exception {
         return MapParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))
@@ -54,7 +94,7 @@ public strictfp class ParameterConstraints {
                 .hydroCount(spawnCount)
                 .unexplored(false)
                 .symmetrySettings(symmetrySettings)
-                .biome(biome)
+                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();
     }
 
@@ -69,11 +109,12 @@ public strictfp class ParameterConstraints {
         List<Integer> mapSizes = Arrays.asList(256, 512, 1024);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
+        List<String> biomes = new ArrayList(Biomes.BIOMES_LIST);
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
                     rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange, mapSizes,
-                    numTeamsRange, hydroCountRange);
+                    numTeamsRange, hydroCountRange, biomes);
         }
 
         public ParameterConstraintsBuilder landDensity(float min, float max) {
@@ -123,6 +164,11 @@ public strictfp class ParameterConstraints {
 
         public ParameterConstraintsBuilder hydroCount(float min, float max) {
             hydroCountRange = Range.of(min, max);
+            return this;
+        }
+
+        public ParameterConstraintsBuilder biomes(String... biomeNames) {
+            biomes = Arrays.asList(biomeNames);
             return this;
         }
     }

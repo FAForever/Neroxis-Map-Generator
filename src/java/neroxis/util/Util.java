@@ -4,6 +4,8 @@ import java.util.LinkedHashSet;
 
 public strictfp class Util {
 
+    public static boolean DEBUG = false;
+
     public static String getStackTraceLineInClass(Class<?> clazz) {
         return getStackTraceLineInClass(clazz.getCanonicalName());
     }
@@ -70,5 +72,17 @@ public strictfp class Util {
     public static String getStackTraceParentClass() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         return stackTrace[2].getClassName();
+    }
+
+    public static void timedRun(String packageName, String description, Runnable runnable) {
+        long sTime = System.currentTimeMillis();
+        runnable.run();
+        if (DEBUG) {
+            System.out.printf("Done: %4d ms, %s, %s\n",
+                    System.currentTimeMillis() - sTime,
+                    Util.getStackTraceLineInPackage(packageName),
+                    description);
+        }
+
     }
 }

@@ -2,6 +2,7 @@ package neroxis.map;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Data
 public strictfp class AIMarker extends Marker {
     private LinkedHashSet<String> neighbors;

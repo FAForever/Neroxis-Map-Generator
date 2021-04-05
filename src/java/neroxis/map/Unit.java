@@ -2,13 +2,14 @@ package neroxis.map;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Data
-public strictfp class Unit extends PositionedObject {
-    private final String id;
+public strictfp class Unit extends Marker {
     private final String type;
     private float rotation;
 
@@ -17,8 +18,7 @@ public strictfp class Unit extends PositionedObject {
     }
 
     public Unit(String id, String type, Vector3f position, float rotation) {
-        super(position);
-        this.id = id;
+        super(id, position);
         this.type = type;
         this.rotation = rotation;
     }

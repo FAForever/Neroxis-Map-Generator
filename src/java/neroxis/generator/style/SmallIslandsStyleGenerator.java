@@ -1,7 +1,10 @@
 package neroxis.generator.style;
 
 import neroxis.generator.ParameterConstraints;
-import neroxis.generator.prop.*;
+import neroxis.generator.prop.BasicPropGenerator;
+import neroxis.generator.prop.NavyWrecksPropGenerator;
+import neroxis.generator.prop.RockFieldPropGenerator;
+import neroxis.generator.prop.SmallBattlePropGenerator;
 import neroxis.generator.terrain.SmallIslandsTerrainGenerator;
 import neroxis.map.MapParameters;
 
@@ -24,8 +27,8 @@ public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
         super.initialize(mapParameters, seed);
         teamSeparation = mapParameters.getMapSize() / 2;
         terrainGenerators.add(new SmallIslandsTerrainGenerator());
-        propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
-                new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
+        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(),
+                new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }
 }
 

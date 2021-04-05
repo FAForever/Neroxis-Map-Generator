@@ -23,8 +23,8 @@ public strictfp class ValleyStyleGenerator extends StyleGenerator {
         super.initialize(mapParameters, seed);
         teamSeparation = mapParameters.getMapSize() / 2;
         terrainGenerators.add(new ValleyTerrainGenerator());
-        propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
-                new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
+        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
+                new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator(), new HighReclaimPropGenerator()));
     }
 }
 

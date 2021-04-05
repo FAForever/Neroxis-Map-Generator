@@ -7,16 +7,16 @@ import neroxis.map.MapParameters;
 import java.util.Arrays;
 
 @Getter
-public strictfp class DefaultStyleGenerator extends StyleGenerator {
+public strictfp class BasicStyleGenerator extends StyleGenerator {
 
-    public DefaultStyleGenerator() {
-        name = "DEFAULT";
+    public BasicStyleGenerator() {
+        name = "BASIC";
     }
 
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
+        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
                 new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }
 }

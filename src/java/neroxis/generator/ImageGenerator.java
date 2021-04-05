@@ -6,12 +6,9 @@ import neroxis.map.FloatMask;
 import neroxis.map.Symmetry;
 import neroxis.map.SymmetrySettings;
 import neroxis.util.ArgumentParser;
-import neroxis.util.FileUtils;
 import neroxis.util.Vector2f;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -39,12 +36,7 @@ public strictfp class ImageGenerator {
 
     public static void main(String[] args) throws IOException {
 
-        Locale.setDefault(Locale.US);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
+        Locale.setDefault(Locale.ROOT);
 
         ImageGenerator imageGenerator = new ImageGenerator();
 

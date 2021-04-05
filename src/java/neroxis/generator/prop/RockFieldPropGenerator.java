@@ -1,14 +1,13 @@
 package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
-import neroxis.generator.MapGenerator;
 import neroxis.generator.ParameterConstraints;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
 
-public class RockFieldPropGenerator extends DefaultPropGenerator {
+public class RockFieldPropGenerator extends BasicPropGenerator {
 
     protected ConcurrentBinaryMask largeRockFieldMask;
 
@@ -36,23 +35,19 @@ public class RockFieldPropGenerator extends DefaultPropGenerator {
         float reclaimDensity = mapParameters.getReclaimDensity();
         largeRockFieldMask.setSize(mapSize / 4);
 
-        largeRockFieldMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .00075f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
+        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
         largeRockFieldMask.intersect(passableLand);
     }
 
     @Override
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
-        long sTime = System.currentTimeMillis();
-        Biome biome = mapParameters.getBiome();
-        propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-        propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
-        propPlacer.placeProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
-        propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
-        if (MapGenerator.DEBUG) {
-            System.out.printf("Done: %4d ms, %s, placeProps\n",
-                    System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage("neroxis.generator"));
-        }
+        Util.timedRun("neroxis.generator", "placeProps", () -> {
+            Biome biome = mapParameters.getBiome();
+            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
+            propPlacer.placeProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
+        });
     }
 }

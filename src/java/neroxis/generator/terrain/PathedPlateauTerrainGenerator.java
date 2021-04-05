@@ -3,7 +3,7 @@ package neroxis.generator.terrain;
 import neroxis.map.SymmetrySettings;
 import neroxis.map.SymmetryType;
 
-public strictfp abstract class PathedPlateauTerrainGenerator extends DefaultTerrainGenerator {
+public strictfp abstract class PathedPlateauTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     protected void plateausSetup() {

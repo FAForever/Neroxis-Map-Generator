@@ -1,6 +1,5 @@
 package neroxis.generator.prop;
 
-import neroxis.generator.MapGenerator;
 import neroxis.generator.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
@@ -10,7 +9,7 @@ import neroxis.util.Util;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class EnemyCivPropGenerator extends DefaultPropGenerator {
+public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected ConcurrentBinaryMask baseMask;
     protected BinaryMask noBases;
@@ -31,6 +30,7 @@ public class EnemyCivPropGenerator extends DefaultPropGenerator {
 
     protected void setupCivilianPipeline() {
         int mapSize = map.getSize();
+        baseMask.startVisualDebugger();
         baseMask.setSize(mapSize / 4);
 
         if (!map.isUnexplored()) {
@@ -55,24 +55,18 @@ public class EnemyCivPropGenerator extends DefaultPropGenerator {
         if (!mapParameters.isUnexplored()) {
             generateUnitExclusionMasks();
             Pipeline.await(baseMask);
-            long sTime = System.currentTimeMillis();
-            Army army17 = new Army("ARMY_17", new ArrayList<>());
-            Group army17Initial = new Group("INITIAL", new ArrayList<>());
-            Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
-            army17.addGroup(army17Initial);
-            army17.addGroup(army17Wreckage);
-            map.addArmy(army17);
-            try {
-                unitPlacer.placeBases(baseMask.getFinalMask().minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
-            } catch (IOException e) {
-                System.out.println("Could not generate bases due to lua parsing error");
-                e.printStackTrace();
-            }
-            if (MapGenerator.DEBUG) {
-                System.out.printf("Done: %4d ms, %s, placeBases\n",
-                        System.currentTimeMillis() - sTime,
-                        Util.getStackTraceLineInPackage("neroxis.generator"));
-            }
+            Util.timedRun("neroxis.generator", "placeBases", () -> {
+                Army army17 = new Army("ARMY_17", new ArrayList<>());
+                Group army17Initial = new Group("INITIAL", new ArrayList<>());
+                army17.addGroup(army17Initial);
+                map.addArmy(army17);
+                try {
+                    unitPlacer.placeBases(baseMask.getFinalMask().minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                } catch (IOException e) {
+                    System.out.println("Could not generate bases due to lua parsing error");
+                    e.printStackTrace();
+                }
+            });
         }
     }
 }

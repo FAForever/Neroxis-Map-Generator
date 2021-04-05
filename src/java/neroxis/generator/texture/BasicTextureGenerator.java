@@ -1,12 +1,11 @@
 package neroxis.generator.texture;
 
-import neroxis.generator.MapGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
 
-public class DefaultTextureGenerator extends TextureGenerator {
+public class BasicTextureGenerator extends TextureGenerator {
     protected ConcurrentBinaryMask realLand;
     protected ConcurrentBinaryMask realPlateaus;
     protected ConcurrentFloatMask accentGroundTexture;
@@ -46,14 +45,10 @@ public class DefaultTextureGenerator extends TextureGenerator {
     @Override
     public void setTextures() {
         Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
-        long sTime = System.currentTimeMillis();
-        map.setTextureMasksLowScaled(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
-        map.setTextureMasksHighScaled(steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
-        if (MapGenerator.DEBUG) {
-            System.out.printf("Done: %4d ms, %s, generateTextures\n",
-                    System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage("neroxis.generator"));
-        }
+        Util.timedRun("neroxis.generator", "generateTextures", () -> {
+            map.setTextureMasksLowScaled(accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
+            map.setTextureMasksHighScaled(steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+        });
     }
 
     protected void setupTexturePipeline() {

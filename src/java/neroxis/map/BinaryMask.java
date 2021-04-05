@@ -267,10 +267,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask space(float minSpacing, float maxSpacing) {
         List<Vector2f> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
+        List<Vector2f> symmetricCoordinates = new ArrayList<>();
+        coordinates.forEach(coordinate -> symmetricCoordinates.addAll(getSymmetryPoints(coordinate, SymmetryType.SPAWN)));
+        coordinates.addAll(symmetricCoordinates);
         clear();
-        limitToSymmetryRegion(SymmetryType.SPAWN);
         fillCoordinates(coordinates, true);
-        applySymmetry(SymmetryType.SPAWN);
         VisualDebugger.visualizeMask(this);
         return this;
     }

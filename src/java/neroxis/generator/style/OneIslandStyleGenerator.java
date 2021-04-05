@@ -21,7 +21,7 @@ public strictfp class OneIslandStyleGenerator extends StyleGenerator {
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
         terrainGenerators.add(new OneIslandTerrainGenerator());
-        propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new NavyWrecksPropGenerator(),
+        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(),
                 new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }
 }

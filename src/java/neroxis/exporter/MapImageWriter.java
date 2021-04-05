@@ -4,11 +4,9 @@ import neroxis.importer.MapImporter;
 import neroxis.importer.SaveImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
-import neroxis.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -38,12 +36,7 @@ public strictfp class MapImageWriter {
 
     public static void main(String[] args) throws IOException {
 
-        Locale.setDefault(Locale.US);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
+        Locale.setDefault(Locale.ROOT);
 
         MapImageWriter mapImageWriter = new MapImageWriter();
 

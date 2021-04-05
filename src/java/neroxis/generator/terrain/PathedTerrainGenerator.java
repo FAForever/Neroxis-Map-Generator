@@ -4,7 +4,7 @@ import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 import neroxis.map.SymmetryType;
 
-public strictfp abstract class PathedTerrainGenerator extends DefaultTerrainGenerator {
+public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {

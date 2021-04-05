@@ -1,6 +1,5 @@
 package neroxis.generator.resource;
 
-import neroxis.generator.MapGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.MapParameters;
@@ -9,7 +8,7 @@ import neroxis.map.SymmetrySettings;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
 
-public class DefaultResourceGenerator extends ResourceGenerator {
+public class BasicResourceGenerator extends ResourceGenerator {
     protected ConcurrentBinaryMask resourceMask;
     protected ConcurrentBinaryMask waterResourceMask;
 
@@ -34,13 +33,9 @@ public class DefaultResourceGenerator extends ResourceGenerator {
     @Override
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
-        long sTime = System.currentTimeMillis();
-        mexPlacer.placeMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-        hydroPlacer.placeHydros(resourceMask.getFinalMask().deflate(8));
-        if (MapGenerator.DEBUG) {
-            System.out.printf("Done: %4d ms, %s, generateResources\n",
-                    System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage("neroxis.generator"));
-        }
+        Util.timedRun("neroxis.generator", "generateResources", () -> {
+            mexPlacer.placeMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
+            hydroPlacer.placeHydros(resourceMask.getFinalMask().deflate(8));
+        });
     }
 }

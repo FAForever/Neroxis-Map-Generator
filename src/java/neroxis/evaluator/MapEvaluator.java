@@ -3,12 +3,10 @@ package neroxis.evaluator;
 import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
-import neroxis.util.FileUtils;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -35,12 +33,7 @@ public strictfp class MapEvaluator {
 
     public static void main(String[] args) throws IOException {
 
-        Locale.setDefault(Locale.US);
-        if (DEBUG) {
-            Path debugDir = Paths.get(".", "debug");
-            FileUtils.deleteRecursiveIfExists(debugDir);
-            Files.createDirectory(debugDir);
-        }
+        Locale.setDefault(Locale.ROOT);
 
         MapEvaluator evaluator = new MapEvaluator();
 

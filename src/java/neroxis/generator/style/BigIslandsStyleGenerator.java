@@ -24,7 +24,7 @@ public strictfp class BigIslandsStyleGenerator extends StyleGenerator {
         super.initialize(mapParameters, seed);
         teamSeparation = mapParameters.getMapSize() / 2;
         terrainGenerators.add(new BigIslandsTerrainGenerator());
-        propGenerators.addAll(Arrays.asList(new DefaultPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
+        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(),
                 new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }
 }

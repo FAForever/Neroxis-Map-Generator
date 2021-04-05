@@ -31,6 +31,10 @@ public strictfp class Range {
         return StrictMath.max(StrictMath.min((value - min) / range, 1f), 0f);
     }
 
+    public float map(float value) {
+        return StrictMath.max(StrictMath.min(value * range + min, max), min);
+    }
+
     public float getRandomFloat(Random random) {
         return random.nextFloat() * range + min;
     }
