@@ -129,7 +129,7 @@ public strictfp class MapGenerator {
         }
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
-        if (numTeams != 0) {
+        if (numTeams > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
             terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 || symmetry.getNumSymPoints() > spawnCount * 4);
         } else {
@@ -230,9 +230,9 @@ public strictfp class MapGenerator {
                 teams = new ArrayList<>(Collections.singletonList(terrainSymmetry));
                 break;
         }
-        if (numTeams != 0) {
-            spawns.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || symmetry.getNumSymPoints() % numTeams != 0);
-            teams.removeIf(symmetry -> spawnCount % symmetry.getNumSymPoints() != 0 || symmetry.getNumSymPoints() % numTeams != 0);
+        if (numTeams > 1) {
+            spawns.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
+            teams.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
         }
         spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
         teamSymmetry = teams.get(random.nextInt(teams.size()));
