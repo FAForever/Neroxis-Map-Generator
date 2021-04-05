@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
 
-    public static boolean HASH_MASK = true;
+    public static boolean HASH_MASK = false;
 
     private static final List<Entry> pipeline = new ArrayList<>();
     private static CompletableFuture<List<ConcurrentMask<?>>> started = new CompletableFuture<>();

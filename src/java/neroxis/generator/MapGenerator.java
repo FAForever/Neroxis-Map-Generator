@@ -331,7 +331,6 @@ public strictfp class MapGenerator {
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options\n" +
-                    "--no-hash              optional, turn off pipeline hashing of masks\n" +
                     "--num-to-gen           optional, number of maps to generate\n" +
                     "--preview-path         optional, path to dump previews to\n");
             validArgs = false;
@@ -356,12 +355,9 @@ public strictfp class MapGenerator {
             return;
         }
 
-        if (arguments.containsKey("no-hash")) {
-            Pipeline.HASH_MASK = false;
-        }
-
         if (arguments.containsKey("debug")) {
             Util.DEBUG = true;
+            Pipeline.HASH_MASK = true;
         }
 
         if (arguments.containsKey("num-to-gen")) {
@@ -650,7 +646,7 @@ public strictfp class MapGenerator {
             FileOutputStream out = new FileOutputStream(outFile);
             String summaryString = "Seed: " + seed +
                     "\n" + mapParameters.toString() +
-                    "\nStyle: " + mapStyle.toString();
+                    "\nStyle: " + mapStyle.getName();
             out.write(summaryString.getBytes());
             out.flush();
             out.close();

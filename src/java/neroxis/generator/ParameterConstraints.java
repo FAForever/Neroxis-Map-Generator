@@ -114,7 +114,7 @@ public strictfp class ParameterConstraints {
         List<Integer> mapSizes = Arrays.asList(256, 512, 1024);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
-        List<String> biomes = new ArrayList(Biomes.BIOMES_LIST);
+        List<String> biomes = new ArrayList<>(Biomes.BIOMES_LIST);
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
