@@ -138,11 +138,11 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         } else if (spawnCount <= 4) {
             mexCount = (int) (9 + 8 * mexDensity);
         } else if (spawnCount <= 10) {
-            mexCount = (int) (8 + 4 * mexDensity);
+            mexCount = (int) (8 + 7 * mexDensity);
         } else if (spawnCount <= 12) {
             mexCount = (int) (6 + 7 * mexDensity);
         } else {
-            mexCount = (int) (6 + 6 * mexDensity);
+            mexCount = (int) (6 + 7 * mexDensity);
         }
         if (mapSize < 512) {
             mexMultiplier = .75f;
