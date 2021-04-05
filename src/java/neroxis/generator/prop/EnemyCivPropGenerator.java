@@ -30,7 +30,6 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected void setupCivilianPipeline() {
         int mapSize = map.getSize();
-        baseMask.startVisualDebugger();
         baseMask.setSize(mapSize / 4);
 
         if (!map.isUnexplored()) {
