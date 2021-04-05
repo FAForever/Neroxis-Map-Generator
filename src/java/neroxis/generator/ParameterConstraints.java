@@ -62,22 +62,27 @@ public strictfp class ParameterConstraints {
                 .build();
     }
 
-    public MapParameters mapToLevel(float level, MapParameters mapParameters, Random random) throws Exception {
-        return MapParameters.builder()
-                .spawnCount(mapParameters.getSpawnCount())
-                .landDensity(landDensityRange.map(level))
-                .plateauDensity(plateauDensityRange.map(level))
-                .mountainDensity(mountainDensityRange.map(level))
-                .rampDensity(rampDensityRange.map(level))
-                .reclaimDensity(reclaimDensityRange.map(level))
-                .mexDensity(mexDensityRange.map(level))
-                .mapSize(mapParameters.getMapSize())
-                .numTeams(mapParameters.getNumTeams())
-                .hydroCount(mapParameters.getHydroCount())
-                .unexplored(false)
-                .symmetrySettings(mapParameters.getSymmetrySettings())
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
+    public MapParameters mapToLevel(float level, MapParameters mapParameters, Random random) {
+        try {
+            return MapParameters.builder()
+                    .spawnCount(mapParameters.getSpawnCount())
+                    .landDensity(landDensityRange.map(level))
+                    .plateauDensity(plateauDensityRange.map(level))
+                    .mountainDensity(mountainDensityRange.map(level))
+                    .rampDensity(rampDensityRange.map(level))
+                    .reclaimDensity(reclaimDensityRange.map(level))
+                    .mexDensity(mexDensityRange.map(level))
+                    .mapSize(mapParameters.getMapSize())
+                    .numTeams(mapParameters.getNumTeams())
+                    .hydroCount(mapParameters.getHydroCount())
+                    .unexplored(false)
+                    .symmetrySettings(mapParameters.getSymmetrySettings())
+                    .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return mapParameters;
+        }
     }
 
     public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Biome biome, SymmetrySettings symmetrySettings) throws Exception {
