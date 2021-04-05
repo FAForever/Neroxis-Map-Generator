@@ -68,7 +68,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
         spawnSize = 36;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
-        plateauHeight = 4f;
+        plateauHeight = 5f;
         oceanFloor = -16f;
         valleyFloor = -5f;
         landHeight = .05f;
