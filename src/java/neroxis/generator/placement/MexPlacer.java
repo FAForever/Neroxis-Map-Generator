@@ -19,7 +19,7 @@ public strictfp class MexPlacer {
 
     public void placeMexes(BinaryMask spawnMask, BinaryMask spawnMaskWater) {
         map.getMexes().clear();
-        int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(36f / (map.getMexCountInit() * map.getSpawnCountInit()), .5f), 1.75f));
+        int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(36f / (map.getMexCountInit() * map.getSpawnCountInit()), .25f), 1.75f));
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
