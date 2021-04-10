@@ -5,7 +5,7 @@ import lombok.Data;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import static neroxis.map.SCMap.*;
@@ -41,17 +41,14 @@ public strictfp class WaterSettings {
     private String TexPathCubemap;
     private String TexPathWaterRamp;
 
-    private WaveTexture[] WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
+    private List<WaveTexture> WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
 
-    private static WaveTexture[] makeWaveTextures(
-            String[] WaveTexturePaths,
-            float[] WaveNormalRepeats,
-            Vector2f[] WaveNormalMovements) {
-        List<WaveTexture> textures = new LinkedList<>();
+    private static List<WaveTexture> makeWaveTextures(String[] WaveTexturePaths, float[] WaveNormalRepeats, Vector2f[] WaveNormalMovements) {
+        List<WaveTexture> textures = new ArrayList<>();
         for (int i = 0; i < WAVE_NORMAL_COUNT; i++) {
             textures.add(new WaveTexture(WaveTexturePaths[i], WaveNormalMovements[i], WaveNormalRepeats[i]));
         }
-        return textures.toArray(new WaveTexture[0]);
+        return textures;
     }
 
     @Data

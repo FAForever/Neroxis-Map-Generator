@@ -349,15 +349,15 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask grow(float strength) {
-        return grow(strength, SymmetryType.TERRAIN);
+    public BinaryMask dilute(float strength) {
+        return dilute(strength, SymmetryType.TERRAIN);
     }
 
-    public BinaryMask grow(float strength, SymmetryType symmetryType) {
-        return grow(strength, symmetryType, 1);
+    public BinaryMask dilute(float strength, SymmetryType symmetryType) {
+        return dilute(strength, symmetryType, 1);
     }
 
-    public BinaryMask grow(float strength, SymmetryType symmetryType, int count) {
+    public BinaryMask dilute(float strength, SymmetryType symmetryType, int count) {
         for (int i = 0; i < count; i++) {
             Boolean[][] newMask = getEmptyMask(getSize());
             applyWithSymmetry(symmetryType, (x, y) -> {
@@ -407,7 +407,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return smooth(1, .35f);
     }
 
-    public BinaryMask smooth(int radius) {
+    public BinaryMask blur(int radius) {
         return smooth(radius, .5f);
     }
 

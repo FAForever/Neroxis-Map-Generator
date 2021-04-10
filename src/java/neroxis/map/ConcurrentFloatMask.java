@@ -195,7 +195,7 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
 
     public ConcurrentFloatMask smooth(int radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.smooth(radius)
+                this.mask.blur(radius)
         );
     }
 

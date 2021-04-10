@@ -169,19 +169,19 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     public ConcurrentBinaryMask grow(float strength, SymmetryType symmetryType, int count) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.grow(strength, symmetryType, count)
+                this.mask.dilute(strength, symmetryType, count)
         );
     }
 
     public ConcurrentBinaryMask grow(float strength, SymmetryType symmetryType) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.grow(strength, symmetryType)
+                this.mask.dilute(strength, symmetryType)
         );
     }
 
     public ConcurrentBinaryMask grow(float strength) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.grow(strength)
+                this.mask.dilute(strength)
         );
     }
 
@@ -217,7 +217,7 @@ public strictfp class ConcurrentBinaryMask extends ConcurrentMask<BinaryMask> {
 
     public ConcurrentBinaryMask smooth(int radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
-                this.mask.smooth(radius)
+                this.mask.blur(radius)
         );
     }
 

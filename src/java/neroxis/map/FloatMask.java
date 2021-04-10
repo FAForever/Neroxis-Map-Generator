@@ -429,11 +429,11 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask fixNonPerfectSymmetry() {
-        return smooth(1);
+        return blur(1);
     }
 
 
-    public FloatMask smooth(int radius) {
+    public FloatMask blur(int radius) {
         int[][] innerCount = getInnerCount();
         modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
         VisualDebugger.visualizeMask(this);

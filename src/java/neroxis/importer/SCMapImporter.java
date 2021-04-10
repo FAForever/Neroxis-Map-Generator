@@ -346,12 +346,12 @@ public strictfp class SCMapImporter {
 
         // waves
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            waterSettings.getWaveTextures()[i].setNormalRepeat(readFloat());
+            waterSettings.getWaveTextures().get(i).setNormalRepeat(readFloat());
         }
 
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            waterSettings.getWaveTextures()[i].setNormalMovement(readVector2f());
-            waterSettings.getWaveTextures()[i].setTexPath(readStringNull());
+            waterSettings.getWaveTextures().get(i).setNormalMovement(readVector2f());
+            waterSettings.getWaveTextures().get(i).setTexPath(readStringNull());
         }
 
         return waterSettings;

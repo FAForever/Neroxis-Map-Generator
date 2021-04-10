@@ -33,7 +33,7 @@ public strictfp abstract class Mask<T> {
 
     public abstract Mask<T> fixNonPerfectSymmetry();
 
-    public abstract Mask<T> smooth(int size);
+    public abstract Mask<T> blur(int size);
 
     public abstract Mask<T> copy();
 
@@ -414,6 +414,18 @@ public strictfp abstract class Mask<T> {
         return StrictMath.max(StrictMath.min(y, size), 0);
     }
 
+    private int getMaxYFromXOnArc(int x, float angle) {
+        int size = getSize();
+        float dx = x - size / 2f;
+        int y;
+        if (x > size / 2) {
+            y = (int) (size / 2f + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
+        } else {
+            y = size / 2 + 1;
+        }
+        return StrictMath.max(StrictMath.min(y, getSize()), 0);
+    }
+
     public boolean inTeam(Vector3f pos, boolean reverse) {
         return inTeam(new Vector2f(pos), reverse);
     }
@@ -432,18 +444,6 @@ public strictfp abstract class Mask<T> {
 
     public boolean inHalf(int x, int y, float angle) {
         return inHalf(new Vector2f(x, y), angle);
-    }
-
-    private int getMaxYFromXOnArc(int x, float angle) {
-        int size = getSize();
-        float dx = x - size / 2f;
-        int y;
-        if (x > size / 2) {
-            y = (int) (size / 2f + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
-        } else {
-            y = size / 2 + 1;
-        }
-        return StrictMath.max(StrictMath.min(y, getSize()), 0);
     }
 
     public boolean inHalf(Vector2f pos, float angle) {
@@ -536,7 +536,7 @@ public strictfp abstract class Mask<T> {
     public Mask<T> fixNonPerfectSymmetry(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         enlarge(newSize, symmetryType);
-        smooth(StrictMath.round((float) newSize / oldSize / 2));
+        blur(StrictMath.round((float) newSize / oldSize / 2));
         VisualDebugger.visualizeMask(this);
         return this;
     }
@@ -547,7 +547,7 @@ public strictfp abstract class Mask<T> {
 
     public Mask<T> decimate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
-        smooth(StrictMath.round((float) oldSize / newSize / 2));
+        blur(StrictMath.round((float) oldSize / newSize / 2));
         shrink(newSize, symmetryType);
         VisualDebugger.visualizeMask(this);
         return this;
