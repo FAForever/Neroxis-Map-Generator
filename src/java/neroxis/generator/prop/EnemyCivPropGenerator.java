@@ -1,6 +1,6 @@
 package neroxis.generator.prop;
 
-import neroxis.generator.UnitPlacer;
+import neroxis.generator.placement.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.*;
 import neroxis.util.Pipeline;

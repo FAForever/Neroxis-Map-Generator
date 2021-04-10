@@ -1,7 +1,7 @@
 package neroxis.generator.decal;
 
-import neroxis.generator.DecalPlacer;
 import neroxis.generator.ElementGenerator;
+import neroxis.generator.placement.DecalPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.ConcurrentFloatMask;

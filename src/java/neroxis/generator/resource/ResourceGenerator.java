@@ -1,8 +1,8 @@
 package neroxis.generator.resource;
 
 import neroxis.generator.ElementGenerator;
-import neroxis.generator.HydroPlacer;
-import neroxis.generator.MexPlacer;
+import neroxis.generator.placement.HydroPlacer;
+import neroxis.generator.placement.MexPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.MapParameters;

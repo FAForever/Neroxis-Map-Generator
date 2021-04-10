@@ -1,4 +1,4 @@
-package neroxis.generator;
+package neroxis.generator.placement;
 
 import neroxis.bases.BaseTemplate;
 import neroxis.map.*;

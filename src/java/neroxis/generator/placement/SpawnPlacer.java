@@ -1,4 +1,4 @@
-package neroxis.generator;
+package neroxis.generator.placement;
 
 import neroxis.map.*;
 import neroxis.util.Vector2f;

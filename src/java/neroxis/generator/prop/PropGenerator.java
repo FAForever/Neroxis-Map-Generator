@@ -2,8 +2,8 @@ package neroxis.generator.prop;
 
 import lombok.Getter;
 import neroxis.generator.ElementGenerator;
-import neroxis.generator.PropPlacer;
-import neroxis.generator.UnitPlacer;
+import neroxis.generator.placement.PropPlacer;
+import neroxis.generator.placement.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.map.ConcurrentBinaryMask;
 import neroxis.map.MapParameters;

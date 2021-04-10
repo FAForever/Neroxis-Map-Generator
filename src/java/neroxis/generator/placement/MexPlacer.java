@@ -1,4 +1,4 @@
-package neroxis.generator;
+package neroxis.generator.placement;
 
 import neroxis.map.*;
 import neroxis.util.Vector2f;
@@ -68,7 +68,7 @@ public strictfp class MexPlacer {
     }
 
     public void placeBaseMexes(BinaryMask spawnMask) {
-        int numBaseMexes = (random.nextInt(2) + 3);
+        int numBaseMexes = (random.nextInt(3) + 3);
         for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
             BinaryMask baseMexes = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
@@ -83,7 +83,7 @@ public strictfp class MexPlacer {
         int expMexCountLeft = possibleExpMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
-        int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .5f), 1.5f));
+        int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .75f), 1.75f));
 
         BinaryMask expansionSpawnMask = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
         expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).intersect(spawnMask);

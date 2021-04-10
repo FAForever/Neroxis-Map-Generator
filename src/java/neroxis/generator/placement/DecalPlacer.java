@@ -1,4 +1,4 @@
-package neroxis.generator;
+package neroxis.generator.placement;
 
 import neroxis.map.BinaryMask;
 import neroxis.map.Decal;

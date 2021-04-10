@@ -1,11 +1,11 @@
 package neroxis.generator.style;
 
 import lombok.Getter;
-import neroxis.generator.AIMarkerPlacer;
 import neroxis.generator.ElementGenerator;
-import neroxis.generator.SpawnPlacer;
 import neroxis.generator.decal.BasicDecalGenerator;
 import neroxis.generator.decal.DecalGenerator;
+import neroxis.generator.placement.AIMarkerPlacer;
+import neroxis.generator.placement.SpawnPlacer;
 import neroxis.generator.prop.BasicPropGenerator;
 import neroxis.generator.prop.PropGenerator;
 import neroxis.generator.resource.BasicResourceGenerator;

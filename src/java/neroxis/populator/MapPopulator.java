@@ -1,7 +1,7 @@
 package neroxis.populator;
 
 import neroxis.exporter.MapExporter;
-import neroxis.generator.*;
+import neroxis.generator.placement.*;
 import neroxis.importer.MapImporter;
 import neroxis.map.*;
 import neroxis.util.ArgumentParser;
