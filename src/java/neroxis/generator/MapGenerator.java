@@ -46,7 +46,8 @@ public strictfp class MapGenerator {
     private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
             new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
             new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
-            new TestStyleGenerator()));
+            new HighReclaimStyleGenerator(), new TestStyleGenerator()));
+    private final List<StyleGenerator> productionStyles = mapStyles.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     //read from cli args
     private String pathToFolder = ".";
@@ -90,7 +91,6 @@ public strictfp class MapGenerator {
         while (count < MapGenerator.NUM_TO_GEN) {
             Pipeline.reset();
             MapGenerator generator = new MapGenerator();
-            generator.seed = new Random().nextLong();
             generator.interpretArguments(args);
             if (!generator.validArgs) {
                 return;
@@ -146,21 +146,22 @@ public strictfp class MapGenerator {
         if (!mapName.startsWith("neroxis_map_generator")) {
             throw new IllegalArgumentException("Map name is not a generated map");
         }
-        String[] args = mapName.split("_");
-        if (args.length < 4) {
+
+        String[] nameArgs = mapName.split("_");
+        if (nameArgs.length < 4) {
             throw new RuntimeException("Version not specified");
         }
-        if (args.length < 5) {
-            throw new RuntimeException("Seed not specified");
-        }
-        String version = args[3];
+
+        String version = nameArgs[3];
         if (!VERSION.equals(version)) {
             throw new RuntimeException("Wrong generator version: " + version);
         }
 
-        byte[] optionBytes = new byte[0];
+        if (nameArgs.length < 5) {
+            throw new RuntimeException("Seed not specified");
+        }
 
-        String seedString = args[4];
+        String seedString = nameArgs[4];
         try {
             seed = Long.parseLong(seedString);
         } catch (NumberFormatException nfe) {
@@ -169,23 +170,65 @@ public strictfp class MapGenerator {
             seed = seedWrapper.getLong();
         }
 
-        if (args.length >= 6) {
-            String optionString = args[5];
+        byte[] optionBytes = new byte[0];
+
+        if (nameArgs.length >= 6) {
+            String optionString = nameArgs[5];
             optionBytes = NAME_ENCODER.decode(optionString);
         }
 
-        if (args.length >= 7) {
-            String parametersString = args[6];
+        if (nameArgs.length >= 7) {
+            String parametersString = nameArgs[6];
             byte[] parameterBytes = NAME_ENCODER.decode(parametersString);
             parseParameters(parameterBytes);
         }
 
-        if (args.length >= 8) {
-            String timeString = args[7];
+        if (nameArgs.length >= 8) {
+            String timeString = nameArgs[7];
             generationTime = ByteBuffer.wrap(NAME_ENCODER.decode(timeString)).getLong();
         }
 
         parseOptions(optionBytes);
+    }
+
+    private void parseOptions(byte[] optionBytes) throws Exception {
+        if (optionBytes.length > 0) {
+            if (optionBytes[0] <= 16) {
+                spawnCount = optionBytes[0];
+            }
+        }
+        if (optionBytes.length > 1) {
+            mapSize = (int) optionBytes[1] * 64;
+        }
+
+        if (optionBytes.length > 2) {
+            numTeams = optionBytes[2];
+        }
+
+        randomizeOptions();
+
+        if (optionBytes.length == 12) {
+            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
+            landDensity = DiscreteUtils.normalizeBin(optionBytes[4], numBins);
+            plateauDensity = DiscreteUtils.normalizeBin(optionBytes[5], numBins);
+            mountainDensity = DiscreteUtils.normalizeBin(optionBytes[6], numBins);
+            rampDensity = DiscreteUtils.normalizeBin(optionBytes[7], numBins);
+            reclaimDensity = DiscreteUtils.normalizeBin(optionBytes[8], numBins);
+            mexDensity = DiscreteUtils.normalizeBin(optionBytes[9], numBins);
+            hydroCount = optionBytes[10];
+            terrainSymmetry = Symmetry.values()[optionBytes[11]];
+            optionsUsed = true;
+        } else if (optionBytes.length == 4) {
+            mapStyle = mapStyles.get(optionBytes[3]);
+            styleSpecified = true;
+        }
+    }
+
+    private void parseParameters(byte[] parameterBytes) {
+        BitSet parameters = BitSet.valueOf(parameterBytes);
+        tournamentStyle = parameters.get(0);
+        blind = parameters.get(1);
+        unexplored = parameters.get(2);
     }
 
     public void setSymmetrySettings() {
@@ -255,7 +298,6 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        List<StyleGenerator> productionStyles = mapStyles.stream().filter(style -> !style.getName().equals("TEST")).collect(Collectors.toList());
         mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, mapParameters, new BasicStyleGenerator());
     }
 
@@ -263,44 +305,24 @@ public strictfp class MapGenerator {
         styleSpecified = false;
         validArgs = true;
         seed = new Random().nextLong();
-        if (args.length == 0 || args[0].startsWith("--")) {
-            interpretArguments(ArgumentParser.parse(args));
-        } else if (args.length == 2) {
-            pathToFolder = args[0];
-            mapName = args[1];
-            parseMapName();
-        } else {
-            try {
-                pathToFolder = args[0];
-                try {
-                    seed = Long.parseLong(args[1]);
-                } catch (NumberFormatException nfe) {
-                    System.out.println("Seed not numeric using default seed or map name");
-                }
-                if (!VERSION.equals(args[2])) {
-                    System.out.println("This generator only supports version " + VERSION);
-                    validArgs = false;
-                }
-                if (args.length >= 4) {
-                    mapName = args[3];
-                    parseMapName();
-                } else {
-                    randomizeOptions();
-                }
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("Usage: generator [targetFolder] [seed] [expectedVersion] (mapName)");
-            }
-        }
+
+        interpretArguments(ArgumentParser.parse(args));
+
         if (!validArgs) {
             return;
         }
+
         setSymmetrySettings();
-        if (!styleSpecified || mapStyle == null) {
+
+        if (optionsUsed) {
             setMapStyle();
+        } else if (styleSpecified) {
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, symmetrySettings);
         } else {
-            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, biome, symmetrySettings);
-            biome = mapParameters.getBiome();
+            mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, symmetrySettings);
         }
+
         if (mapName == null) {
             generateMapName();
         }
@@ -338,7 +360,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("styles")) {
-            System.out.println("Valid Styles:\n" + mapStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
+            System.out.println("Valid Styles:\n" + productionStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
             validArgs = false;
             return;
         }
@@ -378,28 +400,32 @@ public strictfp class MapGenerator {
             return;
         }
 
-        tournamentStyle = arguments.containsKey("tournament-style") || arguments.containsKey("blind") || arguments.containsKey("unexplored");
-        blind = arguments.containsKey("blind") || arguments.containsKey("unexplored");
         unexplored = arguments.containsKey("unexplored");
-
-        if (tournamentStyle) {
-            generationTime = Instant.now().getEpochSecond();
-        }
+        blind = arguments.containsKey("blind") || unexplored;
+        tournamentStyle = arguments.containsKey("tournament-style") || blind;
 
         if (arguments.containsKey("spawn-count") && arguments.get("spawn-count") != null) {
             spawnCount = Integer.parseInt(arguments.get("spawn-count"));
-        }
-
-        if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
-            mapSize = Integer.parseInt(arguments.get("map-size"));
         }
 
         if (arguments.containsKey("num-teams") && arguments.get("num-teams") != null) {
             numTeams = Integer.parseInt(arguments.get("num-teams"));
         }
 
+        if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
+            mapSize = Integer.parseInt(arguments.get("map-size"));
+        }
+
         if (arguments.containsKey("seed") && arguments.get("seed") != null) {
             seed = Long.parseLong(arguments.get("seed"));
+        }
+
+        if (tournamentStyle) {
+            generationTime = Instant.now().getEpochSecond();
+        }
+
+        if (numTeams != 0 && spawnCount % numTeams != 0) {
+            throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
         }
 
         randomizeOptions();
@@ -414,32 +440,32 @@ public strictfp class MapGenerator {
 
             if (!styleSpecified) {
                 if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
-                    landDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
+                    landDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
-                    plateauDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
+                    plateauDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
-                    mountainDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
+                    mountainDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
-                    rampDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
+                    rampDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
-                    reclaimDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
+                    reclaimDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                    mexDensity = ParseUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
+                    mexDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
                     optionsUsed = true;
                 }
 
@@ -457,62 +483,17 @@ public strictfp class MapGenerator {
     }
 
     private void randomizeOptions() throws Exception {
-        if (numTeams != 0 && spawnCount % numTeams != 0) {
-            throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
-        }
         random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
-        landDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
-        plateauDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
-        mountainDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
-        rampDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
-        reclaimDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
-        mexDensity = ParseUtils.discretePercentage(RandomUtils.averageRandomFloat(random, 2), numBins);
+        landDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        plateauDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        mountainDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        rampDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        reclaimDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        mexDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
         hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
         setValidTerrainSymmetry();
         biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
-    }
-
-    private void parseOptions(byte[] optionBytes) throws Exception {
-        if (optionBytes.length > 0) {
-            if (optionBytes[0] <= 16) {
-                spawnCount = optionBytes[0];
-            }
-        }
-        if (optionBytes.length > 1) {
-            mapSize = (int) optionBytes[1] * 64;
-        }
-
-        if (optionBytes.length > 2) {
-            numTeams = optionBytes[2];
-        }
-
-        randomizeOptions();
-
-        if (optionBytes.length > 3) {
-            biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
-        }
-
-        if (optionBytes.length == 12) {
-            landDensity = ParseUtils.normalizeBin(optionBytes[4], numBins);
-            plateauDensity = ParseUtils.normalizeBin(optionBytes[5], numBins);
-            mountainDensity = ParseUtils.normalizeBin(optionBytes[6], numBins);
-            rampDensity = ParseUtils.normalizeBin(optionBytes[7], numBins);
-            reclaimDensity = ParseUtils.normalizeBin(optionBytes[8], numBins);
-            mexDensity = ParseUtils.normalizeBin(optionBytes[9], numBins);
-            hydroCount = optionBytes[10];
-            terrainSymmetry = Symmetry.values()[optionBytes[11]];
-        } else if (optionBytes.length == 5) {
-            mapStyle = mapStyles.get(optionBytes[4]);
-            styleSpecified = true;
-        }
-    }
-
-    private void parseParameters(byte[] parameterBytes) {
-        BitSet parameters = BitSet.valueOf(parameterBytes);
-        tournamentStyle = parameters.get(0);
-        blind = parameters.get(1);
-        unexplored = parameters.get(2);
     }
 
     private void generateMapName() {
@@ -526,12 +507,12 @@ public strictfp class MapGenerator {
                     (byte) (mapParameters.getMapSize() / 64),
                     (byte) mapParameters.getNumTeams(),
                     (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
-                    (byte) ParseUtils.binPercentage(mapParameters.getLandDensity(), numBins),
-                    (byte) ParseUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
-                    (byte) ParseUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
-                    (byte) ParseUtils.binPercentage(mapParameters.getRampDensity(), numBins),
-                    (byte) ParseUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
-                    (byte) ParseUtils.binPercentage(mapParameters.getMexDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getLandDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getRampDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
+                    (byte) DiscreteUtils.binPercentage(mapParameters.getMexDensity(), numBins),
                     (byte) mapParameters.getHydroCount(),
                     (byte) mapParameters.getSymmetrySettings().getTerrainSymmetry().ordinal()};
         } else if (styleSpecified) {
@@ -540,7 +521,6 @@ public strictfp class MapGenerator {
             optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),
                     (byte) (mapParameters.getMapSize() / 64),
                     (byte) mapParameters.getNumTeams(),
-                    (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
                     (byte) styleIndex};
         } else {
             optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),

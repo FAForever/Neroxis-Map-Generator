@@ -21,7 +21,7 @@ public strictfp class DropPlateauStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        terrainGenerators.add(new DropPlateauTerrainGenerator());
+        terrainGenerator = new DropPlateauTerrainGenerator();
         propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
                 new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator(), new HighReclaimPropGenerator()));
     }

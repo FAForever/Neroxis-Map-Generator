@@ -403,7 +403,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask fixNonPerfectSymmetry() {
+    public BinaryMask interpolate() {
         return smooth(1, .35f);
     }
 
@@ -444,11 +444,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         return this;
     }
 
-    public BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+    private BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
         return combineWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public BinaryMask combineWithOffset(BinaryMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    private BinaryMask combineWithOffset(BinaryMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         int size = getSize();
         int otherSize = other.getSize();
         int smallerSize = StrictMath.min(size, otherSize);
@@ -482,13 +482,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             });
         }
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public BinaryMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location, boolean wrapEdges) {
+    private BinaryMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location, boolean wrapEdges) {
         combineWithOffset(other.convertToBinaryMask(minValue, maxValue), location, true, wrapEdges);
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 

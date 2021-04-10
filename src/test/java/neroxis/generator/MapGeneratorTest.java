@@ -5,8 +5,8 @@ import neroxis.generator.style.StyleGenerator;
 import neroxis.map.Army;
 import neroxis.map.Group;
 import neroxis.map.SCMap;
+import neroxis.util.DiscreteUtils;
 import neroxis.util.FileUtils;
-import neroxis.util.ParseUtils;
 import neroxis.util.Pipeline;
 import org.junit.After;
 import org.junit.Before;
@@ -30,12 +30,12 @@ public class MapGeneratorTest {
     float rampDensity = .5649f;
     float reclaimDensity = .1354f;
     float mexDensity = .7325f;
-    float roundedLandDensity = ParseUtils.discretePercentage(landDensity, 127);
-    float roundedPlateauDensity = ParseUtils.discretePercentage(plateauDensity, 127);
-    float roundedMountainDensity = ParseUtils.discretePercentage(mountainDensity, 127);
-    float roundedRampDensity = ParseUtils.discretePercentage(rampDensity, 127);
-    float roundedReclaimDensity = ParseUtils.discretePercentage(reclaimDensity, 127);
-    float roundedMexDensity = ParseUtils.discretePercentage(mexDensity, 127);
+    float roundedLandDensity = DiscreteUtils.discretePercentage(landDensity, 127);
+    float roundedPlateauDensity = DiscreteUtils.discretePercentage(plateauDensity, 127);
+    float roundedMountainDensity = DiscreteUtils.discretePercentage(mountainDensity, 127);
+    float roundedRampDensity = DiscreteUtils.discretePercentage(rampDensity, 127);
+    float roundedReclaimDensity = DiscreteUtils.discretePercentage(reclaimDensity, 127);
+    float roundedMexDensity = DiscreteUtils.discretePercentage(mexDensity, 127);
     int mapSize = 256;
     int numTeams = 2;
     String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
@@ -55,37 +55,6 @@ public class MapGeneratorTest {
     @Before
     public void setup() {
         instance = new MapGenerator();
-    }
-
-    @Test
-    public void TestParseOrdered3Args() throws Exception {
-        String[] args = {folderPath, Long.toString(seed), version};
-
-        instance.interpretArguments(args);
-
-        assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-    }
-
-    @Test
-    public void TestParseOrdered2Args() throws Exception {
-        String[] args = {folderPath, numericMapName};
-
-        instance.interpretArguments(args);
-
-        assertEquals(instance.getMapName(), numericMapName);
-        assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-    }
-
-    @Test
-    public void TestParseOrdered4Args() throws Exception {
-        String[] args = {folderPath, Long.toString(seed), version, numericMapName};
-
-        instance.interpretArguments(args);
-
-        assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
     }
 
     @Test
@@ -149,7 +118,7 @@ public class MapGeneratorTest {
         Pipeline.reset();
         instance = new MapGenerator();
 
-        String[] args = {folderPath, map1.getName()};
+        String[] args = {"--map-name", map1.getName()};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
@@ -401,41 +370,6 @@ public class MapGeneratorTest {
             assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
             assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
         }
-    }
-
-    @Test
-    public void TestEqualityMapNameNameKeyword() throws Exception {
-        instance.interpretArguments(new String[]{"--map-size", "256"});
-        String[] args;
-        args = new String[]{"--map-name", instance.getMapName()};
-        instance.interpretArguments(args);
-        SCMap map1 = instance.generate();
-
-        Pipeline.reset();
-        instance = new MapGenerator();
-
-        args = new String[]{folderPath, map1.getName()};
-        instance.interpretArguments(args);
-        SCMap map2 = instance.generate();
-
-        assertEquals(map1.getName(), map2.getName());
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
     @Test

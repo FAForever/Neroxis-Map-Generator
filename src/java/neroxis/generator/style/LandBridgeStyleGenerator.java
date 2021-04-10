@@ -11,6 +11,7 @@ public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
 
     public LandBridgeStyleGenerator() {
         name = "LAND_BRIDGE";
+        weight = 2;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.25f, .75f)
                 .mexDensity(.5f, 1f)
@@ -22,7 +23,7 @@ public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        terrainGenerators.add(new LandBridgeTerrainGenerator());
+        terrainGenerator = new LandBridgeTerrainGenerator();
         propGenerators.addAll(Arrays.asList(new LargeBattlePropGenerator(), new NavyWrecksPropGenerator(),
                 new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
         int mapSize = mapParameters.getMapSize();

@@ -1,7 +1,6 @@
 package neroxis.generator;
 
 import lombok.Value;
-import neroxis.biomes.Biome;
 import neroxis.biomes.Biomes;
 import neroxis.map.MapParameters;
 import neroxis.map.SymmetrySettings;
@@ -85,7 +84,7 @@ public strictfp class ParameterConstraints {
         }
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Biome biome, SymmetrySettings symmetrySettings) throws Exception {
+    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, SymmetrySettings symmetrySettings) throws Exception {
         return MapParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))

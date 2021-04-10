@@ -13,6 +13,7 @@ public strictfp class OneIslandStyleGenerator extends StyleGenerator {
         name = "ONE_ISLAND";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)
+                .plateauDensity(0f, .75f)
                 .mapSizes(512, 1024)
                 .build();
     }
@@ -20,7 +21,7 @@ public strictfp class OneIslandStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        terrainGenerators.add(new OneIslandTerrainGenerator());
+        terrainGenerator = new OneIslandTerrainGenerator();
         propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(),
                 new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }

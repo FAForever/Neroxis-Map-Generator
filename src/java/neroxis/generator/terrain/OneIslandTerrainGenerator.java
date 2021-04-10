@@ -21,7 +21,6 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;
-        spawnSize = 48;
     }
 
     @Override
@@ -36,6 +35,8 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int numWalkers = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - normalizedLandDensity) * .75f))) + mapSize / 8;
         float maxStepSize = mapSize / 128f;
+        land.startVisualDebugger();
+        connections.startVisualDebugger();
         land.setSize(mapSize + 1);
 
         pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
@@ -50,6 +51,19 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         }
         land.setSize(mapSize + 1);
         land.smooth(mapSize / 64, .75f);
+    }
+
+    @Override
+    protected void teamConnectionsSetup() {
+        float maxStepSize = map.getSize() / 128f;
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 2;
+        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 2 + 1);
+        int numTeammateConnections = 1;
+        connections.setSize(map.getSize() + 1);
+
+        connectTeams(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 }
 

@@ -1,6 +1,6 @@
 package neroxis.util;
 
-public strictfp class ParseUtils {
+public strictfp class DiscreteUtils {
 
     public static float discretePercentage(float percent, int numBins) {
         return binPercentage(percent, numBins) / (float) numBins;

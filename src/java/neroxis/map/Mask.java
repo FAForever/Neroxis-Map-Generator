@@ -31,7 +31,7 @@ public strictfp abstract class Mask<T> {
 
     protected abstract T[][] getEmptyMask(int size);
 
-    public abstract Mask<T> fixNonPerfectSymmetry();
+    public abstract Mask<T> interpolate();
 
     public abstract Mask<T> blur(int size);
 
@@ -103,7 +103,7 @@ public strictfp abstract class Mask<T> {
     public Mask<T> resample(int newSize) {
         int size = getSize();
         if (size < newSize) {
-            fixNonPerfectSymmetry(newSize);
+            interpolate(newSize);
         } else if (size > newSize) {
             decimate(newSize);
         }
@@ -474,7 +474,7 @@ public strictfp abstract class Mask<T> {
             });
         });
         if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
-            fixNonPerfectSymmetry();
+            interpolate();
         }
         VisualDebugger.visualizeMask(this);
     }
@@ -493,15 +493,15 @@ public strictfp abstract class Mask<T> {
         VisualDebugger.visualizeMask(this);
     }
 
-    public Mask<T> enlarge(int size) {
+    private Mask<T> enlarge(int size) {
         return enlarge(size, SymmetryType.SPAWN);
     }
 
-    public Mask<T> shrink(int size) {
+    private Mask<T> shrink(int size) {
         return shrink(size, SymmetryType.SPAWN);
     }
 
-    public Mask<T> enlarge(int newSize, SymmetryType symmetryType) {
+    private Mask<T> enlarge(int newSize, SymmetryType symmetryType) {
         T[][] smallMask = mask;
         int oldSize = getSize();
         float scale = (float) newSize / oldSize;
@@ -511,11 +511,10 @@ public strictfp abstract class Mask<T> {
             int smallY = StrictMath.min((int) (y / scale), oldSize - 1);
             return smallMask[smallX][smallY];
         });
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public Mask<T> shrink(int newSize, SymmetryType symmetryType) {
+    private Mask<T> shrink(int newSize, SymmetryType symmetryType) {
         T[][] largeMask = mask;
         int oldSize = getSize();
         float scale = (float) oldSize / newSize;
@@ -525,31 +524,28 @@ public strictfp abstract class Mask<T> {
             int largeY = StrictMath.min(StrictMath.round(y * scale + scale / 2), oldSize - 1);
             return largeMask[largeX][largeY];
         });
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public Mask<T> fixNonPerfectSymmetry(int newSize) {
-        return fixNonPerfectSymmetry(newSize, SymmetryType.SPAWN);
+    private Mask<T> interpolate(int newSize) {
+        return interpolate(newSize, SymmetryType.SPAWN);
     }
 
-    public Mask<T> fixNonPerfectSymmetry(int newSize, SymmetryType symmetryType) {
+    private Mask<T> interpolate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         enlarge(newSize, symmetryType);
         blur(StrictMath.round((float) newSize / oldSize / 2));
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
-    public Mask<T> decimate(int newSize) {
+    private Mask<T> decimate(int newSize) {
         return decimate(newSize, SymmetryType.SPAWN);
     }
 
-    public Mask<T> decimate(int newSize, SymmetryType symmetryType) {
+    private Mask<T> decimate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         blur(StrictMath.round((float) oldSize / newSize / 2));
         shrink(newSize, symmetryType);
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 

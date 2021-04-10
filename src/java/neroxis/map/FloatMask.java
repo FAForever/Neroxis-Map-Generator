@@ -213,11 +213,11 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+    private FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
         return addWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public FloatMask addWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    private FloatMask addWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         int size = getSize();
         int otherSize = other.getSize();
         int smallerSize = StrictMath.min(size, otherSize);
@@ -252,7 +252,6 @@ public strictfp class FloatMask extends Mask<Float> {
                 }
             });
         }
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
@@ -278,11 +277,11 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center, boolean wrapEdges) {
+    private FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center, boolean wrapEdges) {
         return addWithOffset(other.copy().multiply(-1f), loc, center, wrapEdges);
     }
 
-    public FloatMask subtractWithOffset(FloatMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
+    private FloatMask subtractWithOffset(FloatMask other, int offsetX, int offsetY, boolean center, boolean wrapEdges) {
         return addWithOffset(other.copy().multiply(-1f), offsetX, offsetY, center, wrapEdges);
     }
 
@@ -299,11 +298,11 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask multiplyWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+    private FloatMask multiplyWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
         return multiplyWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
-    public FloatMask multiplyWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    private FloatMask multiplyWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         int size = getSize();
         int otherSize = other.getSize();
         int smallerSize = StrictMath.min(size, otherSize);
@@ -338,7 +337,6 @@ public strictfp class FloatMask extends Mask<Float> {
                 }
             });
         }
-        VisualDebugger.visualizeMask(this);
         return this;
     }
 
@@ -428,7 +426,7 @@ public strictfp class FloatMask extends Mask<Float> {
         return this;
     }
 
-    public FloatMask fixNonPerfectSymmetry() {
+    public FloatMask interpolate() {
         return blur(1);
     }
 

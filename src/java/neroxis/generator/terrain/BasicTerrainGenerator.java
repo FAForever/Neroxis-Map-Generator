@@ -66,7 +66,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapLand = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
         heightmapOcean = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
         noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
-        spawnSize = 36;
+        spawnSize = 48;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
         plateauHeight = 5f;
         oceanFloor = -16f;
@@ -77,9 +77,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         mountainBrushDensity = map.getSize() < 512 ? .1f : .05f;
         mountainBrushIntensity = 10f;
 
-        plateauBrushSize = 32;
-        plateauBrushDensity = .64f;
-        plateauBrushIntensity = 6f;
+        plateauBrushSize = 64;
+        plateauBrushDensity = .16f;
+        plateauBrushIntensity = 10f;
 
         smallFeatureBrushSize = 24;
         hillBrushIntensity = 0.5f;
@@ -312,7 +312,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
                 .space(6, 12).combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
-                .inflate(24);
+                .minus(mountains).inflate(24);
     }
 
     protected void setupMountainHeightmapPipeline() {
@@ -342,6 +342,11 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).smooth(1, plateaus);
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+
+        ConcurrentBinaryMask plateauBase = new ConcurrentBinaryMask(heightmapPlateaus, 1, random.nextLong(), "plateauBase");
+
+        plateauBase.outline().inflate(4);
+        heightmapPlateaus.smooth(1, plateauBase);
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {

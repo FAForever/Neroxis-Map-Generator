@@ -20,16 +20,15 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
         super.initialize(map, seed, mapParameters);
         plateauHeight = 12f;
         plateauBrushIntensity = 16f;
-        spawnSize = 32;
     }
 
     @Override
     protected void teamConnectionsSetup() {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
-        int minMiddlePoints = 2;
-        int maxMiddlePoints = 4;
-        int numTeamConnections = 2;
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 2;
+        int numTeamConnections = 3;
         int numTeammateConnections = 1;
 
         connections.setSize(mapSize + 1);
@@ -49,7 +48,7 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
         plateaus.grow(.5f, SymmetryType.SPAWN, 4);
 
         plateaus.setSize(mapSize + 1);
-        plateaus.minus(connections.copy().inflate(plateauBrushSize * 5f / 8f).smooth(12, .125f));
+        plateaus.minus(connections.copy().inflate(plateauBrushSize * 7f / 16f).smooth(12, .125f));
     }
 
     @Override

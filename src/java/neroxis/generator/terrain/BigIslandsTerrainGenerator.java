@@ -1,7 +1,9 @@
 package neroxis.generator.terrain;
 
 import neroxis.generator.ParameterConstraints;
-import neroxis.map.*;
+import neroxis.map.ConcurrentBinaryMask;
+import neroxis.map.SymmetrySettings;
+import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
 
 public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
@@ -13,12 +15,6 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
                 .mapSizes(1024)
                 .build();
         weight = 2;
-    }
-
-    @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
-        spawnSize = 48;
     }
 
     @Override

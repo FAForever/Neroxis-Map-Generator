@@ -22,7 +22,7 @@ public strictfp class CenterLakeStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        terrainGenerators.add(new CenterLakeTerrainGenerator());
+        terrainGenerator = new CenterLakeTerrainGenerator();
         propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(),
                 new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }

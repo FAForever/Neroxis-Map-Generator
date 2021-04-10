@@ -20,7 +20,6 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         mountainBrushSize = 32;
         mountainBrushDensity = .05f;
         mountainBrushIntensity = 10;
-        spawnSize = 48;
     }
 
     @Override

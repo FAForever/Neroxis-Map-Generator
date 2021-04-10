@@ -1,6 +1,7 @@
 package neroxis.util;
 
 import neroxis.generator.ElementGenerator;
+import neroxis.generator.ParameterConstraints;
 import neroxis.map.MapParameters;
 
 import java.util.ArrayList;
@@ -48,8 +49,27 @@ public strictfp class RandomUtils {
         List<T> matchingGenerators = generators.stream()
                 .filter(generator -> generator.getParameterConstraints().matches(mapParameters))
                 .collect(Collectors.toList());
-        if (matchingGenerators.size() > 0) {
-            List<Float> weights = matchingGenerators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
+        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
+    }
+
+    public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
+                                                                               int spawnCount, int mapSize, int numTeams,
+                                                                               T defaultGenerator) {
+        List<T> matchingGenerators = generators.stream()
+                .filter(generator -> {
+                    ParameterConstraints constraints = generator.getParameterConstraints();
+                    return constraints.getMapSizes().contains(mapSize)
+                            && constraints.getNumTeamsRange().contains(numTeams)
+                            && constraints.getSpawnCountRange().contains(spawnCount);
+                })
+                .collect(Collectors.toList());
+        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
+    }
+
+    private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
+                                                                                    T defaultGenerator) {
+        if (generators.size() > 0) {
+            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
             List<Float> cumulativeWeights = new ArrayList<>();
             float sum = 0;
             for (float weight : weights) {
@@ -59,7 +79,7 @@ public strictfp class RandomUtils {
             float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
             return cumulativeWeights.stream().filter(weight -> value <= weight)
                     .reduce((first, second) -> first)
-                    .map(weight -> matchingGenerators.get(cumulativeWeights.indexOf(weight)))
+                    .map(weight -> generators.get(cumulativeWeights.indexOf(weight)))
                     .orElse(defaultGenerator);
         } else {
             return defaultGenerator;
