@@ -117,6 +117,7 @@ public strictfp class SCMap {
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
         cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
+        skyBox = new SkyBox();
 
         generatePreview = true;
         preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
