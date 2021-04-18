@@ -176,8 +176,7 @@ public strictfp class SCMapExporter {
 
         // additional skybox
         if (map.getMinorVersion() >= 60) {
-            SkyBox skyBox = map.getSkyBox();
-            writeSkyBox(skyBox);
+            writeSkyBox(map.getSkyBox());
         }
 
         //props
@@ -205,7 +204,7 @@ public strictfp class SCMapExporter {
         try {
             ImageIO.write(renderedImage, fileFormat, previewFile);
         } catch (IOException e) {
-            System.out.print("Could not write the preview image\n" + e.toString());
+            System.out.print("Could not write the preview image\n" + e);
         }
     }
 
