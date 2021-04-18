@@ -28,12 +28,12 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
         float maxStepSize = mapSize / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 2;
-        int numTeamConnections = 3;
+        int numTeamConnections = 2;
         int numTeammateConnections = 1;
 
         connections.setSize(mapSize + 1);
 
-        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
         connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 

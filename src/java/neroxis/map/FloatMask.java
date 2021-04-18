@@ -3,6 +3,7 @@ package neroxis.map;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import neroxis.util.Vector2f;
+import neroxis.util.Vector3f;
 import neroxis.util.VisualDebugger;
 
 import java.awt.image.BufferedImage;
@@ -91,6 +92,17 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public void multiplyValueAt(int x, int y, float value) {
         mask[x][y] *= value;
+    }
+
+    public Vector3f getNormalAt(int x, int y) {
+        if (onBoundary(x, y) || !inBounds(x, y)) {
+            return new Vector3f(0, 1, 0);
+        }
+        return new Vector3f(
+                (getValueAt(x - 1, y) - getValueAt(x + 1, y)) / 2f,
+                1,
+                (getValueAt(x, y - 1) - getValueAt(x, y + 1)) / 2f
+        ).normalize();
     }
 
     public boolean isLocalMax(int x, int y) {
@@ -418,6 +430,58 @@ public strictfp class FloatMask extends Mask<Float> {
         mask = maskCopy;
         VisualDebugger.visualizeMask(this);
         return this;
+    }
+
+    public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
+                                float depositionRate, float maxOffset, float iterationScale) {
+        for (int i = 0; i < numDrops; ++i) {
+            waterDrop(maxIterations, random.nextInt(getSize()), random.nextInt(getSize()), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
+        }
+        applySymmetry(SymmetryType.SPAWN);
+        VisualDebugger.visualizeMask(this);
+        return this;
+    }
+
+    public void waterDrop(int maxIterations, float x, float y, float friction, float speed, float erosionRate,
+                          float depositionRate, float maxOffset, float iterationScale) {
+        float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
+        float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
+        float sediment = 0;
+        float xPrev = x;
+        float yPrev = y;
+        float xVelocity = 0;
+        float yVelocity = 0;
+
+        for (int i = 0; i < maxIterations; ++i) {
+            int sampleX = (int) (x + xOffset);
+            int sampleY = (int) (y + yOffset);
+            if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
+                break;
+            }
+            Vector3f surfaceNormal = getNormalAt(sampleX, sampleY);
+
+            // If the terrain is flat, stop simulating, the snowball cannot roll any further
+            if (surfaceNormal.getY() >= 1) {
+                break;
+            }
+
+            // Calculate the deposition and erosion rate
+            float deposit = sediment * depositionRate * surfaceNormal.getY();
+            float erosion = erosionRate * (1 - surfaceNormal.getY()) * StrictMath.min(1, i * iterationScale);
+
+            float sedimentChange = erosion - deposit;
+
+            // Change the sediment on the place this snowball came from
+            subtractValueAt((int) xPrev, (int) yPrev, sedimentChange);
+            sediment += sedimentChange;
+
+            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * speed;
+            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * speed;
+            xPrev = x;
+            yPrev = y;
+            x += xVelocity;
+            y += yVelocity;
+        }
     }
 
     public FloatMask threshold(float val) {

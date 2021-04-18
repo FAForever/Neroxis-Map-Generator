@@ -68,14 +68,14 @@ public class BasicTextureGenerator extends TextureGenerator {
         steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
         accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f).intersect(rock);
 
-        accentGroundTexture.init(accentGround, 0, .5f).smooth(12).add(accentGround, .325f).smooth(8).add(accentGround, .25f).clampMax(1f).smooth(2);
-        accentPlateauTexture.init(accentPlateau, 0, .5f).smooth(12).add(accentPlateau, .325f).smooth(8).add(accentPlateau, .25f).clampMax(1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .75f).smooth(4).clampMax(1f);
-        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f);
-        steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f);
-        waterBeachTexture.init(realLand.copy().invert().inflate(12).minus(realPlateaus), 0, 1).smooth(12);
-        rockTexture.init(rock, 0, 1f).smooth(4).add(rock, 1f).smooth(2).clampMax(1f);
-        accentRockTexture.init(accentRock, 0, 1f).smooth(4).clampMax(1f);
+        accentGroundTexture.init(accentGround, 0, .5f).blur(12).add(accentGround, .325f).blur(8).add(accentGround, .25f).clampMax(1f).blur(2);
+        accentPlateauTexture.init(accentPlateau, 0, .5f).blur(12).add(accentPlateau, .325f).blur(8).add(accentPlateau, .25f).clampMax(1f).blur(2);
+        slopesTexture.init(slopes, 0, 1).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
+        accentSlopesTexture.init(accentSlopes, 0, 1).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
+        steepHillsTexture.init(steepHills, 0, 1).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).clampMax(1f);
+        waterBeachTexture.init(realLand.copy().invert().inflate(12).minus(realPlateaus), 0, 1).blur(12);
+        rockTexture.init(rock, 0, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
+        accentRockTexture.init(accentRock, 0, 1f).blur(4).clampMax(1f);
     }
 
     protected void setupSimpleTexturePipeline() {
@@ -91,13 +91,13 @@ public class BasicTextureGenerator extends TextureGenerator {
         accentSlopes.minus(flat);
         accentRock.intersect(rock);
 
-        accentGroundTexture.init(accentGround, 0, .5f).smooth(12).add(accentGround, .325f).smooth(8).add(accentGround, .25f).clampMax(1f).smooth(2);
-        accentPlateauTexture.init(accentPlateau, 0, .5f).smooth(12).add(accentPlateau, .325f).smooth(8).add(accentPlateau, .25f).clampMax(1f).smooth(2);
-        slopesTexture.init(slopes, 0, 1).smooth(8).add(slopes, .75f).smooth(4).clampMax(1f);
-        accentSlopesTexture.init(accentSlopes, 0, 1).smooth(8).add(accentSlopes, .65f).smooth(4).add(accentSlopes, .5f).smooth(1).clampMax(1f);
-        steepHillsTexture.init(steepHills, 0, 1).smooth(8).clampMax(0.35f).add(steepHills, .65f).smooth(4).clampMax(0.65f).add(steepHills, .5f).smooth(1).clampMax(1f);
-        waterBeachTexture.init(realLand.copy().invert().inflate(12).minus(realPlateaus), 0, 1).smooth(12);
-        rockTexture.init(rock, 0, 1f).smooth(4).add(rock, 1f).smooth(2).clampMax(1f);
-        accentRockTexture.init(accentRock, 0, 1f).smooth(4).clampMax(1f);
+        accentGroundTexture.init(accentGround, 0, .5f).blur(12).add(accentGround, .325f).blur(8).add(accentGround, .25f).clampMax(1f).blur(2);
+        accentPlateauTexture.init(accentPlateau, 0, .5f).blur(12).add(accentPlateau, .325f).blur(8).add(accentPlateau, .25f).clampMax(1f).blur(2);
+        slopesTexture.init(slopes, 0, 1).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
+        accentSlopesTexture.init(accentSlopes, 0, 1).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
+        steepHillsTexture.init(steepHills, 0, 1).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).clampMax(1f);
+        waterBeachTexture.init(realLand.copy().invert().inflate(12).minus(realPlateaus), 0, 1).blur(12);
+        rockTexture.init(rock, 0, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
+        accentRockTexture.init(accentRock, 0, 1f).blur(4).clampMax(1f);
     }
 }

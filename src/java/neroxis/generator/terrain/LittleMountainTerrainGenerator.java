@@ -30,7 +30,7 @@ public strictfp class LittleMountainTerrainGenerator extends PathedPlateauTerrai
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mapParameters.getMountainDensity());
         mountains.setSize(mapSize / 4);
 
-        mountains.randomWalk((int) (normalizedMountainDensity * 150 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 20), mapSize / 64);
+        mountains.randomWalk((int) (normalizedMountainDensity * 150 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 50), mapSize / 128);
 
         mountains.setSize(mapSize + 1);
     }

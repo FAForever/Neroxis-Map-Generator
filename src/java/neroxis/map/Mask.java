@@ -120,6 +120,15 @@ public strictfp abstract class Mask<T> {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
+    public boolean onBoundary(Vector2f location) {
+        return onBoundary((int) location.getX(), (int) location.getY());
+    }
+
+    public boolean onBoundary(int x, int y) {
+        int size = getSize();
+        return x == 0 || x == size - 1 || y == 0 || y == size - 1;
+    }
+
     public List<Vector2f> getSymmetryPoints(Vector3f v, SymmetryType symmetryType) {
         return getSymmetryPoints(new Vector2f(v), symmetryType);
     }

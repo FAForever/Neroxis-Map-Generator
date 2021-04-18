@@ -29,10 +29,9 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mapParameters.getMountainDensity());
-        mountains.startVisualDebugger();
         mountains.setSize(mapSize / 2);
 
-        mountains.progressiveWalk((int) (normalizedMountainDensity * 4 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 4, mapSize / 2);
+        mountains.progressiveWalk((int) (normalizedMountainDensity * 4 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8, mapSize / 4);
         mountains.inflate(2);
 
         mountains.setSize(mapSize + 1);

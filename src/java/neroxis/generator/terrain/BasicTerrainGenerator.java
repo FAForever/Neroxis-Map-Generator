@@ -66,6 +66,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapLand = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
         heightmapOcean = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
         noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
+
         spawnSize = 48;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
         plateauHeight = 5f;
@@ -125,13 +126,13 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void teamConnectionsSetup() {
         float maxStepSize = map.getSize() / 128f;
-        int minMiddlePoints = 0;
+        int minMiddlePoints = 1;
         int maxMiddlePoints = 2;
-        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 2 + 1);
+        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 3 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
         connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 
@@ -234,19 +235,19 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         noise.setSize(mapSize / 128);
 
         heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).minus(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
-                .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0).smooth(4, deepWater).smooth(1);
+                .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0).blur(4, deepWater).blur(1);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
                 .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
-                .smooth(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
+                .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
         noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64).addWhiteNoise(plateauHeight / 2).resample(mapSize + 1).addWhiteNoise(1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).smooth(mapSize / 16, spawnLandMask.copy().inflate(8))
-                .smooth(mapSize / 16, spawnPlateauMask.copy().inflate(8)).smooth(mapSize / 16);
+                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).blur(mapSize / 16, spawnLandMask.copy().inflate(8))
+                .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
 
-        heightmap.add(heightmapLand).add(waterHeight).add(noise).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
+        heightmap.add(heightmapLand).add(waterHeight).add(noise);
+
+        smoothRamps();
     }
 
     protected void setupSimpleHeightmapPipeline() {
@@ -283,18 +284,25 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         mountains.replace(paintedMountains);
         land.combine(paintedMountains);
 
-        heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).smooth(1, plateaus);
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+        heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).blur(1, plateaus);
 
         initRamps();
 
         heightmapLand.add(heightmapMountains).add(landHeight)
                 .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
-                .smooth(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
+                .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
-        heightmap.add(heightmapLand).add(waterHeight).smooth(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(6, ramps.copy().inflate(8).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .smooth(4, ramps.copy().inflate(12)).smooth(4, ramps.copy().inflate(16)).clampMin(0f).clampMax(255f);
+        heightmap.add(heightmapLand).add(waterHeight);
+
+        smoothRamps();
+    }
+
+    private void smoothRamps() {
+        heightmap.blur(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .blur(6, ramps.copy().inflate(2).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+                .blur(4, ramps.copy().inflate(4))
+                .blur(2, ramps.copy().inflate(8))
+                .clampMin(0f).clampMax(255f);
     }
 
     protected void initRamps() {
@@ -310,9 +318,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
             pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         }
 
-        ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
-                .space(6, 12).combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
-                .minus(mountains).inflate(24);
+        ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize * 2).intersect(plateaus.copy().outline())
+                .combine(connections.copy().inflate(maxStepSize * 2).intersect(plateaus.copy().outline()))
+                .minus(mountains).inflate(8);
     }
 
     protected void setupMountainHeightmapPipeline() {
@@ -326,7 +334,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         mountains.replace(paintedMountains);
         land.combine(paintedMountains);
 
-        heightmapMountains.smooth(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
+        heightmapMountains.blur(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
     }
 
     protected void setupPlateauHeightmapPipeline() {
@@ -340,13 +348,13 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
 
-        heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).smooth(1, plateaus);
+        heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).blur(1, plateaus);
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
         ConcurrentBinaryMask plateauBase = new ConcurrentBinaryMask(heightmapPlateaus, 1, random.nextLong(), "plateauBase");
 
         plateauBase.outline().inflate(4);
-        heightmapPlateaus.smooth(1, plateauBase);
+        heightmapPlateaus.blur(1, plateauBase);
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {

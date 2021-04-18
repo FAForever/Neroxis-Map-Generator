@@ -27,7 +27,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        heightmap = new ConcurrentFloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmapBase");
+        heightmap = new ConcurrentFloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap");
         slope = new ConcurrentFloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope");
         impassable = new ConcurrentBinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable");
         unbuildable = new ConcurrentBinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable");
@@ -88,7 +88,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void connectTeamsAroundCenter(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
+    protected void connectTeamsAroundCenter(ConcurrentBinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize,
+                                            int bound) {
         if (mapParameters.getNumTeams() == 0) {
             return;
         }
@@ -107,6 +108,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             offCenterAngle *= random.nextBoolean() ? 1 : -1;
             offCenterAngle += start.getAngle(new Vector2f(maskToUse.getPlannedSize() / 2f, maskToUse.getPlannedSize() / 2f));
             end.addPolar(offCenterAngle, random.nextFloat() * maskToUse.getPlannedSize() / 2f + maskToUse.getPlannedSize() / 2f);
+            end.clampMax(maskToUse.getPlannedSize() - bound, maskToUse.getPlannedSize() - bound).clampMin(bound, bound);
             float maxMiddleDistance = start.getDistance(end);
             maskToUse.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }

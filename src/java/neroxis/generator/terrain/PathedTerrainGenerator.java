@@ -24,8 +24,8 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         pathInCenterBounds(ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
 
         ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
-                .space(6, 12).combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
-                .inflate(24);
+                .combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
+                .minus(mountains).inflate(8);
     }
 
     @Override

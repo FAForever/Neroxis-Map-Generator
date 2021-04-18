@@ -127,9 +127,21 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
+    public ConcurrentFloatMask multiply(ConcurrentFloatMask other) {
+        return Pipeline.add(this, Arrays.asList(this, other), res ->
+                this.mask.multiply(((ConcurrentFloatMask) res.get(1)).getFloatMask())
+        );
+    }
+
     public ConcurrentFloatMask setToValue(float value, ConcurrentBinaryMask area) {
         return Pipeline.add(this, Arrays.asList(this, area), res ->
                 this.mask.setToValue(((ConcurrentBinaryMask) res.get(1)).getBinaryMask(), value)
+        );
+    }
+
+    public ConcurrentFloatMask sqrt() {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.sqrt()
         );
     }
 
@@ -193,13 +205,13 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
         );
     }
 
-    public ConcurrentFloatMask smooth(int radius) {
+    public ConcurrentFloatMask blur(int radius) {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.blur(radius)
         );
     }
 
-    public ConcurrentFloatMask smooth(int radius, ConcurrentBinaryMask limiter) {
+    public ConcurrentFloatMask blur(int radius, ConcurrentBinaryMask limiter) {
         return Pipeline.add(this, Arrays.asList(this, limiter), res ->
                 this.mask.smooth(radius, ((ConcurrentBinaryMask) res.get(1)).getBinaryMask())
         );
@@ -208,6 +220,13 @@ public strictfp class ConcurrentFloatMask extends ConcurrentMask<FloatMask> {
     public ConcurrentFloatMask gradient() {
         return Pipeline.add(this, Collections.singletonList(this), res ->
                 this.mask.gradient()
+        );
+    }
+
+    public ConcurrentFloatMask waterErode(int numDrops, int maxIterations, float friction, float maxSpeed, float erosionRate,
+                                          float depositionRate, float maxOffset, float iterationScale) {
+        return Pipeline.add(this, Collections.singletonList(this), res ->
+                this.mask.waterErode(numDrops, maxIterations, friction, maxSpeed, erosionRate, depositionRate, maxOffset, iterationScale)
         );
     }
 

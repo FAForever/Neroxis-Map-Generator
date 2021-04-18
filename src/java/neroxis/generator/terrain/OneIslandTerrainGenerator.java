@@ -35,14 +35,12 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int numWalkers = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - normalizedLandDensity) * .75f))) + mapSize / 8;
         float maxStepSize = mapSize / 128f;
-        land.startVisualDebugger();
-        connections.startVisualDebugger();
         land.setSize(mapSize + 1);
 
         pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
                 .inflate(mapSize / 64f).smooth(12, .125f));
-        connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
         connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
         land.grow(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);
@@ -58,7 +56,7 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 2;
-        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 2 + 1);
+        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 2 + 2);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
