@@ -147,7 +147,9 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         if (mapSize < 512) {
             mexMultiplier = .75f;
         } else if (mapSize > 512) {
-            if (spawnCount <= 6) {
+            if (spawnCount <= 4) {
+                mexMultiplier = 1.75f;
+            } else if (spawnCount <= 6) {
                 mexMultiplier = 1.5f;
             } else if (spawnCount <= 10) {
                 mexMultiplier = 1.35f;
