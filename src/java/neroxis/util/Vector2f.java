@@ -136,6 +136,13 @@ public strictfp class Vector2f {
         return this;
     }
 
+    public Vector2f normalize() {
+        float magnitude = (float) StrictMath.sqrt(x * x + y * y);
+        x /= magnitude;
+        y /= magnitude;
+        return this;
+    }
+
     @Override
     public String toString() {
         return String.format("(%f, %f)", x, y);

@@ -79,6 +79,14 @@ public strictfp class Vector3f {
         z = StrictMath.round(y * 2) / 2f;
     }
 
+    public Vector3f normalize() {
+        float magnitude = (float) StrictMath.sqrt(x * x + y * y + z * z);
+        x /= magnitude;
+        y /= magnitude;
+        z /= magnitude;
+        return this;
+    }
+
     @Override
     public String toString() {
         return String.format("%f, %f, %f", x, y, z);
