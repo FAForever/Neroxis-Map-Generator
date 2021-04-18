@@ -58,49 +58,17 @@ public strictfp class VisualDebugger {
         if (dontRecord(mask)) {
             return;
         }
-        ImageSource checkerBoard = (x, y) -> (x + y) % 2 == 0 ? 0xFF_66_66_66 : 0xDD_DD_DD_DD;
+        float max = mask.getMax();
+        float min = mask.getMin();
+        float range = max - min;
         visualize((x, y) -> {
-            float value = mask.getValueAt(x, y);
+            float normalizedValue = (mask.getValueAt(x, y) - min) / range;
 
-            if (ignoreNegativeRange && value < 0) {
-                return checkerBoard.get(x, y);
-            }
-            // For each range we interpolate from color white to the color given in the corresponding array.
-            // Ranges must be positive and ordered smallest to biggest. Anything bigger than biggest range
-            // becomes black. Anything smaller than smallest becomes checkerboard.
-            int[] colors = new int[]{
-                    0xFF_FF_00_00,
-                    0xFF_00_FF_00,
-                    0xFF_00_00_FF,
-                    0xFF_FF_00_FF,
-                    0xFF_00_FF_FF,
-                    0xFF_00_00_00};
-            int[] ranges = new int[]{25, 50, 75, 100, 125, 150};
+            int r = (int) (255 * normalizedValue);
+            int g = (int) (255 * normalizedValue);
+            int b = (int) (255 * normalizedValue);
 
-            for (int i = 0; i < colors.length; i++) {
-                int color = colors[i];
-                int rangeMaxAbs = ranges[i];
-                if (value >= -rangeMaxAbs && value <= rangeMaxAbs) {
-                    int rangeMinAbs = i > 0 ? ranges[i - 1] : 0;
-                    float normalized = normalize(value, rangeMinAbs, rangeMaxAbs);
-                    float inverted = Math.max(0, 1 - normalized);
-
-                    int r = (color >>> 16) & 0xFF;
-                    int g = (color >>> 8) & 0xFF;
-                    int b = color & 0xFF;
-
-                    r = r + (int) (inverted * (255 - r));
-                    g = g + (int) (inverted * (255 - g));
-                    b = b + (int) (inverted * (255 - b));
-
-                    return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-                }
-            }
-            if (value < 0) {
-                return checkerBoard.get(x, y);
-            } else {
-                return 0xFF_00_00_00;
-            }
+            return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
         }, mask.getSize(), mask.hashCode());
     }
 
