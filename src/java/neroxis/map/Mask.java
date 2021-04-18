@@ -447,6 +447,18 @@ public strictfp abstract class Mask<T> {
         return (x >= getMinXBound(SymmetryType.TEAM) && x < getMaxXBound(SymmetryType.TEAM) && y >= getMinYBound(x, SymmetryType.TEAM) && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
     }
 
+    public boolean inTeamNoBounds(Vector3f pos, boolean reverse) {
+        return inTeam(new Vector2f(pos), reverse);
+    }
+
+    public boolean inTeamNoBounds(Vector2f pos, boolean reverse) {
+        return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
+    }
+
+    public boolean inTeamNoBounds(int x, int y, boolean reverse) {
+        return (x >= getMinXBound(SymmetryType.TEAM) && x < getMaxXBound(SymmetryType.TEAM) && y >= getMinYBound(x, SymmetryType.TEAM) && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
+    }
+
     public boolean inHalf(Vector3f pos, float angle) {
         return inHalf(new Vector2f(pos), angle);
     }
@@ -463,6 +475,25 @@ public strictfp abstract class Mask<T> {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
         } else {
             return (vectorAngle >= angle && vectorAngle < adjustedAngle) && inBounds(pos);
+        }
+    }
+
+    public boolean inHalfNoBounds(Vector3f pos, float angle) {
+        return inHalfNoBounds(new Vector2f(pos), angle);
+    }
+
+    public boolean inHalfNoBounds(int x, int y, float angle) {
+        return inHalfNoBounds(new Vector2f(x, y), angle);
+    }
+
+    public boolean inHalfNoBounds(Vector2f pos, float angle) {
+        float halfSize = getSize() / 2f;
+        float vectorAngle = (float) ((new Vector2f(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        float adjustedAngle = (angle + 180f) % 360f;
+        if (angle >= 180) {
+            return (vectorAngle >= angle || vectorAngle < adjustedAngle);
+        } else {
+            return (vectorAngle >= angle && vectorAngle < adjustedAngle);
         }
     }
 
