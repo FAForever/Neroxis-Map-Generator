@@ -352,7 +352,7 @@ public strictfp class MapTransformer {
             }
         });
         if (spawns.size() == transformedSpawns.size()) {
-            transformedSpawns.forEach(spawn -> matchToClosestMarker(spawn, spawns));
+            matchToClosestMarkers(spawns, transformedSpawns);
         } else {
             transformedSpawns.forEach(spawn -> spawn.setId("ARMY_" + transformedSpawns.indexOf(spawn)));
         }
@@ -371,7 +371,7 @@ public strictfp class MapTransformer {
             }
         });
         if (markers.size() == transformedMarkers.size()) {
-            transformedMarkers.forEach(marker -> matchToClosestMarker(marker, markers));
+            matchToClosestMarkers(markers, transformedMarkers);
         }
         markers.clear();
         markers.addAll(transformedMarkers);
@@ -390,6 +390,9 @@ public strictfp class MapTransformer {
                 });
             }
         });
+        if (aiMarkers.size() == transformedAImarkers.size()) {
+            matchToClosestMarkers(aiMarkers, transformedAImarkers);
+        }
         aiMarkers.clear();
         aiMarkers.addAll(transformedAImarkers);
     }
@@ -473,17 +476,14 @@ public strictfp class MapTransformer {
         decals.addAll(transformedDecals);
     }
 
-    private void matchToClosestMarker(Marker marker, Collection<? extends Marker> markers) {
-        Marker[] closestMarker = {null};
-        float[] minDistance = {Float.POSITIVE_INFINITY};
-        markers.forEach(s -> {
-            float distance = marker.getPosition().getXZDistance(s.getPosition());
-            if (distance < minDistance[0]) {
-                closestMarker[0] = s;
-                minDistance[0] = distance;
-            }
-        });
-        marker.setId(closestMarker[0].getId());
+    private void matchToClosestMarkers(Collection<? extends Marker> sourceMarkers, Collection<? extends Marker> destMarkers) {
+        List<Marker> sourceMarkersCopy = new ArrayList<>(sourceMarkers);
+        for (Marker destMarker : destMarkers) {
+            Marker matchingMarker = sourceMarkersCopy.stream().min(Comparator.comparingDouble(sourceMarker -> sourceMarker.getPosition().getXZDistance(destMarker.getPosition())))
+                    .orElseThrow(() -> new IndexOutOfBoundsException("List sizes are different"));
+            sourceMarkersCopy.remove(matchingMarker);
+            destMarker.setId(matchingMarker.getId());
+        }
     }
 
     private boolean inSourceRegion(Vector3f position) {
