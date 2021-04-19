@@ -471,8 +471,8 @@ public strictfp class MapPopulator {
                 accentRockTexture.replaceValues(textureBox, texturesMasks[7]);
             }
 
-            map.setTextureMasksLowScaled(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
-            map.setTextureMasksHighScaled(steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
+            map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
+            map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
         }
 
         if (populateProps) {

@@ -21,6 +21,7 @@ public strictfp class PreviewGenerator {
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";
     private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
+    private static final int PREVIEW_SIZE = 256;
 
     public static void generatePreview(SCMap map) {
         BufferedImage previewImage = map.getPreview();
@@ -28,18 +29,18 @@ public strictfp class PreviewGenerator {
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
-                BufferedImage layer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(materials.getPreviewColors()[i]);
-                layerGraphics.fillRect(0, 0, 256, 256);
+                layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
                 BufferedImage shadedLayer = getShadedImage(layer, map, i);
-                TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, 256, 256));
+                TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
                 graphics.setPaint(layerPaint);
                 graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
             }
         }
         BufferedImage waterLayer = getWaterLayer(map);
-        TexturePaint layerPaint = new TexturePaint(waterLayer, new Rectangle2D.Float(0, 0, 256, 256));
+        TexturePaint layerPaint = new TexturePaint(waterLayer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
         graphics.setPaint(layerPaint);
         graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
     }
@@ -57,8 +58,8 @@ public strictfp class PreviewGenerator {
 
     private static void addMarkerImages(Collection<? extends Marker> markers, BufferedImage markerImage, BufferedImage preview, SCMap map) {
         markers.forEach(marker -> {
-            int x = (int) (marker.getPosition().getX() / map.getSize() * 256 - markerImage.getWidth(null) / 2);
-            int y = (int) (marker.getPosition().getZ() / map.getSize() * 256 - markerImage.getHeight(null) / 2);
+            int x = (int) (marker.getPosition().getX() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2);
+            int y = (int) (marker.getPosition().getZ() / map.getSize() * PREVIEW_SIZE - markerImage.getHeight(null) / 2);
             if (ImageUtils.inImageBounds(x, y, preview)) {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
             }
@@ -68,13 +69,13 @@ public strictfp class PreviewGenerator {
     private static BufferedImage getShadedImage(BufferedImage image, SCMap map, int layerIndex) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         BufferedImage heightMap = map.getHeightmap();
-        BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
+        BufferedImage heightMapScaled = scaleImage(heightMap, PREVIEW_SIZE, PREVIEW_SIZE);
 
         BufferedImage textureLowMap = map.getTextureMasksLow();
-        BufferedImage textureLowScaled = scaleImage(textureLowMap, 256, 256);
+        BufferedImage textureLowScaled = scaleImage(textureLowMap, PREVIEW_SIZE, PREVIEW_SIZE);
 
         BufferedImage textureHighMap = map.getTextureMasksHigh();
-        BufferedImage textureHighScaled = scaleImage(textureHighMap, 256, 256);
+        BufferedImage textureHighScaled = scaleImage(textureHighMap, PREVIEW_SIZE, PREVIEW_SIZE);
 
         float ambientCoefficient = .5f;
         float landDiffuseCoefficient = .5f;
@@ -92,8 +93,8 @@ public strictfp class PreviewGenerator {
         int[] newRGBA = new int[4];
         int relativeLayerIndex;
 
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
+        for (int y = 0; y < imageHeight; y++) {
+            for (int x = 0; x < imageWidth; x++) {
                 if (layerIndex < 5) {
                     textureLowScaled.getRaster().getPixel(x, y, textureAlphas);
                     relativeLayerIndex = layerIndex;
@@ -147,9 +148,9 @@ public strictfp class PreviewGenerator {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
         WaterSettings waterSettings = map.getBiome().getWaterSettings();
         BufferedImage heightMap = map.getHeightmap();
-        BufferedImage heightMapScaled = scaleImage(heightMap, 256, 256);
+        BufferedImage heightMapScaled = scaleImage(heightMap, PREVIEW_SIZE, PREVIEW_SIZE);
 
-        BufferedImage waterLayer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage waterLayer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
         Graphics2D waterLayerGraphics = waterLayer.createGraphics();
 
         float elevation = lightingSettings.getSunDirection().getElevation();
@@ -160,7 +161,7 @@ public strictfp class PreviewGenerator {
         float waterShininess = 1f;
         int[] heightArray = new int[1];
         int[] newRGBA = new int[4];
-        BufferedImage layer = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
 
         for (int y = 0; y < waterLayer.getHeight(); y++) {
             for (int x = 0; x < waterLayer.getWidth(); x++) {
@@ -186,9 +187,9 @@ public strictfp class PreviewGenerator {
             }
         }
 
-        TexturePaint layerPaint = new TexturePaint(layer, new Rectangle2D.Float(0, 0, 256, 256));
+        TexturePaint layerPaint = new TexturePaint(layer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
         waterLayerGraphics.setPaint(layerPaint);
-        waterLayerGraphics.fillRect(0, 0, 256, 256);
+        waterLayerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
         return waterLayer;
     }
 }

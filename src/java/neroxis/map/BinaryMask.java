@@ -309,8 +309,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     private void markInRadius(float radius, Boolean[][] maskCopy, int x, int y, boolean value) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
-        for (int x2 = StrictMath.round(x - radius); x2 < StrictMath.round(x + radius + 1); x2++) {
-            for (int y2 = StrictMath.round(y - radius); y2 < StrictMath.round(y + radius + 1); y2++) {
+        int minX = StrictMath.round(x - radius);
+        int maxX = StrictMath.round(x + radius + 1);
+        int minY = StrictMath.round(y - radius);
+        int maxY = StrictMath.round(y + radius + 1);
+        for (int x2 = minX; x2 < maxX; x2++) {
+            for (int y2 = minY; y2 < maxY; y2++) {
                 if (inBounds(x2, y2) && maskCopy[x2][y2] != value && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     maskCopy[x2][y2] = value;
                 }

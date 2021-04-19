@@ -331,8 +331,8 @@ public strictfp class MapTransformer {
         map.setImageFromMask(map.getWaterDepthBiasMap(), waterDepthBiasMask);
         map.setImageFromMask(map.getTerrainType(), terrainTypeMask);
         map.setHeightImage(heightmapBase);
-        map.setTextureMasksLowRaw(texturesMasks[0], texturesMasks[1], texturesMasks[2], texturesMasks[3]);
-        map.setTextureMasksHighRaw(texturesMasks[4], texturesMasks[5], texturesMasks[6], texturesMasks[7]);
+        map.setTextureMasksRaw(map.getTextureMasksLow(), texturesMasks[0], texturesMasks[1], texturesMasks[2], texturesMasks[3]);
+        map.setTextureMasksRaw(map.getTextureMasksHigh(), texturesMasks[4], texturesMasks[5], texturesMasks[6], texturesMasks[7]);
     }
 
     private void transformSpawns(Collection<Spawn> spawns) {
