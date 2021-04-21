@@ -33,12 +33,12 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         int bound = (int) (mapSize / 64 * (24 * (random.nextFloat() * .25f + normalizedLandDensity * .75f))) + mapSize / 8;
         land.setSize(mapSize + 1);
         land.invert();
-        ConcurrentBinaryMask noLand = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand");
+        BinaryMask noLand = new BinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand", true);
 
         pathInCenterBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noLand.inflate(1).setSize(mapSize / 4);
-        noLand.grow(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
-        noLand.smooth(mapSize / 64, .5f);
+        noLand.dilute(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
+        noLand.blur(mapSize / 64, .5f);
         land.minus(noLand);
     }
 }

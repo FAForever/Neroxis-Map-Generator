@@ -6,31 +6,31 @@ import neroxis.util.Pipeline;
 import neroxis.util.Util;
 
 public class BasicTextureGenerator extends TextureGenerator {
-    protected ConcurrentBinaryMask realLand;
-    protected ConcurrentBinaryMask realPlateaus;
-    protected ConcurrentFloatMask accentGroundTexture;
-    protected ConcurrentFloatMask waterBeachTexture;
-    protected ConcurrentFloatMask accentSlopesTexture;
-    protected ConcurrentFloatMask accentPlateauTexture;
-    protected ConcurrentFloatMask slopesTexture;
-    protected ConcurrentFloatMask steepHillsTexture;
-    protected ConcurrentFloatMask rockTexture;
-    protected ConcurrentFloatMask accentRockTexture;
+    protected BinaryMask realLand;
+    protected BinaryMask realPlateaus;
+    protected FloatMask accentGroundTexture;
+    protected FloatMask waterBeachTexture;
+    protected FloatMask accentSlopesTexture;
+    protected FloatMask accentPlateauTexture;
+    protected FloatMask slopesTexture;
+    protected FloatMask steepHillsTexture;
+    protected FloatMask rockTexture;
+    protected FloatMask accentRockTexture;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        realLand = new ConcurrentBinaryMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), random.nextLong(), "realLand");
-        realPlateaus = new ConcurrentBinaryMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation() + 3f, random.nextLong(), "realPlateaus");
-        accentGroundTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture");
-        waterBeachTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture");
-        accentSlopesTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture");
-        accentPlateauTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture");
-        slopesTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture");
-        steepHillsTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture");
-        rockTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "rockTexture");
-        accentRockTexture = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture");
+        realLand = new BinaryMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), random.nextLong(), "realLand");
+        realPlateaus = new BinaryMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation() + 3f, random.nextLong(), "realPlateaus");
+        accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
+        accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
+        accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture", true);
+        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
+        steepHillsTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture", true);
+        rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
+        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
     }
 
     @Override
@@ -52,21 +52,21 @@ public class BasicTextureGenerator extends TextureGenerator {
     }
 
     protected void setupTexturePipeline() {
-        ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "flat").invert();
-        ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(realLand, random.nextLong(), "accentGround");
-        ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(realPlateaus, random.nextLong(), "accentPlateau");
-        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopes");
-        ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
-        ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
-        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rock");
-        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentRock");
+        BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong(), "flat").invert();
+        BinaryMask accentGround = new BinaryMask(realLand, random.nextLong(), "accentGround");
+        BinaryMask accentPlateau = new BinaryMask(realPlateaus, random.nextLong(), "accentPlateau");
+        BinaryMask slopes = new BinaryMask(slope, .15f, random.nextLong(), "slopes");
+        BinaryMask accentSlopes = new BinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
+        BinaryMask steepHills = new BinaryMask(slope, .55f, random.nextLong(), "steepHills");
+        BinaryMask rock = new BinaryMask(slope, .75f, random.nextLong(), "rock");
+        BinaryMask accentRock = new BinaryMask(slope, .75f, random.nextLong(), "accentRock");
 
-        accentGround.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).smooth(6, .75f);
-        accentPlateau.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).smooth(6, .75f);
+        accentGround.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).blur(6, .75f);
+        accentPlateau.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).blur(6, .75f);
         slopes.flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-        accentSlopes.minus(flat).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f).acid(.55f, 0);
+        accentSlopes.minus(flat).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).blur(4, .75f).acid(.55f, 0);
         steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-        accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f).intersect(rock);
+        accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).blur(2, .5f).intersect(rock);
 
         accentGroundTexture.init(accentGround, 0, .5f).blur(12).add(accentGround, .325f).blur(8).add(accentGround, .25f).clampMax(1f).blur(2);
         accentPlateauTexture.init(accentPlateau, 0, .5f).blur(12).add(accentPlateau, .325f).blur(8).add(accentPlateau, .25f).clampMax(1f).blur(2);
@@ -79,14 +79,14 @@ public class BasicTextureGenerator extends TextureGenerator {
     }
 
     protected void setupSimpleTexturePipeline() {
-        ConcurrentBinaryMask flat = new ConcurrentBinaryMask(slope, .05f, random.nextLong(), "flat").invert();
-        ConcurrentBinaryMask accentGround = new ConcurrentBinaryMask(realLand, random.nextLong(), "accentGround");
-        ConcurrentBinaryMask accentPlateau = new ConcurrentBinaryMask(realPlateaus, random.nextLong(), "accentPlateau");
-        ConcurrentBinaryMask slopes = new ConcurrentBinaryMask(slope, .15f, random.nextLong(), "slopes");
-        ConcurrentBinaryMask accentSlopes = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
-        ConcurrentBinaryMask steepHills = new ConcurrentBinaryMask(slope, .55f, random.nextLong(), "steepHills");
-        ConcurrentBinaryMask rock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "rock");
-        ConcurrentBinaryMask accentRock = new ConcurrentBinaryMask(slope, .75f, random.nextLong(), "accentRock");
+        BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong(), "flat").invert();
+        BinaryMask accentGround = new BinaryMask(realLand, random.nextLong(), "accentGround");
+        BinaryMask accentPlateau = new BinaryMask(realPlateaus, random.nextLong(), "accentPlateau");
+        BinaryMask slopes = new BinaryMask(slope, .15f, random.nextLong(), "slopes");
+        BinaryMask accentSlopes = new BinaryMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
+        BinaryMask steepHills = new BinaryMask(slope, .55f, random.nextLong(), "steepHills");
+        BinaryMask rock = new BinaryMask(slope, .75f, random.nextLong(), "rock");
+        BinaryMask accentRock = new BinaryMask(slope, .75f, random.nextLong(), "accentRock");
 
         accentSlopes.minus(flat);
         accentRock.intersect(rock);

@@ -535,7 +535,7 @@ public strictfp class SCMap {
     }
 
     public FloatMask getHeightMask(SymmetrySettings symmetrySettings) {
-        FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), null, symmetrySettings);
+        FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), null, symmetrySettings, "heightMask");
         for (int y = 0; y < size + 1; y++) {
             for (int x = 0; x < size + 1; x++) {
                 heightMask.setValueAt(x, y, this.heightmap.getRaster().getPixel(x, y, new int[1])[0] * heightMapScale);
@@ -582,7 +582,7 @@ public strictfp class SCMap {
         textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
     }
 
-    public void setTextureMasksScaled(BufferedImage textureMasks, FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+    public void setTextureMasksScaled(BufferedImage textureMasks, Mask<Float> mask0, Mask<Float> mask1, Mask<Float> mask2, Mask<Float> mask3) {
         int textureMasksWidth = textureMasks.getWidth();
         checkMaskSize(mask0, textureMasksWidth);
         checkMaskSize(mask1, textureMasksWidth);
@@ -618,10 +618,10 @@ public strictfp class SCMap {
 
     public FloatMask[] getTextureMasksScaled(SymmetrySettings symmetrySettings) {
         int textureMasksLowHeight = textureMasksLow.getHeight();
-        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
+        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask0");
+        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask1");
+        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask2");
+        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask3");
         for (int y = 0; y < textureMasksLowHeight; y++) {
             for (int x = 0; x < textureMasksLowHeight; x++) {
                 int[] valsLow = new int[4];
@@ -633,10 +633,10 @@ public strictfp class SCMap {
             }
         }
         int textureMasksHighHeight = textureMasksHigh.getHeight();
-        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
+        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask4");
+        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask5");
+        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask6");
+        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask7");
         for (int y = 0; y < textureMasksHighHeight; y++) {
             for (int x = 0; x < textureMasksHighHeight; x++) {
                 int[] valsHigh = new int[4];
@@ -652,10 +652,10 @@ public strictfp class SCMap {
 
     public FloatMask[] getTextureMasksRaw(SymmetrySettings symmetrySettings) {
         int textureMasksLowHeight = textureMasksLow.getHeight();
-        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
-        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings);
+        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask0");
+        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask1");
+        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask2");
+        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask3");
         for (int y = 0; y < textureMasksLowHeight; y++) {
             for (int x = 0; x < textureMasksLowHeight; x++) {
                 float[] valsLow = new float[4];
@@ -667,10 +667,10 @@ public strictfp class SCMap {
             }
         }
         int textureMasksHighHeight = textureMasksHigh.getHeight();
-        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
-        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings);
+        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask4");
+        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask5");
+        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask6");
+        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask7");
         for (int y = 0; y < textureMasksHighHeight; y++) {
             for (int x = 0; x < textureMasksHighHeight; x++) {
                 float[] valsHigh = new float[4];
@@ -703,7 +703,7 @@ public strictfp class SCMap {
     }
 
     public FloatMask getMaskFromImage(BufferedImage image, SymmetrySettings symmetrySettings) {
-        FloatMask mask = new FloatMask(image.getHeight(), null, symmetrySettings);
+        FloatMask mask = new FloatMask(image.getHeight(), null, symmetrySettings, "image");
         int maskSize = mask.getSize();
         for (int y = 0; y < maskSize; y++) {
             for (int x = 0; x < maskSize; x++) {

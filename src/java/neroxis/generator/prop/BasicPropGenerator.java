@@ -8,19 +8,19 @@ import neroxis.util.Util;
 
 public class BasicPropGenerator extends PropGenerator {
 
-    protected ConcurrentBinaryMask treeMask;
-    protected ConcurrentBinaryMask cliffRockMask;
-    protected ConcurrentBinaryMask fieldStoneMask;
+    protected BinaryMask treeMask;
+    protected BinaryMask cliffRockMask;
+    protected BinaryMask fieldStoneMask;
     protected BinaryMask noProps;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        treeMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "treeMask");
-        cliffRockMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "cliffRockMask");
-        fieldStoneMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask");
-        noProps = new BinaryMask(1, random.nextLong(), symmetrySettings);
+        treeMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "treeMask", true);
+        cliffRockMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", true);
+        fieldStoneMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", true);
+        noProps = new BinaryMask(1, random.nextLong(), symmetrySettings, "noProps");
     }
 
     @Override
@@ -36,7 +36,7 @@ public class BasicPropGenerator extends PropGenerator {
         fieldStoneMask.setSize(mapSize / 4);
 
         cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .5f).setSize(mapSize + 1);
-        cliffRockMask.intersect(impassable).grow(.5f, SymmetryType.SPAWN, 6).minus(impassable).intersect(passableLand);
+        cliffRockMask.intersect(impassable).dilute(.5f, SymmetryType.SPAWN, 6).minus(impassable).intersect(passableLand);
         fieldStoneMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .0025f).setSize(mapSize + 1);
         fieldStoneMask.intersect(passableLand).fillEdge(10, false);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
@@ -47,7 +47,7 @@ public class BasicPropGenerator extends PropGenerator {
 
 
     protected void generatePropExclusionMasks() {
-        noProps.init(unbuildable.getFinalMask());
+        noProps.init((BinaryMask) unbuildable.getFinalMask());
 
         generateExclusionZones(noProps, 30, 2, 8);
     }
@@ -68,9 +68,9 @@ public class BasicPropGenerator extends PropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
+            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps((BinaryMask) cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
+            propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }
 

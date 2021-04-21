@@ -26,7 +26,7 @@ public strictfp class AIMarkerPlacer {
                     if (location != location1) {
                         if (location.getDistance(location1) < 64) {
                             LinkedHashSet<Vector2f> lineCoordinates = location.getLine(location1);
-                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.inBounds(loc) || !passable.getValueAt(loc));
+                            boolean connected = !lineCoordinates.removeIf(loc -> !passable.inBounds(loc) || !passable.getFinalValueAt(loc));
                             if (connected) {
                                 unusedCoordinates.add(location1);
                             }
@@ -47,7 +47,7 @@ public strictfp class AIMarkerPlacer {
         markers.forEach(aiMarker -> markers.forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) <= 128) {
                 LinkedHashSet<Vector2f> lineCoordinates = aiMarker.getPosition().getXZLine(aiMarker1.getPosition());
-                boolean connected = !lineCoordinates.removeIf(location -> !passable.inBounds(location) || !passable.getValueAt(location));
+                boolean connected = !lineCoordinates.removeIf(location -> !passable.inBounds(location) || !passable.getFinalValueAt(location));
                 if (connected) {
                     aiMarker.addNeighbor(aiMarker1.getId());
                 }

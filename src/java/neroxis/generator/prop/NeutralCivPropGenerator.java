@@ -11,14 +11,14 @@ import java.util.ArrayList;
 
 public class NeutralCivPropGenerator extends BasicPropGenerator {
 
-    protected ConcurrentBinaryMask civReclaimMask;
+    protected BinaryMask civReclaimMask;
     protected BinaryMask noCivs;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        civReclaimMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "civReclaimMask");
+        civReclaimMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
 
         noCivs = new BinaryMask(1, random.nextLong(), symmetrySettings);
     }
@@ -42,11 +42,11 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
     @Override
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine(civReclaimMask.getFinalMask());
+        noProps.combine((BinaryMask) civReclaimMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
-        noCivs.init(unbuildable.getFinalMask());
+        noCivs.init((BinaryMask) unbuildable.getFinalMask());
         noCivs.inflate(12);
         generateExclusionZones(noCivs, 96, 32, 32);
     }
@@ -62,7 +62,7 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
                 civilian.addGroup(civilianInitial);
                 map.addArmy(civilian);
                 try {
-                    unitPlacer.placeBases(civReclaimMask.getFinalMask().minus(noCivs), UnitPlacer.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                    unitPlacer.placeBases(((BinaryMask) civReclaimMask.getFinalMask()).minus(noCivs), UnitPlacer.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
                 } catch (IOException e) {
                     System.out.println("Could not generate bases due to lua parsing error");
                     e.printStackTrace();

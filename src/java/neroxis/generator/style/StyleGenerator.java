@@ -14,7 +14,7 @@ import neroxis.generator.terrain.BasicTerrainGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.generator.texture.BasicTextureGenerator;
 import neroxis.generator.texture.TextureGenerator;
-import neroxis.map.ConcurrentBinaryMask;
+import neroxis.map.BinaryMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 import neroxis.util.Pipeline;
@@ -116,12 +116,12 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         decalGenerator.setupPipeline();
     }
 
-    protected void generateAIMarkers(ConcurrentBinaryMask passable, ConcurrentBinaryMask passableLand, ConcurrentBinaryMask passableWater) {
+    protected void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater) {
         Pipeline.await(passable, passableLand, passableWater);
         Util.timedRun("neroxis.generator", "placeAIMarkers", () -> {
-            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
-            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
-            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
+            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
+            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
+            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
             CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAirAIMarkers(map));
             CompletableFuture.allOf(AmphibiousMarkers, LandMarkers, NavyMarkers, AirMarkers).join();
         });

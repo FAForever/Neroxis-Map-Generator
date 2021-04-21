@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
-    protected ConcurrentBinaryMask landWreckMask;
+    protected BinaryMask landWreckMask;
     protected BinaryMask noWrecks;
 
     public SmallBattlePropGenerator() {
@@ -25,7 +25,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        landWreckMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
+        landWreckMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
         noWrecks = new BinaryMask(1, random.nextLong(), symmetrySettings);
     }
 
@@ -45,7 +45,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected void generateUnitExclusionMasks() {
-        noWrecks.init(unbuildable.getFinalMask());
+        noWrecks.init((BinaryMask) unbuildable.getFinalMask());
         generateExclusionZones(noWrecks, 128, 8, 32);
     }
 
@@ -59,7 +59,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                BinaryMask placementMask = landWreckMask.getFinalMask().minus(noWrecks);
+                BinaryMask placementMask = ((BinaryMask) landWreckMask.getFinalMask()).minus(noWrecks);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 3f, 4f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 5f, 8f);
             });

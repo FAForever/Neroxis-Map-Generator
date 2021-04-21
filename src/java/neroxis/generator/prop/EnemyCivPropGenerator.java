@@ -11,14 +11,14 @@ import java.util.ArrayList;
 
 public class EnemyCivPropGenerator extends BasicPropGenerator {
 
-    protected ConcurrentBinaryMask baseMask;
+    protected BinaryMask baseMask;
     protected BinaryMask noBases;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        baseMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "baseMask");
+        baseMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
         noBases = new BinaryMask(1, random.nextLong(), symmetrySettings);
     }
 
@@ -40,11 +40,11 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine(baseMask.getFinalMask());
+        noProps.combine((BinaryMask) baseMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
-        noBases.init(unbuildable.getFinalMask());
+        noBases.init((BinaryMask) unbuildable.getFinalMask());
         noBases.inflate(12);
         generateExclusionZones(noBases, 128, 32, 32);
     }
@@ -60,7 +60,7 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
                 army17.addGroup(army17Initial);
                 map.addArmy(army17);
                 try {
-                    unitPlacer.placeBases(baseMask.getFinalMask().minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                    unitPlacer.placeBases(((BinaryMask) baseMask.getFinalMask()).minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
                 } catch (IOException e) {
                     System.out.println("Could not generate bases due to lua parsing error");
                     e.printStackTrace();

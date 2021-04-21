@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public strictfp class Brushes {
@@ -24,11 +25,11 @@ public strictfp class Brushes {
     public static FloatMask loadBrush(String brushPath, Long seed) {
         try {
             if (Brushes.class.getResource(CUSTOM_BRUSHES_DIR + brushPath) != null) {
-                BufferedImage image = ImageIO.read(Brushes.class.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath));
-                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+                BufferedImage image = ImageIO.read(Objects.requireNonNull(Brushes.class.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)));
+                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), brushPath);
             } else {
                 BufferedImage image = ImageIO.read(Paths.get(brushPath).toFile());
-                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), brushPath);
             }
         } catch (Exception e) {
             e.printStackTrace();

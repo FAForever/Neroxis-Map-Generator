@@ -2,6 +2,7 @@ package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
 import neroxis.generator.ParameterConstraints;
+import neroxis.map.BinaryMask;
 import neroxis.map.SymmetryType;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
@@ -27,7 +28,7 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
         fieldStoneMask.setSize(mapSize / 4);
 
         cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .5f).setSize(mapSize + 1);
-        cliffRockMask.intersect(impassable).grow(.5f, SymmetryType.SPAWN, 12).minus(impassable).intersect(passableLand);
+        cliffRockMask.intersect(impassable).dilute(.5f, SymmetryType.SPAWN, 12).minus(impassable).intersect(passableLand);
         fieldStoneMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .0025f).setSize(mapSize + 1);
         fieldStoneMask.intersect(passableLand).fillEdge(10, false);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
@@ -40,9 +41,9 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
+            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps((BinaryMask) cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
+            propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }
 

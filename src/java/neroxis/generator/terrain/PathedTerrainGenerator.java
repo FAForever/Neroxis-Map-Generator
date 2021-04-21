@@ -32,14 +32,14 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
     protected void spawnTerrainSetup() {
         int mapSize = map.getSize();
         spawnPlateauMask.setSize(mapSize / 4);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 8);
+        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).dilute(.5f, SymmetryType.SPAWN, 8);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
-        spawnPlateauMask.smooth(4);
+        spawnPlateauMask.blur(4);
 
         spawnLandMask.setSize(mapSize / 4);
-        spawnLandMask.erode(.25f, SymmetryType.SPAWN, mapSize / 128).grow(.5f, SymmetryType.SPAWN, 4);
+        spawnLandMask.erode(.25f, SymmetryType.SPAWN, mapSize / 128).dilute(.5f, SymmetryType.SPAWN, 4);
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
-        spawnLandMask.smooth(4);
+        spawnLandMask.blur(4);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);

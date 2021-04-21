@@ -74,9 +74,9 @@ public strictfp class ImageUtils {
         final byte[] byteArray = new byte[length];
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                byte redByte = (byte) ((Float) (redMask.getValueAt(x, y) * scaleMultiplier)).intValue();
-                byte greenByte = (byte) ((Float) (greenMask.getValueAt(x, y) * scaleMultiplier)).intValue();
-                byte blueByte = (byte) ((Float) (blueMask.getValueAt(x, y) * scaleMultiplier)).intValue();
+                byte redByte = (byte) ((Float) (redMask.getFinalValueAt(x, y) * scaleMultiplier)).intValue();
+                byte greenByte = (byte) ((Float) (greenMask.getFinalValueAt(x, y) * scaleMultiplier)).intValue();
+                byte blueByte = (byte) ((Float) (blueMask.getFinalValueAt(x, y) * scaleMultiplier)).intValue();
                 byteArray[index] = redByte;
                 index += 1;
                 byteArray[index] = greenByte;
@@ -90,7 +90,7 @@ public strictfp class ImageUtils {
         ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
         BufferedImage image = new BufferedImage(colorModel, raster, true, null);
         ImageIO.write(image, "png", path.toFile());
-        System.out.println("PNG created at " + path.toString());
+        System.out.println("PNG created at " + path);
     }
 
     public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, Path path) throws IOException {

@@ -1,5 +1,6 @@
 package neroxis.util;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 
 public strictfp class Util {
@@ -44,10 +45,10 @@ public strictfp class Util {
         return "not found";
     }
 
-    public static String getStackTraceMethodInPackage(String packageName) {
+    public static String getStackTraceMethodInPackage(String packageName, String... excludedMethodNames) {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         for (StackTraceElement ste : stackTrace) {
-            if (ste.getClassName().contains(packageName)) {
+            if (ste.getClassName().contains(packageName) && Arrays.stream(excludedMethodNames).noneMatch(excluded -> ste.getMethodName().equals(excluded))) {
                 return ste.getMethodName();
             }
         }

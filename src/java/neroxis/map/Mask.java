@@ -1,31 +1,51 @@
 package neroxis.map;
 
 import lombok.Getter;
-import neroxis.util.Util;
-import neroxis.util.Vector2f;
-import neroxis.util.Vector3f;
-import neroxis.util.VisualDebugger;
+import lombok.Setter;
+import neroxis.util.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
-@Getter
 public strictfp abstract class Mask<T> {
+    protected final static String MOCKED_NAME = "mocked";
+    @Getter
+    protected final SymmetrySettings symmetrySettings;
+    @Getter
+    private final String name;
     protected final Random random;
+    protected int plannedSize;
+    @Getter
+    @Setter
+    private boolean parallel;
+    @Getter
+    @Setter
+    private boolean processing;
     protected T[][] mask;
-    protected SymmetrySettings symmetrySettings;
 
-    protected Mask(Long seed) {
+    protected Mask(Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(seed, symmetrySettings, name, false);
+    }
+
+    protected Mask(Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        this.symmetrySettings = symmetrySettings;
+        this.name = name;
+        this.parallel = parallel;
+        this.processing = false;
         if (seed != null) {
             this.random = new Random(seed);
         } else {
             this.random = null;
         }
     }
+
+    public abstract Mask<T> mockClone();
 
     public abstract String toHash() throws NoSuchAlgorithmException;
 
@@ -50,6 +70,19 @@ public strictfp abstract class Mask<T> {
         return wrapEdges ? (val + offset + size) % size : val + offset - 1;
     }
 
+    public T getFinalValueAt(Vector3f location) {
+        return getFinalValueAt((int) location.getX(), (int) location.getZ());
+    }
+
+    public T getFinalValueAt(Vector2f location) {
+        return getFinalValueAt((int) location.getX(), (int) location.getY());
+    }
+
+    public T getFinalValueAt(int x, int y) {
+        assertDoneProcessing();
+        return mask[x][y];
+    }
+
     public T getValueAt(Vector3f location) {
         return getValueAt((int) location.getX(), (int) location.getZ());
     }
@@ -71,7 +104,11 @@ public strictfp abstract class Mask<T> {
     }
 
     public int getSize() {
-        return mask[0].length;
+        if (parallel && !processing) {
+            return plannedSize;
+        } else {
+            return mask[0].length;
+        }
     }
 
     protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
@@ -90,25 +127,31 @@ public strictfp abstract class Mask<T> {
     }
 
     public Mask<T> setSize(int newSize) {
-        int size = getSize();
-        if (size < newSize) {
-            enlarge(newSize);
-        } else if (size > newSize) {
-            shrink(newSize);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
+        plannedSize = newSize;
+        return execute(() -> {
+            int size = getSize();
+            if (size < newSize) {
+                enlarge(newSize);
+            } else if (size > newSize) {
+                shrink(newSize);
+            }
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public Mask<T> resample(int newSize) {
-        int size = getSize();
-        if (size < newSize) {
-            interpolate(newSize);
-        } else if (size > newSize) {
-            decimate(newSize);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
+        plannedSize = newSize;
+        return execute(() -> {
+            int size = getSize();
+            if (size < newSize) {
+                interpolate(newSize);
+            } else if (size > newSize) {
+                decimate(newSize);
+            }
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public boolean inBounds(Vector2f location) {
@@ -502,35 +545,41 @@ public strictfp abstract class Mask<T> {
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
-            Vector2f location = new Vector2f(x, y);
-            List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
-            symPoints.forEach(symmetryPoint -> {
-                if (reverse) {
-                    setValueAt(location, getValueAt(symmetryPoint));
-                } else {
-                    setValueAt(symmetryPoint, getValueAt(location));
-                }
+        execute(() -> {
+            applyWithSymmetry(symmetryType, (x, y) -> {
+                Vector2f location = new Vector2f(x, y);
+                List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
+                symPoints.forEach(symmetryPoint -> {
+                    if (reverse) {
+                        setValueAt(location, getValueAt(symmetryPoint));
+                    } else {
+                        setValueAt(symmetryPoint, getValueAt(location));
+                    }
+                });
             });
+            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
+                interpolate();
+            }
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
-            interpolate();
-        }
-        VisualDebugger.visualizeMask(this);
     }
 
     public void applySymmetry(float angle) {
-        if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
-            System.out.println("Spawn Symmetry must equal POINT2");
-        }
-        apply((x, y) -> {
-            if (inHalf(x, y, angle)) {
-                Vector2f location = new Vector2f(x, y);
-                List<Vector2f> symPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
+        execute(() -> {
+            if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
+                throw new IllegalArgumentException("Spawn Symmetry must equal POINT2");
             }
+            apply((x, y) -> {
+                if (inHalf(x, y, angle)) {
+                    Vector2f location = new Vector2f(x, y);
+                    List<Vector2f> symPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
+                    symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
+                }
+            });
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        VisualDebugger.visualizeMask(this);
     }
 
     private Mask<T> enlarge(int size) {
@@ -590,19 +639,22 @@ public strictfp abstract class Mask<T> {
     }
 
     public Mask<T> flip(SymmetryType symmetryType) {
-        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        if (symmetry.getNumSymPoints() != 2) {
-            throw new IllegalArgumentException("Cannot flip non single axis symmetry");
-        }
-        int size = getSize();
-        T[][] newMask = getEmptyMask(size);
-        apply((x, y) -> {
-            List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-            newMask[x][y] = getValueAt(symmetryPoints.get(0));
-        });
-        this.mask = newMask;
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+                    Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+                    if (symmetry.getNumSymPoints() != 2) {
+                        throw new IllegalArgumentException("Cannot flip non single axis symmetry");
+                    }
+                    int size = getSize();
+                    T[][] newMask = getEmptyMask(size);
+                    apply((x, y) -> {
+                        List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+                        newMask[x][y] = getValueAt(symmetryPoints.get(0));
+                    });
+                    this.mask = newMask;
+                    VisualDebugger.visualizeMask(this);
+                    return this;
+                }
+        );
     }
 
     protected void modify(BiFunction<Integer, Integer, T> valueFunction) {
@@ -650,7 +702,17 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    protected void checkCompatibleMask(Mask<?> other) {
+    protected <U extends Mask<T>> U execute(Supplier<U> function, Mask<?>... usedMasks) {
+        List<Mask<?>> dependencies = new ArrayList<>(Arrays.asList(usedMasks));
+        dependencies.add(this);
+        if (parallel && !processing) {
+            return Pipeline.add((U) this, dependencies, function);
+        } else {
+            return function.get();
+        }
+    }
+
+    protected void assertCompatibleMask(Mask<?> other) {
         if (other.getSize() != getSize()) {
             throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and Mask is " + getSize());
         }
@@ -659,14 +721,25 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    protected void checkSmallerSize(int size) {
+    protected void assertSmallerSize(int size) {
         if (size > getSize()) {
             throw new IllegalArgumentException("Intended mask size is larger than base mask size: Mask is " + getSize() + " and size is " + size);
         }
     }
 
+    public void assertDoneProcessing() {
+        if (parallel && processing) {
+            throw new IllegalStateException("Mask not finished processing results will not be deterministic");
+        }
+    }
+
+    public Mask<T> getFinalMask() {
+        Pipeline.await(this);
+        return copy();
+    }
+
     public Mask<T> startVisualDebugger() {
-        return startVisualDebugger(toString(), Util.getStackTraceParentClass());
+        return startVisualDebugger(name == null ? toString() : name, Util.getStackTraceParentClass());
     }
 
     public Mask<T> startVisualDebugger(String maskName) {

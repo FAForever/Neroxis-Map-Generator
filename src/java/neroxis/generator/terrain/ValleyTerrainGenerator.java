@@ -1,7 +1,7 @@
 package neroxis.generator.terrain;
 
 import neroxis.generator.ParameterConstraints;
-import neroxis.map.ConcurrentBinaryMask;
+import neroxis.map.BinaryMask;
 import neroxis.map.SymmetrySettings;
 import neroxis.map.SymmetryType;
 
@@ -31,12 +31,12 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
         int numPaths = (int) (8 + 8 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints());
         int bound = (int) (mapSize / 16 * (3 * (random.nextFloat() * .25f + normalizedMountainDensity * .75f) + 1));
         mountains.setSize(mapSize + 1);
-        ConcurrentBinaryMask noMountains = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains");
+        BinaryMask noMountains = new BinaryMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains", true);
 
         pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noMountains.setSize(mapSize / 4);
-        noMountains.grow(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
-        noMountains.smooth(mapSize / 64);
+        noMountains.dilute(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
+        noMountains.blur(mapSize / 64);
 
         mountains.invert().minus(noMountains);
     }

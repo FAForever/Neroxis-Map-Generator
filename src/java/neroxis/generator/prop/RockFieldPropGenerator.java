@@ -9,7 +9,7 @@ import neroxis.util.Util;
 
 public class RockFieldPropGenerator extends BasicPropGenerator {
 
-    protected ConcurrentBinaryMask largeRockFieldMask;
+    protected BinaryMask largeRockFieldMask;
 
     public RockFieldPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
@@ -21,7 +21,7 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        largeRockFieldMask = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "largeRockFieldMask");
+        largeRockFieldMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "largeRockFieldMask", true);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         float reclaimDensity = mapParameters.getReclaimDensity();
         largeRockFieldMask.setSize(mapSize / 4);
 
-        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).grow(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
+        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).dilute(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
         largeRockFieldMask.intersect(passableLand);
     }
 
@@ -44,10 +44,10 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
-            propPlacer.placeProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
+            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(((BinaryMask) cliffRockMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
+            propPlacer.placeProps(((BinaryMask) largeRockFieldMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+            propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
         });
     }
 }

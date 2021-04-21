@@ -45,10 +45,10 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
         plateaus.setSize(mapSize / 4);
 
         plateaus.randomWalk((int) (normalizedPlateauDensity * 4 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints() + 4), mapSize * 4);
-        plateaus.grow(.5f, SymmetryType.SPAWN, 4);
+        plateaus.dilute(.5f, SymmetryType.SPAWN, 4);
 
         plateaus.setSize(mapSize + 1);
-        plateaus.minus(connections.copy().inflate(plateauBrushSize * 7f / 16f).smooth(12, .125f));
+        plateaus.minus(connections.copy().inflate(plateauBrushSize * 7f / 16f).blur(12, .125f));
     }
 
     @Override

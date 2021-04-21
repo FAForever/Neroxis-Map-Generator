@@ -39,16 +39,16 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
         pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         land.combine(connections.copy().fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
-                .inflate(mapSize / 64f).smooth(12, .125f));
+                .inflate(mapSize / 64f).blur(12, .125f));
         connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
         connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
-        land.grow(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);
+        land.dilute(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);
         if (mapSize > 512) {
             land.erode(.5f, SymmetryType.SPAWN, 4);
         }
         land.setSize(mapSize + 1);
-        land.smooth(mapSize / 64, .75f);
+        land.blur(mapSize / 64, .75f);
     }
 
     @Override

@@ -125,7 +125,7 @@ public strictfp class MapImageWriter {
 
         Random random = new Random();
         FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
-        heightmapBase = new FloatMask(heightmapBase, random.nextLong());
+        heightmapBase = new FloatMask(heightmapBase, random.nextLong(), "heightmapBase");
         map.setHeightImage(heightmapBase);
 
         FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
@@ -166,8 +166,8 @@ public strictfp class MapImageWriter {
             texturesMasks[5].clampMin(0f).clampMax(1f).setSize(mapImageSize);
             texturesMasks[6].clampMin(0f).clampMax(1f).setSize(mapImageSize);
             texturesMasks[7].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings).invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).clampMin(0f);
+            FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0");
+            oldLayer0.init(new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).clampMin(0f);
             neroxis.util.ImageUtils.writePNGFromMask(oldLayer0, 255, Paths.get(writeImagesPath + "\\Layer 0.png"));
         }
     }

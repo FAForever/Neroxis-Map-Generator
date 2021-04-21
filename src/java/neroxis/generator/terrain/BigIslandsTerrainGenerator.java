@@ -1,7 +1,7 @@
 package neroxis.generator.terrain;
 
 import neroxis.generator.ParameterConstraints;
-import neroxis.map.ConcurrentBinaryMask;
+import neroxis.map.BinaryMask;
 import neroxis.map.SymmetrySettings;
 import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
@@ -27,7 +27,7 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 8);
         float maxStepSize = mapSize / 128f;
 
-        ConcurrentBinaryMask islands = new ConcurrentBinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands");
+        BinaryMask islands = new BinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands", true);
 
         land.setSize(mapSize + 1);
         map.getSpawns().forEach(spawn -> pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, maxMiddlePoints, bound, (float) StrictMath.PI / 2));
@@ -37,10 +37,10 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         islands.minus(land.copy().inflate(32));
 
         land.combine(islands);
-        land.grow(.5f, SymmetryType.SPAWN, 8);
+        land.dilute(.5f, SymmetryType.SPAWN, 8);
 
         land.setSize(mapSize + 1);
-        land.smooth(16);
+        land.blur(16);
     }
 }
 

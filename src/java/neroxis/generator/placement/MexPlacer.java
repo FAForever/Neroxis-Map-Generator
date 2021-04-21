@@ -160,7 +160,7 @@ public strictfp class MexPlacer {
             for (int dy = 0; dy < size; dy++) {
                 Vector2f loc = new Vector2f(location).add(dx - size / 2, dy - size / 2);
                 if (spawnMask.inBounds(loc)) {
-                    if (spawnMask.getValueAt(loc)) {
+                    if (spawnMask.getFinalValueAt(loc)) {
                         ++count;
                     }
                 }

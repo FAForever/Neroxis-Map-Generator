@@ -5,22 +5,22 @@ import neroxis.map.*;
 import neroxis.util.Vector3f;
 
 public class BasicTerrainGenerator extends TerrainGenerator {
-    protected ConcurrentBinaryMask spawnLandMask;
-    protected ConcurrentBinaryMask spawnPlateauMask;
-    protected ConcurrentBinaryMask land;
-    protected ConcurrentBinaryMask mountains;
-    protected ConcurrentBinaryMask hills;
-    protected ConcurrentBinaryMask valleys;
-    protected ConcurrentBinaryMask plateaus;
-    protected ConcurrentBinaryMask ramps;
-    protected ConcurrentBinaryMask connections;
-    protected ConcurrentFloatMask heightmapValleys;
-    protected ConcurrentFloatMask heightmapHills;
-    protected ConcurrentFloatMask heightmapPlateaus;
-    protected ConcurrentFloatMask heightmapMountains;
-    protected ConcurrentFloatMask heightmapLand;
-    protected ConcurrentFloatMask heightmapOcean;
-    protected ConcurrentFloatMask noise;
+    protected BinaryMask spawnLandMask;
+    protected BinaryMask spawnPlateauMask;
+    protected BinaryMask land;
+    protected BinaryMask mountains;
+    protected BinaryMask hills;
+    protected BinaryMask valleys;
+    protected BinaryMask plateaus;
+    protected BinaryMask ramps;
+    protected BinaryMask connections;
+    protected FloatMask heightmapValleys;
+    protected FloatMask heightmapHills;
+    protected FloatMask heightmapPlateaus;
+    protected FloatMask heightmapMountains;
+    protected FloatMask heightmapLand;
+    protected FloatMask heightmapOcean;
+    protected FloatMask noise;
 
     protected int spawnSize;
     protected float waterHeight;
@@ -50,22 +50,22 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        spawnLandMask = new ConcurrentBinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask");
-        spawnPlateauMask = new ConcurrentBinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask");
-        land = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "land");
-        mountains = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "mountains");
-        plateaus = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "plateaus");
-        ramps = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "ramps");
-        hills = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "hills");
-        valleys = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "valleys");
-        connections = new ConcurrentBinaryMask(1, random.nextLong(), symmetrySettings, "connections");
-        heightmapValleys = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys");
-        heightmapHills = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills");
-        heightmapPlateaus = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
-        heightmapMountains = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains");
-        heightmapLand = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
-        heightmapOcean = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
-        noise = new ConcurrentFloatMask(1, random.nextLong(), symmetrySettings, "noise");
+        spawnLandMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask", true);
+        spawnPlateauMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask", true);
+        land = new BinaryMask(1, random.nextLong(), symmetrySettings, "land", true);
+        mountains = new BinaryMask(1, random.nextLong(), symmetrySettings, "mountains", true);
+        plateaus = new BinaryMask(1, random.nextLong(), symmetrySettings, "plateaus", true);
+        ramps = new BinaryMask(1, random.nextLong(), symmetrySettings, "ramps", true);
+        hills = new BinaryMask(1, random.nextLong(), symmetrySettings, "hills", true);
+        valleys = new BinaryMask(1, random.nextLong(), symmetrySettings, "valleys", true);
+        connections = new BinaryMask(1, random.nextLong(), symmetrySettings, "connections", true);
+        heightmapValleys = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys", true);
+        heightmapHills = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills", true);
+        heightmapPlateaus = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus", true);
+        heightmapMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains", true);
+        heightmapLand = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand", true);
+        heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean", true);
+        noise = new FloatMask(1, random.nextLong(), symmetrySettings, "noise", true);
 
         spawnSize = 48;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
@@ -144,14 +144,14 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         int mapSize = map.getSize();
         land.setSize(mapSize / 16);
 
-        land.randomize(scaledLandDensity).smooth(2, .75f).erode(.5f, SymmetryType.TERRAIN, mapSize / 256);
+        land.randomize(scaledLandDensity).blur(2, .75f).erode(.5f, SymmetryType.TERRAIN, mapSize / 256);
         land.setSize(mapSize / 4);
-        land.grow(.5f, SymmetryType.TERRAIN, mapSize / 128);
+        land.dilute(.5f, SymmetryType.TERRAIN, mapSize / 128);
         land.setSize(mapSize + 1);
-        land.smooth(8, .75f);
+        land.blur(8, .75f);
 
         if (mapSize <= 512) {
-            land.combine(connections.copy().inflate(mountainBrushSize / 8f).smooth(12, .125f));
+            land.combine(connections.copy().inflate(mountainBrushSize / 8f).blur(12, .125f));
         }
     }
 
@@ -162,10 +162,10 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         float scaledPlateauDensity = mapParameters.getPlateauDensity() * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 
-        plateaus.randomize(scaledPlateauDensity).smooth(2, .75f).setSize(map.getSize() / 4);
-        plateaus.grow(.5f, SymmetryType.TERRAIN, map.getSize() / 128);
+        plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);
+        plateaus.dilute(.5f, SymmetryType.TERRAIN, map.getSize() / 128);
         plateaus.setSize(map.getSize() + 1);
-        plateaus.smooth(16, .25f);
+        plateaus.blur(16, .25f);
     }
 
     protected void mountainSetup() {
@@ -176,30 +176,30 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         } else {
             mountains.randomWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 16);
         }
-        mountains.grow(.5f, SymmetryType.TERRAIN, 2);
+        mountains.dilute(.5f, SymmetryType.TERRAIN, 2);
         mountains.setSize(map.getSize() + 1);
     }
 
     protected void spawnTerrainSetup() {
         spawnPlateauMask.setSize(map.getSize() / 4);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).grow(.5f, SymmetryType.SPAWN, 8);
+        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).dilute(.5f, SymmetryType.SPAWN, 8);
         spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(map.getSize() + 1);
-        spawnPlateauMask.smooth(4);
+        spawnPlateauMask.blur(4);
 
         spawnLandMask.setSize(map.getSize() / 4);
-        spawnLandMask.erode(.25f, SymmetryType.SPAWN, map.getSize() / 128).grow(.5f, SymmetryType.SPAWN, 4);
+        spawnLandMask.erode(.25f, SymmetryType.SPAWN, map.getSize() / 128).dilute(.5f, SymmetryType.SPAWN, 4);
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(map.getSize() + 1);
-        spawnLandMask.smooth(4);
+        spawnLandMask.blur(4);
 
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
         land.combine(spawnLandMask).combine(spawnPlateauMask);
         if (map.getSize() > 512 && mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() <= 4) {
             land.combine(spawnLandMask).combine(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
-            land.erode(.5f, SymmetryType.SPAWN, 10).combine((ConcurrentBinaryMask) spawnLandMask.copy().setSize(map.getSize() / 8)).combine((ConcurrentBinaryMask) spawnPlateauMask.copy().setSize(map.getSize() / 8))
-                    .smooth(4, .75f).grow(.5f, SymmetryType.SPAWN, 5).setSize(map.getSize() + 1);
-            land.smooth(8, .75f);
+            land.erode(.5f, SymmetryType.SPAWN, 10).combine((BinaryMask) spawnLandMask.copy().setSize(map.getSize() / 8)).combine((BinaryMask) spawnPlateauMask.copy().setSize(map.getSize() / 8))
+                    .blur(4, .75f).dilute(.5f, SymmetryType.SPAWN, 5).setSize(map.getSize() + 1);
+            land.blur(8, .75f);
         } else {
-            land.grow(.25f, SymmetryType.SPAWN, 16).smooth(2);
+            land.dilute(.25f, SymmetryType.SPAWN, 16).blur(2);
         }
 
         ensureSpawnTerrain();
@@ -208,7 +208,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void ensureSpawnTerrain() {
-        mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).smooth(12, .125f));
+        mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).blur(12, .125f));
         mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
 
         plateaus.intersect(land).minus(spawnLandMask).combine(spawnPlateauMask);
@@ -226,8 +226,8 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         setupSmallFeatureHeightmapPipeline();
         initRamps();
 
-        ConcurrentBinaryMask water = land.copy().invert();
-        ConcurrentBinaryMask deepWater = water.copy().deflate(32);
+        BinaryMask water = land.copy().invert();
+        BinaryMask deepWater = water.copy().deflate(32);
 
         heightmap.setSize(mapSize + 1);
         heightmapLand.setSize(mapSize + 1);
@@ -238,23 +238,26 @@ public class BasicTerrainGenerator extends TerrainGenerator {
                 .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0).blur(4, deepWater).blur(1);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
-                .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
+                .setToValue(spawnLandMask, landHeight).add(heightmapPlateaus).setToValue(spawnPlateauMask, plateauHeight + landHeight)
                 .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
-        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64).addWhiteNoise(plateauHeight / 2).resample(mapSize + 1).addWhiteNoise(1)
-                .subtractAvg().clampMin(0f).setToValue(0f, land.copy().invert().inflate(16)).blur(mapSize / 16, spawnLandMask.copy().inflate(8))
+        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64);
+        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize + 1);
+        noise.addWhiteNoise(1)
+                .subtractAvg().clampMin(0f).setToValue(land.copy().invert().inflate(16), 0f)
+                .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
                 .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
 
         heightmap.add(heightmapLand).add(waterHeight).add(noise);
 
-        smoothRamps();
+        blurRamps();
     }
 
     protected void setupSimpleHeightmapPipeline() {
         int mapSize = map.getSize();
         float waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
 
-        ConcurrentBinaryMask symmetryLimits = new ConcurrentBinaryMask(mapSize + 1, random.nextLong(), mapParameters.getSymmetrySettings(), "symmetryLimits");
+        BinaryMask symmetryLimits = new BinaryMask(mapSize + 1, random.nextLong(), mapParameters.getSymmetrySettings(), "symmetryLimits", true);
         symmetryLimits.fillCircle((mapSize + 1) / 2f, (mapSize + 1) / 2f, (mapSize - 32) / 2f, true).setSize(mapSize / 8);
         symmetryLimits.inflate(1).erode(.5f, SymmetryType.SPAWN, 6).inflate(2);
         symmetryLimits.setSize(mapSize + 1);
@@ -271,12 +274,12 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         plateaus.intersect(symmetryLimits);
         mountains.intersect(symmetryLimits);
 
-        heightmapPlateaus.addDistance(plateaus.grow(1, SymmetryType.SPAWN).inflate(1).invert(), 1).clampMax(plateauHeight);
-        heightmapMountains.addDistance(mountains.grow(1, SymmetryType.SPAWN).inflate(1).invert(), 1f);
+        heightmapPlateaus.addDistance(plateaus.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1).clampMax(plateauHeight);
+        heightmapMountains.addDistance(mountains.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1f);
         heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
-        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
+        BinaryMask paintedPlateaus = new BinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
+        BinaryMask paintedMountains = new BinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
@@ -289,15 +292,15 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         initRamps();
 
         heightmapLand.add(heightmapMountains).add(landHeight)
-                .setToValue(landHeight, spawnLandMask).add(heightmapPlateaus).setToValue(plateauHeight + landHeight, spawnPlateauMask)
+                .setToValue(spawnLandMask, landHeight).add(heightmapPlateaus).setToValue(spawnPlateauMask, plateauHeight + landHeight)
                 .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
         heightmap.add(heightmapLand).add(waterHeight);
 
-        smoothRamps();
+        blurRamps();
     }
 
-    private void smoothRamps() {
+    private void blurRamps() {
         heightmap.blur(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .blur(6, ramps.copy().inflate(2).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
                 .blur(4, ramps.copy().inflate(4))
@@ -329,7 +332,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapMountains.setSize(map.getSize() + 1);
         heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity, mountainBrushIntensity, false);
 
-        ConcurrentBinaryMask paintedMountains = new ConcurrentBinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
+        BinaryMask paintedMountains = new BinaryMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
 
         mountains.replace(paintedMountains);
         land.combine(paintedMountains);
@@ -343,7 +346,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapPlateaus.setSize(map.getSize() + 1);
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
 
-        ConcurrentBinaryMask paintedPlateaus = new ConcurrentBinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
+        BinaryMask paintedPlateaus = new BinaryMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
@@ -351,7 +354,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapPlateaus.add(plateaus, 3).clampMax(plateauHeight).blur(1, plateaus);
         plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
-        ConcurrentBinaryMask plateauBase = new ConcurrentBinaryMask(heightmapPlateaus, 1, random.nextLong(), "plateauBase");
+        BinaryMask plateauBase = new BinaryMask(heightmapPlateaus, 1, random.nextLong(), "plateauBase");
 
         plateauBase.outline().inflate(4);
         heightmapPlateaus.blur(1, plateauBase);
@@ -368,10 +371,10 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         hills.setSize(map.getSize() / 4);
         valleys.setSize(map.getSize() / 4);
 
-        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 2) / numSymPoints).grow(.5f, SymmetryType.SPAWN, 2)
+        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 2)
                 .setSize(map.getSize() + 1);
         hills.intersect(land.copy().deflate(8)).minus(plateaus.copy().outline().inflate(8)).minus(spawnLandMask);
-        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 2) / numSymPoints).grow(.5f, SymmetryType.SPAWN, 4)
+        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 4)
                 .setSize(map.getSize() + 1);
         valleys.intersect(plateaus.copy().deflate(8)).minus(spawnPlateauMask);
 

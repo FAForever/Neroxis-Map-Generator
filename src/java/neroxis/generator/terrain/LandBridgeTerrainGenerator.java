@@ -28,9 +28,9 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
                 pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
-        land.grow(.5f, SymmetryType.SPAWN, 8);
+        land.dilute(.5f, SymmetryType.SPAWN, 8);
         land.setSize(mapSize + 1);
-        land.smooth(8);
+        land.blur(8);
     }
 
     @Override
@@ -45,8 +45,8 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
 
         pathInEdgeBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
-        plateaus.grow(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1);
-        plateaus.smooth(12);
+        plateaus.dilute(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1);
+        plateaus.blur(12);
     }
 }
 

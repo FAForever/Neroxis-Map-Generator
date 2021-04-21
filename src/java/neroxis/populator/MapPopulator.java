@@ -325,7 +325,7 @@ public strictfp class MapPopulator {
             flatAboveCoast.intersect(flat);
             higherFlatAboveCoast.intersect(flat);
             lowWaterBeach.invert().minus(smallWater).inflate(6).minus(aboveBeach);
-            smallWaterBeach.minus(flatAboveCoast).smooth(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).blur(1);
+            smallWaterBeach.minus(flatAboveCoast).blur(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).blur(1);
             smallWaterBeach.setSize(mapImageSize);
 
             smallWaterBeachTexture.init(smallWaterBeach, 0, 1).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
@@ -347,17 +347,17 @@ public strictfp class MapPopulator {
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
-            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
-            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0);
+            accentGround.minus(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0);
+            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0);
             slopes.intersect(land).flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).smooth(4, .75f).acid(.55f, 0);
+            accentSlopes.minus(flat).intersect(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).blur(4, .75f).acid(.55f, 0);
             steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
             if (waterPresent) {
-                waterBeach.invert().minus(smallWater).minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).smooth(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).blur(2).blur(1);
+                waterBeach.invert().minus(smallWater).minus(flatAboveCoast).minus(inland).inflate(1).combine(lowWaterBeach).blur(5, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).blur(2).blur(1);
             } else {
                 waterBeach.clear();
             }
-            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).smooth(2, .5f).intersect(rock);
+            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).blur(2, .5f).intersect(rock);
 
             accentGround.setSize(mapImageSize);
             accentPlateau.setSize(mapImageSize);
@@ -374,10 +374,10 @@ public strictfp class MapPopulator {
             slopesTexture.init(slopes, 0, 1).blur(8).add(slopes, .65f).blur(4).add(slopes, .5f).blur(1).clampMax(1f);
             accentSlopesTexture.init(accentSlopes, 0, 1).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
             steepHillsTexture.init(steepHills, 0, 1).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).add(steepHills, 1f).clampMax(1f);
-            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).smooth(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).smooth(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).smooth(2, rock.copy().invert());
-            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).smooth(2, rock.copy().invert()).smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert());
-            waterBeachTexture.smooth(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).smooth(2, rock.copy().invert()).smooth(1, rock.copy().invert()).smooth(1, rock.copy().invert()).clampMax(1f);
+            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).blur(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
+            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).blur(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).blur(2, rock.copy().invert());
+            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).blur(2, rock.copy().invert()).blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).blur(2, rock.copy().invert());
+            waterBeachTexture.blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).blur(2, rock.copy().invert()).blur(1, rock.copy().invert()).blur(1, rock.copy().invert()).clampMax(1f);
             waterBeachTexture.removeAreasOfSpecifiedSizeWithLocalMaximums(0, smallWaterSizeLimit, 15, 1f).blur(1).blur(1);
             if (smallWaterTexturesOnLayer5) {
                 steepHillsTexture.add(smallWaterBeachTexture).clampMax(1f);
@@ -501,7 +501,7 @@ public strictfp class MapPopulator {
             BinaryMask largeRockFieldMask = new BinaryMask(land, random.nextLong());
             BinaryMask smallRockFieldMask = new BinaryMask(land, random.nextLong());
 
-            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).smooth(2, .75f).acid(.45f, 0));
+            treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).intersect(flatEnoughNearRock);
             fieldStoneMask.randomize(.00145f).intersect(flatEnoughNearRock.copy().deflate(1));
             largeRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);

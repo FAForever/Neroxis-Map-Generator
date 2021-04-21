@@ -1,19 +1,13 @@
 package neroxis.map;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import neroxis.util.Vector2f;
 import neroxis.util.Vector3f;
 import neroxis.util.VisualDebugger;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -29,39 +23,69 @@ import static neroxis.brushes.Brushes.loadBrush;
 public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        super(seed);
+        this(size, seed, symmetrySettings, null, false);
+    }
+
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
+    }
+
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
-        this.symmetrySettings = symmetrySettings;
+        this.plannedSize = size;
         VisualDebugger.visualizeMask(this);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        super(seed);
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(sourceImage, seed, symmetrySettings, name, false);
+    }
+
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(sourceImage.getHeight());
         Raster imageData = sourceImage.getData();
-        this.symmetrySettings = symmetrySettings;
-        modify((x, y) -> {
-            int[] value = new int[1];
-            imageData.getPixel(x, y, value);
-            return value[0] / 255f;
+        execute(() -> {
+            modify((x, y) -> {
+                int[] value = new int[1];
+                imageData.getPixel(x, y, value);
+                return value[0] / 255f;
+            });
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        VisualDebugger.visualizeMask(this);
     }
 
     public FloatMask(FloatMask sourceMask, Long seed) {
-        super(seed);
+        this(sourceMask, seed, null);
+    }
+
+    public FloatMask(FloatMask sourceMask, Long seed, String name) {
+        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
         this.mask = getEmptyMask(sourceMask.getSize());
-        this.symmetrySettings = sourceMask.getSymmetrySettings();
-        modify(sourceMask::getValueAt);
-        VisualDebugger.visualizeMask(this);
+        this.plannedSize = sourceMask.getSize();
+        setProcessing(sourceMask.isProcessing());
+        execute(() -> {
+            modify(sourceMask::getValueAt);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, sourceMask);
     }
 
     public FloatMask(BinaryMask sourceMask, float low, float high, Long seed) {
-        super(seed);
+        this(sourceMask, low, high, seed, null);
+    }
+
+    public FloatMask(BinaryMask sourceMask, float low, float high, Long seed, String name) {
+        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
         this.mask = getEmptyMask(sourceMask.getSize());
-        this.symmetrySettings = sourceMask.getSymmetrySettings();
-        modify((x, y) -> sourceMask.getValueAt(x, y) ? high : low);
-        VisualDebugger.visualizeMask(this);
+        this.plannedSize = sourceMask.getSize();
+        setProcessing(sourceMask.isProcessing());
+        execute(() -> {
+            modify((x, y) -> sourceMask.getValueAt(x, y) ? high : low);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, sourceMask);
     }
 
     protected Float[][] getEmptyMask(int size) {
@@ -148,81 +172,103 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask init(BinaryMask other, float low, float high) {
-        setSize(other.getSize());
-        checkCompatibleMask(other);
-        modify((x, y) -> other.getValueAt(x, y) ? high : low);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        plannedSize = other.getSize();
+        return execute(() -> {
+            setSize(other.getSize());
+            assertCompatibleMask(other);
+            modify((x, y) -> other.getValueAt(x, y) ? high : low);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask init(FloatMask other) {
-        setSize(other.getSize());
-        checkCompatibleMask(other);
-        modify(other::getValueAt);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        plannedSize = other.getSize();
+        return execute(() -> {
+            setSize(other.getSize());
+            assertCompatibleMask(other);
+            modify(other::getValueAt);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     @Override
     public FloatMask copy() {
         if (random != null) {
-            return new FloatMask(this, random.nextLong());
+            return new FloatMask(this, random.nextLong(), getName() + "Copy");
         } else {
-            return new FloatMask(this, null);
+            return new FloatMask(this, null, getName() + "Copy");
         }
     }
 
     public FloatMask clear() {
-        modify((x, y) -> 0f);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> 0f);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask addDistance(BinaryMask other, float scale) {
-        checkCompatibleMask(other);
-        FloatMask distanceField = other.getDistanceField();
-        add(distanceField.multiply(scale));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            FloatMask distanceField = other.getDistanceField();
+            add(distanceField.multiply(scale));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask add(FloatMask other) {
-        checkCompatibleMask(other);
-        add(other::getValueAt);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            add(other::getValueAt);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask add(BinaryMask other, float value) {
-        checkCompatibleMask(other);
-        add((x, y) -> other.getValueAt(x, y) ? value : 0);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            add((x, y) -> other.getValueAt(x, y) ? value : 0);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask add(float val) {
-        add((x, y) -> val);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            add((x, y) -> val);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask addWeighted(FloatMask other, float weight) {
-        checkCompatibleMask(other);
-        add((x, y) -> other.getValueAt(x, y) * weight);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            add((x, y) -> other.getValueAt(x, y) * weight);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     private FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
@@ -230,45 +276,47 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     private FloatMask addWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        int smallerSize = StrictMath.min(size, otherSize);
-        int offsetX;
-        int offsetY;
-        if (center) {
-            offsetX = xCoordinate - smallerSize / 2;
-            offsetY = yCoordinate - smallerSize / 2;
-        } else {
-            offsetX = xCoordinate;
-            offsetY = yCoordinate;
-        }
-        if (size >= otherSize) {
-            other.apply((x, y) -> {
-                int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
-                int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
-                if (inBounds(shiftX, shiftY)) {
-                    float value = other.getValueAt(x, y);
-                    addValueAt(shiftX, shiftY, value);
-                    List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
-                    for (Vector2f symmetryPoint : symmetryPoints) {
-                        addValueAt(symmetryPoint, value);
+        return execute(() -> {
+            int size = getSize();
+            int otherSize = other.getSize();
+            int smallerSize = StrictMath.min(size, otherSize);
+            int offsetX;
+            int offsetY;
+            if (center) {
+                offsetX = xCoordinate - smallerSize / 2;
+                offsetY = yCoordinate - smallerSize / 2;
+            } else {
+                offsetX = xCoordinate;
+                offsetY = yCoordinate;
+            }
+            if (size >= otherSize) {
+                other.apply((x, y) -> {
+                    int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
+                    int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
+                    if (inBounds(shiftX, shiftY)) {
+                        float value = other.getValueAt(x, y);
+                        addValueAt(shiftX, shiftY, value);
+                        List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                        for (Vector2f symmetryPoint : symmetryPoints) {
+                            addValueAt(symmetryPoint, value);
+                        }
                     }
-                }
-            });
-        } else {
-            apply((x, y) -> {
-                int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
-                int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
-                if (other.inBounds(shiftX, shiftY)) {
-                    addValueAt(x, y, other.getValueAt(shiftX, shiftY));
-                }
-            });
-        }
-        return this;
+                });
+            } else {
+                apply((x, y) -> {
+                    int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
+                    int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
+                    if (other.inBounds(shiftX, shiftY)) {
+                        addValueAt(x, y, other.getValueAt(shiftX, shiftY));
+                    }
+                });
+            }
+            return this;
+        }, other);
     }
 
     public FloatMask subtractAvg() {
-        return subtract(getAvg());
+        return execute(() -> subtract(getAvg()));
     }
 
     public FloatMask subtract(float val) {
@@ -276,17 +324,21 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask subtract(FloatMask other) {
-        checkCompatibleMask(other);
-        add((x, y) -> -other.getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            add((x, y) -> -other.getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask subtract(BinaryMask other, float value) {
-        checkCompatibleMask(other);
-        add((x, y) -> other.getValueAt(x, y) ? -value : 0);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            add((x, y) -> other.getValueAt(x, y) ? -value : 0);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     private FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center, boolean wrapEdges) {
@@ -298,16 +350,20 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask multiply(FloatMask other) {
-        checkCompatibleMask(other);
-        multiply(other::getValueAt);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            multiply(other::getValueAt);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask multiply(float val) {
-        multiply((x, y) -> val);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            multiply((x, y) -> val);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     private FloatMask multiplyWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
@@ -315,131 +371,153 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     private FloatMask multiplyWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        int size = getSize();
-        int otherSize = other.getSize();
-        int smallerSize = StrictMath.min(size, otherSize);
-        int offsetX;
-        int offsetY;
-        if (center) {
-            offsetX = xCoordinate - smallerSize / 2;
-            offsetY = yCoordinate - smallerSize / 2;
-        } else {
-            offsetX = xCoordinate;
-            offsetY = yCoordinate;
-        }
-        if (size >= otherSize) {
-            other.apply((x, y) -> {
-                int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
-                int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
-                if (inBounds(shiftX, shiftY)) {
-                    float value = other.getValueAt(x, y);
-                    multiplyValueAt(shiftX, shiftY, value);
-                    List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
-                    for (Vector2f symmetryPoint : symmetryPoints) {
-                        multiplyValueAt(symmetryPoint, value);
+        return execute(() -> {
+            int size = getSize();
+            int otherSize = other.getSize();
+            int smallerSize = StrictMath.min(size, otherSize);
+            int offsetX;
+            int offsetY;
+            if (center) {
+                offsetX = xCoordinate - smallerSize / 2;
+                offsetY = yCoordinate - smallerSize / 2;
+            } else {
+                offsetX = xCoordinate;
+                offsetY = yCoordinate;
+            }
+            if (size >= otherSize) {
+                other.apply((x, y) -> {
+                    int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
+                    int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
+                    if (inBounds(shiftX, shiftY)) {
+                        float value = other.getValueAt(x, y);
+                        multiplyValueAt(shiftX, shiftY, value);
+                        List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
+                        for (Vector2f symmetryPoint : symmetryPoints) {
+                            multiplyValueAt(symmetryPoint, value);
+                        }
                     }
-                }
-            });
-        } else {
-            apply((x, y) -> {
-                int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
-                int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
-                if (other.inBounds(shiftX, shiftY)) {
-                    multiplyValueAt(x, y, other.getValueAt(shiftX, shiftY));
-                }
-            });
-        }
-        return this;
+                });
+            } else {
+                apply((x, y) -> {
+                    int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
+                    int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
+                    if (other.inBounds(shiftX, shiftY)) {
+                        multiplyValueAt(x, y, other.getValueAt(shiftX, shiftY));
+                    }
+                });
+            }
+            return this;
+        }, other);
     }
 
     public FloatMask sqrt() {
-        modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask max(FloatMask other) {
-        checkCompatibleMask(other);
-        modify((x, y) -> StrictMath.max(getValueAt(x, y), other.getValueAt(x, y)));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            modify((x, y) -> StrictMath.max(getValueAt(x, y), other.getValueAt(x, y)));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask clampMax(BinaryMask area, float val) {
-        checkCompatibleMask(area);
-        modify((x, y) -> area.getValueAt(x, y) ? StrictMath.min(getValueAt(x, y), val) : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(area);
+            modify((x, y) -> area.getValueAt(x, y) ? StrictMath.min(getValueAt(x, y), val) : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, area);
     }
 
     public FloatMask clampMax(float val) {
-        modify((x, y) -> StrictMath.min(getValueAt(x, y), val));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> StrictMath.min(getValueAt(x, y), val));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask min(FloatMask other) {
-        checkCompatibleMask(other);
-        modify((x, y) -> StrictMath.min(getValueAt(x, y), other.getValueAt(x, y)));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            modify((x, y) -> StrictMath.min(getValueAt(x, y), other.getValueAt(x, y)));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask clampMin(BinaryMask area, float val) {
-        checkCompatibleMask(area);
-        modify((x, y) -> area.getValueAt(x, y) ? StrictMath.max(getValueAt(x, y), val) : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(area);
+            modify((x, y) -> area.getValueAt(x, y) ? StrictMath.max(getValueAt(x, y), val) : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, area);
     }
 
     public FloatMask clampMin(float val) {
-        modify((x, y) -> StrictMath.max(getValueAt(x, y), val));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> StrictMath.max(getValueAt(x, y), val));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask gradient() {
-        Float[][] maskCopy = getEmptyMask(getSize());
-        apply((x, y) -> {
-            int xNeg = StrictMath.max(0, x - 1);
-            int xPos = StrictMath.min(getSize() - 1, x + 1);
-            int yNeg = StrictMath.max(0, y - 1);
-            int yPos = StrictMath.min(getSize() - 1, y + 1);
-            float xSlope = getValueAt(xPos, y) - getValueAt(xNeg, y);
-            float ySlope = getValueAt(x, yPos) - getValueAt(x, yNeg);
-            maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
+        return execute(() -> {
+            Float[][] maskCopy = getEmptyMask(getSize());
+            apply((x, y) -> {
+                int xNeg = StrictMath.max(0, x - 1);
+                int xPos = StrictMath.min(getSize() - 1, x + 1);
+                int yNeg = StrictMath.max(0, y - 1);
+                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                float xSlope = getValueAt(xPos, y) - getValueAt(xNeg, y);
+                float ySlope = getValueAt(x, yPos) - getValueAt(x, yNeg);
+                maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
+            });
+            mask = maskCopy;
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        mask = maskCopy;
-        VisualDebugger.visualizeMask(this);
-        return this;
     }
 
     public FloatMask supcomGradient() {
-        Float[][] maskCopy = getEmptyMask(getSize());
-        apply((x, y) -> {
-            int xPos = StrictMath.min(getSize() - 1, x + 1);
-            int yPos = StrictMath.min(getSize() - 1, y + 1);
-            int xNeg = StrictMath.max(0, x - 1);
-            int yNeg = StrictMath.max(0, y - 1);
-            float xPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
-            float yPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yPos));
-            float xNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xNeg, y));
-            float yNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yNeg));
-            maskCopy[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
+        return execute(() -> {
+            Float[][] maskCopy = getEmptyMask(getSize());
+            apply((x, y) -> {
+                int xPos = StrictMath.min(getSize() - 1, x + 1);
+                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                int xNeg = StrictMath.max(0, x - 1);
+                int yNeg = StrictMath.max(0, y - 1);
+                float xPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
+                float yPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yPos));
+                float xNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xNeg, y));
+                float yNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yNeg));
+                maskCopy[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
+            });
+            mask = maskCopy;
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        mask = maskCopy;
-        VisualDebugger.visualizeMask(this);
-        return this;
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
-        for (int i = 0; i < numDrops; ++i) {
-            waterDrop(maxIterations, random.nextInt(getSize()), random.nextInt(getSize()), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
-        }
-        applySymmetry(SymmetryType.SPAWN);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            for (int i = 0; i < numDrops; ++i) {
+                waterDrop(maxIterations, random.nextInt(getSize()), random.nextInt(getSize()), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
+            }
+            applySymmetry(SymmetryType.SPAWN);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public void waterDrop(int maxIterations, float x, float y, float friction, float speed, float erosionRate,
@@ -485,9 +563,11 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask threshold(float val) {
-        modify((x, y) -> getValueAt(x, y) < val ? 0 : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> getValueAt(x, y) < val ? 0 : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask interpolate() {
@@ -496,102 +576,124 @@ public strictfp class FloatMask extends Mask<Float> {
 
 
     public FloatMask blur(int radius) {
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
-    public FloatMask smooth(int radius, BinaryMask limiter) {
-        checkCompatibleMask(limiter);
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+    public FloatMask blur(int radius, BinaryMask limiter) {
+        return execute(() -> {
+            assertCompatibleMask(limiter);
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, limiter);
     }
 
     public FloatMask spike(int radius) {
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> {
-            float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
-            return value * value;
+        return execute(() -> {
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> {
+                float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
+                return value * value;
+            });
+            VisualDebugger.visualizeMask(this);
+            return this;
         });
-        VisualDebugger.visualizeMask(this);
-        return this;
     }
 
     public FloatMask spike(int radius, BinaryMask limiter) {
-        checkCompatibleMask(limiter);
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> {
-            if (limiter.getValueAt(x, y)) {
-                float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
-                return value * value;
-            } else {
-                return getValueAt(x, y);
-            }
-        });
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(limiter);
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> {
+                if (limiter.getValueAt(x, y)) {
+                    float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
+                    return value * value;
+                } else {
+                    return getValueAt(x, y);
+                }
+            });
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, limiter);
     }
 
     public FloatMask zeroOutsideRange(float min, float max) {
-        modify((x, y) -> getValueAt(x, y) < min || getValueAt(x, y) > max ? 0 : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> getValueAt(x, y) < min || getValueAt(x, y) > max ? 0 : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask setToValue(BinaryMask other, float val) {
-        checkCompatibleMask(other);
-        modify((x, y) -> other.getValueAt(x, y) ? val : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            modify((x, y) -> other.getValueAt(x, y) ? val : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other);
     }
 
     public FloatMask replaceValues(BinaryMask other, FloatMask replacement) {
-        checkCompatibleMask(other);
-        checkCompatibleMask(replacement);
-        modify((x, y) -> other.getValueAt(x, y) ? replacement.getValueAt(x, y) : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertCompatibleMask(other);
+            assertCompatibleMask(replacement);
+            modify((x, y) -> other.getValueAt(x, y) ? replacement.getValueAt(x, y) : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, other, replacement);
     }
 
     public FloatMask zeroInRange(float min, float max) {
-        modify((x, y) -> getValueAt(x, y) >= min && getValueAt(x, y) < max ? 0 : getValueAt(x, y));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            modify((x, y) -> getValueAt(x, y) >= min && getValueAt(x, y) < max ? 0 : getValueAt(x, y));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public BinaryMask convertToBinaryMask(float minValue, float maxValue) {
-        BinaryMask newMask = new BinaryMask(this, minValue, maxValue, random.nextLong());
+        BinaryMask newMask = new BinaryMask(this, minValue, maxValue, random.nextLong(), getName() + "ToBinary");
         VisualDebugger.visualizeMask(this);
         return newMask;
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
-        this.subtract(tempMask2).clampMin(0f);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
+            this.subtract(tempMask2).clampMin(0f);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
-        }
-        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            for (int x = 0; x < levelOfPrecision; x++) {
+                removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
+            }
+            removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public BinaryMask getLocalMaximums(float minValue, float maxValue) {
-        BinaryMask localMaxima = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
+        BinaryMask localMaxima = new BinaryMask(getSize(), random.nextLong(), symmetrySettings, getName() + "localMaxima");
         applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
             float value = getValueAt(x, y);
             if (value >= minValue && value < maxValue && isLocalMax(x, y)) {
@@ -604,7 +706,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public BinaryMask getLocal1DMaximums(float minValue, float maxValue) {
-        BinaryMask localMaxima = new BinaryMask(getSize(), random.nextLong(), symmetrySettings);
+        BinaryMask localMaxima = new BinaryMask(getSize(), random.nextLong(), symmetrySettings, getName() + "local1DMaxima");
         applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
             float value = getValueAt(x, y);
             if (value > minValue && value < maxValue && isLocal1DMax(x, y)) {
@@ -624,38 +726,42 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask getDistanceFieldForRange(float minValue, float maxValue) {
-        convertToBinaryMask(minValue, maxValue).getDistanceField();
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return convertToBinaryMask(minValue, maxValue).getDistanceField();
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
-        FloatMask brush = loadBrush(brushName, random.nextLong());
-        brush.multiply(intensity / brush.getMax()).setSize(size);
-        addWithOffset(brush, location, true, wrapEdges);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            FloatMask brush = loadBrush(brushName, random.nextLong());
+            brush.multiply(intensity / brush.getMax()).setSize(size);
+            addWithOffset(brush, location, true, wrapEdges);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        });
     }
 
     public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        checkSmallerSize(size);
-        ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
-        int length = possibleLocations.size();
-        FloatMask brush = loadBrush(brushName, random.nextLong());
-        brush.multiply(intensity / brush.getMax()).setSize(size);
-        for (int i = 0; i < numUses; i++) {
-            Vector2f location = possibleLocations.get(random.nextInt(length));
-            addWithOffset(brush, location, true, wrapEdges);
-        }
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            assertSmallerSize(size);
+            ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
+            int length = possibleLocations.size();
+            FloatMask brush = loadBrush(brushName, random.nextLong());
+            brush.multiply(intensity / brush.getMax()).setSize(size);
+            for (int i = 0; i < numUses; i++) {
+                Vector2f location = possibleLocations.get(random.nextInt(length));
+                addWithOffset(brush, location, true, wrapEdges);
+            }
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, area);
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity, boolean wrapEdges) {
-        int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-        useBrushWithinArea(area, brushName, size, frequency, intensity, wrapEdges);
-        VisualDebugger.visualizeMask(this);
-        return this;
+        return execute(() -> {
+            int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
+            useBrushWithinArea(area, brushName, size, frequency, intensity, wrapEdges);
+            VisualDebugger.visualizeMask(this);
+            return this;
+        }, area);
     }
 
     public boolean areAnyEdgesGreaterThan(float value) {
@@ -717,24 +823,11 @@ public strictfp class FloatMask extends Mask<Float> {
         }
     }
 
-    // -------------------------------------------
-
-    @SneakyThrows
-    public void writeToFile(Path path) {
-        if (!Files.exists(path)) {
-            Files.createFile(path);
-        }
-        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path.toFile())));
-
-        for (int x = 0; x < getSize(); x++) {
-            for (int y = 0; y < getSize(); y++) {
-                out.writeFloat(getValueAt(x, y));
-            }
-        }
-
-        out.close();
+    public FloatMask mockClone() {
+        return new FloatMask(this, 0L, MOCKED_NAME);
     }
 
+    // -------------------------------------------
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);

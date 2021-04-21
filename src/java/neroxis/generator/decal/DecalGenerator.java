@@ -3,15 +3,15 @@ package neroxis.generator.decal;
 import neroxis.generator.ElementGenerator;
 import neroxis.generator.placement.DecalPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
-import neroxis.map.ConcurrentBinaryMask;
-import neroxis.map.ConcurrentFloatMask;
+import neroxis.map.BinaryMask;
+import neroxis.map.FloatMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 
 public abstract strictfp class DecalGenerator extends ElementGenerator {
     protected DecalPlacer decalPlacer;
-    protected ConcurrentFloatMask slope;
-    protected ConcurrentBinaryMask passableLand;
+    protected FloatMask slope;
+    protected BinaryMask passableLand;
 
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters);
