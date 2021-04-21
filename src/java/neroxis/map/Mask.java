@@ -713,8 +713,10 @@ public strictfp abstract class Mask<T> {
     }
 
     protected void assertCompatibleMask(Mask<?> other) {
-        if (other.getSize() != getSize()) {
-            throw new IllegalArgumentException("Masks not the same size: other is " + other.getSize() + " and Mask is " + getSize());
+        int otherSize = other.getSize();
+        int size = getSize();
+        if (otherSize != size) {
+            throw new IllegalArgumentException("Masks not the same size: other is " + otherSize + " and Mask is " + size);
         }
         if (!getSymmetrySettings().equals(other.getSymmetrySettings())) {
             throw new IllegalArgumentException("Masks not the same symmetry: other is " + other.getSymmetrySettings() + " and Mask is " + getSymmetrySettings());
@@ -722,8 +724,9 @@ public strictfp abstract class Mask<T> {
     }
 
     protected void assertSmallerSize(int size) {
-        if (size > getSize()) {
-            throw new IllegalArgumentException("Intended mask size is larger than base mask size: Mask is " + getSize() + " and size is " + size);
+        int actualSize = getSize();
+        if (size > actualSize) {
+            throw new IllegalArgumentException("Intended mask size is larger than base mask size: Mask is " + actualSize + " and size is " + size);
         }
     }
 

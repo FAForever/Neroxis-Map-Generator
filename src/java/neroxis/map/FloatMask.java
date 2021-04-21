@@ -472,12 +472,13 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask gradient() {
         return execute(() -> {
-            Float[][] maskCopy = getEmptyMask(getSize());
+            int size = getSize();
+            Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
                 int xNeg = StrictMath.max(0, x - 1);
-                int xPos = StrictMath.min(getSize() - 1, x + 1);
+                int xPos = StrictMath.min(size - 1, x + 1);
                 int yNeg = StrictMath.max(0, y - 1);
-                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                int yPos = StrictMath.min(size - 1, y + 1);
                 float xSlope = getValueAt(xPos, y) - getValueAt(xNeg, y);
                 float ySlope = getValueAt(x, yPos) - getValueAt(x, yNeg);
                 maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
@@ -490,10 +491,11 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask supcomGradient() {
         return execute(() -> {
-            Float[][] maskCopy = getEmptyMask(getSize());
+            int size = getSize();
+            Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
-                int xPos = StrictMath.min(getSize() - 1, x + 1);
-                int yPos = StrictMath.min(getSize() - 1, y + 1);
+                int xPos = StrictMath.min(size - 1, x + 1);
+                int yPos = StrictMath.min(size - 1, y + 1);
                 int xNeg = StrictMath.max(0, x - 1);
                 int yNeg = StrictMath.max(0, y - 1);
                 float xPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
@@ -511,8 +513,9 @@ public strictfp class FloatMask extends Mask<Float> {
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
         return execute(() -> {
+            int size = getSize();
             for (int i = 0; i < numDrops; ++i) {
-                waterDrop(maxIterations, random.nextInt(getSize()), random.nextInt(getSize()), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
+                waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
             applySymmetry(SymmetryType.SPAWN);
             VisualDebugger.visualizeMask(this);
@@ -720,7 +723,8 @@ public strictfp class FloatMask extends Mask<Float> {
 
     @Override
     protected int[][] getInnerCount() {
-        int[][] innerCount = new int[getSize()][getSize()];
+        int size = getSize();
+        int[][] innerCount = new int[size][size];
         apply((x, y) -> calculateInnerValue(innerCount, x, y, StrictMath.round(getValueAt(x, y) * 1000)));
         return innerCount;
     }
@@ -830,7 +834,8 @@ public strictfp class FloatMask extends Mask<Float> {
     // -------------------------------------------
     @Override
     public String toHash() throws NoSuchAlgorithmException {
-        ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
+        int size = getSize();
+        ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
         applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getValueAt(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();

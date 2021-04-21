@@ -88,10 +88,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public boolean isEdge(int x, int y) {
         boolean value = getValueAt(x, y);
+        int size = getSize();
         return ((x > 0 && getValueAt(x - 1, y) != value)
                 || (y > 0 && getValueAt(x, y - 1) != value)
-                || (x < getSize() - 1 && getValueAt(x + 1, y) != value)
-                || (y < getSize() - 1 && getValueAt(x, y + 1) != value));
+                || (x < size - 1 && getValueAt(x + 1, y) != value)
+                || (y < size - 1 && getValueAt(x, y + 1) != value));
     }
 
     @Override
@@ -225,6 +226,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         return execute(() -> {
+            int size = getSize();
             List<Vector2f> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2f(start));
             for (int i = 0; i < numMiddlePoints; i++) {
@@ -238,8 +240,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 checkPoints.add(nextLoc);
             }
             checkPoints.add(new Vector2f(end));
-            checkPoints.forEach(point -> point.round().clampMin(0, 0).clampMax(getSize() - 1, getSize() - 1));
-            int size = getSize();
+            checkPoints.forEach(point -> point.round().clampMin(0, 0).clampMax(size - 1, size - 1));
             int numSteps = 0;
             for (int i = 0; i < checkPoints.size() - 1; i++) {
                 Vector2f location = checkPoints.get(i);
@@ -616,8 +617,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask limitToCenteredCircle(float circleRadius) {
         return execute(() -> {
-            BinaryMask symmetryLimit = new BinaryMask(getSize(), random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
-            symmetryLimit.fillCircle(getSize() / 2f, getSize() / 2f, circleRadius, true);
+            int size = getSize();
+            BinaryMask symmetryLimit = new BinaryMask(size, random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
+            symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
             intersect(symmetryLimit);
             VisualDebugger.visualizeMask(this);
             return this;
@@ -630,18 +632,19 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillSides(int extent, boolean value, SymmetryType symmetryType) {
         return execute(() -> {
+            int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case Z:
-                    fillRect(0, 0, extent / 2, getSize(), value).fillRect(getSize() - extent / 2, 0, getSize() - extent / 2, getSize(), value);
+                    fillRect(0, 0, extent / 2, size, value).fillRect(size - extent / 2, 0, size - extent / 2, size, value);
                     break;
                 case X:
-                    fillRect(0, 0, getSize(), extent / 2, value).fillRect(0, getSize() - extent / 2, getSize(), extent / 2, value);
+                    fillRect(0, 0, size, extent / 2, value).fillRect(0, size - extent / 2, size, extent / 2, value);
                     break;
                 case XZ:
-                    fillParallelogram(0, 0, getSize(), extent * 3 / 4, 0, -1, value).fillParallelogram(getSize() - extent * 3 / 4, getSize(), getSize(), extent * 3 / 4, 0, -1, value);
+                    fillParallelogram(0, 0, size, extent * 3 / 4, 0, -1, value).fillParallelogram(size - extent * 3 / 4, size, size, extent * 3 / 4, 0, -1, value);
                     break;
                 case ZX:
-                    fillParallelogram(getSize() - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, getSize() - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
+                    fillParallelogram(size - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, size - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
                     break;
             }
             applySymmetry(symmetryType);
@@ -656,6 +659,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillCenter(int extent, boolean value, SymmetryType symmetryType) {
         return execute(() -> {
+            int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case POINT2:
                 case POINT3:
@@ -672,13 +676,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 case POINT14:
                 case POINT15:
                 case POINT16:
-                    fillCircle((float) getSize() / 2, (float) getSize() / 2, extent * 3 / 4f, value);
+                    fillCircle((float) size / 2, (float) size / 2, extent * 3 / 4f, value);
                     break;
                 case Z:
-                    fillRect(0, getSize() / 2 - extent / 2, getSize(), extent, value);
+                    fillRect(0, size / 2 - extent / 2, size, extent, value);
                     break;
                 case X:
-                    fillRect(getSize() / 2 - extent / 2, 0, extent, getSize(), value);
+                    fillRect(size / 2 - extent / 2, 0, extent, size, value);
                     break;
                 case XZ:
                     fillDiagonal(extent * 3 / 4, false, value);
@@ -698,11 +702,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     break;
                 case QUAD:
                     if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
-                        fillRect(getSize() / 2 - extent / 4, 0, extent / 2, getSize(), value);
-                        fillRect(0, getSize() / 2 - extent / 4, getSize(), extent / 2, value);
+                        fillRect(size / 2 - extent / 4, 0, extent / 2, size, value);
+                        fillRect(0, size / 2 - extent / 4, size, extent / 2, value);
                     } else {
-                        fillRect(getSize() / 2 - extent / 8, 0, extent / 4, getSize(), value);
-                        fillRect(0, getSize() / 2 - extent / 8, getSize(), extent / 4, value);
+                        fillRect(size / 2 - extent / 8, 0, extent / 4, size, value);
+                        fillRect(0, size / 2 - extent / 8, size, extent / 4, value);
                         fillCenter(extent, value, SymmetryType.TEAM);
                     }
                     break;
@@ -794,15 +798,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
         return execute(() -> {
+            int size = getSize();
             for (int cx = -extent; cx < extent; cx++) {
-                for (int y = 0; y < getSize(); y++) {
+                for (int y = 0; y < size; y++) {
                     int x;
                     if (inverted) {
-                        x = getSize() - (cx + y);
+                        x = size - (cx + y);
                     } else {
                         x = cx + y;
                     }
-                    if (x >= 0 && x < getSize()) {
+                    if (x >= 0 && x < size) {
                         setValueAt(x, y, value);
                     }
                 }
@@ -814,12 +819,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask fillEdge(int rimWidth, boolean value) {
         return execute(() -> {
+            int size = getSize();
             for (int a = 0; a < rimWidth; a++) {
-                for (int b = 0; b < getSize() - rimWidth; b++) {
+                for (int b = 0; b < size - rimWidth; b++) {
                     setValueAt(a, b, value);
-                    setValueAt(getSize() - 1 - a, getSize() - 1 - b, value);
-                    setValueAt(b, getSize() - 1 - a, value);
-                    setValueAt(getSize() - 1 - b, a, value);
+                    setValueAt(size - 1 - a, size - 1 - b, value);
+                    setValueAt(b, size - 1 - a, value);
+                    setValueAt(size - 1 - b, a, value);
                 }
             }
             VisualDebugger.visualizeMask(this);
@@ -865,7 +871,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public BinaryMask removeAreasSmallerThan(int minArea) {
         return execute(() -> {
-            Set<Vector2f> seen = new HashSet<>(getSize() * getSize() * 2);
+            int size = getSize();
+            Set<Vector2f> seen = new HashSet<>(size * size * 2);
             applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 Vector2f location = new Vector2f(x, y);
                 if (!seen.contains(location)) {
@@ -909,7 +916,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location) {
-        return getShapeCoordinates(location, getSize() * getSize());
+        int size = getSize();
+        return getShapeCoordinates(location, size * size);
     }
 
     public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location, int maxSize) {
@@ -945,14 +953,16 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     @Override
     protected int[][] getInnerCount() {
-        int[][] innerCount = new int[getSize()][getSize()];
+        int size = getSize();
+        int[][] innerCount = new int[size][size];
         apply((x, y) -> calculateInnerValue(innerCount, x, y, getValueAt(x, y) ? 1 : 0));
         return innerCount;
     }
 
     public FloatMask getDistanceField() {
-        FloatMask distanceField = new FloatMask(getSize(), random.nextLong(), symmetrySettings, getName() + "distanceField");
-        distanceField.init(this, getSize() * getSize(), 0f);
+        int size = getSize();
+        FloatMask distanceField = new FloatMask(size, random.nextLong(), symmetrySettings, getName() + "distanceField");
+        distanceField.init(this, size * size, 0f);
         addCalculatedParabolicDistance(distanceField, false);
         addCalculatedParabolicDistance(distanceField, true);
         distanceField.sqrt();
@@ -960,7 +970,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     private void addCalculatedParabolicDistance(FloatMask distanceField, boolean useColumns) {
-        for (int i = 0; i < getSize(); i++) {
+        int size = getSize();
+        for (int i = 0; i < size; i++) {
             List<Vector2f> vertices = new ArrayList<>();
             List<Vector2f> intersections = new ArrayList<>();
             int index = 0;
@@ -973,7 +984,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             vertices.add(new Vector2f(0, value));
             intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
             intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-            for (int j = 1; j < getSize(); j++) {
+            for (int j = 1; j < size; j++) {
                 if (!useColumns) {
                     value = distanceField.getValueAt(i, j);
                 } else {
@@ -1002,7 +1013,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             index = 0;
-            for (int j = 0; j < getSize(); j++) {
+            for (int j = 0; j < size; j++) {
                 while (intersections.get(index + 1).getX() < j) {
                     index += 1;
                 }
@@ -1030,8 +1041,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public LinkedList<Vector2f> getAllCoordinates(int spacing) {
         LinkedList<Vector2f> coordinates = new LinkedList<>();
-        for (int x = 0; x < getSize(); x += spacing) {
-            for (int y = 0; y < getSize(); y += spacing) {
+        int size = getSize();
+        for (int x = 0; x < size; x += spacing) {
+            for (int y = 0; y < size; y += spacing) {
                 Vector2f location = new Vector2f(x, y);
                 coordinates.addLast(location);
             }
@@ -1041,8 +1053,9 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     public LinkedList<Vector2f> getAllCoordinatesEqualTo(boolean value, int spacing) {
         LinkedList<Vector2f> coordinates = new LinkedList<>();
-        for (int x = 0; x < getSize(); x += spacing) {
-            for (int y = 0; y < getSize(); y += spacing) {
+        int size = getSize();
+        for (int x = 0; x < size; x += spacing) {
+            for (int y = 0; y < size; y += spacing) {
                 if (getValueAt(x, y) == value) {
                     Vector2f location = new Vector2f(x, y);
                     coordinates.addLast(location);
@@ -1106,7 +1119,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     @Override
     public String toHash() throws NoSuchAlgorithmException {
-        ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize());
+        int size = getSize();
+        ByteBuffer bytes = ByteBuffer.allocate(size * size);
         applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(getValueAt(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
