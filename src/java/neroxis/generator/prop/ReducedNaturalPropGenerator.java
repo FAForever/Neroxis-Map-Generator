@@ -28,7 +28,7 @@ public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGene
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
             propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps((BinaryMask) cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
         });
     }
 }

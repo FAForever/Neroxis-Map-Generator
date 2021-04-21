@@ -123,7 +123,7 @@ public strictfp abstract class Mask<T> {
         return (float) count / area;
     }
 
-    public Mask<T> setSize(int newSize) {
+    public <U extends Mask<T>> U setSize(int newSize) {
         plannedSize = newSize;
         execute(() -> {
             int size = getSize();
@@ -134,10 +134,10 @@ public strictfp abstract class Mask<T> {
             }
             VisualDebugger.visualizeMask(this);
         });
-        return this;
+        return (U) this;
     }
 
-    public Mask<T> resample(int newSize) {
+    public <U extends Mask<T>> U resample(int newSize) {
         plannedSize = newSize;
         execute(() -> {
             int size = getSize();
@@ -148,7 +148,7 @@ public strictfp abstract class Mask<T> {
             }
             VisualDebugger.visualizeMask(this);
         });
-        return this;
+        return (U) this;
     }
 
     public boolean inBounds(Vector2f location) {
@@ -577,15 +577,15 @@ public strictfp abstract class Mask<T> {
         });
     }
 
-    private Mask<T> enlarge(int size) {
+    private <U extends Mask<T>> U enlarge(int size) {
         return enlarge(size, SymmetryType.SPAWN);
     }
 
-    private Mask<T> shrink(int size) {
+    private <U extends Mask<T>> U shrink(int size) {
         return shrink(size, SymmetryType.SPAWN);
     }
 
-    private Mask<T> enlarge(int newSize, SymmetryType symmetryType) {
+    private <U extends Mask<T>> U enlarge(int newSize, SymmetryType symmetryType) {
         T[][] smallMask = mask;
         int oldSize = getSize();
         float scale = (float) newSize / oldSize;
@@ -595,10 +595,10 @@ public strictfp abstract class Mask<T> {
             int smallY = StrictMath.min((int) (y / scale), oldSize - 1);
             return smallMask[smallX][smallY];
         });
-        return this;
+        return (U) this;
     }
 
-    private Mask<T> shrink(int newSize, SymmetryType symmetryType) {
+    private <U extends Mask<T>> U shrink(int newSize, SymmetryType symmetryType) {
         T[][] largeMask = mask;
         int oldSize = getSize();
         float scale = (float) oldSize / newSize;
@@ -608,32 +608,32 @@ public strictfp abstract class Mask<T> {
             int largeY = StrictMath.min(StrictMath.round(y * scale + scale / 2), oldSize - 1);
             return largeMask[largeX][largeY];
         });
-        return this;
+        return (U) this;
     }
 
-    private Mask<T> interpolate(int newSize) {
+    private <U extends Mask<T>> U interpolate(int newSize) {
         return interpolate(newSize, SymmetryType.SPAWN);
     }
 
-    private Mask<T> interpolate(int newSize, SymmetryType symmetryType) {
+    private <U extends Mask<T>> U interpolate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         enlarge(newSize, symmetryType);
         blur(StrictMath.round((float) newSize / oldSize / 2));
-        return this;
+        return (U) this;
     }
 
-    private Mask<T> decimate(int newSize) {
+    private <U extends Mask<T>> U decimate(int newSize) {
         return decimate(newSize, SymmetryType.SPAWN);
     }
 
-    private Mask<T> decimate(int newSize, SymmetryType symmetryType) {
+    private <U extends Mask<T>> U decimate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         blur(StrictMath.round((float) oldSize / newSize / 2));
         shrink(newSize, symmetryType);
-        return this;
+        return (U) this;
     }
 
-    public Mask<T> flip(SymmetryType symmetryType) {
+    public <U extends Mask<T>> U flip(SymmetryType symmetryType) {
         execute(() -> {
             Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
             if (symmetry.getNumSymPoints() != 2) {
@@ -649,7 +649,7 @@ public strictfp abstract class Mask<T> {
                     VisualDebugger.visualizeMask(this);
                 }
         );
-        return this;
+        return (U) this;
     }
 
     protected void modify(BiFunction<Integer, Integer, T> valueFunction) {
@@ -731,9 +731,9 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    public Mask<T> getFinalMask() {
+    public <U extends Mask<T>> U getFinalMask() {
         Pipeline.await(this);
-        return copy();
+        return (U) copy();
     }
 
     public Mask<T> startVisualDebugger() {

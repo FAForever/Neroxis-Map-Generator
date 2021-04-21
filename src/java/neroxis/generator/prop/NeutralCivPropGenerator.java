@@ -42,11 +42,11 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
     @Override
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine((BinaryMask) civReclaimMask.getFinalMask());
+        noProps.combine(civReclaimMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
-        noCivs.init((BinaryMask) unbuildable.getFinalMask());
+        noCivs.init(unbuildable.getFinalMask());
         noCivs.inflate(12);
         generateExclusionZones(noCivs, 96, 32, 32);
     }

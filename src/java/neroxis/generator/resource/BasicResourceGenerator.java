@@ -34,7 +34,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
         Util.timedRun("neroxis.generator", "generateResources", () -> {
-            mexPlacer.placeMexes((BinaryMask) resourceMask.getFinalMask(), (BinaryMask) waterResourceMask.getFinalMask());
+            mexPlacer.placeMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroPlacer.placeHydros(((BinaryMask) resourceMask.getFinalMask()).deflate(8));
         });
     }

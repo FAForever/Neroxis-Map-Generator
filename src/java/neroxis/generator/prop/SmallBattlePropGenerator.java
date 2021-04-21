@@ -45,7 +45,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected void generateUnitExclusionMasks() {
-        noWrecks.init((BinaryMask) unbuildable.getFinalMask());
+        noWrecks.init(unbuildable.getFinalMask());
         generateExclusionZones(noWrecks, 128, 8, 32);
     }
 

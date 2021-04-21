@@ -40,11 +40,11 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine((BinaryMask) baseMask.getFinalMask());
+        noProps.combine(baseMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
-        noBases.init((BinaryMask) unbuildable.getFinalMask());
+        noBases.init(unbuildable.getFinalMask());
         noBases.inflate(12);
         generateExclusionZones(noBases, 128, 32, 32);
     }

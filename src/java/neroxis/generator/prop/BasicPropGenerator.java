@@ -47,7 +47,7 @@ public class BasicPropGenerator extends PropGenerator {
 
 
     protected void generatePropExclusionMasks() {
-        noProps.init((BinaryMask) unbuildable.getFinalMask());
+        noProps.init(unbuildable.getFinalMask());
 
         generateExclusionZones(noProps, 30, 2, 8);
     }
@@ -69,7 +69,7 @@ public class BasicPropGenerator extends PropGenerator {
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
             propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps((BinaryMask) cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
             propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }

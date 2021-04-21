@@ -119,9 +119,9 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater) {
         Pipeline.await(passable, passableLand, passableWater);
         Util.timedRun("neroxis.generator", "placeAIMarkers", () -> {
-            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
-            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
-            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers((BinaryMask) passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
+            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
+            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
+            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
             CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAirAIMarkers(map));
             CompletableFuture.allOf(AmphibiousMarkers, LandMarkers, NavyMarkers, AirMarkers).join();
         });

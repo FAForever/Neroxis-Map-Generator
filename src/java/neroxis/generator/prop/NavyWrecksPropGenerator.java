@@ -51,7 +51,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected void generateUnitExclusionMasks() {
-        noWrecks.init((BinaryMask) passableLand.getFinalMask()).combine((BinaryMask) impassable.getFinalMask());
+        noWrecks.init(passableLand.getFinalMask()).combine(impassable.getFinalMask());
         generateExclusionZones(noWrecks, 64, 8, 32);
     }
 

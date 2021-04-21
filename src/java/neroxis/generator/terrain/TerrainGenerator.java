@@ -39,7 +39,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     public void setHeightmapImage() {
         Pipeline.await(heightmap);
         Util.timedRun("neroxis.generator", "setHeightMap", () -> {
-            map.setHeightImage((FloatMask) heightmap.getFinalMask());
+            map.setHeightImage(heightmap.getFinalMask());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
         });
     }
