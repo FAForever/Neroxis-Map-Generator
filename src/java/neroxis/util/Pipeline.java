@@ -35,7 +35,7 @@ public strictfp class Pipeline {
 
         List<Pipeline.Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies);
         CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies)
-                .thenAccept(m -> {
+                .thenRunAsync(() -> {
                     long startTime = System.currentTimeMillis();
                     function.run();
                     long functionTime = System.currentTimeMillis() - startTime;
@@ -61,7 +61,6 @@ public strictfp class Pipeline {
                 });
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture);
 
-        entry.dependencies.forEach(d -> d.dependants.add(entry));
         pipeline.add(entry);
 
         if (Util.DEBUG) {
@@ -161,7 +160,6 @@ public strictfp class Pipeline {
         private final Mask<?> executingMask;
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
-        private final Set<Entry> dependants = new HashSet<>();
         private final int index;
 
         public Entry(int index, Mask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future) {
