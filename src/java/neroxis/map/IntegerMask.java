@@ -90,11 +90,6 @@ public strictfp class IntegerMask extends Mask<Integer> {
     }
 
     @Override
-    public Mask<Integer> mockClone() {
-        return new IntegerMask(this, 0L, MOCKED_NAME);
-    }
-
-    @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
         applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putInt(getValueAt(x, y)));

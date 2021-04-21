@@ -1108,11 +1108,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
 
     // --------------------------------------------------
     @Override
-    public Mask<Boolean> mockClone() {
-        return new BinaryMask(this, 0L, MOCKED_NAME);
-    }
-
-    @Override
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size);

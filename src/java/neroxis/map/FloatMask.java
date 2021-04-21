@@ -825,10 +825,6 @@ public strictfp class FloatMask extends Mask<Float> {
         }
     }
 
-    public FloatMask mockClone() {
-        return new FloatMask(this, 0L, MOCKED_NAME);
-    }
-
     // -------------------------------------------
     @Override
     public String toHash() throws NoSuchAlgorithmException {

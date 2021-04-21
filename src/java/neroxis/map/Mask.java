@@ -44,8 +44,6 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    public abstract Mask<T> mockClone();
-
     public abstract String toHash() throws NoSuchAlgorithmException;
 
     protected abstract T[][] getEmptyMask(int size);

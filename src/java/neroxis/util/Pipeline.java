@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
 
@@ -35,7 +34,7 @@ public strictfp class Pipeline {
         String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map", "execute");
 
         List<Pipeline.Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies);
-        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
+        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies)
                 .thenAccept(m -> {
                     long startTime = System.currentTimeMillis();
                     function.run();
@@ -119,9 +118,9 @@ public strictfp class Pipeline {
      * Returns a future that completes once all dependencies are met and returns their result
      *
      * @param dependencyList list of dependencies
-     * @return a list of the results, DO NOT MODIFY THOSE!, may be mocks
+     * @return future that completes when all dependent futures are completed
      */
-    public static CompletableFuture<Void> getDependencyFuture(List<Entry> dependencyList, Mask<?> requestingMask) {
+    private static CompletableFuture<Void> getDependencyFuture(List<Entry> dependencyList) {
         if (pipeline.isEmpty() || dependencyList.isEmpty()) {
             return started;
         }
@@ -163,22 +162,13 @@ public strictfp class Pipeline {
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
-        private final List<Mask<?>> maskBackups = new ArrayList<>();
         private final int index;
 
         public Entry(int index, Mask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies = new HashSet<>(dependencies);
-            this.future = future.thenRun(() -> {
-                if (dependants.size() > 0) {
-                    if (dependants.stream().anyMatch(d -> d.getExecutingMask() == this.executingMask)) {
-                        IntStream.range(0, dependants.size() - 1).forEach(i -> maskBackups.add(executingMask.mockClone()));
-                    } else {
-                        IntStream.range(0, dependants.size()).forEach(i -> maskBackups.add(executingMask.mockClone()));
-                    }
-                }
-            });
+            this.future = future;
         }
     }
 }
