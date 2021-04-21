@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
@@ -27,12 +26,7 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
-    public static <T extends Mask<U>, U> T add(T executingMask, List<Mask<?>> dependencies, Supplier<T> function) {
-        addInternal(executingMask, dependencies, function);
-        return executingMask;
-    }
-
-    private static <T extends Mask<?>> void addInternal(T executingMask, List<Mask<?>> maskDependencies, Supplier<T> function) {
+    public static void add(Mask<?> executingMask, List<Mask<?>> maskDependencies, Runnable function) {
         int index = pipeline.size();
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -41,10 +35,10 @@ public strictfp class Pipeline {
         String callingMethod = Util.getStackTraceMethodInPackage("neroxis.map", "execute");
 
         List<Pipeline.Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies);
-        CompletableFuture<Mask<?>> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
-                .thenApply(m -> {
+        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
+                .thenAccept(m -> {
                     long startTime = System.currentTimeMillis();
-                    Mask<?> res = function.get();
+                    function.run();
                     long functionTime = System.currentTimeMillis() - startTime;
                     startTime = System.currentTimeMillis();
                     if (HASH_MASK) {
@@ -65,7 +59,6 @@ public strictfp class Pipeline {
                                 callingMethod
                         );
                     }
-                    return res;
                 });
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture);
 
@@ -173,7 +166,7 @@ public strictfp class Pipeline {
         private final List<Mask<?>> maskBackups = new ArrayList<>();
         private final int index;
 
-        public Entry(int index, Mask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Mask<?>> future) {
+        public Entry(int index, Mask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies = new HashSet<>(dependencies);
@@ -186,18 +179,6 @@ public strictfp class Pipeline {
                     }
                 }
             });
-        }
-
-        public synchronized Mask<?> getResult(Mask<?> requestingMask) {
-            if (requestingMask == executingMask) {
-                return executingMask;
-            } else {
-                if (maskBackups.isEmpty()) {
-                    new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName())).printStackTrace();
-                    return null;
-                }
-                return maskBackups.remove(0);
-            }
         }
     }
 }

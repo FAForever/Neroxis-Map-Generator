@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 public strictfp abstract class Mask<T> {
     protected final static String MOCKED_NAME = "mocked";
@@ -128,7 +127,7 @@ public strictfp abstract class Mask<T> {
 
     public Mask<T> setSize(int newSize) {
         plannedSize = newSize;
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             if (size < newSize) {
                 enlarge(newSize);
@@ -136,13 +135,13 @@ public strictfp abstract class Mask<T> {
                 shrink(newSize);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public Mask<T> resample(int newSize) {
         plannedSize = newSize;
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             if (size < newSize) {
                 interpolate(newSize);
@@ -150,8 +149,8 @@ public strictfp abstract class Mask<T> {
                 decimate(newSize);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public boolean inBounds(Vector2f location) {
@@ -561,7 +560,6 @@ public strictfp abstract class Mask<T> {
                 interpolate();
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
     }
 
@@ -578,7 +576,6 @@ public strictfp abstract class Mask<T> {
                 }
             });
             VisualDebugger.visualizeMask(this);
-            return this;
         });
     }
 
@@ -639,22 +636,22 @@ public strictfp abstract class Mask<T> {
     }
 
     public Mask<T> flip(SymmetryType symmetryType) {
-        return execute(() -> {
-                    Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-                    if (symmetry.getNumSymPoints() != 2) {
-                        throw new IllegalArgumentException("Cannot flip non single axis symmetry");
-                    }
-                    int size = getSize();
-                    T[][] newMask = getEmptyMask(size);
-                    apply((x, y) -> {
-                        List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                        newMask[x][y] = getValueAt(symmetryPoints.get(0));
-                    });
+        execute(() -> {
+            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+            if (symmetry.getNumSymPoints() != 2) {
+                throw new IllegalArgumentException("Cannot flip non single axis symmetry");
+            }
+            int size = getSize();
+            T[][] newMask = getEmptyMask(size);
+            apply((x, y) -> {
+                List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+                newMask[x][y] = getValueAt(symmetryPoints.get(0));
+            });
                     this.mask = newMask;
                     VisualDebugger.visualizeMask(this);
-                    return this;
                 }
         );
+        return this;
     }
 
     protected void modify(BiFunction<Integer, Integer, T> valueFunction) {
@@ -702,13 +699,13 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    protected <U extends Mask<T>> U execute(Supplier<U> function, Mask<?>... usedMasks) {
+    protected void execute(Runnable function, Mask<?>... usedMasks) {
         List<Mask<?>> dependencies = new ArrayList<>(Arrays.asList(usedMasks));
         dependencies.add(this);
         if (parallel && !processing) {
-            return Pipeline.add((U) this, dependencies, function);
+            Pipeline.add(this, dependencies, function);
         } else {
-            return function.get();
+            function.run();
         }
     }
 

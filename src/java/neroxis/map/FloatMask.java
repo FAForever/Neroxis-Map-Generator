@@ -34,7 +34,7 @@ public strictfp class FloatMask extends Mask<Float> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        VisualDebugger.visualizeMask(this);
+        execute(() -> VisualDebugger.visualizeMask(this));
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
@@ -52,7 +52,6 @@ public strictfp class FloatMask extends Mask<Float> {
                 return value[0] / 255f;
             });
             VisualDebugger.visualizeMask(this);
-            return this;
         });
     }
 
@@ -68,7 +67,6 @@ public strictfp class FloatMask extends Mask<Float> {
         execute(() -> {
             modify(sourceMask::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -84,7 +82,6 @@ public strictfp class FloatMask extends Mask<Float> {
         execute(() -> {
             modify((x, y) -> sourceMask.getValueAt(x, y) ? high : low);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -173,24 +170,24 @@ public strictfp class FloatMask extends Mask<Float> {
 
     public FloatMask init(BinaryMask other, float low, float high) {
         plannedSize = other.getSize();
-        return execute(() -> {
+        execute(() -> {
             setSize(other.getSize());
             assertCompatibleMask(other);
             modify((x, y) -> other.getValueAt(x, y) ? high : low);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask init(FloatMask other) {
         plannedSize = other.getSize();
-        return execute(() -> {
+        execute(() -> {
             setSize(other.getSize());
             assertCompatibleMask(other);
             modify(other::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     @Override
@@ -203,72 +200,72 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask clear() {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> 0f);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        return execute(() -> {
+        execute(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        return execute(() -> {
+        execute(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask addDistance(BinaryMask other, float scale) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             FloatMask distanceField = other.getDistanceField();
             add(distanceField.multiply(scale));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask add(FloatMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             add(other::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask add(BinaryMask other, float value) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             add((x, y) -> other.getValueAt(x, y) ? value : 0);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask add(float val) {
-        return execute(() -> {
+        execute(() -> {
             add((x, y) -> val);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask addWeighted(FloatMask other, float weight) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             add((x, y) -> other.getValueAt(x, y) * weight);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     private FloatMask addWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
@@ -276,7 +273,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     private FloatMask addWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             int otherSize = other.getSize();
             int smallerSize = StrictMath.min(size, otherSize);
@@ -311,12 +308,13 @@ public strictfp class FloatMask extends Mask<Float> {
                     }
                 });
             }
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask subtractAvg() {
-        return execute(() -> subtract(getAvg()));
+        execute(() -> subtract(getAvg()));
+        return this;
     }
 
     public FloatMask subtract(float val) {
@@ -324,21 +322,21 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask subtract(FloatMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             add((x, y) -> -other.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask subtract(BinaryMask other, float value) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             add((x, y) -> other.getValueAt(x, y) ? -value : 0);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     private FloatMask subtractWithOffset(FloatMask other, Vector2f loc, boolean center, boolean wrapEdges) {
@@ -350,20 +348,20 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask multiply(FloatMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             multiply(other::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask multiply(float val) {
-        return execute(() -> {
+        execute(() -> {
             multiply((x, y) -> val);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     private FloatMask multiplyWithOffset(FloatMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
@@ -371,7 +369,7 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     private FloatMask multiplyWithOffset(FloatMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             int otherSize = other.getSize();
             int smallerSize = StrictMath.min(size, otherSize);
@@ -406,72 +404,72 @@ public strictfp class FloatMask extends Mask<Float> {
                     }
                 });
             }
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask sqrt() {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask max(FloatMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> StrictMath.max(getValueAt(x, y), other.getValueAt(x, y)));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask clampMax(BinaryMask area, float val) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(area);
             modify((x, y) -> area.getValueAt(x, y) ? StrictMath.min(getValueAt(x, y), val) : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, area);
+        return this;
     }
 
     public FloatMask clampMax(float val) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> StrictMath.min(getValueAt(x, y), val));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask min(FloatMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> StrictMath.min(getValueAt(x, y), other.getValueAt(x, y)));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask clampMin(BinaryMask area, float val) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(area);
             modify((x, y) -> area.getValueAt(x, y) ? StrictMath.max(getValueAt(x, y), val) : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, area);
+        return this;
     }
 
     public FloatMask clampMin(float val) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> StrictMath.max(getValueAt(x, y), val));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask gradient() {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -485,12 +483,12 @@ public strictfp class FloatMask extends Mask<Float> {
             });
             mask = maskCopy;
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask supcomGradient() {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -506,21 +504,21 @@ public strictfp class FloatMask extends Mask<Float> {
             });
             mask = maskCopy;
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
             applySymmetry(SymmetryType.SPAWN);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public void waterDrop(int maxIterations, float x, float y, float friction, float speed, float erosionRate,
@@ -566,11 +564,11 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask threshold(float val) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> getValueAt(x, y) < val ? 0 : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask interpolate() {
@@ -579,38 +577,38 @@ public strictfp class FloatMask extends Mask<Float> {
 
 
     public FloatMask blur(int radius) {
-        return execute(() -> {
+        execute(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask blur(int radius, BinaryMask limiter) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, limiter);
+        return this;
     }
 
     public FloatMask spike(int radius) {
-        return execute(() -> {
+        execute(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> {
                 float value = calculateAreaAverage(radius, x, y, innerCount) / 1000;
                 return value * value;
             });
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask spike(int radius, BinaryMask limiter) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> {
@@ -622,43 +620,43 @@ public strictfp class FloatMask extends Mask<Float> {
                 }
             });
             VisualDebugger.visualizeMask(this);
-            return this;
         }, limiter);
+        return this;
     }
 
     public FloatMask zeroOutsideRange(float min, float max) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> getValueAt(x, y) < min || getValueAt(x, y) > max ? 0 : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask setToValue(BinaryMask other, float val) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> other.getValueAt(x, y) ? val : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public FloatMask replaceValues(BinaryMask other, FloatMask replacement) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             assertCompatibleMask(replacement);
             modify((x, y) -> other.getValueAt(x, y) ? replacement.getValueAt(x, y) : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other, replacement);
+        return this;
     }
 
     public FloatMask zeroInRange(float min, float max) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> getValueAt(x, y) >= min && getValueAt(x, y) < max ? 0 : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask convertToBinaryMask(float minValue, float maxValue) {
@@ -668,31 +666,31 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        return execute(() -> {
+        execute(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBinaryMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
             this.subtract(tempMask2).clampMin(0f);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        return execute(() -> {
+        execute(() -> {
             subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        return execute(() -> {
+        execute(() -> {
             for (int x = 0; x < levelOfPrecision; x++) {
                 removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
             }
             removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask getLocalMaximums(float minValue, float maxValue) {
@@ -734,17 +732,17 @@ public strictfp class FloatMask extends Mask<Float> {
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public FloatMask useBrushWithinArea(BinaryMask area, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             assertSmallerSize(size);
             ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
@@ -755,17 +753,17 @@ public strictfp class FloatMask extends Mask<Float> {
                 addWithOffset(brush, location, true, wrapEdges);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         }, area);
+        return this;
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BinaryMask area, String brushName, int size, float density, float intensity, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
             useBrushWithinArea(area, brushName, size, frequency, intensity, wrapEdges);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, area);
+        return this;
     }
 
     public boolean areAnyEdgesGreaterThan(float value) {

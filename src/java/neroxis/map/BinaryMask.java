@@ -28,7 +28,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        VisualDebugger.visualizeMask(this);
+        execute(() -> VisualDebugger.visualizeMask(this));
     }
 
     public BinaryMask(BinaryMask sourceMask, Long seed) {
@@ -43,7 +43,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         execute(() -> {
             modify(sourceMask::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -59,7 +58,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         execute(() -> {
             modify((x, y) -> sourceMask.getValueAt(x, y) >= minValue);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -71,7 +69,6 @@ public strictfp class BinaryMask extends Mask<Boolean> {
         execute(() -> {
             modify((x, y) -> sourceMask.getValueAt(x, y) >= minValue && sourceMask.getValueAt(x, y) < maxValue);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -105,33 +102,33 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask clear() {
-        return execute(() -> {
+        execute(() -> {
             apply((x, y) -> setValueAt(x, y, false));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask init(BinaryMask other) {
         plannedSize = other.getSize();
-        return execute(() -> {
+        execute(() -> {
             setSize(other.getSize());
             assertCompatibleMask(other);
             combine(other);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask init(FloatMask other, float threshold) {
         plannedSize = other.getSize();
-        return execute(() -> {
+        execute(() -> {
             setSize(other.getSize());
             assertCompatibleMask(other);
             combine(other, threshold);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask randomize(float density) {
@@ -139,24 +136,24 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask randomize(float density, SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             modifyWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask flipValues(float density) {
-        return execute(() -> {
+        execute(() -> {
             modifyWithSymmetry(SymmetryType.SPAWN, (x, y) -> getValueAt(x, y) && random.nextFloat() < density);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
 
     public BinaryMask randomWalk(int numWalkers, int numSteps) {
-        return execute(() -> {
+        execute(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
                 int minXBound = getMinXBound(SymmetryType.TERRAIN);
@@ -186,13 +183,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask randomWalkWithBrush(Vector2f start, String brushName, int size, int numberOfUses,
                                           float minValue, float maxValue, int maxStepSize) {
-        return execute(() -> {
+        execute(() -> {
             Vector2f location = new Vector2f(start);
             BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                     .setSize(size)).convertToBinaryMask(minValue, maxValue);
@@ -203,13 +200,13 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 location.add(dx, dy);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
                                           float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             Vector2f location = new Vector2f(start);
             BinaryMask brush = ((FloatMask) loadBrush(brushName, random.nextLong())
                     .setSize(size)).convertToBinaryMask(minValue, maxValue);
@@ -220,12 +217,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 location.add(dx, dy);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             List<Vector2f> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2f(start));
@@ -263,24 +260,24 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
                 List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
                 path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask progressiveWalk(int numWalkers, int numSteps) {
-        return execute(() -> {
+        execute(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN)) + getMinXBound(SymmetryType.TERRAIN);
                 int y = random.nextInt(getMaxYBound(x, SymmetryType.TERRAIN) - getMinYBound(x, SymmetryType.TERRAIN) + 1) + getMinYBound(x, SymmetryType.TERRAIN);
@@ -309,12 +306,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask space(float minSpacing, float maxSpacing) {
-        return execute(() -> {
+        execute(() -> {
             List<Vector2f> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
             List<Vector2f> symmetricCoordinates = new ArrayList<>();
             coordinates.forEach(coordinate -> symmetricCoordinates.addAll(getSymmetryPoints(coordinate, SymmetryType.SPAWN)));
@@ -322,20 +319,20 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             clear();
             fillCoordinates(coordinates, true);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask invert() {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> !getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask inflate(float radius) {
-        return execute(() -> {
+        execute(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
                 if (getValueAt(x, y) && isEdge(x, y)) {
@@ -344,12 +341,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             });
             modify((x, y) -> maskCopy[x][y] || getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask deflate(float radius) {
-        return execute(() -> {
+        execute(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
                 if (!getValueAt(x, y) && isEdge(x, y)) {
@@ -359,8 +356,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             modify((x, y) -> !maskCopy[x][y] && getValueAt(x, y));
 
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     private void markInRadius(float radius, Boolean[][] maskCopy, int x, int y, boolean value) {
@@ -379,7 +376,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask cutCorners() {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             Boolean[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -399,18 +396,18 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             });
             mask = maskCopy;
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask acid(float strength, float size) {
-        return execute(() -> {
+        execute(() -> {
             BinaryMask holes = new BinaryMask(getSize(), random.nextLong(), symmetrySettings, getName() + "holes");
             holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
             minus(holes);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask dilute(float strength) {
@@ -422,7 +419,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask dilute(float strength, SymmetryType symmetryType, int count) {
-        return execute(() -> {
+        execute(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
@@ -434,8 +431,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 mask = newMask;
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask erode(float strength) {
@@ -447,7 +444,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask erode(float strength, SymmetryType symmetryType, int count) {
-        return execute(() -> {
+        execute(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
@@ -459,18 +456,18 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 mask = newMask;
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask outline() {
-        return execute(() -> {
+        execute(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> maskCopy[x][y] = isEdge(x, y));
             mask = maskCopy;
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask interpolate() {
@@ -482,46 +479,46 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask blur(int radius, float density) {
-        return execute(() -> {
+        execute(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask replace(BinaryMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify(other::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask combine(BinaryMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> getValueAt(x, y) || other.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask combine(FloatMask other, float minValue) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> other.getValueAt(x, y) >= minValue);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask combine(FloatMask other, float minValue, float maxValue) {
-        return execute(() -> {
+        execute(() -> {
             modify((x, y) -> other.getValueAt(x, y) >= minValue && other.getValueAt(x, y) <= maxValue);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     private BinaryMask combineWithOffset(BinaryMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
@@ -529,7 +526,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     private BinaryMask combineWithOffset(BinaryMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             int otherSize = other.getSize();
             int smallerSize = StrictMath.min(size, otherSize);
@@ -563,42 +560,42 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                     }
                 });
             }
-            return this;
         }, other);
+        return this;
     }
 
     private BinaryMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location, boolean wrapEdges) {
-        return execute(() -> {
+        execute(() -> {
             combineWithOffset(other.convertToBinaryMask(minValue, maxValue), location, true, wrapEdges);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
-        return execute(() -> {
+        execute(() -> {
             FloatMask brush = (FloatMask) loadBrush(brushName, random.nextLong()).setSize(size);
             combineWithOffset(brush, minValue, maxValue, location, false);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask intersect(BinaryMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> getValueAt(x, y) && other.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask minus(BinaryMask other) {
-        return execute(() -> {
+        execute(() -> {
             assertCompatibleMask(other);
             modify((x, y) -> getValueAt(x, y) && !other.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-            return this;
         }, other);
+        return this;
     }
 
     public BinaryMask limitToSymmetryRegion() {
@@ -606,24 +603,24 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask limitToSymmetryRegion(SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
             modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask limitToCenteredCircle(float circleRadius) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             BinaryMask symmetryLimit = new BinaryMask(size, random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
             symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
             intersect(symmetryLimit);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillSides(int extent, boolean value) {
@@ -631,7 +628,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillSides(int extent, boolean value, SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case Z:
@@ -649,8 +646,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             }
             applySymmetry(symmetryType);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillCenter(int extent, boolean value) {
@@ -658,7 +655,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillCenter(int extent, boolean value, SymmetryType symmetryType) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case POINT2:
@@ -713,8 +710,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             }
             applySymmetry(SymmetryType.SPAWN);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillCircle(Vector3f v, float radius, boolean value) {
@@ -730,7 +727,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillArc(float x, float y, float startAngle, float endAngle, float radius, boolean value) {
-        return execute(() -> {
+        execute(() -> {
             float dx;
             float dy;
             float radius2 = (radius + .5f) * (radius + .5f);
@@ -746,8 +743,8 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillSquare(Vector2f v, int extent, boolean value) {
@@ -767,13 +764,11 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillRectFromPoints(int x1, int x2, int z1, int z2, boolean value) {
-        return execute(() -> {
-            int smallX = StrictMath.min(x1, x2);
-            int bigX = StrictMath.max(x1, x2);
-            int smallZ = StrictMath.min(z1, z2);
-            int bigZ = StrictMath.max(z1, z2);
-            return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
-        });
+        int smallX = StrictMath.min(x1, x2);
+        int bigX = StrictMath.max(x1, x2);
+        int smallZ = StrictMath.min(z1, z2);
+        int bigZ = StrictMath.max(z1, z2);
+        return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
     }
 
     public BinaryMask fillParallelogram(Vector2f v, int width, int height, int xSlope, int ySlope, boolean value) {
@@ -781,7 +776,7 @@ public strictfp class BinaryMask extends Mask<Boolean> {
     }
 
     public BinaryMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
-        return execute(() -> {
+        execute(() -> {
             for (int px = 0; px < width; px++) {
                 for (int py = 0; py < height; py++) {
                     int calcX = x + px + py * xSlope;
@@ -792,12 +787,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillDiagonal(int extent, boolean inverted, boolean value) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             for (int cx = -extent; cx < extent; cx++) {
                 for (int y = 0; y < size; y++) {
@@ -813,12 +808,12 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillEdge(int rimWidth, boolean value) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             for (int a = 0; a < rimWidth; a++) {
                 for (int b = 0; b < size - rimWidth; b++) {
@@ -829,48 +824,48 @@ public strictfp class BinaryMask extends Mask<Boolean> {
                 }
             }
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillShape(Vector2f location) {
-        return execute(() -> {
+        execute(() -> {
             fillCoordinates(getShapeCoordinates(location), !getValueAt(location));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillCoordinates(Collection<Vector2f> coordinates, boolean value) {
-        return execute(() -> {
+        execute(() -> {
             coordinates.forEach(location -> setValueAt(location, value));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask fillGaps(int minDist) {
-        return execute(() -> {
+        execute(() -> {
             BinaryMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             combine(filledGaps);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask widenGaps(int minDist) {
-        return execute(() -> {
+        execute(() -> {
             BinaryMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             minus(filledGaps);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask removeAreasSmallerThan(int minArea) {
-        return execute(() -> {
+        execute(() -> {
             int size = getSize();
             Set<Vector2f> seen = new HashSet<>(size * size * 2);
             applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
@@ -886,33 +881,33 @@ public strictfp class BinaryMask extends Mask<Boolean> {
             });
             applySymmetry(SymmetryType.SPAWN);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask removeAreasBiggerThan(int maxArea) {
-        return execute(() -> {
+        execute(() -> {
             minus(copy().removeAreasSmallerThan(maxArea));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
-        return execute(() -> {
+        execute(() -> {
             removeAreasSmallerThan(minSize);
             removeAreasBiggerThan(maxSize);
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public BinaryMask removeAreasInSizeRange(int minSize, int maxSize) {
-        return execute(() -> {
+        execute(() -> {
             minus(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
             VisualDebugger.visualizeMask(this);
-            return this;
         });
+        return this;
     }
 
     public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location) {

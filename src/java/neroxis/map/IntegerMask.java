@@ -20,7 +20,7 @@ public strictfp class IntegerMask extends Mask<Integer> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        VisualDebugger.visualizeMask(this);
+        execute(() -> VisualDebugger.visualizeMask(this));
     }
 
     public IntegerMask(IntegerMask sourceMask, Long seed) {
@@ -35,7 +35,6 @@ public strictfp class IntegerMask extends Mask<Integer> {
         execute(() -> {
             modify(sourceMask::getValueAt);
             VisualDebugger.visualizeMask(this);
-            return this;
         }, sourceMask);
     }
 
@@ -56,17 +55,21 @@ public strictfp class IntegerMask extends Mask<Integer> {
     }
 
     public IntegerMask blur(int radius) {
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> StrictMath.round(calculateAreaAverage(radius, x, y, innerCount)));
-        VisualDebugger.visualizeMask(this);
+        execute(() -> {
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> StrictMath.round(calculateAreaAverage(radius, x, y, innerCount)));
+            VisualDebugger.visualizeMask(this);
+        });
         return this;
     }
 
     public IntegerMask blur(int radius, BinaryMask limiter) {
-        assertCompatibleMask(limiter);
-        int[][] innerCount = getInnerCount();
-        modify((x, y) -> StrictMath.round(limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) : getValueAt(x, y)));
-        VisualDebugger.visualizeMask(this);
+        execute(() -> {
+            assertCompatibleMask(limiter);
+            int[][] innerCount = getInnerCount();
+            modify((x, y) -> StrictMath.round(limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) : getValueAt(x, y)));
+            VisualDebugger.visualizeMask(this);
+        });
         return this;
     }
 
