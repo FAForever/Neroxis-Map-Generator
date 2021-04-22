@@ -19,7 +19,7 @@ public strictfp class HydroPlacer {
         random = new Random(seed);
     }
 
-    public void placeHydros(BooleanMask spawnMask) {
+    public void placeHydros(int hydroCount, BooleanMask spawnMask) {
         map.getHydros().clear();
         int numSymPoints = spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
 
@@ -34,7 +34,7 @@ public strictfp class HydroPlacer {
 
         map.getSpawns().forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 30f, false));
 
-        int numHydrosLeft = (map.getHydroCountInit() - map.getHydroCount()) / numSymPoints;
+        int numHydrosLeft = (hydroCount - map.getHydroCount()) / numSymPoints;
 
         placeIndividualHydros(spawnMask, numHydrosLeft, hydroSpacing);
     }

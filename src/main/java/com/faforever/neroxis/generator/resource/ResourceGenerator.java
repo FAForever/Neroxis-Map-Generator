@@ -24,4 +24,6 @@ public abstract strictfp class ResourceGenerator extends ElementGenerator {
 
     public abstract void placeResources();
 
+    protected abstract int getMexCount();
+
 }

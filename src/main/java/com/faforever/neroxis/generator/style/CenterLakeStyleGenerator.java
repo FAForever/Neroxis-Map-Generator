@@ -13,7 +13,7 @@ public strictfp class CenterLakeStyleGenerator extends StyleGenerator {
         name = "CENTER_LAKE";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .5f)
-                .plateauDensity(0, .5f)
+                .rampDensity(.75f, 1f)
                 .mexDensity(.25f, 1)
                 .mapSizes(512, 1024)
                 .build();

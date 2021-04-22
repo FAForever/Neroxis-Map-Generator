@@ -61,9 +61,6 @@ public strictfp class SCMap {
     private String description = "";
     private String terrainShaderPath = "TTerrainXP";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
-    private int spawnCountInit;
-    private int mexCountInit;
-    private int hydroCountInit;
     private boolean generatePreview;
     private boolean isUnexplored;
     private float noRushRadius = 50;
@@ -92,12 +89,9 @@ public strictfp class SCMap {
     private int cartographicMapLandStartColor = new Color(255, 255, 255).getRGB();
     private int cartographicMapLandEndColor = new Color(0, 0, 0).getRGB();
 
-    public SCMap(int size, int spawnCount, int mexCount, int hydroCount, Biome biome) {
+    public SCMap(int size, Biome biome) {
         this.size = size;
         this.biome = biome;
-        this.spawnCountInit = spawnCount;
-        this.mexCountInit = mexCount;
-        this.hydroCountInit = hydroCount;
         spawns = new ArrayList<>();
         mexes = new ArrayList<>();
         hydros = new ArrayList<>();

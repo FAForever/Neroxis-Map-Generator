@@ -34,8 +34,43 @@ public class BasicResourceGenerator extends ResourceGenerator {
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
         Util.timedRun("com.faforever.neroxis.generator", "generateResources", () -> {
-            mexPlacer.placeMexes(resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            hydroPlacer.placeHydros(resourceMask.getFinalMask().deflate(8));
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
+            hydroPlacer.placeHydros(mapParameters.getHydroCount(), resourceMask.getFinalMask().deflate(8));
         });
+    }
+
+    @Override
+    protected int getMexCount() {
+        int mexCount;
+        int mapSize = mapParameters.getMapSize();
+        int spawnCount = mapParameters.getSpawnCount();
+        float mexDensity = mapParameters.getMexDensity();
+        float mexMultiplier = 1f;
+        if (spawnCount <= 2) {
+            mexCount = (int) (14 + 18 * mexDensity);
+        } else if (spawnCount <= 4) {
+            mexCount = (int) (9 + 8 * mexDensity);
+        } else if (spawnCount <= 10) {
+            mexCount = (int) (8 + 7 * mexDensity);
+        } else if (spawnCount <= 12) {
+            mexCount = (int) (6 + 7 * mexDensity);
+        } else {
+            mexCount = (int) (6 + 7 * mexDensity);
+        }
+        if (mapSize < 512) {
+            mexMultiplier = .75f;
+        } else if (mapSize > 512) {
+            if (spawnCount <= 4) {
+                mexMultiplier = 1.75f;
+            } else if (spawnCount <= 6) {
+                mexMultiplier = 1.5f;
+            } else if (spawnCount <= 10) {
+                mexMultiplier = 1.35f;
+            } else {
+                mexMultiplier = 1.25f;
+            }
+        }
+        mexCount *= mexMultiplier;
+        return mexCount * spawnCount;
     }
 }

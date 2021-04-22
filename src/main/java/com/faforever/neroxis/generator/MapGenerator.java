@@ -46,7 +46,7 @@ public strictfp class MapGenerator {
     private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
             new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
             new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
-            new HighReclaimStyleGenerator(), new TestStyleGenerator()));
+            new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new TestStyleGenerator()));
     private final List<StyleGenerator> productionStyles = mapStyles.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     //read from cli args
@@ -107,6 +107,7 @@ public strictfp class MapGenerator {
             System.out.println("Seed: " + generator.seed);
             System.out.println(generator.mapStyle.mapParameters.toString());
             System.out.println("Style: " + generator.mapStyle.getName());
+            System.out.println(generator.mapStyle.generatorsToString());
             System.out.println("Done");
             if (generator.previewFolder != null) {
                 SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);
@@ -549,12 +550,14 @@ public strictfp class MapGenerator {
             MapExporter.exportMap(folderPath, map, !tournamentStyle);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
-            startTime = System.currentTimeMillis();
-            Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
-            SCMapExporter.exportSCMapString(folderPath, mapName, map);
-            Pipeline.toFile(folderPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
-            toFile(folderPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
-            System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
+            if (!tournamentStyle && Util.DEBUG) {
+                startTime = System.currentTimeMillis();
+                Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
+                SCMapExporter.exportSCMapString(folderPath, mapName, map);
+                Pipeline.toFile(folderPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+                toFile(folderPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
+                System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -618,7 +621,6 @@ public strictfp class MapGenerator {
     }
 
     public void toFile(Path path) throws IOException {
-
         Files.deleteIfExists(path);
         File outFile = path.toFile();
         boolean status = outFile.createNewFile();
@@ -626,7 +628,8 @@ public strictfp class MapGenerator {
             FileOutputStream out = new FileOutputStream(outFile);
             String summaryString = "Seed: " + seed +
                     "\n" + mapParameters.toString() +
-                    "\nStyle: " + mapStyle.getName();
+                    "\nStyle: " + mapStyle.getName() +
+                    "\n" + mapStyle.generatorsToString();
             out.write(summaryString.getBytes());
             out.flush();
             out.close();

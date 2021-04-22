@@ -243,12 +243,11 @@ public strictfp class MapPopulator {
 
         if (populateSpawns) {
             if (spawnCount > 0) {
-                map.setSpawnCountInit(spawnCount);
                 SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
                 float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BooleanMask spawns = land.copy();
                 spawns.intersect(passable).minus(ramps).deflate(16);
-                spawnPlacer.placeSpawns(spawns, spawnSeparation);
+                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation);
             } else {
                 map.getSpawns().clear();
             }
@@ -265,10 +264,9 @@ public strictfp class MapPopulator {
 
         if (populateMexes) {
             if (mexCountPerPlayer > 0) {
-                map.setMexCountInit(mexCountPerPlayer * map.getSpawnCount());
                 MexPlacer mexPlacer = new MexPlacer(map, random.nextLong());
 
-                mexPlacer.placeMexes(resourceMask, waterResourceMask);
+                mexPlacer.placeMexes(mexCountPerPlayer * map.getSpawnCount(), resourceMask, waterResourceMask);
             } else {
                 map.getMexes().clear();
             }
@@ -276,10 +274,9 @@ public strictfp class MapPopulator {
 
         if (populateHydros) {
             if (hydroCountPerPlayer > 0) {
-                map.setMexCountInit(hydroCountPerPlayer * map.getSpawnCount());
                 HydroPlacer hydroPlacer = new HydroPlacer(map, random.nextLong());
 
-                hydroPlacer.placeHydros(resourceMask.deflate(4));
+                hydroPlacer.placeHydros(hydroCountPerPlayer * map.getSpawnCount(), resourceMask.deflate(4));
             } else {
                 map.getHydros().clear();
             }

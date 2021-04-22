@@ -48,9 +48,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected void initialize(MapParameters mapParameters, long seed) {
         this.mapParameters = mapParameters;
         random = new Random(seed);
-        map = new SCMap(mapParameters.getMapSize(), mapParameters.getSpawnCount(),
-                getMexCount(), mapParameters.getHydroCount(),
-                mapParameters.getBiome());
+        map = new SCMap(mapParameters.getMapSize(), mapParameters.getBiome());
 
         Pipeline.reset();
 
@@ -90,9 +88,8 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     @Override
     public void setupPipeline() {
-        Util.timedRun("com.faforever.neroxis.generator", "placeSpawns", () -> {
-            spawnPlacer.placeSpawns(spawnSeparation, teamSeparation, mapParameters.getSymmetrySettings());
-        });
+        Util.timedRun("com.faforever.neroxis.generator", "placeSpawns", () ->
+                spawnPlacer.placeSpawns(mapParameters.getSpawnCount(), spawnSeparation, teamSeparation, mapParameters.getSymmetrySettings()));
 
         Util.timedRun("com.faforever.neroxis.generator", "selectGenerators", () -> {
             terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, mapParameters, terrainGenerator);
@@ -127,43 +124,15 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         });
     }
 
-    protected int getMexCount() {
-        int mexCount;
-        int mapSize = mapParameters.getMapSize();
-        int spawnCount = mapParameters.getSpawnCount();
-        float mexDensity = mapParameters.getMexDensity();
-        float mexMultiplier = 1f;
-        if (spawnCount <= 2) {
-            mexCount = (int) (10 + 20 * mexDensity);
-        } else if (spawnCount <= 4) {
-            mexCount = (int) (9 + 8 * mexDensity);
-        } else if (spawnCount <= 10) {
-            mexCount = (int) (8 + 7 * mexDensity);
-        } else if (spawnCount <= 12) {
-            mexCount = (int) (6 + 7 * mexDensity);
-        } else {
-            mexCount = (int) (6 + 7 * mexDensity);
-        }
-        if (mapSize < 512) {
-            mexMultiplier = .75f;
-        } else if (mapSize > 512) {
-            if (spawnCount <= 4) {
-                mexMultiplier = 1.75f;
-            } else if (spawnCount <= 6) {
-                mexMultiplier = 1.5f;
-            } else if (spawnCount <= 10) {
-                mexMultiplier = 1.35f;
-            } else {
-                mexMultiplier = 1.25f;
-            }
-        }
-        mexCount *= mexMultiplier;
-        return mexCount * spawnCount;
+    protected void setHeights() {
+        Util.timedRun("com.faforever.neroxis.generator", "setPlacements", () -> map.setHeights());
     }
 
-    protected void setHeights() {
-        Util.timedRun("com.faforever.neroxis.generator", "setPlacements", () -> {
-            map.setHeights();
-        });
+    public String generatorsToString() {
+        return "TerrainGenerator: " + terrainGenerator.getClass().getSimpleName() +
+                "\nTextureGenerator: " + textureGenerator.getClass().getSimpleName() +
+                "\nResourceGenerator: " + resourceGenerator.getClass().getSimpleName() +
+                "\nPropGenerator: " + propGenerator.getClass().getSimpleName() +
+                "\nDecalGenerator: " + decalGenerator.getClass().getSimpleName();
     }
 }

@@ -181,7 +181,7 @@ public strictfp class SCMapImporter {
 
         in.close();
 
-        SCMap map = new SCMap(widthInt, 0, 0, 0, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), new DecalMaterials(), mapWaterSettings, mapLightingSettings));
+        SCMap map = new SCMap(widthInt, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), new DecalMaterials(), mapWaterSettings, mapLightingSettings));
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);
