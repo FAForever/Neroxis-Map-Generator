@@ -11,15 +11,15 @@ import java.util.ArrayList;
 
 public class EnemyCivPropGenerator extends BasicPropGenerator {
 
-    protected BinaryMask baseMask;
-    protected BinaryMask noBases;
+    protected BooleanMask baseMask;
+    protected BooleanMask noBases;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        baseMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
-        noBases = new BinaryMask(1, random.nextLong(), symmetrySettings);
+        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
+        noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
                 army17.addGroup(army17Initial);
                 map.addArmy(army17);
                 try {
-                    unitPlacer.placeBases(((BinaryMask) baseMask.getFinalMask()).minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                    unitPlacer.placeBases(baseMask.getFinalMask().minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
                 } catch (IOException e) {
                     System.out.println("Could not generate bases due to lua parsing error");
                     e.printStackTrace();

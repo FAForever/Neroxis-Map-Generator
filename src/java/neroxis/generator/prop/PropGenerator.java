@@ -5,7 +5,7 @@ import neroxis.generator.ElementGenerator;
 import neroxis.generator.placement.PropPlacer;
 import neroxis.generator.placement.UnitPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 
@@ -13,9 +13,9 @@ import neroxis.map.SCMap;
 public abstract strictfp class PropGenerator extends ElementGenerator {
     protected UnitPlacer unitPlacer;
     protected PropPlacer propPlacer;
-    protected BinaryMask impassable;
-    protected BinaryMask unbuildable;
-    protected BinaryMask passableLand;
+    protected BooleanMask impassable;
+    protected BooleanMask unbuildable;
+    protected BooleanMask passableLand;
 
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters);

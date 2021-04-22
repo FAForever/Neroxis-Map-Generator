@@ -8,19 +8,19 @@ import neroxis.util.Util;
 
 public class BasicPropGenerator extends PropGenerator {
 
-    protected BinaryMask treeMask;
-    protected BinaryMask cliffRockMask;
-    protected BinaryMask fieldStoneMask;
-    protected BinaryMask noProps;
+    protected BooleanMask treeMask;
+    protected BooleanMask cliffRockMask;
+    protected BooleanMask fieldStoneMask;
+    protected BooleanMask noProps;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        treeMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "treeMask", true);
-        cliffRockMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", true);
-        fieldStoneMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", true);
-        noProps = new BinaryMask(1, random.nextLong(), symmetrySettings, "noProps");
+        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", true);
+        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", true);
+        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", true);
+        noProps = new BooleanMask(1, random.nextLong(), symmetrySettings, "noProps");
     }
 
     @Override
@@ -52,7 +52,7 @@ public class BasicPropGenerator extends PropGenerator {
         generateExclusionZones(noProps, 30, 2, 8);
     }
 
-    protected void generateExclusionZones(BinaryMask mask, float spawnSpacing, float mexSpacing, float hydroSpacing) {
+    protected void generateExclusionZones(BooleanMask mask, float spawnSpacing, float mexSpacing, float hydroSpacing) {
         map.getSpawns().forEach(spawn -> mask.fillCircle(spawn.getPosition(), spawnSpacing, true));
         map.getMexes().forEach(mex -> mask.fillCircle(mex.getPosition(), mexSpacing, true));
         map.getHydros().forEach(hydro -> mask.fillCircle(hydro.getPosition(), hydroSpacing, true));
@@ -68,9 +68,9 @@ public class BasicPropGenerator extends PropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
-            propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }
 

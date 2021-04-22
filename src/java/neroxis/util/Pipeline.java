@@ -25,7 +25,7 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
-    public static void add(Mask<?> executingMask, List<Mask<?>> maskDependencies, Runnable function) {
+    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Runnable function) {
         int index = pipeline.size();
         if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -89,15 +89,15 @@ public strictfp class Pipeline {
         return started.isDone();
     }
 
-    public static void await(Mask<?>... masks) {
+    public static void await(Mask<?, ?>... masks) {
         getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
-        for (Mask<?> mask : masks) {
+        for (Mask<?, ?> mask : masks) {
             mask.setProcessing(false);
             mask.setParallel(false);
         }
     }
 
-    public static <T extends Mask<?>> List<Entry> getDependencyList(List<T> requiredMasks) {
+    public static <T extends Mask<?, ?>> List<Entry> getDependencyList(List<T> requiredMasks) {
         List<Entry> res = new ArrayList<>();
 
         for (T requiredMask : requiredMasks) {
@@ -157,12 +157,12 @@ public strictfp class Pipeline {
 
     @Getter
     public static strictfp class Entry {
-        private final Mask<?> executingMask;
+        private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
         private final int index;
 
-        public Entry(int index, Mask<?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future) {
+        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies = new HashSet<>(dependencies);

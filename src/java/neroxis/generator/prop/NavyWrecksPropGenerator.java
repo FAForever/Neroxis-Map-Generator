@@ -11,9 +11,9 @@ import java.util.ArrayList;
 
 public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
-    protected BinaryMask t2NavyWreckMask;
-    protected BinaryMask navyFactoryWreckMask;
-    protected BinaryMask noWrecks;
+    protected BooleanMask t2NavyWreckMask;
+    protected BooleanMask navyFactoryWreckMask;
+    protected BooleanMask noWrecks;
 
     public NavyWrecksPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
@@ -27,9 +27,9 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        t2NavyWreckMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", true);
-        navyFactoryWreckMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask", true);
-        noWrecks = new BinaryMask(1, random.nextLong(), symmetrySettings);
+        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", true);
+        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask", true);
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
@@ -65,8 +65,8 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                unitPlacer.placeUnits(((BinaryMask) t2NavyWreckMask.getFinalMask()).minus(noWrecks), UnitPlacer.T2_Navy, army17, army17Wreckage, 128f);
-                unitPlacer.placeUnits(((BinaryMask) navyFactoryWreckMask.getFinalMask()).minus(noWrecks), UnitPlacer.Navy_Factory, army17, army17Wreckage, 256f);
+                unitPlacer.placeUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T2_Navy, army17, army17Wreckage, 128f);
+                unitPlacer.placeUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.Navy_Factory, army17, army17Wreckage, 256f);
             });
         }
     }

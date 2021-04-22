@@ -14,7 +14,7 @@ import neroxis.generator.terrain.BasicTerrainGenerator;
 import neroxis.generator.terrain.TerrainGenerator;
 import neroxis.generator.texture.BasicTextureGenerator;
 import neroxis.generator.texture.TextureGenerator;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 import neroxis.util.Pipeline;
@@ -116,7 +116,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         decalGenerator.setupPipeline();
     }
 
-    protected void generateAIMarkers(BinaryMask passable, BinaryMask passableLand, BinaryMask passableWater) {
+    protected void generateAIMarkers(BooleanMask passable, BooleanMask passableLand, BooleanMask passableWater) {
         Pipeline.await(passable, passableLand, passableWater);
         Util.timedRun("neroxis.generator", "placeAIMarkers", () -> {
             CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));

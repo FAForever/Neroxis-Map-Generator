@@ -1,6 +1,6 @@
 package neroxis.generator.placement;
 
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.Decal;
 import neroxis.map.SCMap;
 import neroxis.map.SymmetryType;
@@ -21,9 +21,9 @@ public strictfp class DecalPlacer {
         random = new Random(seed);
     }
 
-    public void placeDecals(BinaryMask spawnMask, String[] paths, float minSeparation, float maxSeparation, float minScale, float maxScale) {
+    public void placeDecals(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation, float minScale, float maxScale) {
         if (paths != null && paths.length > 0) {
-            BinaryMask spawnMaskCopy = new BinaryMask(spawnMask, random.nextLong(), "spawnMaskCopy");
+            BooleanMask spawnMaskCopy = new BooleanMask(spawnMask, random.nextLong(), "spawnMaskCopy");
             spawnMaskCopy.limitToSymmetryRegion();
             LinkedList<Vector2f> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {

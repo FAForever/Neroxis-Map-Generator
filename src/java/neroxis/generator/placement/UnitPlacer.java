@@ -62,7 +62,7 @@ public strictfp class UnitPlacer {
         random = new Random(seed);
     }
 
-    public void placeBases(BinaryMask spawnMask, String[] templates, Army army, Group group, float separation) throws IOException {
+    public void placeBases(BooleanMask spawnMask, String[] templates, Army army, Group group, float separation) throws IOException {
         if (templates != null && templates.length > 0) {
             String luaFile = templates[random.nextInt(templates.length)];
             if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
@@ -87,11 +87,11 @@ public strictfp class UnitPlacer {
         }
     }
 
-    public void placeUnits(BinaryMask spawnMask, String[] types, Army army, Group group, float separation) {
+    public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float separation) {
         placeUnits(spawnMask, types, army, group, separation, separation);
     }
 
-    public void placeUnits(BinaryMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
+    public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
         if (types != null && types.length > 0) {
             spawnMask.limitToSymmetryRegion();
             LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);

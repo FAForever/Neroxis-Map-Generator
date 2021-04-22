@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
 
-    protected BinaryMask landWreckMask;
-    protected BinaryMask noWrecks;
+    protected BooleanMask landWreckMask;
+    protected BooleanMask noWrecks;
 
     public LargeBattlePropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
@@ -26,8 +26,8 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        landWreckMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
-        noWrecks = new BinaryMask(1, random.nextLong(), symmetrySettings);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected void generateUnitExclusionMasks() {
-        noWrecks.init(((BinaryMask) passableLand.getFinalMask()).invert());
+        noWrecks.init(passableLand.getFinalMask().invert());
         generateExclusionZones(noWrecks, 128, 4, 32);
     }
 
@@ -63,7 +63,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                BinaryMask placementMask = ((BinaryMask) landWreckMask.getFinalMask()).minus(noWrecks);
+                BooleanMask placementMask = landWreckMask.getFinalMask().minus(noWrecks);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 2f, 8f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 8f, 12f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T3_Land, army17, army17Wreckage, 30f, 40f);

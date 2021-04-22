@@ -4,15 +4,15 @@ import neroxis.generator.ElementGenerator;
 import neroxis.generator.placement.HydroPlacer;
 import neroxis.generator.placement.MexPlacer;
 import neroxis.generator.terrain.TerrainGenerator;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 
 public abstract strictfp class ResourceGenerator extends ElementGenerator {
     protected MexPlacer mexPlacer;
     protected HydroPlacer hydroPlacer;
-    protected BinaryMask unbuildable;
-    protected BinaryMask passableLand;
+    protected BooleanMask unbuildable;
+    protected BooleanMask passableLand;
 
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters);

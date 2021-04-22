@@ -2,7 +2,6 @@ package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
 import neroxis.generator.ParameterConstraints;
-import neroxis.map.BinaryMask;
 import neroxis.map.SymmetryType;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
@@ -41,9 +40,9 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
-            propPlacer.placeProps(((BinaryMask) fieldStoneMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }
 

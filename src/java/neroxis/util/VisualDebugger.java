@@ -1,6 +1,6 @@
 package neroxis.util;
 
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.FloatMask;
 import neroxis.map.Mask;
 
@@ -25,7 +25,7 @@ public strictfp class VisualDebugger {
 
     private static Map<Integer, String[]> drawMasksWhitelist = null;
 
-    public static void whitelistMask(Mask<?> binaryOrFloatMask, String name, String parentClass) {
+    public static void whitelistMask(Mask<?, ?> binaryOrFloatMask, String name, String parentClass) {
         if (drawMasksWhitelist == null) {
             drawMasksWhitelist = new HashMap<>();
         }
@@ -39,15 +39,15 @@ public strictfp class VisualDebugger {
         }
     }
 
-    public static void visualizeMask(Mask<?> mask) {
+    public static void visualizeMask(Mask<?, ?> mask) {
         if (mask instanceof FloatMask) {
             visualizeMask((FloatMask) mask);
-        } else if (mask instanceof BinaryMask) {
-            visualizeMask((BinaryMask) mask);
+        } else if (mask instanceof BooleanMask) {
+            visualizeMask((BooleanMask) mask);
         }
     }
 
-    public static void visualizeMask(BinaryMask mask) {
+    public static void visualizeMask(BooleanMask mask) {
         if (dontRecord(mask)) {
             return;
         }
@@ -72,7 +72,7 @@ public strictfp class VisualDebugger {
         }, mask.getSize(), mask.hashCode());
     }
 
-    private static boolean dontRecord(Mask<?> mask) {
+    private static boolean dontRecord(Mask<?, ?> mask) {
         if (!ENABLED) {
             return true;
         }

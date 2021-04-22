@@ -1,7 +1,7 @@
 package neroxis.generator.decal;
 
 import neroxis.generator.terrain.TerrainGenerator;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.MapParameters;
 import neroxis.map.SCMap;
 import neroxis.map.SymmetrySettings;
@@ -9,15 +9,15 @@ import neroxis.util.Pipeline;
 import neroxis.util.Util;
 
 public class BasicDecalGenerator extends DecalGenerator {
-    protected BinaryMask fieldDecal;
-    protected BinaryMask slopeDecal;
+    protected BooleanMask fieldDecal;
+    protected BooleanMask slopeDecal;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        fieldDecal = new BinaryMask(1, random.nextLong(), symmetrySettings, "fieldDecal", true);
-        slopeDecal = new BinaryMask(1, random.nextLong(), symmetrySettings, "slopeDecal", true);
+        fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal", true);
+        slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal", true);
     }
 
     @Override

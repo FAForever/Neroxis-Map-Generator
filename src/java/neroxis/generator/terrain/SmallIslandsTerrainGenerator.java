@@ -31,7 +31,7 @@ public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerato
         int bound = ((int) (mapSize / 16 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 16);
         float maxStepSize = mapSize / 128f;
 
-        BinaryMask islands = new BinaryMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands", true);
+        BooleanMask islands = new BooleanMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands", true);
 
         land.setSize(mapSize + 1);
         map.getSpawns().forEach(spawn -> pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, maxMiddlePoints, bound, (float) StrictMath.PI / 2));

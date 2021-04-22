@@ -166,7 +166,7 @@ public strictfp class MapEvaluator {
         evaluateUnits();
     }
 
-    public static float getLocationListScore(List<Vector3f> locations, Mask<?> mask) {
+    public static float getLocationListScore(List<Vector3f> locations, Mask<?, ?> mask) {
         float locationScore = 0f;
         Set<Vector3f> locationsSet = new HashSet<>(locations);
         while (locationsSet.size() > 0) {
@@ -189,19 +189,19 @@ public strictfp class MapEvaluator {
         return locationScore;
     }
 
-    public static float getMaskScore(Mask<?> mask) {
+    public static float getMaskScore(Mask<?, ?> mask) {
         if (mask instanceof FloatMask) {
             FloatMask difference = (FloatMask) mask.copy();
             difference.startVisualDebugger("diff");
             difference.applySymmetry(SymmetryType.SPAWN, false);
             difference.show();
             return (float) StrictMath.sqrt(difference.subtract((FloatMask) mask).multiply(difference).getSum());
-        } else if (mask instanceof BinaryMask) {
-            BinaryMask difference = (BinaryMask) mask.copy();
+        } else if (mask instanceof BooleanMask) {
+            BooleanMask difference = (BooleanMask) mask.copy();
             difference.startVisualDebugger("diff");
             difference.applySymmetry(SymmetryType.SPAWN, false);
             difference.show();
-            return difference.minus((BinaryMask) mask).getCount();
+            return difference.minus((BooleanMask) mask).getCount();
         }
         throw new IllegalArgumentException("Not a supported Mask type");
     }
@@ -212,9 +212,9 @@ public strictfp class MapEvaluator {
         terrainScore = getMaskScore(heightmapBase);
         System.out.println(String.format("Terrain Score: %.2f", terrainScore));
 
-        FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
+        IntegerMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
         textureScore = 0;
-        for (FloatMask textureMask : texturesMasks) {
+        for (IntegerMask textureMask : texturesMasks) {
             textureScore += getMaskScore(textureMask);
         }
         System.out.println(String.format("Texture Score: %.2f", textureScore));

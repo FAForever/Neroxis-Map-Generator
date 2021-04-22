@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
-    protected BinaryMask landWreckMask;
-    protected BinaryMask noWrecks;
+    protected BooleanMask landWreckMask;
+    protected BooleanMask noWrecks;
 
     public SmallBattlePropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
@@ -25,8 +25,8 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        landWreckMask = new BinaryMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
-        noWrecks = new BinaryMask(1, random.nextLong(), symmetrySettings);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                BinaryMask placementMask = ((BinaryMask) landWreckMask.getFinalMask()).minus(noWrecks);
+                BooleanMask placementMask = landWreckMask.getFinalMask().minus(noWrecks);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 3f, 4f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 5f, 8f);
             });

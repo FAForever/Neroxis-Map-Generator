@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 @Getter
 public abstract strictfp class TerrainGenerator extends ElementGenerator {
     protected FloatMask heightmap;
-    protected BinaryMask impassable;
-    protected BinaryMask unbuildable;
-    protected BinaryMask passable;
-    protected BinaryMask passableLand;
-    protected BinaryMask passableWater;
+    protected BooleanMask impassable;
+    protected BooleanMask unbuildable;
+    protected BooleanMask passable;
+    protected BooleanMask passableLand;
+    protected BooleanMask passableWater;
     protected FloatMask slope;
 
     protected abstract void terrainSetup();
@@ -29,11 +29,11 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
         slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
-        impassable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
-        unbuildable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", true);
-        passable = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
-        passableLand = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
-        passableWater = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
+        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
+        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", true);
+        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
+        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
+        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
     }
 
     public void setHeightmapImage() {
@@ -51,7 +51,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     }
 
     protected void passableSetup() {
-        BinaryMask actualLand = new BinaryMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), random.nextLong(), "actualLand");
+        BooleanMask actualLand = new BooleanMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), random.nextLong(), "actualLand");
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);
@@ -68,7 +68,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         passableWater.deflate(16).fillEdge(8, false);
     }
 
-    protected void connectTeams(BinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
+    protected void connectTeams(BooleanMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
         if (mapParameters.getNumTeams() == 0) {
             return;
         }
@@ -88,7 +88,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void connectTeamsAroundCenter(BinaryMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize,
+    protected void connectTeamsAroundCenter(BooleanMask maskToUse, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize,
                                             int bound) {
         if (mapParameters.getNumTeams() == 0) {
             return;
@@ -114,7 +114,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void connectTeammates(BinaryMask maskToUse, int maxMiddlePoints, int numConnections, float maxStepSize) {
+    protected void connectTeammates(BooleanMask maskToUse, int maxMiddlePoints, int numConnections, float maxStepSize) {
         List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
         if (startTeamSpawns.size() > 1) {
             startTeamSpawns.forEach(startSpawn -> {
@@ -132,7 +132,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void pathInCenterBounds(BinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    protected void pathInCenterBounds(BooleanMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             Vector2f start = new Vector2f(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
             Vector2f end = new Vector2f(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
@@ -142,7 +142,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void pathInEdgeBounds(BinaryMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    protected void pathInEdgeBounds(BooleanMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             int startX = random.nextInt(bound) + (random.nextBoolean() ? 0 : maskToUse.getSize() - bound);
             int startY = random.nextInt(bound) + (random.nextBoolean() ? 0 : maskToUse.getSize() - bound);
@@ -156,7 +156,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         }
     }
 
-    protected void pathAroundPoint(BinaryMask maskToUse, Vector2f start, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    protected void pathAroundPoint(BooleanMask maskToUse, Vector2f start, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             int endX = (int) (random.nextFloat() * bound + start.getX());
             int endY = (int) (random.nextFloat() * bound + start.getY());

@@ -1,7 +1,6 @@
 package neroxis.generator.prop;
 
 import neroxis.biomes.Biome;
-import neroxis.map.BinaryMask;
 import neroxis.map.SymmetryType;
 import neroxis.util.Pipeline;
 import neroxis.util.Util;
@@ -27,7 +26,7 @@ public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGene
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("neroxis.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(((BinaryMask) treeMask.getFinalMask()).minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
         });
     }

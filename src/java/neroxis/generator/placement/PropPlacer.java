@@ -1,6 +1,6 @@
 package neroxis.generator.placement;
 
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.Prop;
 import neroxis.map.SCMap;
 import neroxis.map.SymmetryType;
@@ -21,11 +21,11 @@ public strictfp class PropPlacer {
         random = new Random(seed);
     }
 
-    public void placeProps(BinaryMask spawnMask, String[] paths, float separation) {
+    public void placeProps(BooleanMask spawnMask, String[] paths, float separation) {
         placeProps(spawnMask, paths, separation, separation);
     }
 
-    public void placeProps(BinaryMask spawnMask, String[] paths, float minSeparation, float maxSeparation) {
+    public void placeProps(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation) {
         if (paths != null && paths.length > 0) {
             spawnMask.limitToSymmetryRegion();
             LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);

@@ -11,6 +11,7 @@ import neroxis.util.Vector3f;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -156,7 +157,7 @@ public strictfp class SCMap {
         }
     }
 
-    private static void checkMaskSize(Mask<?> mask, int size) {
+    private static void checkMaskSize(Mask<?, ?> mask, int size) {
         if (mask.getSize() != size) {
             throw new IllegalArgumentException("Image size does not match required size: Image size is " + mask.getSize() +
                     " required size is " + size);
@@ -582,7 +583,7 @@ public strictfp class SCMap {
         textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
     }
 
-    public void setTextureMasksScaled(BufferedImage textureMasks, Mask<Float> mask0, Mask<Float> mask1, Mask<Float> mask2, Mask<Float> mask3) {
+    public void setTextureMasksScaled(BufferedImage textureMasks, FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
         int textureMasksWidth = textureMasks.getWidth();
         checkMaskSize(mask0, textureMasksWidth);
         checkMaskSize(mask1, textureMasksWidth);
@@ -599,7 +600,7 @@ public strictfp class SCMap {
         }
     }
 
-    public void setTextureMasksRaw(BufferedImage textureMasks, FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
+    public void setTextureMasksRaw(BufferedImage textureMasks, IntegerMask mask0, IntegerMask mask1, IntegerMask mask2, IntegerMask mask3) {
         int textureMasksWidth = textureMasks.getWidth();
         checkMaskSize(mask0, textureMasksWidth);
         checkMaskSize(mask1, textureMasksWidth);
@@ -650,15 +651,15 @@ public strictfp class SCMap {
         return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
     }
 
-    public FloatMask[] getTextureMasksRaw(SymmetrySettings symmetrySettings) {
+    public IntegerMask[] getTextureMasksRaw(SymmetrySettings symmetrySettings) {
         int textureMasksLowHeight = textureMasksLow.getHeight();
-        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask0");
-        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask1");
-        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask2");
-        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask3");
+        IntegerMask mask0 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
+        IntegerMask mask1 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
+        IntegerMask mask2 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
+        IntegerMask mask3 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
         for (int y = 0; y < textureMasksLowHeight; y++) {
             for (int x = 0; x < textureMasksLowHeight; x++) {
-                float[] valsLow = new float[4];
+                int[] valsLow = new int[4];
                 textureMasksLow.getRaster().getPixel(x, y, valsLow);
                 mask0.setValueAt(x, y, valsLow[0]);
                 mask1.setValueAt(x, y, valsLow[1]);
@@ -667,13 +668,13 @@ public strictfp class SCMap {
             }
         }
         int textureMasksHighHeight = textureMasksHigh.getHeight();
-        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask4");
-        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask5");
-        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask6");
-        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask7");
+        IntegerMask mask4 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
+        IntegerMask mask5 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
+        IntegerMask mask6 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
+        IntegerMask mask7 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
         for (int y = 0; y < textureMasksHighHeight; y++) {
             for (int x = 0; x < textureMasksHighHeight; x++) {
-                float[] valsHigh = new float[4];
+                int[] valsHigh = new int[4];
                 textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
                 mask4.setValueAt(x, y, valsHigh[0]);
                 mask5.setValueAt(x, y, valsHigh[1]);
@@ -681,7 +682,7 @@ public strictfp class SCMap {
                 mask7.setValueAt(x, y, valsHigh[3]);
             }
         }
-        return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
+        return new IntegerMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
     }
 
     private float convertToScaledTextureValue(float value) {
@@ -692,24 +693,18 @@ public strictfp class SCMap {
         return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
     }
 
-    public void setImageFromMask(BufferedImage image, FloatMask mask) {
-        checkMaskSize(mask, image.getHeight());
-        int maskSize = mask.getSize();
-        for (int y = 0; y < maskSize; y++) {
-            for (int x = 0; x < maskSize; x++) {
-                image.setRGB(x, y, StrictMath.round(mask.getValueAt(x, y)));
-            }
-        }
+    public void setImageFromMask(BufferedImage image, IntegerMask mask) {
+        int imageSize = image.getHeight();
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        checkMaskSize(mask, imageSize);
+        mask.apply((x, y) -> imageBuffer.setElem(x + y * imageSize, mask.getValueAt(x, y)));
     }
 
-    public FloatMask getMaskFromImage(BufferedImage image, SymmetrySettings symmetrySettings) {
-        FloatMask mask = new FloatMask(image.getHeight(), null, symmetrySettings, "image");
-        int maskSize = mask.getSize();
-        for (int y = 0; y < maskSize; y++) {
-            for (int x = 0; x < maskSize; x++) {
-                mask.setValueAt(x, y, (float) image.getRGB(x, y));
-            }
-        }
+    public IntegerMask getMaskFromImage(BufferedImage image, SymmetrySettings symmetrySettings) {
+        int imageSize = image.getHeight();
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        IntegerMask mask = new IntegerMask(imageSize, null, symmetrySettings);
+        mask.modify((x, y) -> imageBuffer.getElem(x + y * imageSize));
         return mask;
     }
 

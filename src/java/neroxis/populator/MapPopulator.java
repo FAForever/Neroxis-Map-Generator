@@ -53,8 +53,8 @@ public strictfp class MapPopulator {
     private boolean keepLayer7;
     private boolean keepLayer8;
 
-    private BinaryMask resourceMask;
-    private BinaryMask waterResourceMask;
+    private BooleanMask resourceMask;
+    private BooleanMask waterResourceMask;
 
     private SymmetrySettings symmetrySettings;
 
@@ -231,22 +231,22 @@ public strictfp class MapPopulator {
             waterHeight = heightmapBase.getMin();
         }
 
-        BinaryMask wholeMap = new BinaryMask(heightmapBase, 0f, random.nextLong());
-        BinaryMask land = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-        BinaryMask plateaus = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
+        BooleanMask wholeMap = new BooleanMask(heightmapBase, 0f, random.nextLong());
+        BooleanMask land = new BooleanMask(heightmapBase, waterHeight, random.nextLong());
+        BooleanMask plateaus = new BooleanMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
-        BinaryMask impassable = new BinaryMask(slope, .9f, random.nextLong());
-        BinaryMask ramps = new BinaryMask(slope, .25f, random.nextLong()).minus(impassable);
-        BinaryMask passable = impassable.copy().invert();
-        BinaryMask passableLand = new BinaryMask(land, random.nextLong());
-        BinaryMask passableWater = new BinaryMask(land, random.nextLong()).invert();
+        BooleanMask impassable = new BooleanMask(slope, .9f, random.nextLong());
+        BooleanMask ramps = new BooleanMask(slope, .25f, random.nextLong()).minus(impassable);
+        BooleanMask passable = impassable.copy().invert();
+        BooleanMask passableLand = new BooleanMask(land, random.nextLong());
+        BooleanMask passableWater = new BooleanMask(land, random.nextLong()).invert();
 
         if (populateSpawns) {
             if (spawnCount > 0) {
                 map.setSpawnCountInit(spawnCount);
                 SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
                 float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
-                BinaryMask spawns = land.copy();
+                BooleanMask spawns = land.copy();
                 spawns.intersect(passable).minus(ramps).deflate(16);
                 spawnPlacer.placeSpawns(spawns, spawnSeparation);
             } else {
@@ -255,8 +255,8 @@ public strictfp class MapPopulator {
         }
 
         if (populateMexes || populateHydros) {
-            resourceMask = new BinaryMask(land, random.nextLong());
-            waterResourceMask = new BinaryMask(land, random.nextLong()).invert();
+            resourceMask = new BooleanMask(land, random.nextLong());
+            waterResourceMask = new BooleanMask(land, random.nextLong()).invert();
 
             resourceMask.minus(impassable).deflate(8).minus(ramps);
             resourceMask.fillEdge(16, false).fillCenter(16, false);
@@ -307,18 +307,18 @@ public strictfp class MapPopulator {
             texturesMasks[6].clampMin(0f).clampMax(1f).resample(mapImageSize);
             texturesMasks[7].clampMin(0f).clampMax(1f).resample(mapImageSize);
 
-            BinaryMask water = new BinaryMask(land.copy().invert(), random.nextLong());
-            BinaryMask flat = new BinaryMask(slope, .05f, random.nextLong()).invert();
-            BinaryMask inland = new BinaryMask(land, random.nextLong());
-            BinaryMask highGround = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
-            BinaryMask aboveBeach = new BinaryMask(heightmapBase, waterHeight + 1.5f, random.nextLong());
-            BinaryMask aboveBeachEdge = new BinaryMask(heightmapBase, waterHeight + 3f, random.nextLong());
-            BinaryMask flatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 0.29f, random.nextLong());
-            BinaryMask higherFlatAboveCoast = new BinaryMask(heightmapBase, waterHeight + 1.2f, random.nextLong());
-            BinaryMask lowWaterBeach = new BinaryMask(heightmapBase, waterHeight, random.nextLong());
-            BinaryMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
-            BinaryMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
-            BinaryMask smallWaterBeach = smallWater.copy().minus(tinyWater).inflate(2).combine(tinyWater);
+            BooleanMask water = new BooleanMask(land.copy().invert(), random.nextLong());
+            BooleanMask flat = new BooleanMask(slope, .05f, random.nextLong()).invert();
+            BooleanMask inland = new BooleanMask(land, random.nextLong());
+            BooleanMask highGround = new BooleanMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BooleanMask aboveBeach = new BooleanMask(heightmapBase, waterHeight + 1.5f, random.nextLong());
+            BooleanMask aboveBeachEdge = new BooleanMask(heightmapBase, waterHeight + 3f, random.nextLong());
+            BooleanMask flatAboveCoast = new BooleanMask(heightmapBase, waterHeight + 0.29f, random.nextLong());
+            BooleanMask higherFlatAboveCoast = new BooleanMask(heightmapBase, waterHeight + 1.2f, random.nextLong());
+            BooleanMask lowWaterBeach = new BooleanMask(heightmapBase, waterHeight, random.nextLong());
+            BooleanMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
+            BooleanMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
+            BooleanMask smallWaterBeach = smallWater.copy().minus(tinyWater).inflate(2).combine(tinyWater);
             FloatMask smallWaterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
             inland.deflate(2);
@@ -328,16 +328,16 @@ public strictfp class MapPopulator {
             smallWaterBeach.minus(flatAboveCoast).blur(2, 0.5f).minus(aboveBeach).minus(higherFlatAboveCoast).blur(1);
             smallWaterBeach.setSize(mapImageSize);
 
-            smallWaterBeachTexture.init(smallWaterBeach, 0, 1).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
+            smallWaterBeachTexture.init(smallWaterBeach, 0f, 1f).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
 
-            BinaryMask waterBeach = new BinaryMask(heightmapBase, waterHeight + 1f, random.nextLong());
-            BinaryMask accentGround = new BinaryMask(land, random.nextLong());
-            BinaryMask accentPlateau = new BinaryMask(plateaus, random.nextLong());
-            BinaryMask slopes = new BinaryMask(slope, .1f, random.nextLong());
-            BinaryMask accentSlopes = new BinaryMask(slope, .75f, random.nextLong()).invert();
-            BinaryMask steepHills = new BinaryMask(slope, .55f, random.nextLong());
-            BinaryMask rock = new BinaryMask(slope, 1.25f, random.nextLong());
-            BinaryMask accentRock = new BinaryMask(slope, 1.25f, random.nextLong());
+            BooleanMask waterBeach = new BooleanMask(heightmapBase, waterHeight + 1f, random.nextLong());
+            BooleanMask accentGround = new BooleanMask(land, random.nextLong());
+            BooleanMask accentPlateau = new BooleanMask(plateaus, random.nextLong());
+            BooleanMask slopes = new BooleanMask(slope, .1f, random.nextLong());
+            BooleanMask accentSlopes = new BooleanMask(slope, .75f, random.nextLong()).invert();
+            BooleanMask steepHills = new BooleanMask(slope, .55f, random.nextLong());
+            BooleanMask rock = new BooleanMask(slope, 1.25f, random.nextLong());
+            BooleanMask accentRock = new BooleanMask(slope, 1.25f, random.nextLong());
             FloatMask waterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentGroundTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentPlateauTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
@@ -369,23 +369,23 @@ public strictfp class MapPopulator {
             rock.setSize(mapImageSize);
             accentRock.setSize(mapImageSize);
             smallWater.setSize(mapImageSize);
-            accentGroundTexture.init(accentGround, 0, 1).blur(8).add(accentGround, .65f).blur(4).add(accentGround, .5f).blur(1).clampMax(1f);
-            accentPlateauTexture.init(accentPlateau, 0, 1).blur(8).add(accentPlateau, .65f).blur(4).add(accentPlateau, .5f).blur(1).clampMax(1f);
-            slopesTexture.init(slopes, 0, 1).blur(8).add(slopes, .65f).blur(4).add(slopes, .5f).blur(1).clampMax(1f);
-            accentSlopesTexture.init(accentSlopes, 0, 1).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
-            steepHillsTexture.init(steepHills, 0, 1).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).add(steepHills, 1f).clampMax(1f);
-            waterBeachTexture.init(waterBeach, 0, 1).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0).blur(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
-            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0).blur(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0).add(waterBeach, .65f).blur(2, rock.copy().invert());
-            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0).add(waterBeach, .5f).blur(2, rock.copy().invert()).blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).blur(2, rock.copy().invert());
-            waterBeachTexture.blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0).blur(2, rock.copy().invert()).blur(1, rock.copy().invert()).blur(1, rock.copy().invert()).clampMax(1f);
+            accentGroundTexture.init(accentGround, 0f, 1f).blur(8).add(accentGround, .65f).blur(4).add(accentGround, .5f).blur(1).clampMax(1f);
+            accentPlateauTexture.init(accentPlateau, 0f, 1f).blur(8).add(accentPlateau, .65f).blur(4).add(accentPlateau, .5f).blur(1).clampMax(1f);
+            slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .65f).blur(4).add(slopes, .5f).blur(1).clampMax(1f);
+            accentSlopesTexture.init(accentSlopes, 0f, 1f).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
+            steepHillsTexture.init(steepHills, 0f, 1f).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).add(steepHills, 1f).clampMax(1f);
+            waterBeachTexture.init(waterBeach, 0f, 1f).subtract(rock, 1f).subtract(aboveBeachEdge, 1f).clampMin(0f).blur(2, rock.copy().invert()).add(waterBeach, 1f).subtract(rock, 1f);
+            waterBeachTexture.subtract(aboveBeachEdge, .9f).clampMin(0f).blur(2, rock.copy().invert()).subtract(rock, 1f).subtract(aboveBeachEdge, .8f).clampMin(0f).add(waterBeach, .65f).blur(2, rock.copy().invert());
+            waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0f).add(waterBeach, .5f).blur(2, rock.copy().invert()).blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0f).blur(2, rock.copy().invert());
+            waterBeachTexture.blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0f).blur(2, rock.copy().invert()).blur(1, rock.copy().invert()).blur(1, rock.copy().invert()).clampMax(1f);
             waterBeachTexture.removeAreasOfSpecifiedSizeWithLocalMaximums(0, smallWaterSizeLimit, 15, 1f).blur(1).blur(1);
             if (smallWaterTexturesOnLayer5) {
                 steepHillsTexture.add(smallWaterBeachTexture).clampMax(1f);
             } else {
                 waterBeachTexture.add(smallWaterBeachTexture).clampMax(1f);
             }
-            rockTexture.init(rock, 0, 1).blur(8).clampMax(0.2f).add(rock, .65f).blur(4).clampMax(0.3f).add(rock, .5f).blur(1).add(rock, 1f).clampMax(1f);
-            accentRockTexture.init(accentRock, 0, 1).clampMin(0).blur(8).add(accentRock, .65f).blur(4).add(accentRock, .5f).blur(1).clampMax(1f);
+            rockTexture.init(rock, 0f, 1f).blur(8).clampMax(0.2f).add(rock, .65f).blur(4).clampMax(0.3f).add(rock, .5f).blur(1).add(rock, 1f).clampMax(1f);
+            accentRockTexture.init(accentRock, 0f, 1f).clampMin(0f).blur(8).add(accentRock, .65f).blur(4).add(accentRock, .5f).blur(1).clampMax(1f);
 
             if (keepLayer1) {
                 accentGroundTexture = new FloatMask(texturesMasks[0], null);
@@ -455,7 +455,7 @@ public strictfp class MapPopulator {
             }
 
             if (restrictTextures && x1 >= 0 && x1 <= mapImageSize && x2 >= 0 && x2 <= mapImageSize && z1 >= 0 && z1 <= mapImageSize && z2 >= 0 && z2 <= mapImageSize) {
-                BinaryMask textureBox = new BinaryMask(mapImageSize, random.nextLong(), symmetrySettings);
+                BooleanMask textureBox = new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings);
                 if (texturesInside) {
                     textureBox.invert().fillRectFromPoints(x1, x2, z1, z2, true);
                 } else {
@@ -486,20 +486,20 @@ public strictfp class MapPopulator {
                 throw new Exception("An error occured while loading props\n", e);
             }
 
-            BinaryMask flatEnough = new BinaryMask(slope, .02f, random.nextLong());
-            BinaryMask flatish = new BinaryMask(slope, .042f, random.nextLong());
-            BinaryMask nearSteepHills = new BinaryMask(slope,.55f, random.nextLong());
-            BinaryMask flatEnoughNearRock = new BinaryMask(slope,1.25f, random.nextLong());
+            BooleanMask flatEnough = new BooleanMask(slope, .02f, random.nextLong());
+            BooleanMask flatish = new BooleanMask(slope, .042f, random.nextLong());
+            BooleanMask nearSteepHills = new BooleanMask(slope, .55f, random.nextLong());
+            BooleanMask flatEnoughNearRock = new BooleanMask(slope, 1.25f, random.nextLong());
             flatEnough.invert().intersect(land).erode(.15f);
             flatish.invert().intersect(land).erode(.15f);
             nearSteepHills.inflate(6).combine(flatEnoughNearRock.copy().inflate(16).intersect(nearSteepHills.copy().inflate(11).minus(flatEnough))).intersect(land.copy().deflate(10));
             flatEnoughNearRock.inflate(7).combine(nearSteepHills).intersect(flatish);
 
-            BinaryMask treeMask = new BinaryMask(flatEnough, random.nextLong());
-            BinaryMask cliffRockMask = new BinaryMask(land, random.nextLong());
-            BinaryMask fieldStoneMask = new BinaryMask(land, random.nextLong());
-            BinaryMask largeRockFieldMask = new BinaryMask(land, random.nextLong());
-            BinaryMask smallRockFieldMask = new BinaryMask(land, random.nextLong());
+            BooleanMask treeMask = new BooleanMask(flatEnough, random.nextLong());
+            BooleanMask cliffRockMask = new BooleanMask(land, random.nextLong());
+            BooleanMask fieldStoneMask = new BooleanMask(land, random.nextLong());
+            BooleanMask largeRockFieldMask = new BooleanMask(land, random.nextLong());
+            BooleanMask smallRockFieldMask = new BooleanMask(land, random.nextLong());
 
             treeMask.deflate(6).erode(0.5f).intersect(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).intersect(flatEnoughNearRock);
@@ -507,7 +507,7 @@ public strictfp class MapPopulator {
             largeRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);
             smallRockFieldMask.randomize(.015f).intersect(flatEnoughNearRock);
 
-            BinaryMask noProps = new BinaryMask(impassable, null);
+            BooleanMask noProps = new BooleanMask(impassable, null);
 
             for (int i = 0; i < map.getSpawnCount(); i++) {
                 noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);
@@ -537,7 +537,7 @@ public strictfp class MapPopulator {
             map.getLandAIMarkers().clear();
             map.getNavyAIMarkers().clear();
             map.getAirAIMarkers().clear();
-            BinaryMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
+            BooleanMask passableAI = passable.copy().combine(land.copy().invert()).fillEdge(8, false);
             passableLand.intersect(passableAI);
             passableWater.deflate(16).intersect(passableAI).fillEdge(8, false);
             AIMarkerPlacer.placeAIMarkers(passableAI, map.getAmphibiousAIMarkers(), "AmphPN%d");

@@ -1,7 +1,7 @@
 package neroxis.generator.placement;
 
 import neroxis.map.AIMarker;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.SCMap;
 import neroxis.map.SymmetryType;
 import neroxis.util.Vector2f;
@@ -12,9 +12,9 @@ import java.util.List;
 
 public strictfp class AIMarkerPlacer {
 
-    public static void placeAIMarkers(BinaryMask passable, List<AIMarker> markers, String nameFormat) {
+    public static void placeAIMarkers(BooleanMask passable, List<AIMarker> markers, String nameFormat) {
         LinkedHashSet<Vector2f> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
-        coordinates.addAll(passable.getDistanceField().getLocalMaximums(8, passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
+        coordinates.addAll(passable.getDistanceField().getLocalMaximums(8f, (float) passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
         LinkedHashSet<Vector2f> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
             if (!unusedCoordinates.contains(location)) {
@@ -58,7 +58,7 @@ public strictfp class AIMarkerPlacer {
     public static void placeAirAIMarkers(SCMap map) {
         float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
-        List<Vector2f> airCoordinates = new BinaryMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
+        List<Vector2f> airCoordinates = new BooleanMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
         airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(String.format("AirPN%d", airCoordinates.indexOf(location)), location.add(.5f, .5f), new LinkedHashSet<>())));
         map.getAirAIMarkers().forEach(aiMarker -> map.getAirAIMarkers().forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) < airMarkerConnectionDistance) {

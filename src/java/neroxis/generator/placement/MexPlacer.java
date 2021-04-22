@@ -17,7 +17,7 @@ public strictfp class MexPlacer {
         random = new Random(seed);
     }
 
-    public void placeMexes(BinaryMask spawnMask, BinaryMask spawnMaskWater) {
+    public void placeMexes(BooleanMask spawnMask, BooleanMask spawnMaskWater) {
         map.getMexes().clear();
         int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(36f / (map.getMexCountInit() * map.getSpawnCountInit()), .25f), 1.75f));
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
@@ -45,7 +45,7 @@ public strictfp class MexPlacer {
 
         int numPlayerMexes = numMexesLeft / map.getSpawnCount() / numSymPoints;
         for (Spawn spawn : map.getSpawns()) {
-            BinaryMask playerSpawnMask = new BinaryMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
+            BooleanMask playerSpawnMask = new BooleanMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
             playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).intersect(spawnMask).fillEdge(map.getSize() / 16, false);
             if (map.getSpawnCountInit() < 6) {
                 placeIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing * 2);
@@ -67,17 +67,17 @@ public strictfp class MexPlacer {
         placeIndividualMexes(spawnMaskWater, StrictMath.min(numMexesLeft, 10), mexSpacing);
     }
 
-    public void placeBaseMexes(BinaryMask spawnMask) {
+    public void placeBaseMexes(BooleanMask spawnMask) {
         int numBaseMexes = (random.nextInt(3) + 3);
         for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
-            BinaryMask baseMexes = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+            BooleanMask baseMexes = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
             baseMexes.fillCircle(spawn.getPosition(), 15, true).fillCircle(spawn.getPosition(), 5, false).intersect(spawnMask);
             placeIndividualMexes(baseMexes, numBaseMexes, 10);
         }
     }
 
-    public void placeMexExpansions(BinaryMask spawnMask, int possibleExpMexCount, int mexSpacing) {
+    public void placeMexExpansions(BooleanMask spawnMask, int possibleExpMexCount, int mexSpacing) {
         Vector2f expLocation;
         int expMexCount;
         int expMexCountLeft = possibleExpMexCount;
@@ -85,7 +85,7 @@ public strictfp class MexPlacer {
         int expSize = 10;
         int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .75f), 1.75f));
 
-        BinaryMask expansionSpawnMask = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+        BooleanMask expansionSpawnMask = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
         expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).intersect(spawnMask);
 
         map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
@@ -113,7 +113,7 @@ public strictfp class MexPlacer {
                 break;
             }
 
-            BinaryMask expansion = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+            BooleanMask expansion = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
             expansion.fillCircle(expLocation, expSize, true);
             expansion.intersect(spawnMask);
 
@@ -139,7 +139,7 @@ public strictfp class MexPlacer {
         }
     }
 
-    public void placeIndividualMexes(BinaryMask spawnMask, int numMexes, int mexSpacing) {
+    public void placeIndividualMexes(BooleanMask spawnMask, int numMexes, int mexSpacing) {
         if (numMexes > 0) {
             LinkedList<Vector2f> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
             mexLocations.stream().limit(numMexes).forEachOrdered(location -> {
@@ -153,7 +153,7 @@ public strictfp class MexPlacer {
         }
     }
 
-    private boolean isMexExpValid(Vector2f location, float size, BinaryMask spawnMask) {
+    private boolean isMexExpValid(Vector2f location, float size, BooleanMask spawnMask) {
         float count = 0;
 
         for (int dx = 0; dx < size; dx++) {

@@ -12,8 +12,8 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
-public strictfp abstract class Mask<T> {
-    protected final static String MOCKED_NAME = "mocked";
+@SuppressWarnings("unchecked")
+public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     protected final SymmetrySettings symmetrySettings;
     @Getter
@@ -48,11 +48,11 @@ public strictfp abstract class Mask<T> {
 
     protected abstract T[][] getEmptyMask(int size);
 
-    public abstract Mask<T> interpolate();
+    public abstract U interpolate();
 
-    public abstract Mask<T> blur(int size);
+    public abstract U blur(int size);
 
-    public abstract Mask<T> copy();
+    public abstract U copy();
 
     protected abstract int[][] getInnerCount();
 
@@ -123,7 +123,7 @@ public strictfp abstract class Mask<T> {
         return (float) count / area;
     }
 
-    public <U extends Mask<T>> U setSize(int newSize) {
+    public U setSize(int newSize) {
         plannedSize = newSize;
         execute(() -> {
             int size = getSize();
@@ -137,7 +137,7 @@ public strictfp abstract class Mask<T> {
         return (U) this;
     }
 
-    public <U extends Mask<T>> U resample(int newSize) {
+    public U resample(int newSize) {
         plannedSize = newSize;
         execute(() -> {
             int size = getSize();
@@ -577,15 +577,15 @@ public strictfp abstract class Mask<T> {
         });
     }
 
-    private <U extends Mask<T>> U enlarge(int size) {
+    private U enlarge(int size) {
         return enlarge(size, SymmetryType.SPAWN);
     }
 
-    private <U extends Mask<T>> U shrink(int size) {
+    private U shrink(int size) {
         return shrink(size, SymmetryType.SPAWN);
     }
 
-    private <U extends Mask<T>> U enlarge(int newSize, SymmetryType symmetryType) {
+    private U enlarge(int newSize, SymmetryType symmetryType) {
         T[][] smallMask = mask;
         int oldSize = getSize();
         float scale = (float) newSize / oldSize;
@@ -598,7 +598,7 @@ public strictfp abstract class Mask<T> {
         return (U) this;
     }
 
-    private <U extends Mask<T>> U shrink(int newSize, SymmetryType symmetryType) {
+    private U shrink(int newSize, SymmetryType symmetryType) {
         T[][] largeMask = mask;
         int oldSize = getSize();
         float scale = (float) oldSize / newSize;
@@ -611,29 +611,29 @@ public strictfp abstract class Mask<T> {
         return (U) this;
     }
 
-    private <U extends Mask<T>> U interpolate(int newSize) {
+    private U interpolate(int newSize) {
         return interpolate(newSize, SymmetryType.SPAWN);
     }
 
-    private <U extends Mask<T>> U interpolate(int newSize, SymmetryType symmetryType) {
+    private U interpolate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         enlarge(newSize, symmetryType);
         blur(StrictMath.round((float) newSize / oldSize / 2));
         return (U) this;
     }
 
-    private <U extends Mask<T>> U decimate(int newSize) {
+    private U decimate(int newSize) {
         return decimate(newSize, SymmetryType.SPAWN);
     }
 
-    private <U extends Mask<T>> U decimate(int newSize, SymmetryType symmetryType) {
+    private U decimate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         blur(StrictMath.round((float) oldSize / newSize / 2));
         shrink(newSize, symmetryType);
         return (U) this;
     }
 
-    public <U extends Mask<T>> U flip(SymmetryType symmetryType) {
+    public U flip(SymmetryType symmetryType) {
         execute(() -> {
             Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
             if (symmetry.getNumSymPoints() != 2) {
@@ -697,8 +697,8 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    protected void execute(Runnable function, Mask<?>... usedMasks) {
-        List<Mask<?>> dependencies = new ArrayList<>(Arrays.asList(usedMasks));
+    protected void execute(Runnable function, Mask<?, ?>... usedMasks) {
+        List<Mask<?, ?>> dependencies = new ArrayList<>(Arrays.asList(usedMasks));
         dependencies.add(this);
         if (parallel && !processing) {
             Pipeline.add(this, dependencies, function);
@@ -707,7 +707,7 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    protected void assertCompatibleMask(Mask<?> other) {
+    protected void assertCompatibleMask(Mask<?, ?> other) {
         int otherSize = other.getSize();
         int size = getSize();
         if (otherSize != size) {
@@ -731,23 +731,23 @@ public strictfp abstract class Mask<T> {
         }
     }
 
-    public <U extends Mask<T>> U getFinalMask() {
+    public U getFinalMask() {
         Pipeline.await(this);
-        return (U) copy();
+        return copy();
     }
 
-    public Mask<T> startVisualDebugger() {
+    public U startVisualDebugger() {
         return startVisualDebugger(name == null ? toString() : name, Util.getStackTraceParentClass());
     }
 
-    public Mask<T> startVisualDebugger(String maskName) {
+    public U startVisualDebugger(String maskName) {
         return startVisualDebugger(maskName, Util.getStackTraceParentClass());
     }
 
-    public Mask<T> startVisualDebugger(String maskName, String parentClass) {
+    public U startVisualDebugger(String maskName, String parentClass) {
         VisualDebugger.whitelistMask(this, maskName, parentClass);
         show();
-        return this;
+        return (U) this;
     }
 
     public void show() {

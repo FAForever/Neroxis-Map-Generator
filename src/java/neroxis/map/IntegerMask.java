@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public strictfp class IntegerMask extends Mask<Integer> {
+public strictfp class IntegerMask extends Mask<Integer, IntegerMask> {
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -63,7 +63,7 @@ public strictfp class IntegerMask extends Mask<Integer> {
         return this;
     }
 
-    public IntegerMask blur(int radius, BinaryMask limiter) {
+    public IntegerMask blur(int radius, BooleanMask limiter) {
         execute(() -> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();

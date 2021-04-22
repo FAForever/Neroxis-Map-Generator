@@ -1,7 +1,7 @@
 package neroxis.generator;
 
 import neroxis.brushes.Brushes;
-import neroxis.map.BinaryMask;
+import neroxis.map.BooleanMask;
 import neroxis.map.FloatMask;
 import neroxis.map.Symmetry;
 import neroxis.map.SymmetrySettings;
@@ -140,7 +140,7 @@ public strictfp class ImageGenerator {
             String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
             String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
 
-            BinaryMask base = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            BooleanMask base = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
@@ -153,7 +153,7 @@ public strictfp class ImageGenerator {
             base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
 
-            BinaryMask mountains = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            BooleanMask mountains = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
                 Vector2f loc = base.getRandomPosition();
                 if (loc == null) {
@@ -162,14 +162,14 @@ public strictfp class ImageGenerator {
                 mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2, false);
             }
             mountains.intersect(base);
-            BinaryMask mountainsBase = mountains.copy().inflate(15);
-            BinaryMask mountainsBaseEdge = mountainsBase.copy().inflate(15).minus(mountainsBase);
+            BooleanMask mountainsBase = mountains.copy().inflate(15);
+            BooleanMask mountainsBaseEdge = mountainsBase.copy().inflate(15).minus(mountainsBase);
 
             FloatMask newBrush = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30), false);
             newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30), false);
             newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)), false);
-            newBrush.clampMin(0);
+            newBrush.clampMin(0f);
             if (newBrush.areAnyEdgesGreaterThan(0f)) {
                 i = i - 1;
             } else {
@@ -194,9 +194,9 @@ public strictfp class ImageGenerator {
             greenMask = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             blueMask = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
-            BinaryMask wholeImage = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+            BooleanMask wholeImage = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             wholeImage.fillRect(0,0, size, size, true);
-            BinaryMask areaToTexture = wholeImage;
+            BooleanMask areaToTexture = wholeImage;
 
             if(redStrength == -1) {
                 redLocus = random.nextFloat();
@@ -217,11 +217,11 @@ public strictfp class ImageGenerator {
             for (int a = 0; a < levelOfDetail; a++) {
                 int chainBrushSize = random.nextInt(maxFeatureSize) + 1;
                 int chainTextureBrushSize = random.nextInt(maxFeatureSize) + 1;
-                BinaryMask chain = new BinaryMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
+                BooleanMask chain = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
                 FloatMask chainTexture = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
                 if(a > 0.75 * levelOfDetail && tooEmpty) {
                     FloatMask wholeImageTexture = redMask.copy().add(greenMask).add(blueMask);
-                    areaToTexture = wholeImageTexture.convertToBinaryMask(0f, 0.1f);
+                    areaToTexture = wholeImageTexture.convertToBooleanMask(0f, 0.1f);
                     if(areaToTexture.getCount() < size * 3) {
                         tooEmpty = false;
                         areaToTexture = wholeImage;

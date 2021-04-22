@@ -19,7 +19,7 @@ public strictfp class SpawnPlacer {
     public void placeSpawns(float teammateSeparation, int teamSeparation, SymmetrySettings symmetrySettings) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BinaryMask spawnMask = new BinaryMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
+        BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         spawnMask.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
@@ -38,7 +38,7 @@ public strictfp class SpawnPlacer {
 
             addSpawn(location, symmetryPoints);
             if (spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() != 1) {
-                BinaryMask nextSpawn = new BinaryMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
+                BooleanMask nextSpawn = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
                 nextSpawn.fillCircle(location, teammateSeparation * 2, true).intersect(spawnMask);
                 location = nextSpawn.getRandomPosition();
                 if (location == null) {
@@ -50,10 +50,10 @@ public strictfp class SpawnPlacer {
         }
     }
 
-    public void placeSpawns(BinaryMask spawnMask, float separation) {
+    public void placeSpawns(BooleanMask spawnMask, float separation) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BinaryMask spawnMaskCopy = spawnMask.copy();
+        BooleanMask spawnMaskCopy = spawnMask.copy();
         spawnMaskCopy.fillSides(map.getSize() / map.getSpawnCountInit() * 3 / 2, false).fillCenter(map.getSize() * 3 / 8, false).fillEdge(map.getSize() / 32, false).limitToSymmetryRegion();
         Vector2f location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < map.getSpawnCountInit()) {

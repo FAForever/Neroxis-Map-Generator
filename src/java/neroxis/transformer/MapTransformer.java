@@ -279,14 +279,14 @@ public strictfp class MapTransformer {
     }
 
     private void transformTerrain() {
-        FloatMask previewMask = map.getMaskFromImage(map.getPreview(), symmetrySettings);
-        FloatMask normalMask = map.getMaskFromImage(map.getNormalMap(), symmetrySettings);
-        FloatMask waterMask = map.getMaskFromImage(map.getWaterMap(), symmetrySettings);
-        FloatMask waterFoamMask = map.getMaskFromImage(map.getWaterFoamMap(), symmetrySettings);
-        FloatMask waterFlatnessMask = map.getMaskFromImage(map.getWaterFlatnessMap(), symmetrySettings);
-        FloatMask waterDepthBiasMask = map.getMaskFromImage(map.getWaterDepthBiasMap(), symmetrySettings);
-        FloatMask terrainTypeMask = map.getMaskFromImage(map.getTerrainType(), symmetrySettings);
-        FloatMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
+        IntegerMask previewMask = map.getMaskFromImage(map.getPreview(), symmetrySettings);
+        IntegerMask normalMask = map.getMaskFromImage(map.getNormalMap(), symmetrySettings);
+        IntegerMask waterMask = map.getMaskFromImage(map.getWaterMap(), symmetrySettings);
+        IntegerMask waterFoamMask = map.getMaskFromImage(map.getWaterFoamMap(), symmetrySettings);
+        IntegerMask waterFlatnessMask = map.getMaskFromImage(map.getWaterFlatnessMap(), symmetrySettings);
+        IntegerMask waterDepthBiasMask = map.getMaskFromImage(map.getWaterDepthBiasMap(), symmetrySettings);
+        IntegerMask terrainTypeMask = map.getMaskFromImage(map.getTerrainType(), symmetrySettings);
+        IntegerMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
 
         if (!useAngle) {
             previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
