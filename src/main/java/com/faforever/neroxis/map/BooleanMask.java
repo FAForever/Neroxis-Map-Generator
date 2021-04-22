@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
+@SuppressWarnings("unchecked")
 @Getter
 public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
@@ -28,52 +29,57 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        execute(() -> VisualDebugger.visualizeMask(this));
-    }
-
-    public BooleanMask(BooleanMask sourceMask, Long seed) {
-        this(sourceMask, seed, null);
-    }
-
-    public BooleanMask(BooleanMask sourceMask, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify(sourceMask::getValueAt);
+        execute(dependencies -> {
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        });
     }
 
-    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T sourceMask, U minValue, Long seed) {
-        this(sourceMask, minValue, seed, null);
+    public BooleanMask(BooleanMask other, Long seed) {
+        this(other, seed, null);
     }
 
-    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T sourceMask, U minValue, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify((x, y) -> sourceMask.valueAtGreaterThanEqualTo(x, y, minValue));
+    public BooleanMask(BooleanMask other, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        }, other);
     }
 
-    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T sourceMask, U minValue, U maxValue, Long seed) {
-        this(sourceMask, minValue, maxValue, seed, null);
+    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, Long seed) {
+        this(other, minValue, seed, null);
     }
 
-    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T sourceMask, U minValue, U maxValue, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify((x, y) -> sourceMask.valueAtGreaterThanEqualTo(x, y, minValue) && sourceMask.valueAtLessThanEqualTo(x, y, maxValue));
+    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            T source = (T) dependencies.get(0);
+            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        }, other);
+    }
+
+    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed) {
+        this(other, minValue, maxValue, seed, null);
+    }
+
+    public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            T source = (T) dependencies.get(0);
+            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
+            VisualDebugger.visualizeMask(this);
+        }, other);
     }
 
     @Override
@@ -106,7 +112,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask clear() {
-        execute(() -> {
+        execute(dependencies -> {
             apply((x, y) -> setValueAt(x, y, false));
             VisualDebugger.visualizeMask(this);
         });
@@ -115,10 +121,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask init(BooleanMask other) {
         plannedSize = other.getSize();
-        execute(() -> {
-            setSize(other.getSize());
-            assertCompatibleMask(other);
-            combine(other);
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            setSize(source.getSize());
+            assertCompatibleMask(source);
+            combine(source);
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
@@ -126,10 +133,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask init(FloatMask other, float threshold) {
         plannedSize = other.getSize();
-        execute(() -> {
-            setSize(other.getSize());
-            assertCompatibleMask(other);
-            combine(other, threshold);
+        execute(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            setSize(source.getSize());
+            assertCompatibleMask(source);
+            combine(source, threshold);
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
@@ -492,7 +500,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask replace(BooleanMask other) {
-        execute(() -> {
+        execute(dependencies -> {
             assertCompatibleMask(other);
             modify(other::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -501,25 +509,30 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask combine(BooleanMask other) {
-        execute(() -> {
-            assertCompatibleMask(other);
-            modify((x, y) -> getValueAt(x, y) || other.getValueAt(x, y));
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            modify((x, y) -> getValueAt(x, y) || source.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combine(T other, U minValue) {
-        execute(() -> {
-            modify((x, y) -> other.valueAtGreaterThanEqualTo(x, y, minValue));
+        execute(dependencies -> {
+            T source = (T) dependencies.get(0);
+            assertCompatibleMask(source);
+            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combine(T other, U minValue, U maxValue) {
-        execute(() -> {
-            modify((x, y) -> other.valueAtGreaterThanEqualTo(x, y, minValue) && other.valueAtLessThan(x, y, maxValue));
+        execute(dependencies -> {
+            T source = (T) dependencies.get(0);
+            assertCompatibleMask(source);
+            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
@@ -530,9 +543,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask combineWithOffset(BooleanMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        execute(() -> {
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
             int size = getSize();
-            int otherSize = other.getSize();
+            int otherSize = source.getSize();
             int smallerSize = StrictMath.min(size, otherSize);
             int offsetX;
             int offsetY;
@@ -547,7 +561,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 apply((x, y) -> {
                     int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
                     int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
-                    if (inBounds(shiftX, shiftY) && other.getValueAt(x, y)) {
+                    if (inBounds(shiftX, shiftY) && source.getValueAt(x, y)) {
                         setValueAt(shiftX, shiftY, true);
                         List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
                         for (Vector2f symmetryPoint : symmetryPoints) {
@@ -556,10 +570,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 });
             } else {
-                other.apply((x, y) -> {
+                source.apply((x, y) -> {
                     int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
                     int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
-                    if (other.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
+                    if (source.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
                         setValueAt(x, y, true);
                     }
                 });
@@ -568,9 +582,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    private BooleanMask combineWithOffset(FloatMask other, float minValue, float maxValue, Vector2f location, boolean wrapEdges) {
-        execute(() -> {
-            combineWithOffset(other.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
+    private <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combineWithOffset(T other, U minValue, U maxValue, Vector2f location, boolean wrapEdges) {
+        execute(dependencies -> {
+            T source = (T) dependencies.get(0);
+            combineWithOffset(source.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
         }, other);
         return this;
     }
@@ -585,18 +600,20 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask intersect(BooleanMask other) {
-        execute(() -> {
-            assertCompatibleMask(other);
-            modify((x, y) -> getValueAt(x, y) && other.getValueAt(x, y));
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            modify((x, y) -> getValueAt(x, y) && source.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
 
     public BooleanMask minus(BooleanMask other) {
-        execute(() -> {
-            assertCompatibleMask(other);
-            modify((x, y) -> getValueAt(x, y) && !other.getValueAt(x, y));
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            modify((x, y) -> getValueAt(x, y) && !source.getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         }, other);
         return this;
@@ -959,6 +976,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public FloatMask getDistanceField() {
+        assertNotParallel();
         int size = getSize();
         FloatMask distanceField = new FloatMask(size, random.nextLong(), symmetrySettings, getName() + "distanceField");
         distanceField.init(this, (float) (size * size), 0f);

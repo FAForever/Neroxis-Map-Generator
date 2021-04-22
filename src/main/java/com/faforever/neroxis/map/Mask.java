@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
 @ToString(onlyExplicitlyIncluded = true)
@@ -701,13 +702,19 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected void execute(Runnable function, Mask<?, ?>... usedMasks) {
-        List<Mask<?, ?>> dependencies = new ArrayList<>(Arrays.asList(usedMasks));
-        dependencies.add(this);
+    protected void execute(Runnable function) {
+        execute((ignored) -> function.run());
+    }
+
+    protected void execute(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
+        List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !processing) {
+            if (dependencies.stream().anyMatch(dep -> !dep.isParallel() || dep.isProcessing())) {
+                throw new IllegalArgumentException("Non parallel masks used as dependents");
+            }
             Pipeline.add(this, dependencies, function);
         } else {
-            function.run();
+            function.accept(dependencies);
         }
     }
 
@@ -729,8 +736,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void assertDoneProcessing() {
-        if (parallel) {
+    public void assertNotParallel() {
+        if (parallel && !processing) {
             throw new IllegalStateException("Mask not finished processing results will not be deterministic");
         }
     }

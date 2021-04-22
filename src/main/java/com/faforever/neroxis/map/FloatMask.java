@@ -59,30 +59,32 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         this(sourceMask, seed, null);
     }
 
-    public FloatMask(FloatMask sourceMask, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify(sourceMask::getValueAt);
+    public FloatMask(FloatMask other, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        }, other);
     }
 
     public FloatMask(BooleanMask sourceMask, float low, float high, Long seed) {
         this(sourceMask, low, high, seed, null);
     }
 
-    public FloatMask(BooleanMask sourceMask, float low, float high, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify((x, y) -> sourceMask.getValueAt(x, y) ? high : low);
+    public FloatMask(BooleanMask other, float low, float high, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            modify((x, y) -> source.getValueAt(x, y) ? high : low);
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        }, other);
     }
 
     @Override
@@ -164,9 +166,10 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask addDistance(BooleanMask other, float scale) {
-        execute(() -> {
-            assertCompatibleMask(other);
-            FloatMask distanceField = other.getDistanceField();
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
             VisualDebugger.visualizeMask(this);
         }, other);
@@ -287,13 +290,14 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     @Override
-    public FloatMask blur(int radius, BooleanMask limiter) {
-        execute(() -> {
+    public FloatMask blur(int radius, BooleanMask other) {
+        execute(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
-        }, limiter);
+        }, other);
         return this;
     }
 
@@ -347,10 +351,11 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         return this;
     }
 
-    public FloatMask useBrushWithinArea(BooleanMask area, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        execute(() -> {
+    public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
             assertSmallerSize(size);
-            ArrayList<Vector2f> possibleLocations = new ArrayList<>(area.getAllCoordinatesEqualTo(true, 1));
+            ArrayList<Vector2f> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
@@ -359,16 +364,17 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 addWithOffset(brush, location, true, wrapEdges);
             }
             VisualDebugger.visualizeMask(this);
-        }, area);
+        }, other);
         return this;
     }
 
-    public FloatMask useBrushWithinAreaWithDensity(BooleanMask area, String brushName, int size, float density, float intensity, boolean wrapEdges) {
-        execute(() -> {
-            int frequency = (int) (density * (float) area.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-            useBrushWithinArea(area, brushName, size, frequency, intensity, wrapEdges);
+    public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
+        execute(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
+            useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
             VisualDebugger.visualizeMask(this);
-        }, area);
+        }, other);
         return this;
     }
 

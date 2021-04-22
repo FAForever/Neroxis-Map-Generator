@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public strictfp class IntegerMask extends Mask<Integer, IntegerMask> {
+public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -27,15 +27,16 @@ public strictfp class IntegerMask extends Mask<Integer, IntegerMask> {
         this(sourceMask, seed, null);
     }
 
-    public IntegerMask(IntegerMask sourceMask, Long seed, String name) {
-        super(seed, sourceMask.getSymmetrySettings(), name, sourceMask.isParallel());
-        this.mask = getEmptyMask(sourceMask.getSize());
-        this.plannedSize = sourceMask.getSize();
-        setProcessing(sourceMask.isProcessing());
-        execute(() -> {
-            modify(sourceMask::getValueAt);
+    public IntegerMask(IntegerMask other, Long seed, String name) {
+        super(seed, other.getSymmetrySettings(), name, other.isParallel());
+        this.mask = getEmptyMask(other.getSize());
+        this.plannedSize = other.getSize();
+        setProcessing(other.isProcessing());
+        execute(dependencies -> {
+            IntegerMask source = (IntegerMask) dependencies.get(0);
+            modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
-        }, sourceMask);
+        }, other);
     }
 
     @Override
@@ -80,6 +81,37 @@ public strictfp class IntegerMask extends Mask<Integer, IntegerMask> {
         } else {
             return new IntegerMask(this, null);
         }
+    }
+
+    @Override
+    public Integer getDefaultValue() {
+        return 0;
+    }
+
+    @Override
+    public Integer add(Integer val1, Integer val2) {
+        return val1 + val2;
+    }
+
+    @Override
+    public Integer subtract(Integer val1, Integer val2) {
+        return val1 - val2;
+    }
+
+    @Override
+    public Integer multiply(Integer val1, Integer val2) {
+        return val1 * val2;
+    }
+
+    @Override
+    public Integer divide(Integer val1, Integer val2) {
+        return val1 / val2;
+    }
+
+    @Override
+    public Integer getAvg() {
+        int size = getSize();
+        return getSum() / size / size;
     }
 
     @Override
