@@ -76,7 +76,7 @@ public strictfp class VisualDebugger {
     private static void visualize(ImageSource imageSource, int size, int maskHash) {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);
         String maskName = maskDetails[0];
-        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "execute");
+        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
         float perPixelSize = calculateAutoZoom(size);
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels

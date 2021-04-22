@@ -130,7 +130,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U setSize(int newSize) {
         plannedSize = newSize;
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             if (size < newSize) {
                 enlarge(newSize);
@@ -144,7 +144,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U resample(int newSize) {
         plannedSize = newSize;
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             if (size < newSize) {
                 interpolate(newSize);
@@ -547,7 +547,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
-        execute(() -> {
+        enqueue(() -> {
             applyWithSymmetry(symmetryType, (x, y) -> {
                 Vector2f location = new Vector2f(x, y);
                 List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
@@ -567,7 +567,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void applySymmetry(float angle) {
-        execute(() -> {
+        enqueue(() -> {
             if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
                 throw new IllegalArgumentException("Spawn Symmetry must equal POINT2");
             }
@@ -639,7 +639,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public U flip(SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
             if (symmetry.getNumSymPoints() != 2) {
                 throw new IllegalArgumentException("Cannot flip non single axis symmetry");
@@ -702,11 +702,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected void execute(Runnable function) {
-        execute((ignored) -> function.run());
+    protected void enqueue(Runnable function) {
+        enqueue((ignored) -> function.run());
     }
 
-    protected void execute(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
+    protected void enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !processing) {
             if (dependencies.stream().anyMatch(dep -> !dep.isParallel() || dep.isProcessing())) {

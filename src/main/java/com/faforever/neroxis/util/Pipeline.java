@@ -30,11 +30,11 @@ public strictfp class Pipeline {
 
     public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
-        if (isStarted() && !executingMask.getName().equals("mocked") && !executingMask.getName().equals("new binary mask") && !executingMask.getName().equals("new float mask")) {
+        if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
         String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.generator");
-        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "execute");
+        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
         CompletableFuture<Mask<?, ?>> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)

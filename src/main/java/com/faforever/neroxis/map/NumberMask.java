@@ -113,7 +113,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U clear() {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> getDefaultValue());
             VisualDebugger.visualizeMask(this);
         });
@@ -122,7 +122,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
 
     public U init(BooleanMask other, T low, T high) {
         plannedSize = other.getSize();
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             setSize(source.getSize());
             assertCompatibleMask(source);
@@ -134,7 +134,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
 
     public U init(U other) {
         plannedSize = other.getSize();
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             setSize(source.getSize());
             assertCompatibleMask(source);
@@ -145,7 +145,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U add(U other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             add(source::getValueAt);
@@ -155,7 +155,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U add(BooleanMask other, T value) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             add((x, y) -> source.getValueAt(x, y) ? value : getDefaultValue());
@@ -165,7 +165,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U add(T val) {
-        execute(() -> {
+        enqueue(() -> {
             add((x, y) -> val);
             VisualDebugger.visualizeMask(this);
         });
@@ -173,7 +173,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U addWeighted(U other, T weight) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             add((x, y) -> multiply(source.getValueAt(x, y), weight));
@@ -187,7 +187,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U addWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             int size = getSize();
             int otherSize = source.getSize();
@@ -228,17 +228,17 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U subtractAvg() {
-        execute(() -> subtract(getAvg()));
+        enqueue(() -> subtract(getAvg()));
         return (U) this;
     }
 
     public U subtract(T val) {
-        execute(() -> subtract((x, y) -> val));
+        enqueue(() -> subtract((x, y) -> val));
         return (U) this;
     }
 
     public U subtract(U other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             subtract(source::getValueAt);
@@ -248,7 +248,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U subtract(BooleanMask other, T value) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             subtract((x, y) -> source.getValueAt(x, y) ? value : getDefaultValue());
@@ -258,7 +258,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U multiply(U other) {
-        execute(() -> {
+        enqueue(() -> {
             assertCompatibleMask(other);
             multiply(other::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -267,7 +267,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U multiply(T val) {
-        execute(() -> {
+        enqueue(() -> {
             multiply((x, y) -> val);
             VisualDebugger.visualizeMask(this);
         });
@@ -279,7 +279,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     private U multiplyWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             int size = getSize();
             int otherSize = source.getSize();
@@ -320,7 +320,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U max(U other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> {
@@ -334,7 +334,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U clampMax(BooleanMask other, T val) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> {
@@ -347,7 +347,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U clampMax(T val) {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> {
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) < 0 ? thisVal : val;
@@ -358,7 +358,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U min(U other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> {
@@ -372,7 +372,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U clampMin(BooleanMask other, T val) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> {
@@ -385,7 +385,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U clampMin(T val) {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> {
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) > 0 ? thisVal : val;
@@ -396,7 +396,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U threshold(T val) {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> {
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) > 0 ? getDefaultValue() : getValueAt(x, y);
@@ -411,7 +411,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U zeroOutsideRange(T min, T max) {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getDefaultValue() : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         });
@@ -419,7 +419,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U setToValue(BooleanMask other, T val) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.getValueAt(x, y) ? val : getValueAt(x, y));
@@ -429,7 +429,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U replaceValues(BooleanMask area, U values) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask placement = (BooleanMask) dependencies.get(0);
             U source = (U) dependencies.get(1);
             assertCompatibleMask(source);
@@ -440,7 +440,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     }
 
     public U zeroInRange(T min, T max) {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getDefaultValue() : getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         });

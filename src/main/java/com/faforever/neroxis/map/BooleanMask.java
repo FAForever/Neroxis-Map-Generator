@@ -29,7 +29,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             VisualDebugger.visualizeMask(this);
         });
     }
@@ -43,7 +43,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -59,7 +59,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
             VisualDebugger.visualizeMask(this);
@@ -75,7 +75,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
             VisualDebugger.visualizeMask(this);
@@ -112,7 +112,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask clear() {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             apply((x, y) -> setValueAt(x, y, false));
             VisualDebugger.visualizeMask(this);
         });
@@ -121,7 +121,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask init(BooleanMask other) {
         plannedSize = other.getSize();
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             setSize(source.getSize());
             assertCompatibleMask(source);
@@ -133,7 +133,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask init(FloatMask other, float threshold) {
         plannedSize = other.getSize();
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             setSize(source.getSize());
             assertCompatibleMask(source);
@@ -148,7 +148,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             modifyWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
             VisualDebugger.visualizeMask(this);
         });
@@ -156,7 +156,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask flipValues(float density) {
-        execute(() -> {
+        enqueue(() -> {
             modifyWithSymmetry(SymmetryType.SPAWN, (x, y) -> getValueAt(x, y) && random.nextFloat() < density);
             VisualDebugger.visualizeMask(this);
         });
@@ -165,7 +165,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
 
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
-        execute(() -> {
+        enqueue(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
                 int minXBound = getMinXBound(SymmetryType.TERRAIN);
@@ -201,7 +201,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask randomWalkWithBrush(Vector2f start, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize) {
-        execute(() -> {
+        enqueue(() -> {
             Vector2f location = new Vector2f(start);
             BooleanMask brush = loadBrush(brushName, random.nextLong())
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
@@ -218,7 +218,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
-        execute(() -> {
+        enqueue(() -> {
             Vector2f location = new Vector2f(start);
             BooleanMask brush = loadBrush(brushName, random.nextLong())
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
@@ -234,7 +234,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             List<Vector2f> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2f(start));
@@ -277,7 +277,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
                 List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
@@ -289,7 +289,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask progressiveWalk(int numWalkers, int numSteps) {
-        execute(() -> {
+        enqueue(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN)) + getMinXBound(SymmetryType.TERRAIN);
                 int y = random.nextInt(getMaxYBound(x, SymmetryType.TERRAIN) - getMinYBound(x, SymmetryType.TERRAIN) + 1) + getMinYBound(x, SymmetryType.TERRAIN);
@@ -323,7 +323,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask space(float minSpacing, float maxSpacing) {
-        execute(() -> {
+        enqueue(() -> {
             List<Vector2f> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
             List<Vector2f> symmetricCoordinates = new ArrayList<>();
             coordinates.forEach(coordinate -> symmetricCoordinates.addAll(getSymmetryPoints(coordinate, SymmetryType.SPAWN)));
@@ -336,7 +336,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask invert() {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> !getValueAt(x, y));
             VisualDebugger.visualizeMask(this);
         });
@@ -344,7 +344,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask inflate(float radius) {
-        execute(() -> {
+        enqueue(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
                 if (getValueAt(x, y) && isEdge(x, y)) {
@@ -358,7 +358,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask deflate(float radius) {
-        execute(() -> {
+        enqueue(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
                 if (!getValueAt(x, y) && isEdge(x, y)) {
@@ -388,7 +388,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask cutCorners() {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             Boolean[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -413,7 +413,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask acid(float strength, float size) {
-        execute(() -> {
+        enqueue(() -> {
             BooleanMask holes = new BooleanMask(getSize(), random.nextLong(), symmetrySettings, getName() + "holes");
             holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
             minus(holes);
@@ -431,7 +431,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask dilute(float strength, SymmetryType symmetryType, int count) {
-        execute(() -> {
+        enqueue(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
@@ -456,7 +456,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask erode(float strength, SymmetryType symmetryType, int count) {
-        execute(() -> {
+        enqueue(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
@@ -473,7 +473,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask outline() {
-        execute(() -> {
+        enqueue(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> maskCopy[x][y] = isEdge(x, y));
             mask = maskCopy;
@@ -491,7 +491,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask blur(int radius, float density) {
-        execute(() -> {
+        enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
             VisualDebugger.visualizeMask(this);
@@ -500,7 +500,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask replace(BooleanMask other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             assertCompatibleMask(other);
             modify(other::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -509,7 +509,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask combine(BooleanMask other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) || source.getValueAt(x, y));
@@ -519,7 +519,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combine(T other, U minValue) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
@@ -529,7 +529,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combine(T other, U minValue, U maxValue) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
@@ -543,7 +543,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask combineWithOffset(BooleanMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int size = getSize();
             int otherSize = source.getSize();
@@ -583,7 +583,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     private <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combineWithOffset(T other, U minValue, U maxValue, Vector2f location, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             combineWithOffset(source.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
         }, other);
@@ -591,7 +591,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
-        execute(() -> {
+        enqueue(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong()).setSize(size);
             combineWithOffset(brush, minValue, maxValue, location, false);
             VisualDebugger.visualizeMask(this);
@@ -600,7 +600,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask intersect(BooleanMask other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) && source.getValueAt(x, y));
@@ -610,7 +610,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask minus(BooleanMask other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) && !source.getValueAt(x, y));
@@ -624,7 +624,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
             modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
@@ -634,7 +634,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask limitToCenteredCircle(float circleRadius) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             BooleanMask symmetryLimit = new BooleanMask(size, random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
             symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
@@ -649,7 +649,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillSides(int extent, boolean value, SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case Z:
@@ -676,7 +676,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillCenter(int extent, boolean value, SymmetryType symmetryType) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
                 case POINT2:
@@ -748,7 +748,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillArc(float x, float y, float startAngle, float endAngle, float radius, boolean value) {
-        execute(() -> {
+        enqueue(() -> {
             float dx;
             float dy;
             float radius2 = (radius + .5f) * (radius + .5f);
@@ -797,7 +797,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, boolean value) {
-        execute(() -> {
+        enqueue(() -> {
             for (int px = 0; px < width; px++) {
                 for (int py = 0; py < height; py++) {
                     int calcX = x + px + py * xSlope;
@@ -813,7 +813,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillDiagonal(int extent, boolean inverted, boolean value) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             for (int cx = -extent; cx < extent; cx++) {
                 for (int y = 0; y < size; y++) {
@@ -834,7 +834,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillEdge(int rimWidth, boolean value) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             for (int a = 0; a < rimWidth; a++) {
                 for (int b = 0; b < size - rimWidth; b++) {
@@ -850,7 +850,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillShape(Vector2f location) {
-        execute(() -> {
+        enqueue(() -> {
             fillCoordinates(getShapeCoordinates(location), !getValueAt(location));
             VisualDebugger.visualizeMask(this);
         });
@@ -858,7 +858,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillCoordinates(Collection<Vector2f> coordinates, boolean value) {
-        execute(() -> {
+        enqueue(() -> {
             coordinates.forEach(location -> setValueAt(location, value));
             VisualDebugger.visualizeMask(this);
         });
@@ -866,7 +866,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillGaps(int minDist) {
-        execute(() -> {
+        enqueue(() -> {
             BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             combine(filledGaps);
@@ -876,7 +876,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask widenGaps(int minDist) {
-        execute(() -> {
+        enqueue(() -> {
             BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             minus(filledGaps);
@@ -886,7 +886,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasSmallerThan(int minArea) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             Set<Vector2f> seen = new HashSet<>(size * size * 2);
             applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
@@ -907,7 +907,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasBiggerThan(int maxArea) {
-        execute(() -> {
+        enqueue(() -> {
             minus(copy().removeAreasSmallerThan(maxArea));
             VisualDebugger.visualizeMask(this);
         });
@@ -915,7 +915,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
-        execute(() -> {
+        enqueue(() -> {
             removeAreasSmallerThan(minSize);
             removeAreasBiggerThan(maxSize);
             VisualDebugger.visualizeMask(this);
@@ -924,7 +924,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
-        execute(() -> {
+        enqueue(() -> {
             minus(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
             VisualDebugger.visualizeMask(this);
         });

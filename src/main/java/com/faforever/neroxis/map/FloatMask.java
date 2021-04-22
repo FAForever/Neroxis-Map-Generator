@@ -34,7 +34,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        execute(() -> VisualDebugger.visualizeMask(this));
+        enqueue(() -> VisualDebugger.visualizeMask(this));
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
@@ -45,7 +45,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(sourceImage.getHeight());
         Raster imageData = sourceImage.getData();
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> {
                 int[] value = new int[1];
                 imageData.getPixel(x, y, value);
@@ -64,7 +64,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -80,7 +80,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             modify((x, y) -> source.getValueAt(x, y) ? high : low);
             VisualDebugger.visualizeMask(this);
@@ -150,7 +150,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        execute(() -> {
+        enqueue(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
             VisualDebugger.visualizeMask(this);
         });
@@ -158,7 +158,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        execute(() -> {
+        enqueue(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
             VisualDebugger.visualizeMask(this);
         });
@@ -166,7 +166,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask addDistance(BooleanMask other, float scale) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             FloatMask distanceField = source.getDistanceField();
@@ -177,7 +177,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask sqrt() {
-        execute(() -> {
+        enqueue(() -> {
             modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
             VisualDebugger.visualizeMask(this);
         });
@@ -185,7 +185,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask gradient() {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -204,7 +204,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask supcomGradient() {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             Float[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
@@ -226,7 +226,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
-        execute(() -> {
+        enqueue(() -> {
             int size = getSize();
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
@@ -281,7 +281,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
 
     @Override
     public FloatMask blur(int radius) {
-        execute(() -> {
+        enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
             VisualDebugger.visualizeMask(this);
@@ -291,7 +291,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
 
     @Override
     public FloatMask blur(int radius, BooleanMask other) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
@@ -302,7 +302,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        execute(() -> {
+        enqueue(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
             this.subtract(tempMask2).clampMin(0f);
             VisualDebugger.visualizeMask(this);
@@ -311,7 +311,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        execute(() -> {
+        enqueue(() -> {
             subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
             VisualDebugger.visualizeMask(this);
         });
@@ -319,7 +319,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        execute(() -> {
+        enqueue(() -> {
             for (int x = 0; x < levelOfPrecision; x++) {
                 removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
             }
@@ -342,7 +342,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
-        execute(() -> {
+        enqueue(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
@@ -352,7 +352,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertSmallerSize(size);
             ArrayList<Vector2f> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
@@ -369,7 +369,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);

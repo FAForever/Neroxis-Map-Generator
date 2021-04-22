@@ -20,7 +20,7 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        execute(() -> VisualDebugger.visualizeMask(this));
+        enqueue(() -> VisualDebugger.visualizeMask(this));
     }
 
     public IntegerMask(IntegerMask sourceMask, Long seed) {
@@ -32,7 +32,7 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
         this.mask = getEmptyMask(other.getSize());
         this.plannedSize = other.getSize();
         setProcessing(other.isProcessing());
-        execute(dependencies -> {
+        enqueue(dependencies -> {
             IntegerMask source = (IntegerMask) dependencies.get(0);
             modify(source::getValueAt);
             VisualDebugger.visualizeMask(this);
@@ -56,7 +56,7 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
     }
 
     public IntegerMask blur(int radius) {
-        execute(() -> {
+        enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> StrictMath.round(calculateAreaAverage(radius, x, y, innerCount)));
             VisualDebugger.visualizeMask(this);
@@ -65,7 +65,7 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
     }
 
     public IntegerMask blur(int radius, BooleanMask limiter) {
-        execute(() -> {
+        enqueue(() -> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> StrictMath.round(limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) : getValueAt(x, y)));
