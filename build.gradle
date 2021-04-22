@@ -5,25 +5,16 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
-group 'net.neroxis'
+group 'net.com.faforever.neroxis'
 version "${version}"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/java']
-        }
-        resources {
-            srcDirs = ['src/resources']
-        }
-    }
 
-    test {
-        java {
-            srcDirs = ['src/test/java']
-        }
+test {
+    testLogging {
+        events "failed"
+        showStandardStreams = true
     }
 }
 
@@ -50,7 +41,7 @@ dependencies {
 shadowJar {
     getArchiveFileName().set("NeroxisGen_${generatorVersion}.jar")
     manifest {
-        attributes 'Main-Class': 'neroxis.generator.MapGenerator',
+        attributes 'Main-Class': 'com.faforever.neroxis.generator.MapGenerator',
                 "Implementation-Version": generatorVersion,
                 "Impletementation-Title": "Neroxis Map Generator"
     }
@@ -60,7 +51,7 @@ task populatorJar(type: ShadowJar) {
     getArchiveBaseName().set('MapPopulator')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'neroxis.populator.MapPopulator'
+            attributes 'Main-Class': 'com.faforever.neroxis.populator.MapPopulator'
         }
     }
     project.configurations.implementation.canBeResolved = true
@@ -71,7 +62,7 @@ task evaluatorJar(type: ShadowJar) {
     getArchiveBaseName().set('MapEvaluator')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'neroxis.evaluator.MapEvaluator'
+            attributes 'Main-Class': 'com.faforever.neroxis.evaluator.MapEvaluator'
         }
     }
     project.configurations.implementation.canBeResolved = true
@@ -82,7 +73,7 @@ task transformerJar(type: ShadowJar) {
     getArchiveBaseName().set('MapTransformer')
     from(sourceSets.main.output) {
         manifest {
-            attributes 'Main-Class': 'neroxis.transformer.MapTransformer'
+            attributes 'Main-Class': 'com.faforever.neroxis.transformer.MapTransformer'
         }
     }
     project.configurations.implementation.canBeResolved = true
