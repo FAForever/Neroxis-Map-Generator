@@ -174,7 +174,7 @@ public strictfp class Pipeline {
     }
 
     @Getter
-    public static strictfp class Entry {
+    private static strictfp class Entry {
         private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
@@ -200,8 +200,7 @@ public strictfp class Pipeline {
 
         public synchronized Mask<?, ?> getResult(Mask<?, ?> requestingMask) {
             if (maskBackups.isEmpty()) {
-                new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName())).printStackTrace();
-                return null;
+                throw new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName()));
             }
             return maskBackups.remove(0);
         }
