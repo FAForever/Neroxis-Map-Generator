@@ -76,7 +76,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public T getFinalValueAt(int x, int y) {
-        assertDoneProcessing();
+        Pipeline.await(this);
         return mask[x][y];
     }
 
@@ -726,7 +726,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void assertDoneProcessing() {
-        if (parallel && processing) {
+        if (parallel) {
             throw new IllegalStateException("Mask not finished processing results will not be deterministic");
         }
     }

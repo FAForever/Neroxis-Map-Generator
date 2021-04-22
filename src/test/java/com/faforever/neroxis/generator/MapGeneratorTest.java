@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 public class MapGeneratorTest {
 
     String folderPath = ".";
-    String version = MapGenerator.VERSION;
     long seed = 1234;
     byte spawnCount = 2;
     float landDensity = .56746f;
@@ -38,7 +37,6 @@ public class MapGeneratorTest {
     float roundedMexDensity = DiscreteUtils.discretePercentage(mexDensity, 127);
     int mapSize = 256;
     int numTeams = 2;
-    String numericMapName = String.format("neroxis_map_generator_%s_%d", version, seed);
     String[] keywordArgs = {"--folder-path", ".",
             "--seed", Long.toString(seed),
             "--spawn-count", Byte.toString(spawnCount),

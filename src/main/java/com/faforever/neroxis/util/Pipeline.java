@@ -97,16 +97,13 @@ public strictfp class Pipeline {
         }
     }
 
-    public static <T extends Mask<?, ?>> List<Entry> getDependencyList(List<T> requiredMasks) {
+    public static List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
         List<Entry> res = new ArrayList<>();
 
-        for (T requiredMask : requiredMasks) {
-            if (requiredMask.isParallel()) {
-                for (int i = pipeline.size() - 1; i >= 0; i--) {
-                    if (requiredMask == pipeline.get(i).executingMask) {
-                        res.add(pipeline.get(i));
-                        break;
-                    }
+        for (Mask<?, ?> requiredMask : requiredMasks) {
+            for (int i = pipeline.size() - 1; i >= 0; i--) {
+                if (requiredMask == pipeline.get(i).executingMask) {
+                    res.add(pipeline.get(i));
                 }
             }
         }
