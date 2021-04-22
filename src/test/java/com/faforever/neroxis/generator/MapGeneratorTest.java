@@ -188,6 +188,7 @@ public class MapGeneratorTest {
         long seed1 = instance.getSeed();
 
         Pipeline.reset();
+        Thread.sleep(1000);
         instance = new MapGenerator();
 
         instance.interpretArguments(new String[]{"--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256"});
