@@ -64,10 +64,11 @@ public strictfp class Pipeline {
         pipeline.add(entry);
 
         if (Util.DEBUG) {
-            System.out.printf("%d: New pipeline entry:   %s,  %s,  deps:[%s]\n",
+            System.out.printf("%d: New pipeline entry:   %s,  %s,  %s,  deps:[%s]\n",
                     index,
                     executingMask.getName(),
-                    Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "execute"),
+                    callingMethod,
+                    callingLine,
                     entryDependencies.stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
             );
         }
@@ -104,6 +105,7 @@ public strictfp class Pipeline {
             for (int i = pipeline.size() - 1; i >= 0; i--) {
                 if (requiredMask == pipeline.get(i).executingMask) {
                     res.add(pipeline.get(i));
+                    break;
                 }
             }
         }
