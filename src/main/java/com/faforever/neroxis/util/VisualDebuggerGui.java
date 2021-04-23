@@ -1,8 +1,8 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.map.BooleanMask;
-import com.faforever.neroxis.map.FloatMask;
 import com.faforever.neroxis.map.Mask;
+import com.faforever.neroxis.map.NumberMask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -156,8 +156,8 @@ public strictfp class VisualDebuggerGui {
 
         @Override
         public String getToolTipText(MouseEvent e) {
-            if (mask instanceof FloatMask) {
-                return ((FloatMask) mask).getValueAt((int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX), (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY)).toString();
+            if (mask instanceof NumberMask<?, ?>) {
+                return ((NumberMask<?, ?>) mask).getValueAt((int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX), (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY)).toString();
             } else if (mask instanceof BooleanMask) {
                 return ((BooleanMask) mask).getValueAt((int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX), (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY)).toString();
             } else {

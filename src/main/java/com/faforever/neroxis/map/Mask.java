@@ -3,7 +3,6 @@ package com.faforever.neroxis.map;
 import com.faforever.neroxis.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -15,15 +14,12 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
-@ToString(onlyExplicitlyIncluded = true)
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     protected final SymmetrySettings symmetrySettings;
     @Getter
-    @ToString.Include
     private final String name;
     protected final Random random;
-    @ToString.Include
     protected int plannedSize;
     @Getter
     @Setter
@@ -714,7 +710,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         } else {
             function.accept(dependencies);
             String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
-            VisualDebugger.visualizeMask(this, callingMethod);
+            String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.");
+            VisualDebugger.visualizeMask(this, callingMethod, callingLine);
         }
     }
 
@@ -763,5 +760,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public void show() {
         VisualDebugger.visualizeMask(this, "show");
+    }
+
+    @Override
+    public String toString() {
+        if (name != null) {
+            return String.format("Mask(name=%s,size=%d", name, getSize());
+        } else {
+            return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
+        }
     }
 }

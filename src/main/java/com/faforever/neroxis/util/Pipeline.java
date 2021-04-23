@@ -32,7 +32,7 @@ public strictfp class Pipeline {
         if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.generator");
+        String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
         String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);

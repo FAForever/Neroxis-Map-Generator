@@ -24,7 +24,9 @@ public strictfp class Util {
     public static String getStackTraceLineInPackage(String packageName) {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         for (StackTraceElement ste : stackTrace) {
-            if (ste.getClassName().contains(packageName)) {
+            String className = ste.getClassName();
+            String packName = className.substring(0, className.lastIndexOf("."));
+            if (packName.contains(packageName)) {
                 return ste.getFileName() + ":" + ste.getLineNumber();
             }
         }

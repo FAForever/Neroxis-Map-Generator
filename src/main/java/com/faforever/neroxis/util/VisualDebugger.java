@@ -2,6 +2,7 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.FloatMask;
+import com.faforever.neroxis.map.IntegerMask;
 import com.faforever.neroxis.map.Mask;
 
 import java.awt.*;
@@ -42,6 +43,8 @@ public strictfp class VisualDebugger {
             visualizeMask((FloatMask) mask, method, line);
         } else if (mask instanceof BooleanMask) {
             visualizeMask((BooleanMask) mask, method, line);
+        } else if (mask instanceof IntegerMask) {
+            visualizeMask((IntegerMask) mask, method, line);
         }
     }
 
@@ -65,13 +68,27 @@ public strictfp class VisualDebugger {
         }, mask.hashCode(), mask, method, line);
     }
 
+    private static void visualizeMask(IntegerMask mask, String method, String line) {
+        int max = mask.getMax();
+        int min = mask.getMin();
+        int range = max - min;
+        visualize((x, y) -> {
+            float normalizedValue = (mask.getValueAt(x, y) - min) / (float) range;
+
+            int r = (int) (255 * normalizedValue);
+            int g = (int) (255 * normalizedValue);
+            int b = (int) (255 * normalizedValue);
+
+            return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
+        }, mask.hashCode(), mask, method, line);
+    }
+
     private static boolean dontRecord(Mask<?, ?> mask) {
         if (!ENABLED) {
             return true;
         }
         return drawMasksWhitelist == null || !drawMasksWhitelist.containsKey(mask.hashCode());
     }
-
 
     private static void visualize(ImageSource imageSource, int maskHash, Mask<?, ?> mask, String method, String line) {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);

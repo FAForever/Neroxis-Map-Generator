@@ -1,8 +1,8 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.generator.ElementGenerator;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.generator.ElementGenerator;
+import com.faforever.neroxis.map.generator.ParameterConstraints;
 
 import java.util.ArrayList;
 import java.util.List;
