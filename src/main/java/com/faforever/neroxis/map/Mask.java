@@ -113,6 +113,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
+    public int getImmediateSize() {
+        return mask[0].length;
+    }
+
     protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
         int xLeft = StrictMath.max(0, x - radius);
         int size = getSize();
@@ -137,7 +141,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             } else if (size > newSize) {
                 shrink(newSize);
             }
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -151,7 +154,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             } else if (size > newSize) {
                 decimate(newSize);
             }
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -562,7 +564,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
                 interpolate();
             }
-            VisualDebugger.visualizeMask(this);
         });
     }
 
@@ -578,7 +579,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
                 }
             });
-            VisualDebugger.visualizeMask(this);
         });
     }
 
@@ -650,10 +650,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                 newMask[x][y] = getValueAt(symmetryPoints.get(0));
             });
-                    this.mask = newMask;
-                    VisualDebugger.visualizeMask(this);
-                }
-        );
+            this.mask = newMask;
+        });
         return (U) this;
     }
 
@@ -715,6 +713,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             Pipeline.add(this, dependencies, function);
         } else {
             function.accept(dependencies);
+            String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
+            VisualDebugger.visualizeMask(this, callingMethod);
         }
     }
 
@@ -762,6 +762,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void show() {
-        VisualDebugger.visualizeMask(this);
+        VisualDebugger.visualizeMask(this, "show");
     }
 }

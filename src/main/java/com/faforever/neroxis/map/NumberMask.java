@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.VisualDebugger;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -115,7 +114,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public U clear() {
         enqueue(() -> {
             modify((x, y) -> getDefaultValue());
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -127,7 +125,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             setSize(source.getSize());
             assertCompatibleMask(source);
             modify((x, y) -> source.getValueAt(x, y) ? high : low);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -139,7 +136,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             setSize(source.getSize());
             assertCompatibleMask(source);
             modify(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -149,7 +145,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             add(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -159,7 +154,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             add((x, y) -> source.getValueAt(x, y) ? value : getDefaultValue());
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -167,7 +161,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public U add(T val) {
         enqueue(() -> {
             add((x, y) -> val);
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -177,7 +170,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             add((x, y) -> multiply(source.getValueAt(x, y), weight));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -242,7 +234,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             subtract(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -252,7 +243,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             subtract((x, y) -> source.getValueAt(x, y) ? value : getDefaultValue());
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -261,7 +251,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
         enqueue(() -> {
             assertCompatibleMask(other);
             multiply(other::getValueAt);
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -269,7 +258,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public U multiply(T val) {
         enqueue(() -> {
             multiply((x, y) -> val);
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -328,7 +316,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T otherVal = source.getValueAt(x, y);
                 return thisVal.compareTo(otherVal) > 0 ? thisVal : otherVal;
             });
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -341,7 +328,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = getValueAt(x, y);
                 return source.getValueAt(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
             });
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -352,7 +338,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) < 0 ? thisVal : val;
             });
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -366,7 +351,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T otherVal = source.getValueAt(x, y);
                 return thisVal.compareTo(otherVal) < 0 ? thisVal : otherVal;
             });
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -379,7 +363,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = getValueAt(x, y);
                 return source.getValueAt(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
             });
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -390,7 +373,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) > 0 ? thisVal : val;
             });
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -401,7 +383,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = getValueAt(x, y);
                 return thisVal.compareTo(val) > 0 ? getDefaultValue() : getValueAt(x, y);
             });
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -413,7 +394,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public U zeroOutsideRange(T min, T max) {
         enqueue(() -> {
             modify((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getDefaultValue() : getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -423,7 +403,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.getValueAt(x, y) ? val : getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return (U) this;
     }
@@ -434,7 +413,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             U source = (U) dependencies.get(1);
             assertCompatibleMask(source);
             modify((x, y) -> placement.getValueAt(x, y) ? source.getValueAt(x, y) : getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, area, values);
         return (U) this;
     }
@@ -442,7 +420,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public U zeroInRange(T min, T max) {
         enqueue(() -> {
             modify((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getDefaultValue() : getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         });
         return (U) this;
     }
@@ -450,9 +427,7 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public BooleanMask convertToBooleanMask(T minValue, T maxValue) {
         assertNotParallel();
         Long seed = random != null ? random.nextLong() : null;
-        BooleanMask newMask = new BooleanMask(this, minValue, maxValue, seed);
-        VisualDebugger.visualizeMask(this);
-        return newMask;
+        return new BooleanMask(this, minValue, maxValue, seed);
     }
 
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {

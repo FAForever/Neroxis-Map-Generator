@@ -2,7 +2,6 @@ package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.util.Vector2f;
 import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.VisualDebugger;
 import lombok.Getter;
 
 import java.awt.image.BufferedImage;
@@ -34,7 +33,8 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        enqueue(() -> VisualDebugger.visualizeMask(this));
+        enqueue(() -> {
+        });
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
@@ -51,7 +51,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 imageData.getPixel(x, y, value);
                 return value[0] / 255f;
             });
-            VisualDebugger.visualizeMask(this);
         });
     }
 
@@ -67,7 +66,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             modify(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -83,7 +81,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             modify((x, y) -> source.getValueAt(x, y) ? high : low);
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -152,7 +149,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     public FloatMask addGaussianNoise(float scale) {
         enqueue(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -160,7 +156,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     public FloatMask addWhiteNoise(float scale) {
         enqueue(() -> {
             addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -171,7 +166,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             assertCompatibleMask(source);
             FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -179,7 +173,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     public FloatMask sqrt() {
         enqueue(() -> {
             modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -198,7 +191,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
             });
             mask = maskCopy;
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -219,7 +211,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 maskCopy[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
             });
             mask = maskCopy;
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -232,7 +223,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
             applySymmetry(SymmetryType.SPAWN);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -284,7 +274,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -296,7 +285,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -305,7 +293,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
             this.subtract(tempMask2).clampMin(0f);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -313,7 +300,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
         enqueue(() -> {
             subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -324,7 +310,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
             }
             removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -346,7 +331,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -363,7 +347,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 Vector2f location = possibleLocations.get(random.nextInt(length));
                 addWithOffset(brush, location, true, wrapEdges);
             }
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -373,7 +356,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }

@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public strictfp class Pipeline {
 
@@ -37,8 +36,8 @@ public strictfp class Pipeline {
         String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
-        CompletableFuture<Mask<?, ?>> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
-                .thenApplyAsync(inputs -> {
+        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
+                .thenAcceptAsync(inputs -> {
                     long startTime = System.currentTimeMillis();
                     function.accept(inputs);
                     long functionTime = System.currentTimeMillis() - startTime;
@@ -61,7 +60,6 @@ public strictfp class Pipeline {
                                 callingMethod
                         );
                     }
-                    return executingMask;
                 });
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
@@ -179,30 +177,31 @@ public strictfp class Pipeline {
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
-        private final List<Mask<?, ?>> maskBackups = new ArrayList<>();
+        private final List<Mask<?, ?>> maskCopies = new ArrayList<>();
         private final int index;
         private final String method;
         private final String line;
 
-        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Mask<?, ?>> future, String method, String line) {
+        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies = new HashSet<>(dependencies);
             this.method = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (dependants.size() > 0) {
-                    IntStream.range(0, dependants.size()).forEach(i -> maskBackups.add(executingMask.copy()));
-                }
-                dependants.clear();
+                VisualDebugger.visualizeMask(executingMask, method, line);
+                dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).forEach(dep -> maskCopies.add(executingMask.copy()));
             });
         }
 
         public synchronized Mask<?, ?> getResult(Mask<?, ?> requestingMask) {
-            if (maskBackups.isEmpty()) {
+            if (executingMask.equals(requestingMask)) {
+                return executingMask;
+            }
+            if (maskCopies.isEmpty()) {
                 throw new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName()));
             }
-            return maskBackups.remove(0);
+            return maskCopies.remove(0);
         }
     }
 }

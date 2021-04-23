@@ -30,25 +30,27 @@ public strictfp class VisualDebugger {
         }
     }
 
-    public static void visualizeMask(Mask<?, ?> mask) {
+    public static void visualizeMask(Mask<?, ?> mask, String method) {
+        visualizeMask(mask, method, null);
+    }
+
+    public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
+        if (dontRecord(mask)) {
+            return;
+        }
         if (mask instanceof FloatMask) {
-            visualizeMask((FloatMask) mask);
+            visualizeMask((FloatMask) mask, method, line);
         } else if (mask instanceof BooleanMask) {
-            visualizeMask((BooleanMask) mask);
+            visualizeMask((BooleanMask) mask, method, line);
         }
     }
 
-    public static void visualizeMask(BooleanMask mask) {
-        if (dontRecord(mask)) {
-            return;
-        }
-        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask);
+    private static void visualizeMask(BooleanMask mask, String method, String line) {
+        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB()
+                , mask.hashCode(), mask, method, line);
     }
 
-    public static void visualizeMask(FloatMask mask) {
-        if (dontRecord(mask)) {
-            return;
-        }
+    private static void visualizeMask(FloatMask mask, String method, String line) {
         float max = mask.getMax();
         float min = mask.getMin();
         float range = max - min;
@@ -60,7 +62,7 @@ public strictfp class VisualDebugger {
             int b = (int) (255 * normalizedValue);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.getSize(), mask.hashCode(), mask);
+        }, mask.hashCode(), mask, method, line);
     }
 
     private static boolean dontRecord(Mask<?, ?> mask) {
@@ -71,10 +73,10 @@ public strictfp class VisualDebugger {
     }
 
 
-    private static void visualize(ImageSource imageSource, int size, int maskHash, Mask<?, ?> mask) {
+    private static void visualize(ImageSource imageSource, int maskHash, Mask<?, ?> mask, String method, String line) {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);
         String maskName = maskDetails[0];
-        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
+        int size = mask.getImmediateSize();
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels
         for (int y = 0; y < size; y++) {
@@ -83,7 +85,7 @@ public strictfp class VisualDebugger {
                 currentImage.setRGB(x, y, color);
             }
         }
-        VisualDebuggerGui.update(maskName + " " + callingMethod, currentImage, mask.copy());
+        VisualDebuggerGui.update(maskName + " " + method, currentImage, mask.copy(), line);
     }
 
     @FunctionalInterface

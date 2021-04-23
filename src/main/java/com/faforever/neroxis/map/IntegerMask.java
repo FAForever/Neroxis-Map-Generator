@@ -1,7 +1,5 @@
 package com.faforever.neroxis.map;
 
-import com.faforever.neroxis.util.VisualDebugger;
-
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,7 +18,8 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
         super(seed, symmetrySettings, name, parallel);
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
-        enqueue(() -> VisualDebugger.visualizeMask(this));
+        enqueue(() -> {
+        });
     }
 
     public IntegerMask(IntegerMask sourceMask, Long seed) {
@@ -35,7 +34,6 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
         enqueue(dependencies -> {
             IntegerMask source = (IntegerMask) dependencies.get(0);
             modify(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -59,7 +57,6 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> StrictMath.round(calculateAreaAverage(radius, x, y, innerCount)));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -69,7 +66,6 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             modify((x, y) -> StrictMath.round(limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) : getValueAt(x, y)));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }

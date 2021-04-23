@@ -2,7 +2,6 @@ package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.util.Vector2f;
 import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.VisualDebugger;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -30,7 +29,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
         enqueue(dependencies -> {
-            VisualDebugger.visualizeMask(this);
         });
     }
 
@@ -46,7 +44,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             modify(source::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -62,7 +59,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -78,7 +74,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
-            VisualDebugger.visualizeMask(this);
         }, other);
     }
 
@@ -114,7 +109,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask clear() {
         enqueue(dependencies -> {
             apply((x, y) -> setValueAt(x, y, false));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -126,7 +120,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -138,7 +131,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source, threshold);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -150,7 +142,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
         enqueue(() -> {
             modifyWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -158,7 +149,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask flipValues(float density) {
         enqueue(() -> {
             modifyWithSymmetry(SymmetryType.SPAWN, (x, y) -> getValueAt(x, y) && random.nextFloat() < density);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -194,7 +184,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -211,7 +200,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 int dy = (random.nextBoolean() ? 1 : -1) * random.nextInt(maxStepSize + 1);
                 location.add(dx, dy);
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -228,7 +216,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 int dy = (target.getY() > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
                 location.add(dx, dy);
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -271,7 +258,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     break;
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -283,7 +269,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
                 path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -317,7 +302,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -330,7 +314,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             coordinates.addAll(symmetricCoordinates);
             clear();
             fillCoordinates(coordinates, true);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -338,7 +321,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask invert() {
         enqueue(() -> {
             modify((x, y) -> !getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -352,7 +334,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 }
             });
             modify((x, y) -> maskCopy[x][y] || getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -367,7 +348,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             });
             modify((x, y) -> !maskCopy[x][y] && getValueAt(x, y));
 
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -407,7 +387,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     maskCopy[x][y] = getValueAt(x, y);
             });
             mask = maskCopy;
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -417,7 +396,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask holes = new BooleanMask(getSize(), random.nextLong(), symmetrySettings, getName() + "holes");
             holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
             minus(holes);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -442,7 +420,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 });
                 mask = newMask;
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -467,7 +444,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 });
                 mask = newMask;
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -477,7 +453,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> maskCopy[x][y] = isEdge(x, y));
             mask = maskCopy;
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -494,7 +469,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
             modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -503,7 +477,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             assertCompatibleMask(other);
             modify(other::getValueAt);
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -513,7 +486,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) || source.getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -523,7 +495,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -533,7 +504,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -594,7 +564,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong()).setSize(size);
             combineWithOffset(brush, minValue, maxValue, location, false);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -604,7 +573,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) && source.getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -614,7 +582,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             modify((x, y) -> getValueAt(x, y) && !source.getValueAt(x, y));
-            VisualDebugger.visualizeMask(this);
         }, other);
         return this;
     }
@@ -628,7 +595,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
             modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -639,7 +605,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask symmetryLimit = new BooleanMask(size, random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
             symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
             intersect(symmetryLimit);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -666,7 +631,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     break;
             }
             applySymmetry(symmetryType);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -730,7 +694,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     break;
             }
             applySymmetry(SymmetryType.SPAWN);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -763,7 +726,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -807,7 +769,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -828,7 +789,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     }
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -844,7 +804,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     setValueAt(size - 1 - b, a, value);
                 }
             }
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -852,7 +811,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask fillShape(Vector2f location) {
         enqueue(() -> {
             fillCoordinates(getShapeCoordinates(location), !getValueAt(location));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -860,7 +818,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask fillCoordinates(Collection<Vector2f> coordinates, boolean value) {
         enqueue(() -> {
             coordinates.forEach(location -> setValueAt(location, value));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -870,7 +827,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             combine(filledGaps);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -880,7 +836,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             minus(filledGaps);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -901,7 +856,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 }
             });
             applySymmetry(SymmetryType.SPAWN);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -909,7 +863,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask removeAreasBiggerThan(int maxArea) {
         enqueue(() -> {
             minus(copy().removeAreasSmallerThan(maxArea));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -918,7 +871,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             removeAreasSmallerThan(minSize);
             removeAreasBiggerThan(maxSize);
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -926,7 +878,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
         enqueue(() -> {
             minus(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
-            VisualDebugger.visualizeMask(this);
         });
         return this;
     }
@@ -1140,9 +1091,5 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             stringBuilder.append(String.format("%02x", datum));
         }
         return stringBuilder.toString();
-    }
-
-    public void show() {
-        VisualDebugger.visualizeMask(this);
     }
 }

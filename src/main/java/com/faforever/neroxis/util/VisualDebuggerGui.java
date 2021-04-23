@@ -24,7 +24,7 @@ public strictfp class VisualDebuggerGui {
 
     private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
     private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
-    private static final MouseListener mouseListener = new MouseListener();
+    private static final CanvasMouseListener CANVAS_MOUSE_LISTENER = new CanvasMouseListener();
     private static JFrame frame;
     private static Container contentPane;
     private static JList<MaskListItem> list;
@@ -68,24 +68,22 @@ public strictfp class VisualDebuggerGui {
         contentPane.add(listScroller);
     }
 
-    public synchronized static void update(String uniqueMaskName, BufferedImage image, Mask<?, ?> mask) {
+    public synchronized static void update(String uniqueMaskName, BufferedImage image, Mask<?, ?> mask, String line) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
-            int count = 0;
             for (int i = 0; i < listModel.getSize(); i++) {
                 if (listModel.get(i).maskName.split(" ")[0].equals(uniqueMaskName.split(" ")[0])) {
                     ind = i + 1;
-                    count += 1;
                 }
             }
-            uniqueMaskName = String.format("%s %d", uniqueMaskName, count);
+            uniqueMaskName = String.format("%s %s", uniqueMaskName, line);
             maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
             canvas.setToolTipText("");
-            canvas.addMouseListener(mouseListener);
-            canvas.addMouseMotionListener(mouseListener);
-            canvas.addMouseWheelListener(mouseListener);
+            canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
+            canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
+            canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
             canvas.setViewModel(image, mask);
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
@@ -174,11 +172,11 @@ public strictfp class VisualDebuggerGui {
 
         @Override
         public String toString() {
-            return "  " + maskName + "  ";
+            return maskName;
         }
     }
 
-    private static class MouseListener extends MouseInputAdapter {
+    private static class CanvasMouseListener extends MouseInputAdapter {
         private int x;
         private int y;
 
