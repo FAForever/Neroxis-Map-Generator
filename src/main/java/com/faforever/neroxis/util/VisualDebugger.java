@@ -5,8 +5,6 @@ import com.faforever.neroxis.map.FloatMask;
 import com.faforever.neroxis.map.Mask;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.HashMap;
@@ -44,7 +42,7 @@ public strictfp class VisualDebugger {
         if (dontRecord(mask)) {
             return;
         }
-        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode());
+        visualize((x, y) -> mask.getValueAt(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), mask.getSize(), mask.hashCode(), mask);
     }
 
     public static void visualizeMask(FloatMask mask) {
@@ -62,7 +60,7 @@ public strictfp class VisualDebugger {
             int b = (int) (255 * normalizedValue);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.getSize(), mask.hashCode());
+        }, mask.getSize(), mask.hashCode(), mask);
     }
 
     private static boolean dontRecord(Mask<?, ?> mask) {
@@ -73,11 +71,10 @@ public strictfp class VisualDebugger {
     }
 
 
-    private static void visualize(ImageSource imageSource, int size, int maskHash) {
+    private static void visualize(ImageSource imageSource, int size, int maskHash, Mask<?, ?> mask) {
         String[] maskDetails = drawMasksWhitelist.get(maskHash);
         String maskName = maskDetails[0];
         String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
-        float perPixelSize = calculateAutoZoom(size);
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         // iterate source pixels
         for (int y = 0; y < size; y++) {
@@ -86,16 +83,7 @@ public strictfp class VisualDebugger {
                 currentImage.setRGB(x, y, color);
             }
         }
-        BufferedImage scaledImage = new BufferedImage((int) (size * perPixelSize), (int) (size * perPixelSize), BufferedImage.TYPE_INT_RGB);
-        AffineTransform at = new AffineTransform();
-        at.scale(perPixelSize, perPixelSize);
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        scaleOp.filter(currentImage, scaledImage);
-        VisualDebuggerGui.update(maskName + " " + callingMethod, scaledImage, size);
-    }
-
-    private static float calculateAutoZoom(int imageSize) {
-        return 512f / imageSize;
+        VisualDebuggerGui.update(maskName + " " + callingMethod, currentImage, mask.copy());
     }
 
     @FunctionalInterface
