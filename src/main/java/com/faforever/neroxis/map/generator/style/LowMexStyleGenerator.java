@@ -18,6 +18,7 @@ public strictfp class LowMexStyleGenerator extends StyleGenerator {
         parameterConstraints = ParameterConstraints.builder()
                 .mexDensity(0f, .25f)
                 .mapSizes(256, 512)
+                .spawnCount(0, 4)
                 .build();
     }
 

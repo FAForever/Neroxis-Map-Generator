@@ -49,7 +49,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
         if (spawnCount <= 2) {
             mexCount = (int) (14 + 18 * mexDensity);
         } else if (spawnCount <= 4) {
-            mexCount = (int) (9 + 8 * mexDensity);
+            mexCount = (int) (12 + 6 * mexDensity);
         } else if (spawnCount <= 10) {
             mexCount = (int) (8 + 7 * mexDensity);
         } else if (spawnCount <= 12) {
