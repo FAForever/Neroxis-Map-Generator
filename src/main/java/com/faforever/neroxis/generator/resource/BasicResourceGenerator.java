@@ -58,7 +58,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
             mexCount = (int) (6 + 7 * mexDensity);
         }
         if (mapSize < 512) {
-            mexMultiplier = .75f;
+            mexMultiplier = .5f;
         } else if (mapSize > 512) {
             if (spawnCount <= 4) {
                 mexMultiplier = 1.75f;

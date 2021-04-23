@@ -7,7 +7,7 @@ public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
     public LowMexResourceGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                 .mexDensity(0f, .25f)
-                .mapSizes(256, 512)
+                .mapSizes(512)
                 .spawnCount(0, 4)
                 .build();
     }
@@ -27,7 +27,7 @@ public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
             mexCount = (int) (6 + 4 * mexDensity);
         }
         if (mapSize < 512) {
-            mexMultiplier = .75f;
+            mexMultiplier = .9f;
         }
         mexCount *= mexMultiplier;
         return mexCount * spawnCount;
