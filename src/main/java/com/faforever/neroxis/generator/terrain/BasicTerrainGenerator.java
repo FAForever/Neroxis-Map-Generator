@@ -165,7 +165,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);
         plateaus.dilute(.5f, SymmetryType.TERRAIN, map.getSize() / 128);
         plateaus.setSize(map.getSize() + 1);
-        plateaus.blur(16, .25f);
+        plateaus.blur(16, .75f);
     }
 
     protected void mountainSetup() {
@@ -238,8 +238,8 @@ public class BasicTerrainGenerator extends TerrainGenerator {
                 .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0f).blur(4, deepWater).blur(1);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
-                .setToValue(spawnLandMask, landHeight).add(heightmapPlateaus).setToValue(spawnPlateauMask, plateauHeight + landHeight)
-                .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
+                .add(heightmapPlateaus).setToValue(spawnLandMask, landHeight).setToValue(spawnPlateauMask, plateauHeight + landHeight)
+                .blur(1, spawnLandMask.copy().inflate(4)).blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
         noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64);
         noise.addWhiteNoise(plateauHeight / 2).resample(mapSize + 1);
@@ -350,9 +350,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         land.combine(paintedPlateaus);
         plateaus.replace(paintedPlateaus);
+        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
         heightmapPlateaus.add(plateaus, 3f).clampMax(plateauHeight).blur(1, plateaus);
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
 
         BooleanMask plateauBase = new BooleanMask(heightmapPlateaus, 1f, random.nextLong(), "plateauBase");
 

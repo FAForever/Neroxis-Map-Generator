@@ -31,7 +31,6 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - normalizedLandDensity) + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (24 * (random.nextFloat() * .25f + normalizedLandDensity * .75f))) + mapSize / 8;
-        spawnPlateauMask.clear();
         land.setSize(mapSize + 1);
         land.invert();
         BooleanMask noLand = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand", true);
