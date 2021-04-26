@@ -3,10 +3,7 @@ package com.faforever.neroxis.map.exporter;
 import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.generator.PreviewGenerator;
-import com.faforever.neroxis.util.DDSHeader;
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.Vector4f;
+import com.faforever.neroxis.util.*;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
 
@@ -15,7 +12,9 @@ import java.awt.image.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.faforever.neroxis.jsquish.Squish.compressImage;
 import static com.faforever.neroxis.util.Swapper.swap;
@@ -208,6 +207,20 @@ public strictfp class SCMapExporter {
         }
     }
 
+    public static void exportNormal(Path folderPath, SCMap map) throws IOException {
+        final String fileFormat = "dds";
+        Path decalsPath = Paths.get("env", "decals");
+        Path normalsPath = folderPath.resolve(decalsPath).resolve("map_normal." + fileFormat);
+        Files.createDirectories(normalsPath.getParent());
+        map.getDecals().add(new Decal(Paths.get("/maps").resolve(folderPath.getFileName()).resolve(decalsPath).resolve("map_normal." + fileFormat).toString().replace('\\', '/'),
+                new Vector2(), new Vector3(), map.getSize(), 10000));
+        try {
+            ImageUtils.writeNormalDDS(map.getNormalMap(), normalsPath);
+        } catch (IOException e) {
+            System.out.print("Could not write the normal map image\n" + e);
+        }
+    }
+
     private static void writeFloat(float f) throws IOException {
         out.writeInt(swap(Float.floatToRawIntBits(f)));
     }
@@ -254,20 +267,20 @@ public strictfp class SCMapExporter {
         }
     }
 
-    private static void writeVector3f(Vector3f v) throws IOException {
+    private static void writeVector3f(Vector3 v) throws IOException {
         writeFloat(v.getX());
         writeFloat(v.getY());
         writeFloat(v.getZ());
     }
 
-    private static void writeVector4f(Vector4f v) throws IOException {
+    private static void writeVector4f(Vector4 v) throws IOException {
         writeFloat(v.getX());
         writeFloat(v.getY());
         writeFloat(v.getZ());
         writeFloat(v.getW());
     }
 
-    private static void writeVector2f(Vector2f v) throws IOException {
+    private static void writeVector2f(Vector2 v) throws IOException {
         writeFloat(v.getX());
         writeFloat(v.getY());
     }
@@ -275,10 +288,10 @@ public strictfp class SCMapExporter {
     private static void writeProp(Prop prop) throws IOException {
         writeStringNull(prop.getPath());
         writeVector3f(prop.getPosition());
-        writeVector3f(new Vector3f((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
-        writeVector3f(new Vector3f(0f, 1f, 0f));
-        writeVector3f(new Vector3f((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
-        writeVector3f(new Vector3f(1f, 1f, 1f)); //scale
+        writeVector3f(new Vector3((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
+        writeVector3f(new Vector3(0f, 1f, 0f));
+        writeVector3f(new Vector3((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
+        writeVector3f(new Vector3(1f, 1f, 1f)); //scale
     }
 
     private static void writeDecal(Decal decal, int id) throws IOException {

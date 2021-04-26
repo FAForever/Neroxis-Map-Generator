@@ -1,9 +1,13 @@
-package com.faforever.neroxis.map;
+package com.faforever.neroxis.map.mask;
 
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
-import lombok.Getter;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings("unchecked")
-@Getter
 public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -25,26 +28,15 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(seed, symmetrySettings, name, parallel);
-        this.mask = getEmptyMask(size);
-        this.plannedSize = size;
-        enqueue(dependencies -> {
-        });
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public BooleanMask(BooleanMask other, Long seed) {
-        this(other, seed, null);
+        super(other, seed);
     }
 
     public BooleanMask(BooleanMask other, Long seed, String name) {
-        super(seed, other.getSymmetrySettings(), name, other.isParallel());
-        this.mask = getEmptyMask(other.getSize());
-        this.plannedSize = other.getSize();
-        setProcessing(other.isProcessing());
-        enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
-            modify(source::getValueAt);
-        }, other);
+        super(other, seed, name);
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, Long seed) {
@@ -52,13 +44,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, Long seed, String name) {
-        super(seed, other.getSymmetrySettings(), name, other.isParallel());
-        this.mask = getEmptyMask(other.getSize());
-        this.plannedSize = other.getSize();
-        setProcessing(other.isProcessing());
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
+            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
+            return this;
         }, other);
     }
 
@@ -67,14 +57,17 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed, String name) {
-        super(seed, other.getSymmetrySettings(), name, other.isParallel());
-        this.mask = getEmptyMask(other.getSize());
-        this.plannedSize = other.getSize();
-        setProcessing(other.isProcessing());
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
+            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
+            return this;
         }, other);
+    }
+
+    @Override
+    protected Boolean getZeroValue() {
+        return false;
     }
 
     @Override
@@ -82,19 +75,19 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         Boolean[][] empty = new Boolean[size][size];
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                empty[x][y] = false;
+                empty[x][y] = getZeroValue();
             }
         }
         return empty;
     }
 
     public boolean isEdge(int x, int y) {
-        boolean value = getValueAt(x, y);
+        boolean value = get(x, y);
         int size = getSize();
-        return ((x > 0 && getValueAt(x - 1, y) != value)
-                || (y > 0 && getValueAt(x, y - 1) != value)
-                || (x < size - 1 && getValueAt(x + 1, y) != value)
-                || (y < size - 1 && getValueAt(x, y + 1) != value));
+        return ((x > 0 && get(x - 1, y) != value)
+                || (y > 0 && get(x, y - 1) != value)
+                || (x < size - 1 && get(x + 1, y) != value)
+                || (y < size - 1 && get(x, y + 1) != value));
     }
 
     @Override
@@ -106,13 +99,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         }
     }
 
-    public BooleanMask clear() {
-        enqueue(dependencies -> {
-            apply((x, y) -> setValueAt(x, y, false));
-        });
-        return this;
-    }
-
     public BooleanMask init(BooleanMask other) {
         plannedSize = other.getSize();
         enqueue(dependencies -> {
@@ -120,6 +106,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source);
+            return this;
         }, other);
         return this;
     }
@@ -131,6 +118,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source, threshold);
+            return this;
         }, other);
         return this;
     }
@@ -140,16 +128,12 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        enqueue(() -> {
-            modifyWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
-        });
+        enqueue(() -> setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density));
         return this;
     }
 
     public BooleanMask flipValues(float density) {
-        enqueue(() -> {
-            modifyWithSymmetry(SymmetryType.SPAWN, (x, y) -> getValueAt(x, y) && random.nextFloat() < density);
-        });
+        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> get(x, y) && random.nextFloat() < density));
         return this;
     }
 
@@ -165,8 +149,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
                 for (int j = 0; j < numSteps; j++) {
                     if (inBounds(x, y)) {
-                        setValueAt(x, y, true);
-                        getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint, true));
+                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
                     }
                     switch (random.nextInt(4)) {
                         case 0:
@@ -188,10 +171,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask randomWalkWithBrush(Vector2f start, String brushName, int size, int numberOfUses,
+    public BooleanMask randomWalkWithBrush(Vector2 start, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize) {
         enqueue(() -> {
-            Vector2f location = new Vector2f(start);
+            Vector2 location = new Vector2(start);
             BooleanMask brush = loadBrush(brushName, random.nextLong())
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
             for (int i = 0; i < numberOfUses; i++) {
@@ -204,10 +187,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask guidedWalkWithBrush(Vector2f start, Vector2f target, String brushName, int size, int numberOfUses,
+    public BooleanMask guidedWalkWithBrush(Vector2 start, Vector2 target, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
         enqueue(() -> {
-            Vector2f location = new Vector2f(start);
+            Vector2 location = new Vector2(start);
             BooleanMask brush = loadBrush(brushName, random.nextLong())
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
             for (int i = 0; i < numberOfUses; i++) {
@@ -220,33 +203,32 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask path(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
+    public BooleanMask path(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         enqueue(() -> {
             int size = getSize();
-            List<Vector2f> checkPoints = new ArrayList<>();
-            checkPoints.add(new Vector2f(start));
+            List<Vector2> checkPoints = new ArrayList<>();
+            checkPoints.add(new Vector2(start));
             for (int i = 0; i < numMiddlePoints; i++) {
-                Vector2f previousLoc = checkPoints.get(checkPoints.size() - 1);
+                Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.getAngle(end);
                 if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4 && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
                     angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f;
                 }
                 float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
-                Vector2f nextLoc = new Vector2f(previousLoc).addPolar(angle, magnitude);
+                Vector2 nextLoc = new Vector2(previousLoc).addPolar(angle, magnitude);
                 checkPoints.add(nextLoc);
             }
-            checkPoints.add(new Vector2f(end));
-            checkPoints.forEach(point -> point.round().clampMin(0, 0).clampMax(size - 1, size - 1));
+            checkPoints.add(new Vector2(end));
+            checkPoints.forEach(point -> point.round().clampMin(0f).clampMax(size - 1));
             int numSteps = 0;
             for (int i = 0; i < checkPoints.size() - 1; i++) {
-                Vector2f location = checkPoints.get(i);
-                Vector2f nextLoc = checkPoints.get(i + 1);
+                Vector2 location = checkPoints.get(i);
+                Vector2 nextLoc = checkPoints.get(i + 1);
                 float oldAngle = location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
                 while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
-                    List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                    List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
                     if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
-                        setValueAt(location, true);
-                        symmetryPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, true));
+                        applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
                     float angle = oldAngle * .5f + location.getAngle(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * maxAngleError;
@@ -262,11 +244,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask connect(Vector2f start, Vector2f end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
+    public BooleanMask connect(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         enqueue(() -> {
             path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
-                List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
+                List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
                 path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             }
         });
@@ -283,8 +265,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 directions.remove(regressiveDir);
                 for (int j = 0; j < numSteps; j++) {
                     if (inBounds(x, y)) {
-                        setValueAt(x, y, true);
-                        getSymmetryPoints(x, y, SymmetryType.TERRAIN).forEach(symmetryPoint -> setValueAt(symmetryPoint, true));
+                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
                     }
                     switch (directions.get(random.nextInt(directions.size()))) {
                         case 0:
@@ -308,8 +289,8 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
 
     public BooleanMask space(float minSpacing, float maxSpacing) {
         enqueue(() -> {
-            List<Vector2f> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
-            List<Vector2f> symmetricCoordinates = new ArrayList<>();
+            List<Vector2> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
+            List<Vector2> symmetricCoordinates = new ArrayList<>();
             coordinates.forEach(coordinate -> symmetricCoordinates.addAll(getSymmetryPoints(coordinate, SymmetryType.SPAWN)));
             coordinates.addAll(symmetricCoordinates);
             clear();
@@ -319,9 +300,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public BooleanMask invert() {
-        enqueue(() -> {
-            modify((x, y) -> !getValueAt(x, y));
-        });
+        enqueue(() -> set((x, y) -> !get(x, y)));
         return this;
     }
 
@@ -329,11 +308,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
-                if (getValueAt(x, y) && isEdge(x, y)) {
+                if (get(x, y) && isEdge(x, y)) {
                     markInRadius(radius, maskCopy, x, y, true);
                 }
             });
-            modify((x, y) -> maskCopy[x][y] || getValueAt(x, y));
+            set((x, y) -> maskCopy[x][y] || get(x, y));
         });
         return this;
     }
@@ -342,11 +321,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             Boolean[][] maskCopy = getEmptyMask(getSize());
             apply((x, y) -> {
-                if (!getValueAt(x, y) && isEdge(x, y)) {
+                if (!get(x, y) && isEdge(x, y)) {
                     markInRadius(radius, maskCopy, x, y, true);
                 }
             });
-            modify((x, y) -> !maskCopy[x][y] && getValueAt(x, y));
+            set((x, y) -> !maskCopy[x][y] && get(x, y));
 
         });
         return this;
@@ -373,18 +352,18 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             Boolean[][] maskCopy = getEmptyMask(size);
             apply((x, y) -> {
                 int count = 0;
-                if (x > 0 && !getValueAt(x - 1, y))
+                if (x > 0 && !get(x - 1, y))
                     count++;
-                if (y > 0 && !getValueAt(x, y - 1))
+                if (y > 0 && !get(x, y - 1))
                     count++;
-                if (x < size - 1 && !getValueAt(x + 1, y))
+                if (x < size - 1 && !get(x + 1, y))
                     count++;
-                if (y < size - 1 && !getValueAt(x, y + 1))
+                if (y < size - 1 && !get(x, y + 1))
                     count++;
                 if (count > 1)
                     maskCopy[x][y] = false;
                 else
-                    maskCopy[x][y] = getValueAt(x, y);
+                    maskCopy[x][y] = get(x, y);
             });
             mask = maskCopy;
         });
@@ -413,9 +392,9 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
-                    boolean value = getValueAt(x, y) || (isEdge(x, y) && random.nextFloat() < strength);
+                    boolean value = get(x, y) || (isEdge(x, y) && random.nextFloat() < strength);
                     newMask[x][y] = value;
-                    List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
+                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
                     symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
                 });
                 mask = newMask;
@@ -437,9 +416,9 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] newMask = getEmptyMask(getSize());
                 applyWithSymmetry(symmetryType, (x, y) -> {
-                    boolean value = getValueAt(x, y) && (!isEdge(x, y) || random.nextFloat() > strength);
+                    boolean value = get(x, y) && (!isEdge(x, y) || random.nextFloat() > strength);
                     newMask[x][y] = value;
-                    List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
+                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
                     symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
                 });
                 mask = newMask;
@@ -457,6 +436,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
+    @Override
     public BooleanMask interpolate() {
         return blur(1, .35f);
     }
@@ -468,15 +448,17 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask blur(int radius, float density) {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
-            modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
+            set((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
         });
         return this;
     }
 
     public BooleanMask replace(BooleanMask other) {
         enqueue(dependencies -> {
-            assertCompatibleMask(other);
-            modify(other::getValueAt);
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            set(source::get);
+            return this;
         }, other);
         return this;
     }
@@ -485,7 +467,8 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
-            modify((x, y) -> getValueAt(x, y) || source.getValueAt(x, y));
+            set((x, y) -> get(x, y) || source.get(x, y));
+            return this;
         }, other);
         return this;
     }
@@ -494,7 +477,8 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
-            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
+            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
+            return this;
         }, other);
         return this;
     }
@@ -503,64 +487,35 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
-            modify((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
+            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
+            return this;
         }, other);
         return this;
     }
 
-    public BooleanMask combineWithOffset(BooleanMask other, Vector2f loc, boolean centered, boolean wrapEdges) {
+    public BooleanMask combineWithOffset(BooleanMask other, Vector2 loc, boolean centered, boolean wrapEdges) {
         return combineWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
 
     public BooleanMask combineWithOffset(BooleanMask other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            int size = getSize();
-            int otherSize = source.getSize();
-            int smallerSize = StrictMath.min(size, otherSize);
-            int offsetX;
-            int offsetY;
-            if (center) {
-                offsetX = xCoordinate - smallerSize / 2;
-                offsetY = yCoordinate - smallerSize / 2;
-            } else {
-                offsetX = xCoordinate;
-                offsetY = yCoordinate;
-            }
-            if (size >= otherSize) {
-                apply((x, y) -> {
-                    int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
-                    int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
-                    if (inBounds(shiftX, shiftY) && source.getValueAt(x, y)) {
-                        setValueAt(shiftX, shiftY, true);
-                        List<Vector2f> symmetryPoints = getSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN);
-                        for (Vector2f symmetryPoint : symmetryPoints) {
-                            setValueAt(symmetryPoint, true);
-                        }
-                    }
-                });
-            } else {
-                source.apply((x, y) -> {
-                    int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
-                    int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
-                    if (source.inBounds(shiftX, shiftY) && other.getValueAt(shiftX, shiftY)) {
-                        setValueAt(x, y, true);
-                    }
-                });
-            }
+            applyWithOffset(source, this::set, xCoordinate, yCoordinate, center, wrapEdges);
+            return this;
         }, other);
         return this;
     }
 
-    private <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combineWithOffset(T other, U minValue, U maxValue, Vector2f location, boolean wrapEdges) {
+    private <T extends NumberMask<U, ?>, U extends Number & Comparable<U>> BooleanMask combineWithOffset(T other, U minValue, U maxValue, Vector2 location, boolean wrapEdges) {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             combineWithOffset(source.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
+            return this;
         }, other);
         return this;
     }
 
-    public BooleanMask combineBrush(Vector2f location, String brushName, float minValue, float maxValue, int size) {
+    public BooleanMask combineBrush(Vector2 location, String brushName, float minValue, float maxValue, int size) {
         enqueue(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong()).setSize(size);
             combineWithOffset(brush, minValue, maxValue, location, false);
@@ -572,7 +527,8 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
-            modify((x, y) -> getValueAt(x, y) && source.getValueAt(x, y));
+            set((x, y) -> get(x, y) && source.get(x, y));
+            return this;
         }, other);
         return this;
     }
@@ -581,7 +537,8 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
-            modify((x, y) -> getValueAt(x, y) && !source.getValueAt(x, y));
+            set((x, y) -> get(x, y) && !source.get(x, y));
+            return this;
         }, other);
         return this;
     }
@@ -594,7 +551,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(() -> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
-            modify((x, y) -> getValueAt(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
+            set((x, y) -> get(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
         });
         return this;
     }
@@ -698,11 +655,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask fillCircle(Vector3f v, float radius, boolean value) {
-        return fillCircle(new Vector2f(v), radius, value);
+    public BooleanMask fillCircle(Vector3 v, float radius, boolean value) {
+        return fillCircle(new Vector2(v), radius, value);
     }
 
-    public BooleanMask fillCircle(Vector2f v, float radius, boolean value) {
+    public BooleanMask fillCircle(Vector2 v, float radius, boolean value) {
         return fillCircle(v.getX(), v.getY(), radius, value);
     }
 
@@ -722,7 +679,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     dy = y - cy;
                     float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
                     if (inBounds(cx, cy) && dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
-                        setValueAt(cx, cy, value);
+                        set(cx, cy, value);
                     }
                 }
             }
@@ -730,7 +687,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask fillSquare(Vector2f v, int extent, boolean value) {
+    public BooleanMask fillSquare(Vector2 v, int extent, boolean value) {
         return fillSquare((int) v.getX(), (int) v.getY(), extent, value);
     }
 
@@ -738,7 +695,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return fillRect(x, y, extent, extent, value);
     }
 
-    public BooleanMask fillRect(Vector2f v, int width, int height, boolean value) {
+    public BooleanMask fillRect(Vector2 v, int width, int height, boolean value) {
         return fillRect((int) v.getX(), (int) v.getY(), width, height, value);
     }
 
@@ -754,7 +711,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
     }
 
-    public BooleanMask fillParallelogram(Vector2f v, int width, int height, int xSlope, int ySlope, boolean value) {
+    public BooleanMask fillParallelogram(Vector2 v, int width, int height, int xSlope, int ySlope, boolean value) {
         return fillParallelogram((int) v.getX(), (int) v.getY(), width, height, xSlope, ySlope, value);
     }
 
@@ -765,7 +722,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     int calcX = x + px + py * xSlope;
                     int calcY = y + py + px * ySlope;
                     if (inBounds(calcX, calcY)) {
-                        setValueAt(calcX, calcY, value);
+                        set(calcX, calcY, value);
                     }
                 }
             }
@@ -785,7 +742,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                         x = cx + y;
                     }
                     if (x >= 0 && x < size) {
-                        setValueAt(x, y, value);
+                        set(x, y, value);
                     }
                 }
             }
@@ -798,27 +755,25 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             int size = getSize();
             for (int a = 0; a < rimWidth; a++) {
                 for (int b = 0; b < size - rimWidth; b++) {
-                    setValueAt(a, b, value);
-                    setValueAt(size - 1 - a, size - 1 - b, value);
-                    setValueAt(b, size - 1 - a, value);
-                    setValueAt(size - 1 - b, a, value);
+                    set(a, b, value);
+                    set(size - 1 - a, size - 1 - b, value);
+                    set(b, size - 1 - a, value);
+                    set(size - 1 - b, a, value);
                 }
             }
         });
         return this;
     }
 
-    public BooleanMask fillShape(Vector2f location) {
+    public BooleanMask fillShape(Vector2 location) {
         enqueue(() -> {
-            fillCoordinates(getShapeCoordinates(location), !getValueAt(location));
+            fillCoordinates(getShapeCoordinates(location), !get(location));
         });
         return this;
     }
 
-    public BooleanMask fillCoordinates(Collection<Vector2f> coordinates, boolean value) {
-        enqueue(() -> {
-            coordinates.forEach(location -> setValueAt(location, value));
-        });
+    public BooleanMask fillCoordinates(Collection<Vector2> coordinates, boolean value) {
+        enqueue(() -> coordinates.forEach(location -> set(location, value)));
         return this;
     }
 
@@ -843,12 +798,12 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public BooleanMask removeAreasSmallerThan(int minArea) {
         enqueue(() -> {
             int size = getSize();
-            Set<Vector2f> seen = new HashSet<>(size * size * 2);
+            Set<Vector2> seen = new HashSet<>(size * size * 2);
             applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                Vector2f location = new Vector2f(x, y);
+                Vector2 location = new Vector2(x, y);
                 if (!seen.contains(location)) {
-                    boolean value = getValueAt(location);
-                    Set<Vector2f> coordinates = getShapeCoordinates(location, minArea);
+                    boolean value = get(location);
+                    Set<Vector2> coordinates = getShapeCoordinates(location, minArea);
                     seen.addAll(coordinates);
                     if (coordinates.size() < minArea) {
                         fillCoordinates(coordinates, !value);
@@ -882,33 +837,33 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return this;
     }
 
-    public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location) {
+    public LinkedHashSet<Vector2> getShapeCoordinates(Vector2 location) {
         int size = getSize();
         return getShapeCoordinates(location, size * size);
     }
 
-    public LinkedHashSet<Vector2f> getShapeCoordinates(Vector2f location, int maxSize) {
-        LinkedHashSet<Vector2f> areaHash = new LinkedHashSet<>();
-        LinkedHashSet<Vector2f> edgeHash = new LinkedHashSet<>();
-        LinkedList<Vector2f> queue = new LinkedList<>();
-        LinkedHashSet<Vector2f> queueHash = new LinkedHashSet<>();
+    public LinkedHashSet<Vector2> getShapeCoordinates(Vector2 location, int maxSize) {
+        LinkedHashSet<Vector2> areaHash = new LinkedHashSet<>();
+        LinkedHashSet<Vector2> edgeHash = new LinkedHashSet<>();
+        LinkedList<Vector2> queue = new LinkedList<>();
+        LinkedHashSet<Vector2> queueHash = new LinkedHashSet<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
-        boolean value = getValueAt(location);
+        boolean value = get(location);
         queue.add(location);
         queueHash.add(location);
         while (queue.size() > 0) {
-            Vector2f next = queue.remove();
+            Vector2 next = queue.remove();
             queueHash.remove(next);
-            if (getValueAt(next) == value && !areaHash.contains(next)) {
+            if (get(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
                 edges.forEach((e) -> {
-                    Vector2f newLocation = new Vector2f(next.getX() + e[0], next.getY() + e[1]);
+                    Vector2 newLocation = new Vector2(next.getX() + e[0], next.getY() + e[1]);
                     if (!queueHash.contains(newLocation) && !areaHash.contains(newLocation) && !edgeHash.contains(newLocation) && inBounds(newLocation)) {
                         queue.add(newLocation);
                         queueHash.add(newLocation);
                     }
                 });
-            } else if (getValueAt(next) != value) {
+            } else if (get(next) != value) {
                 edgeHash.add(next);
             }
             if (areaHash.size() > maxSize) {
@@ -918,48 +873,51 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return areaHash;
     }
 
-    @Override
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, getValueAt(x, y) ? 1 : 0));
+        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y) ? 1 : 0));
         return innerCount;
     }
 
     public FloatMask getDistanceField() {
-        assertNotParallel();
         int size = getSize();
-        FloatMask distanceField = new FloatMask(size, random.nextLong(), symmetrySettings, getName() + "distanceField");
-        distanceField.init(this, (float) (size * size), 0f);
-        addCalculatedParabolicDistance(distanceField, false);
-        addCalculatedParabolicDistance(distanceField, true);
-        distanceField.sqrt();
+        Long seed = random != null ? random.nextLong() : null;
+        FloatMask distanceField = new FloatMask(size, seed, symmetrySettings, getName() + "DistanceField", isParallel());
+        enqueue(distanceField, dependencies -> {
+            FloatMask dest = (FloatMask) dependencies.get(0);
+            dest.init(this, (float) (size * size), 0f);
+            addCalculatedParabolicDistance(dest, false);
+            addCalculatedParabolicDistance(dest, true);
+            dest.sqrt();
+            return dest;
+        }, distanceField);
         return distanceField;
     }
 
     private void addCalculatedParabolicDistance(FloatMask distanceField, boolean useColumns) {
         int size = getSize();
         for (int i = 0; i < size; i++) {
-            List<Vector2f> vertices = new ArrayList<>();
-            List<Vector2f> intersections = new ArrayList<>();
+            List<Vector2> vertices = new ArrayList<>();
+            List<Vector2> intersections = new ArrayList<>();
             int index = 0;
             float value;
             if (!useColumns) {
-                value = distanceField.getValueAt(i, 0);
+                value = distanceField.get(i, 0);
             } else {
-                value = distanceField.getValueAt(0, i);
+                value = distanceField.get(0, i);
             }
-            vertices.add(new Vector2f(0, value));
-            intersections.add(new Vector2f(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
-            intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+            vertices.add(new Vector2(0, value));
+            intersections.add(new Vector2(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
+            intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
             for (int j = 1; j < size; j++) {
                 if (!useColumns) {
-                    value = distanceField.getValueAt(i, j);
+                    value = distanceField.get(i, j);
                 } else {
-                    value = distanceField.getValueAt(j, i);
+                    value = distanceField.get(j, i);
                 }
-                Vector2f current = new Vector2f(j, value);
-                Vector2f vertex = vertices.get(index);
+                Vector2 current = new Vector2(j, value);
+                Vector2 vertex = vertices.get(index);
                 float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
                 while (xIntersect <= intersections.get(index).getX()) {
                     index -= 1;
@@ -973,11 +931,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                     vertices.add(current);
                 }
                 if (index < intersections.size() - 1) {
-                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.set(index + 1, new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.set(index + 1, new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
                 } else {
-                    intersections.set(index, new Vector2f(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.add(new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
                 }
             }
             index = 0;
@@ -985,13 +943,13 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
                 while (intersections.get(index + 1).getX() < j) {
                     index += 1;
                 }
-                Vector2f vertex = vertices.get(index);
+                Vector2 vertex = vertices.get(index);
                 float dx = j - vertex.getX();
                 float height = dx * dx + vertex.getY();
                 if (!useColumns) {
-                    distanceField.setValueAt(i, j, height);
+                    distanceField.set(i, j, height);
                 } else {
-                    distanceField.setValueAt(j, i, height);
+                    distanceField.set(j, i, height);
                 }
             }
         }
@@ -1000,32 +958,32 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     public int getCount() {
         AtomicInteger cellCount = new AtomicInteger();
         apply((x, y) -> {
-            if (getValueAt(x, y)) {
+            if (get(x, y)) {
                 cellCount.incrementAndGet();
             }
         });
         return cellCount.get();
     }
 
-    public LinkedList<Vector2f> getAllCoordinates(int spacing) {
-        LinkedList<Vector2f> coordinates = new LinkedList<>();
+    public LinkedList<Vector2> getAllCoordinates(int spacing) {
+        LinkedList<Vector2> coordinates = new LinkedList<>();
         int size = getSize();
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
-                Vector2f location = new Vector2f(x, y);
+                Vector2 location = new Vector2(x, y);
                 coordinates.addLast(location);
             }
         }
         return coordinates;
     }
 
-    public LinkedList<Vector2f> getAllCoordinatesEqualTo(boolean value, int spacing) {
-        LinkedList<Vector2f> coordinates = new LinkedList<>();
+    public LinkedList<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
+        LinkedList<Vector2> coordinates = new LinkedList<>();
         int size = getSize();
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
-                if (getValueAt(x, y) == value) {
-                    Vector2f location = new Vector2f(x, y);
+                if (get(x, y) == value) {
+                    Vector2 location = new Vector2(x, y);
                     coordinates.addLast(location);
                 }
             }
@@ -1033,58 +991,88 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         return coordinates;
     }
 
-    public LinkedList<Vector2f> getSpacedCoordinates(float radius, int spacing) {
-        LinkedList<Vector2f> coordinateList = getAllCoordinates(spacing);
+    public LinkedList<Vector2> getSpacedCoordinates(float radius, int spacing) {
+        LinkedList<Vector2> coordinateList = getAllCoordinates(spacing);
         return spaceCoordinates(radius, coordinateList);
     }
 
-    public LinkedList<Vector2f> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
-        LinkedList<Vector2f> coordinateList = getAllCoordinatesEqualTo(value, spacing);
+    public LinkedList<Vector2> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
+        LinkedList<Vector2> coordinateList = getAllCoordinatesEqualTo(value, spacing);
         return spaceCoordinates(radius, coordinateList);
     }
 
-    private LinkedList<Vector2f> spaceCoordinates(float radius, LinkedList<Vector2f> coordinateList) {
-        LinkedList<Vector2f> chosenCoordinates = new LinkedList<>();
+    private LinkedList<Vector2> spaceCoordinates(float radius, LinkedList<Vector2> coordinateList) {
+        LinkedList<Vector2> chosenCoordinates = new LinkedList<>();
         while (coordinateList.size() > 0) {
-            Vector2f location = coordinateList.removeFirst();
+            Vector2 location = coordinateList.removeFirst();
             chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < radius);
         }
         return chosenCoordinates;
     }
 
-    public LinkedList<Vector2f> getRandomCoordinates(float spacing) {
+    public LinkedList<Vector2> getRandomCoordinates(float spacing) {
         return getRandomCoordinates(spacing, spacing);
     }
 
-    public LinkedList<Vector2f> getRandomCoordinates(float minSpacing, float maxSpacing) {
-        LinkedList<Vector2f> coordinateList = getAllCoordinatesEqualTo(true, 1);
-        LinkedList<Vector2f> chosenCoordinates = new LinkedList<>();
+    public LinkedList<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing) {
+        LinkedList<Vector2> coordinateList = getAllCoordinatesEqualTo(true, 1);
+        LinkedList<Vector2> chosenCoordinates = new LinkedList<>();
         while (coordinateList.size() > 0) {
-            Vector2f location = coordinateList.remove(random.nextInt(coordinateList.size()));
+            Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
             float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
             chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
-            List<Vector2f> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
+            List<Vector2> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
             symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getDistance(loc) < spacing));
         }
         return chosenCoordinates;
     }
 
-    public Vector2f getRandomPosition() {
-        List<Vector2f> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
+    public Vector2 getRandomPosition() {
+        List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
         if (coordinates.size() == 0)
             return null;
         int cell = random.nextInt(coordinates.size());
         return coordinates.get(cell);
     }
 
-    // --------------------------------------------------
+    protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
+        innerCount[x][y] = val;
+        innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
+        innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
+        innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+    }
+
+    protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
+        int xLeft = StrictMath.max(0, x - radius);
+        int size = getSize();
+        int xRight = StrictMath.min(size - 1, x + radius);
+        int yUp = StrictMath.max(0, y - radius);
+        int yDown = StrictMath.min(size - 1, y + radius);
+        int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
+        int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
+        int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
+        int countD = innerCount[xRight][yDown];
+        int count = countD + countA - countB - countC;
+        int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
+        return (float) count / area;
+    }
+
+    @Override
+    public BufferedImage writeToImage(BufferedImage image) {
+        assertSize(image.getHeight());
+        int size = getSize();
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        apply((x, y) -> imageBuffer.setElem(x + y * size, get(x, y) ? 255 : 0));
+        return image;
+    }
+
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(getValueAt(x, y) ? (byte) 1 : 0));
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(get(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

@@ -1,7 +1,7 @@
 package com.faforever.neroxis.map;
 
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -15,11 +15,11 @@ import java.util.LinkedHashSet;
 public strictfp class AIMarker extends Marker {
     private LinkedHashSet<String> neighbors;
 
-    public AIMarker(String id, Vector2f position, LinkedHashSet<String> neighbors) {
-        this(id, new Vector3f(position), neighbors);
+    public AIMarker(String id, Vector2 position, LinkedHashSet<String> neighbors) {
+        this(id, new Vector3(position), neighbors);
     }
 
-    public AIMarker(String id, Vector3f position, LinkedHashSet<String> neighbors) {
+    public AIMarker(String id, Vector3 position, LinkedHashSet<String> neighbors) {
         super(id, position);
         this.neighbors = neighbors;
     }

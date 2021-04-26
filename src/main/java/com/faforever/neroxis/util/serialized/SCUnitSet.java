@@ -1,7 +1,7 @@
 package com.faforever.neroxis.util.serialized;
 
-import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.Vector4f;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import lombok.Data;
 
 import java.util.List;
@@ -13,13 +13,13 @@ import java.util.List;
 @Data
 public strictfp class SCUnitSet {
     private List<SCUnit> Units;
-    private Vector3f Center;
+    private Vector3 Center;
 
     @Data
     public static strictfp class SCUnit {
         private String ID;
-        private Vector3f pos;
-        private Vector4f rot;
+        private Vector3 pos;
+        private Vector4 rot;
         private String orders;
         private String platoon;
     }

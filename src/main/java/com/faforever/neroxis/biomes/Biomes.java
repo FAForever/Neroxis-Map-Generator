@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
-import com.google.gson.JsonParseException;
 import lombok.Data;
 
 import java.io.File;
@@ -45,8 +44,6 @@ public strictfp class Biomes {
             terrainMaterials = FileUtils.deserialize(folderPath + "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %smaterials.json\n", folderPath), e);
-        } catch (JsonParseException e) {
-            throw new Exception(String.format("An error occurred while parsing materials.json from the following biome:%s\n", folderPath), e);
         }
 
         PropMaterials propMaterials;
@@ -54,8 +51,6 @@ public strictfp class Biomes {
             propMaterials = FileUtils.deserialize(folderPath + "props.json", PropMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %sprops.json\n", folderPath), e);
-        } catch (JsonParseException e) {
-            throw new Exception(String.format("An error occurred while parsing props.json from the following biome:%s\n", folderPath), e);
         }
 
         DecalMaterials decalMaterials;
@@ -63,8 +58,6 @@ public strictfp class Biomes {
             decalMaterials = FileUtils.deserialize(folderPath + "decals.json", DecalMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
-        } catch (JsonParseException e) {
-            throw new Exception(String.format("An error occurred while parsing decals.json from the following biome:%s\n", folderPath), e);
         }
 
         // Water parameters
@@ -73,8 +66,6 @@ public strictfp class Biomes {
             waterSettings = FileUtils.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %s WaterSettings\n", folderPath), e);
-        } catch (JsonParseException e) {
-            throw new Exception(String.format("An error occurred while parsing WaterSettings from the following biome:%s\n", folderPath), e);
         }
 
         // Lighting settings
@@ -83,8 +74,6 @@ public strictfp class Biomes {
             lightingSettings = FileUtils.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
-        } catch (JsonParseException e) {
-            throw new Exception(String.format("An error occurred while parsing LightingSettings from the following biome:%s\n", folderPath), e);
         }
 
         return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, decalMaterials, waterSettings, lightingSettings);

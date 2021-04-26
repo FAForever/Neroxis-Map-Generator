@@ -1,9 +1,11 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.map.mask.Mask;
 import com.faforever.neroxis.util.ImageUtils;
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -11,7 +13,6 @@ import lombok.SneakyThrows;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,7 +33,7 @@ public strictfp class SCMap {
 
     public static final int WAVE_NORMAL_COUNT = 4;
     public static final float[] WAVE_NORMAL_REPEATS = {0.0009f, 0.009f, 0.05f, 0.5f};
-    public static final Vector2f[] WAVE_NORMAL_MOVEMENTS = {new Vector2f(0.5f, -0.95f), new Vector2f(0.05f, -0.095f), new Vector2f(0.01f, 0.03f), new Vector2f(0.0005f, 0.0009f)};
+    public static final Vector2[] WAVE_NORMAL_MOVEMENTS = {new Vector2(0.5f, -0.95f), new Vector2(0.05f, -0.095f), new Vector2(0.01f, 0.03f), new Vector2(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
     private final List<Spawn> spawns;
     private final List<Marker> mexes;
@@ -420,9 +421,9 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void changeMapSize(int contentSize, int boundsSize, Vector2f centerOffset) {
+    public void changeMapSize(int contentSize, int boundsSize, Vector2 centerOffset) {
         int oldSize = size;
-        Vector2f topLeftOffset = new Vector2f(centerOffset.getX() - (float) contentSize / 2, centerOffset.getY() - (float) contentSize / 2);
+        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - (float) contentSize / 2, centerOffset.getY() - (float) contentSize / 2);
         float contentScale = (float) contentSize / (float) oldSize;
         float boundsScale = (float) boundsSize / (float) contentSize;
 
@@ -439,7 +440,7 @@ public strictfp class SCMap {
         moveObjects(contentScale, topLeftOffset);
     }
 
-    private void moveObjects(float contentScale, Vector2f offset) {
+    private void moveObjects(float contentScale, Vector2 offset) {
         repositionObjects(getSpawns(), contentScale, offset);
         repositionObjects(getAirAIMarkers(), contentScale, offset);
         repositionObjects(getAmphibiousAIMarkers(), contentScale, offset);
@@ -459,8 +460,8 @@ public strictfp class SCMap {
         armies.forEach(army -> army.getGroups().forEach(group -> repositionObjects(group.getUnits(), contentScale, offset)));
 
         decals.forEach(decal -> {
-            Vector3f scale = decal.getScale();
-            decal.setScale(new Vector3f(scale.getX() * contentScale, scale.getY(), scale.getZ() * contentScale));
+            Vector3 scale = decal.getScale();
+            decal.setScale(new Vector3(scale.getX() * contentScale, scale.getY(), scale.getZ() * contentScale));
             decal.setCutOffLOD(decal.getCutOffLOD() * contentScale);
         });
 
@@ -477,12 +478,11 @@ public strictfp class SCMap {
         this.waterDepthBiasMap = waterDepthBiasMap;
     }
 
-    private <T extends PositionedObject> void repositionObjects(Collection<T> positionedObjects, float distanceScale, Vector2f offset) {
+    private <T extends PositionedObject> void repositionObjects(Collection<T> positionedObjects, float distanceScale, Vector2 offset) {
         Collection<T> repositionedObjects = new ArrayList<>();
         positionedObjects.forEach(positionedObject -> {
-            Vector2f newPosition = new Vector2f(positionedObject.getPosition());
-            newPosition.multiply(distanceScale).add(offset).roundToNearestHalfPoint();
-            positionedObject.setPosition(new Vector3f(newPosition));
+            Vector2 newPosition = new Vector2(positionedObject.getPosition()).multiply(distanceScale).add(offset).roundToNearestHalfPoint();
+            positionedObject.setPosition(new Vector3(newPosition));
             if (ImageUtils.inImageBounds(newPosition, heightmap)) {
                 repositionedObjects.add(positionedObject);
             }
@@ -513,30 +513,11 @@ public strictfp class SCMap {
 
     private void setObjectHeights(Collection<? extends PositionedObject> positionedObjects) {
         positionedObjects.forEach(positionedObject -> {
-            Vector2f position = new Vector2f(positionedObject.getPosition());
+            Vector2 position = new Vector2(positionedObject.getPosition());
             if (ImageUtils.inImageBounds(position, heightmap)) {
                 positionedObject.getPosition().setY(heightmap.getRaster().getPixel((int) position.getX(), (int) position.getY(), new int[]{0})[0] * heightMapScale);
             }
         });
-    }
-
-    public void setHeightImage(FloatMask heightmap) {
-        checkMaskSize(heightmap, size + 1);
-        for (int y = 0; y < size + 1; y++) {
-            for (int x = 0; x < size + 1; x++) {
-                this.heightmap.getRaster().setPixel(x, y, new int[]{(short) (heightmap.getValueAt(x, y) / heightMapScale)});
-            }
-        }
-    }
-
-    public FloatMask getHeightMask(SymmetrySettings symmetrySettings) {
-        FloatMask heightMask = new FloatMask(this.heightmap.getHeight(), null, symmetrySettings, "heightMask");
-        for (int y = 0; y < size + 1; y++) {
-            for (int x = 0; x < size + 1; x++) {
-                heightMask.setValueAt(x, y, this.heightmap.getRaster().getPixel(x, y, new int[1])[0] * heightMapScale);
-            }
-        }
-        return heightMask;
     }
 
     private void scaleMapContent(float contentScale) {
@@ -557,24 +538,24 @@ public strictfp class SCMap {
         textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale), StrictMath.round(textureMasksLow.getHeight() * contentScale));
     }
 
-    private void scaleMapBounds(float boundsScale, Vector2f topLeftOffset) {
+    private void scaleMapBounds(float boundsScale, Vector2 topLeftOffset) {
         float normalMapScale = (float) normalMap.getWidth() / size;
         float waterMapScale = (float) waterMap.getWidth() / size;
         float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
         float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
         preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
-        Vector2f previewOffset = boundsScale > 1 ? new Vector2f(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2f(-64 / boundsScale, -64 / boundsScale);
+        Vector2 previewOffset = boundsScale > 1 ? new Vector2(128 - 128 / boundsScale, 128 - 128 / boundsScale) : new Vector2(-64 / boundsScale, -64 / boundsScale);
         preview = insertImageIntoNewImageOfSize(preview, 256, 256, previewOffset);
         heightmap = insertImageIntoNewImageOfSize(heightmap, StrictMath.round(((heightmap.getWidth() - 1) * boundsScale)) + 1, StrictMath.round((heightmap.getHeight() - 1) * boundsScale) + 1, topLeftOffset);
-        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale), StrictMath.round(normalMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(normalMapScale));
-        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale), StrictMath.round(waterMap.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(waterMapScale));
-        Vector2f halvedTopLeftOffset = new Vector2f(topLeftOffset).multiply(.5f);
+        normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale), StrictMath.round(normalMap.getHeight() * boundsScale), new Vector2(topLeftOffset).multiply(normalMapScale));
+        waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale), StrictMath.round(waterMap.getHeight() * boundsScale), new Vector2(topLeftOffset).multiply(waterMapScale));
+        Vector2 halvedTopLeftOffset = new Vector2(topLeftOffset).multiply(.5f);
         waterFoamMap = insertImageIntoNewImageOfSize(waterFoamMap, StrictMath.round(waterFoamMap.getWidth() * boundsScale), StrictMath.round(waterFoamMap.getHeight() * boundsScale), halvedTopLeftOffset);
         waterFlatnessMap = insertImageIntoNewImageOfSize(waterFlatnessMap, StrictMath.round(waterFlatnessMap.getWidth() * boundsScale), StrictMath.round(waterFlatnessMap.getHeight() * boundsScale), halvedTopLeftOffset);
         waterDepthBiasMap = insertImageIntoNewImageOfSize(waterDepthBiasMap, StrictMath.round(waterDepthBiasMap.getWidth() * boundsScale), StrictMath.round(waterDepthBiasMap.getHeight() * boundsScale), halvedTopLeftOffset);
         terrainType = insertImageIntoNewImageOfSize(terrainType, StrictMath.round(terrainType.getWidth() * boundsScale), StrictMath.round(terrainType.getHeight() * boundsScale), topLeftOffset);
-        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskHighScale));
-        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2f(topLeftOffset).multiply(textureMaskLowScale));
+        textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh, StrictMath.round(textureMasksHigh.getWidth() * boundsScale), StrictMath.round(textureMasksHigh.getHeight() * boundsScale), new Vector2(topLeftOffset).multiply(textureMaskHighScale));
+        textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * boundsScale), StrictMath.round(textureMasksLow.getHeight() * boundsScale), new Vector2(topLeftOffset).multiply(textureMaskLowScale));
     }
 
     public void setTextureMasksScaled(BufferedImage textureMasks, FloatMask mask0, FloatMask mask1, FloatMask mask2, FloatMask mask3) {
@@ -583,123 +564,19 @@ public strictfp class SCMap {
         checkMaskSize(mask1, textureMasksWidth);
         checkMaskSize(mask2, textureMasksWidth);
         checkMaskSize(mask3, textureMasksWidth);
-        for (int y = 0; y < textureMasksWidth; y++) {
-            for (int x = 0; x < textureMasksWidth; x++) {
-                int val0 = convertToRawTextureValue(mask0.getValueAt(x, y));
-                int val1 = convertToRawTextureValue(mask1.getValueAt(x, y));
-                int val2 = convertToRawTextureValue(mask2.getValueAt(x, y));
-                int val3 = convertToRawTextureValue(mask3.getValueAt(x, y));
+        for (int x = 0; x < textureMasksWidth; x++) {
+            for (int y = 0; y < textureMasksWidth; y++) {
+                int val0 = convertToRawTextureValue(mask0.get(x, y));
+                int val1 = convertToRawTextureValue(mask1.get(x, y));
+                int val2 = convertToRawTextureValue(mask2.get(x, y));
+                int val3 = convertToRawTextureValue(mask3.get(x, y));
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
     }
 
-    public void setTextureMasksRaw(BufferedImage textureMasks, IntegerMask mask0, IntegerMask mask1, IntegerMask mask2, IntegerMask mask3) {
-        int textureMasksWidth = textureMasks.getWidth();
-        checkMaskSize(mask0, textureMasksWidth);
-        checkMaskSize(mask1, textureMasksWidth);
-        checkMaskSize(mask2, textureMasksWidth);
-        checkMaskSize(mask3, textureMasksWidth);
-        for (int y = 0; y < textureMasksWidth; y++) {
-            for (int x = 0; x < textureMasksWidth; x++) {
-                float val0 = mask0.getValueAt(x, y);
-                float val1 = mask1.getValueAt(x, y);
-                float val2 = mask2.getValueAt(x, y);
-                float val3 = mask3.getValueAt(x, y);
-                textureMasks.getRaster().setPixel(x, y, new float[]{val0, val1, val2, val3});
-            }
-        }
-    }
-
-    public FloatMask[] getTextureMasksScaled(SymmetrySettings symmetrySettings) {
-        int textureMasksLowHeight = textureMasksLow.getHeight();
-        FloatMask mask0 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask0");
-        FloatMask mask1 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask1");
-        FloatMask mask2 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask2");
-        FloatMask mask3 = new FloatMask(textureMasksLowHeight, null, symmetrySettings, "mask3");
-        for (int y = 0; y < textureMasksLowHeight; y++) {
-            for (int x = 0; x < textureMasksLowHeight; x++) {
-                int[] valsLow = new int[4];
-                textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                mask0.setValueAt(x, y, convertToScaledTextureValue(valsLow[0]));
-                mask1.setValueAt(x, y, convertToScaledTextureValue(valsLow[1]));
-                mask2.setValueAt(x, y, convertToScaledTextureValue(valsLow[2]));
-                mask3.setValueAt(x, y, convertToScaledTextureValue(valsLow[3]));
-            }
-        }
-        int textureMasksHighHeight = textureMasksHigh.getHeight();
-        FloatMask mask4 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask4");
-        FloatMask mask5 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask5");
-        FloatMask mask6 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask6");
-        FloatMask mask7 = new FloatMask(textureMasksHighHeight, null, symmetrySettings, "mask7");
-        for (int y = 0; y < textureMasksHighHeight; y++) {
-            for (int x = 0; x < textureMasksHighHeight; x++) {
-                int[] valsHigh = new int[4];
-                textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
-                mask4.setValueAt(x, y, convertToScaledTextureValue(valsHigh[0]));
-                mask5.setValueAt(x, y, convertToScaledTextureValue(valsHigh[1]));
-                mask6.setValueAt(x, y, convertToScaledTextureValue(valsHigh[2]));
-                mask7.setValueAt(x, y, convertToScaledTextureValue(valsHigh[3]));
-            }
-        }
-        return new FloatMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
-    }
-
-    public IntegerMask[] getTextureMasksRaw(SymmetrySettings symmetrySettings) {
-        int textureMasksLowHeight = textureMasksLow.getHeight();
-        IntegerMask mask0 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
-        IntegerMask mask1 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
-        IntegerMask mask2 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
-        IntegerMask mask3 = new IntegerMask(textureMasksLowHeight, null, symmetrySettings);
-        for (int y = 0; y < textureMasksLowHeight; y++) {
-            for (int x = 0; x < textureMasksLowHeight; x++) {
-                int[] valsLow = new int[4];
-                textureMasksLow.getRaster().getPixel(x, y, valsLow);
-                mask0.setValueAt(x, y, valsLow[0]);
-                mask1.setValueAt(x, y, valsLow[1]);
-                mask2.setValueAt(x, y, valsLow[2]);
-                mask3.setValueAt(x, y, valsLow[3]);
-            }
-        }
-        int textureMasksHighHeight = textureMasksHigh.getHeight();
-        IntegerMask mask4 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
-        IntegerMask mask5 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
-        IntegerMask mask6 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
-        IntegerMask mask7 = new IntegerMask(textureMasksHighHeight, null, symmetrySettings);
-        for (int y = 0; y < textureMasksHighHeight; y++) {
-            for (int x = 0; x < textureMasksHighHeight; x++) {
-                int[] valsHigh = new int[4];
-                textureMasksHigh.getRaster().getPixel(x, y, valsHigh);
-                mask4.setValueAt(x, y, valsHigh[0]);
-                mask5.setValueAt(x, y, valsHigh[1]);
-                mask6.setValueAt(x, y, valsHigh[2]);
-                mask7.setValueAt(x, y, valsHigh[3]);
-            }
-        }
-        return new IntegerMask[]{mask0, mask1, mask2, mask3, mask4, mask5, mask6, mask7};
-    }
-
-    private float convertToScaledTextureValue(float value) {
-        return value > 0 ? (value - 128) / 127f : 0f;
-    }
-
     private int convertToRawTextureValue(float value) {
         return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
-    }
-
-    public void setImageFromMask(BufferedImage image, IntegerMask mask) {
-        int imageSize = image.getHeight();
-        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        checkMaskSize(mask, imageSize);
-        mask.apply((x, y) -> imageBuffer.setElem(x + y * imageSize, mask.getValueAt(x, y)));
-    }
-
-    public IntegerMask getMaskFromImage(BufferedImage image, SymmetrySettings symmetrySettings) {
-        int imageSize = image.getHeight();
-        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        IntegerMask mask = new IntegerMask(imageSize, null, symmetrySettings);
-        mask.modify((x, y) -> imageBuffer.getElem(x + y * imageSize));
-        return mask;
     }
 
     @SneakyThrows

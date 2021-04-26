@@ -2,8 +2,6 @@ package com.faforever.neroxis.map;
 
 import lombok.Data;
 
-import java.awt.*;
-
 @Data
 public strictfp class TerrainMaterials {
 
@@ -16,6 +14,6 @@ public strictfp class TerrainMaterials {
     private float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
-    private Color[] previewColors = new Color[TERRAIN_NORMAL_COUNT];
+    private Integer[] previewColors = new Integer[TERRAIN_NORMAL_COUNT];
 
 }

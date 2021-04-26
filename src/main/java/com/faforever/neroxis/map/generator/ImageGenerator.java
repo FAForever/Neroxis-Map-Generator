@@ -1,12 +1,12 @@
 package com.faforever.neroxis.map.generator;
 
 import com.faforever.neroxis.brushes.Brushes;
-import com.faforever.neroxis.map.BooleanMask;
-import com.faforever.neroxis.map.FloatMask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -14,6 +14,9 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+
+import static com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMask;
+import static com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMasks;
 
 public strictfp class ImageGenerator {
 
@@ -142,22 +145,22 @@ public strictfp class ImageGenerator {
 
             BooleanMask base = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
 
             BooleanMask mountains = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
-                Vector2f loc = base.getRandomPosition();
+                Vector2 loc = base.getRandomPosition();
                 if (loc == null) {
-                    loc = new Vector2f(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance));
+                    loc = new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance), center + random.nextInt(variationDistance) - random.nextInt(variationDistance));
                 }
                 mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2, false);
             }
@@ -170,11 +173,7 @@ public strictfp class ImageGenerator {
             newBrush.useBrushWithinAreaWithDensity(mountainsBase, brush2, variationDistance, 0.005f, (float) 5 + random.nextInt(30), false);
             newBrush.useBrushWithinAreaWithDensity(mountainsBaseEdge, brush2, variationDistance, 0.05f, (float) 0.25 * (5 + random.nextInt(30)), false);
             newBrush.clampMin(0f);
-            if (newBrush.areAnyEdgesGreaterThan(0f)) {
-                i = i - 1;
-            } else {
-                com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
-            }
+            writeAutoScaledPNGFromMask(newBrush, Paths.get(folderPath + "\\Brush_" + (i + 1) + ".png"));
         }
     }
 
@@ -227,14 +226,14 @@ public strictfp class ImageGenerator {
                         areaToTexture = wholeImage;
                     }
                 }
-                LinkedList<Vector2f> possibleLocations = areaToTexture.getAllCoordinatesEqualTo(true, 1);
+                LinkedList<Vector2> possibleLocations = areaToTexture.getAllCoordinatesEqualTo(true, 1);
                 int numPossibleLocations = possibleLocations.size();
                 for (int x = 0; x < 5; x++) {
-                    Vector2f loc = possibleLocations.get(random.nextInt(numPossibleLocations));
+                    Vector2 loc = possibleLocations.get(random.nextInt(numPossibleLocations));
                     while (loc == null) {
                         loc = wholeImage.getRandomPosition();
                     }
-                    Vector2f target = possibleLocations.get(random.nextInt(numPossibleLocations));
+                    Vector2 target = possibleLocations.get(random.nextInt(numPossibleLocations));
                     while (target == null) {
                         target = wholeImage.getRandomPosition();
                     }
@@ -253,20 +252,14 @@ public strictfp class ImageGenerator {
 
                 color(redWeight, greenWeight, blueWeight, chainTexture);
             }
-            com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, Paths.get(folderPath + "\\Texture_" + (i + 1) + ".png"));
+            writeAutoScaledPNGFromMasks(redMask, greenMask, blueMask, Paths.get(folderPath + "\\Texture_" + (i + 1) + ".png"));
         }
     }
 
     private void color(float redPercent, float greenPercent, float bluePercent, FloatMask other) {
-        redMask.addWeighted(other, redPercent);
-        greenMask.addWeighted(other, greenPercent);
-        blueMask.addWeighted(other, bluePercent);
-    }
-
-    private void colorScaled(float redPercent, float greenPercent, float bluePercent, FloatMask other, float scaleMultiplier) {
-        redMask.addWeighted(other, redPercent);
-        greenMask.addWeighted(other, greenPercent);
-        blueMask.addWeighted(other, bluePercent);
+        redMask.add(other.copy().multiply(redPercent));
+        greenMask.add(other.copy().multiply(greenPercent));
+        blueMask.add(other.copy().multiply(bluePercent));
     }
 
     public void generate() throws IOException {

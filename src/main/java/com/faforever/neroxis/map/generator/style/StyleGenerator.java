@@ -1,6 +1,5 @@
 package com.faforever.neroxis.map.generator.style;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ElementGenerator;
@@ -16,6 +15,7 @@ import com.faforever.neroxis.map.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.map.generator.texture.TextureGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 import lombok.Getter;
@@ -30,14 +30,19 @@ import static com.faforever.neroxis.util.RandomUtils.selectRandomMatchingGenerat
 public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
+    @Getter
     protected TerrainGenerator terrainGenerator = new BasicTerrainGenerator();
     protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
+    @Getter
     protected TextureGenerator textureGenerator = new BasicTextureGenerator();
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
+    @Getter
     protected ResourceGenerator resourceGenerator = new BasicResourceGenerator();
     protected final List<PropGenerator> propGenerators = new ArrayList<>();
+    @Getter
     protected PropGenerator propGenerator = new BasicPropGenerator();
     protected final List<DecalGenerator> decalGenerators = new ArrayList<>();
+    @Getter
     protected DecalGenerator decalGenerator = new BasicDecalGenerator();
     @Getter
     protected String name;

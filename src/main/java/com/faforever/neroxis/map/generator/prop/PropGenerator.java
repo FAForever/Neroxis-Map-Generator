@@ -1,12 +1,12 @@
 package com.faforever.neroxis.map.generator.prop;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.generator.placement.PropPlacer;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import lombok.Getter;
 
 @Getter

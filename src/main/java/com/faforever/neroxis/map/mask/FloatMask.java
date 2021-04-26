@@ -1,24 +1,22 @@
-package com.faforever.neroxis.map;
+package com.faforever.neroxis.map.mask;
 
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
-import lombok.Getter;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
+import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiFunction;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
-@Getter
 public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -30,57 +28,46 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(seed, symmetrySettings, name, parallel);
-        this.mask = getEmptyMask(size);
-        this.plannedSize = size;
-        enqueue(() -> {
-        });
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(sourceImage, seed, symmetrySettings, name, false);
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
+        this(sourceImage, seed, symmetrySettings, 1f, null, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(seed, symmetrySettings, name, parallel);
-        this.mask = getEmptyMask(sourceImage.getHeight());
-        Raster imageData = sourceImage.getData();
-        enqueue(() -> {
-            modify((x, y) -> {
-                int[] value = new int[1];
-                imageData.getPixel(x, y, value);
-                return value[0] / 255f;
-            });
-        });
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
+    }
+
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
+    }
+
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+        super(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+        DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
+        int size = getSize();
+        enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
     public FloatMask(FloatMask sourceMask, Long seed) {
-        this(sourceMask, seed, null);
+        super(sourceMask, seed);
     }
 
-    public FloatMask(FloatMask other, Long seed, String name) {
-        super(seed, other.getSymmetrySettings(), name, other.isParallel());
-        this.mask = getEmptyMask(other.getSize());
-        this.plannedSize = other.getSize();
-        setProcessing(other.isProcessing());
-        enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            modify(source::getValueAt);
-        }, other);
+    public FloatMask(FloatMask sourceMask, Long seed, String name) {
+        super(sourceMask, seed, name);
     }
 
-    public FloatMask(BooleanMask sourceMask, float low, float high, Long seed) {
-        this(sourceMask, low, high, seed, null);
+    public FloatMask(BooleanMask other, float low, float high, Long seed) {
+        this(other, low, high, seed, null);
     }
 
     public FloatMask(BooleanMask other, float low, float high, Long seed, String name) {
-        super(seed, other.getSymmetrySettings(), name, other.isParallel());
-        this.mask = getEmptyMask(other.getSize());
-        this.plannedSize = other.getSize();
-        setProcessing(other.isProcessing());
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            modify((x, y) -> source.getValueAt(x, y) ? high : low);
+            set((x, y) -> source.get(x, y) ? high : low);
+            return this;
         }, other);
     }
 
@@ -111,39 +98,48 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     @Override
-    public Float getDefaultValue() {
+    public Float getZeroValue() {
         return 0f;
     }
 
     @Override
-    public Float add(Float val1, Float val2) {
-        return val1 + val2;
+    public void addValueAt(int x, int y, Float value) {
+        mask[x][y] += value;
     }
 
     @Override
-    public Float subtract(Float val1, Float val2) {
-        return val1 - val2;
+    public void subtractValueAt(int x, int y, Float value) {
+        mask[x][y] -= value;
     }
 
     @Override
-    public Float multiply(Float val1, Float val2) {
-        return val1 * val2;
+    public void multiplyValueAt(int x, int y, Float value) {
+        mask[x][y] *= value;
     }
 
     @Override
-    public Float divide(Float val1, Float val2) {
-        return val1 / val2;
+    public void divideValueAt(int x, int y, Float value) {
+        mask[x][y] /= value;
     }
 
-    public Vector3f getNormalAt(int x, int y) {
+    public Vector3 getNormalAt(int x, int y) {
+        return getNormalAt(x, y, 1f);
+    }
+
+    public Vector3 getNormalAt(int x, int y, float scale) {
         if (onBoundary(x, y) || !inBounds(x, y)) {
-            return new Vector3f(0, 1, 0);
+            return new Vector3(0, 1, 0);
         }
-        return new Vector3f(
-                (getValueAt(x - 1, y) - getValueAt(x + 1, y)) / 2f,
+        return new Vector3(
+                (get(x - 1, y) - get(x + 1, y)) * scale / 2f,
                 1,
-                (getValueAt(x, y - 1) - getValueAt(x, y + 1)) / 2f
+                (get(x, y - 1) - get(x, y + 1)) * scale / 2f
         ).normalize();
+    }
+
+    @Override
+    public Float getSum() {
+        return Arrays.stream(mask).flatMap(Arrays::stream).reduce(Float::sum).orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     public FloatMask addGaussianNoise(float scale) {
@@ -166,14 +162,13 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             assertCompatibleMask(source);
             FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
+            return this;
         }, other);
         return this;
     }
 
     public FloatMask sqrt() {
-        enqueue(() -> {
-            modify((x, y) -> (float) StrictMath.sqrt(getValueAt(x, y)));
-        });
+        enqueue(() -> set((x, y) -> (float) StrictMath.sqrt(get(x, y))));
         return this;
     }
 
@@ -186,8 +181,8 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 int xPos = StrictMath.min(size - 1, x + 1);
                 int yNeg = StrictMath.max(0, y - 1);
                 int yPos = StrictMath.min(size - 1, y + 1);
-                float xSlope = getValueAt(xPos, y) - getValueAt(xNeg, y);
-                float ySlope = getValueAt(x, yPos) - getValueAt(x, yNeg);
+                float xSlope = (get(xPos, y) - get(xNeg, y)) / (xPos - xNeg);
+                float ySlope = (get(x, yPos) - get(x, yNeg)) / (yPos - yNeg);
                 maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
             });
             mask = maskCopy;
@@ -204,10 +199,10 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 int yPos = StrictMath.min(size - 1, y + 1);
                 int xNeg = StrictMath.max(0, x - 1);
                 int yNeg = StrictMath.max(0, y - 1);
-                float xPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xPos, y));
-                float yPosSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yPos));
-                float xNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(xNeg, y));
-                float yNegSlope = StrictMath.abs(getValueAt(x, y) - getValueAt(x, yNeg));
+                float xPosSlope = StrictMath.abs(get(x, y) - get(xPos, y));
+                float yPosSlope = StrictMath.abs(get(x, y) - get(x, yPos));
+                float xNegSlope = StrictMath.abs(get(x, y) - get(xNeg, y));
+                float yNegSlope = StrictMath.abs(get(x, y) - get(x, yNeg));
                 maskCopy[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
             });
             mask = maskCopy;
@@ -219,15 +214,16 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                                 float depositionRate, float maxOffset, float iterationScale) {
         enqueue(() -> {
             int size = getSize();
+            Vector3Mask normalVectorMask = getNormalMask(10);
             for (int i = 0; i < numDrops; ++i) {
-                waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
+                waterDrop(normalVectorMask, maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
             applySymmetry(SymmetryType.SPAWN);
         });
         return this;
     }
 
-    public void waterDrop(int maxIterations, float x, float y, float friction, float speed, float erosionRate,
+    public void waterDrop(Vector3Mask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
                           float depositionRate, float maxOffset, float iterationScale) {
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
@@ -243,10 +239,11 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
                 break;
             }
-            Vector3f surfaceNormal = getNormalAt(sampleX, sampleY);
+            Vector3 surfaceNormal = normalMask.get(sampleX, sampleY);
+//            Vector3f surfaceNormal = getNormalAt((int) x, (int) y, 100);
 
             // If the terrain is flat, stop simulating, the snowball cannot roll any further
-            if (surfaceNormal.getY() >= 1) {
+            if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
                 break;
             }
 
@@ -269,24 +266,8 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         }
     }
 
-    @Override
-    public FloatMask blur(int radius) {
-        enqueue(() -> {
-            int[][] innerCount = getInnerCount();
-            modify((x, y) -> calculateAreaAverage(radius, x, y, innerCount) / 1000);
-        });
-        return this;
-    }
-
-    @Override
-    public FloatMask blur(int radius, BooleanMask other) {
-        enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(limiter);
-            int[][] innerCount = getInnerCount();
-            modify((x, y) -> limiter.getValueAt(x, y) ? calculateAreaAverage(radius, x, y, innerCount) / 1000 : getValueAt(x, y));
-        }, other);
-        return this;
+    public Float transformAverage(float value) {
+        return value / 1000f;
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
@@ -318,7 +299,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, StrictMath.round(getValueAt(x, y) * 1000)));
+        apply((x, y) -> calculateInnerValue(innerCount, x, y, StrictMath.round(get(x, y) * 1000)));
         return innerCount;
     }
 
@@ -326,7 +307,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         return convertToBooleanMask(minValue, maxValue).getDistanceField();
     }
 
-    public FloatMask useBrush(Vector2f location, String brushName, float intensity, int size, boolean wrapEdges) {
+    public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
         enqueue(() -> {
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
@@ -339,14 +320,15 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertSmallerSize(size);
-            ArrayList<Vector2f> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
+            ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
             FloatMask brush = loadBrush(brushName, random.nextLong());
             brush.multiply(intensity / brush.getMax()).setSize(size);
             for (int i = 0; i < numUses; i++) {
-                Vector2f location = possibleLocations.get(random.nextInt(length));
+                Vector2 location = possibleLocations.get(random.nextInt(length));
                 addWithOffset(brush, location, true, wrapEdges);
             }
+            return this;
         }, other);
         return this;
     }
@@ -356,75 +338,45 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
+            return this;
         }, other);
         return this;
     }
 
-    public boolean areAnyEdgesGreaterThan(float value) {
+    public NormalMask getNormalMask() {
+        return getNormalMask(1f);
+    }
+
+    public NormalMask getNormalMask(float scale) {
+        Long seed = random != null ? random.nextLong() : null;
+        NormalMask normals = new NormalMask(getSize(), seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), getName() + "Normals", isParallel());
+        normals.getSymmetrySettings().setSpawnSymmetry(Symmetry.NONE);
+        enqueue(normals, dependencies -> {
+            NormalMask dest = (NormalMask) dependencies.get(0);
+            apply((x, y) -> dest.set(x, y, getNormalAt(x, y, scale)));
+            return dest;
+        }, normals);
+        return normals;
+    }
+
+    @Override
+    public BufferedImage writeToImage(BufferedImage image) {
+        return writeImage(image, 1f);
+    }
+
+    public BufferedImage writeImage(BufferedImage image, float scaleFactor) {
+        assertSize(image.getHeight());
         int size = getSize();
-        int farEdge = size - 1;
-        AtomicBoolean edgesGreater = new AtomicBoolean(false);
-        apply((x, y) -> edgesGreater.set(getValueAt(x, y) > value || getValueAt(farEdge - x, farEdge - y) > value
-                || getValueAt(x, farEdge - y) > value || getValueAt(farEdge - x, y) > value));
-        return edgesGreater.get();
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        apply((x, y) -> imageBuffer.setElemFloat(x + y * size, get(x, y) * scaleFactor));
+        return image;
     }
 
-    protected void add(BiFunction<Integer, Integer, Float> valueFunction) {
-        int size = getSize();
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                addValueAt(x, y, valueFunction.apply(x, y));
-            }
-        }
-    }
-
-    protected void addWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        int minX = getMinXBound(symmetryType);
-        int maxX = getMaxXBound(symmetryType);
-        for (int x = minX; x < maxX; x++) {
-            int minY = getMinYBound(x, symmetryType);
-            int maxY = getMaxYBound(x, symmetryType);
-            for (int y = minY; y < maxY; y++) {
-                Float value = valueFunction.apply(x, y);
-                addValueAt(x, y, value);
-                Vector2f location = new Vector2f(x, y);
-                List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                symmetryPoints.forEach(symmetryPoint -> addValueAt(symmetryPoint, value));
-            }
-        }
-    }
-
-    protected void multiply(BiFunction<Integer, Integer, Float> valueFunction) {
-        int size = getSize();
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                multiplyValueAt(x, y, valueFunction.apply(x, y));
-            }
-        }
-    }
-
-    protected void multiplyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        int minX = getMinXBound(symmetryType);
-        int maxX = getMaxXBound(symmetryType);
-        for (int x = minX; x < maxX; x++) {
-            int minY = getMinYBound(x, symmetryType);
-            int maxY = getMaxYBound(x, symmetryType);
-            for (int y = minY; y < maxY; y++) {
-                Float value = valueFunction.apply(x, y);
-                multiplyValueAt(x, y, value);
-                Vector2f location = new Vector2f(x, y);
-                List<Vector2f> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                symmetryPoints.forEach(symmetryPoint -> multiplyValueAt(symmetryPoint, value));
-            }
-        }
-    }
-
-    // -------------------------------------------
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getValueAt(x, y)));
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(get(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

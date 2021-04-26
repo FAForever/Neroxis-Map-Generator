@@ -1,8 +1,12 @@
 package com.faforever.neroxis.map.generator.placement;
 
 import com.faforever.neroxis.bases.BaseTemplate;
-import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.Unit;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
 import java.util.*;
@@ -69,13 +73,13 @@ public strictfp class UnitPlacer {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
-            LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(separation);
-            LinkedHashMap<String, LinkedHashSet<Vector2f>> units = BaseTemplate.loadUnits(luaFile);
+            LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
+            LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(luaFile);
             coordinates.forEach((location) -> {
                 BaseTemplate base = new BaseTemplate(location, army, group, units);
                 base.addUnits();
-                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> {
                     BaseTemplate symBase = new BaseTemplate(symmetryPoint, army, group, base.getUnits());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
@@ -94,7 +98,7 @@ public strictfp class UnitPlacer {
     public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
         if (types != null && types.length > 0) {
             spawnMask.limitToSymmetryRegion();
-            LinkedList<Vector2f> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
+            LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
             coordinates.forEach((location) -> {
@@ -102,8 +106,8 @@ public strictfp class UnitPlacer {
                 int groupID = group.getUnitCount();
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
                 group.addUnit(unit);
-                List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
+                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i), symmetryRotation.get(i)));

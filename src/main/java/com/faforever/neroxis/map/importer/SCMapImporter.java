@@ -4,9 +4,9 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.DDSHeader;
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.Vector4f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
 
@@ -295,16 +295,16 @@ public strictfp class SCMapImporter {
         return readString.toString();
     }
 
-    private static Vector3f readVector3f() throws IOException {
-        return new Vector3f(readFloat(), readFloat(), readFloat());
+    private static Vector3 readVector3f() throws IOException {
+        return new Vector3(readFloat(), readFloat(), readFloat());
     }
 
-    private static Vector4f readVector4f() throws IOException {
-        return new Vector4f(readFloat(), readFloat(), readFloat(), readFloat());
+    private static Vector4 readVector4f() throws IOException {
+        return new Vector4(readFloat(), readFloat(), readFloat(), readFloat());
     }
 
-    private static Vector2f readVector2f() throws IOException {
-        return new Vector2f(readFloat(), readFloat());
+    private static Vector2 readVector2f() throws IOException {
+        return new Vector2(readFloat(), readFloat());
     }
 
     private static LightingSettings readLightingSettings() throws IOException {
@@ -360,9 +360,9 @@ public strictfp class SCMapImporter {
     private static WaveGenerator readWaveGenerator() throws IOException {
         String textureName = readStringNull();
         String rampName = readStringNull();
-        Vector3f position = readVector3f();
+        Vector3 position = readVector3f();
         float rotation = readFloat();
-        Vector3f velocity = readVector3f();
+        Vector3 velocity = readVector3f();
 
         WaveGenerator waveGenerator = new WaveGenerator(textureName, rampName, position, rotation, velocity);
 
@@ -389,9 +389,9 @@ public strictfp class SCMapImporter {
             int stringLength = readInt();
             texturePaths[j] = readString(stringLength);
         }
-        Vector3f scale = readVector3f();
-        Vector3f position = readVector3f();
-        Vector3f rotation = readVector3f();
+        Vector3 scale = readVector3f();
+        Vector3 position = readVector3f();
+        Vector3 rotation = readVector3f();
         float cutOffLOD = readFloat();
         readFloat(); // nearCutOffLOD
         readInt(); // ownerArmy
@@ -478,8 +478,8 @@ public strictfp class SCMapImporter {
 
     private static Prop readProp() throws IOException {
         String path = readStringNull();
-        Vector3f position = readVector3f();
-        Vector3f rotationX = readVector3f();
+        Vector3 position = readVector3f();
+        Vector3 rotationX = readVector3f();
         readVector3f(); // Y rotation
         readVector3f(); // Z rotation
         readVector3f(); // scale

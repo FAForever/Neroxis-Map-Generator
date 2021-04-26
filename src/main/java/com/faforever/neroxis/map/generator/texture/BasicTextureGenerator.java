@@ -1,9 +1,18 @@
 package com.faforever.neroxis.map.generator.texture;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.generator.PreviewGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -44,11 +53,14 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     public void setTextures() {
-        Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
+        Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture, normals);
         Util.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+            map.setNormalMap(new BufferedImage(normals.getSize(), normals.getSize(), BufferedImage.TYPE_INT_ARGB));
+            normals.getFinalMask().writeToImage(map.getNormalMap());
         });
+
     }
 
     protected void setupTexturePipeline() {

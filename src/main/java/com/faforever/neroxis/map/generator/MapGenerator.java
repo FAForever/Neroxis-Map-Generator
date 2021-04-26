@@ -11,7 +11,6 @@ import com.google.common.io.BaseEncoding;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,8 +23,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.faforever.neroxis.util.ImageUtils.readImage;
 
 @Getter
 @Setter
@@ -296,6 +293,7 @@ public strictfp class MapGenerator {
                 .numTeams(numTeams)
                 .hydroCount(spawnCount)
                 .unexplored(unexplored)
+                .blind(blind)
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
@@ -547,7 +545,7 @@ public strictfp class MapGenerator {
             FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
 
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(folderPath, map, !tournamentStyle);
+            MapExporter.exportMap(folderPath, map, !tournamentStyle, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             if (!tournamentStyle && Util.DEBUG) {
@@ -611,7 +609,7 @@ public strictfp class MapGenerator {
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
-        map.addBlank(new Marker(mapName, new Vector2f(0, 0)));
+        map.addBlank(new Marker(mapName, new Vector2(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
         map.setName(mapName);
         map.setFolderName(mapName);

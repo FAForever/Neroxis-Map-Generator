@@ -1,7 +1,8 @@
 package com.faforever.neroxis.map.generator.placement;
 
 import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.util.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public strictfp class SpawnPlacer {
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
-        Vector2f location = spawnMask.getRandomPosition();
+        Vector2 location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
             if (location == null) {
                 placeSpawns(spawnCount, StrictMath.max(teammateSeparation - 4, 0), teamSeparation, symmetrySettings);
@@ -32,8 +33,8 @@ public strictfp class SpawnPlacer {
             }
             location.add(.5f, .5f);
             spawnMask.fillCircle(location, teammateSeparation, false);
-            List<Vector2f> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+            List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
             symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, teamSeparation, false));
 
             addSpawn(location, symmetryPoints);
@@ -55,7 +56,7 @@ public strictfp class SpawnPlacer {
         map.getSpawns().clear();
         BooleanMask spawnMaskCopy = spawnMask.copy();
         spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false).fillCenter(map.getSize() * 3 / 8, false).fillEdge(map.getSize() / 32, false).limitToSymmetryRegion();
-        Vector2f location = spawnMaskCopy.getRandomPosition();
+        Vector2 location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
             if (location == null) {
                 if (separation - 4 >= 10) {
@@ -66,8 +67,8 @@ public strictfp class SpawnPlacer {
                 }
             }
             spawnMaskCopy.fillCircle(location, separation, false);
-            List<Vector2f> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(Vector2f::roundToNearestHalfPoint);
+            List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
+            symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
             symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
 
             if (spawnMaskCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
@@ -78,15 +79,15 @@ public strictfp class SpawnPlacer {
         }
     }
 
-    private void addSpawn(Vector2f location, List<Vector2f> symmetryPoints) {
-        map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2f(0, 0), 0));
+    private void addSpawn(Vector2 location, List<Vector2> symmetryPoints) {
+        map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2(0, 0), 0));
         Group initial = new Group("INITIAL", new ArrayList<>());
         Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
         army.addGroup(initial);
         map.addArmy(army);
         for (int i = 0; i < symmetryPoints.size(); ++i) {
-            Vector2f symmetryPoint = symmetryPoints.get(i);
-            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint, new Vector2f(0, 0), i + 1));
+            Vector2 symmetryPoint = symmetryPoints.get(i);
+            map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint, new Vector2(0, 0), i + 1));
             Group initialSym = new Group("INITIAL", new ArrayList<>());
             Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
             armySym.addGroup(initialSym);

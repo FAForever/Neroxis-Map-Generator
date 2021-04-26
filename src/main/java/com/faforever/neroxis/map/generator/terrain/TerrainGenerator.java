@@ -2,9 +2,11 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.generator.ElementGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.util.Vector2;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     public void setHeightmapImage() {
         Pipeline.await(heightmap);
         Util.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> {
-            map.setHeightImage(heightmap.getFinalMask());
+            heightmap.getFinalMask().writeImage(map.getHeightmap(), 1 / map.getHeightMapScale());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
         });
     }
@@ -81,8 +83,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             } else {
                 numMiddlePoints = maxMiddlePoints;
             }
-            Vector2f start = new Vector2f(startSpawn.getPosition());
-            Vector2f end = new Vector2f(start);
+            Vector2 start = new Vector2(startSpawn.getPosition());
+            Vector2 end = new Vector2(start);
             float maxMiddleDistance = start.getDistance(end);
             maskToUse.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
@@ -102,13 +104,13 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             } else {
                 numMiddlePoints = maxMiddlePoints;
             }
-            Vector2f start = new Vector2f(startSpawn.getPosition());
-            Vector2f end = new Vector2f(start);
+            Vector2 start = new Vector2(startSpawn.getPosition());
+            Vector2 end = new Vector2(start);
             float offCenterAngle = (float) (StrictMath.PI * (1f / 4f + random.nextFloat() / 4f));
             offCenterAngle *= random.nextBoolean() ? 1 : -1;
-            offCenterAngle += start.getAngle(new Vector2f(maskToUse.getSize() / 2f, maskToUse.getSize() / 2f));
+            offCenterAngle += start.getAngle(new Vector2(maskToUse.getSize() / 2f, maskToUse.getSize() / 2f));
             end.addPolar(offCenterAngle, random.nextFloat() * maskToUse.getSize() / 2f + maskToUse.getSize() / 2f);
-            end.clampMax(maskToUse.getSize() - bound, maskToUse.getSize() - bound).clampMin(bound, bound);
+            end.clampMax(maskToUse.getSize() - bound).clampMin(bound);
             float maxMiddleDistance = start.getDistance(end);
             maskToUse.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
@@ -123,8 +125,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
                     otherSpawns.remove(startSpawn);
                     Spawn endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
                     int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                    Vector2f start = new Vector2f(startSpawn.getPosition());
-                    Vector2f end = new Vector2f(endSpawn.getPosition());
+                    Vector2 start = new Vector2(startSpawn.getPosition());
+                    Vector2 end = new Vector2(endSpawn.getPosition());
                     float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
                     maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
                 }
@@ -134,8 +136,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
 
     protected void pathInCenterBounds(BooleanMask maskToUse, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
-            Vector2f start = new Vector2f(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
-            Vector2f end = new Vector2f(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
+            Vector2 start = new Vector2(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
+            Vector2 end = new Vector2(random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound, random.nextInt(maskToUse.getSize() + 1 - bound * 2) + bound);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
             maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
@@ -148,19 +150,19 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             int startY = random.nextInt(bound) + (random.nextBoolean() ? 0 : maskToUse.getSize() - bound);
             int endX = random.nextInt(bound * 2) - bound + startX;
             int endY = random.nextInt(bound * 2) - bound + startY;
-            Vector2f start = new Vector2f(startX, startY);
-            Vector2f end = new Vector2f(endX, endY);
+            Vector2 start = new Vector2(startX, startY);
+            Vector2 end = new Vector2(endX, endY);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
             maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
         }
     }
 
-    protected void pathAroundPoint(BooleanMask maskToUse, Vector2f start, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    protected void pathAroundPoint(BooleanMask maskToUse, Vector2 start, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
         for (int i = 0; i < numPaths; i++) {
             int endX = (int) (random.nextFloat() * bound + start.getX());
             int endY = (int) (random.nextFloat() * bound + start.getY());
-            Vector2f end = new Vector2f(endX, endY);
+            Vector2 end = new Vector2(endX, endY);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
             maskToUse.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);

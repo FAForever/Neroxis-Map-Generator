@@ -1,9 +1,13 @@
-package com.faforever.neroxis.map;
+package com.faforever.neroxis.map.mask;
 
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +15,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
@@ -24,85 +28,86 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     @Setter
     private boolean parallel;
-    @Getter
-    @Setter
-    private boolean processing;
     protected T[][] mask;
 
-    protected Mask(Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(seed, symmetrySettings, name, false);
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
-    protected Mask(Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.symmetrySettings = symmetrySettings;
         this.name = name;
+        this.mask = getEmptyMask(size);
+        this.plannedSize = size;
         this.parallel = parallel;
-        this.processing = false;
         if (seed != null) {
             this.random = new Random(seed);
         } else {
             this.random = null;
         }
+        enqueue(() -> {
+        });
     }
+
+    public Mask(U other, Long seed) {
+        this(other, seed, null);
+    }
+
+    public Mask(U other, Long seed, String name) {
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        enqueue(dependencies -> {
+            U source = (U) dependencies.get(0);
+            set(source::get);
+            return (U) this;
+        }, other);
+    }
+
+    public abstract BufferedImage writeToImage(BufferedImage image);
 
     public abstract String toHash() throws NoSuchAlgorithmException;
 
     protected abstract T[][] getEmptyMask(int size);
 
-    public abstract U interpolate();
-
-    public abstract U blur(int size);
+    protected abstract T getZeroValue();
 
     public abstract U copy();
 
-    protected abstract int[][] getInnerCount();
+    public abstract U blur(int size);
 
-    protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
-        innerCount[x][y] = val;
-        innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
-        innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
-        innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+    public U interpolate() {
+        return blur(1);
     }
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
         return wrapEdges ? (val + offset + size) % size : val + offset - 1;
     }
 
-    public T getFinalValueAt(Vector3f location) {
-        return getFinalValueAt((int) location.getX(), (int) location.getZ());
+    public T get(Vector3 location) {
+        return get((int) location.getX(), (int) location.getZ());
     }
 
-    public T getFinalValueAt(Vector2f location) {
-        return getFinalValueAt((int) location.getX(), (int) location.getY());
+    public T get(Vector2 location) {
+        return get((int) location.getX(), (int) location.getY());
     }
 
-    public T getFinalValueAt(int x, int y) {
-        Pipeline.await(this);
+    public T get(int x, int y) {
         return mask[x][y];
     }
 
-    public T getValueAt(Vector3f location) {
-        return getValueAt((int) location.getX(), (int) location.getZ());
+    public void set(Vector3 location, T value) {
+        set((int) location.getX(), (int) location.getZ(), value);
     }
 
-    public T getValueAt(Vector2f location) {
-        return getValueAt((int) location.getX(), (int) location.getY());
+    public void set(Vector2 location, T value) {
+        set((int) location.getX(), (int) location.getY(), value);
     }
 
-    public T getValueAt(int x, int y) {
-        return mask[x][y];
-    }
-
-    protected void setValueAt(Vector2f location, T value) {
-        setValueAt((int) location.getX(), (int) location.getY(), value);
-    }
-
-    protected void setValueAt(int x, int y, T value) {
+    public void set(int x, int y, T value) {
         mask[x][y] = value;
     }
 
     public int getSize() {
-        if (parallel && !processing) {
+        if (parallel && !Pipeline.isStarted()) {
             return plannedSize;
         } else {
             return mask[0].length;
@@ -113,19 +118,21 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return mask[0].length;
     }
 
-    protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
-        int xLeft = StrictMath.max(0, x - radius);
-        int size = getSize();
-        int xRight = StrictMath.min(size - 1, x + radius);
-        int yUp = StrictMath.max(0, y - radius);
-        int yDown = StrictMath.min(size - 1, y + radius);
-        int countA = xLeft > 0 && yUp > 0 ? innerCount[xLeft - 1][yUp - 1] : 0;
-        int countB = yUp > 0 ? innerCount[xRight][yUp - 1] : 0;
-        int countC = xLeft > 0 ? innerCount[xLeft - 1][yDown] : 0;
-        int countD = innerCount[xRight][yDown];
-        int count = countD + countA - countB - countC;
-        int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
-        return (float) count / area;
+    public U clear() {
+        enqueue(() -> set((x, y) -> getZeroValue()));
+        return (U) this;
+    }
+
+    public U init(U other) {
+        plannedSize = other.getSize();
+        enqueue(dependencies -> {
+            U source = (U) dependencies.get(0);
+            setSize(source.getSize());
+            assertCompatibleMask(source);
+            set(source::get);
+            return (U) this;
+        }, other);
+        return (U) this;
     }
 
     public U setSize(int newSize) {
@@ -154,7 +161,28 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    public boolean inBounds(Vector2f location) {
+    public U setToValue(BooleanMask other, T val) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertCompatibleMask(source);
+            set((x, y) -> source.get(x, y) ? val : get(x, y));
+            return (U) this;
+        }, other);
+        return (U) this;
+    }
+
+    public U replaceValues(BooleanMask area, U values) {
+        enqueue(dependencies -> {
+            BooleanMask placement = (BooleanMask) dependencies.get(0);
+            U source = (U) dependencies.get(1);
+            assertCompatibleMask(source);
+            set((x, y) -> placement.get(x, y) ? source.get(x, y) : get(x, y));
+            return (U) this;
+        }, area, values);
+        return (U) this;
+    }
+
+    public boolean inBounds(Vector2 location) {
         return inBounds((int) location.getX(), (int) location.getY());
     }
 
@@ -163,7 +191,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
-    public boolean onBoundary(Vector2f location) {
+    public boolean onBoundary(Vector2 location) {
         return onBoundary((int) location.getX(), (int) location.getY());
     }
 
@@ -172,41 +200,41 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return x == 0 || x == size - 1 || y == 0 || y == size - 1;
     }
 
-    public List<Vector2f> getSymmetryPoints(Vector3f v, SymmetryType symmetryType) {
-        return getSymmetryPoints(new Vector2f(v), symmetryType);
+    public List<Vector2> getSymmetryPoints(Vector3 v, SymmetryType symmetryType) {
+        return getSymmetryPoints(new Vector2(v), symmetryType);
     }
 
-    public List<Vector2f> getSymmetryPoints(Vector2f v, SymmetryType symmetryType) {
+    public List<Vector2> getSymmetryPoints(Vector2 v, SymmetryType symmetryType) {
         return getSymmetryPoints(v.getX(), v.getY(), symmetryType);
     }
 
-    public List<Vector2f> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
-        List<Vector2f> symmetryPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
+    public List<Vector2> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
+        List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
         symmetryPoints.removeIf(point -> !inBounds(point));
         return symmetryPoints;
     }
 
-    public List<Vector2f> getSymmetryPointsWithOutOfBounds(Vector3f v, SymmetryType symmetryType) {
-        return getSymmetryPointsWithOutOfBounds(new Vector2f(v), symmetryType);
+    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector3 v, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(new Vector2(v), symmetryType);
     }
 
-    public List<Vector2f> getSymmetryPointsWithOutOfBounds(Vector2f v, SymmetryType symmetryType) {
+    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector2 v, SymmetryType symmetryType) {
         return getSymmetryPointsWithOutOfBounds(v.getX(), v.getY(), symmetryType);
     }
 
-    public List<Vector2f> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
+    public List<Vector2> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int numSymPoints = symmetry.getNumSymPoints();
-        List<Vector2f> symmetryPoints = new ArrayList<>(numSymPoints - 1);
+        List<Vector2> symmetryPoints = new ArrayList<>(numSymPoints - 1);
         int size = getSize();
         switch (symmetry) {
             case POINT2:
-                symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 break;
             case POINT4:
-                symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
-                symmetryPoints.add(new Vector2f(y, size - x - 1));
-                symmetryPoints.add(new Vector2f(size - y - 1, x));
+                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
+                symmetryPoints.add(new Vector2(y, size - x - 1));
+                symmetryPoints.add(new Vector2(size - y - 1, x));
                 break;
             case POINT6:
             case POINT8:
@@ -214,12 +242,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             case POINT12:
             case POINT14:
             case POINT16:
-                symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 for (int i = 1; i < numSymPoints / 2; i++) {
                     float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
-                    Vector2f rotated = getRotatedPoint(x, y, angle);
+                    Vector2 rotated = getRotatedPoint(x, y, angle);
                     symmetryPoints.add(rotated);
-                    Vector2f antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
+                    Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
                     symmetryPoints.add(antiRotated);
                 }
                 break;
@@ -231,42 +259,42 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             case POINT13:
             case POINT15:
                 for (int i = 1; i < numSymPoints; i++) {
-                    Vector2f rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
+                    Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
                     symmetryPoints.add(rotated);
                 }
                 break;
             case X:
-                symmetryPoints.add(new Vector2f(size - x - 1, y));
+                symmetryPoints.add(new Vector2(size - x - 1, y));
                 break;
             case Z:
-                symmetryPoints.add(new Vector2f(x, size - y - 1));
+                symmetryPoints.add(new Vector2(x, size - y - 1));
                 break;
             case XZ:
-                symmetryPoints.add(new Vector2f(y, x));
+                symmetryPoints.add(new Vector2(y, x));
                 break;
             case ZX:
-                symmetryPoints.add(new Vector2f(size - y - 1, size - x - 1));
+                symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
                 break;
             case QUAD:
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
-                    symmetryPoints.add(new Vector2f(x, size - y - 1));
-                    symmetryPoints.add(new Vector2f(size - x - 1, y));
-                    symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                    symmetryPoints.add(new Vector2(x, size - y - 1));
+                    symmetryPoints.add(new Vector2(size - x - 1, y));
+                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 } else {
-                    symmetryPoints.add(new Vector2f(size - x - 1, y));
-                    symmetryPoints.add(new Vector2f(x, size - y - 1));
-                    symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                    symmetryPoints.add(new Vector2(size - x - 1, y));
+                    symmetryPoints.add(new Vector2(x, size - y - 1));
+                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 }
                 break;
             case DIAG:
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
-                    symmetryPoints.add(new Vector2f(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2f(y, x));
-                    symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
+                    symmetryPoints.add(new Vector2(y, x));
+                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 } else {
-                    symmetryPoints.add(new Vector2f(y, x));
-                    symmetryPoints.add(new Vector2f(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2f(size - x - 1, size - y - 1));
+                    symmetryPoints.add(new Vector2(y, x));
+                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
+                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 }
                 break;
         }
@@ -277,7 +305,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return getSymmetryRotation(rot, SymmetryType.SPAWN);
     }
 
-    private Vector2f getRotatedPoint(float x, float y, float angle) {
+    private Vector2 getRotatedPoint(float x, float y, float angle) {
         float halfSize = getSize() / 2f;
         float xOffset = x - halfSize;
         float yOffset = y - halfSize;
@@ -285,7 +313,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         double sinAngle = StrictMath.sin(angle);
         float newX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
         float newY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
-        return new Vector2f(newX, newY);
+        return new Vector2(newX, newY);
     }
 
     protected int getMinXBound(SymmetryType symmetryType) {
@@ -478,11 +506,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return StrictMath.max(StrictMath.min(y, getSize()), 0);
     }
 
-    public boolean inTeam(Vector3f pos, boolean reverse) {
-        return inTeam(new Vector2f(pos), reverse);
+    public boolean inTeam(Vector3 pos, boolean reverse) {
+        return inTeam(new Vector2(pos), reverse);
     }
 
-    public boolean inTeam(Vector2f pos, boolean reverse) {
+    public boolean inTeam(Vector2 pos, boolean reverse) {
         return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
     }
 
@@ -490,11 +518,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (x >= getMinXBound(SymmetryType.TEAM) && x < getMaxXBound(SymmetryType.TEAM) && y >= getMinYBound(x, SymmetryType.TEAM) && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
     }
 
-    public boolean inTeamNoBounds(Vector3f pos, boolean reverse) {
-        return inTeam(new Vector2f(pos), reverse);
+    public boolean inTeamNoBounds(Vector3 pos, boolean reverse) {
+        return inTeam(new Vector2(pos), reverse);
     }
 
-    public boolean inTeamNoBounds(Vector2f pos, boolean reverse) {
+    public boolean inTeamNoBounds(Vector2 pos, boolean reverse) {
         return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
     }
 
@@ -502,17 +530,17 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (x >= getMinXBound(SymmetryType.TEAM) && x < getMaxXBound(SymmetryType.TEAM) && y >= getMinYBound(x, SymmetryType.TEAM) && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
     }
 
-    public boolean inHalf(Vector3f pos, float angle) {
-        return inHalf(new Vector2f(pos), angle);
+    public boolean inHalf(Vector3 pos, float angle) {
+        return inHalf(new Vector2(pos), angle);
     }
 
     public boolean inHalf(int x, int y, float angle) {
-        return inHalf(new Vector2f(x, y), angle);
+        return inHalf(new Vector2(x, y), angle);
     }
 
-    public boolean inHalf(Vector2f pos, float angle) {
+    public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2f(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
@@ -521,17 +549,17 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public boolean inHalfNoBounds(Vector3f pos, float angle) {
-        return inHalfNoBounds(new Vector2f(pos), angle);
+    public boolean inHalfNoBounds(Vector3 pos, float angle) {
+        return inHalfNoBounds(new Vector2(pos), angle);
     }
 
     public boolean inHalfNoBounds(int x, int y, float angle) {
-        return inHalfNoBounds(new Vector2f(x, y), angle);
+        return inHalfNoBounds(new Vector2(x, y), angle);
     }
 
-    public boolean inHalfNoBounds(Vector2f pos, float angle) {
+    public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2f(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);
@@ -545,22 +573,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
-        enqueue(() -> {
-            applyWithSymmetry(symmetryType, (x, y) -> {
-                Vector2f location = new Vector2f(x, y);
-                List<Vector2f> symPoints = getSymmetryPoints(location, symmetryType);
-                symPoints.forEach(symmetryPoint -> {
-                    if (reverse) {
-                        setValueAt(location, getValueAt(symmetryPoint));
-                    } else {
-                        setValueAt(symmetryPoint, getValueAt(location));
-                    }
-                });
-            });
-            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry()) {
-                interpolate();
+        enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
+            if (!reverse) {
+                T value = get(x, y);
+                applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
+            } else {
+                if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
+                    throw new IllegalArgumentException("Symmetry has more than two symmetry points");
+                }
+                List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+                symPoints.forEach(symmetryPoint -> set(x, y, get(symmetryPoint)));
             }
-        });
+        }));
     }
 
     public void applySymmetry(float angle) {
@@ -570,28 +594,27 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             }
             apply((x, y) -> {
                 if (inHalf(x, y, angle)) {
-                    Vector2f location = new Vector2f(x, y);
-                    List<Vector2f> symPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-                    symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, getValueAt(location)));
+                    T value = get(x, y);
+                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> set(sx, sy, value));
                 }
             });
         });
     }
 
-    private U enlarge(int size) {
+    protected U enlarge(int size) {
         return enlarge(size, SymmetryType.SPAWN);
     }
 
-    private U shrink(int size) {
+    protected U shrink(int size) {
         return shrink(size, SymmetryType.SPAWN);
     }
 
-    private U enlarge(int newSize, SymmetryType symmetryType) {
+    protected U enlarge(int newSize, SymmetryType symmetryType) {
         T[][] smallMask = mask;
         int oldSize = getSize();
         float scale = (float) newSize / oldSize;
         mask = getEmptyMask(newSize);
-        modifyWithSymmetry(symmetryType, (x, y) -> {
+        setWithSymmetry(symmetryType, (x, y) -> {
             int smallX = StrictMath.min((int) (x / scale), oldSize - 1);
             int smallY = StrictMath.min((int) (y / scale), oldSize - 1);
             return smallMask[smallX][smallY];
@@ -599,12 +622,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    private U shrink(int newSize, SymmetryType symmetryType) {
+    protected U shrink(int newSize, SymmetryType symmetryType) {
         T[][] largeMask = mask;
         int oldSize = getSize();
         float scale = (float) oldSize / newSize;
         mask = getEmptyMask(newSize);
-        modifyWithSymmetry(symmetryType, (x, y) -> {
+        setWithSymmetry(symmetryType, (x, y) -> {
             int largeX = StrictMath.min(StrictMath.round(x * scale + scale / 2), oldSize - 1);
             int largeY = StrictMath.min(StrictMath.round(y * scale + scale / 2), oldSize - 1);
             return largeMask[largeX][largeY];
@@ -619,7 +642,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     private U interpolate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
         enlarge(newSize, symmetryType);
-        blur(StrictMath.round((float) newSize / oldSize / 2));
+        blur(StrictMath.round((float) newSize / oldSize / 2 - 1));
         return (U) this;
     }
 
@@ -629,7 +652,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     private U decimate(int newSize, SymmetryType symmetryType) {
         int oldSize = getSize();
-        blur(StrictMath.round((float) oldSize / newSize / 2));
+        blur(StrictMath.round((float) oldSize / newSize / 2 - 1));
         shrink(newSize, symmetryType);
         return (U) this;
     }
@@ -643,36 +666,24 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             int size = getSize();
             T[][] newMask = getEmptyMask(size);
             apply((x, y) -> {
-                List<Vector2f> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                newMask[x][y] = getValueAt(symmetryPoints.get(0));
+                List<Vector2> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
+                newMask[x][y] = get(symmetryPoints.get(0));
             });
             this.mask = newMask;
         });
         return (U) this;
     }
 
-    protected void modify(BiFunction<Integer, Integer, T> valueFunction) {
-        int size = getSize();
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                setValueAt(x, y, valueFunction.apply(x, y));
-            }
-        }
+    protected void set(BiFunction<Integer, Integer, T> valueFunction) {
+        apply((x, y) -> set(x, y, valueFunction.apply(x, y)));
     }
 
-    protected void modifyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        int minX = getMinXBound(symmetryType);
-        int maxX = getMaxXBound(symmetryType);
-        for (int x = minX; x < maxX; x++) {
-            int minY = getMinYBound(x, symmetryType);
-            int maxY = getMaxYBound(x, symmetryType);
-            for (int y = minY; y < maxY; y++) {
-                T value = valueFunction.apply(x, y);
-                setValueAt(x, y, value);
-                List<Vector2f> symPoints = getSymmetryPoints(x, y, symmetryType);
-                symPoints.forEach(symmetryPoint -> setValueAt(symmetryPoint, value));
-            }
-        }
+    protected void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+        applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            set(x, y, value);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
+        });
     }
 
     protected void apply(BiConsumer<Integer, Integer> maskAction) {
@@ -696,33 +707,87 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected void enqueue(Runnable function) {
-        enqueue((ignored) -> function.run());
+    protected void applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
+        action.accept(x, y);
+        List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+        symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
     }
 
-    protected void enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
+    public void applyWithOffset(U other, TriConsumer<Integer, Integer, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+        int size = getSize();
+        int otherSize = other.getSize();
+        int smallerSize = StrictMath.min(size, otherSize);
+        int offsetX;
+        int offsetY;
+        if (center) {
+            offsetX = xCoordinate - smallerSize / 2;
+            offsetY = yCoordinate - smallerSize / 2;
+        } else {
+            offsetX = xCoordinate;
+            offsetY = yCoordinate;
+        }
+        if (size >= otherSize) {
+            other.apply((x, y) -> {
+                int shiftX = getShiftedValue(x, offsetX, size, wrapEdges);
+                int shiftY = getShiftedValue(y, offsetY, size, wrapEdges);
+                if (inBounds(shiftX, shiftY)) {
+                    T value = other.get(x, y);
+                    applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN, (sx, sy) -> action.accept(sx, sy, value));
+                }
+            });
+        } else {
+            apply((x, y) -> {
+                int shiftX = getShiftedValue(x, offsetX, otherSize, wrapEdges);
+                int shiftY = getShiftedValue(y, offsetY, otherSize, wrapEdges);
+                if (other.inBounds(shiftX, shiftY)) {
+                    T value = other.get(shiftX, shiftY);
+                    action.accept(x, y, value);
+                }
+            });
+        }
+    }
+
+    protected void enqueue(Runnable function) {
+        enqueue((ignored) -> {
+            function.run();
+            return (U) this;
+        });
+    }
+
+    protected void enqueue(Function<List<Mask<?, ?>>, U> function, Mask<?, ?>... usedMasks) {
+        enqueue((U) this, function, usedMasks);
+    }
+
+    protected <V extends Mask<?, ?>> void enqueue(V resultMask, Function<List<Mask<?, ?>>, V> function, Mask<?, ?>... usedMasks) {
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
-        if (parallel && !processing) {
-            if (dependencies.stream().anyMatch(dep -> !dep.isParallel() || dep.isProcessing())) {
+        if (parallel && !Pipeline.isStarted()) {
+            if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
                 throw new IllegalArgumentException("Non parallel masks used as dependents");
             }
-            Pipeline.add(this, dependencies, function);
+            Pipeline.add(this, resultMask, dependencies, function);
         } else {
-            function.accept(dependencies);
+            function.apply(dependencies);
             String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
             String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.");
-            VisualDebugger.visualizeMask(this, callingMethod, callingLine);
+            VisualDebugger.visualizeMask(resultMask, callingMethod, callingLine);
         }
     }
 
     protected void assertCompatibleMask(Mask<?, ?> other) {
         int otherSize = other.getSize();
         int size = getSize();
+        String name = getName();
+        String otherName = other.getName();
         if (otherSize != size) {
-            throw new IllegalArgumentException("Masks not the same size: other is " + otherSize + " and Mask is " + size);
+            throw new IllegalArgumentException(String.format("Masks not the same size: %s is %d and %s is %d", name, size, otherName, otherSize));
         }
-        if (!getSymmetrySettings().equals(other.getSymmetrySettings())) {
-            throw new IllegalArgumentException("Masks not the same symmetry: other is " + other.getSymmetrySettings() + " and Mask is " + getSymmetrySettings());
+        SymmetrySettings symmetrySettings = getSymmetrySettings();
+        SymmetrySettings otherSymmetrySettings = other.getSymmetrySettings();
+        if (!symmetrySettings.equals(otherSymmetrySettings)) {
+            throw new IllegalArgumentException(String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings, otherName, otherSymmetrySettings));
+        }
+        if (isParallel() && !Pipeline.isStarted() && !other.isParallel()) {
+            throw new IllegalArgumentException(String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
     }
 
@@ -733,9 +798,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void assertNotParallel() {
-        if (parallel && !processing) {
-            throw new IllegalStateException("Mask not finished processing results will not be deterministic");
+    protected void assertSize(int size) {
+        int actualSize = getSize();
+        if (size != actualSize) {
+            throw new IllegalArgumentException("Mask size is incorrect: Mask is " + actualSize + " and size is " + size);
         }
     }
 
@@ -759,13 +825,15 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void show() {
-        VisualDebugger.visualizeMask(this, "show");
+        if (!parallel) {
+            VisualDebugger.visualizeMask(this, "show");
+        }
     }
 
     @Override
     public String toString() {
         if (name != null) {
-            return String.format("Mask(name=%s,size=%d", name, getSize());
+            return String.format("Mask(name=%s,size=%d)", name, getSize());
         } else {
             return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
         }

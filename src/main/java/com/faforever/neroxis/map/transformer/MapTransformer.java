@@ -3,10 +3,11 @@ package com.faforever.neroxis.map.transformer;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.importer.MapImporter;
+import com.faforever.neroxis.map.mask.IntegerMask;
 import com.faforever.neroxis.util.ArgumentParser;
 import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,7 +23,7 @@ public strictfp class MapTransformer {
     private String source;
 
     //masks used in transformation
-    private FloatMask heightmapBase;
+    private IntegerMask heightMask;
 
     private boolean transformResources;
     private boolean transformProps;
@@ -207,7 +208,7 @@ public strictfp class MapTransformer {
 
     public void exportMap() {
         long startTime = System.currentTimeMillis();
-        MapExporter.exportMap(outFolderPath, map, true);
+        MapExporter.exportMap(outFolderPath, map, true, false);
         System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
     }
 
@@ -230,13 +231,12 @@ public strictfp class MapTransformer {
         shiftZ = shiftZSet ? shiftZ : mapBounds / 2;
 
         if (mapBounds != mapSize || resize != mapSize) {
-            map.changeMapSize(resize, mapBounds, new Vector2f(shiftX, shiftZ));
+            map.changeMapSize(resize, mapBounds, new Vector2(shiftX, shiftZ));
         }
     }
 
     private void transformSymmetry() {
-        heightmapBase = map.getHeightMask(symmetrySettings);
-        heightmapBase.startVisualDebugger();
+        heightMask = new IntegerMask(map.getHeightmap(), null, symmetrySettings, "heightMask");
 
         if (transformTerrain) {
             transformTerrain();
@@ -275,16 +275,15 @@ public strictfp class MapTransformer {
     }
 
     private void transformTerrain() {
-        IntegerMask previewMask = map.getMaskFromImage(map.getPreview(), symmetrySettings);
-        IntegerMask normalMask = map.getMaskFromImage(map.getNormalMap(), symmetrySettings);
-        IntegerMask waterMask = map.getMaskFromImage(map.getWaterMap(), symmetrySettings);
-        IntegerMask waterFoamMask = map.getMaskFromImage(map.getWaterFoamMap(), symmetrySettings);
-        IntegerMask waterFlatnessMask = map.getMaskFromImage(map.getWaterFlatnessMap(), symmetrySettings);
-        IntegerMask waterDepthBiasMask = map.getMaskFromImage(map.getWaterDepthBiasMap(), symmetrySettings);
-        IntegerMask terrainTypeMask = map.getMaskFromImage(map.getTerrainType(), symmetrySettings);
-        IntegerMask[] texturesMasks = map.getTextureMasksRaw(symmetrySettings);
-
-        terrainTypeMask.startVisualDebugger();
+        IntegerMask previewMask = new IntegerMask(map.getPreview(), null, symmetrySettings, "preview");
+        IntegerMask normalMask = new IntegerMask(map.getNormalMap(), null, symmetrySettings, "normal");
+        IntegerMask waterMask = new IntegerMask(map.getWaterMap(), null, symmetrySettings, "water");
+        IntegerMask waterFoamMask = new IntegerMask(map.getWaterFoamMap(), null, symmetrySettings, "waterFoam");
+        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterFlatnessMap(), null, symmetrySettings, "waterFlatness");
+        IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings, "waterDepthBias");
+        IntegerMask terrainTypeMask = new IntegerMask(map.getTerrainType(), null, symmetrySettings, "terrainType");
+        IntegerMask textureMasksLowMask = new IntegerMask(map.getTextureMasksLow(), null, symmetrySettings, "textureMasksLow");
+        IntegerMask textureMasksHighMask = new IntegerMask(map.getTextureMasksHigh(), null, symmetrySettings, "textureMasksHigh");
 
         if (!useAngle) {
             previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
@@ -294,15 +293,9 @@ public strictfp class MapTransformer {
             waterFlatnessMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
             waterDepthBiasMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
             terrainTypeMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            heightmapBase.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[0].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[1].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[2].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[3].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[4].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[5].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[6].applySymmetry(SymmetryType.SPAWN, reverseSide);
-            texturesMasks[7].applySymmetry(SymmetryType.SPAWN, reverseSide);
+            textureMasksLowMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            textureMasksHighMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            heightMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
         } else {
             previewMask.applySymmetry(angle);
             normalMask.applySymmetry(angle);
@@ -311,26 +304,20 @@ public strictfp class MapTransformer {
             waterFlatnessMask.applySymmetry(angle);
             waterDepthBiasMask.applySymmetry(angle);
             terrainTypeMask.applySymmetry(angle);
-            heightmapBase.applySymmetry(angle);
-            texturesMasks[0].applySymmetry(angle);
-            texturesMasks[1].applySymmetry(angle);
-            texturesMasks[2].applySymmetry(angle);
-            texturesMasks[3].applySymmetry(angle);
-            texturesMasks[4].applySymmetry(angle);
-            texturesMasks[5].applySymmetry(angle);
-            texturesMasks[6].applySymmetry(angle);
-            texturesMasks[7].applySymmetry(angle);
+            textureMasksLowMask.applySymmetry(angle);
+            textureMasksHighMask.applySymmetry(angle);
+            heightMask.applySymmetry(angle);
         }
-        map.setImageFromMask(map.getPreview(), previewMask);
-        map.setImageFromMask(map.getNormalMap(), normalMask);
-        map.setImageFromMask(map.getWaterMap(), waterMask);
-        map.setImageFromMask(map.getWaterFoamMap(), waterFoamMask);
-        map.setImageFromMask(map.getWaterFlatnessMap(), waterFlatnessMask);
-        map.setImageFromMask(map.getWaterDepthBiasMap(), waterDepthBiasMask);
-        map.setImageFromMask(map.getTerrainType(), terrainTypeMask);
-        map.setHeightImage(heightmapBase);
-        map.setTextureMasksRaw(map.getTextureMasksLow(), texturesMasks[0], texturesMasks[1], texturesMasks[2], texturesMasks[3]);
-        map.setTextureMasksRaw(map.getTextureMasksHigh(), texturesMasks[4], texturesMasks[5], texturesMasks[6], texturesMasks[7]);
+        previewMask.writeToImage(map.getPreview());
+        normalMask.writeToImage(map.getNormalMap());
+        waterMask.writeToImage(map.getWaterMap());
+        waterFoamMask.writeToImage(map.getWaterFoamMap());
+        waterFlatnessMask.writeToImage(map.getWaterFlatnessMap());
+        waterDepthBiasMask.writeToImage(map.getWaterDepthBiasMap());
+        terrainTypeMask.writeToImage(map.getTerrainType());
+        textureMasksLowMask.writeToImage(map.getTextureMasksLow());
+        textureMasksHighMask.writeToImage(map.getTextureMasksHigh());
+        heightMask.writeToImage(map.getHeightmap());
     }
 
     private void transformSpawns(Collection<Spawn> spawns) {
@@ -338,12 +325,12 @@ public strictfp class MapTransformer {
         spawns.forEach(spawn -> {
             if (inSourceRegion(spawn.getPosition())) {
                 transformedSpawns.add(new Spawn("", spawn.getPosition(), spawn.getNoRushOffset(), 0));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(spawn.getPosition(), SymmetryType.SPAWN);
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(spawn.getPosition(), SymmetryType.SPAWN);
                 for (int i = 0; i < symmetryPoints.size(); ++i) {
-                    Vector2f symmetryPoint = symmetryPoints.get(i);
-                    Vector2f symmetricNoRushOffset = new Vector2f(spawn.getNoRushOffset());
-                    if (!heightmapBase.inTeam(symmetryPoint, false)) {
-                        symmetricNoRushOffset.flip(new Vector2f(0, 0), heightmapBase.getSymmetrySettings().getSpawnSymmetry());
+                    Vector2 symmetryPoint = symmetryPoints.get(i);
+                    Vector2 symmetricNoRushOffset = new Vector2(spawn.getNoRushOffset());
+                    if (!heightMask.inTeam(symmetryPoint, false)) {
+                        symmetricNoRushOffset.flip(new Vector2(0, 0), heightMask.getSymmetrySettings().getSpawnSymmetry());
                     }
                     transformedSpawns.add(new Spawn("", symmetryPoint, symmetricNoRushOffset, i + 1));
                 }
@@ -364,7 +351,7 @@ public strictfp class MapTransformer {
         markers.forEach(marker -> {
             if (inSourceRegion(marker.getPosition())) {
                 transformedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(marker.getPosition(), SymmetryType.SPAWN);
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(marker.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> transformedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
             }
         });
@@ -380,7 +367,7 @@ public strictfp class MapTransformer {
         aiMarkers.forEach(aiMarker -> {
             if (inSourceRegion(aiMarker.getPosition())) {
                 transformedAImarkers.add(new AIMarker(aiMarker.getId(), aiMarker.getPosition(), aiMarker.getNeighbors()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(aiMarker.getPosition(), SymmetryType.SPAWN);
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(aiMarker.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(symmetryPoint -> {
                     LinkedHashSet<String> newNeighbors = new LinkedHashSet<>();
                     aiMarker.getNeighbors().forEach(marker -> newNeighbors.add(String.format(marker + "s%d", symmetryPoints.indexOf(symmetryPoint))));
@@ -412,8 +399,8 @@ public strictfp class MapTransformer {
         units.forEach(unit -> {
             if (inSourceRegion(unit.getPosition())) {
                 transformedUnits.add(new Unit(unit.getId(), unit.getType(), unit.getPosition(), unit.getRotation()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(unit.getPosition(), SymmetryType.SPAWN);
-                ArrayList<Float> symmetryRotation = heightmapBase.getSymmetryRotation(unit.getRotation());
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(unit.getPosition(), SymmetryType.SPAWN);
+                ArrayList<Float> symmetryRotation = heightMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     transformedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), symmetryPoints.get(i), symmetryRotation.get(i)));
                 }
@@ -428,8 +415,8 @@ public strictfp class MapTransformer {
         props.forEach(prop -> {
             if (inSourceRegion(prop.getPosition())) {
                 transformedProps.add(new Prop(prop.getPath(), prop.getPosition(), prop.getRotation()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(prop.getPosition(), SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightmapBase.getSymmetryRotation(prop.getRotation());
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(prop.getPosition(), SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     transformedProps.add(new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i)));
                 }
@@ -444,10 +431,10 @@ public strictfp class MapTransformer {
         waveGenerators.forEach(waveGenerator -> {
             if (inSourceRegion(waveGenerator.getPosition())) {
                 transformedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), waveGenerator.getPosition(), waveGenerator.getRotation(), waveGenerator.getVelocity()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(waveGenerator.getPosition(), SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightmapBase.getSymmetryRotation(waveGenerator.getRotation());
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(waveGenerator.getPosition(), SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(waveGenerator.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3f newPosition = new Vector3f(symmetryPoints.get(i));
+                    Vector3 newPosition = new Vector3(symmetryPoints.get(i));
                     newPosition.setY(waveGenerator.getPosition().getY());
                     transformedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), newPosition, symmetryRotation.get(i), waveGenerator.getVelocity()));
                 }
@@ -462,11 +449,11 @@ public strictfp class MapTransformer {
         decals.forEach(decal -> {
             if (inSourceRegion(decal.getPosition())) {
                 transformedDecals.add(new Decal(decal.getPath(), decal.getPosition(), decal.getRotation(), decal.getScale(), decal.getCutOffLOD()));
-                List<Vector2f> symmetryPoints = heightmapBase.getSymmetryPointsWithOutOfBounds(decal.getPosition(), SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightmapBase.getSymmetryRotation(decal.getRotation().getY());
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(decal.getPosition(), SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(decal.getRotation().getY());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3f symVectorRotation = new Vector3f(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
-                    transformedDecals.add(new Decal(decal.getPath(), new Vector3f(symmetryPoints.get(i)), symVectorRotation, decal.getScale(), decal.getCutOffLOD()));
+                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
+                    transformedDecals.add(new Decal(decal.getPath(), new Vector3(symmetryPoints.get(i)), symVectorRotation, decal.getScale(), decal.getCutOffLOD()));
                 }
             }
         });
@@ -484,7 +471,7 @@ public strictfp class MapTransformer {
         }
     }
 
-    private boolean inSourceRegion(Vector3f position) {
-        return (!useAngle && heightmapBase.inTeamNoBounds(position, reverseSide)) || (useAngle && heightmapBase.inHalfNoBounds(position, angle));
+    private boolean inSourceRegion(Vector3 position) {
+        return (!useAngle && heightMask.inTeamNoBounds(position, reverseSide)) || (useAngle && heightMask.inHalfNoBounds(position, angle));
     }
 }

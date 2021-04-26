@@ -1,9 +1,7 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.map.TerrainMaterials;
-import com.faforever.neroxis.util.serialized.TerrainMaterialsAdapter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.SneakyThrows;
 
 import java.io.*;
@@ -15,7 +13,7 @@ import java.util.stream.Stream;
 
 public strictfp class FileUtils {
 
-    private static final Gson gson = new GsonBuilder().registerTypeAdapter(TerrainMaterials.class, new TerrainMaterialsAdapter()).setPrettyPrinting().create();
+    private static final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {
@@ -66,14 +64,20 @@ public strictfp class FileUtils {
      * @return the deserialized object
      */
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
-        return gson.fromJson(readFile(path), clazz);
+        BufferedReader bufferedReader;
+        InputStream inputStream;
+        URL resource;
+        if ((inputStream = FileUtils.class.getResourceAsStream(path)) != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        } else if ((resource = FileUtils.class.getResource(path)) != null) {
+            bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
+        } else {
+            bufferedReader = new BufferedReader(new FileReader(Paths.get(path).toFile()));
+        }
+        return objectMapper.readValue(bufferedReader, clazz);
     }
 
-    public static <T> void serialize(String filename, T obj, Class<?> clazz) throws IOException {
-        FileWriter file = new FileWriter(filename);
-        file.write(gson.toJson(obj, clazz));
-        file.flush();
-        file.close();
-
+    public static <T> void serialize(String filename, T obj) throws IOException {
+        objectMapper.writeValue(Paths.get(filename).toFile(), obj);
     }
 }

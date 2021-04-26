@@ -1,8 +1,13 @@
 package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.brushes.Brushes;
-import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.util.Vector3;
 
 public class BasicTerrainGenerator extends TerrainGenerator {
     protected BooleanMask spawnLandMask;
@@ -112,13 +117,13 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void spawnMaskSetup() {
         map.getSpawns().forEach(spawn -> {
-            Vector3f location = spawn.getPosition();
+            Vector3 location = spawn.getPosition();
             spawnLandMask.fillCircle(location, spawnSize, true);
         });
 
         if (random.nextFloat() < mapParameters.getPlateauDensity()) {
             map.getSpawns().forEach(spawn -> {
-                Vector3f location = spawn.getPosition();
+                Vector3 location = spawn.getPosition();
                 spawnPlateauMask.fillCircle(location, spawnSize, true);
             });
         }

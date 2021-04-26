@@ -2,8 +2,8 @@ package com.faforever.neroxis.map.importer;
 
 import com.faforever.commons.lua.LuaLoader;
 import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
@@ -54,24 +54,24 @@ public strictfp class SaveImporter {
     public static void addMarker(LuaTable marker, String id, SCMap map) {
         LuaString type = marker.get("type").checkstring();
         LuaTable locTable;
-        Vector3f location;
+        Vector3 location;
         List<String> neighbors;
         switch (type.toString()) {
             case "Mass":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addMex(new Marker(id, location));
                 break;
             case "Hydrocarbon":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addHydro(new Marker(id, location));
                 break;
             case "Blank Marker":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 if (id.contains("ARMY")) {
-                    map.addSpawn(new Spawn(id, location, new Vector2f(0, 0), 0));
+                    map.addSpawn(new Spawn(id, location, new Vector2(0, 0), 0));
                 } else {
                     map.addBlank(new Marker(id, location));
                 }
@@ -79,50 +79,50 @@ public strictfp class SaveImporter {
             case "Air Path Node":
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
                 break;
             case "Amphibious Path Node":
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
                 break;
             case "Water Path Node":
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
                 break;
             case "Naval Area":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavalAreaMarker(new AIMarker(id, location, new LinkedHashSet<>()));
                 break;
             case "Expansion Area":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
                 break;
             case "Large Expansion Area":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLargeExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
                 break;
             case "Land Path Node":
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
                 break;
             case "Rally Point":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
                 break;
             case "Naval Rally Point":
                 locTable = marker.get("position").checktable();
-                location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
                 break;
         }
@@ -154,7 +154,7 @@ public strictfp class SaveImporter {
                 String type = unitTable.get("type").checkjstring();
                 float rotation = unitTable.get("Orientation").checktable().get(2).tofloat();
                 LuaTable locTable = unitTable.get("Position").checktable();
-                Vector3f location = new Vector3f(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                Vector3 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 group.addUnit(new Unit(id, type, location, rotation));
             } catch (LuaError e) {
                 System.out.printf("Could not read unit %s%n", id);

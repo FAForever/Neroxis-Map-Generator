@@ -10,6 +10,12 @@ public strictfp class SymmetrySettings {
     private Symmetry teamSymmetry;
     private Symmetry spawnSymmetry;
 
+    public SymmetrySettings() {
+        terrainSymmetry = Symmetry.NONE;
+        teamSymmetry = Symmetry.NONE;
+        spawnSymmetry = Symmetry.NONE;
+    }
+
     public Symmetry getSymmetry(SymmetryType symmetryType) {
         switch (symmetryType) {
             case TEAM:

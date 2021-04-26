@@ -1,8 +1,8 @@
 package com.faforever.neroxis.brushes;
 
-import com.faforever.neroxis.map.FloatMask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.mask.FloatMask;
 import lombok.Data;
 
 import javax.imageio.ImageIO;
@@ -24,13 +24,13 @@ public strictfp class Brushes {
 
     public static FloatMask loadBrush(String brushPath, Long seed) {
         try {
+            BufferedImage image;
             if (Brushes.class.getResource(CUSTOM_BRUSHES_DIR + brushPath) != null) {
-                BufferedImage image = ImageIO.read(Objects.requireNonNull(Brushes.class.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)));
-                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), brushPath);
+                image = ImageIO.read(Objects.requireNonNull(Brushes.class.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)));
             } else {
-                BufferedImage image = ImageIO.read(Paths.get(brushPath).toFile());
-                return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), brushPath);
+                image = ImageIO.read(Paths.get(brushPath).toFile());
             }
+            return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), 1f, brushPath);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Could not load brush");

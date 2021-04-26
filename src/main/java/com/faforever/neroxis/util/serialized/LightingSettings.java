@@ -1,7 +1,7 @@
 package com.faforever.neroxis.util.serialized;
 
-import com.faforever.neroxis.util.Vector3f;
-import com.faforever.neroxis.util.Vector4f;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import lombok.Data;
 
 /**
@@ -12,13 +12,13 @@ import lombok.Data;
 @Data
 public strictfp class LightingSettings {
     private float LightingMultiplier;
-    private Vector3f SunDirection;
-    private Vector3f SunAmbience;
-    private Vector3f SunColor;
-    private Vector3f ShadowFillColor;
-    private Vector4f SpecularColor;
+    private Vector3 SunDirection;
+    private Vector3 SunAmbience;
+    private Vector3 SunColor;
+    private Vector3 ShadowFillColor;
+    private Vector4 SpecularColor;
     private float Bloom;
-    private Vector3f FogColor;
+    private Vector3 FogColor;
     private float FogStart;
     private float FogEnd;
 

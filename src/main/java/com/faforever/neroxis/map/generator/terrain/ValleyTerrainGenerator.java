@@ -1,9 +1,9 @@
 package com.faforever.neroxis.map.generator.terrain;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
+import com.faforever.neroxis.map.mask.BooleanMask;
 
 public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
