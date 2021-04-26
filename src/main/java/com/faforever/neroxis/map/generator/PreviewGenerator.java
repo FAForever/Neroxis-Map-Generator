@@ -31,7 +31,7 @@ public strictfp class PreviewGenerator {
             if (!materials.getTexturePaths()[i].isEmpty()) {
                 BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
-                layerGraphics.setColor(materials.getPreviewColors()[i]);
+                layerGraphics.setColor(new Color(materials.getPreviewColors()[i]));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
                 BufferedImage shadedLayer = getShadedImage(layer, map, i);
                 TexturePaint layerPaint = new TexturePaint(shadedLayer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
