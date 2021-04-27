@@ -998,19 +998,30 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     }
 
     public LinkedList<Vector2> getRandomCoordinates(float spacing) {
-        return getRandomCoordinates(spacing, spacing);
+        return getRandomCoordinates(spacing, SymmetryType.TEAM);
+    }
+
+    public LinkedList<Vector2> getRandomCoordinates(float spacing, SymmetryType symmetryType) {
+        return getRandomCoordinates(spacing, spacing, symmetryType);
     }
 
     public LinkedList<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing) {
-        LinkedList<Vector2> coordinateList = getAllCoordinatesEqualTo(true, 1);
+        return getRandomCoordinates(minSpacing, maxSpacing, SymmetryType.TEAM);
+    }
+
+    public LinkedList<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
+        LinkedList<Vector2> coordinateList;
+        if (symmetryType != null) {
+            coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true, 1);
+        } else {
+            coordinateList = getAllCoordinatesEqualTo(true, 1);
+        }
         LinkedList<Vector2> chosenCoordinates = new LinkedList<>();
         while (coordinateList.size() > 0) {
             Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
             float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
             chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
-            List<Vector2> symmetryPoints = getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(symmetryPoint -> coordinateList.removeIf((loc) -> symmetryPoint.getDistance(loc) < spacing));
         }
         return chosenCoordinates;
     }
