@@ -64,12 +64,14 @@ public strictfp class Pipeline {
                         }
                         return result;
                     } catch (Exception e) {
-                        Pipeline.cancel();
+                        e.printStackTrace();
                         System.out.printf("Pipeline threw error computing %s%n", executingMask.getName());
                         System.out.printf("Entry id %d, method %s, line %s%n", index, callingMethod, callingLine);
                         System.out.printf("Expected dependencies: %s%n", maskDependencies.stream().map(Mask::getName).collect(Collectors.joining(", ")));
-                        System.out.printf("Received dependencies: %s%n", inputs.stream().map(Mask::getName).collect(Collectors.joining(", ")));
-                        e.printStackTrace();
+                        if (inputs != null) {
+                            System.out.printf("Received dependencies: %s%n", inputs.stream().map(Mask::getName).collect(Collectors.joining(", ")));
+                        }
+                        Pipeline.cancel();
                         return null;
                     }
                 });
