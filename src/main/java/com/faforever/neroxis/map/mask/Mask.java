@@ -63,7 +63,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            set(source::get);
+            T[][] sourceMask = source.mask;
+            for (int i = 0; i < mask.length; i++) {
+                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
+            }
         }, other);
     }
 
@@ -683,7 +686,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
-            set(x, y, value);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
         });
     }
