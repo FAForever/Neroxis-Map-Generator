@@ -8,15 +8,15 @@ import java.nio.file.Path;
 
 public strictfp class MapExporter {
 
-    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportNormal) {
+    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportNormals) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
             if (exportPreview) {
                 SCMapExporter.exportPreview(mapPath, map);
             }
-            if (exportNormal) {
-                SCMapExporter.exportNormal(mapPath, map);
+            if (exportNormals) {
+                SCMapExporter.exportNormals(mapPath, map);
             }
             SCMapExporter.exportSCMAP(mapPath, map);
             SaveExporter.exportSave(mapPath, map);

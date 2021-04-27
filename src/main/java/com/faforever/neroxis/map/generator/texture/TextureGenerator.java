@@ -18,9 +18,10 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         super.initialize(map, seed, mapParameters);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        normals = heightmap.copy().waterErode(10000, 100, .9f, 10, .25f, .25f, 5, .5f)
-                .getNormalMask(4f);
+        normals = heightmap.getNormalMask(8f);
     }
 
     public abstract void setTextures();
+
+    public abstract void generatePreview();
 }

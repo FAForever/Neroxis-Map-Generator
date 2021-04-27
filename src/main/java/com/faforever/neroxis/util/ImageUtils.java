@@ -15,6 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 import static com.faforever.neroxis.jsquish.Squish.compressImage;
 
@@ -146,6 +147,36 @@ public strictfp class ImageUtils {
         byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
+    }
+
+    public static byte[] compressNormal(NormalMask mask) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector3 value = mask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max((128 * (1 - value.getY()) + 127), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+                imageByteBuffer.put((byte) yV);
+                imageByteBuffer.put((byte) zV);
+                imageByteBuffer.put((byte) 0);
+                imageByteBuffer.put((byte) xV);
+            }
+        }
+        DDSHeader ddsHeader = new DDSHeader();
+        ddsHeader.setWidth(size);
+        ddsHeader.setHeight(size);
+        ddsHeader.setFourCC("DXT5");
+        ddsHeader.toBytes();
+        byte[] headerBytes = ddsHeader.toBytes();
+        byte[] imageBytes = compressImage(imageByteBuffer.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+        int headerLength = headerBytes.length;
+        int imageLength = imageBytes.length;
+        byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
+        System.arraycopy(imageBytes, 0, allBytes, headerLength, imageLength);
+        return allBytes;
     }
 
     public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, Path path) throws IOException {

@@ -3,7 +3,10 @@ package com.faforever.neroxis.map.exporter;
 import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.generator.PreviewGenerator;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.util.DDSHeader;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
 
@@ -15,6 +18,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import static com.faforever.neroxis.jsquish.Squish.compressImage;
 import static com.faforever.neroxis.util.Swapper.swap;
@@ -207,15 +211,18 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportNormal(Path folderPath, SCMap map) throws IOException {
+    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
+        byte[] compressedNormal = map.getCompressedNormal();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
-        Path normalsPath = folderPath.resolve(decalsPath).resolve("map_normal." + fileFormat);
-        Files.createDirectories(normalsPath.getParent());
-        map.getDecals().add(new Decal(Paths.get("/maps").resolve(folderPath.getFileName()).resolve(decalsPath).resolve("map_normal." + fileFormat).toString().replace('\\', '/'),
+        Path decalParent = Paths.get("/maps").resolve(map.getName());
+        Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
+        Path writingPath = folderPath.resolve(decalPath);
+        Files.createDirectories(writingPath.getParent());
+        map.getDecals().add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
                 new Vector2(), new Vector3(), map.getSize(), 10000));
         try {
-            ImageUtils.writeNormalDDS(map.getNormalMap(), normalsPath);
+            Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
         } catch (IOException e) {
             System.out.print("Could not write the normal map image\n" + e);
         }

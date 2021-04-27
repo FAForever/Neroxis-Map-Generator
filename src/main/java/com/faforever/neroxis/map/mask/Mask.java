@@ -29,6 +29,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Setter
     private boolean parallel;
     protected T[][] mask;
+    @Getter
+    @Setter
+    private boolean visualDebug;
+    @Getter
+    @Setter
+    private String visualName;
 
     protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         this(size, seed, symmetrySettings, name, false);
@@ -811,15 +817,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public U startVisualDebugger() {
-        return startVisualDebugger(name == null ? toString() : name, Util.getStackTraceParentClass());
+        return startVisualDebugger(name == null ? toString() : name);
     }
 
     public U startVisualDebugger(String maskName) {
-        return startVisualDebugger(maskName, Util.getStackTraceParentClass());
-    }
-
-    public U startVisualDebugger(String maskName, String parentClass) {
-        VisualDebugger.whitelistMask(this, maskName, parentClass);
+        visualName = maskName;
+        visualDebug = true;
+        VisualDebugger.createGUI();
         show();
         return (U) this;
     }

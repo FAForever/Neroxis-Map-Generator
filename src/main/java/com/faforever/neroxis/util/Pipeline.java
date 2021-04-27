@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public strictfp class Pipeline {
 
     public static boolean HASH_MASK = false;
@@ -82,20 +83,18 @@ public strictfp class Pipeline {
     public static void start() {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
-        pipeline.forEach(entry -> {
-            if (Util.DEBUG) {
-                System.out.printf("%d Pipeline entry:  %s,\t  %s,\t executor %s(%d);\t resultor %s;\t parents:[%s];\t  children:[%s]\n",
-                        entry.getIndex(),
-                        entry.getLine(),
-                        entry.getMethod(),
-                        entry.getExecutingMask().getName(),
-                        entry.getIndex(),
-                        entry.getResultMask().getName(),
-                        entry.getDependencies().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none"),
-                        entry.getDependants().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
-                );
-            }
-        });
+        if (Util.DEBUG) {
+            pipeline.forEach(entry -> System.out.printf("%d Pipeline entry:  %s,\t  %s,\t executor %s(%d);\t resultor %s;\t parents:[%s];\t  children:[%s]\n",
+                    entry.getIndex(),
+                    entry.getLine(),
+                    entry.getMethod(),
+                    entry.getExecutingMask().getName(),
+                    entry.getIndex(),
+                    entry.getResultMask().getName(),
+                    entry.getDependencies().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none"),
+                    entry.getDependants().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
+            ));
+        }
         started.complete(null);
     }
 
@@ -194,12 +193,13 @@ public strictfp class Pipeline {
         private final Mask<?, ?> executingMask;
         private final V resultMask;
         private final Set<Entry<?>> dependencies;
-        private final CompletableFuture<Mask<?, ?>> future;
+        private final CompletableFuture<Void> future;
         private final Set<Entry<?>> dependants = new HashSet<>();
-        private final List<Mask<?, ?>> maskCopies = new ArrayList<>();
         private final int index;
         private final String method;
         private final String line;
+        private V backupResult;
+
 
         public Entry(int index, Mask<?, ?> executingMask, V resultMask, Collection<Entry<?>> dependencies, CompletableFuture<V> future, String method, String line) {
             this.index = index;
@@ -208,21 +208,20 @@ public strictfp class Pipeline {
             this.dependencies = new HashSet<>(dependencies);
             this.method = method;
             this.line = line;
-            this.future = future.thenApplyAsync(result -> {
+            this.future = future.thenAcceptAsync(result -> {
+                backupResult = (V) result.copy();
                 VisualDebugger.visualizeMask(resultMask, method, line);
-                dependants.stream().filter(dependant -> !dependant.getResultMask().equals(result)).forEach(dep -> maskCopies.add(result.copy()));
-                return result;
             });
         }
 
-        public synchronized Mask<?, ?> getResult(Mask<?, ?> resultingMask) {
+        public V getResult(Mask<?, ?> resultingMask) {
             if (resultingMask.equals(resultMask)) {
                 return resultMask;
             }
-            if (maskCopies.isEmpty()) {
-                throw new RuntimeException(String.format("No backup mask left: %d", index));
-            }
-            return maskCopies.remove(0);
+            V resultCopy = (V) backupResult.copy();
+            resultCopy.setVisualDebug(resultMask.isVisualDebug());
+            resultCopy.setVisualName(resultMask.getVisualName());
+            return resultCopy;
         }
     }
 }

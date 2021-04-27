@@ -5,22 +5,10 @@ import com.faforever.neroxis.map.mask.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.util.HashMap;
-import java.util.Map;
 
 public strictfp class VisualDebugger {
 
     public static boolean ENABLED = Util.DEBUG;
-
-    private static Map<Integer, String[]> drawMasksWhitelist = null;
-
-    public static void whitelistMask(Mask<?, ?> mask, String name, String parentClass) {
-        if (drawMasksWhitelist == null) {
-            drawMasksWhitelist = new HashMap<>();
-        }
-        drawMasksWhitelist.put(mask.hashCode(), new String[]{name, parentClass});
-        createGUI();
-    }
 
     public synchronized static void createGUI() {
         if (!VisualDebuggerGui.isCreated()) {
@@ -33,7 +21,7 @@ public strictfp class VisualDebugger {
     }
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
-        if (dontRecord(mask)) {
+        if (!mask.isVisualDebug()) {
             return;
         }
         if (mask instanceof FloatMask) {
@@ -52,8 +40,8 @@ public strictfp class VisualDebugger {
     }
 
     private static void visualizeMask(BooleanMask mask, String method, String line) {
-        visualize((x, y) -> mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB()
-                , mask.hashCode(), mask, method, line);
+        visualize((x, y) -> mask.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB(),
+                mask, method, line);
     }
 
     private static void visualizeMask(FloatMask mask, String method, String line) {
@@ -68,7 +56,7 @@ public strictfp class VisualDebugger {
             int b = (int) (255 * normalizedValue);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.hashCode(), mask, method, line);
+        }, mask, method, line);
     }
 
     private static void visualizeMask(IntegerMask mask, String method, String line) {
@@ -83,7 +71,7 @@ public strictfp class VisualDebugger {
             int b = (int) (255 * normalizedValue);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.hashCode(), mask, method, line);
+        }, mask, method, line);
     }
 
     private static void visualizeMask(Vector3Mask mask, String method, String line) {
@@ -98,7 +86,7 @@ public strictfp class VisualDebugger {
             int b = (int) StrictMath.min(StrictMath.max((255 * normalizedValue.getZ()), 0), 255);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.hashCode(), mask, method, line);
+        }, mask, method, line);
     }
 
     private static void visualizeMask(NormalMask mask, String method, String line) {
@@ -110,7 +98,7 @@ public strictfp class VisualDebugger {
             int b = (int) StrictMath.min(StrictMath.max((127 * normalizedValue.getY() + 128), 0), 255);
 
             return 0xFF_00_00_00 | (r << 16) | (g << 8) | b;
-        }, mask.hashCode(), mask, method, line);
+        }, mask, method, line);
     }
 
     private static void visualizeMask(Vector4Mask mask, String method, String line) {
@@ -126,19 +114,10 @@ public strictfp class VisualDebugger {
             int a = (int) StrictMath.min(StrictMath.max((160 * (1 - normalizedValue.getW()) + 95), 0), 255);
 
             return (a << 24) | (r << 16) | (g << 8) | b;
-        }, mask.hashCode(), mask, method, line);
+        }, mask, method, line);
     }
 
-    private static boolean dontRecord(Mask<?, ?> mask) {
-        if (!ENABLED) {
-            return true;
-        }
-        return drawMasksWhitelist == null || !drawMasksWhitelist.containsKey(mask.hashCode());
-    }
-
-    private static void visualize(ImageSource imageSource, int maskHash, Mask<?, ?> mask, String method, String line) {
-        String[] maskDetails = drawMasksWhitelist.get(maskHash);
-        String maskName = maskDetails[0];
+    private static void visualize(ImageSource imageSource, Mask<?, ?> mask, String method, String line) {
         int size = mask.getImmediateSize();
         Mask<?, ?> maskCopy = mask.copy();
         BufferedImage currentImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
@@ -149,7 +128,7 @@ public strictfp class VisualDebugger {
                 currentImage.setRGB(x, y, color);
             }
         }
-        VisualDebuggerGui.update(maskName + " " + method, currentImage, maskCopy, line);
+        VisualDebuggerGui.update(mask.getVisualName() + " " + method, currentImage, maskCopy, line);
     }
 
     @FunctionalInterface

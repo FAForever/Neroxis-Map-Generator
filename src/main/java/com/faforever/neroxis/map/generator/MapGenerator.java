@@ -11,7 +11,6 @@ import com.google.common.io.BaseEncoding;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,8 +23,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.faforever.neroxis.util.ImageUtils.readImage;
 
 @Getter
 @Setter
@@ -82,6 +79,7 @@ public strictfp class MapGenerator {
     private StyleGenerator mapStyle;
     private MapParameters mapParameters;
     private String previewFolder;
+    private Path folderPath;
 
     public static void main(String[] args) throws Exception {
 
@@ -328,6 +326,9 @@ public strictfp class MapGenerator {
         if (mapName == null) {
             generateMapName();
         }
+
+        folderPath = Paths.get(pathToFolder);
+        FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
     }
 
     private void interpretArguments(Map<String, String> arguments) throws Exception {
@@ -543,10 +544,6 @@ public strictfp class MapGenerator {
 
     public void save() {
         try {
-            Path folderPath = Paths.get(pathToFolder);
-
-            FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
-
             long startTime = System.currentTimeMillis();
             MapExporter.exportMap(folderPath, map, !tournamentStyle, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
@@ -587,12 +584,6 @@ public strictfp class MapGenerator {
             map.setCartographicMapLandStartColor(1);
             map.setCartographicMapLandEndColor(1);
         }
-        if (!blind) {
-            PreviewGenerator.generatePreview(map);
-        } else {
-            BufferedImage blindPreview = readImage(BLANK_PREVIEW);
-            map.getPreview().setData(blindPreview.getData());
-        }
         StringBuilder descriptionBuilder = new StringBuilder();
         if (tournamentStyle) {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC. ",
@@ -603,11 +594,7 @@ public strictfp class MapGenerator {
             descriptionBuilder.append("Use with the Unexplored Maps Mod for best experience");
         }
         map.setDescription(descriptionBuilder.toString());
-        if (Util.DEBUG) {
-            System.out.printf("Done: %4d ms, %s, generatePreview\n",
-                    System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator"));
-        }
+
         ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);

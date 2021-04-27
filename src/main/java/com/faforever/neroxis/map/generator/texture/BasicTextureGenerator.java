@@ -8,10 +8,10 @@ import com.faforever.neroxis.map.generator.PreviewGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class BasicTextureGenerator extends TextureGenerator {
@@ -25,6 +25,16 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask steepHillsTexture;
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
+    protected FloatMask accentGroundPreviewTexture;
+    protected FloatMask waterBeachPreviewTexture;
+    protected FloatMask accentSlopesPreviewTexture;
+    protected FloatMask accentPlateauPreviewTexture;
+    protected FloatMask slopesPreviewTexture;
+    protected FloatMask steepHillsPreviewTexture;
+    protected FloatMask rockPreviewTexture;
+    protected FloatMask accentRockPreviewTexture;
+    protected FloatMask heightmapPreview;
+    protected FloatMask reflectance;
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
@@ -49,6 +59,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         } else {
             setupSimpleTexturePipeline();
         }
+        setupPreviewPipeline();
     }
 
     @Override
@@ -57,10 +68,29 @@ public class BasicTextureGenerator extends TextureGenerator {
         Util.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
-            map.setNormalMap(new BufferedImage(normals.getSize(), normals.getSize(), BufferedImage.TYPE_INT_ARGB));
-            normals.getFinalMask().writeToImage(map.getNormalMap());
+            map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask()));
         });
 
+    }
+
+    @Override
+    public void generatePreview() {
+        Pipeline.await(accentGroundPreviewTexture, accentPlateauPreviewTexture, slopesPreviewTexture,
+                accentSlopesPreviewTexture, steepHillsPreviewTexture, waterBeachPreviewTexture, rockPreviewTexture,
+                accentRockPreviewTexture, reflectance, heightmapPreview);
+        Util.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
+            if (!mapParameters.isBlind()) {
+                PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
+                        accentGroundPreviewTexture.getFinalMask(), accentPlateauPreviewTexture.getFinalMask(), slopesPreviewTexture.getFinalMask(), accentSlopesPreviewTexture.getFinalMask(),
+                        steepHillsPreviewTexture.getFinalMask(), waterBeachPreviewTexture.getFinalMask(), rockPreviewTexture.getFinalMask(), accentRockPreviewTexture.getFinalMask());
+            } else {
+                try {
+                    PreviewGenerator.generateBlankPreview(map);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     protected void setupTexturePipeline() {
@@ -111,5 +141,18 @@ public class BasicTextureGenerator extends TextureGenerator {
         waterBeachTexture.init(realLand.copy().invert().inflate(12).minus(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
         accentRockTexture.init(accentRock, 0f, 1f).blur(4).clampMax(1f);
+    }
+
+    protected void setupPreviewPipeline() {
+        accentGroundPreviewTexture = accentGroundTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        accentPlateauPreviewTexture = accentPlateauTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        slopesPreviewTexture = slopesTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        accentSlopesPreviewTexture = accentSlopesTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        steepHillsPreviewTexture = steepHillsTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        waterBeachPreviewTexture = waterBeachTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        rockPreviewTexture = rockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        accentRockPreviewTexture = accentRockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        reflectance = normals.copy().resample(PreviewGenerator.PREVIEW_SIZE).dot(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
     }
 }
