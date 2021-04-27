@@ -157,7 +157,7 @@ public strictfp class ImageUtils {
             for (int x = 0; x < size; x++) {
                 Vector3 value = mask.get(x, y);
                 int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max((128 * (1 - value.getY()) + 127), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
                 int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
                 imageByteBuffer.put((byte) yV);
                 imageByteBuffer.put((byte) zV);
