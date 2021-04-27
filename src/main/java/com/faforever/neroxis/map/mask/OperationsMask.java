@@ -42,7 +42,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             add(source::get);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -52,7 +51,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             add((x, y) -> source.get(x, y) ? value : getZeroValue());
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -72,7 +70,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             applyWithOffset(source, this::addValueAt, xCoordinate, yCoordinate, center, wrapEdges);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -92,7 +89,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             subtract(source::get);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -102,7 +98,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             subtract((x, y) -> source.get(x, y) ? value : getZeroValue());
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -115,7 +110,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             applyWithOffset(source, this::subtractValueAt, xCoordinate, yCoordinate, center, wrapEdges);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -125,7 +119,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             multiply(source::get);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -142,7 +135,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             multiply((x, y) -> source.get(x, y) ? value : getZeroValue());
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -155,7 +147,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             applyWithOffset(source, this::multiplyValueAt, xCoordinate, yCoordinate, center, wrapEdges);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -165,7 +156,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             U source = (U) dependencies.get(0);
             assertCompatibleMask(source);
             divide(source::get);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -182,7 +172,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             divide((x, y) -> source.get(x, y) ? value : getZeroValue());
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -195,7 +184,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             applyWithOffset(source, this::divideValueAt, xCoordinate, yCoordinate, center, wrapEdges);
-            return (U) this;
         }, other);
         return (U) this;
     }

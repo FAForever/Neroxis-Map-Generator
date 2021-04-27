@@ -54,7 +54,6 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         enqueue((dependencies) -> {
             Vector3Mask source = (Vector3Mask) dependencies.get(0);
             set((x, y) -> get(x, y).cross(source.get(x, y)));
-            return this;
         }, other);
         return this;
     }

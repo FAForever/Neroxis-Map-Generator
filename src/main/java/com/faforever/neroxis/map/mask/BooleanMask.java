@@ -48,7 +48,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
-            return this;
         }, other);
     }
 
@@ -61,7 +60,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
-            return this;
         }, other);
     }
 
@@ -106,7 +104,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source);
-            return this;
         }, other);
         return this;
     }
@@ -118,7 +115,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             combine(source, threshold);
-            return this;
         }, other);
         return this;
     }
@@ -458,7 +454,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             set(source::get);
-            return this;
         }, other);
         return this;
     }
@@ -468,7 +463,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> get(x, y) || source.get(x, y));
-            return this;
         }, other);
         return this;
     }
@@ -478,7 +472,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
-            return this;
         }, other);
         return this;
     }
@@ -488,7 +481,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             T source = (T) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThan(x, y, maxValue));
-            return this;
         }, other);
         return this;
     }
@@ -501,7 +493,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             applyWithOffset(source, this::set, xCoordinate, yCoordinate, center, wrapEdges);
-            return this;
         }, other);
         return this;
     }
@@ -510,7 +501,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             combineWithOffset(source.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
-            return this;
         }, other);
         return this;
     }
@@ -528,7 +518,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> get(x, y) && source.get(x, y));
-            return this;
         }, other);
         return this;
     }
@@ -538,7 +527,6 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> get(x, y) && !source.get(x, y));
-            return this;
         }, other);
         return this;
     }
@@ -885,13 +873,11 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         Long seed = random != null ? random.nextLong() : null;
         FloatMask distanceField = new FloatMask(size, seed, symmetrySettings, getName() + "DistanceField", isParallel());
         enqueue(distanceField, dependencies -> {
-            FloatMask dest = (FloatMask) dependencies.get(0);
-            dest.init(this, (float) (size * size), 0f);
-            addCalculatedParabolicDistance(dest, false);
-            addCalculatedParabolicDistance(dest, true);
-            dest.sqrt();
-            return dest;
-        }, distanceField);
+            distanceField.init(this, (float) (size * size), 0f);
+            addCalculatedParabolicDistance(distanceField, false);
+            addCalculatedParabolicDistance(distanceField, true);
+            distanceField.sqrt();
+        });
         return distanceField;
     }
 

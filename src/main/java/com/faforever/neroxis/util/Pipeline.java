@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
-    public static <V extends Mask<?, ?>> void add(Mask<?, ?> executingMask, V resultMask, List<Mask<?, ?>> maskDependencies, Function<List<Mask<?, ?>>, V> function) {
+    public static <V extends Mask<?, ?>> void add(Mask<?, ?> executingMask, V resultMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
         if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -37,11 +37,11 @@ public strictfp class Pipeline {
         String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
 
         List<Entry<?>> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
-        CompletableFuture<V> newFuture = Pipeline.getDependencyFuture(entryDependencies, resultMask)
-                .thenApplyAsync(inputs -> {
+        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, resultMask)
+                .thenAcceptAsync(inputs -> {
                     try {
                         long startTime = System.currentTimeMillis();
-                        V result = function.apply(inputs);
+                        function.accept(inputs);
                         long functionTime = System.currentTimeMillis() - startTime;
                         startTime = System.currentTimeMillis();
                         if (HASH_MASK) {
@@ -62,7 +62,6 @@ public strictfp class Pipeline {
                                     callingMethod
                             );
                         }
-                        return result;
                     } catch (Exception e) {
                         e.printStackTrace();
                         System.out.printf("Pipeline threw error computing %s%n", executingMask.getName());
@@ -72,7 +71,6 @@ public strictfp class Pipeline {
                             System.out.printf("Received dependencies: %s%n", inputs.stream().map(Mask::getName).collect(Collectors.joining(", ")));
                         }
                         Pipeline.cancel();
-                        return null;
                     }
                 });
 
@@ -203,15 +201,15 @@ public strictfp class Pipeline {
         private V backupResult;
 
 
-        public Entry(int index, Mask<?, ?> executingMask, V resultMask, Collection<Entry<?>> dependencies, CompletableFuture<V> future, String method, String line) {
+        public Entry(int index, Mask<?, ?> executingMask, V resultMask, Collection<Entry<?>> dependencies, CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.resultMask = resultMask;
             this.dependencies = new HashSet<>(dependencies);
             this.method = method;
             this.line = line;
-            this.future = future.thenAcceptAsync(result -> {
-                backupResult = (V) result.copy();
+            this.future = future.thenRunAsync(() -> {
+                backupResult = (V) resultMask.copy();
                 VisualDebugger.visualizeMask(resultMask, method, line);
             });
         }

@@ -81,7 +81,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             set((x, y) -> limiter.get(x, y) ? transformAverage(calculateAreaAverage(radius, x, y, innerCount)) : get(x, y));
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -121,7 +120,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
             setSize(source.getSize());
             assertCompatibleMask(source);
             set((x, y) -> source.get(x, y) ? high : low);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -135,7 +133,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) > 0 ? thisVal : otherVal;
             });
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -148,7 +145,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = get(x, y);
                 return source.get(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
             });
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -172,7 +168,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) < 0 ? thisVal : otherVal;
             });
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -185,7 +180,6 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
                 T thisVal = get(x, y);
                 return source.get(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
             });
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -232,32 +226,26 @@ public strictfp abstract class NumberMask<T extends Number & Comparable<T>, U ex
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {
         Long seed = random != null ? random.nextLong() : null;
         BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "Maximas", isParallel());
-        enqueue(localMaxima, dependencies -> {
-            BooleanMask dest = (BooleanMask) dependencies.get(0);
-            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                T value = get(x, y);
-                if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocalMax(x, y)) {
-                    dest.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> dest.set(x, y, true));
-                }
-            });
-            return dest;
-        }, localMaxima);
+        enqueue(localMaxima, dependencies ->
+                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    T value = get(x, y);
+                    if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocalMax(x, y)) {
+                        localMaxima.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> localMaxima.set(x, y, true));
+                    }
+                }));
         return localMaxima;
     }
 
     public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
         Long seed = random != null ? random.nextLong() : null;
         BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "1DMaximas", isParallel());
-        enqueue(localMaxima, dependencies -> {
-            BooleanMask dest = (BooleanMask) dependencies.get(0);
-            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                T value = get(x, y);
-                if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocal1DMax(x, y)) {
-                    dest.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> dest.set(x, y, true));
-                }
-            });
-            return dest;
-        }, localMaxima);
+        enqueue(localMaxima, dependencies ->
+                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    T value = get(x, y);
+                    if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocal1DMax(x, y)) {
+                        localMaxima.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> localMaxima.set(x, y, true));
+                    }
+                }), localMaxima);
 
         return localMaxima;
     }

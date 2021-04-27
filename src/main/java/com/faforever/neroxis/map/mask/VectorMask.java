@@ -64,7 +64,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
                     value.set(i, sources.get(i).get(x, y));
                 }
             });
-            return this;
         }, components);
     }
 
@@ -232,7 +231,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     public U normalize() {
         enqueue((dependencies) -> {
             apply((x, y) -> get(x, y).normalize());
-            return this;
         });
         return (U) this;
     }
@@ -242,11 +240,9 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         Long seed = random != null ? random.nextLong() : null;
         FloatMask dotMask = new FloatMask(getSize(), seed, symmetrySettings, getName() + "dot" + other.getName(), isParallel());
         enqueue(dotMask, (dependencies) -> {
-            FloatMask dest = (FloatMask) dependencies.get(0);
             U source = (U) dependencies.get(0);
-            apply((x, y) -> dest.set(x, y, get(x, y).dot(source.get(x, y))));
-            return dest;
-        }, dotMask, other);
+            apply((x, y) -> dotMask.set(x, y, get(x, y).dot(source.get(x, y))));
+        }, other);
         return dotMask;
     }
 
@@ -255,10 +251,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         Long seed = random != null ? random.nextLong() : null;
         FloatMask dotMask = new FloatMask(getSize(), seed, symmetrySettings, getName() + "dot", isParallel());
         enqueue(dotMask, (dependencies) -> {
-            FloatMask dest = (FloatMask) dependencies.get(0);
-            apply((x, y) -> dest.set(x, y, get(x, y).dot(vector)));
-            return dest;
-        }, dotMask);
+            apply((x, y) -> dotMask.set(x, y, get(x, y).dot(vector)));
+        });
         return dotMask;
     }
 
@@ -276,7 +270,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
             assertCompatibleMask(limiter);
             T[][] innerCount = getInnerCount();
             set((x, y) -> limiter.get(x, y) ? calculateAreaAverage(radius, x, y, innerCount).round().divide(1000) : get(x, y));
-            return this;
         }, other);
         return (U) this;
     }
@@ -295,7 +288,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
             assertCompatibleMask(limiter);
             int[][] innerCount = getComponentInnerCount(component);
             setComponent((x, y) -> limiter.get(x, y) ? calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(x, y).get(component), component);
-            return this;
         }, other);
         return (U) this;
     }
@@ -304,7 +296,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             addComponent(source, component);
-            return this;
         });
         return (U) this;
     }
@@ -313,7 +304,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             subtractComponent(source, component);
-            return this;
         });
         return (U) this;
     }
@@ -322,7 +312,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             multiplyComponent(source, component);
-            return this;
         });
         return (U) this;
     }
@@ -331,7 +320,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             divideComponent(source, component);
-            return this;
         });
         return (U) this;
     }
@@ -342,10 +330,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         Long seed = random != null ? random.nextLong() : null;
         FloatMask componentMask = new FloatMask(size, seed, symmetrySettings, name + "Component" + component, isParallel());
         enqueue(componentMask, dependencies -> {
-            FloatMask dest = (FloatMask) dependencies.get(0);
-            apply((x, y) -> dest.set(x, y, get(x, y).get(component)));
-            return dest;
-        }, componentMask);
+            apply((x, y) -> componentMask.set(x, y, get(x, y).get(component)));
+        });
         return componentMask;
     }
 
@@ -356,13 +342,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         FloatMask[] components = new FloatMask[dimesion];
         for (int i = 0; i < dimesion; ++i) {
             Long seed = random != null ? random.nextLong() : null;
-            components[i] = new FloatMask(size, seed, symmetrySettings, name + "Component" + i, isParallel());
-            int component = i;
-            enqueue(components[i], dependencies -> {
-                FloatMask dest = (FloatMask) dependencies.get(0);
-                apply((x, y) -> dest.set(x, y, get(x, y).get(component)));
-                return dest;
-            }, components[i]);
+            FloatMask component = new FloatMask(size, seed, symmetrySettings, name + "Component" + i, isParallel());
+            int componentInd = i;
+            enqueue(component, dependencies -> {
+                apply((x, y) -> component.set(x, y, get(x, y).get(componentInd)));
+            });
+            components[i] = component;
         }
         return components;
     }

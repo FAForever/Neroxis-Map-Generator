@@ -67,7 +67,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             set((x, y) -> source.get(x, y) ? high : low);
-            return this;
         }, other);
     }
 
@@ -162,7 +161,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             assertCompatibleMask(source);
             FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
-            return this;
         }, other);
         return this;
     }
@@ -328,7 +326,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
                 Vector2 location = possibleLocations.get(random.nextInt(length));
                 addWithOffset(brush, location, true, wrapEdges);
             }
-            return this;
         }, other);
         return this;
     }
@@ -338,7 +335,6 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
-            return this;
         }, other);
         return this;
     }
@@ -350,12 +346,9 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     public NormalMask getNormalMask(float scale) {
         Long seed = random != null ? random.nextLong() : null;
         NormalMask normals = new NormalMask(getSize(), seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), getName() + "Normals", isParallel());
-        normals.getSymmetrySettings().setSpawnSymmetry(Symmetry.NONE);
         enqueue(normals, dependencies -> {
-            NormalMask dest = (NormalMask) dependencies.get(0);
-            apply((x, y) -> dest.set(x, y, getNormalAt(x, y, scale)));
-            return dest;
-        }, normals);
+            apply((x, y) -> normals.set(x, y, getNormalAt(x, y, scale)));
+        });
         return normals;
     }
 

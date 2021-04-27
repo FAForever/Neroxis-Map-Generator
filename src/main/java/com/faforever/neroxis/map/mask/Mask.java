@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
@@ -64,7 +64,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
             set(source::get);
-            return (U) this;
         }, other);
     }
 
@@ -136,7 +135,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             setSize(source.getSize());
             assertCompatibleMask(source);
             set(source::get);
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -172,7 +170,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
             set((x, y) -> source.get(x, y) ? val : get(x, y));
-            return (U) this;
         }, other);
         return (U) this;
     }
@@ -183,7 +180,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             U source = (U) dependencies.get(1);
             assertCompatibleMask(source);
             set((x, y) -> placement.get(x, y) ? source.get(x, y) : get(x, y));
-            return (U) this;
         }, area, values);
         return (U) this;
     }
@@ -754,17 +750,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void enqueue(Runnable function) {
-        enqueue((ignored) -> {
-            function.run();
-            return (U) this;
-        });
+        enqueue((ignored) -> function.run());
     }
 
-    protected void enqueue(Function<List<Mask<?, ?>>, U> function, Mask<?, ?>... usedMasks) {
+    protected void enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         enqueue((U) this, function, usedMasks);
     }
 
-    protected <V extends Mask<?, ?>> void enqueue(V resultMask, Function<List<Mask<?, ?>>, V> function, Mask<?, ?>... usedMasks) {
+    protected <V extends Mask<?, ?>> void enqueue(V resultMask, Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !Pipeline.isStarted()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
@@ -772,7 +765,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             }
             Pipeline.add(this, resultMask, dependencies, function);
         } else {
-            function.apply(dependencies);
+            function.accept(dependencies);
             String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
             String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.");
             VisualDebugger.visualizeMask(resultMask, callingMethod, callingLine);
