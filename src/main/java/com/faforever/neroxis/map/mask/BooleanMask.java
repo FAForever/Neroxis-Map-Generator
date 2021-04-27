@@ -453,7 +453,10 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertCompatibleMask(source);
-            set(source::get);
+            Boolean[][] sourceMask = source.mask;
+            for (int i = 0; i < mask.length; i++) {
+                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
+            }
         }, other);
         return this;
     }

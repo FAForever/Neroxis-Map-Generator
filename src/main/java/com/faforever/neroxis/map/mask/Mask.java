@@ -137,7 +137,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             U source = (U) dependencies.get(0);
             setSize(source.getSize());
             assertCompatibleMask(source);
-            set(source::get);
+            T[][] sourceMask = source.mask;
+            for (int i = 0; i < mask.length; i++) {
+                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
+            }
         }, other);
         return (U) this;
     }
