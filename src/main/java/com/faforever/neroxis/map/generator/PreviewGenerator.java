@@ -142,7 +142,7 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);
-                newRGBA[3] = waterheight > heightmap.get(x, y) ? (int) (128 * weight + 127) : 0;
+                newRGBA[3] = waterheight > heightmap.get(x, y) ? (int) (191 * weight + 32) : 0;
 
                 layer.getRaster().setPixel(x, y, newRGBA);
             }
