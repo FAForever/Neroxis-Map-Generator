@@ -73,11 +73,7 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     @Override
     protected Float[][] getEmptyMask(int size) {
         Float[][] empty = new Float[size][size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                empty[x][y] = 0f;
-            }
-        }
+        maskFill(empty, getZeroValue());
         return empty;
     }
 

@@ -71,11 +71,7 @@ public strictfp class BooleanMask extends Mask<Boolean, BooleanMask> {
     @Override
     protected Boolean[][] getEmptyMask(int size) {
         Boolean[][] empty = new Boolean[size][size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                empty[x][y] = getZeroValue();
-            }
-        }
+        maskFill(empty, getZeroValue());
         return empty;
     }
 

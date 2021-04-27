@@ -50,11 +50,7 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
     @Override
     protected Integer[][] getEmptyMask(int size) {
         Integer[][] empty = new Integer[size][size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                empty[x][y] = 0;
-            }
-        }
+        maskFill(empty, getZeroValue());
         return empty;
     }
 

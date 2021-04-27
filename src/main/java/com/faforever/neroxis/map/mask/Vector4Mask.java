@@ -59,11 +59,7 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     @Override
     protected Vector4[][] getEmptyMask(int size) {
         Vector4[][] empty = new Vector4[size][size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                empty[x][y] = getZeroValue();
-            }
-        }
+        maskFill(empty, getZeroValue());
         return empty;
     }
 

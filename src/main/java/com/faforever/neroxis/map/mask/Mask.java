@@ -127,7 +127,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public U clear() {
-        enqueue(() -> set((x, y) -> getZeroValue()));
+        enqueue(() -> maskFill(getZeroValue()));
         return (U) this;
     }
 
@@ -829,6 +829,36 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public void show() {
         if (!parallel) {
             VisualDebugger.visualizeMask(this, "show");
+        }
+    }
+
+    protected void maskFill(T value) {
+        for (int r = 0; r < mask.length; ++r) {
+            int len = mask[r].length;
+
+            if (len > 0) {
+                mask[r][0] = value;
+            }
+
+            //Value of i will be [1, 2, 4, 8, 16, 32, ..., len]
+            for (int i = 1; i < len; i += i) {
+                System.arraycopy(mask[r], 0, mask[r], i, StrictMath.min((len - i), i));
+            }
+        }
+    }
+
+    protected void maskFill(T[][] mask, T value) {
+        for (int r = 0; r < mask.length; ++r) {
+            int len = mask[r].length;
+
+            if (len > 0) {
+                mask[r][0] = value;
+            }
+
+            //Value of i will be [1, 2, 4, 8, 16, 32, ..., len]
+            for (int i = 1; i < len; i += i) {
+                System.arraycopy(mask[r], 0, mask[r], i, StrictMath.min((len - i), i));
+            }
         }
     }
 
