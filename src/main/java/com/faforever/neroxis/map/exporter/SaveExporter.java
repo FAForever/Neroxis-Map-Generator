@@ -1,7 +1,7 @@
 package com.faforever.neroxis.map.exporter;
 
 import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector3;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -26,7 +26,7 @@ public strictfp class SaveExporter {
         for (Spawn spawn : map.getSpawns()) {
             out.writeBytes(String.format("        ['%s'] = {\n", spawn.getId()));
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
-            Vector3f v = spawn.getPosition();
+            Vector3 v = spawn.getPosition();
             out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
@@ -43,7 +43,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['type'] = STRING( 'Mass' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                Vector3f v = mex.getPosition();
+                Vector3 v = mex.getPosition();
                 out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
@@ -56,7 +56,7 @@ public strictfp class SaveExporter {
                 out.writeBytes("          ['type'] = STRING( 'Hydrocarbon' ),\n");
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                Vector3f v = hydro.getPosition();
+                Vector3 v = hydro.getPosition();
                 out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
@@ -64,7 +64,7 @@ public strictfp class SaveExporter {
         for (Marker blankMarker : map.getBlankMarkers()) {
             out.writeBytes("        ['" + blankMarker.getId() + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
-            Vector3f v = blankMarker.getPosition();
+            Vector3 v = blankMarker.getPosition();
             out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
@@ -118,7 +118,7 @@ public strictfp class SaveExporter {
                 out.writeBytes(String.format("          ['graph'] = STRING( '%s' ),\n", graph));
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-                Vector3f v = aiMarker.getPosition();
+                Vector3 v = aiMarker.getPosition();
                 out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
@@ -133,7 +133,7 @@ public strictfp class SaveExporter {
             out.writeBytes("          ['type'] = STRING( '" + type + "' ),\n");
             out.writeBytes("          ['prop'] = STRING( '" + prop + "' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
-            Vector3f v = aiMarker.getPosition();
+            Vector3 v = aiMarker.getPosition();
             out.writeBytes(String.format("          ['position'] = VECTOR3( %s),\n", v.toString()));
             out.writeBytes("        },\n");
         }
@@ -180,7 +180,7 @@ public strictfp class SaveExporter {
         out.writeBytes(String.format("	              type = '%s',\n", unit.getType()));
         out.writeBytes("			              orders = '',\n");
         out.writeBytes("			              platoon = '',\n");
-        Vector3f v = unit.getPosition();
+        Vector3 v = unit.getPosition();
         out.writeBytes(String.format("			              Position = { %s },\n", v.toString()));
         float rot = unit.getRotation();
         out.writeBytes(String.format("			              Orientation = { 0, %f, 0 },\n", rot));

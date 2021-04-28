@@ -3,13 +3,14 @@ package com.faforever.neroxis.map.generator.prop;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class NeutralCivPropGenerator extends BasicPropGenerator {
+public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask civReclaimMask;
     protected BooleanMask noCivs;
@@ -35,14 +36,14 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
 
         if (!map.isUnexplored()) {
             civReclaimMask.randomize(.005f).setSize(mapSize + 1);
-            civReclaimMask.intersect(passableLand.copy().minus(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(64, false);
+            civReclaimMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(64, false);
         }
     }
 
     @Override
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine(civReclaimMask.getFinalMask());
+        noProps.add(civReclaimMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
@@ -62,7 +63,7 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
                 civilian.addGroup(civilianInitial);
                 map.addArmy(civilian);
                 try {
-                    unitPlacer.placeBases(civReclaimMask.getFinalMask().minus(noCivs), UnitPlacer.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
+                    unitPlacer.placeBases(civReclaimMask.getFinalMask().subtract(noCivs), UnitPlacer.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
                 } catch (IOException e) {
                     System.out.println("Could not generate bases due to lua parsing error");
                     e.printStackTrace();

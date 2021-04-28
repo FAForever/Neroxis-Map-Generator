@@ -1,17 +1,25 @@
 package com.faforever.neroxis.map.exporter;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.map.importer.SaveImporter;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.map.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+
+import static com.faforever.neroxis.util.ImageUtils.writePNGFromMask;
 
 public strictfp class MapImageWriter {
 
@@ -124,51 +132,47 @@ public strictfp class MapImageWriter {
     public void writeMapImages() throws IOException {
 
         Random random = new Random();
-        FloatMask heightmapBase = map.getHeightMask(symmetrySettings);
-        heightmapBase = new FloatMask(heightmapBase, random.nextLong(), "heightmapBase");
-        map.setHeightImage(heightmapBase);
+        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings, map.getHeightMapScale(), "heightmapBase");
 
-        FloatMask[] texturesMasks = map.getTextureMasksScaled(symmetrySettings);
-        if(writeLayerh) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(heightmapBase, 1, Paths.get(writeImagesPath + "\\Heightmap.png"));
+        FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.nextLong(), symmetrySettings, 1f, "TextureMasksLow")
+                .subtractScalar(128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
+        FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(), symmetrySettings, 1f, "TextureMasksHigh")
+                .subtractScalar(128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
+        if (writeLayerh) {
+            writePNGFromMask(heightmapBase, 1, Paths.get(writeImagesPath).resolve("Heightmap.png"));
         }
-        if(writeLayer1) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[0], 255, Paths.get(writeImagesPath + "\\Layer 1.png"));
+        if (writeLayer1) {
+            writePNGFromMask(textureMasksLow[0], 255, Paths.get(writeImagesPath).resolve("Layer 1.png"));
         }
-        if(writeLayer2) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[1], 255, Paths.get(writeImagesPath + "\\Layer 2.png"));
+        if (writeLayer2) {
+            writePNGFromMask(textureMasksLow[1], 255, Paths.get(writeImagesPath).resolve("Layer 2.png"));
         }
-        if(writeLayer3) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[2], 255, Paths.get(writeImagesPath + "\\Layer 3.png"));
+        if (writeLayer3) {
+            writePNGFromMask(textureMasksLow[2], 255, Paths.get(writeImagesPath).resolve("Layer 3.png"));
         }
-        if(writeLayer4) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[3], 255, Paths.get(writeImagesPath + "\\Layer 4.png"));
+        if (writeLayer4) {
+            writePNGFromMask(textureMasksLow[3], 255, Paths.get(writeImagesPath).resolve("Layer 4.png"));
         }
-        if(writeLayer5) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[4], 255, Paths.get(writeImagesPath + "\\Layer 5.png"));
+        if (writeLayer5) {
+            writePNGFromMask(textureMasksHigh[0], 255, Paths.get(writeImagesPath).resolve("Layer 5.png"));
         }
-        if(writeLayer6) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[5], 255, Paths.get(writeImagesPath + "\\Layer 6.png"));
+        if (writeLayer6) {
+            writePNGFromMask(textureMasksHigh[1], 255, Paths.get(writeImagesPath).resolve("Layer 6.png"));
         }
         if(writeLayer7) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[6], 255, Paths.get(writeImagesPath + "\\Layer 7.png"));
+            writePNGFromMask(textureMasksHigh[2], 255, Paths.get(writeImagesPath).resolve("Layer 7.png"));
         }
         if(writeLayer8) {
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(texturesMasks[7], 255, Paths.get(writeImagesPath + "\\Layer 8.png"));
+            writePNGFromMask(textureMasksHigh[3], 255, Paths.get(writeImagesPath).resolve("Layer 8.png"));
         }
         if(writeLayer0) {
-            int mapImageSize = texturesMasks[0].getSize();
-            texturesMasks[0].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[1].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[2].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[3].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[4].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[5].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[6].clampMin(0f).clampMax(1f).setSize(mapImageSize);
-            texturesMasks[7].clampMin(0f).clampMax(1f).setSize(mapImageSize);
+            int mapImageSize = textureMasksLow[0].getSize();
             FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0");
-            oldLayer0.init(new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(), 0f, 1f).subtract(texturesMasks[7]).subtract(texturesMasks[6]).subtract(texturesMasks[5]).subtract(texturesMasks[4]).subtract(texturesMasks[3]).subtract(texturesMasks[2]).subtract(texturesMasks[1]).subtract(texturesMasks[0]).clampMin(0f);
-            com.faforever.neroxis.util.ImageUtils.writePNGFromMask(oldLayer0, 255, Paths.get(writeImagesPath + "\\Layer 0.png"));
+            oldLayer0.init(new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(), 0f, 1f);
+            Arrays.stream(textureMasksHigh).forEach(oldLayer0::subtract);
+            Arrays.stream(textureMasksLow).forEach(oldLayer0::subtract);
+            oldLayer0.clampMin(0f);
+            writePNGFromMask(oldLayer0, 255, Paths.get(writeImagesPath).resolve("Layer 0.png"));
         }
     }
 }

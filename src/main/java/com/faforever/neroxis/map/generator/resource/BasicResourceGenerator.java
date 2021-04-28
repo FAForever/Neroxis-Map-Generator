@@ -1,14 +1,14 @@
 package com.faforever.neroxis.map.generator.resource;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicResourceGenerator extends ResourceGenerator {
+public strictfp class BasicResourceGenerator extends ResourceGenerator {
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
 
@@ -25,9 +25,9 @@ public class BasicResourceGenerator extends ResourceGenerator {
         resourceMask.init(passableLand);
         waterResourceMask.init(passableLand).invert();
 
-        resourceMask.minus(unbuildable).deflate(4);
+        resourceMask.subtract(unbuildable).deflate(4);
         resourceMask.fillEdge(16, false).fillCenter(24, false);
-        waterResourceMask.minus(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
+        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
     }
 
     @Override

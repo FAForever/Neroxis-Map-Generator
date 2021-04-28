@@ -1,12 +1,12 @@
 package com.faforever.neroxis.map.generator.resource;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.generator.placement.HydroPlacer;
 import com.faforever.neroxis.map.generator.placement.MexPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 
 public abstract strictfp class ResourceGenerator extends ElementGenerator {
     protected MexPlacer mexPlacer;

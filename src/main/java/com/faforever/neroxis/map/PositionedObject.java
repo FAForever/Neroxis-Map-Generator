@@ -1,7 +1,7 @@
 package com.faforever.neroxis.map;
 
-import com.faforever.neroxis.util.Vector2f;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public strictfp abstract class PositionedObject {
-    protected Vector3f position;
+    protected Vector3 position;
 
-    protected PositionedObject(Vector2f position) {
-        this.position = new Vector3f(position);
+    protected PositionedObject(Vector2 position) {
+        this.position = new Vector3(position);
     }
 }

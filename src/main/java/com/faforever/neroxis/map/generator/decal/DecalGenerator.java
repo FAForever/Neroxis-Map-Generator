@@ -1,12 +1,12 @@
 package com.faforever.neroxis.map.generator.decal;
 
-import com.faforever.neroxis.map.BooleanMask;
-import com.faforever.neroxis.map.FloatMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.generator.placement.DecalPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.map.mask.FloatMask;
 
 public abstract strictfp class DecalGenerator extends ElementGenerator {
     protected DecalPlacer decalPlacer;

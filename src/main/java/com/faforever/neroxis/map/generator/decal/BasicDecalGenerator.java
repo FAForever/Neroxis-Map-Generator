@@ -1,14 +1,14 @@
 package com.faforever.neroxis.map.generator.decal;
 
-import com.faforever.neroxis.map.BooleanMask;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicDecalGenerator extends DecalGenerator {
+public strictfp class BasicDecalGenerator extends DecalGenerator {
     protected BooleanMask fieldDecal;
     protected BooleanMask slopeDecal;
 
@@ -24,7 +24,7 @@ public class BasicDecalGenerator extends DecalGenerator {
     public void setupPipeline() {
         fieldDecal.init(passableLand);
         slopeDecal.init(slope, .25f);
-        fieldDecal.minus(slopeDecal.copy().inflate(16));
+        fieldDecal.subtract(slopeDecal.copy().inflate(16));
     }
 
     @Override

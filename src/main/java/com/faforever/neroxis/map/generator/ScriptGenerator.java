@@ -3,7 +3,7 @@ package com.faforever.neroxis.map.generator;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector3;
 
 public strictfp class ScriptGenerator {
 
@@ -32,19 +32,19 @@ public strictfp class ScriptGenerator {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("local mexLocations = {");
         for (Marker mex : map.getMexes()) {
-            Vector3f v = mex.getPosition();
+            Vector3 v = mex.getPosition();
             stringBuilder.append(String.format("{position = VECTOR3( %s ), marked = false},", v.toString()));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local hydroLocations = {");
         for (Marker hydro : map.getHydros()) {
-            Vector3f v = hydro.getPosition();
+            Vector3 v = hydro.getPosition();
             stringBuilder.append(String.format("{position = VECTOR3( %s ), marked = false},", v.toString()));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local propLocations = {");
         for (Prop prop : map.getProps()) {
-            Vector3f v = prop.getPosition();
+            Vector3 v = prop.getPosition();
             stringBuilder.append(String.format("{position = VECTOR3( %s ), bp = '%s', heading = %f, marked = false},", v.toString(), prop.getPath(), prop.getRotation()));
         }
         stringBuilder.append("}\n");

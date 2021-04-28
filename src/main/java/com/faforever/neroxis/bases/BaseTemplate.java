@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.util.Vector2;
 import lombok.Value;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -17,20 +17,20 @@ import java.util.LinkedHashSet;
 
 @Value
 public strictfp class BaseTemplate {
-    Vector2f center;
+    Vector2 center;
     Army army;
     Group group;
-    LinkedHashMap<String, LinkedHashSet<Vector2f>> units;
+    LinkedHashMap<String, LinkedHashSet<Vector2>> units;
 
-    public BaseTemplate(Vector2f center, Army army, Group group, LinkedHashMap<String, LinkedHashSet<Vector2f>> units) {
+    public BaseTemplate(Vector2 center, Army army, Group group, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
         this.center = center;
         this.army = army;
         this.group = group;
         this.units = units;
     }
 
-    public static LinkedHashMap<String, LinkedHashSet<Vector2f>> loadUnits(String luaFile) throws IOException {
-        LinkedHashMap<String, LinkedHashSet<Vector2f>> units = new LinkedHashMap<>();
+    public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String luaFile) throws IOException {
+        LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
         LuaValue lua = LuaLoader.load(BaseTemplate.class.getResourceAsStream(luaFile));
         LuaTable luaUnits = lua.get("Units").checktable();
         LuaValue key = LuaValue.NIL;
@@ -39,7 +39,7 @@ public strictfp class BaseTemplate {
             LuaValue unit = luaUnits.get(key);
             String type = unit.get("type").checkstring().toString();
             LuaTable posTable = unit.get("Position").checktable();
-            Vector2f position = new Vector2f(posTable.get(1).tofloat(), posTable.get(3).tofloat());
+            Vector2 position = new Vector2(posTable.get(1).tofloat(), posTable.get(3).tofloat());
             if (units.containsKey(type)) {
                 units.get(type).add(position);
             } else {
@@ -52,10 +52,10 @@ public strictfp class BaseTemplate {
     public void addUnits() {
         units.forEach((name, positions) ->
                 positions.forEach(position ->
-                        group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, new Vector2f(position).add(center), 0))));
+                        group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, new Vector2(position).add(center), 0))));
     }
 
     public void flip(Symmetry symmetry) {
-        units.values().forEach(positions -> positions.forEach(position -> position.flip(new Vector2f(0, 0), symmetry)));
+        units.values().forEach(positions -> positions.forEach(position -> position.flip(new Vector2(0, 0), symmetry)));
     }
 }

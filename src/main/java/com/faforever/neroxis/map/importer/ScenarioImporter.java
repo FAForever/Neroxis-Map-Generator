@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.importer;
 
 import com.faforever.commons.lua.LuaLoader;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.util.Vector2;
 import org.luaj.vm2.LuaValue;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public strictfp class ScenarioImporter {
             if (lua.get("norushoffsetX_" + spawn.getId()) != LuaValue.NIL && lua.get("norushoffsetY_" + spawn.getId()) != LuaValue.NIL) {
                 float xOffset = (float) lua.get("norushoffsetX_" + spawn.getId()).checkdouble();
                 float yOffset = (float) lua.get("norushoffsetY_" + spawn.getId()).checkdouble();
-                spawn.setNoRushOffset(new Vector2f(xOffset, yOffset));
+                spawn.setNoRushOffset(new Vector2(xOffset, yOffset));
             }
         });
 

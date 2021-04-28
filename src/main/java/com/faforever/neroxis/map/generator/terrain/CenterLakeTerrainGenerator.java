@@ -1,7 +1,11 @@
 package com.faforever.neroxis.map.generator.terrain;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
+import com.faforever.neroxis.map.mask.BooleanMask;
 
 public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -39,7 +43,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.dilute(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
         noLand.blur(mapSize / 64, .5f);
-        land.minus(noLand);
+        land.subtract(noLand);
     }
 }
 

@@ -1,13 +1,17 @@
 package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class RockFieldPropGenerator extends BasicPropGenerator {
+public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask largeRockFieldMask;
 
@@ -36,7 +40,7 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         largeRockFieldMask.setSize(mapSize / 4);
 
         largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).dilute(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
-        largeRockFieldMask.intersect(passableLand);
+        largeRockFieldMask.multiply(passableLand);
     }
 
     @Override
@@ -44,10 +48,10 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
         Util.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
-            propPlacer.placeProps(largeRockFieldMask.getFinalMask().minus(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 20f);
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);
+            propPlacer.placeProps(largeRockFieldMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getBoulders(), 20f);
         });
     }
 }

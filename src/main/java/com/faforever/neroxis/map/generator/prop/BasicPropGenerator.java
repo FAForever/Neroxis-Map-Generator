@@ -1,12 +1,16 @@
 package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicPropGenerator extends PropGenerator {
+public strictfp class BasicPropGenerator extends PropGenerator {
 
     protected BooleanMask treeMask;
     protected BooleanMask cliffRockMask;
@@ -36,13 +40,13 @@ public class BasicPropGenerator extends PropGenerator {
         fieldStoneMask.setSize(mapSize / 4);
 
         cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .5f).setSize(mapSize + 1);
-        cliffRockMask.intersect(impassable).dilute(.5f, SymmetryType.SPAWN, 6).minus(impassable).intersect(passableLand);
+        cliffRockMask.multiply(impassable).dilute(.5f, SymmetryType.SPAWN, 6).subtract(impassable).multiply(passableLand);
         fieldStoneMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .0025f).setSize(mapSize + 1);
-        fieldStoneMask.intersect(passableLand).fillEdge(10, false);
+        fieldStoneMask.multiply(passableLand).fillEdge(10, false);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
         treeMask.inflate(2).erode(.5f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
         treeMask.setSize(mapSize + 1);
-        treeMask.intersect(passableLand.copy().deflate(8)).fillEdge(8, false);
+        treeMask.multiply(passableLand.copy().deflate(8)).fillEdge(8, false);
     }
 
 
@@ -68,9 +72,9 @@ public class BasicPropGenerator extends PropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         Util.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().minus(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().minus(noProps), biome.getPropMaterials().getBoulders(), 30f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getBoulders(), 30f);
         });
     }
 

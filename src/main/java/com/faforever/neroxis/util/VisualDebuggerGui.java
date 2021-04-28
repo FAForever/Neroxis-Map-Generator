@@ -1,8 +1,6 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.map.BooleanMask;
-import com.faforever.neroxis.map.Mask;
-import com.faforever.neroxis.map.NumberMask;
+import com.faforever.neroxis.map.mask.Mask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -19,17 +17,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public strictfp class VisualDebuggerGui {
-
-    private static final int IMAGE_SIZE = 512;
-
     private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
     private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
     private static final CanvasMouseListener CANVAS_MOUSE_LISTENER = new CanvasMouseListener();
     private static JFrame frame;
     private static Container contentPane;
     private static JList<MaskListItem> list;
+    private static JLabel label;
     private static JPanel canvasContainer;
     private static double userZoomScale = 1d;
+    private static int centeredX = 0;
+    private static int centeredY = 0;
+    private static double imageXOffset = 0;
+    private static double imageYOffset = 0;
     private static double xOffset = 0;
     private static double yOffset = 0;
 
@@ -43,15 +43,33 @@ public strictfp class VisualDebuggerGui {
         }
         frame = new JFrame();
         contentPane = frame.getContentPane();
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+        contentPane.setLayout(new GridBagLayout());
 
         createList();
-        canvasContainer = new JPanel();
-        contentPane.add(canvasContainer);
+        createCanvasContainer();
+
+        contentPane.revalidate();
+        contentPane.repaint();
 
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+
+    private static void createCanvasContainer() {
+        canvasContainer = new JPanel();
+        canvasContainer.setMinimumSize(new Dimension(600, 600));
+        canvasContainer.setPreferredSize(new Dimension(600, 600));
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 1;
+        constraints.weightx = 4;
+        constraints.gridy = 0;
+        constraints.weighty = 1;
+        constraints.gridheight = 2;
+
+        contentPane.add(canvasContainer, constraints);
     }
 
     private static void createList() {
@@ -64,11 +82,20 @@ public strictfp class VisualDebuggerGui {
             }
         });
         JScrollPane listScroller = new JScrollPane(list);
-        listScroller.setMinimumSize(new Dimension(100, 0));
-        contentPane.add(listScroller);
+        listScroller.setMinimumSize(new Dimension(250, 0));
+        listScroller.setPreferredSize(new Dimension(250, 0));
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.weightx = 1;
+        constraints.gridy = 0;
+        constraints.weighty = 1;
+
+        contentPane.add(listScroller, constraints);
     }
 
-    public synchronized static void update(String uniqueMaskName, BufferedImage image, Mask<?, ?> mask, String line) {
+    public synchronized static void update(String uniqueMaskName, Mask<?, ?> mask) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
             for (int i = 0; i < listModel.getSize(); i++) {
@@ -76,7 +103,6 @@ public strictfp class VisualDebuggerGui {
                     ind = i + 1;
                 }
             }
-            uniqueMaskName = String.format("%s %s", uniqueMaskName, line);
             maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
@@ -84,7 +110,7 @@ public strictfp class VisualDebuggerGui {
             canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
-            canvas.setViewModel(image, mask);
+            canvas.setViewModel(mask);
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
             }
@@ -99,11 +125,18 @@ public strictfp class VisualDebuggerGui {
     }
 
     private static void updateVisibleCanvas(String maskName, ImagePanel canvas) {
-        canvas.revalidate();
-        canvas.repaint();
+        Point locationOnScreen = MouseInfo.getPointerInfo().getLocation();
+        Point locationOnComponent = new Point(locationOnScreen);
+        SwingUtilities.convertPointFromScreen(locationOnComponent, canvas);
+        ToolTipManager.sharedInstance().mouseMoved(
+                new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
+                        locationOnScreen.x, locationOnScreen.y, 0, false, 0));
+        contentPane.revalidate();
         contentPane.repaint();
-        frame.pack();
         frame.setTitle("Mask: " + maskName + ", Size: " + canvas.getImage().getHeight());
+        ToolTipManager.sharedInstance().mouseMoved(
+                new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
+                        locationOnScreen.x, locationOnScreen.y, 0, false, 0));
     }
 
     private static void setUserZoomScale(double scale) {
@@ -111,8 +144,8 @@ public strictfp class VisualDebuggerGui {
     }
 
     private static void setOffsets(double x, double y) {
-        xOffset = StrictMath.max(IMAGE_SIZE * (1 - userZoomScale), StrictMath.min(0, x));
-        yOffset = StrictMath.max(IMAGE_SIZE * (1 - userZoomScale), StrictMath.min(0, y));
+        xOffset = StrictMath.max(canvasContainer.getWidth() * (1 - userZoomScale), StrictMath.min(0, x));
+        yOffset = StrictMath.max(canvasContainer.getHeight() * (1 - userZoomScale), StrictMath.min(0, y));
     }
 
     /**
@@ -124,19 +157,43 @@ public strictfp class VisualDebuggerGui {
     @Data
     public static class ImagePanel extends JPanel {
         private BufferedImage image;
+        private BufferedImage backgroundImage;
         private Mask<?, ?> mask;
         private double imageZoomScaleX;
         private double imageZoomScaleY;
 
-        public void setViewModel(BufferedImage image, Mask<?, ?> mask) {
-            this.image = image;
+        public void setViewModel(Mask<?, ?> mask) {
             this.mask = mask;
+            image = new BufferedImage(mask.getImmediateSize(), mask.getImmediateSize(), BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < image.getWidth(); ++x) {
+                for (int y = 0; y < image.getHeight(); ++y) {
+                    if ((x / 4 + y / 4) % 2 == 0) {
+                        image.setRGB(x, y, Color.GRAY.getRGB());
+                    } else {
+                        image.setRGB(x, y, Color.DARK_GRAY.getRGB());
+                    }
+                }
+            }
+
+            Graphics g = image.getGraphics();
+            g.drawImage(mask.toImage(), 0, 0, this);
+
+            imageZoomScaleX = (double) getWidth() / image.getWidth();
+            imageZoomScaleY = (double) getHeight() / image.getHeight();
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(canvasContainer.getWidth(), canvasContainer.getHeight());
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g.create();
+
+            setOffsets(-(imageXOffset * userZoomScale - centeredX), -(imageYOffset * userZoomScale - centeredY));
+
             imageZoomScaleX = (double) getWidth() / image.getWidth();
             imageZoomScaleY = (double) getHeight() / image.getHeight();
             AffineTransform at = new AffineTransform();
@@ -150,19 +207,13 @@ public strictfp class VisualDebuggerGui {
         }
 
         @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(IMAGE_SIZE, IMAGE_SIZE);
-        }
-
-        @Override
         public String getToolTipText(MouseEvent e) {
-            if (mask instanceof NumberMask<?, ?>) {
-                return ((NumberMask<?, ?>) mask).getValueAt((int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX), (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY)).toString();
-            } else if (mask instanceof BooleanMask) {
-                return ((BooleanMask) mask).getValueAt((int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX), (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY)).toString();
-            } else {
-                return null;
+            int maskX = (int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX);
+            int maskY = (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY);
+            if (mask.inBounds(maskX, maskY)) {
+                return String.format("X: %d, Y: %d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString());
             }
+            return null;
         }
     }
 
@@ -182,25 +233,31 @@ public strictfp class VisualDebuggerGui {
 
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
-            double imageXOffset = (e.getX() - xOffset) / userZoomScale;
-            double imageYOffset = (e.getY() - yOffset) / userZoomScale;
+            centeredX = e.getX();
+            centeredY = e.getY();
+            imageXOffset = (e.getX() - xOffset) / userZoomScale;
+            imageYOffset = (e.getY() - yOffset) / userZoomScale;
             setUserZoomScale(userZoomScale - e.getWheelRotation() / 1.25d);
-            setOffsets(-(imageXOffset * userZoomScale - e.getX()), -(imageYOffset * userZoomScale - e.getY()));
             ((ImagePanel) e.getSource()).repaint();
-            contentPane.repaint();
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             x = e.getX();
             y = e.getY();
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
-            setOffsets(xOffset - (x - e.getX()), yOffset - (y - e.getY()));
+            ImagePanel sourceImagePanel = (ImagePanel) e.getSource();
+            BufferedImage sourceImage = sourceImagePanel.getImage();
+            imageXOffset += (x - e.getX()) / userZoomScale / sourceImagePanel.imageZoomScaleX;
+            imageYOffset += (y - e.getY()) / userZoomScale / sourceImagePanel.imageZoomScaleY;
+            imageXOffset = StrictMath.min(sourceImage.getWidth(), StrictMath.max(0, imageXOffset));
+            imageYOffset = StrictMath.min(sourceImage.getWidth(), StrictMath.max(0, imageYOffset));
             x = e.getX();
             y = e.getY();
-            ((ImagePanel) e.getSource()).repaint();
-            contentPane.repaint();
+            sourceImagePanel.repaint();
         }
     }
 }

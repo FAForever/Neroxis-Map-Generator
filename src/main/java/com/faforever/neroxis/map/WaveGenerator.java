@@ -1,6 +1,6 @@
 package com.faforever.neroxis.map;
 
-import com.faforever.neroxis.util.Vector3f;
+import com.faforever.neroxis.util.Vector3;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -12,7 +12,7 @@ public strictfp class WaveGenerator extends PositionedObject {
     private final String textureName;
     private final String rampName;
     private final float rotation;
-    private final Vector3f velocity;
+    private final Vector3 velocity;
 
     private float lifeTimeFirst;
     private float lifeTimeSecond;
@@ -26,7 +26,7 @@ public strictfp class WaveGenerator extends PositionedObject {
     private float frameRateSecond;
     private float stripCount;
 
-    public WaveGenerator(String textureName, String rampName, Vector3f position, float rotation, Vector3f velocity) {
+    public WaveGenerator(String textureName, String rampName, Vector3 position, float rotation, Vector3 velocity) {
         super(position);
         this.textureName = textureName;
         this.rampName = rampName;

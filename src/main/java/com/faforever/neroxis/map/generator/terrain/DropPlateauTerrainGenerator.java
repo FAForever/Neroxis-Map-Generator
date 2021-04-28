@@ -48,7 +48,7 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
         plateaus.dilute(.5f, SymmetryType.SPAWN, 4);
 
         plateaus.setSize(mapSize + 1);
-        plateaus.minus(connections.copy().inflate(plateauBrushSize * 7f / 16f).blur(12, .125f));
+        plateaus.subtract(connections.copy().inflate(plateauBrushSize * 7f / 16f).blur(12, .125f));
     }
 
     @Override

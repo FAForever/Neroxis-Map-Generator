@@ -4,8 +4,6 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.util.DDSReader;
 import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.serialized.LightingSettings;
-import com.faforever.neroxis.util.serialized.WaterSettings;
 
 import java.awt.*;
 import java.io.*;
@@ -22,10 +20,10 @@ public strictfp class BiomeExporter {
         Files.createDirectories(folderPath.resolve(biomeName));
 
         filename = folderPath.resolve(biomeName).resolve("Light.scmlighting").toString();
-        FileUtils.serialize(filename, biome.getLightingSettings(), LightingSettings.class);
+        FileUtils.serialize(filename, biome.getLightingSettings());
 
         filename = folderPath.resolve(biomeName).resolve("WaterSettings.scmwtr").toString();
-        FileUtils.serialize(filename, biome.getWaterSettings(), WaterSettings.class);
+        FileUtils.serialize(filename, biome.getWaterSettings());
 
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (biome.getTerrainMaterials().getPreviewColors()[i] == null && !biome.getTerrainMaterials().getTexturePaths()[i].isEmpty()) {
@@ -35,10 +33,10 @@ public strictfp class BiomeExporter {
         biome.getTerrainMaterials().setName(biomeName);
 
         filename = folderPath.resolve(biomeName).resolve("materials.json").toString();
-        FileUtils.serialize(filename, biome.getTerrainMaterials(), TerrainMaterials.class);
+        FileUtils.serialize(filename, biome.getTerrainMaterials());
     }
 
-    public static Color getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
+    public static Integer getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
         File file = Paths.get(envDir.toString(), texturePath).toFile();
         InputStream inputStream = new FileInputStream(file);
         byte[] buffer = new byte[inputStream.available()];
@@ -54,7 +52,7 @@ public strictfp class BiomeExporter {
                 avgB += pixColor.getBlue();
                 avgG += pixColor.getGreen();
             }
-            return new Color((int) avgR / pixels.length, (int) avgG / pixels.length, (int) avgB / pixels.length);
+            return new Color((int) avgR / pixels.length, (int) avgG / pixels.length, (int) avgB / pixels.length).getRGB();
         }
         return null;
     }

@@ -1,4 +1,4 @@
-package com.faforever.neroxis.map.generator;
+package com.faforever.neroxis.biomes;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.exporter.BiomeExporter;
@@ -39,7 +39,7 @@ public strictfp class BiomeExtractor {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("com.faforever.neroxis.map-gen usage:\n" +
+            System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
                     "--biome-name arg       required, set the name for the generated biome\n" +
                     "--map-path arg         required, set the map path to generate biome from\n" +

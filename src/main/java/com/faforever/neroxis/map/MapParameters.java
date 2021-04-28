@@ -18,6 +18,7 @@ public strictfp class MapParameters {
     int numTeams;
     int hydroCount;
     boolean unexplored;
+    boolean blind;
     SymmetrySettings symmetrySettings;
     Biome biome;
 

@@ -3,7 +3,7 @@ package com.faforever.neroxis.map.generator.terrain;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.util.Vector2f;
+import com.faforever.neroxis.util.Vector2;
 
 public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -25,7 +25,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
         connectTeammates(land, 8, 2, maxStepSize);
         connectTeams(land, 0, 2, 1, maxStepSize);
         map.getSpawns().forEach(spawn ->
-                pathAroundPoint(land, new Vector2f(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
+                pathAroundPoint(land, new Vector2(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
         land.dilute(.5f, SymmetryType.SPAWN, 8);

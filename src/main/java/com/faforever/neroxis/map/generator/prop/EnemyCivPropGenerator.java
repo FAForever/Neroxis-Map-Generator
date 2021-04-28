@@ -3,13 +3,14 @@ package com.faforever.neroxis.map.generator.prop;
 import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class EnemyCivPropGenerator extends BasicPropGenerator {
+public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask baseMask;
     protected BooleanMask noBases;
@@ -34,13 +35,13 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
         if (!map.isUnexplored()) {
             baseMask.randomize(.005f).setSize(mapSize + 1);
-            baseMask.intersect(passableLand.copy().minus(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(32, false);
+            baseMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(32, false);
         }
     }
 
     protected void generatePropExclusionMasks() {
         super.generatePropExclusionMasks();
-        noProps.combine(baseMask.getFinalMask());
+        noProps.add(baseMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
@@ -60,7 +61,7 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
                 army17.addGroup(army17Initial);
                 map.addArmy(army17);
                 try {
-                    unitPlacer.placeBases(baseMask.getFinalMask().minus(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
+                    unitPlacer.placeBases(baseMask.getFinalMask().subtract(noBases), UnitPlacer.MEDIUM_ENEMY, army17, army17Initial, 512f);
                 } catch (IOException e) {
                     System.out.println("Could not generate bases due to lua parsing error");
                     e.printStackTrace();
