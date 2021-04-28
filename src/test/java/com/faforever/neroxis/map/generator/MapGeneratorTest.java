@@ -373,7 +373,7 @@ public class MapGeneratorTest {
 
     @Test
     public void TestUnexploredNoUnits() throws Exception {
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 10; ++i) {
             Pipeline.reset();
             instance = new MapGenerator();
             instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});

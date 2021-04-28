@@ -37,6 +37,8 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
         if (!map.isUnexplored()) {
             civReclaimMask.randomize(.005f).setSize(mapSize + 1);
             civReclaimMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(64, false);
+        } else {
+            civReclaimMask.setSize(mapSize + 1);
         }
     }
 

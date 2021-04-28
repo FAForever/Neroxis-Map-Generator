@@ -36,6 +36,8 @@ public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
         if (!map.isUnexplored()) {
             baseMask.randomize(.005f).setSize(mapSize + 1);
             baseMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(32, false);
+        } else {
+            baseMask.setSize(mapSize + 1);
         }
     }
 
