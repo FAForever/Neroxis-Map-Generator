@@ -40,11 +40,11 @@ public strictfp class Vector2 extends Vector<Vector2> {
         components[Vector.Y] = y;
     }
 
-    public float getAngle(Vector3 location) {
-        return getAngle(new Vector2(location));
+    public float angleTo(Vector3 location) {
+        return angleTo(new Vector2(location));
     }
 
-    public float getAngle(Vector2 location) {
+    public float angleTo(Vector2 location) {
         float dx = location.getX() - getX();
         float dy = location.getY() - getY();
         return (float) StrictMath.atan2(dy, dx);
@@ -55,7 +55,7 @@ public strictfp class Vector2 extends Vector<Vector2> {
         Vector2 currentPoint = this;
         while (currentPoint.getDistance(location) > .1) {
             line.add(currentPoint);
-            float angle = currentPoint.getAngle(location);
+            float angle = currentPoint.angleTo(location);
             currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)), (float) (currentPoint.getY() + StrictMath.sin(angle))).round();
         }
         return line;

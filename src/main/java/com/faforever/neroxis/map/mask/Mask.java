@@ -530,7 +530,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
@@ -549,7 +549,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).getAngle(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f) % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);

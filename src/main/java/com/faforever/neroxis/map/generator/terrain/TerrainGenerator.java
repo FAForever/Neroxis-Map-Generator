@@ -108,7 +108,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             Vector2 end = new Vector2(start);
             float offCenterAngle = (float) (StrictMath.PI * (1f / 4f + random.nextFloat() / 4f));
             offCenterAngle *= random.nextBoolean() ? 1 : -1;
-            offCenterAngle += start.getAngle(new Vector2(maskToUse.getSize() / 2f, maskToUse.getSize() / 2f));
+            offCenterAngle += start.angleTo(new Vector2(maskToUse.getSize() / 2f, maskToUse.getSize() / 2f));
             end.addPolar(offCenterAngle, random.nextFloat() * maskToUse.getSize() / 2f + maskToUse.getSize() / 2f);
             end.clampMax(maskToUse.getSize() - bound).clampMin(bound);
             float maxMiddleDistance = start.getDistance(end);

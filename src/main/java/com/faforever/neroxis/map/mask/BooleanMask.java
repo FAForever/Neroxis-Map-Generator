@@ -206,7 +206,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             checkPoints.add(new Vector2(start));
             for (int i = 0; i < numMiddlePoints; i++) {
                 Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
-                float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.getAngle(end);
+                float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
                 if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4 && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
                     angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f;
                 }
@@ -220,14 +220,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             for (int i = 0; i < checkPoints.size() - 1; i++) {
                 Vector2 location = checkPoints.get(i);
                 Vector2 nextLoc = checkPoints.get(i + 1);
-                float oldAngle = location.getAngle(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
+                float oldAngle = location.angleTo(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
                 while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
                     List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
                     if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
                         applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-                    float angle = oldAngle * .5f + location.getAngle(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * maxAngleError;
+                    float angle = oldAngle * .5f + location.angleTo(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * maxAngleError;
                     location.addPolar(angle, magnitude).round();
                     oldAngle = angle;
                     numSteps++;

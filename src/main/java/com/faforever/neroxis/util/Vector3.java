@@ -76,7 +76,7 @@ public strictfp class Vector3 extends Vector<Vector3> {
         Vector2 targetPoint = new Vector2(location);
         while (currentPoint.getDistance(targetPoint) > 1) {
             line.add(currentPoint);
-            float angle = currentPoint.getAngle(location);
+            float angle = currentPoint.angleTo(location);
             currentPoint = new Vector2(StrictMath.round(currentPoint.getX() + StrictMath.cos(angle)), StrictMath.round(currentPoint.getY() + StrictMath.sin(angle)));
         }
         return line;
