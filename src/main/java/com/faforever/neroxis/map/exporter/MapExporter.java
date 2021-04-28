@@ -12,13 +12,13 @@ public strictfp class MapExporter {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
-            if (exportPreview) {
-                SCMapExporter.exportPreview(mapPath, map);
-            }
             if (exportNormals) {
                 SCMapExporter.exportNormals(mapPath, map);
             }
             SCMapExporter.exportSCMAP(mapPath, map);
+            if (exportPreview) {
+                SCMapExporter.exportPreview(mapPath, map);
+            }
             SaveExporter.exportSave(mapPath, map);
             ScenarioExporter.exportScenario(mapPath, map);
             ScriptExporter.exportScript(mapPath, map);
