@@ -40,7 +40,7 @@ public strictfp class SpawnPlacer {
             addSpawn(location, symmetryPoints);
             if (spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() != 1) {
                 BooleanMask nextSpawn = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-                nextSpawn.fillCircle(location, teammateSeparation * 2, true).intersect(spawnMask);
+                nextSpawn.fillCircle(location, teammateSeparation * 2, true).multiply(spawnMask);
                 location = nextSpawn.getRandomPosition();
                 if (location == null) {
                     location = spawnMask.getRandomPosition();

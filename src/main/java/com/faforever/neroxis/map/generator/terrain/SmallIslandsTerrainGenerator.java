@@ -43,7 +43,7 @@ public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerato
 
         islands.randomWalk((int) (normalizedLandDensity * 40 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 2, mapSize / 8);
 
-        land.combine(islands);
+        land.add(islands);
         land.dilute(.5f, SymmetryType.SPAWN, 8);
 
         land.setSize(mapSize + 1);

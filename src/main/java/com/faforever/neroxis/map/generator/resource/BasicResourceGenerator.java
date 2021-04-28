@@ -25,9 +25,9 @@ public class BasicResourceGenerator extends ResourceGenerator {
         resourceMask.init(passableLand);
         waterResourceMask.init(passableLand).invert();
 
-        resourceMask.minus(unbuildable).deflate(4);
+        resourceMask.subtract(unbuildable).deflate(4);
         resourceMask.fillEdge(16, false).fillCenter(24, false);
-        waterResourceMask.minus(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
+        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
     }
 
     @Override

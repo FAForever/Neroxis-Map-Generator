@@ -59,7 +59,11 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     @Override
     protected Vector4[][] getEmptyMask(int size) {
         Vector4[][] empty = new Vector4[size][size];
-        maskFill(empty, getZeroValue());
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                empty[x][y] = getZeroValue();
+            }
+        }
         return empty;
     }
 
@@ -75,6 +79,14 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
         } else {
             return new Vector4Mask(this, null, getName() + "Copy");
         }
+    }
+
+    @Override
+    public BufferedImage toImage() {
+        int size = getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        writeToImage(image);
+        return image;
     }
 
     @Override

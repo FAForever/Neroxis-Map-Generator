@@ -38,7 +38,7 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
         noMountains.dilute(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
         noMountains.blur(mapSize / 64);
 
-        mountains.invert().minus(noMountains);
+        mountains.invert().subtract(noMountains);
     }
 }
 

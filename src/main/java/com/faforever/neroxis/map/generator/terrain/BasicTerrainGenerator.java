@@ -156,7 +156,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         land.blur(8, .75f);
 
         if (mapSize <= 512) {
-            land.combine(connections.copy().inflate(mountainBrushSize / 8f).blur(12, .125f));
+            land.add(connections.copy().inflate(mountainBrushSize / 8f).blur(12, .125f));
         }
     }
 
@@ -196,11 +196,11 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(map.getSize() + 1);
         spawnLandMask.blur(4);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask);
+        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
+        land.add(spawnLandMask).add(spawnPlateauMask);
         if (map.getSize() > 512 && mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() <= 4) {
-            land.combine(spawnLandMask).combine(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
-            land.erode(.5f, SymmetryType.SPAWN, 10).combine(spawnLandMask.copy().setSize(map.getSize() / 8)).combine(spawnPlateauMask.copy().setSize(map.getSize() / 8))
+            land.add(spawnLandMask).add(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
+            land.erode(.5f, SymmetryType.SPAWN, 10).add(spawnLandMask.copy().setSize(map.getSize() / 8)).add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
                     .blur(4, .75f).dilute(.5f, SymmetryType.SPAWN, 5).setSize(map.getSize() + 1);
             land.blur(8, .75f);
         } else {
@@ -209,15 +209,15 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         ensureSpawnTerrain();
 
-        mountains.intersect(mapParameters.getLandDensity() < .25f ? land.copy().deflate(24) : land);
+        mountains.multiply(mapParameters.getLandDensity() < .25f ? land.copy().deflate(24) : land);
     }
 
     protected void ensureSpawnTerrain() {
-        mountains.minus(connections.copy().inflate(mountainBrushSize / 2f).blur(12, .125f));
-        mountains.minus(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
+        mountains.subtract(connections.copy().inflate(mountainBrushSize / 2f).blur(12, .125f));
+        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
 
-        plateaus.intersect(land).minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(plateaus).combine(spawnLandMask).combine(spawnPlateauMask);
+        plateaus.multiply(land).subtract(spawnLandMask).add(spawnPlateauMask);
+        land.add(plateaus).add(spawnLandMask).add(spawnPlateauMask);
     }
 
     protected void setupHeightmapPipeline() {
@@ -239,7 +239,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapOcean.setSize(mapSize + 1);
         noise.setSize(mapSize / 128);
 
-        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).minus(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
+        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
                 .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0f).blur(4, deepWater).blur(1);
 
         heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
@@ -275,9 +275,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightmapOcean.setSize(mapSize + 1);
         noise.setSize(mapSize / 128);
 
-        land.intersect(symmetryLimits);
-        plateaus.intersect(symmetryLimits);
-        mountains.intersect(symmetryLimits);
+        land.multiply(symmetryLimits);
+        plateaus.multiply(symmetryLimits);
+        mountains.multiply(symmetryLimits);
 
         heightmapPlateaus.addDistance(plateaus.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1).clampMax(plateauHeight);
         heightmapMountains.addDistance(mountains.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1f);
@@ -286,11 +286,11 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         BooleanMask paintedPlateaus = new BooleanMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
         BooleanMask paintedMountains = new BooleanMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
 
-        land.combine(paintedPlateaus);
-        plateaus.replace(paintedPlateaus);
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        mountains.replace(paintedMountains);
-        land.combine(paintedMountains);
+        land.add(paintedPlateaus);
+        plateaus.init(paintedPlateaus);
+        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
+        mountains.init(paintedMountains);
+        land.add(paintedMountains);
 
         heightmapPlateaus.add(plateaus, 3f).clampMax(plateauHeight).blur(1, plateaus);
 
@@ -326,9 +326,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
             pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         }
 
-        ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize * 2).intersect(plateaus.copy().outline())
-                .combine(connections.copy().inflate(maxStepSize * 2).intersect(plateaus.copy().outline()))
-                .minus(mountains).inflate(8);
+        ramps.subtract(connections.copy().inflate(32)).inflate(maxStepSize * 2).multiply(plateaus.copy().outline())
+                .add(connections.copy().inflate(maxStepSize * 2).multiply(plateaus.copy().outline()))
+                .subtract(mountains).inflate(8);
     }
 
     protected void setupMountainHeightmapPipeline() {
@@ -339,10 +339,10 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         BooleanMask paintedMountains = new BooleanMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
 
-        mountains.replace(paintedMountains);
-        land.combine(paintedMountains);
+        mountains.init(paintedMountains);
+        land.add(paintedMountains);
 
-        heightmapMountains.blur(4, mountains.copy().inflate(32).minus(mountains.copy().inflate(4)));
+        heightmapMountains.blur(4, mountains.copy().inflate(32).subtract(mountains.copy().inflate(4)));
     }
 
     protected void setupPlateauHeightmapPipeline() {
@@ -353,15 +353,15 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         BooleanMask paintedPlateaus = new BooleanMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
 
-        land.combine(paintedPlateaus);
-        plateaus.replace(paintedPlateaus);
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
+        land.add(paintedPlateaus);
+        plateaus.init(paintedPlateaus);
+        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
 
         heightmapPlateaus.add(plateaus, 3f).clampMax(plateauHeight).blur(1, plateaus);
 
         BooleanMask plateauBase = new BooleanMask(heightmapPlateaus, 1f, random.nextLong(), "plateauBase");
 
-        heightmapPlateaus.blur(1, plateauBase.copy().outline().inflate(8).minus(plateauBase));
+        heightmapPlateaus.blur(1, plateauBase.copy().outline().inflate(8).subtract(plateauBase));
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {
@@ -377,14 +377,14 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 2)
                 .setSize(map.getSize() + 1);
-        hills.intersect(land.copy().deflate(8)).minus(plateaus.copy().outline().inflate(8)).minus(spawnLandMask);
+        hills.multiply(land.copy().deflate(8)).subtract(plateaus.copy().outline().inflate(8)).subtract(spawnLandMask);
         valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 4)
                 .setSize(map.getSize() + 1);
-        valleys.intersect(plateaus.copy().deflate(8)).minus(spawnPlateauMask);
+        valleys.multiply(plateaus.copy().deflate(8)).subtract(spawnPlateauMask);
 
         valleyBrushIntensity = -0.35f;
         heightmapValleys.useBrushWithinAreaWithDensity(valleys, brushValley, smallFeatureBrushSize, valleyBrushDensity, valleyBrushIntensity, false)
                 .clampMin(valleyFloor);
-        heightmapHills.useBrushWithinAreaWithDensity(hills.combine(mountains.copy().outline().inflate(4).acid(.01f, 4)), brushHill, smallFeatureBrushSize, hillBrushDensity, hillBrushIntensity, false);
+        heightmapHills.useBrushWithinAreaWithDensity(hills.add(mountains.copy().outline().inflate(4).acid(.01f, 4)), brushHill, smallFeatureBrushSize, hillBrushDensity, hillBrushIntensity, false);
     }
 }

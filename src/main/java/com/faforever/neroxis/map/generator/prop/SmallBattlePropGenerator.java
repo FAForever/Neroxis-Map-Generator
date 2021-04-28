@@ -42,7 +42,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.setSize(mapSize / 8);
 
         landWreckMask.randomize((reclaimDensity * .8f + random.nextFloat() * .2f) * .005f).setSize(mapSize + 1);
-        landWreckMask.inflate(6f).intersect(passableLand).fillEdge(32, false);
+        landWreckMask.inflate(6f).multiply(passableLand).fillEdge(32, false);
     }
 
     protected void generateUnitExclusionMasks() {
@@ -60,7 +60,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                BooleanMask placementMask = landWreckMask.getFinalMask().minus(noWrecks);
+                BooleanMask placementMask = landWreckMask.getFinalMask().subtract(noWrecks);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 3f, 4f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 5f, 8f);
             });

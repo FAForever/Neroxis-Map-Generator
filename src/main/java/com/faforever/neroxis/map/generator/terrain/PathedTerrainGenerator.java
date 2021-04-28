@@ -23,9 +23,9 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         pathInCenterBounds(ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
 
-        ramps.minus(connections.copy().inflate(32)).inflate(maxStepSize / 2f).intersect(plateaus.copy().outline())
-                .combine(connections.copy().inflate(maxStepSize / 2f).intersect(plateaus.copy().outline()))
-                .minus(mountains).inflate(8);
+        ramps.subtract(connections.copy().inflate(32)).inflate(maxStepSize / 2f).multiply(plateaus.copy().outline())
+                .add(connections.copy().inflate(maxStepSize / 2f).multiply(plateaus.copy().outline()))
+                .subtract(mountains).inflate(8);
     }
 
     @Override
@@ -41,12 +41,12 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
         spawnLandMask.blur(4);
 
-        plateaus.minus(spawnLandMask).combine(spawnPlateauMask);
-        land.combine(spawnLandMask).combine(spawnPlateauMask);
+        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
+        land.add(spawnLandMask).add(spawnPlateauMask);
 
         ensureSpawnTerrain();
 
-        mountains.intersect(land.copy().deflate(24));
+        mountains.multiply(land.copy().deflate(24));
     }
 }
 

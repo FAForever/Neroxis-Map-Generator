@@ -43,7 +43,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.dilute(.5f, SymmetryType.TERRAIN, 10).setSize(mapSize + 1);
         noLand.blur(mapSize / 64, .5f);
-        land.minus(noLand);
+        land.subtract(noLand);
     }
 }
 

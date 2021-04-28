@@ -41,7 +41,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     public void setHeightmapImage() {
         Pipeline.await(heightmap);
         Util.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> {
-            heightmap.getFinalMask().writeImage(map.getHeightmap(), 1 / map.getHeightMapScale());
+            heightmap.getFinalMask().writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale());
             map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
         });
     }
@@ -66,7 +66,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         passableWater.init(actualLand).invert();
 
         passable.fillEdge(8, false);
-        passableLand.intersect(passable);
+        passableLand.multiply(passable);
         passableWater.deflate(16).fillEdge(8, false);
     }
 

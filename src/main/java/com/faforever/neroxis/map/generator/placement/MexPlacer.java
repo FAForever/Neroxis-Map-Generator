@@ -47,7 +47,7 @@ public strictfp class MexPlacer {
         int numPlayerMexes = numMexesLeft / map.getSpawnCount() / numSymPoints;
         for (Spawn spawn : map.getSpawns()) {
             BooleanMask playerSpawnMask = new BooleanMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
-            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).intersect(spawnMask).fillEdge(map.getSize() / 16, false);
+            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).multiply(spawnMask).fillEdge(map.getSize() / 16, false);
             if (mexCount < 6) {
                 placeIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing * 2);
             } else {
@@ -73,7 +73,7 @@ public strictfp class MexPlacer {
         for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
             BooleanMask baseMexes = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-            baseMexes.fillCircle(spawn.getPosition(), 15, true).fillCircle(spawn.getPosition(), 5, false).intersect(spawnMask);
+            baseMexes.fillCircle(spawn.getPosition(), 15, true).fillCircle(spawn.getPosition(), 5, false).multiply(spawnMask);
             placeIndividualMexes(baseMexes, numBaseMexes, 10);
         }
     }
@@ -87,7 +87,7 @@ public strictfp class MexPlacer {
         int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .75f), 1.75f));
 
         BooleanMask expansionSpawnMask = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-        expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).intersect(spawnMask);
+        expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).multiply(spawnMask);
 
         map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
 
@@ -116,7 +116,7 @@ public strictfp class MexPlacer {
 
             BooleanMask expansion = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
             expansion.fillCircle(expLocation, expSize, true);
-            expansion.intersect(spawnMask);
+            expansion.multiply(spawnMask);
 
             int expID = map.getLargeExpansionMarkerCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             if (expMexCount >= 3) {

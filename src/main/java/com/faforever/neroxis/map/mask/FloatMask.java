@@ -17,7 +17,7 @@ import java.util.Collections;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
-public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
+public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -50,12 +50,12 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
         enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
-    public FloatMask(FloatMask sourceMask, Long seed) {
-        super(sourceMask, seed);
+    public FloatMask(FloatMask other, Long seed) {
+        super(other, seed);
     }
 
-    public FloatMask(FloatMask sourceMask, Long seed, String name) {
-        super(sourceMask, seed, name);
+    public FloatMask(FloatMask other, Long seed, String name) {
+        super(other, seed, name);
     }
 
     public FloatMask(BooleanMask other, float low, float high, Long seed) {
@@ -349,11 +349,19 @@ public strictfp class FloatMask extends NumberMask<Float, FloatMask> {
     }
 
     @Override
-    public BufferedImage writeToImage(BufferedImage image) {
-        return writeImage(image, 1f);
+    public BufferedImage toImage() {
+        int size = getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+        writeToImage(image, 255 / getMax());
+        return image;
     }
 
-    public BufferedImage writeImage(BufferedImage image, float scaleFactor) {
+    @Override
+    public BufferedImage writeToImage(BufferedImage image) {
+        return writeToImage(image, 1f);
+    }
+
+    public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();

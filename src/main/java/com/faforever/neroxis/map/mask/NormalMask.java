@@ -66,6 +66,14 @@ public strictfp class NormalMask extends Vector3Mask {
     }
 
     @Override
+    public BufferedImage toImage() {
+        int size = getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        writeToImage(image);
+        return image;
+    }
+
+    @Override
     public BufferedImage writeToImage(BufferedImage image) {
         assertSize(image.getHeight());
         WritableRaster imageRaster = image.getRaster();

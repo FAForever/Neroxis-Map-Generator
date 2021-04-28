@@ -34,9 +34,9 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         land.inflate(maxStepSize).setSize(mapSize / 4);
 
         islands.randomWalk((int) (normalizedLandDensity * 20 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 2, mapSize * 4);
-        islands.minus(land.copy().inflate(32));
+        islands.subtract(land.copy().inflate(32));
 
-        land.combine(islands);
+        land.add(islands);
         land.dilute(.5f, SymmetryType.SPAWN, 8);
 
         land.setSize(mapSize + 1);

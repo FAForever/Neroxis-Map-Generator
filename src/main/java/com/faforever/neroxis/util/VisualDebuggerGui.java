@@ -95,7 +95,7 @@ public strictfp class VisualDebuggerGui {
         contentPane.add(listScroller, constraints);
     }
 
-    public synchronized static void update(String uniqueMaskName, BufferedImage image, Mask<?, ?> mask, String line) {
+    public synchronized static void update(String uniqueMaskName, Mask<?, ?> mask) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
             for (int i = 0; i < listModel.getSize(); i++) {
@@ -103,7 +103,6 @@ public strictfp class VisualDebuggerGui {
                     ind = i + 1;
                 }
             }
-            uniqueMaskName = String.format("%s %s", uniqueMaskName, line);
             maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
@@ -111,7 +110,7 @@ public strictfp class VisualDebuggerGui {
             canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
-            canvas.setViewModel(image, mask);
+            canvas.setViewModel(mask);
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
             }
@@ -163,9 +162,9 @@ public strictfp class VisualDebuggerGui {
         private double imageZoomScaleX;
         private double imageZoomScaleY;
 
-        public void setViewModel(BufferedImage maskImage, Mask<?, ?> mask) {
+        public void setViewModel(Mask<?, ?> mask) {
             this.mask = mask;
-            image = new BufferedImage(maskImage.getWidth(), maskImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            image = new BufferedImage(mask.getImmediateSize(), mask.getImmediateSize(), BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < image.getWidth(); ++x) {
                 for (int y = 0; y < image.getHeight(); ++y) {
                     if ((x / 4 + y / 4) % 2 == 0) {
@@ -177,7 +176,7 @@ public strictfp class VisualDebuggerGui {
             }
 
             Graphics g = image.getGraphics();
-            g.drawImage(maskImage, 0, 0, this);
+            g.drawImage(mask.toImage(), 0, 0, this);
 
             imageZoomScaleX = (double) getWidth() / image.getWidth();
             imageZoomScaleY = (double) getHeight() / image.getHeight();

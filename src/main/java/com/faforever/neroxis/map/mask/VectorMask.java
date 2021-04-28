@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, VectorMask<T, U>> {
+public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
 
     public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -228,6 +228,21 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return (U) this;
     }
 
+    @Override
+    public U clear() {
+        enqueue(() -> mask = getEmptyMask(getSize()));
+        return (U) this;
+    }
+
+    @Override
+    public U init(U other) {
+        enqueue(dependencies -> {
+            U source = (U) dependencies.get(0);
+            set((x, y) -> source.get(x, y).copy());
+        }, other);
+        return (U) this;
+    }
+
     public U normalize() {
         enqueue((dependencies) -> {
             apply((x, y) -> get(x, y).normalize());
@@ -292,35 +307,55 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return (U) this;
     }
 
+    public U addComponent(float value, int component) {
+        enqueue(() -> addComponent((x, y) -> value, component));
+        return (U) this;
+    }
+
     public U addComponent(FloatMask other, int component) {
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            addComponent(source, component);
-        });
+            addComponent(source::get, component);
+        }, other);
+        return (U) this;
+    }
+
+    public U subtractComponent(float value, int component) {
+        enqueue(() -> subtractComponent((x, y) -> value, component));
         return (U) this;
     }
 
     public U subtractComponent(FloatMask other, int component) {
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            subtractComponent(source, component);
-        });
+            subtractComponent(source::get, component);
+        }, other);
+        return (U) this;
+    }
+
+    public U multiplyComponent(float value, int component) {
+        enqueue(() -> multiplyComponent((x, y) -> value, component));
         return (U) this;
     }
 
     public U multiplyComponent(FloatMask other, int component) {
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            multiplyComponent(source, component);
-        });
+            multiplyComponent(source::get, component);
+        }, other);
+        return (U) this;
+    }
+
+    public U divideComponent(float value, int component) {
+        enqueue(() -> divideComponent((x, y) -> value, component));
         return (U) this;
     }
 
     public U divideComponent(FloatMask other, int component) {
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            divideComponent(source, component);
-        });
+            divideComponent(source::get, component);
+        }, other);
         return (U) this;
     }
 

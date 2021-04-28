@@ -43,10 +43,10 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.setSize(mapSize + 1);
         landWreckMask.fillCenter(196, true);
         map.getSpawns().forEach(spawn -> landWreckMask.fillCircle(spawn.getPosition(), 128, false));
-        landWreckMask.intersect(passableLand).space(96, 128);
+        landWreckMask.multiply(passableLand).space(96, 128);
         landWreckMask.inflate(40f).setSize(mapSize / 4);
         landWreckMask.erode(.5f, SymmetryType.SPAWN, 10).setSize(mapSize + 1);
-        landWreckMask.intersect(passableLand).fillEdge(96, false);
+        landWreckMask.multiply(passableLand).fillEdge(96, false);
     }
 
     protected void generateUnitExclusionMasks() {
@@ -64,7 +64,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                BooleanMask placementMask = landWreckMask.getFinalMask().minus(noWrecks);
+                BooleanMask placementMask = landWreckMask.getFinalMask().subtract(noWrecks);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 2f, 8f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 8f, 12f);
                 unitPlacer.placeUnits(placementMask, UnitPlacer.T3_Land, army17, army17Wreckage, 30f, 40f);

@@ -9,10 +9,7 @@ import lombok.Setter;
 
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -61,16 +58,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public Mask(U other, Long seed, String name) {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
-        enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
-            T[][] sourceMask = source.mask;
-            for (int i = 0; i < mask.length; i++) {
-                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
-            }
-        }, other);
+        init(other);
     }
 
     public abstract BufferedImage writeToImage(BufferedImage image);
+
+    public abstract BufferedImage toImage();
 
     public abstract String toHash() throws NoSuchAlgorithmException;
 
@@ -79,6 +72,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected abstract T getZeroValue();
 
     public abstract U copy();
+
+    public abstract U init(U other);
+
+    public abstract U clear();
 
     public abstract U blur(int size);
 
@@ -126,48 +123,33 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return mask[0].length;
     }
 
-    public U clear() {
-        enqueue(() -> maskFill(getZeroValue()));
-        return (U) this;
-    }
-
-    public U init(U other) {
-        plannedSize = other.getSize();
-        enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
-            setSize(source.getSize());
-            assertCompatibleMask(source);
-            T[][] sourceMask = source.mask;
-            for (int i = 0; i < mask.length; i++) {
-                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
-            }
-        }, other);
-        return (U) this;
-    }
-
     public U setSize(int newSize) {
-        plannedSize = newSize;
-        enqueue(() -> {
-            int size = getSize();
-            if (size < newSize) {
-                enlarge(newSize);
-            } else if (size > newSize) {
-                shrink(newSize);
-            }
-        });
+        int size = getSize();
+        if (newSize != size) {
+            plannedSize = newSize;
+            enqueue(() -> {
+                if (size < newSize) {
+                    enlarge(newSize);
+                } else {
+                    shrink(newSize);
+                }
+            });
+        }
         return (U) this;
     }
 
     public U resample(int newSize) {
-        plannedSize = newSize;
-        enqueue(() -> {
-            int size = getSize();
-            if (size < newSize) {
-                interpolate(newSize);
-            } else if (size > newSize) {
-                decimate(newSize);
-            }
-        });
+        int size = getSize();
+        if (newSize != size) {
+            plannedSize = newSize;
+            enqueue(() -> {
+                if (size < newSize) {
+                    interpolate(newSize);
+                } else {
+                    decimate(newSize);
+                }
+            });
+        }
         return (U) this;
     }
 
@@ -682,18 +664,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    protected void set(BiFunction<Integer, Integer, T> valueFunction) {
+    public void set(BiFunction<Integer, Integer, T> valueFunction) {
         apply((x, y) -> set(x, y, valueFunction.apply(x, y)));
     }
 
-    protected void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
         });
     }
 
-    protected void apply(BiConsumer<Integer, Integer> maskAction) {
+    public void apply(BiConsumer<Integer, Integer> maskAction) {
         int size = getSize();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -702,7 +684,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected void applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
+    public void applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
         int minX = getMinXBound(symmetryType);
         int maxX = getMaxXBound(symmetryType);
         for (int x = minX; x < maxX; x++) {
@@ -714,7 +696,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected void applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
+    public void applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
         action.accept(x, y);
         List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
         symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
@@ -809,6 +791,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
+    protected void assertNotPipelined() {
+        if (parallel && !Pipeline.isStarted()) {
+            throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
+        }
+    }
+
     public U getFinalMask() {
         Pipeline.await(this);
         return copy();
@@ -832,19 +820,212 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
+    public U fillSides(int extent, T value) {
+        return fillSides(extent, value, SymmetryType.TEAM);
+    }
+
+    public U fillSides(int extent, T value, SymmetryType symmetryType) {
+        enqueue(() -> {
+            int size = getSize();
+            switch (symmetrySettings.getSymmetry(symmetryType)) {
+                case Z:
+                    fillRect(0, 0, extent / 2, size, value).fillRect(size - extent / 2, 0, size - extent / 2, size, value);
+                    break;
+                case X:
+                    fillRect(0, 0, size, extent / 2, value).fillRect(0, size - extent / 2, size, extent / 2, value);
+                    break;
+                case XZ:
+                    fillParallelogram(0, 0, size, extent * 3 / 4, 0, -1, value).fillParallelogram(size - extent * 3 / 4, size, size, extent * 3 / 4, 0, -1, value);
+                    break;
+                case ZX:
+                    fillParallelogram(size - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, size - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
+                    break;
+            }
+            applySymmetry(symmetryType);
+        });
+        return (U) this;
+    }
+
+    public U fillCenter(int extent, T value) {
+        return fillCenter(extent, value, SymmetryType.SPAWN);
+    }
+
+    public U fillCenter(int extent, T value, SymmetryType symmetryType) {
+        enqueue(() -> {
+            int size = getSize();
+            switch (symmetrySettings.getSymmetry(symmetryType)) {
+                case POINT2:
+                case POINT3:
+                case POINT4:
+                case POINT5:
+                case POINT6:
+                case POINT7:
+                case POINT8:
+                case POINT9:
+                case POINT10:
+                case POINT11:
+                case POINT12:
+                case POINT13:
+                case POINT14:
+                case POINT15:
+                case POINT16:
+                    fillCircle((float) size / 2, (float) size / 2, extent * 3 / 4f, value);
+                    break;
+                case Z:
+                    fillRect(0, size / 2 - extent / 2, size, extent, value);
+                    break;
+                case X:
+                    fillRect(size / 2 - extent / 2, 0, extent, size, value);
+                    break;
+                case XZ:
+                    fillDiagonal(extent * 3 / 4, false, value);
+                    break;
+                case ZX:
+                    fillDiagonal(extent * 3 / 4, true, value);
+                    break;
+                case DIAG:
+                    if (symmetrySettings.getTeamSymmetry() == Symmetry.DIAG) {
+                        fillDiagonal(extent * 3 / 8, false, value);
+                        fillDiagonal(extent * 3 / 8, true, value);
+                    } else {
+                        fillDiagonal(extent * 3 / 16, false, value);
+                        fillDiagonal(extent * 3 / 16, true, value);
+                        fillCenter(extent, value, SymmetryType.TEAM);
+                    }
+                    break;
+                case QUAD:
+                    if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
+                        fillRect(size / 2 - extent / 4, 0, extent / 2, size, value);
+                        fillRect(0, size / 2 - extent / 4, size, extent / 2, value);
+                    } else {
+                        fillRect(size / 2 - extent / 8, 0, extent / 4, size, value);
+                        fillRect(0, size / 2 - extent / 8, size, extent / 4, value);
+                        fillCenter(extent, value, SymmetryType.TEAM);
+                    }
+                    break;
+            }
+            applySymmetry(SymmetryType.SPAWN);
+        });
+        return (U) this;
+    }
+
+    public U fillCircle(Vector3 v, float radius, T value) {
+        return fillCircle(new Vector2(v), radius, value);
+    }
+
+    public U fillCircle(Vector2 v, float radius, T value) {
+        return fillCircle(v.getX(), v.getY(), radius, value);
+    }
+
+    public U fillCircle(float x, float y, float radius, T value) {
+        return fillArc(x, y, 0, 360, radius, value);
+    }
+
+    public U fillArc(float x, float y, float startAngle, float endAngle, float radius, T value) {
+        enqueue(() -> {
+            float dx;
+            float dy;
+            float radius2 = (radius + .5f) * (radius + .5f);
+            float radiansToDegreeFactor = (float) (180 / StrictMath.PI);
+            for (int cx = StrictMath.round(x - radius); cx < StrictMath.round(x + radius + 1); cx++) {
+                for (int cy = StrictMath.round(y - radius); cy < StrictMath.round(y + radius + 1); cy++) {
+                    dx = x - cx;
+                    dy = y - cy;
+                    float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
+                    if (inBounds(cx, cy) && dx * dx + dy * dy <= radius2 && angle >= startAngle && angle <= endAngle) {
+                        set(cx, cy, value);
+                    }
+                }
+            }
+        });
+        return (U) this;
+    }
+
+    public U fillSquare(Vector2 v, int extent, T value) {
+        return fillSquare((int) v.getX(), (int) v.getY(), extent, value);
+    }
+
+    public U fillSquare(int x, int y, int extent, T value) {
+        return fillRect(x, y, extent, extent, value);
+    }
+
+    public U fillRect(Vector2 v, int width, int height, T value) {
+        return fillRect((int) v.getX(), (int) v.getY(), width, height, value);
+    }
+
+    public U fillRect(int x, int y, int width, int height, T value) {
+        return fillParallelogram(x, y, width, height, 0, 0, value);
+    }
+
+    public U fillRectFromPoints(int x1, int x2, int z1, int z2, T value) {
+        int smallX = StrictMath.min(x1, x2);
+        int bigX = StrictMath.max(x1, x2);
+        int smallZ = StrictMath.min(z1, z2);
+        int bigZ = StrictMath.max(z1, z2);
+        return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
+    }
+
+    public U fillParallelogram(Vector2 v, int width, int height, int xSlope, int ySlope, T value) {
+        return fillParallelogram((int) v.getX(), (int) v.getY(), width, height, xSlope, ySlope, value);
+    }
+
+    public U fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, T value) {
+        enqueue(() -> {
+            for (int px = 0; px < width; px++) {
+                for (int py = 0; py < height; py++) {
+                    int calcX = x + px + py * xSlope;
+                    int calcY = y + py + px * ySlope;
+                    if (inBounds(calcX, calcY)) {
+                        set(calcX, calcY, value);
+                    }
+                }
+            }
+        });
+        return (U) this;
+    }
+
+    public U fillDiagonal(int extent, boolean inverted, T value) {
+        enqueue(() -> {
+            int size = getSize();
+            for (int cx = -extent; cx < extent; cx++) {
+                for (int y = 0; y < size; y++) {
+                    int x;
+                    if (inverted) {
+                        x = size - (cx + y);
+                    } else {
+                        x = cx + y;
+                    }
+                    if (x >= 0 && x < size) {
+                        set(x, y, value);
+                    }
+                }
+            }
+        });
+        return (U) this;
+    }
+
+    public U fillEdge(int rimWidth, T value) {
+        enqueue(() -> {
+            int size = getSize();
+            for (int a = 0; a < rimWidth; a++) {
+                for (int b = 0; b < size - rimWidth; b++) {
+                    set(a, b, value);
+                    set(size - 1 - a, size - 1 - b, value);
+                    set(b, size - 1 - a, value);
+                    set(size - 1 - b, a, value);
+                }
+            }
+        });
+        return (U) this;
+    }
+
+    public U fillCoordinates(Collection<Vector2> coordinates, T value) {
+        enqueue(() -> coordinates.forEach(location -> set(location, value)));
+        return (U) this;
+    }
+
     protected void maskFill(T value) {
-        for (int r = 0; r < mask.length; ++r) {
-            int len = mask[r].length;
-
-            if (len > 0) {
-                mask[r][0] = value;
-            }
-
-            //Value of i will be [1, 2, 4, 8, 16, 32, ..., len]
-            for (int i = 1; i < len; i += i) {
-                System.arraycopy(mask[r], 0, mask[r], i, StrictMath.min((len - i), i));
-            }
-        }
+        maskFill(mask, value);
     }
 
     protected void maskFill(T[][] mask, T value) {

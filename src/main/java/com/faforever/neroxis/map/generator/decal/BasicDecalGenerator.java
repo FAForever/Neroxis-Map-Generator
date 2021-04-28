@@ -24,7 +24,7 @@ public class BasicDecalGenerator extends DecalGenerator {
     public void setupPipeline() {
         fieldDecal.init(passableLand);
         slopeDecal.init(slope, .25f);
-        fieldDecal.minus(slopeDecal.copy().inflate(16));
+        fieldDecal.subtract(slopeDecal.copy().inflate(16));
     }
 
     @Override

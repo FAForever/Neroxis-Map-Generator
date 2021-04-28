@@ -45,14 +45,14 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
         t2NavyWreckMask.setSize(mapSize + 1);
         navyFactoryWreckMask.setSize(mapSize + 1);
 
-        navyFactoryWreckMask.combine(passableLand.copy().inflate(48)).minus(passableLand.copy().inflate(16)).fillEdge(20, false).fillCenter(32, false);
+        navyFactoryWreckMask.add(passableLand.copy().inflate(48)).subtract(passableLand.copy().inflate(16)).fillEdge(20, false).fillCenter(32, false);
         navyFactoryWreckMask.flipValues((reclaimDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
-        t2NavyWreckMask.combine(passableLand.copy().inflate(8).outline()).fillEdge(20, false);
+        t2NavyWreckMask.add(passableLand.copy().inflate(8).outline()).fillEdge(20, false);
         t2NavyWreckMask.flipValues((reclaimDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
     }
 
     protected void generateUnitExclusionMasks() {
-        noWrecks.init(passableLand.getFinalMask()).combine(impassable.getFinalMask());
+        noWrecks.init(passableLand.getFinalMask()).add(impassable.getFinalMask());
         generateExclusionZones(noWrecks, 64, 8, 32);
     }
 
@@ -66,8 +66,8 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
-                unitPlacer.placeUnits(t2NavyWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.T2_Navy, army17, army17Wreckage, 128f);
-                unitPlacer.placeUnits(navyFactoryWreckMask.getFinalMask().minus(noWrecks), UnitPlacer.Navy_Factory, army17, army17Wreckage, 256f);
+                unitPlacer.placeUnits(t2NavyWreckMask.getFinalMask().subtract(noWrecks), UnitPlacer.T2_Navy, army17, army17Wreckage, 128f);
+                unitPlacer.placeUnits(navyFactoryWreckMask.getFinalMask().subtract(noWrecks), UnitPlacer.Navy_Factory, army17, army17Wreckage, 256f);
             });
         }
     }

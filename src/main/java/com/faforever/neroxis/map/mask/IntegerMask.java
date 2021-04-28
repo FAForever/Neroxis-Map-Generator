@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
+public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -112,11 +112,23 @@ public strictfp class IntegerMask extends NumberMask<Integer, IntegerMask> {
     }
 
     @Override
+    public BufferedImage toImage() {
+        int size = getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+        writeToImage(image, 255f / getMax());
+        return image;
+    }
+
+    @Override
     public BufferedImage writeToImage(BufferedImage image) {
+        return writeToImage(image, 1f);
+    }
+
+    public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        apply((x, y) -> imageBuffer.setElem(x + y * size, get(x, y)));
+        apply((x, y) -> imageBuffer.setElem(x + y * size, (int) (get(x, y) * scaleFactor)));
         return image;
     }
 

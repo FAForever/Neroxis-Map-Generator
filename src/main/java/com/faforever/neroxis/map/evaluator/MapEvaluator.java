@@ -205,7 +205,7 @@ public strictfp class MapEvaluator {
             difference.startVisualDebugger("diff");
             difference.applySymmetry(SymmetryType.SPAWN, false);
             difference.show();
-            return difference.minus((BooleanMask) mask).getCount();
+            return difference.subtract((BooleanMask) mask).getCount();
         }
         throw new IllegalArgumentException("Not a supported Mask type");
     }

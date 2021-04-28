@@ -145,15 +145,15 @@ public strictfp class ImageGenerator {
 
             BooleanMask base = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
-            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush1, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush2, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush3, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush4, random.nextFloat(), 1f, reducedSize);
-            base.combineBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
+            base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                     center + random.nextInt(variationDistance) - random.nextInt(variationDistance)), brush5, random.nextFloat(), 1f, reducedSize);
 
             BooleanMask mountains = new BooleanMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
@@ -164,9 +164,9 @@ public strictfp class ImageGenerator {
                 }
                 mountains.guidedWalkWithBrush(loc, base.getRandomPosition(), brush1, mountainsBrushSize, 7, 0.1f, 1f, mountainsBrushSize / 2, false);
             }
-            mountains.intersect(base);
+            mountains.multiply(base);
             BooleanMask mountainsBase = mountains.copy().inflate(15);
-            BooleanMask mountainsBaseEdge = mountainsBase.copy().inflate(15).minus(mountainsBase);
+            BooleanMask mountainsBaseEdge = mountainsBase.copy().inflate(15).subtract(mountainsBase);
 
             FloatMask newBrush = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f, (float) 5 + random.nextInt(30), false);
