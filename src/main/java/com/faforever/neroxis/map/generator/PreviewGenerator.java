@@ -29,9 +29,13 @@ public strictfp class PreviewGenerator {
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
     private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
 
-    public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map, FloatMask... textureMasks) {
+    public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map, FloatMask... textureMasks) throws IOException {
         if (textureMasks.length != 8) {
             throw new IllegalArgumentException("Wrong number of textureMasks");
+        }
+        if (!map.isGeneratePreview()) {
+            generateBlankPreview(map);
+            return;
         }
         BufferedImage previewImage = map.getPreview();
         Graphics2D graphics = previewImage.createGraphics();

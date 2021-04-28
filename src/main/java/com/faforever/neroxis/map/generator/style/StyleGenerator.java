@@ -54,6 +54,8 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         this.mapParameters = mapParameters;
         random = new Random(seed);
         map = new SCMap(mapParameters.getMapSize(), mapParameters.getBiome());
+        map.setUnexplored(mapParameters.isUnexplored());
+        map.setGeneratePreview(!mapParameters.isBlind());
 
         Pipeline.reset();
 

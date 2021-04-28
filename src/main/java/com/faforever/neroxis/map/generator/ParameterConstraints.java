@@ -55,6 +55,7 @@ public strictfp class ParameterConstraints {
                 .mapSize(mapParameters.getMapSize())
                 .numTeams(mapParameters.getNumTeams())
                 .hydroCount(mapParameters.getHydroCount())
+                .blind(false)
                 .unexplored(false)
                 .symmetrySettings(mapParameters.getSymmetrySettings())
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
@@ -74,6 +75,7 @@ public strictfp class ParameterConstraints {
                     .mapSize(mapParameters.getMapSize())
                     .numTeams(mapParameters.getNumTeams())
                     .hydroCount(mapParameters.getHydroCount())
+                    .blind(false)
                     .unexplored(false)
                     .symmetrySettings(mapParameters.getSymmetrySettings())
                     .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
@@ -84,7 +86,7 @@ public strictfp class ParameterConstraints {
         }
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, SymmetrySettings symmetrySettings) throws Exception {
+    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
         return MapParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))
@@ -96,7 +98,8 @@ public strictfp class ParameterConstraints {
                 .mapSize(mapSize)
                 .numTeams(numTeams)
                 .hydroCount(spawnCount)
-                .unexplored(false)
+                .blind(blind)
+                .unexplored(unexplored)
                 .symmetrySettings(symmetrySettings)
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();

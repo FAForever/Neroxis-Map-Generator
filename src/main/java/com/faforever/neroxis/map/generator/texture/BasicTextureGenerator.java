@@ -79,16 +79,12 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
                 accentSlopesPreviewTexture, steepHillsPreviewTexture, waterBeachPreviewTexture, rockPreviewTexture,
                 accentRockPreviewTexture, reflectance, heightmapPreview);
         Util.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
-            if (!mapParameters.isBlind()) {
+            try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
                         accentGroundPreviewTexture.getFinalMask(), accentPlateauPreviewTexture.getFinalMask(), slopesPreviewTexture.getFinalMask(), accentSlopesPreviewTexture.getFinalMask(),
                         steepHillsPreviewTexture.getFinalMask(), waterBeachPreviewTexture.getFinalMask(), rockPreviewTexture.getFinalMask(), accentRockPreviewTexture.getFinalMask());
-            } else {
-                try {
-                    PreviewGenerator.generateBlankPreview(map);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
     }

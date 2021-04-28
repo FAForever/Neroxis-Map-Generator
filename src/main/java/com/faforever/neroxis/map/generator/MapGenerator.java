@@ -317,10 +317,10 @@ public strictfp class MapGenerator {
         if (optionsUsed) {
             setMapStyle();
         } else if (styleSpecified) {
-            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, symmetrySettings);
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, blind, unexplored, symmetrySettings);
         } else {
             mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
-            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, symmetrySettings);
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, blind, unexplored, symmetrySettings);
         }
 
         if (mapName == null) {
@@ -573,17 +573,6 @@ public strictfp class MapGenerator {
 
         map = mapStyle.generate(mapParameters, random.nextLong());
 
-        sTime = System.currentTimeMillis();
-        map.setGeneratePreview(!blind);
-        map.setUnexplored(unexplored);
-        if (unexplored) {
-            map.setCartographicContourInterval(100);
-            map.setCartographicDeepWaterColor(1);
-            map.setCartographicMapContourColor(1);
-            map.setCartographicMapShoreColor(1);
-            map.setCartographicMapLandStartColor(1);
-            map.setCartographicMapLandEndColor(1);
-        }
         StringBuilder descriptionBuilder = new StringBuilder();
         if (tournamentStyle) {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC. ",
@@ -591,6 +580,12 @@ public strictfp class MapGenerator {
                             .format(Instant.ofEpochSecond(generationTime).atZone(ZoneOffset.UTC))));
         }
         if (unexplored) {
+            map.setCartographicContourInterval(100);
+            map.setCartographicDeepWaterColor(1);
+            map.setCartographicMapContourColor(1);
+            map.setCartographicMapShoreColor(1);
+            map.setCartographicMapLandStartColor(1);
+            map.setCartographicMapLandEndColor(1);
             descriptionBuilder.append("Use with the Unexplored Maps Mod for best experience");
         }
         map.setDescription(descriptionBuilder.toString());
