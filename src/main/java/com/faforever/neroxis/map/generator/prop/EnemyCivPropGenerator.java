@@ -10,7 +10,7 @@ import com.faforever.neroxis.util.Util;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class EnemyCivPropGenerator extends BasicPropGenerator {
+public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask baseMask;
     protected BooleanMask noBases;

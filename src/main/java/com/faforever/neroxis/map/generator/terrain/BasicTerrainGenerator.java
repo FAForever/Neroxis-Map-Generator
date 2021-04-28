@@ -9,7 +9,7 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.Vector3;
 
-public class BasicTerrainGenerator extends TerrainGenerator {
+public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected BooleanMask spawnLandMask;
     protected BooleanMask spawnPlateauMask;
     protected BooleanMask land;

@@ -10,7 +10,7 @@ import com.faforever.neroxis.util.Util;
 
 import java.util.ArrayList;
 
-public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
+public strictfp class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;

@@ -8,7 +8,7 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicDecalGenerator extends DecalGenerator {
+public strictfp class BasicDecalGenerator extends DecalGenerator {
     protected BooleanMask fieldDecal;
     protected BooleanMask slopeDecal;
 

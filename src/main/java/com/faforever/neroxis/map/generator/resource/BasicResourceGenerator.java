@@ -8,7 +8,7 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicResourceGenerator extends ResourceGenerator {
+public strictfp class BasicResourceGenerator extends ResourceGenerator {
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
 

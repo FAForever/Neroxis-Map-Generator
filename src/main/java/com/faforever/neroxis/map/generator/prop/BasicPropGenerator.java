@@ -10,7 +10,7 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class BasicPropGenerator extends PropGenerator {
+public strictfp class BasicPropGenerator extends PropGenerator {
 
     protected BooleanMask treeMask;
     protected BooleanMask cliffRockMask;

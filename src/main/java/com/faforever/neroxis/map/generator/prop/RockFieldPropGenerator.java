@@ -11,7 +11,7 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class RockFieldPropGenerator extends BasicPropGenerator {
+public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask largeRockFieldMask;
 

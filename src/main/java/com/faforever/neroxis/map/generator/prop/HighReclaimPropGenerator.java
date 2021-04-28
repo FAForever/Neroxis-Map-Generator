@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
-public class HighReclaimPropGenerator extends BasicPropGenerator {
+public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
 
     public HighReclaimPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()

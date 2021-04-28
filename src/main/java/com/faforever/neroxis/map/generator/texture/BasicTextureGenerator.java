@@ -14,7 +14,7 @@ import com.faforever.neroxis.util.Util;
 
 import java.io.IOException;
 
-public class BasicTextureGenerator extends TextureGenerator {
+public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
     protected FloatMask accentGroundTexture;
