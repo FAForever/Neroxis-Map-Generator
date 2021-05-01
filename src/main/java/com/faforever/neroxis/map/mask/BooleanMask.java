@@ -123,13 +123,18 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
-    public BooleanMask init(FloatMask other, float minValue) {
+    @Override
+    public BooleanMask mock() {
+        return new BooleanMask(this, null, getName() + Mask.MOCK_NAME);
+    }
+
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue) {
         plannedSize = other.getSize();
         init(other.convertToBooleanMask(minValue));
         return this;
     }
 
-    public BooleanMask init(FloatMask other, float minValue, float maxValue) {
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue, T maxValue) {
         plannedSize = other.getSize();
         init(other.convertToBooleanMask(minValue, maxValue));
         return this;
@@ -458,6 +463,30 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask initMaxima(ComparableMask<T, U> other, T minValue, T maxValue) {
+        assertCompatibleMask(other);
+        enqueue(dependencies -> {
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                T value = source.get(x, y);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMax(x, y);
+            });
+        }, other);
+        return this;
+    }
+
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init1DMaxima(ComparableMask<T, U> other, T minValue, T maxValue) {
+        assertCompatibleMask(other);
+        enqueue(dependencies -> {
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                T value = source.get(x, y);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMax(x, y);
+            });
+        }, other);
+        return this;
+    }
+
     public BooleanMask limitToSymmetryRegion() {
         return limitToSymmetryRegion(SymmetryType.TEAM);
     }
@@ -603,72 +632,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         Long seed = random != null ? random.nextLong() : null;
         FloatMask distanceField = new FloatMask(size, seed, symmetrySettings, getName() + "DistanceField", isParallel());
         distanceField.init(this, (float) (size * size), 0f);
-        enqueue(distanceField, dependencies -> {
-            addCalculatedParabolicDistance(distanceField, false);
-            addCalculatedParabolicDistance(distanceField, true);
-            distanceField.sqrt();
-        });
+        distanceField.parabolicMinimization();
         return distanceField;
-    }
-
-    private void addCalculatedParabolicDistance(FloatMask distanceField, boolean useColumns) {
-        int size = getSize();
-        for (int i = 0; i < size; i++) {
-            List<Vector2> vertices = new ArrayList<>();
-            List<Vector2> intersections = new ArrayList<>();
-            int index = 0;
-            float value;
-            if (!useColumns) {
-                value = distanceField.get(i, 0);
-            } else {
-                value = distanceField.get(0, i);
-            }
-            vertices.add(new Vector2(0, value));
-            intersections.add(new Vector2(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
-            intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-            for (int j = 1; j < size; j++) {
-                if (!useColumns) {
-                    value = distanceField.get(i, j);
-                } else {
-                    value = distanceField.get(j, i);
-                }
-                Vector2 current = new Vector2(j, value);
-                Vector2 vertex = vertices.get(index);
-                float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
-                while (xIntersect <= intersections.get(index).getX()) {
-                    index -= 1;
-                    vertex = vertices.get(index);
-                    xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
-                }
-                index += 1;
-                if (index < vertices.size()) {
-                    vertices.set(index, current);
-                } else {
-                    vertices.add(current);
-                }
-                if (index < intersections.size() - 1) {
-                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.set(index + 1, new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-                } else {
-                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
-                    intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
-                }
-            }
-            index = 0;
-            for (int j = 0; j < size; j++) {
-                while (intersections.get(index + 1).getX() < j) {
-                    index += 1;
-                }
-                Vector2 vertex = vertices.get(index);
-                float dx = j - vertex.getX();
-                float height = dx * dx + vertex.getY();
-                if (!useColumns) {
-                    distanceField.set(i, j, height);
-                } else {
-                    distanceField.set(j, i, height);
-                }
-            }
-        }
     }
 
     public int getCount() {

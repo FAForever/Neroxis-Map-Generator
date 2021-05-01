@@ -253,22 +253,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     public FloatMask dot(U other) {
         assertCompatibleMask(other);
         Long seed = random != null ? random.nextLong() : null;
-        FloatMask dotMask = new FloatMask(getSize(), seed, symmetrySettings, getName() + "dot" + other.getName(), isParallel());
-        enqueue(dotMask, (dependencies) -> {
-            U source = (U) dependencies.get(0);
-            apply((x, y) -> dotMask.set(x, y, get(x, y).dot(source.get(x, y))));
-        }, other);
-        return dotMask;
+        return new FloatMask(this, other, seed, getName() + "dot" + other.getName());
     }
 
     public FloatMask dot(T vector) {
         assertMatchingDimension(vector.getDimension());
         Long seed = random != null ? random.nextLong() : null;
-        FloatMask dotMask = new FloatMask(getSize(), seed, symmetrySettings, getName() + "dot", isParallel());
-        enqueue(dotMask, (dependencies) -> {
-            apply((x, y) -> dotMask.set(x, y, get(x, y).dot(vector)));
-        });
-        return dotMask;
+        return new FloatMask(this, vector, seed, getName() + "dot" + vector);
     }
 
     public U blur(int radius) {
@@ -360,29 +351,17 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public FloatMask getComponentMask(int component) {
-        int size = getSize();
-        String name = getName();
         Long seed = random != null ? random.nextLong() : null;
-        FloatMask componentMask = new FloatMask(size, seed, symmetrySettings, name + "Component" + component, isParallel());
-        enqueue(componentMask, dependencies -> {
-            apply((x, y) -> componentMask.set(x, y, get(x, y).get(component)));
-        });
-        return componentMask;
+        return new FloatMask(this, component, seed, getName() + "Component" + component);
     }
 
     public FloatMask[] splitComponentMasks() {
         int dimesion = getZeroValue().getDimension();
-        int size = getSize();
         String name = getName();
         FloatMask[] components = new FloatMask[dimesion];
         for (int i = 0; i < dimesion; ++i) {
             Long seed = random != null ? random.nextLong() : null;
-            FloatMask component = new FloatMask(size, seed, symmetrySettings, name + "Component" + i, isParallel());
-            int componentInd = i;
-            enqueue(component, dependencies -> {
-                apply((x, y) -> component.set(x, y, get(x, y).get(componentInd)));
-            });
-            components[i] = component;
+            components[i] = new FloatMask(this, i, seed, name + "Component" + i);
         }
         return components;
     }

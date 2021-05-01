@@ -1,13 +1,12 @@
 package com.faforever.neroxis.map.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
 @SuppressWarnings("unchecked")
-public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends OperationsMask<T, U>> extends OperationsMask<T, U> {
+public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
 
     protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
@@ -187,27 +186,14 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {
         Long seed = random != null ? random.nextLong() : null;
         BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "Maximas", isParallel());
-        enqueue(localMaxima, dependencies ->
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    T value = get(x, y);
-                    if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocalMax(x, y)) {
-                        localMaxima.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> localMaxima.set(x, y, true));
-                    }
-                }));
+        localMaxima.initMaxima(this, minValue, maxValue);
         return localMaxima;
     }
 
     public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
         Long seed = random != null ? random.nextLong() : null;
         BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "1DMaximas", isParallel());
-        enqueue(localMaxima, dependencies ->
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    T value = get(x, y);
-                    if (value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && isLocal1DMax(x, y)) {
-                        localMaxima.applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> localMaxima.set(x, y, true));
-                    }
-                }), localMaxima);
-
+        localMaxima.init1DMaxima(this, minValue, maxValue);
         return localMaxima;
     }
 

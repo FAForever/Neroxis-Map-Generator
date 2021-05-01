@@ -1,8 +1,8 @@
 package com.faforever.neroxis.map.mask;
 
-import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.Vector;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 
@@ -14,9 +14,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
+@SuppressWarnings("unchecked")
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -70,6 +72,47 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, Long seed) {
+        this(other1, other2, seed, null);
+    }
+
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, Long seed, String name) {
+        super(other1.getSize(), seed, other1.getSymmetrySettings(), name, other1.isParallel());
+        assertCompatibleMask(other1);
+        assertCompatibleMask(other2);
+        enqueue((dependencies) -> {
+            U source1 = (U) dependencies.get(0);
+            U source2 = (U) dependencies.get(1);
+            set((x, y) -> source1.get(x, y).dot(source2.get(x, y)));
+        }, other1, other2);
+    }
+
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, Long seed) {
+        this(other, vector, seed, null);
+    }
+
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, Long seed, String name) {
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        assertCompatibleMask(other);
+        enqueue((dependencies) -> {
+            U source = (U) dependencies.get(0);
+            set((x, y) -> source.get(x, y).dot(vector));
+        }, other);
+    }
+
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, Long seed) {
+        this(other, index, seed, null);
+    }
+
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, Long seed, String name) {
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        assertCompatibleMask(other);
+        enqueue((dependencies) -> {
+            U source = (U) dependencies.get(0);
+            set((x, y) -> source.get(x, y).get(index));
+        }, other);
+    }
+
     @Override
     protected Float[][] getEmptyMask(int size) {
         Float[][] empty = new Float[size][size];
@@ -90,6 +133,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         } else {
             return new FloatMask(this, null, getName() + "Copy");
         }
+    }
+
+    @Override
+    public FloatMask mock() {
+        return new FloatMask(this, null, getName() + Mask.MOCK_NAME);
     }
 
     @Override
@@ -341,11 +389,77 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public NormalMask getNormalMask(float scale) {
         Long seed = random != null ? random.nextLong() : null;
-        NormalMask normals = new NormalMask(getSize(), seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), getName() + "Normals", isParallel());
-        enqueue(normals, dependencies -> {
-            apply((x, y) -> normals.set(x, y, getNormalAt(x, y, scale)));
+        return new NormalMask(this, seed, scale, getName() + "Normals");
+    }
+
+    public FloatMask parabolicMinimization() {
+        enqueue(() -> {
+            addCalculatedParabolicDistance(false);
+            addCalculatedParabolicDistance(true);
+            sqrt();
         });
-        return normals;
+        return this;
+    }
+
+    public void addCalculatedParabolicDistance(boolean useColumns) {
+        assertNotPipelined();
+        int size = getSize();
+        for (int i = 0; i < size; i++) {
+            List<Vector2> vertices = new ArrayList<>();
+            List<Vector2> intersections = new ArrayList<>();
+            int index = 0;
+            float value;
+            if (!useColumns) {
+                value = get(i, 0);
+            } else {
+                value = get(0, i);
+            }
+            vertices.add(new Vector2(0, value));
+            intersections.add(new Vector2(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
+            intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+            for (int j = 1; j < size; j++) {
+                if (!useColumns) {
+                    value = get(i, j);
+                } else {
+                    value = get(j, i);
+                }
+                Vector2 current = new Vector2(j, value);
+                Vector2 vertex = vertices.get(index);
+                float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
+                while (xIntersect <= intersections.get(index).getX()) {
+                    index -= 1;
+                    vertex = vertices.get(index);
+                    xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
+                }
+                index += 1;
+                if (index < vertices.size()) {
+                    vertices.set(index, current);
+                } else {
+                    vertices.add(current);
+                }
+                if (index < intersections.size() - 1) {
+                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.set(index + 1, new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                } else {
+                    intersections.set(index, new Vector2(xIntersect, Float.POSITIVE_INFINITY));
+                    intersections.add(new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY));
+                }
+            }
+            index = 0;
+            for (int j = 0; j < size; j++) {
+                while (intersections.get(index + 1).getX() < j) {
+                    index += 1;
+                }
+                Vector2 vertex = vertices.get(index);
+                float dx = j - vertex.getX();
+                float height = dx * dx + vertex.getY();
+                if (!useColumns) {
+                    set(i, j, height);
+                } else {
+                    set(j, i, height);
+                }
+            }
+        }
     }
 
     @Override

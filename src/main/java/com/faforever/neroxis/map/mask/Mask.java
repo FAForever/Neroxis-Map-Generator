@@ -16,11 +16,14 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
+    protected static final String MOCK_NAME = "Mock";
+
     @Getter
     protected final SymmetrySettings symmetrySettings;
     @Getter
     private final String name;
     protected final Random random;
+    protected final boolean modifiable;
     protected int plannedSize;
     @Getter
     @Setter
@@ -43,6 +46,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
+        this.modifiable = name != null && name.endsWith(MOCK_NAME);
         if (seed != null) {
             this.random = new Random(seed);
         } else {
@@ -73,6 +77,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public abstract U copy();
 
+    public abstract U mock();
+
     public abstract U init(U other);
 
     public abstract U clear();
@@ -99,15 +105,15 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return mask[x][y];
     }
 
-    public void set(Vector3 location, T value) {
+    protected void set(Vector3 location, T value) {
         set((int) location.getX(), (int) location.getZ(), value);
     }
 
-    public void set(Vector2 location, T value) {
+    protected void set(Vector2 location, T value) {
         set((int) location.getX(), (int) location.getY(), value);
     }
 
-    public void set(int x, int y, T value) {
+    protected void set(int x, int y, T value) {
         mask[x][y] = value;
     }
 
@@ -741,21 +747,17 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
-        enqueue((U) this, function, usedMasks);
-    }
-
-    protected <V extends Mask<?, ?>> void enqueue(V resultMask, Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !Pipeline.isStarted()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
                 throw new IllegalArgumentException("Non parallel masks used as dependents");
             }
-            Pipeline.add(this, resultMask, dependencies, function);
+            Pipeline.add(this, dependencies, function);
         } else {
             function.accept(dependencies);
             String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
             String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.");
-            VisualDebugger.visualizeMask(resultMask, callingMethod, callingLine);
+            VisualDebugger.visualizeMask(this, callingMethod, callingLine);
         }
     }
 

@@ -27,7 +27,7 @@ public strictfp class Pipeline {
         pipeline.clear();
     }
 
-    public static void add(Mask<?, ?> executingMask, Mask<?, ?> resultMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
+    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
         if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -36,7 +36,7 @@ public strictfp class Pipeline {
         String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
-        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, resultMask)
+        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
                 .thenAcceptAsync(inputs -> {
                     long startTime = System.currentTimeMillis();
                     function.accept(inputs);
@@ -62,7 +62,7 @@ public strictfp class Pipeline {
                     }
                 });
 
-        Entry entry = new Entry(index, executingMask, resultMask, entryDependencies, newFuture, callingMethod, callingLine);
+        Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
 
         entry.dependencies.forEach(d -> d.dependants.add(entry));
         pipeline.add(entry);
@@ -72,15 +72,13 @@ public strictfp class Pipeline {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
         if (Util.DEBUG) {
-            pipeline.forEach(entry -> System.out.printf("%d Pipeline entry:  %s,\t  %s,\t executor %s(%d);\t resultor %s;\t parents:[%s];\t  children:[%s]\n",
-                    entry.getIndex(),
-                    entry.getLine(),
-                    entry.getMethod(),
+            pipeline.forEach(entry -> System.out.printf("Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
+                    entry.toString(),
+                    entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getExecutingMask().getName(),
-                    entry.getIndex(),
-                    entry.getResultMask().getName(),
-                    entry.getDependencies().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none"),
-                    entry.getDependants().stream().map(e -> e.getExecutingMask().getName() + "(" + pipeline.indexOf(e) + ")").reduce((acc, r) -> acc + ", " + r).orElse("none")
+                    entry.getLine(),
+                    entry.getMethod()
             ));
         }
         started.complete(null);
@@ -115,7 +113,7 @@ public strictfp class Pipeline {
 
         for (Mask<?, ?> requiredMask : requiredMasks) {
             for (int i = pipeline.size() - 1; i >= 0; i--) {
-                if (requiredMask.equals(pipeline.get(i).resultMask)) {
+                if (requiredMask.equals(pipeline.get(i).getExecutingMask())) {
                     res.add(pipeline.get(i));
                     break;
                 }
@@ -130,7 +128,7 @@ public strictfp class Pipeline {
      * @param dependencyList list of dependencies
      * @return future that completes when all dependent futures are completed
      */
-    private static CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList, Mask<?, ?> resultMask) {
+    private static CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList, Mask<?, ?> executingMask) {
         if (pipeline.isEmpty() || dependencyList.isEmpty()) {
             return started;
         }
@@ -144,7 +142,7 @@ public strictfp class Pipeline {
         return CompletableFuture.allOf(futures)
                 .thenApplyAsync(aVoid ->
                         dependencyList.stream()
-                                .map(entry -> entry.getResult(resultMask))
+                                .map(entry -> entry.getResult(executingMask))
                                 .collect(Collectors.toList())
                 );
     }
@@ -174,7 +172,6 @@ public strictfp class Pipeline {
     @Getter
     private static strictfp class Entry {
         private final Mask<?, ?> executingMask;
-        private final Mask<?, ?> resultMask;
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
@@ -184,27 +181,30 @@ public strictfp class Pipeline {
         private final String line;
 
 
-        public Entry(int index, Mask<?, ?> executingMask, Mask<?, ?> resultMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
+        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
-            this.resultMask = resultMask;
             this.dependencies = new HashSet<>(dependencies);
             this.method = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                VisualDebugger.visualizeMask(resultMask, method, line);
-                dependants.stream().filter(dep -> !resultMask.equals(dep.getResultMask())).forEach(dep -> maskCopies.add(resultMask.copy()));
+                VisualDebugger.visualizeMask(executingMask, method, line);
+                dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).forEach(dep -> maskCopies.add(executingMask.copy()));
             });
         }
 
-        public synchronized Mask<?, ?> getResult(Mask<?, ?> resultingMask) {
-            if (resultingMask.equals(resultMask)) {
-                return resultMask;
+        public synchronized Mask<?, ?> getResult(Mask<?, ?> requestingMask) {
+            if (requestingMask.equals(executingMask)) {
+                return executingMask;
             }
             if (maskCopies.isEmpty()) {
-                throw new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, resultingMask.getName()));
+                throw new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName()));
             }
             return maskCopies.remove(0);
+        }
+
+        public String toString() {
+            return String.format("%s(%d)", executingMask.getName(), index);
         }
     }
 }

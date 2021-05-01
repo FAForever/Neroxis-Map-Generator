@@ -69,6 +69,11 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    public IntegerMask mock() {
+        return new IntegerMask(this, null, getName() + Mask.MOCK_NAME);
+    }
+
+    @Override
     public Integer getZeroValue() {
         return 0;
     }

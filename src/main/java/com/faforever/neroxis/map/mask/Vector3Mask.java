@@ -91,6 +91,11 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     @Override
+    public Vector3Mask mock() {
+        return new Vector3Mask(this, null, getName() + Mask.MOCK_NAME);
+    }
+
+    @Override
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);

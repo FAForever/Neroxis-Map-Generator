@@ -30,6 +30,23 @@ public strictfp class NormalMask extends Vector3Mask {
         super(other, seed, name);
     }
 
+    public NormalMask(FloatMask other, Long seed) {
+        this(other, seed, 1f, null);
+    }
+
+    public NormalMask(FloatMask other, Long seed, float scale) {
+        this(other, seed, scale, null);
+    }
+
+    public NormalMask(FloatMask other, Long seed, float scale, String name) {
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        assertCompatibleMask(other);
+        enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            set((x, y) -> source.getNormalAt(x, y, scale));
+        }, other);
+    }
+
     public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, null, false);
     }
@@ -57,6 +74,11 @@ public strictfp class NormalMask extends Vector3Mask {
         } else {
             return new NormalMask(this, null, getName() + "Copy");
         }
+    }
+
+    @Override
+    public NormalMask mock() {
+        return new NormalMask(this, null, getName() + Mask.MOCK_NAME);
     }
 
     @Override
