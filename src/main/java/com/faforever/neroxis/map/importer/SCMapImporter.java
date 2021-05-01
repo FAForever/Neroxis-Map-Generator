@@ -460,7 +460,6 @@ public strictfp class SCMapImporter {
         // Cirrus
         skyBox.setCirrusMultiplier(readFloat());
         skyBox.setCirrusColor(readVector3f());
-
         skyBox.setCirrusTexture(readStringNull());
 
         int cirrusLayerCount = readInt();

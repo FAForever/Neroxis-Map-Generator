@@ -76,12 +76,10 @@ public strictfp class SCMapExporter {
         }
 
         // lighting
-        LightingSettings mapLightingSettings = map.getBiome().getLightingSettings();
-        writeLightingSettings(mapLightingSettings);
+        writeLightingSettings(map.getBiome().getLightingSettings());
 
         // water
-        WaterSettings mapWaterSettings = map.getBiome().getWaterSettings();
-        writeWaterSettings(mapWaterSettings);
+        writeWaterSettings(map.getBiome().getWaterSettings());
 
         // wave generators
         writeInt(map.getWaveGeneratorCount());
