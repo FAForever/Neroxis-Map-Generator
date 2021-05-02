@@ -51,12 +51,12 @@ public strictfp class Pipeline {
                     }
                     long hashTime = System.currentTimeMillis() - startTime;
                     if (Util.DEBUG) {
-                        System.out.printf("Done: function time %4d ms, hash time %4d ms, %s,\t %s(%d)\t->\t%s\n",
+                        System.out.printf("Entry Done: %s(%d); function time %4d ms; hash time %4d ms; %s  -> %s\n",
+                                executingMask.getName(),
+                                index,
                                 functionTime,
                                 hashTime,
                                 callingLine,
-                                executingMask.getName(),
-                                index,
                                 callingMethod
                         );
                     }
@@ -94,6 +94,9 @@ public strictfp class Pipeline {
     }
 
     public static void await(Mask<?, ?>... masks) {
+        if (!isStarted()) {
+            throw new IllegalStateException("Pipeline not started cannot await");
+        }
         getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
         for (Mask<?, ?> mask : masks) {
             mask.setParallel(false);
@@ -175,10 +178,11 @@ public strictfp class Pipeline {
         private final Set<Entry> dependencies;
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
-        private final List<Mask<?, ?>> maskCopies = new ArrayList<>();
         private final int index;
         private final String method;
         private final String line;
+        private Mask<?, ?> immutableResult;
+        private long resultCount = 0;
 
 
         public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
@@ -189,7 +193,10 @@ public strictfp class Pipeline {
             this.line = line;
             this.future = future.thenRunAsync(() -> {
                 VisualDebugger.visualizeMask(executingMask, method, line);
-                dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).forEach(dep -> maskCopies.add(executingMask.copy()));
+                resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
+                if (resultCount > 0) {
+                    immutableResult = executingMask.mock();
+                }
             });
         }
 
@@ -197,10 +204,14 @@ public strictfp class Pipeline {
             if (requestingMask.equals(executingMask)) {
                 return executingMask;
             }
-            if (maskCopies.isEmpty()) {
-                throw new RuntimeException(String.format("No backup mask left: %d, requested from: %s", index, requestingMask.getName()));
+            --resultCount;
+            Mask<?, ?> result = immutableResult;
+            if (resultCount == 0) {
+                immutableResult = null;
+            } else if (resultCount < 0) {
+                throw new IllegalStateException("More results asked for than dependants");
             }
-            return maskCopies.remove(0);
+            return result;
         }
 
         public String toString() {

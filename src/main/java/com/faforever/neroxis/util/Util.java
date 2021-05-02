@@ -79,12 +79,17 @@ public strictfp class Util {
 
     public static void timedRun(String packageName, String description, Runnable runnable) {
         long sTime = System.currentTimeMillis();
+        if (DEBUG) {
+            System.out.printf("Started %s: %s\n",
+                    description,
+                    Util.getStackTraceLineInPackage(packageName));
+        }
         runnable.run();
         if (DEBUG) {
-            System.out.printf("Done: %4d ms, %s, %s\n",
+            System.out.printf("Done %s: %4d ms, %s\n",
+                    description,
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage(packageName),
-                    description);
+                    Util.getStackTraceLineInPackage(packageName));
         }
 
     }

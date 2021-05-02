@@ -78,6 +78,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() ->
                 generateAIMarkers(terrainGenerator.getPassable(), terrainGenerator.getPassableLand(), terrainGenerator.getPassableWater()));
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
+        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedNormal);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
@@ -85,7 +86,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, aiMarkerFuture, textureFuture,
-                previewFuture, resourcesFuture, decalsFuture, propsFuture, unitsFuture)
+                previewFuture, resourcesFuture, decalsFuture, propsFuture, unitsFuture, normalFuture)
                 .thenAccept(aVoid -> setHeights());
 
         placementFuture.join();

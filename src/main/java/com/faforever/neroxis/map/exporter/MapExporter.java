@@ -12,7 +12,7 @@ public strictfp class MapExporter {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
-            if (exportNormals) {
+            if (exportNormals && map.getCompressedNormal() != null) {
                 SCMapExporter.exportNormals(mapPath, map);
             }
             SCMapExporter.exportSCMAP(mapPath, map);

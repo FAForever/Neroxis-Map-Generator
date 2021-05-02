@@ -19,11 +19,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected static final String MOCK_NAME = "Mock";
 
     @Getter
-    protected final SymmetrySettings symmetrySettings;
-    @Getter
     private final String name;
     protected final Random random;
-    protected final boolean modifiable;
+    @Getter
+    protected SymmetrySettings symmetrySettings;
+    private boolean immutable;
     protected int plannedSize;
     @Getter
     @Setter
@@ -46,7 +46,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
-        this.modifiable = name != null && name.endsWith(MOCK_NAME);
         if (seed != null) {
             this.random = new Random(seed);
         } else {
@@ -54,6 +53,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
         enqueue(() -> {
         });
+        this.immutable = name != null && name.endsWith(MOCK_NAME);
     }
 
     public Mask(U other, Long seed) {
@@ -62,7 +62,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public Mask(U other, Long seed, String name) {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        boolean intendedMutability = immutable;
+        immutable = false;
         init(other);
+        immutable = intendedMutability;
     }
 
     public abstract BufferedImage writeToImage(BufferedImage image);
@@ -134,7 +137,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (newSize != size) {
             plannedSize = newSize;
             enqueue(() -> {
-                if (size < newSize) {
+                if (size == 1 && get(0, 0).equals(getZeroValue())) {
+                    mask = getEmptyMask(newSize);
+                } else if (size < newSize) {
                     enlarge(newSize);
                 } else {
                     shrink(newSize);
@@ -747,6 +752,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
+        assertMutable();
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !Pipeline.isStarted()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
@@ -790,6 +796,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         int actualSize = getSize();
         if (size != actualSize) {
             throw new IllegalArgumentException("Mask size is incorrect: Mask is " + actualSize + " and size is " + size);
+        }
+    }
+
+    protected void assertMutable() {
+        if (immutable) {
+            throw new IllegalStateException("Mask is a mock and cannot be modified");
         }
     }
 

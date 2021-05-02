@@ -39,7 +39,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         plannedSize = other.getSize();
         enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            setSize(source.getSize());
+            mask = getEmptyMask(source.getSize());
             assertCompatibleMask(source);
             T[][] sourceMask = source.mask;
             for (int i = 0; i < mask.length; i++) {

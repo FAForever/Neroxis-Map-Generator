@@ -389,7 +389,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public NormalMask getNormalMask(float scale) {
         Long seed = random != null ? random.nextLong() : null;
-        return new NormalMask(this, seed, scale, getName() + "Normals");
+        NormalMask normalMask = new NormalMask(this, seed, scale, getName() + "Normals");
+        normalMask.symmetrySettings = new SymmetrySettings();
+        return normalMask;
     }
 
     public FloatMask parabolicMinimization() {

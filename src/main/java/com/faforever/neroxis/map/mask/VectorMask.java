@@ -259,7 +259,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     public FloatMask dot(T vector) {
         assertMatchingDimension(vector.getDimension());
         Long seed = random != null ? random.nextLong() : null;
-        return new FloatMask(this, vector, seed, getName() + "dot" + vector);
+        return new FloatMask(this, vector, seed, getName() + "dot");
     }
 
     public U blur(int radius) {

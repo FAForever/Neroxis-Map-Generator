@@ -68,9 +68,15 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         Util.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+        });
+    }
+
+    @Override
+    public void setCompressedNormal() {
+        Pipeline.await(normals);
+        Util.timedRun("com.faforever.neroxis.map.generator", "setCompressedNormal", () -> {
             map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask()));
         });
-
     }
 
     @Override
