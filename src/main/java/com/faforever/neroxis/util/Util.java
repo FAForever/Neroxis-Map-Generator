@@ -74,7 +74,17 @@ public strictfp class Util {
 
     public static String getStackTraceParentClass() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        return stackTrace[2].getClassName();
+        return stackTrace[1].getClassName();
+    }
+
+    public static void timedRun(Runnable runnable) {
+        String packageName = getStackTraceParentClass();
+        timedRun(packageName.substring(0, packageName.lastIndexOf(".")), null, runnable);
+    }
+
+    public static void timedRun(String description, Runnable runnable) {
+        String packageName = getStackTraceParentClass();
+        timedRun(packageName.substring(0, packageName.lastIndexOf(".")), description, runnable);
     }
 
     public static void timedRun(String packageName, String description, Runnable runnable) {
@@ -91,6 +101,5 @@ public strictfp class Util {
                     System.currentTimeMillis() - sTime,
                     Util.getStackTraceLineInPackage(packageName));
         }
-
     }
 }
