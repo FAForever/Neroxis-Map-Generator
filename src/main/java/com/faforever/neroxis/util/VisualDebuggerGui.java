@@ -46,6 +46,7 @@ public strictfp class VisualDebuggerGui {
         contentPane.setLayout(new GridBagLayout());
 
         createList();
+        createLabel();
         createCanvasContainer();
 
         contentPane.revalidate();
@@ -95,6 +96,20 @@ public strictfp class VisualDebuggerGui {
         contentPane.add(listScroller, constraints);
     }
 
+    private static void createLabel() {
+        label = new JLabel();
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.weightx = 1;
+        constraints.gridy = 1;
+        constraints.weighty = 0;
+
+        contentPane.add(label, constraints);
+    }
+
     public synchronized static void update(String uniqueMaskName, Mask<?, ?> mask) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
@@ -106,7 +121,6 @@ public strictfp class VisualDebuggerGui {
             maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
             listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
             ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
-            canvas.setToolTipText("");
             canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
@@ -114,6 +128,8 @@ public strictfp class VisualDebuggerGui {
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
             }
+            list.revalidate();
+            list.repaint();
         }
     }
 
@@ -205,16 +221,6 @@ public strictfp class VisualDebuggerGui {
             g2d.drawImage(newImage, 0, 0, this);
             g2d.dispose();
         }
-
-        @Override
-        public String getToolTipText(MouseEvent e) {
-            int maskX = (int) ((e.getX() - xOffset) / userZoomScale / imageZoomScaleX);
-            int maskY = (int) ((e.getY() - yOffset) / userZoomScale / imageZoomScaleY);
-            if (mask.inBounds(maskX, maskY)) {
-                return String.format("X: %d, Y: %d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString());
-            }
-            return null;
-        }
     }
 
     @Value
@@ -258,6 +264,17 @@ public strictfp class VisualDebuggerGui {
             x = e.getX();
             y = e.getY();
             sourceImagePanel.repaint();
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            ImagePanel source = (ImagePanel) e.getSource();
+            Mask<?, ?> mask = source.getMask();
+            int maskX = (int) ((e.getX() - xOffset) / userZoomScale / source.getImageZoomScaleX());
+            int maskY = (int) ((e.getY() - yOffset) / userZoomScale / source.getImageZoomScaleY());
+            if (mask.inBounds(maskX, maskY)) {
+                label.setText(String.format("X: %d, Y: %d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
+            }
         }
     }
 }
