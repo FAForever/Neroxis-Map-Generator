@@ -18,7 +18,11 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         super.initialize(map, seed, mapParameters);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        normals = heightmap.copy().resample(512).getNormalMask(8f);
+        if (heightmap.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            normals = heightmap.copy().resample(512).getNormalMask();
+        } else {
+            normals = new NormalMask(512, null, heightmap.getSymmetrySettings(), "normals");
+        }
     }
 
     public abstract void setTextures();
