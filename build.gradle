@@ -79,3 +79,14 @@ task transformerJar(type: ShadowJar) {
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
 }
+
+task detectorJar(type: ShadowJar) {
+    getArchiveBaseName().set('GeneratedMapDetector')
+    from(sourceSets.main.output) {
+        manifest {
+            attributes 'Main-Class': 'com.faforever.neroxis.map.evaluator.GeneratedMapDetector'
+        }
+    }
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+}
