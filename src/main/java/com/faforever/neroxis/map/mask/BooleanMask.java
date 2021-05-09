@@ -372,11 +372,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask acid(float strength, float size) {
-        enqueue(() -> {
-            BooleanMask holes = new BooleanMask(getSize(), random.nextLong(), symmetrySettings, getName() + "holes");
-            holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
-            subtract(holes);
-        });
+        BooleanMask holes = new BooleanMask(this, getNextSeed(), getName() + "holes");
+        holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
+        enqueue((dependencies) -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            subtract(source);
+        }, holes);
         return this;
     }
 
@@ -629,8 +630,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public FloatMask getDistanceField() {
         int size = getSize();
-        Long seed = random != null ? random.nextLong() : null;
-        FloatMask distanceField = new FloatMask(size, seed, symmetrySettings, getName() + "DistanceField", isParallel());
+        FloatMask distanceField = new FloatMask(size, getNextSeed(), symmetrySettings, getName() + "DistanceField", isParallel());
         distanceField.init(this, (float) (size * size), 0f);
         distanceField.parabolicMinimization();
         return distanceField;

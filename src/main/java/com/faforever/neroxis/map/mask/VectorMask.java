@@ -252,14 +252,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     public FloatMask dot(U other) {
         assertCompatibleMask(other);
-        Long seed = random != null ? random.nextLong() : null;
-        return new FloatMask(this, other, seed, getName() + "dot" + other.getName());
+        return new FloatMask(this, other, getNextSeed(), getName() + "dot" + other.getName());
     }
 
     public FloatMask dot(T vector) {
         assertMatchingDimension(vector.getDimension());
-        Long seed = random != null ? random.nextLong() : null;
-        return new FloatMask(this, vector, seed, getName() + "dot");
+        return new FloatMask(this, vector, getNextSeed(), getName() + "dot");
     }
 
     public U blur(int radius) {
@@ -351,8 +349,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public FloatMask getComponentMask(int component) {
-        Long seed = random != null ? random.nextLong() : null;
-        return new FloatMask(this, component, seed, getName() + "Component" + component);
+        return new FloatMask(this, component, getNextSeed(), getName() + "Component" + component);
     }
 
     public FloatMask[] splitComponentMasks() {
@@ -360,8 +357,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         String name = getName();
         FloatMask[] components = new FloatMask[dimesion];
         for (int i = 0; i < dimesion; ++i) {
-            Long seed = random != null ? random.nextLong() : null;
-            components[i] = new FloatMask(this, i, seed, name + "Component" + i);
+            components[i] = new FloatMask(this, i, getNextSeed(), name + "Component" + i);
         }
         return components;
     }
@@ -519,6 +515,19 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideComponentAt(sx, sy, value, component));
         });
+    }
+
+    protected void maskFill(T value) {
+        maskFill(mask, value);
+    }
+
+    protected void maskFill(T[][] mask, T value) {
+        int maskSize = mask.length;
+        for (int x = 0; x < maskSize; ++x) {
+            for (int y = 0; y < maskSize; ++y) {
+                mask[x][y] = value.copy();
+            }
+        }
     }
 
     @Override

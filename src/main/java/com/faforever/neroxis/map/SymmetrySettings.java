@@ -10,10 +10,10 @@ public strictfp class SymmetrySettings {
     private Symmetry teamSymmetry;
     private Symmetry spawnSymmetry;
 
-    public SymmetrySettings() {
-        terrainSymmetry = Symmetry.NONE;
-        teamSymmetry = Symmetry.NONE;
-        spawnSymmetry = Symmetry.NONE;
+    public SymmetrySettings(Symmetry symmetry) {
+        terrainSymmetry = symmetry;
+        teamSymmetry = symmetry;
+        spawnSymmetry = symmetry;
     }
 
     public Symmetry getSymmetry(SymmetryType symmetryType) {

@@ -1,9 +1,6 @@
 package com.faforever.neroxis.map.generator;
 
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.TerrainMaterials;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.serialized.LightingSettings;
@@ -41,7 +38,7 @@ public strictfp class PreviewGenerator {
         Graphics2D graphics = previewImage.createGraphics();
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
         List<FloatMask> scaledTextures = new ArrayList<>(Arrays.asList(textureMasks));
-        FloatMask baseLayer = new FloatMask(PREVIEW_SIZE, null, new SymmetrySettings()).add(1f);
+        FloatMask baseLayer = new FloatMask(PREVIEW_SIZE, null, new SymmetrySettings(Symmetry.NONE)).add(1f);
         scaledTextures.add(0, baseLayer);
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {

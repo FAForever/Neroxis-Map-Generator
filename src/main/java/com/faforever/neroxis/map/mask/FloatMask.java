@@ -1,5 +1,6 @@
 package com.faforever.neroxis.map.mask;
 
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.Vector;
@@ -193,9 +194,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        enqueue(() -> {
-            addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
-        });
+        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale));
         return this;
     }
 
@@ -388,9 +387,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public NormalMask getNormalMask(float scale) {
-        Long seed = random != null ? random.nextLong() : null;
-        NormalMask normalMask = new NormalMask(this, seed, scale, getName() + "Normals");
-        normalMask.symmetrySettings = new SymmetrySettings();
+        NormalMask normalMask = new NormalMask(this, getNextSeed(), scale, getName() + "Normals");
+        normalMask.symmetrySettings = new SymmetrySettings(Symmetry.NONE);
         return normalMask;
     }
 

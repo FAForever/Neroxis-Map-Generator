@@ -174,25 +174,21 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public BooleanMask convertToBooleanMask(T minValue) {
-        Long seed = random != null ? random.nextLong() : null;
-        return new BooleanMask(this, minValue, seed, getName() + "toBoolean");
+        return new BooleanMask(this, minValue, getNextSeed(), getName() + "toBoolean");
     }
 
     public BooleanMask convertToBooleanMask(T minValue, T maxValue) {
-        Long seed = random != null ? random.nextLong() : null;
-        return new BooleanMask(this, minValue, maxValue, seed, getName() + "toBoolean");
+        return new BooleanMask(this, minValue, maxValue, getNextSeed(), getName() + "toBoolean");
     }
 
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {
-        Long seed = random != null ? random.nextLong() : null;
-        BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "Maximas", isParallel());
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas", isParallel());
         localMaxima.initMaxima(this, minValue, maxValue);
         return localMaxima;
     }
 
     public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
-        Long seed = random != null ? random.nextLong() : null;
-        BooleanMask localMaxima = new BooleanMask(getSize(), seed, symmetrySettings, getName() + "1DMaximas", isParallel());
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "1DMaximas", isParallel());
         localMaxima.init1DMaxima(this, minValue, maxValue);
         return localMaxima;
     }

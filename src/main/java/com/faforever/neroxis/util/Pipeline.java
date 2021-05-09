@@ -32,32 +32,42 @@ public strictfp class Pipeline {
         if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
-        String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
+        String callingMethod = null;
+        String callingLine = null;
+
+        if (Util.DEBUG) {
+            callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
+            callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
+        }
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
+        String finalCallingLine = callingLine;
+        String finalCallingMethod = callingMethod;
         CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies, executingMask)
-                .thenAcceptAsync(inputs -> {
+                .thenAcceptAsync(dependencies -> {
                     long startTime = System.currentTimeMillis();
-                    function.accept(inputs);
+                    boolean visualDebug = executingMask.isVisualDebug();
+                    executingMask.setVisualDebug(false);
+                    function.accept(dependencies);
+                    executingMask.setVisualDebug(visualDebug);
                     long functionTime = System.currentTimeMillis() - startTime;
                     startTime = System.currentTimeMillis();
                     if (HASH_MASK) {
                         try {
-                            hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), callingLine, executingMask.getName(), callingMethod);
+                            hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), finalCallingLine, executingMask.getName(), finalCallingMethod);
                         } catch (NoSuchAlgorithmException e) {
                             System.err.println("Cannot hash mask");
                         }
                     }
                     long hashTime = System.currentTimeMillis() - startTime;
                     if (Util.DEBUG) {
-                        System.out.printf("Entry Done: %s(%d); function time %4d ms; hash time %4d ms; %s  -> %s\n",
-                                executingMask.getName(),
-                                index,
+                        System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
                                 functionTime,
                                 hashTime,
-                                callingLine,
-                                callingMethod
+                                executingMask.getName(),
+                                index,
+                                finalCallingLine,
+                                finalCallingMethod
                         );
                     }
                 });
@@ -192,7 +202,9 @@ public strictfp class Pipeline {
             this.method = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                VisualDebugger.visualizeMask(executingMask, method, line);
+                if (Util.DEBUG) {
+                    VisualDebugger.visualizeMask(executingMask, method, line);
+                }
                 resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
                 if (resultCount > 0) {
                     immutableResult = executingMask.mock();

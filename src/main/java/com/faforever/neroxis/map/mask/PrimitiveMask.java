@@ -34,6 +34,25 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         return (U) this;
     }
 
+    protected void maskFill(T value) {
+        maskFill(mask, value);
+    }
+
+    protected void maskFill(T[][] mask, T value) {
+        for (int r = 0; r < mask.length; ++r) {
+            int len = mask[r].length;
+
+            if (len > 0) {
+                mask[r][0] = value;
+            }
+
+            //Value of i will be [1, 2, 4, 8, 16, 32, ..., len]
+            for (int i = 1; i < len; i += i) {
+                System.arraycopy(mask[r], 0, mask[r], i, StrictMath.min((len - i), i));
+            }
+        }
+    }
+
     @Override
     public U init(U other) {
         plannedSize = other.getSize();
