@@ -28,7 +28,7 @@ public strictfp class ScriptGenerator {
         int mapSize = map.getSize();
         int decalSize = mapSize * mapSize / 8192;
         int checkDecalRange = decalSize / 2 + 24;
-        int checkResourceRange = 32;
+        int checkResourceRange = decalSize / 2 + 32;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("local mexLocations = {");
         for (Marker mex : map.getMexes()) {
