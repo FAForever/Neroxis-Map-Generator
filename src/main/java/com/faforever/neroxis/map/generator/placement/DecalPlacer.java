@@ -30,7 +30,7 @@ public strictfp class DecalPlacer {
                 float scale = random.nextFloat() * (maxScale - minScale) + minScale;
                 location.add(.5f, .5f);
                 Vector3 rotation = new Vector3(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
-                Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000 * map.getSize() / 512f);
+                Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000);
                 map.addDecal(decal);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);

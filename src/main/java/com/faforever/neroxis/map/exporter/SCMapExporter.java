@@ -218,7 +218,7 @@ public strictfp class SCMapExporter {
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
         map.getDecals().add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
-                new Vector2(), new Vector3(), map.getSize(), 2000));
+                new Vector2(), new Vector3(), map.getSize(), 1000));
         try {
             Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
         } catch (IOException e) {
