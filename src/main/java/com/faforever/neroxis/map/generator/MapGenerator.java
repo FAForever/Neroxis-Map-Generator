@@ -107,7 +107,7 @@ public strictfp class MapGenerator {
             System.out.println("Style: " + generator.mapStyle.getName());
             System.out.println(generator.mapStyle.generatorsToString());
             System.out.println("Done");
-            if (generator.previewFolder != null) {
+            if (!generator.tournamentStyle && generator.previewFolder != null) {
                 SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);
             }
             count++;

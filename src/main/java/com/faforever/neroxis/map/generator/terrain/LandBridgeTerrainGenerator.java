@@ -12,6 +12,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
                 .landDensity(.25f, .75f)
                 .mexDensity(.5f, 1f)
                 .mapSizes(1024)
+                .numTeams(2, 4)
                 .build();
     }
 

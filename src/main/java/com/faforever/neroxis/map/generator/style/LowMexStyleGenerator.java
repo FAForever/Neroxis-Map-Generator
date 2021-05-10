@@ -19,6 +19,7 @@ public strictfp class LowMexStyleGenerator extends StyleGenerator {
                 .mexDensity(0f, .25f)
                 .mapSizes(256, 512)
                 .spawnCount(0, 4)
+                .numTeams(2, 2)
                 .build();
     }
 
