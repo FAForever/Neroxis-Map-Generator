@@ -115,10 +115,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    protected Float[][] getEmptyMask(int size) {
-        Float[][] empty = new Float[size][size];
-        maskFill(empty, getZeroValue());
-        return empty;
+    protected Float[][] getNullMask(int size) {
+        return new Float[size][size];
     }
 
     @Override

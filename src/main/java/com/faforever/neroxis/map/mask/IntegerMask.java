@@ -48,10 +48,8 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    protected Integer[][] getEmptyMask(int size) {
-        Integer[][] empty = new Integer[size][size];
-        maskFill(empty, getZeroValue());
-        return empty;
+    protected Integer[][] getNullMask(int size) {
+        return new Integer[size][size];
     }
 
     @Override

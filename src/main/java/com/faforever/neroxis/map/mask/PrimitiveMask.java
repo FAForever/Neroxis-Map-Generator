@@ -34,38 +34,29 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         return (U) this;
     }
 
+    @Override
     protected void maskFill(T value) {
         maskFill(mask, value);
     }
 
-    protected void maskFill(T[][] mask, T value) {
-        for (int r = 0; r < mask.length; ++r) {
-            int len = mask[r].length;
-
-            if (len > 0) {
-                mask[r][0] = value;
-            }
-
-            //Value of i will be [1, 2, 4, 8, 16, 32, ..., len]
-            for (int i = 1; i < len; i += i) {
-                System.arraycopy(mask[r], 0, mask[r], i, StrictMath.min((len - i), i));
+    @Override
+    protected void maskFill(T[][] maskToFill, T value) {
+        int maskSize = maskToFill.length;
+        for (int r = 0; r < maskSize; ++r) {
+            maskToFill[r][0] = value;
+            for (int i = 1; i < maskSize; i += i) {
+                System.arraycopy(maskToFill[r], 0, maskToFill[r], i, StrictMath.min((maskSize - i), i));
             }
         }
     }
 
     @Override
-    public U init(U other) {
-        plannedSize = other.getSize();
-        enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
-            mask = getEmptyMask(source.getSize());
-            assertCompatibleMask(source);
-            T[][] sourceMask = source.mask;
-            for (int i = 0; i < mask.length; i++) {
-                System.arraycopy(sourceMask[i], 0, mask[i], 0, mask[i].length);
-            }
-        }, other);
-        return (U) this;
+    protected void maskFill(T[][] maskToFill) {
+        int maskSize = mask.length;
+        assertSize(maskSize);
+        for (int r = 0; r < maskSize; ++r) {
+            System.arraycopy(mask[r], 0, maskToFill[r], 0, maskSize);
+        }
     }
 
     public U blur(int radius) {

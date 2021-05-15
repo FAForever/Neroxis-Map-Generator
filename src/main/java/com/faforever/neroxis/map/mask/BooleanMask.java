@@ -99,10 +99,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    protected Boolean[][] getEmptyMask(int size) {
-        Boolean[][] empty = new Boolean[size][size];
-        maskFill(empty, getZeroValue());
-        return empty;
+    protected Boolean[][] getNullMask(int size) {
+        return new Boolean[size][size];
     }
 
     public boolean isEdge(int x, int y) {
@@ -307,27 +305,26 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public BooleanMask inflate(float radius) {
         enqueue(() -> {
-            Boolean[][] maskCopy = getEmptyMask(getSize());
+            Boolean[][] maskCopy = getMaskCopy();
             apply((x, y) -> {
                 if (get(x, y) && isEdge(x, y)) {
                     markInRadius(radius, maskCopy, x, y, true);
                 }
             });
-            set((x, y) -> maskCopy[x][y] || get(x, y));
+            mask = maskCopy;
         });
         return this;
     }
 
     public BooleanMask deflate(float radius) {
         enqueue(() -> {
-            Boolean[][] maskCopy = getEmptyMask(getSize());
+            Boolean[][] maskCopy = getMaskCopy();
             apply((x, y) -> {
                 if (!get(x, y) && isEdge(x, y)) {
-                    markInRadius(radius, maskCopy, x, y, true);
+                    markInRadius(radius, maskCopy, x, y, false);
                 }
             });
-            set((x, y) -> !maskCopy[x][y] && get(x, y));
-
+            mask = maskCopy;
         });
         return this;
     }
@@ -392,14 +389,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask dilute(float strength, SymmetryType symmetryType, int count) {
         enqueue(() -> {
             for (int i = 0; i < count; i++) {
-                Boolean[][] newMask = getEmptyMask(getSize());
+                Boolean[][] maskCopy = getMaskCopy();
                 applyWithSymmetry(symmetryType, (x, y) -> {
-                    boolean value = get(x, y) || (isEdge(x, y) && random.nextFloat() < strength);
-                    newMask[x][y] = value;
-                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-                    symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
+                    if (!get(x, y) && random.nextFloat() < strength && isEdge(x, y)) {
+                        applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> maskCopy[sx][sy] = true);
+                    }
                 });
-                mask = newMask;
+                mask = maskCopy;
             }
         });
         return this;
@@ -416,14 +412,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask erode(float strength, SymmetryType symmetryType, int count) {
         enqueue(() -> {
             for (int i = 0; i < count; i++) {
-                Boolean[][] newMask = getEmptyMask(getSize());
+                Boolean[][] maskCopy = getMaskCopy();
                 applyWithSymmetry(symmetryType, (x, y) -> {
-                    boolean value = get(x, y) && (!isEdge(x, y) || random.nextFloat() > strength);
-                    newMask[x][y] = value;
-                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-                    symPoints.forEach(symmetryPoint -> newMask[(int) symmetryPoint.getX()][(int) symmetryPoint.getY()] = value);
+                    if (get(x, y) && random.nextFloat() < strength && isEdge(x, y)) {
+                        applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> maskCopy[sx][sy] = false);
+                    }
                 });
-                mask = newMask;
+                mask = maskCopy;
             }
         });
         return this;

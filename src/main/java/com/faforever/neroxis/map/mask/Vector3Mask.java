@@ -1,13 +1,9 @@
 package com.faforever.neroxis.map.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.Vector3;
 
 import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
 
@@ -66,14 +62,8 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     @Override
-    protected Vector3[][] getEmptyMask(int size) {
-        Vector3[][] empty = new Vector3[size][size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                empty[x][y] = getZeroValue();
-            }
-        }
-        return empty;
+    protected Vector3[][] getNullMask(int size) {
+        return new Vector3[size][size];
     }
 
     @Override
@@ -101,23 +91,5 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         writeToImage(image);
         return image;
-    }
-
-    @Override
-    public String toHash() throws NoSuchAlgorithmException {
-        int size = getSize();
-        ByteBuffer bytes = ByteBuffer.allocate(size * size * 4 * 3);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-            Vector3 value = get(x, y);
-            bytes.putFloat(value.getX());
-            bytes.putFloat(value.getY());
-            bytes.putFloat(value.getZ());
-        });
-        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
     }
 }

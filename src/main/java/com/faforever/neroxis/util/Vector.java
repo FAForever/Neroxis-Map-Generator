@@ -235,6 +235,10 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     @Override
     public String toString() {
-        return Arrays.toString(components).replace("[", "").replace("]", "");
+        String[] strings = new String[components.length];
+        for (int i = 0; i < components.length; ++i) {
+            strings[i] = String.format("%9f", components[i]);
+        }
+        return Arrays.toString(strings).replace("[", "").replace("]", "");
     }
 }

@@ -8,6 +8,9 @@ import com.faforever.neroxis.util.Vector2;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -231,15 +234,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     @Override
     public U clear() {
         enqueue(() -> mask = getEmptyMask(getSize()));
-        return (U) this;
-    }
-
-    @Override
-    public U init(U other) {
-        enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
-            set((x, y) -> source.get(x, y).copy());
-        }, other);
         return (U) this;
     }
 
@@ -521,11 +515,22 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         maskFill(mask, value);
     }
 
-    protected void maskFill(T[][] mask, T value) {
-        int maskSize = mask.length;
+    protected void maskFill(T[][] maskToFill, T value) {
+        int maskSize = maskToFill.length;
         for (int x = 0; x < maskSize; ++x) {
             for (int y = 0; y < maskSize; ++y) {
-                mask[x][y] = value.copy();
+                maskToFill[x][y] = value.copy();
+            }
+        }
+    }
+
+    @Override
+    protected void maskFill(T[][] maskToFill) {
+        int maskSize = mask.length;
+        assertSize(maskSize);
+        for (int x = 0; x < maskSize; ++x) {
+            for (int y = 0; y < maskSize; ++y) {
+                maskToFill[x][y] = get(x, y).copy();
             }
         }
     }
@@ -537,6 +542,25 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         WritableRaster imageRaster = image.getRaster();
         apply((x, y) -> imageRaster.setPixel(x, y, get(x, y).toArray()));
         return image;
+    }
+
+    @Override
+    public String toHash() throws NoSuchAlgorithmException {
+        int size = getSize();
+        int dimension = get(0, 0).getDimension();
+        ByteBuffer bytes = ByteBuffer.allocate(size * size * 4 * dimension);
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            Vector<?> value = get(x, y);
+            for (int i = 0; i < dimension; ++i) {
+                bytes.putFloat(value.get(i));
+            }
+        });
+        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte datum : data) {
+            stringBuilder.append(String.format("%02x", datum));
+        }
+        return stringBuilder.toString();
     }
 
     protected void assertMatchingDimension(int numImageComponents) {

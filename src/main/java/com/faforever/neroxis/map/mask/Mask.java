@@ -74,15 +74,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public abstract String toHash() throws NoSuchAlgorithmException;
 
-    protected abstract T[][] getEmptyMask(int size);
+    protected abstract T[][] getNullMask(int size);
 
     protected abstract T getZeroValue();
 
     public abstract U copy();
 
     public abstract U mock();
-
-    public abstract U init(U other);
 
     public abstract U clear();
 
@@ -166,6 +164,28 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 }
             });
         }
+        return (U) this;
+    }
+
+    protected T[][] getEmptyMask(int size) {
+        T[][] empty = getNullMask(size);
+        maskFill(empty, getZeroValue());
+        return empty;
+    }
+
+    protected T[][] getMaskCopy() {
+        int size = getSize();
+        T[][] copy = getNullMask(size);
+        maskFill(copy);
+        return copy;
+    }
+
+    public U init(U other) {
+        plannedSize = other.getSize();
+        enqueue(dependencies -> {
+            U source = (U) dependencies.get(0);
+            mask = source.getMaskCopy();
+        }, other);
         return (U) this;
     }
 
@@ -596,18 +616,20 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
-        enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
-            if (!reverse) {
+        if (!reverse) {
+            enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
                 T value = get(x, y);
                 applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
-            } else {
-                if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
-                    throw new IllegalArgumentException("Symmetry has more than two symmetry points");
-                }
+            }));
+        } else {
+            if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
+                throw new IllegalArgumentException("Symmetry has more than two symmetry points");
+            }
+            enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
                 List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
                 symPoints.forEach(symmetryPoint -> set(x, y, get(symmetryPoint)));
-            }
-        }));
+            }));
+        }
     }
 
     public void applySymmetry(float angle) {
@@ -1026,6 +1048,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected abstract void maskFill(T value);
 
     protected abstract void maskFill(T[][] mask, T value);
+
+    protected abstract void maskFill(T[][] mask);
 
     @Override
     public String toString() {

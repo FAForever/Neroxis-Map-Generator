@@ -24,8 +24,6 @@ public strictfp class MapPopulator {
 
     private Path inMapPath;
     private Path outFolderPath;
-    private String mapFolder;
-    private String mapName;
     private SCMap map;
     private Path propsPath;
     private boolean populateSpawns;

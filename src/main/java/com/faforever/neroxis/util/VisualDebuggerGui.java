@@ -13,12 +13,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 
 public strictfp class VisualDebuggerGui {
     private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
-    private static final Map<String, ImagePanel> maskNameToCanvas = new HashMap<>();
     private static final CanvasMouseListener CANVAS_MOUSE_LISTENER = new CanvasMouseListener();
     private static JFrame frame;
     private static Container contentPane;
@@ -68,7 +65,7 @@ public strictfp class VisualDebuggerGui {
         constraints.weightx = 4;
         constraints.gridy = 0;
         constraints.weighty = 1;
-        constraints.gridheight = 2;
+        constraints.gridheight = 1;
 
         contentPane.add(canvasContainer, constraints);
     }
@@ -79,7 +76,7 @@ public strictfp class VisualDebuggerGui {
         list.addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
                 MaskListItem selectedItem = list.getSelectedValue();
-                onSelect(selectedItem.maskName);
+                updateVisibleCanvas(selectedItem);
             }
         });
         JScrollPane listScroller = new JScrollPane(list);
@@ -104,6 +101,7 @@ public strictfp class VisualDebuggerGui {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
         constraints.weightx = 1;
+        constraints.gridwidth = 2;
         constraints.gridy = 1;
         constraints.weighty = 0;
 
@@ -118,13 +116,11 @@ public strictfp class VisualDebuggerGui {
                     ind = i + 1;
                 }
             }
-            maskNameToCanvas.put(uniqueMaskName, new ImagePanel());
-            listModel.insertElementAt(new MaskListItem(uniqueMaskName), ind);
-            ImagePanel canvas = maskNameToCanvas.get(uniqueMaskName);
+            ImagePanel canvas = new ImagePanel(mask);
             canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
             canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
-            canvas.setViewModel(mask);
+            listModel.insertElementAt(new MaskListItem(uniqueMaskName, canvas), ind);
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
             }
@@ -133,20 +129,17 @@ public strictfp class VisualDebuggerGui {
         }
     }
 
-    private static void onSelect(String uniqueMaskName) {
-        ImagePanel selectedCanvas = maskNameToCanvas.get(uniqueMaskName);
-        canvasContainer.removeAll();
-        canvasContainer.add(selectedCanvas);
-        updateVisibleCanvas(uniqueMaskName, selectedCanvas);
-    }
-
-    private static void updateVisibleCanvas(String maskName, ImagePanel canvas) {
+    private static void updateVisibleCanvas(MaskListItem maskListItem) {
+        String maskName = maskListItem.getMaskName();
+        ImagePanel canvas = maskListItem.getCanvas();
         Point locationOnScreen = MouseInfo.getPointerInfo().getLocation();
         Point locationOnComponent = new Point(locationOnScreen);
         SwingUtilities.convertPointFromScreen(locationOnComponent, canvas);
         ToolTipManager.sharedInstance().mouseMoved(
                 new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
                         locationOnScreen.x, locationOnScreen.y, 0, false, 0));
+        canvasContainer.removeAll();
+        canvasContainer.add(canvas);
         contentPane.revalidate();
         contentPane.repaint();
         frame.setTitle("Mask: " + maskName + ", Size: " + canvas.getImage().getHeight());
@@ -172,13 +165,12 @@ public strictfp class VisualDebuggerGui {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class ImagePanel extends JPanel {
-        private BufferedImage image;
-        private BufferedImage backgroundImage;
-        private Mask<?, ?> mask;
+        private final BufferedImage image;
+        private final Mask<?, ?> mask;
         private double imageZoomScaleX;
         private double imageZoomScaleY;
 
-        public void setViewModel(Mask<?, ?> mask) {
+        public ImagePanel(Mask<?, ?> mask) {
             this.mask = mask;
             image = new BufferedImage(mask.getImmediateSize(), mask.getImmediateSize(), BufferedImage.TYPE_INT_RGB);
             for (int x = 0; x < image.getWidth(); ++x) {
@@ -226,6 +218,7 @@ public strictfp class VisualDebuggerGui {
     @Value
     public static class MaskListItem {
         String maskName;
+        ImagePanel canvas;
 
         @Override
         public String toString() {
@@ -273,7 +266,7 @@ public strictfp class VisualDebuggerGui {
             int maskX = (int) ((e.getX() - xOffset) / userZoomScale / source.getImageZoomScaleX());
             int maskY = (int) ((e.getY() - yOffset) / userZoomScale / source.getImageZoomScaleY());
             if (mask.inBounds(maskX, maskY)) {
-                label.setText(String.format("X: %d, Y: %d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
+                label.setText(String.format("X: %5d, Y: %5d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
             }
         }
     }
