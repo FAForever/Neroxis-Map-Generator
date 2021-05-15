@@ -7,11 +7,13 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.util.DiscreteUtils;
 import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.image.BufferedImage;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -385,6 +387,20 @@ public class MapGeneratorTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void TestUnexploredPreview() throws Exception {
+        Pipeline.reset();
+        instance = new MapGenerator();
+        instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});
+        SCMap map = instance.generate();
+
+        BufferedImage blankPreview = ImageUtils.readImage(PreviewGenerator.BLANK_PREVIEW);
+        BufferedImage mapPreview = map.getPreview();
+
+        assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
+                mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
     @After

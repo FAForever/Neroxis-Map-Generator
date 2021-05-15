@@ -21,10 +21,10 @@ import static com.faforever.neroxis.util.ImageUtils.scaleImage;
 public strictfp class PreviewGenerator {
 
     public static final int PREVIEW_SIZE = 256;
+    public static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";
     private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
-    private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
 
     public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map, FloatMask... textureMasks) throws IOException {
         if (textureMasks.length != 8) {

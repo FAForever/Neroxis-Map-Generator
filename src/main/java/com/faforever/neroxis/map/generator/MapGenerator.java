@@ -30,7 +30,6 @@ public strictfp class MapGenerator {
 
     public static final String VERSION;
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
-    private static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
 
     private static int NUM_TO_GEN = 1;
 
