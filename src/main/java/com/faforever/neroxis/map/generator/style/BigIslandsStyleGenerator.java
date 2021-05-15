@@ -11,7 +11,7 @@ public strictfp class BigIslandsStyleGenerator extends StyleGenerator {
 
     public BigIslandsStyleGenerator() {
         name = "BIG_ISLANDS";
-        weight = 2;
+        weight = 3;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)
                 .plateauDensity(0, .5f)

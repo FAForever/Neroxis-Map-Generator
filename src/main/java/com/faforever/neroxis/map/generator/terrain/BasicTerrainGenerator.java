@@ -131,8 +131,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void teamConnectionsSetup() {
         float maxStepSize = map.getSize() / 128f;
-        int minMiddlePoints = 1;
-        int maxMiddlePoints = 2;
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 1;
         int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 3 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
@@ -175,13 +175,14 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void mountainSetup() {
         mountains.setSize(map.getSize() / 4);
+        mountains.startVisualDebugger();
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 16);
+            mountains.progressiveWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
         } else {
-            mountains.randomWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 16);
+            mountains.randomWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
         }
-        mountains.dilute(.5f, SymmetryType.TERRAIN, 2);
+        mountains.dilute(.5f, SymmetryType.TERRAIN, 4);
         mountains.setSize(map.getSize() + 1);
     }
 
@@ -213,8 +214,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void ensureSpawnTerrain() {
-        mountains.subtract(connections.copy().inflate(mountainBrushSize / 2f).blur(12, .125f));
-        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 2f));
+        mountains.subtract(connections.copy().inflate(mountainBrushSize / 4f).blur(12, .125f));
+        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
 
         plateaus.multiply(land).subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(plateaus).add(spawnLandMask).add(spawnPlateauMask);
@@ -326,8 +327,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
             pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         }
 
-        ramps.subtract(connections.copy().inflate(32)).inflate(maxStepSize * 2).multiply(plateaus.copy().outline())
-                .add(connections.copy().inflate(maxStepSize * 2).multiply(plateaus.copy().outline()))
+        ramps.subtract(connections.copy().inflate(64)).inflate(maxStepSize / 2f)
+                .add(connections.copy().inflate(maxStepSize / 2f)).multiply(plateaus.copy().outline())
                 .subtract(mountains).inflate(8);
     }
 
@@ -375,10 +376,10 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         hills.setSize(map.getSize() / 4);
         valleys.setSize(map.getSize() / 4);
 
-        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 2)
+        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 2)
                 .setSize(map.getSize() + 1);
         hills.multiply(land.copy().deflate(8)).subtract(plateaus.copy().outline().inflate(8)).subtract(spawnLandMask);
-        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 2) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 4)
+        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 4)
                 .setSize(map.getSize() + 1);
         valleys.multiply(plateaus.copy().deflate(8)).subtract(spawnPlateauMask);
 

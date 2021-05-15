@@ -14,6 +14,7 @@ public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
 
     public SmallIslandsStyleGenerator() {
         name = "SMALL_ISLANDS";
+        weight = 2;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .5f)
                 .plateauDensity(0, .5f)

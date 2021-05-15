@@ -106,7 +106,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
             }
             Vector2 start = new Vector2(startSpawn.getPosition());
             Vector2 end = new Vector2(start);
-            float offCenterAngle = (float) (StrictMath.PI * (1f / 4f + random.nextFloat() / 4f));
+            float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
             offCenterAngle *= random.nextBoolean() ? 1 : -1;
             offCenterAngle += start.angleTo(new Vector2(maskToUse.getSize() / 2f, maskToUse.getSize() / 2f));
             end.addPolar(offCenterAngle, random.nextFloat() * maskToUse.getSize() / 2f + maskToUse.getSize() / 2f);
