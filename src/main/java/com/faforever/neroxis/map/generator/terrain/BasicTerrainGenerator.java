@@ -214,7 +214,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void ensureSpawnTerrain() {
-        mountains.subtract(connections.copy().inflate(mountainBrushSize / 4f).blur(12, .125f));
+        mountains.subtract(connections.copy().inflate(mountainBrushSize / 4f).blur(16, .125f));
         mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
 
         plateaus.multiply(land).subtract(spawnLandMask).add(spawnPlateauMask);
