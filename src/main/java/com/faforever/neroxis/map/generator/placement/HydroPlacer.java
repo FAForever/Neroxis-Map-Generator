@@ -32,11 +32,13 @@ public strictfp class HydroPlacer {
         }
         spawnMask.fillCenter(64, false).limitToSymmetryRegion();
 
-        map.getMexes().forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
+        map.getMexes().stream().filter(mex -> spawnMask.inTeam(mex.getPosition(), false))
+                .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
 
         placeBaseHydros(spawnMask);
 
-        map.getSpawns().forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 30f, false));
+        map.getSpawns().stream().filter(spawn -> spawnMask.inTeam(spawn.getPosition(), false))
+                .forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 30f, false));
 
         int numHydrosLeft = (hydroCount - map.getHydroCount()) / numSymPoints;
 
@@ -50,8 +52,10 @@ public strictfp class HydroPlacer {
                 Spawn spawn = map.getSpawn(i);
                 BooleanMask baseHydro = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
                 baseHydro.fillCircle(spawn.getPosition(), 30f, true).fillCircle(spawn.getPosition(), 10f, false).multiply(spawnMask);
-                map.getSpawns().forEach(otherSpawn -> baseHydro.fillCircle(otherSpawn.getPosition(), 16, false));
-                map.getHydros().forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
+                map.getSpawns().stream().filter(otherSpawn -> spawnMask.inTeam(otherSpawn.getPosition(), false))
+                        .forEach(otherSpawn -> baseHydro.fillCircle(otherSpawn.getPosition(), 16, false));
+                map.getHydros().stream().filter(hydro -> spawnMask.inTeam(hydro.getPosition(), false))
+                        .forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
                 placeIndividualHydros(baseHydro, 1, hydroSpacing);
             }
         }

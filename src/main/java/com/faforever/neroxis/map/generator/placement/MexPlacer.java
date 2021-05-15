@@ -31,41 +31,45 @@ public strictfp class MexPlacer {
         int previousMexCount;
         placeBaseMexes(spawnMask);
         int numMexesLeft = (mexCount - map.getMexCount()) / numSymPoints;
-        map.getSpawns().forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 24, false));
+        map.getSpawns().stream().filter(spawn -> spawnMask.inTeam(spawn.getPosition(), false)).forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 24, false));
 
         previousMexCount = map.getMexCount();
         if (numMexesLeft > 8 && numMexesLeft > map.getSpawnCount()) {
             int possibleExpMexCount = (random.nextInt(numMexesLeft / 2) + numMexesLeft / map.getSpawnCount());
             placeMexExpansions(spawnMask, possibleExpMexCount, mexSpacing);
 
-            map.getMexes().stream().skip(previousMexCount)
-                    .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
+            spacePlacedMexes(spawnMask, mexSpacing, previousMexCount);
             numMexesLeft = mexCount - map.getMexCount();
             previousMexCount = map.getMexCount();
         }
 
-        int numPlayerMexes = numMexesLeft / map.getSpawnCount() / numSymPoints;
-        for (Spawn spawn : map.getSpawns()) {
+        int numPlayerMexes = (int) (numMexesLeft / map.getSpawnCount() / numSymPoints * .75f);
+        for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
+            Spawn spawn = map.getSpawn(i);
             BooleanMask playerSpawnMask = new BooleanMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
-            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize(), true).multiply(spawnMask).fillEdge(map.getSize() / 16, false);
+            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 2f, true).multiply(spawnMask).fillEdge(map.getSize() / 16, false);
             if (mexCount < 6) {
                 placeIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing * 2);
             } else {
                 placeIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing);
             }
-            map.getMexes().stream().skip(previousMexCount)
-                    .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
+            spacePlacedMexes(spawnMask, mexSpacing, previousMexCount);
             previousMexCount = map.getMexCount();
         }
 
         numMexesLeft = (mexCount - map.getMexCount()) / numSymPoints;
+        map.getSpawns().stream().filter(spawn -> spawnMask.inTeam(spawn.getPosition(), false)).forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 48, false));
         placeIndividualMexes(spawnMask, numMexesLeft, mexSpacing);
-        map.getMexes().stream().skip(previousMexCount)
-                .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
+        spacePlacedMexes(spawnMask, mexSpacing, previousMexCount);
 
         numMexesLeft = (mexCount - map.getMexCount()) / numSymPoints;
 
         placeIndividualMexes(spawnMaskWater, StrictMath.min(numMexesLeft, 10), mexSpacing);
+    }
+
+    private void spacePlacedMexes(BooleanMask spawnMask, int mexSpacing, int previousMexCount) {
+        map.getMexes().stream().skip(previousMexCount).filter(mex -> spawnMask.inTeam(mex.getPosition(), false))
+                .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
     }
 
     public void placeBaseMexes(BooleanMask spawnMask) {
@@ -89,7 +93,7 @@ public strictfp class MexPlacer {
         BooleanMask expansionSpawnMask = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
         expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).multiply(spawnMask);
 
-        map.getSpawns().forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
+        map.getSpawns().stream().filter(spawn -> expansionSpawnMask.inTeam(spawn.getPosition(), false)).forEach(spawn -> expansionSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 6f, false));
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
 
@@ -133,9 +137,6 @@ public strictfp class MexPlacer {
 
             placeIndividualMexes(expansion, expMexCount, expMexSpacing);
             spawnMask.fillCircle(expLocation, mexSpacing * 2f * expMexCount / 4f, false);
-            List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN);
-            symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
-            symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, mexSpacing * 2f * expMexCount / 4f, false));
             expMexCountLeft -= expMexCount;
         }
     }
