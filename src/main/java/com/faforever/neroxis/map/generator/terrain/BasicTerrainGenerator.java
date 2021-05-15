@@ -175,7 +175,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void mountainSetup() {
         mountains.setSize(map.getSize() / 4);
-        mountains.startVisualDebugger();
 
         if (random.nextBoolean()) {
             mountains.progressiveWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);

@@ -14,10 +14,11 @@ public strictfp class FloodedStyleGenerator extends StyleGenerator {
     public FloodedStyleGenerator() {
         name = "FLOODED";
         parameterConstraints = ParameterConstraints.builder()
-                .plateauDensity(.75f, 1f)
+                .plateauDensity(0, .25f)
                 .landDensity(0, .5f)
                 .mapSizes(512, 1024)
                 .build();
+        weight = .1f;
     }
 
     @Override

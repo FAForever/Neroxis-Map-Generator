@@ -16,7 +16,7 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
                 .reclaimDensity(.8f, 1f)
                 .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
                 .build();
-        weight = 2;
+        weight = .5f;
     }
 
     protected void setupPropPipeline() {

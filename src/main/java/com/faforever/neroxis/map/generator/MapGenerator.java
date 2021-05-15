@@ -43,7 +43,7 @@ public strictfp class MapGenerator {
     private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
             new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
             new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
-            new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new TestStyleGenerator()));
+            new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator()));
     private final List<StyleGenerator> productionStyles = mapStyles.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     //read from cli args
