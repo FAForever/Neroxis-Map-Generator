@@ -58,12 +58,12 @@ public strictfp class ScriptGenerator {
         stringBuilder.append(String.format("local checkRange = %d;\n", checkResourceRange));
         stringBuilder.append("\n" +
                 "function OnPopulate()\n" +
-                "\t\n" +
                 "\tScenarioUtils.InitializeArmies()\n" +
                 "end\n" +
                 "\n" +
                 "function OnStart(self)\n");
-        stringBuilder.append(String.format("\tScenarioFramework.SetPlayableArea(Rect( %1$d - 1, %1$d - 1, %1$d + 1, %1$d + 1 ) , false)\n", mapSize / 2));
+        stringBuilder.append(String.format("\tScenarioFramework.SetPlayableArea(Rect( %1$d - 4, %1$d - 4, %1$d + 4, %1$d + 4 ) , false)\n", mapSize / 2));
+        stringBuilder.append(String.format("\tScenarioInfo.MapData.PlayableRect = {0, 0, %1$d, %1$d}\n", mapSize));
         stringBuilder.append("\tAddFogDecals()\n" +
                 "\tScenarioFramework.CreateTimerTrigger(MapExpand, 1, true)\n" +
                 "\tlocal player = GetFocusArmy()\n" +
@@ -74,15 +74,15 @@ public strictfp class ScriptGenerator {
                 "\t\t\tbreak\n" +
                 "\t\tend\n" +
                 "\tend\n" +
-                "\tCheckDecals()\n" +
-                "\tCheckMexes()\n" +
-                "\tCheckHydros()\n" +
-                "\tCheckProps()\n" +
                 "end\n" +
                 "\n" +
                 "function MapExpand()\n");
         stringBuilder.append(String.format("\tScenarioFramework.SetPlayableArea(Rect( 0, 0, %1$d, %1$d) , false)\n", mapSize));
-        stringBuilder.append("end\n" +
+        stringBuilder.append("\tCheckDecals()\n" +
+                "\tCheckMexes()\n" +
+                "\tCheckHydros()\n" +
+                "\tCheckProps()\n" +
+                "end\n" +
                 "\n" +
                 "function AddFogDecals()\n" +
                 "\tlocal count = 0\n" +

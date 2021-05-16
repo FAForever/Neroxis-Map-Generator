@@ -22,7 +22,10 @@ public strictfp class VisualDebuggerGui {
     private static JList<MaskListItem> list;
     private static JLabel label;
     private static JPanel canvasContainer;
+    private static ImagePanel currentCanvas;
     private static double userZoomScale = 1d;
+    private static int mouseX = 0;
+    private static int mouseY = 0;
     private static int centeredX = 0;
     private static int centeredY = 0;
     private static double imageXOffset = 0;
@@ -140,12 +143,23 @@ public strictfp class VisualDebuggerGui {
                         locationOnScreen.x, locationOnScreen.y, 0, false, 0));
         canvasContainer.removeAll();
         canvasContainer.add(canvas);
+        currentCanvas = canvas;
+        setLabel();
         contentPane.revalidate();
         contentPane.repaint();
         frame.setTitle("Mask: " + maskName + ", Size: " + canvas.getImage().getHeight());
         ToolTipManager.sharedInstance().mouseMoved(
                 new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
                         locationOnScreen.x, locationOnScreen.y, 0, false, 0));
+    }
+
+    private static void setLabel() {
+        Mask<?, ?> mask = currentCanvas.getMask();
+        int maskX = (int) ((mouseX - xOffset) / userZoomScale / currentCanvas.getImageZoomScaleX());
+        int maskY = (int) ((mouseY - yOffset) / userZoomScale / currentCanvas.getImageZoomScaleY());
+        if (mask.inBounds(maskX, maskY)) {
+            label.setText(String.format("X: %5d, Y: %5d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
+        }
     }
 
     private static void setUserZoomScale(double scale) {
@@ -250,8 +264,8 @@ public strictfp class VisualDebuggerGui {
         public void mouseDragged(MouseEvent e) {
             ImagePanel sourceImagePanel = (ImagePanel) e.getSource();
             BufferedImage sourceImage = sourceImagePanel.getImage();
-            imageXOffset += (x - e.getX()) / userZoomScale / sourceImagePanel.imageZoomScaleX;
-            imageYOffset += (y - e.getY()) / userZoomScale / sourceImagePanel.imageZoomScaleY;
+            imageXOffset += (x - e.getX()) / (userZoomScale * sourceImagePanel.imageZoomScaleX);
+            imageYOffset += (y - e.getY()) / (userZoomScale * sourceImagePanel.imageZoomScaleY);
             imageXOffset = StrictMath.min(sourceImage.getWidth(), StrictMath.max(0, imageXOffset));
             imageYOffset = StrictMath.min(sourceImage.getWidth(), StrictMath.max(0, imageYOffset));
             x = e.getX();
@@ -261,13 +275,9 @@ public strictfp class VisualDebuggerGui {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            ImagePanel source = (ImagePanel) e.getSource();
-            Mask<?, ?> mask = source.getMask();
-            int maskX = (int) ((e.getX() - xOffset) / userZoomScale / source.getImageZoomScaleX());
-            int maskY = (int) ((e.getY() - yOffset) / userZoomScale / source.getImageZoomScaleY());
-            if (mask.inBounds(maskX, maskY)) {
-                label.setText(String.format("X: %5d, Y: %5d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
-            }
+            mouseX = e.getX();
+            mouseY = e.getY();
+            setLabel();
         }
     }
 }
