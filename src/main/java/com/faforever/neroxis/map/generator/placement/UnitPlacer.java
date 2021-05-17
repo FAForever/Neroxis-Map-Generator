@@ -52,7 +52,8 @@ public strictfp class UnitPlacer {
 
     public static final String[] MEDIUM_ENEMY = {
             "/base_template/UEFMedium.lua",
-            "/base_template/AeonMedium.lua"
+            "/base_template/AeonMedium.lua",
+            "/base_template/AeonBase.scunits"
     };
 
     public static final String[] MEDIUM_RECLAIM = {
@@ -67,14 +68,15 @@ public strictfp class UnitPlacer {
     }
 
     public void placeBases(BooleanMask spawnMask, String[] templates, Army army, Group group, float separation) throws IOException {
+        spawnMask.startVisualDebugger();
         if (templates != null && templates.length > 0) {
-            String luaFile = templates[random.nextInt(templates.length)];
+            String templateFile = templates[random.nextInt(templates.length)];
             if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
             LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
-            LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(luaFile);
+            LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
             coordinates.forEach((location) -> {
                 BaseTemplate base = new BaseTemplate(location, army, group, units);
                 base.addUnits();

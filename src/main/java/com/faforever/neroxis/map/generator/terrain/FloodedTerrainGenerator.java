@@ -28,7 +28,6 @@ public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
         float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange().normalize(mapParameters.getPlateauDensity());
         float scaledPlateauDensity = normalizedPlateauDensity * plateauDensityRange + plateauDensityMin;
-        plateaus.startVisualDebugger();
         plateaus.setSize(map.getSize() / 16);
 
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);

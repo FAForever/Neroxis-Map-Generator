@@ -68,13 +68,17 @@ public strictfp class FileUtils {
         InputStream inputStream;
         URL resource;
         if ((inputStream = FileUtils.class.getResourceAsStream(path)) != null) {
-            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            return deserialize(inputStream, clazz);
         } else if ((resource = FileUtils.class.getResource(path)) != null) {
             bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
         } else {
             bufferedReader = new BufferedReader(new FileReader(Paths.get(path).toFile()));
         }
         return objectMapper.readValue(bufferedReader, clazz);
+    }
+
+    public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
+        return objectMapper.readValue(new BufferedReader(new InputStreamReader(inputStream)), clazz);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {

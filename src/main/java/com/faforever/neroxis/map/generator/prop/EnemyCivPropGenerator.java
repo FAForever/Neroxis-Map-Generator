@@ -1,6 +1,7 @@
 package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
@@ -14,6 +15,15 @@ public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
 
     protected BooleanMask baseMask;
     protected BooleanMask noBases;
+
+    public EnemyCivPropGenerator() {
+        parameterConstraints = ParameterConstraints.builder()
+                .mountainDensity(0f, .75f)
+                .plateauDensity(0f, .5f)
+                .rampDensity(.5f, 1f)
+                .build();
+        weight = .5f;
+    }
 
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
