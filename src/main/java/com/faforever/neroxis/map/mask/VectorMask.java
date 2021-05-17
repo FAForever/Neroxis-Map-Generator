@@ -237,6 +237,18 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return (U) this;
     }
 
+    public U randomize(float scale) {
+        T empty = getZeroValue();
+        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> empty.copy().randomize(random, scale)));
+        return (U) this;
+    }
+
+    public U randomize(float minValue, float maxValue) {
+        T empty = getZeroValue();
+        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> empty.copy().randomize(random, minValue, maxValue)));
+        return (U) this;
+    }
+
     public U normalize() {
         enqueue((dependencies) -> {
             apply((x, y) -> get(x, y).normalize());

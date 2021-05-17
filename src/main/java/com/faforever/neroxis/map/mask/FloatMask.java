@@ -3,6 +3,7 @@ package com.faforever.neroxis.map.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.MathUtils;
 import com.faforever.neroxis.util.Vector;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
@@ -196,6 +197,48 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
+    public FloatMask addWhiteNoise(float minValue, float maxValue) {
+        float range = maxValue - minValue;
+        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue));
+        return this;
+    }
+
+    public FloatMask addPerlinNoise(int resolution, float scale) {
+        int size = getSize();
+        int gradientSize = size / resolution;
+        float gradientScale = (float) size / gradientSize;
+        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1,
+                random.nextLong(), symmetrySettings, getName() + "PerlinVectors", isParallel());
+        gradientVectors.randomize(-1f, 1f).normalize();
+        FloatMask noise = new FloatMask(size,
+                random.nextLong(), symmetrySettings, getName() + "PerlinNoise", isParallel());
+        noise.enqueue((dependencies) -> {
+            Vector2Mask source = (Vector2Mask) dependencies.get(0);
+            noise.set((x, y) -> {
+                int xLow = (int) (x / gradientScale);
+                float dXLow = x / gradientScale - xLow;
+                int xHigh = xLow + 1;
+                float dXHigh = x / gradientScale - xHigh;
+                int yLow = (int) (y / gradientScale);
+                float dYLow = y / gradientScale - yLow;
+                int yHigh = yLow + 1;
+                float dYHigh = y / gradientScale - yHigh;
+                float topLeft = new Vector2(dXLow, dYLow).dot(source.get(xLow, yLow));
+                float topRight = new Vector2(dXLow, dYHigh).dot(source.get(xLow, yHigh));
+                float bottomLeft = new Vector2(dXHigh, dYLow).dot(source.get(xHigh, yLow));
+                float bottomRight = new Vector2(dXHigh, dYHigh).dot(source.get(xHigh, yHigh));
+                return MathUtils.smootherStep(MathUtils.smootherStep(topLeft, bottomLeft, dXLow),
+                        MathUtils.smootherStep(topRight, bottomRight, dXLow), dYLow);
+            });
+            float noiseMin = noise.getMin();
+            float noiseMax = noise.getMax();
+            float noiseRange = noiseMax - noiseMin;
+            noise.set((x, y) -> (noise.get(x, y) - noiseMin) / noiseRange * scale);
+        }, gradientVectors);
+        enqueue((dependencies) -> add((FloatMask) dependencies.get(0)), noise);
+        return this;
+    }
+
     public FloatMask addDistance(BooleanMask other, float scale) {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -253,7 +296,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                 float depositionRate, float maxOffset, float iterationScale) {
         enqueue(() -> {
             int size = getSize();
-            Vector3Mask normalVectorMask = getNormalMask(10);
+            Vector3Mask normalVectorMask = getNormalMask();
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(normalVectorMask, maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
@@ -464,20 +507,27 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
-        writeToImage(image, 255 / getMax());
+        float min = getMin();
+        float max = getMax();
+        float range = max - min;
+        writeToImage(image, 255 / range, min);
         return image;
     }
 
     @Override
     public BufferedImage writeToImage(BufferedImage image) {
-        return writeToImage(image, 1f);
+        return writeToImage(image, 1f, 0f);
     }
 
     public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {
+        return writeToImage(image, scaleFactor, 0f);
+    }
+
+    public BufferedImage writeToImage(BufferedImage image, float scaleFactor, float offsetFactor) {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        apply((x, y) -> imageBuffer.setElemFloat(x + y * size, get(x, y) * scaleFactor));
+        apply((x, y) -> imageBuffer.setElemFloat(x + y * size, (get(x, y) - offsetFactor) * scaleFactor));
         return image;
     }
 

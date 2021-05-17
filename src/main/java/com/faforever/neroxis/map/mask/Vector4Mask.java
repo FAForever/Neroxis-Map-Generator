@@ -4,6 +4,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Vector4;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 
 public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
 
@@ -80,7 +81,14 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        writeToImage(image);
+        WritableRaster imageRaster = image.getRaster();
+        Vector4 maxComponents = getMaxComponents();
+        Vector4 minComponents = getMinComponents();
+        Vector4 rangeComponents = maxComponents.copy().subtract(minComponents);
+        apply((x, y) -> {
+            imageRaster.setPixel(x, y, get(x, y).copy().subtract(minComponents).divide(rangeComponents)
+                    .multiply(255f, 255f, 255f, 255f - 64f).add(0f, 0f, 0f, 64f).toArray());
+        });
         return image;
     }
 }

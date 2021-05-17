@@ -207,12 +207,12 @@ public strictfp class MapGenerator {
 
         if (optionBytes.length == 12) {
             biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
-            landDensity = DiscreteUtils.normalizeBin(optionBytes[4], numBins);
-            plateauDensity = DiscreteUtils.normalizeBin(optionBytes[5], numBins);
-            mountainDensity = DiscreteUtils.normalizeBin(optionBytes[6], numBins);
-            rampDensity = DiscreteUtils.normalizeBin(optionBytes[7], numBins);
-            reclaimDensity = DiscreteUtils.normalizeBin(optionBytes[8], numBins);
-            mexDensity = DiscreteUtils.normalizeBin(optionBytes[9], numBins);
+            landDensity = MathUtils.normalizeBin(optionBytes[4], numBins);
+            plateauDensity = MathUtils.normalizeBin(optionBytes[5], numBins);
+            mountainDensity = MathUtils.normalizeBin(optionBytes[6], numBins);
+            rampDensity = MathUtils.normalizeBin(optionBytes[7], numBins);
+            reclaimDensity = MathUtils.normalizeBin(optionBytes[8], numBins);
+            mexDensity = MathUtils.normalizeBin(optionBytes[9], numBins);
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
             optionsUsed = true;
@@ -442,32 +442,32 @@ public strictfp class MapGenerator {
 
             if (!styleSpecified) {
                 if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
-                    landDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
+                    landDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
-                    plateauDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
+                    plateauDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
-                    mountainDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
+                    mountainDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
-                    rampDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
+                    rampDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
-                    reclaimDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
+                    reclaimDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                    mexDensity = DiscreteUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
+                    mexDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
                     optionsUsed = true;
                 }
 
@@ -487,12 +487,12 @@ public strictfp class MapGenerator {
     private void randomizeOptions() throws Exception {
         random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
-        landDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
-        plateauDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
-        mountainDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
-        rampDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
-        reclaimDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
-        mexDensity = DiscreteUtils.discretePercentage(random.nextFloat(), numBins);
+        landDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        plateauDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        mountainDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        rampDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        reclaimDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        mexDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
         hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
         setValidTerrainSymmetry();
         biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
@@ -509,12 +509,12 @@ public strictfp class MapGenerator {
                     (byte) (mapParameters.getMapSize() / 64),
                     (byte) mapParameters.getNumTeams(),
                     (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getLandDensity(), numBins),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getRampDensity(), numBins),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
-                    (byte) DiscreteUtils.binPercentage(mapParameters.getMexDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getLandDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getRampDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
+                    (byte) MathUtils.binPercentage(mapParameters.getMexDensity(), numBins),
                     (byte) mapParameters.getHydroCount(),
                     (byte) mapParameters.getSymmetrySettings().getTerrainSymmetry().ordinal()};
         } else if (styleSpecified) {

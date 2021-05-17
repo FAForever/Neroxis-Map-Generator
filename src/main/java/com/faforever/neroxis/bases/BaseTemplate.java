@@ -5,7 +5,9 @@ import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.Unit;
+import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.serialized.SCUnitSet;
 import lombok.Value;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -29,7 +31,30 @@ public strictfp class BaseTemplate {
         this.units = units;
     }
 
-    public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String luaFile) throws IOException {
+    public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String file) throws IOException {
+        if (file.endsWith(".lua")) {
+            return loadUnitsFromLua(file);
+        } else if (file.endsWith(".scunits")) {
+            return loadUnitsFromSCUnits(file);
+        }
+        throw new IllegalArgumentException("File format not valid");
+    }
+
+    private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(String scunitsFile) throws IOException {
+        LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
+        SCUnitSet scUnitSet = FileUtils.deserialize(BaseTemplate.class.getResourceAsStream(scunitsFile), SCUnitSet.class);
+        scUnitSet.getUnits().forEach(unit -> {
+            unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
+            if (units.containsKey(unit.getID())) {
+                units.get(unit.getID()).add(new Vector2(unit.getPos()));
+            } else {
+                units.put(unit.getID(), new LinkedHashSet<>(Collections.singletonList(new Vector2(unit.getPos()))));
+            }
+        });
+        return units;
+    }
+
+    private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromLua(String luaFile) throws IOException {
         LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
         LuaValue lua = LuaLoader.load(BaseTemplate.class.getResourceAsStream(luaFile));
         LuaTable luaUnits = lua.get("Units").checktable();

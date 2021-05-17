@@ -90,7 +90,7 @@ public strictfp class NormalMask extends Vector3Mask {
     @Override
     public BufferedImage toImage() {
         int size = getSize();
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         writeToImage(image);
         return image;
     }
@@ -102,9 +102,9 @@ public strictfp class NormalMask extends Vector3Mask {
         apply((x, y) -> {
             Vector3 value = get(x, y);
             int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-            int yV = (byte) StrictMath.min(StrictMath.max((128 * (1 - value.getY()) + 127), 0), 255);
+            int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);
             int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
-            imageRaster.setPixel(x, y, new int[]{yV, zV, 0, xV});
+            imageRaster.setPixel(x, y, new int[]{xV, zV, yV});
         });
         return image;
     }

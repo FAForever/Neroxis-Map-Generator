@@ -68,6 +68,8 @@ public strictfp class TemplateNormalizer {
 
     public static void parseSCUnits(Path unitsPath) throws IOException {
         SCUnitSet scUnitSet = FileUtils.deserialize(unitsPath.toString(), SCUnitSet.class);
+        scUnitSet.getCenter().multiply(10f);
+        scUnitSet.getUnits().forEach(unit -> unit.getPos().multiply(10f).subtract(scUnitSet.getCenter()).roundXYToNearestHalfPoint());
         Path parent = unitsPath.getParent();
         String fileName = unitsPath.getFileName().toString();
         Path luaPath = parent.resolve(fileName.replace("scunits", "lua"));
@@ -79,7 +81,7 @@ public strictfp class TemplateNormalizer {
             out.writeBytes(String.format("\t\ttype = '%s',\n", unit.getID()));
             out.writeBytes("\t\torders = '',\n");
             out.writeBytes("\t\tplatoon = '',\n");
-            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", unit.getPos().getX() - scUnitSet.getCenter().getX(), unit.getPos().getZ() - scUnitSet.getCenter().getZ()));
+            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", unit.getPos().getX(), unit.getPos().getZ()));
             out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
             out.writeBytes("\t},\n");
             count++;

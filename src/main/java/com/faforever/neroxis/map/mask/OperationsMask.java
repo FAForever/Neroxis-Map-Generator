@@ -55,6 +55,17 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return (U) this;
     }
 
+    public U add(BooleanMask other, U values) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            U vals = (U) dependencies.get(1);
+            assertCompatibleMask(source);
+            assertCompatibleMask(vals);
+            add((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+        }, other, values);
+        return (U) this;
+    }
+
     public U add(T val) {
         enqueue(() -> {
             add((x, y) -> val);
@@ -102,6 +113,17 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return (U) this;
     }
 
+    public U subtract(BooleanMask other, U values) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            U vals = (U) dependencies.get(1);
+            assertCompatibleMask(source);
+            assertCompatibleMask(vals);
+            subtract((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+        }, other, values);
+        return (U) this;
+    }
+
     public U subtractWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
         return subtractWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
@@ -139,6 +161,17 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return (U) this;
     }
 
+    public U multiply(BooleanMask other, U values) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            U vals = (U) dependencies.get(1);
+            assertCompatibleMask(source);
+            assertCompatibleMask(vals);
+            multiply((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+        }, other, values);
+        return (U) this;
+    }
+
     public U multiplyWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
         return multiplyWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
     }
@@ -173,6 +206,17 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             assertCompatibleMask(source);
             divide((x, y) -> source.get(x, y) ? value : getZeroValue());
         }, other);
+        return (U) this;
+    }
+
+    public U divide(BooleanMask other, U values) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            U vals = (U) dependencies.get(1);
+            assertCompatibleMask(source);
+            assertCompatibleMask(vals);
+            divide((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+        }, other, values);
         return (U) this;
     }
 

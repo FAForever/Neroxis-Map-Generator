@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -35,16 +34,9 @@ public strictfp class MapPopulator {
     private int mexCountPerPlayer;
     private int hydroCountPerPlayer;
     private boolean populateTextures;
-    private boolean keepLayer0;
-    private boolean smallWaterTexturesOnLayer5;
-    private int moveLayer0ToAndSmooth;
     private int mapImageSize;
-    private boolean restrictTextures;
-    private boolean texturesInside;
-    private int x1;
-    private int x2;
-    private int z1;
-    private int z2;
+    private boolean erosionNormal;
+    private int erosionResolution;
     private boolean keepLayer1;
     private boolean keepLayer2;
     private boolean keepLayer3;
@@ -101,17 +93,8 @@ public strictfp class MapPopulator {
                     "--textures arg         optional, populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)\n" +
                     " - ie: to populate all texture layers except layer 7, use: --textures 1234568\n" +
                     " - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock" +
-                    "--keep-layer-0 arg     optional, populate where texture layer 0 is currently visible to init layer number arg (1, 2, 3, 4, 5, 6, 7, 8)\n" +
-                    " - to blur this layer, add a 0 to its layer number arg: (10, 20, 30, 40, 50, 60, 70, 80)\n" +
-                    "--texture-res arg      optional, set arg texture resolution (128, 256, 512, 1024, 2048, etc) - resolution cannot exceed map size (256 = 5 km)\n" +
-                    "--textures-inside      optional, if x1/x2/z1/z2 are entered, textures will only be populated within the box formed between points those points \n" +
-                    " - if this is not entered and if x1/x2/z1/z2 are entered, textures will only be populated outside of the box formed between points those points\n" +
-                    "--x1 arg               optional, x-coordinate for point 1 for optional restriction on where textures will be populated\n" +
-                    "--z1 arg               optional, z-coordinate for point 1 for optional restriction on where textures will be populated\n" +
-                    "--x2 arg               optional, x-coordinate for point 2 for optional restriction on where textures will be populated\n" +
-                    "--z2 arg               optional, z-coordinate for point 2 for optional restriction on where textures will be populated\n" +
-                    "--lakes                optional, switches texturing for small bodies of water to layer 5 (instead of layer 6)\n" +
                     "--decals               optional, populate decals\n" +
+                    "--erosion arg          optional, add map wide erosion normal at arg resolution\n" +
                     "--ai                   optional, populate ai markers\n" +
                     "--keep-current-decals  optional, prevents decals currently on the map from being deleted\n" +
                     "--debug                optional, turn on debugging options\n");
@@ -156,6 +139,10 @@ public strictfp class MapPopulator {
         if (populateProps) {
             propsPath = Paths.get(arguments.get("props"));
         }
+        erosionNormal = arguments.containsKey("erosion");
+        if (erosionNormal) {
+            erosionResolution = Integer.parseInt(arguments.get("erosion"));
+        }
         populateTextures = arguments.containsKey("textures");
         if (populateTextures) {
             String whichTextures = arguments.get("textures");
@@ -170,22 +157,9 @@ public strictfp class MapPopulator {
                 keepLayer8 = !whichTextures.contains("8");
             }
         }
-        keepLayer0 = arguments.containsKey("keep-layer-0");
-        if (keepLayer0) {
-            moveLayer0ToAndSmooth = Integer.parseInt(arguments.get("keep-layer-0"));
-        }
         if (arguments.containsKey("texture-res")) {
             mapImageSize = Integer.parseInt(arguments.get("texture-res")) / 128 * 128;
         }
-        texturesInside = arguments.containsKey("textures-inside");
-        if (arguments.containsKey("x1") && arguments.containsKey("x2") && arguments.containsKey("z1") && arguments.containsKey("z2")) {
-            x1 = Integer.parseInt(arguments.get("x1"));
-            x2 = Integer.parseInt(arguments.get("x2"));
-            z1 = Integer.parseInt(arguments.get("z1"));
-            z2 = Integer.parseInt(arguments.get("z2"));
-            restrictTextures = true;
-        }
-        smallWaterTexturesOnLayer5 = arguments.containsKey("lakes");
         populateAI = arguments.containsKey("ai");
     }
 
@@ -226,7 +200,6 @@ public strictfp class MapPopulator {
             waterHeight = heightmapBase.getMin();
         }
 
-        BooleanMask wholeMap = new BooleanMask(heightmapBase, Float.NEGATIVE_INFINITY, random.nextLong());
         BooleanMask land = new BooleanMask(heightmapBase, waterHeight, random.nextLong());
         BooleanMask plateaus = new BooleanMask(heightmapBase, waterHeight + 3f, random.nextLong());
         FloatMask slope = new FloatMask(heightmapBase, random.nextLong()).gradient();
@@ -365,11 +338,7 @@ public strictfp class MapPopulator {
             waterBeachTexture.subtract(rock, 1f).subtract(aboveBeachEdge, 0.7f).clampMin(0f).add(waterBeach, .5f).blur(2, rock.copy().invert()).blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0f).blur(2, rock.copy().invert());
             waterBeachTexture.blur(2, rock.copy().invert()).subtract(rock, 1f).clampMin(0f).blur(2, rock.copy().invert()).blur(1, rock.copy().invert()).blur(1, rock.copy().invert()).clampMax(1f);
             waterBeachTexture.removeAreasOfSpecifiedSizeWithLocalMaximums(0, smallWaterSizeLimit, 15, 1f).blur(1).blur(1);
-            if (smallWaterTexturesOnLayer5) {
-                steepHillsTexture.add(smallWaterBeachTexture).clampMax(1f);
-            } else {
-                waterBeachTexture.add(smallWaterBeachTexture).clampMax(1f);
-            }
+            waterBeachTexture.add(smallWaterBeachTexture).clampMax(1f);
             rockTexture.init(rock, 0f, 1f).blur(8).clampMax(0.2f).add(rock, .65f).blur(4).clampMax(0.3f).add(rock, .5f).blur(1).add(rock, 1f).clampMax(1f);
             accentRockTexture.init(accentRock, 0f, 1f).clampMin(0f).blur(8).add(accentRock, .65f).blur(4).add(accentRock, .5f).blur(1).clampMax(1f);
 
@@ -397,71 +366,13 @@ public strictfp class MapPopulator {
             if (keepLayer8) {
                 accentRockTexture = new FloatMask(textureMasksHigh[7], null);
             }
-            if (keepLayer0) {
-                FloatMask oldLayer0 = new FloatMask(mapImageSize, null, symmetrySettings);
-                oldLayer0.init(wholeMap, 0f, 1f);
-                Arrays.stream(textureMasksHigh).forEach(oldLayer0::subtract);
-                Arrays.stream(textureMasksLow).forEach(oldLayer0::subtract);
-                oldLayer0.clampMin(0f);
-                FloatMask oldLayer0Texture = new FloatMask(oldLayer0, null);
-                if (moveLayer0ToAndSmooth >= 10) {
-                    oldLayer0Texture.blur(8).clampMax(0.35f).add(oldLayer0).blur(4).clampMax(0.65f).add(oldLayer0).blur(1).add(oldLayer0).clampMax(1f);
-                }
-                switch (moveLayer0ToAndSmooth) {
-                    case 1:
-                    case 10:
-                        accentGroundTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 2:
-                    case 20:
-                        accentPlateauTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 3:
-                    case 30:
-                        slopesTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 4:
-                    case 40:
-                        accentSlopesTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 5:
-                    case 50:
-                        steepHillsTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 6:
-                    case 60:
-                        waterBeachTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 7:
-                    case 70:
-                        rockTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                    case 8:
-                    case 80:
-                        accentRockTexture = new FloatMask(oldLayer0Texture, null);
-                        break;
-                }
-            }
-
-            if (restrictTextures && x1 >= 0 && x1 <= mapImageSize && x2 >= 0 && x2 <= mapImageSize && z1 >= 0 && z1 <= mapImageSize && z2 >= 0 && z2 <= mapImageSize) {
-                BooleanMask textureBox = new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings);
-                if (texturesInside) {
-                    textureBox.invert().fillRectFromPoints(x1, x2, z1, z2, true);
-                } else {
-                    textureBox.fillRectFromPoints(x1, x2, z1, z2, false);
-                }
-                accentGroundTexture.replaceValues(textureBox, textureMasksLow[0]);
-                accentPlateauTexture.replaceValues(textureBox, textureMasksLow[1]);
-                slopesTexture.replaceValues(textureBox, textureMasksLow[2]);
-                accentSlopesTexture.replaceValues(textureBox, textureMasksLow[3]);
-                steepHillsTexture.replaceValues(textureBox, textureMasksHigh[0]);
-                waterBeachTexture.replaceValues(textureBox, textureMasksHigh[1]);
-                rockTexture.replaceValues(textureBox, textureMasksHigh[2]);
-                accentRockTexture.replaceValues(textureBox, textureMasksHigh[3]);
-            }
 
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
+        }
+
+        if (erosionNormal) {
+            FloatMask erosionHeightMask = heightmapBase.resample(erosionResolution);
         }
 
         if (populateProps) {

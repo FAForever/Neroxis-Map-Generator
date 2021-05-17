@@ -3,7 +3,6 @@ package com.faforever.neroxis.map.generator.texture;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.PreviewGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
@@ -54,11 +53,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     public void setupPipeline() {
-        if (mapParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
-            setupTexturePipeline();
-        } else {
-            setupSimpleTexturePipeline();
-        }
+        setupTexturePipeline();
         setupPreviewPipeline();
     }
 
@@ -97,52 +92,25 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
 
     protected void setupTexturePipeline() {
         BooleanMask flat = new BooleanMask(slope, .05f, random.nextLong(), "flat").invert();
-        BooleanMask accentGround = new BooleanMask(realLand, random.nextLong(), "accentGround");
-        BooleanMask accentPlateau = new BooleanMask(realPlateaus, random.nextLong(), "accentPlateau");
         BooleanMask slopes = new BooleanMask(slope, .15f, random.nextLong(), "slopes");
-        BooleanMask accentSlopes = new BooleanMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
+        BooleanMask accentSlopes = new BooleanMask(slope, .55f, random.nextLong(), "accentSlopes").invert().subtract(flat);
         BooleanMask steepHills = new BooleanMask(slope, .55f, random.nextLong(), "steepHills");
         BooleanMask rock = new BooleanMask(slope, .75f, random.nextLong(), "rock");
-        BooleanMask accentRock = new BooleanMask(slope, .75f, random.nextLong(), "accentRock");
+        BooleanMask accentRock = new BooleanMask(slope, .75f, random.nextLong(), "accentRock").inflate(2f);
 
-        accentGround.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).blur(6, .75f);
-        accentPlateau.acid(.1f, 0).erode(.4f, SymmetryType.SPAWN).blur(6, .75f);
-        slopes.flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-        accentSlopes.subtract(flat).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).blur(4, .75f).acid(.55f, 0);
-        steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-        accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).blur(2, .5f).multiply(rock);
-
-        accentGroundTexture.init(accentGround, 0f, .5f).blur(12).add(accentGround, .325f).blur(8).add(accentGround, .25f).clampMax(1f).blur(2);
-        accentPlateauTexture.init(accentPlateau, 0f, .5f).blur(12).add(accentPlateau, .325f).blur(8).add(accentPlateau, .25f).clampMax(1f).blur(2);
+        accentGroundTexture.init(new FloatMask(realLand.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
+                .addPerlinNoise(32, 1f)).setToValue(realLand.copy().invert(), 0f);
+        accentPlateauTexture.init(new FloatMask(realPlateaus.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
+                .addPerlinNoise(32, 1f)).setToValue(realPlateaus.copy().invert(), 0f).blur(2);
         slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
-        accentSlopesTexture.init(accentSlopes, 0f, 1f).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
-        steepHillsTexture.init(steepHills, 0f, 1f).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).clampMax(1f);
+        accentSlopesTexture.init(new FloatMask(accentSlopes.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
+                .addPerlinNoise(8, .5f)).setToValue(accentSlopes.copy().invert(), 0f).blur(4);
+        steepHillsTexture.init(new FloatMask(steepHills.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
+                .addPerlinNoise(64, 1f)).setToValue(steepHills.copy().invert(), 0f).blur(8);
         waterBeachTexture.init(realLand.copy().invert().inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.init(accentRock, 0f, 1f).blur(4).clampMax(1f);
-    }
-
-    protected void setupSimpleTexturePipeline() {
-        BooleanMask flat = new BooleanMask(slope, .05f, random.nextLong(), "flat").invert();
-        BooleanMask accentGround = new BooleanMask(realLand, random.nextLong(), "accentGround");
-        BooleanMask accentPlateau = new BooleanMask(realPlateaus, random.nextLong(), "accentPlateau");
-        BooleanMask slopes = new BooleanMask(slope, .15f, random.nextLong(), "slopes");
-        BooleanMask accentSlopes = new BooleanMask(slope, .55f, random.nextLong(), "accentSlopes").invert();
-        BooleanMask steepHills = new BooleanMask(slope, .55f, random.nextLong(), "steepHills");
-        BooleanMask rock = new BooleanMask(slope, .75f, random.nextLong(), "rock");
-        BooleanMask accentRock = new BooleanMask(slope, .75f, random.nextLong(), "accentRock");
-
-        accentSlopes.subtract(flat);
-        accentRock.multiply(rock);
-
-        accentGroundTexture.init(accentGround, 0f, .5f).blur(12).add(accentGround, .325f).blur(8).add(accentGround, .25f).clampMax(1f).blur(2);
-        accentPlateauTexture.init(accentPlateau, 0f, .5f).blur(12).add(accentPlateau, .325f).blur(8).add(accentPlateau, .25f).clampMax(1f).blur(2);
-        slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
-        accentSlopesTexture.init(accentSlopes, 0f, 1f).blur(8).add(accentSlopes, .65f).blur(4).add(accentSlopes, .5f).blur(1).clampMax(1f);
-        steepHillsTexture.init(steepHills, 0f, 1f).blur(8).clampMax(0.35f).add(steepHills, .65f).blur(4).clampMax(0.65f).add(steepHills, .5f).blur(1).clampMax(1f);
-        waterBeachTexture.init(realLand.copy().invert().inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
-        rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.init(accentRock, 0f, 1f).blur(4).clampMax(1f);
+        accentRockTexture.init(new FloatMask(accentRock.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
+                .addPerlinNoise(32, 1f)).setToValue(accentRock.copy().invert(), 0f).blur(2);
     }
 
     protected void setupPreviewPipeline() {

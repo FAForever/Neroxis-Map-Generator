@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Random;
 
 @EqualsAndHashCode
 @SuppressWarnings("unchecked")
@@ -40,6 +41,21 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public void set(int i, float value) {
         components[i] = value;
+    }
+
+    public T randomize(Random random, float minValue, float maxValue) {
+        float range = maxValue - minValue;
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = random.nextFloat() * range + minValue;
+        }
+        return (T) this;
+    }
+
+    public T randomize(Random random, float scale) {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = random.nextFloat() * scale;
+        }
+        return (T) this;
     }
 
     public T max(T other) {
