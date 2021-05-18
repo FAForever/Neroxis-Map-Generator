@@ -1,7 +1,5 @@
 package com.faforever.neroxis.util;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.LinkedHashSet;
 
 public strictfp class Vector3 extends Vector<Vector3> {
@@ -82,12 +80,10 @@ public strictfp class Vector3 extends Vector<Vector3> {
         return line;
     }
 
-    @JsonIgnore
     public float getAzimuth() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(getZ(), getX()));
     }
 
-    @JsonIgnore
     public float getElevation() {
         return (float) StrictMath.toDegrees(StrictMath.atan2(getY(), StrictMath.sqrt(getX() * getX() + getZ() * getZ())));
     }

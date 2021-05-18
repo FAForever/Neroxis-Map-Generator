@@ -1,5 +1,6 @@
 package com.faforever.neroxis.util.serialized;
 
+import com.dslplatform.json.CompiledJson;
 import com.faforever.neroxis.util.Vector3;
 import com.faforever.neroxis.util.Vector4;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.Data;
  */
 
 @Data
+@CompiledJson
 public strictfp class LightingSettings {
     private float LightingMultiplier;
     private Vector3 SunDirection;

@@ -1,8 +1,6 @@
 package com.faforever.neroxis.bases;
 
 import com.faforever.commons.lua.LuaLoader;
-import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.serialized.SCUnitSet;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
@@ -19,10 +17,7 @@ public strictfp class TemplateNormalizer {
         Path templatePath = Paths.get(args[0]);
         if (templatePath.getFileName().toString().contains(".lua")) {
             parseLua(templatePath);
-        } else if (templatePath.getFileName().toString().contains(".scunits")) {
-            parseSCUnits(templatePath);
         }
-
     }
 
     public static void parseLua(Path luaPath) throws IOException {
@@ -57,31 +52,6 @@ public strictfp class TemplateNormalizer {
             out.writeBytes("\t\torders = '',\n");
             out.writeBytes("\t\tplatoon = '',\n");
             out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", posTable.get(1).tofloat() - centerX, posTable.get(3).tofloat() - centerY));
-            out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
-            out.writeBytes("\t},\n");
-            count++;
-        }
-        out.writeBytes("}\n");
-        out.flush();
-        out.close();
-    }
-
-    public static void parseSCUnits(Path unitsPath) throws IOException {
-        SCUnitSet scUnitSet = FileUtils.deserialize(unitsPath.toString(), SCUnitSet.class);
-        scUnitSet.getCenter().multiply(10f);
-        scUnitSet.getUnits().forEach(unit -> unit.getPos().multiply(10f).subtract(scUnitSet.getCenter()).roundXYToNearestHalfPoint());
-        Path parent = unitsPath.getParent();
-        String fileName = unitsPath.getFileName().toString();
-        Path luaPath = parent.resolve(fileName.replace("scunits", "lua"));
-        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(luaPath.toFile())));
-        out.writeBytes("Units = {\n");
-        int count = 0;
-        for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
-            out.writeBytes(String.format("\t['UNIT_%d'] = {\n", count));
-            out.writeBytes(String.format("\t\ttype = '%s',\n", unit.getID()));
-            out.writeBytes("\t\torders = '',\n");
-            out.writeBytes("\t\tplatoon = '',\n");
-            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", unit.getPos().getX(), unit.getPos().getZ()));
             out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
             out.writeBytes("\t},\n");
             count++;

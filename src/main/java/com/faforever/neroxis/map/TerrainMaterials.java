@@ -1,8 +1,10 @@
 package com.faforever.neroxis.map;
 
+import com.dslplatform.json.CompiledJson;
 import lombok.Data;
 
 @Data
+@CompiledJson
 public strictfp class TerrainMaterials {
 
     // engine limitations - must stay 9 and 10 always

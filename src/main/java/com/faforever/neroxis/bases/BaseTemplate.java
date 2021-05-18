@@ -43,14 +43,14 @@ public strictfp class BaseTemplate {
     private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(String scunitsFile) throws IOException {
         LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
         SCUnitSet scUnitSet = FileUtils.deserialize(BaseTemplate.class.getResourceAsStream(scunitsFile), SCUnitSet.class);
-        scUnitSet.getUnits().forEach(unit -> {
+        for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
             unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
             if (units.containsKey(unit.getID())) {
                 units.get(unit.getID()).add(new Vector2(unit.getPos()));
             } else {
                 units.put(unit.getID(), new LinkedHashSet<>(Collections.singletonList(new Vector2(unit.getPos()))));
             }
-        });
+        }
         return units;
     }
 

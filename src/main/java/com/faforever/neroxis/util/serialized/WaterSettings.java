@@ -1,5 +1,6 @@
 package com.faforever.neroxis.util.serialized;
 
+import com.dslplatform.json.CompiledJson;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import static com.faforever.neroxis.map.SCMap.*;
  */
 
 @Data
+@CompiledJson
 public strictfp class WaterSettings {
     private boolean WaterPresent;
     private float Elevation;

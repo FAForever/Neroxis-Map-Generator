@@ -1,6 +1,5 @@
 package com.faforever.neroxis.util;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -101,7 +100,6 @@ public abstract strictfp class Vector<T extends Vector<T>> {
         return (T) this;
     }
 
-    @JsonIgnore
     public float getMagnitude() {
         float sum = 0;
         for (int i = 0; i < dimension; ++i) {
