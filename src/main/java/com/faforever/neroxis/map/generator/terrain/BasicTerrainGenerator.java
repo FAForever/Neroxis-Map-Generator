@@ -342,7 +342,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         mountains.init(paintedMountains);
         land.add(paintedMountains);
 
-        heightmapMountains.blur(1, mountains.copy().inflate(32).subtract(mountains.copy().inflate(4)));
+        heightmapMountains.blur(4, mountains.copy().inflate(64).subtract(mountains.copy().inflate(4)));
     }
 
     protected void setupPlateauHeightmapPipeline() {
@@ -361,7 +361,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         BooleanMask plateauBase = new BooleanMask(heightmapPlateaus, 1f, random.nextLong(), "plateauBase");
 
-        heightmapPlateaus.blur(1, plateauBase.copy().inflate(16).subtract(plateauBase));
+        heightmapPlateaus.blur(4, plateauBase.copy().inflate(64).subtract(plateauBase.copy().inflate(4)));
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {
