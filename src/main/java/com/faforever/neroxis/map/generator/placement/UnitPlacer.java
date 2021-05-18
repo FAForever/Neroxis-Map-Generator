@@ -76,7 +76,10 @@ public strictfp class UnitPlacer {
             spawnMask.limitToSymmetryRegion();
             LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
             LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
-            coordinates.forEach((location) -> {
+            for (Vector2 location : coordinates) {
+                if (group.getUnits().size() > 400) {
+                    break;
+                }
                 BaseTemplate base = new BaseTemplate(location, army, group, units);
                 base.addUnits();
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
@@ -88,7 +91,7 @@ public strictfp class UnitPlacer {
                     }
                     symBase.addUnits();
                 });
-            });
+            }
         }
     }
 
