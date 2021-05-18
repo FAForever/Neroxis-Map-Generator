@@ -171,7 +171,7 @@ public strictfp class ImageUtils {
         ddsHeader.setFourCC("DXT5");
         ddsHeader.toBytes();
         byte[] headerBytes = ddsHeader.toBytes();
-        byte[] imageBytes = compressImage(imageByteBuffer.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+        byte[] imageBytes = compressImage(imageByteBuffer.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5, Squish.CompressionMethod.RANGE_FIT);
         int headerLength = headerBytes.length;
         int imageLength = imageBytes.length;
         byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
