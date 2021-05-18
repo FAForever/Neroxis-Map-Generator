@@ -71,21 +71,13 @@ final strictfp class CompressorCluster extends CompressorColourFit {
 
         final Vec bestStart = new Vec(0.0f);
         final Vec bestEnd = new Vec(0.0f);
-        float bestError = CompressorCluster.bestError;
+        float currentError = bestError;
 
         final Vec a = new Vec();
         final Vec b = new Vec();
 
         // prepare an ordering using the principle axis
         constructOrdering(principle, 0);
-
-        // loop over iterations
-        final int[] indices = CompressorCluster.indices;
-        final int[] bestIndices = CompressorCluster.bestIndices;
-
-        final float[] alpha = CompressorCluster.alpha;
-        final float[] beta = CompressorCluster.beta;
-        final float[] weights = CompressorCluster.weights;
 
         // check all possible clusters and iterate on the total order
         int bestIteration = 0;
@@ -114,11 +106,11 @@ final strictfp class CompressorCluster extends CompressorColourFit {
                     final float error = solveLeastSquares(a, b);
 
                     // keep the solution if it wins
-                    if (error < bestError) {
+                    if (error < currentError) {
                         bestStart.set(a);
                         bestEnd.set(b);
                         System.arraycopy(indices, 0, bestIndices, 0, 16);
-                        bestError = error;
+                        currentError = error;
                         bestIteration = iteration;
                     }
                 }
@@ -138,9 +130,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         }
 
         // save the block if necessary
-        if (bestError < CompressorCluster.bestError) {
-            final int[] orders = CompressorCluster.orders;
-            final int[] unordered = CompressorCluster.unordered;
+        if (currentError < bestError) {
 
             // remap the indices
             final int order = 16 * bestIteration;
@@ -153,7 +143,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
             ColourBlock.writeColourBlock3(bestStart, bestEnd, bestIndices, block, offset);
 
             // save the error
-            CompressorCluster.bestError = bestError;
+            bestError = currentError;
         }
     }
 
@@ -162,21 +152,13 @@ final strictfp class CompressorCluster extends CompressorColourFit {
 
         final Vec bestStart = new Vec(0.0f);
         final Vec bestEnd = new Vec(0.0f);
-        float bestError = CompressorCluster.bestError;
+        float currentError = bestError;
 
         final Vec start = new Vec();
         final Vec end = new Vec();
 
         // prepare an ordering using the principle axis
         constructOrdering(principle, 0);
-
-        // check all possible clusters and iterate on the total order
-        final int[] indices = CompressorCluster.indices;
-        final int[] bestIndices = CompressorCluster.bestIndices;
-
-        final float[] alpha = CompressorCluster.alpha;
-        final float[] beta = CompressorCluster.beta;
-        final float[] weights = CompressorCluster.weights;
 
         int bestIteration = 0;
 
@@ -214,11 +196,11 @@ final strictfp class CompressorCluster extends CompressorColourFit {
                         final float error = solveLeastSquares(start, end);
 
                         // keep the solution if it wins
-                        if (error < bestError) {
+                        if (error < currentError) {
                             bestStart.set(start);
                             bestEnd.set(end);
                             System.arraycopy(indices, 0, bestIndices, 0, 16);
-                            bestError = error;
+                            currentError = error;
                             bestIteration = iteration;
                         }
                     }
@@ -240,9 +222,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         }
 
         // save the block if necessary
-        if (bestError < CompressorCluster.bestError) {
-            final int[] orders = CompressorCluster.orders;
-            final int[] unordered = CompressorCluster.unordered;
+        if (currentError < bestError) {
 
             // remap the indices
             final int order = 16 * bestIteration;
@@ -254,7 +234,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
             ColourBlock.writeColourBlock4(bestStart, bestEnd, bestIndices, block, offset);
 
             // save the error
-            CompressorCluster.bestError = bestError;
+            bestError = currentError;
         }
     }
 
@@ -263,10 +243,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         final int count = colours.getCount();
         final Vec[] values = colours.getPoints();
 
-        final int[] orders = CompressorCluster.orders;
-
         // build the list of dot products
-        final float[] dps = CompressorCluster.dps;
         final int order = 16 * iteration;
         for (int i = 0; i < count; ++i) {
             dps[i] = values[i].dot(axis);
@@ -305,8 +282,6 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         final float[] cWeights = colours.getWeights();
         xxSum.set(0.0f);
 
-        final float[] weighted = CompressorCluster.weighted;
-
         for (int i = 0, j = 0; i < count; ++i, j += 3) {
             final int p = orders[order + i];
 
@@ -342,10 +317,6 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         float betax_sumX = 0f;
         float betax_sumY = 0f;
         float betax_sumZ = 0f;
-
-        final float[] alpha = CompressorCluster.alpha;
-        final float[] beta = CompressorCluster.beta;
-        final float[] weighted = CompressorCluster.weighted;
 
         // accumulate all the quantities we need
         for (int i = 0, j = 0; i < count; ++i, j += 3) {

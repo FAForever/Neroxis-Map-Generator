@@ -59,7 +59,7 @@ abstract strictfp class CompressorColourFit {
         return (int) (GRID * v + 0.5f) * GRID_RCP;
     }
 
-    final void compress(final byte[] block, final int offset) {
+    void compress(final byte[] block, final int offset) {
         if (type == CompressionType.DXT1) {
             compress3(block, offset);
             if (!colours.isTransparent()) {
