@@ -47,7 +47,7 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
         float mexDensity = mapParameters.getMexDensity();
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
-            mexCount = (int) (14 + 18 * mexDensity);
+            mexCount = (int) (10 + 20 * mexDensity);
         } else if (spawnCount <= 4) {
             mexCount = (int) (12 + 6 * mexDensity);
         } else if (spawnCount <= 10) {
