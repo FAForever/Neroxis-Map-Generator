@@ -98,19 +98,16 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         BooleanMask rock = new BooleanMask(slope, .75f, random.nextLong(), "rock");
         BooleanMask accentRock = new BooleanMask(slope, .75f, random.nextLong(), "accentRock").inflate(2f);
 
-        accentGroundTexture.init(new FloatMask(realLand.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
-                .addPerlinNoise(32, 1f)).setToValue(realLand.copy().invert(), 0f);
-        accentPlateauTexture.init(new FloatMask(realPlateaus.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
-                .addPerlinNoise(32, 1f)).setToValue(realPlateaus.copy().invert(), 0f).blur(2);
+        int textureSize = mapParameters.getMapSize() + 1;
+        int mapSize = mapParameters.getMapSize();
+        accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(realLand.copy().invert(), 0f).blur(2);
+        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(realPlateaus.copy().invert(), 0f).blur(4);
         slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
-        accentSlopesTexture.init(new FloatMask(accentSlopes.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
-                .addPerlinNoise(8, .5f)).setToValue(accentSlopes.copy().invert(), 0f).blur(4);
-        steepHillsTexture.init(new FloatMask(steepHills.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
-                .addPerlinNoise(64, 1f)).setToValue(steepHills.copy().invert(), 0f).blur(8);
+        accentSlopesTexture.setSize(textureSize).addPerlinNoise(mapSize / 32, .5f).setToValue(accentSlopes.copy().invert(), 0f).blur(4);
+        steepHillsTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).setToValue(steepHills.copy().invert(), 0f).blur(8);
         waterBeachTexture.init(realLand.copy().invert().inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.init(new FloatMask(accentRock.getSize(), random.nextLong(), mapParameters.getSymmetrySettings(), null, true)
-                .addPerlinNoise(32, 1f)).setToValue(accentRock.copy().invert(), 0f).blur(2);
+        accentRockTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(accentRock.copy().invert(), 0f).blur(2);
     }
 
     protected void setupPreviewPipeline() {
@@ -123,6 +120,6 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         rockPreviewTexture = rockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         accentRockPreviewTexture = accentRockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        reflectance = normals.copy().resample(PreviewGenerator.PREVIEW_SIZE).dot(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
+        reflectance = heightmap.copy().getNormalMask(8f).resample(PreviewGenerator.PREVIEW_SIZE).dot(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
     }
 }

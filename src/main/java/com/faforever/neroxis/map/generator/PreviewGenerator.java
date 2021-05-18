@@ -82,7 +82,7 @@ public strictfp class PreviewGenerator {
     private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask reflectance, FloatMask textureLayer) {
         LightingSettings lightingSettings = map.getBiome().getLightingSettings();
 
-        float ambientCoefficient = .35f;
+        float ambientCoefficient = .25f;
 
         int[] origRGBA = new int[4];
         int[] newRGBA = new int[4];

@@ -18,7 +18,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         super.initialize(map, seed, mapParameters);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        normals = heightmap.copy().resample(512).addPerlinNoise(64, 6f)
+        normals = heightmap.copy().resample(512).addPerlinNoise(64, 8f)
                 .addGaussianNoise(.01f).getNormalMask(8f);
     }
 

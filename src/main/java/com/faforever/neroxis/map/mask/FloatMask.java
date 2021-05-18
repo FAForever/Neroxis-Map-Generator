@@ -208,7 +208,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int gradientSize = size / resolution;
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1,
-                random.nextLong(), symmetrySettings, getName() + "PerlinVectors", isParallel());
+                random.nextLong(), new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors", isParallel());
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size,
                 random.nextLong(), symmetrySettings, getName() + "PerlinNoise", isParallel());
