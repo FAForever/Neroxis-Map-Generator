@@ -59,11 +59,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public IntegerMask copy() {
-        if (random != null) {
-            return new IntegerMask(this, random.nextLong());
-        } else {
-            return new IntegerMask(this, null);
-        }
+        return new IntegerMask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override

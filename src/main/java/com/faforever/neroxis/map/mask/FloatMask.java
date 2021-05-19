@@ -128,11 +128,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public FloatMask copy() {
-        if (random != null) {
-            return new FloatMask(this, random.nextLong(), getName() + "Copy");
-        } else {
-            return new FloatMask(this, null, getName() + "Copy");
-        }
+        return new FloatMask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override
@@ -186,9 +182,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        enqueue(() -> {
-            addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
-        });
+        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale));
         return this;
     }
 
@@ -211,7 +205,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 random.nextLong(), new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors", isParallel());
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size,
-                random.nextLong(), symmetrySettings, getName() + "PerlinNoise", isParallel());
+                null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue((dependencies) -> {
             Vector2Mask source = (Vector2Mask) dependencies.get(0);
             noise.set((x, y) -> {
@@ -305,8 +299,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
-    public void waterDrop(Vector3Mask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
-                          float depositionRate, float maxOffset, float iterationScale) {
+    private void waterDrop(Vector3Mask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
+                           float depositionRate, float maxOffset, float iterationScale) {
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float sediment = 0;
@@ -391,7 +385,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
         enqueue(() -> {
-            FloatMask brush = loadBrush(brushName, random.nextLong());
+            FloatMask brush = loadBrush(brushName, null);
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
         });
@@ -404,7 +398,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             assertSmallerSize(size);
             ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
-            FloatMask brush = loadBrush(brushName, random.nextLong());
+            FloatMask brush = loadBrush(brushName, null);
             brush.multiply(intensity / brush.getMax()).setSize(size);
             for (int i = 0; i < numUses; i++) {
                 Vector2 location = possibleLocations.get(random.nextInt(length));

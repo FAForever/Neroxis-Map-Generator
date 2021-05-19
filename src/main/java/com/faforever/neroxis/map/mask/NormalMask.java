@@ -69,11 +69,7 @@ public strictfp class NormalMask extends Vector3Mask {
 
     @Override
     public NormalMask copy() {
-        if (random != null) {
-            return new NormalMask(this, random.nextLong(), getName() + "Copy");
-        } else {
-            return new NormalMask(this, null, getName() + "Copy");
-        }
+        return new NormalMask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override

@@ -114,11 +114,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     public BooleanMask copy() {
-        if (random != null) {
-            return new BooleanMask(this, random.nextLong(), getName() + "Copy");
-        } else {
-            return new BooleanMask(this, null, getName() + "Copy");
-        }
+        return new BooleanMask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override
@@ -190,7 +186,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                            float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
         enqueue(() -> {
             Vector2 location = new Vector2(start);
-            BooleanMask brush = loadBrush(brushName, random.nextLong())
+            BooleanMask brush = loadBrush(brushName, null)
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
             for (int i = 0; i < numberOfUses; i++) {
                 addWithOffset(brush, location, true, wrapEdges);
@@ -453,7 +449,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public BooleanMask addBrush(Vector2 location, String brushName, float minValue, float maxValue, int size) {
         enqueue(() -> {
-            FloatMask brush = loadBrush(brushName, random.nextLong()).setSize(size);
+            FloatMask brush = loadBrush(brushName, null).setSize(size);
             addWithOffset(brush, minValue, maxValue, location, false);
         });
         return this;
@@ -499,7 +495,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask limitToCenteredCircle(float circleRadius) {
         enqueue(() -> {
             int size = getSize();
-            BooleanMask symmetryLimit = new BooleanMask(size, random.nextLong(), symmetrySettings, getName() + "symmetryLimit");
+            BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "symmetryLimit");
             symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
             multiply(symmetryLimit);
         });

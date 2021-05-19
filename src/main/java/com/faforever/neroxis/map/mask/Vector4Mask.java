@@ -65,11 +65,7 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
 
     @Override
     public Vector4Mask copy() {
-        if (random != null) {
-            return new Vector4Mask(this, random.nextLong(), getName() + "Copy");
-        } else {
-            return new Vector4Mask(this, null, getName() + "Copy");
-        }
+        return new Vector4Mask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override

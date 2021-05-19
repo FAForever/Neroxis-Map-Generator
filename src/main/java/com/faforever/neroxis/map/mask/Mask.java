@@ -46,11 +46,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.mask = getEmptyMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
-        if (seed != null) {
-            this.random = new Random(seed);
-        } else {
-            this.random = null;
-        }
+        random = seed != null ? new Random(seed) : null;
         enqueue(() -> {
         });
     }

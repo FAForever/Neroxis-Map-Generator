@@ -66,11 +66,7 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
 
     @Override
     public Vector2Mask copy() {
-        if (random != null) {
-            return new Vector2Mask(this, random.nextLong(), getName() + "Copy");
-        } else {
-            return new Vector2Mask(this, null, getName() + "Copy");
-        }
+        return new Vector2Mask(this, getNextSeed(), getName() + "Copy");
     }
 
     @Override
