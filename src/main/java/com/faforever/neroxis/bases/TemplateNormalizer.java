@@ -1,6 +1,6 @@
 package com.faforever.neroxis.bases;
 
-import com.faforever.commons.lua.LuaLoader;
+import com.faforever.neroxis.util.LuaLoader;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 

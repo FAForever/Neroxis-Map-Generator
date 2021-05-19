@@ -25,10 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.FAForever:faf-java-commons:0b83fa48a039cea085a7d462cc937fb5a035c186") {
-        exclude module: 'guava'
-        exclude module: 'faf-commons-api'
-    }
     implementation("org.luaj:luaj-jse:3.0.1")
     implementation("com.google.guava:guava:28.0-jre")
     implementation('com.dslplatform:dsl-json-java8:1.9.8')

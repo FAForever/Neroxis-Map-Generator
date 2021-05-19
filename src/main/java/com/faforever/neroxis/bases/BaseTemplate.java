@@ -1,11 +1,11 @@
 package com.faforever.neroxis.bases;
 
-import com.faforever.commons.lua.LuaLoader;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.serialized.SCUnitSet;
 import lombok.Value;
