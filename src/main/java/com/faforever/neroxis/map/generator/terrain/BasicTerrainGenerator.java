@@ -115,9 +115,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected void symmetrySetup() {
         if (!mapParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             float halfSize = map.getSize() / 2f;
-            land.startVisualDebugger();
-            plateaus.startVisualDebugger();
-            mountains.startVisualDebugger();
             int forceRadius = mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
             land.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
             plateaus.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
