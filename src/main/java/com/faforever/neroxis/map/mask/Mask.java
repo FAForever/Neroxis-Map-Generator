@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected static final String MOCK_NAME = "Mock";
 
@@ -77,11 +77,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public abstract U clear();
 
-    public abstract U blur(int size);
+    public abstract U blur(int radius);
 
-    public U interpolate() {
-        return blur(1);
-    }
+    public abstract U blur(int radius, BooleanMask other);
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
         return wrapEdges ? (val + offset + size) % size : val + offset - 1;
@@ -604,11 +602,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void applySymmetry(SymmetryType symmetryType) {
-        applySymmetry(symmetryType, false);
+    public U applySymmetry(SymmetryType symmetryType) {
+        return applySymmetry(symmetryType, false);
     }
 
-    public void applySymmetry(SymmetryType symmetryType, boolean reverse) {
+    public U applySymmetry(SymmetryType symmetryType, boolean reverse) {
         if (!reverse) {
             enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
                 T value = get(x, y);
@@ -623,9 +621,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 symPoints.forEach(symmetryPoint -> set(x, y, get(symmetryPoint)));
             }));
         }
+        return (U) this;
     }
 
-    public void applySymmetry(float angle) {
+    public U applySymmetry(float angle) {
         enqueue(() -> {
             if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
                 throw new IllegalArgumentException("Spawn Symmetry must equal POINT2");
@@ -637,10 +636,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 }
             });
         });
+        return (U) this;
     }
 
-    public void applySymmetry() {
-        applySymmetry(SymmetryType.SPAWN);
+    public U applySymmetry() {
+        return applySymmetry(SymmetryType.SPAWN);
     }
 
     public U flip(SymmetryType symmetryType) {
@@ -660,18 +660,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    public void set(BiFunction<Integer, Integer, T> valueFunction) {
+    protected void set(BiFunction<Integer, Integer, T> valueFunction) {
         apply((x, y) -> set(x, y, valueFunction.apply(x, y)));
     }
 
-    public void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    protected void setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
         });
     }
 
-    public void apply(BiConsumer<Integer, Integer> maskAction) {
+    protected void apply(BiConsumer<Integer, Integer> maskAction) {
         int size = getSize();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -680,7 +680,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
+    protected void applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
         int minX = getMinXBound(symmetryType);
         int maxX = getMaxXBound(symmetryType);
         for (int x = minX; x < maxX; x++) {
@@ -692,41 +692,75 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
+    protected void applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
         action.accept(x, y);
         List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
         symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
     }
 
-    public void applyWithOffset(U other, TriConsumer<Integer, Integer, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    protected void applyWithOffset(U other, TriConsumer<Integer, Integer, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         int size = getSize();
         int otherSize = other.getSize();
         int smallerSize = StrictMath.min(size, otherSize);
-        int offsetX;
-        int offsetY;
-        if (center) {
-            offsetX = xCoordinate - smallerSize / 2;
-            offsetY = yCoordinate - smallerSize / 2;
-        } else {
-            offsetX = xCoordinate;
-            offsetY = yCoordinate;
-        }
         Map<Integer, Integer> coordinateXMap = new LinkedHashMap<>();
         Map<Integer, Integer> coordinateYMap = new LinkedHashMap<>();
         if (size >= otherSize) {
-            for (int i = 0; i < otherSize; ++i) {
-                coordinateXMap.put(i, getShiftedValue(i, offsetX, size, wrapEdges));
-                coordinateYMap.put(i, getShiftedValue(i, offsetY, size, wrapEdges));
-            }
-            other.apply((x, y) -> {
-                int shiftX = coordinateXMap.get(x);
-                int shiftY = coordinateYMap.get(y);
-                if (inBounds(shiftX, shiftY)) {
-                    T value = other.get(x, y);
-                    applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN, (sx, sy) -> action.accept(sx, sy, value));
+            if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                int offsetX;
+                int offsetY;
+                if (center) {
+                    offsetX = xCoordinate - smallerSize / 2;
+                    offsetY = yCoordinate - smallerSize / 2;
+                } else {
+                    offsetX = xCoordinate;
+                    offsetY = yCoordinate;
                 }
-            });
+                for (int i = 0; i < otherSize; ++i) {
+                    coordinateXMap.put(i, getShiftedValue(i, offsetX, size, wrapEdges));
+                    coordinateYMap.put(i, getShiftedValue(i, offsetY, size, wrapEdges));
+                }
+                other.apply((x, y) -> {
+                    int shiftX = coordinateXMap.get(x);
+                    int shiftY = coordinateYMap.get(y);
+                    if (inBounds(shiftX, shiftY)) {
+                        T value = other.get(x, y);
+                        applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN, (sx, sy) -> action.accept(sx, sy, value));
+                    }
+                });
+            } else {
+                applyAtSymmetryPoints(xCoordinate, yCoordinate, SymmetryType.SPAWN, (sx, sy) -> {
+                    int offsetX;
+                    int offsetY;
+                    if (center) {
+                        offsetX = sx - smallerSize / 2;
+                        offsetY = sy - smallerSize / 2;
+                    } else {
+                        offsetX = sx;
+                        offsetY = sy;
+                    }
+                    for (int i = 0; i < otherSize; ++i) {
+                        coordinateXMap.put(i, getShiftedValue(i, offsetX, size, wrapEdges));
+                        coordinateYMap.put(i, getShiftedValue(i, offsetY, size, wrapEdges));
+                    }
+                    other.apply((x, y) -> {
+                        int shiftX = coordinateXMap.get(x);
+                        int shiftY = coordinateYMap.get(y);
+                        if (inBounds(shiftX, shiftY)) {
+                            action.accept(shiftX, shiftY, other.get(x, y));
+                        }
+                    });
+                });
+            }
         } else {
+            int offsetX;
+            int offsetY;
+            if (center) {
+                offsetX = xCoordinate - smallerSize / 2;
+                offsetY = yCoordinate - smallerSize / 2;
+            } else {
+                offsetX = xCoordinate;
+                offsetY = yCoordinate;
+            }
             for (int i = 0; i < size; ++i) {
                 coordinateXMap.put(i, getShiftedValue(i, offsetX, otherSize, wrapEdges));
                 coordinateYMap.put(i, getShiftedValue(i, offsetY, otherSize, wrapEdges));

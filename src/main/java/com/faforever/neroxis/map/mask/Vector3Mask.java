@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.Vector3;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
 
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -53,13 +54,6 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
             set((x, y) -> get(x, y).cross(source.get(x, y)));
         }, other);
         return this;
-    }
-
-    @Override
-    protected Vector3[][] getInnerCount() {
-        Vector3[][] innerCount = new Vector3[getSize()][getSize()];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
-        return innerCount;
     }
 
     @Override

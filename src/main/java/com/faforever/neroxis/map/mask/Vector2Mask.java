@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
 
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -45,13 +46,6 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     protected Vector2 createValue(float scaleFactor, float... components) {
         assertMatchingDimension(components.length);
         return new Vector2(components[0], components[1]).multiply(scaleFactor);
-    }
-
-    @Override
-    protected Vector2[][] getInnerCount() {
-        Vector2[][] innerCount = new Vector2[getSize()][getSize()];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
-        return innerCount;
     }
 
     @Override

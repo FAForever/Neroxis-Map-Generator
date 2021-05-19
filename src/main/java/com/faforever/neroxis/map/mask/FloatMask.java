@@ -20,7 +20,7 @@ import java.util.List;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {

@@ -107,11 +107,21 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         landSetup();
         plateausSetup();
         mountainSetup();
+        symmetrySetup();
         spawnTerrainSetup();
-        if (mapParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
-            setupHeightmapPipeline();
-        } else {
-            setupSimpleHeightmapPipeline();
+        setupHeightmapPipeline();
+    }
+
+    protected void symmetrySetup() {
+        if (!mapParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            float halfSize = map.getSize() / 2f;
+            land.startVisualDebugger();
+            plateaus.startVisualDebugger();
+            mountains.startVisualDebugger();
+            int forceRadius = mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+            land.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
+            plateaus.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
+            mountains.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
         }
     }
 
@@ -147,6 +157,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float landDensityRange = landDensityMax - landDensityMin;
         float scaledLandDensity = mapParameters.getLandDensity() * landDensityRange + landDensityMin;
         int mapSize = map.getSize();
+
         land.setSize(mapSize / 16);
 
         land.randomize(scaledLandDensity).blur(2, .75f).erode(.5f, SymmetryType.TERRAIN, mapSize / 256);
@@ -254,53 +265,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
                 .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
 
         heightmap.add(heightmapLand).add(waterHeight).add(noise);
-
-        blurRamps();
-    }
-
-    protected void setupSimpleHeightmapPipeline() {
-        int mapSize = map.getSize();
-        float waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
-
-        BooleanMask symmetryLimits = new BooleanMask(mapSize + 1, random.nextLong(), mapParameters.getSymmetrySettings(), "symmetryLimits", true);
-        symmetryLimits.fillCircle((mapSize + 1) / 2f, (mapSize + 1) / 2f, (mapSize - 32) / 2f, true).setSize(mapSize / 8);
-        symmetryLimits.inflate(1).erode(.5f, SymmetryType.SPAWN, 6).inflate(2);
-        symmetryLimits.setSize(mapSize + 1);
-        symmetryLimits.inflate(4);
-
-        heightmap.setSize(mapSize + 1);
-        heightmapMountains.setSize(mapSize + 1);
-        heightmapPlateaus.setSize(mapSize + 1);
-        heightmapLand.setSize(mapSize + 1);
-        heightmapOcean.setSize(mapSize + 1);
-        noise.setSize(mapSize / 128);
-
-        land.multiply(symmetryLimits);
-        plateaus.multiply(symmetryLimits);
-        mountains.multiply(symmetryLimits);
-
-        heightmapPlateaus.addDistance(plateaus.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1).clampMax(plateauHeight);
-        heightmapMountains.addDistance(mountains.dilute(1, SymmetryType.SPAWN).inflate(1).invert(), 1f);
-        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor);
-
-        BooleanMask paintedPlateaus = new BooleanMask(heightmapPlateaus, plateauHeight - 3, random.nextLong(), "paintedPlateaus");
-        BooleanMask paintedMountains = new BooleanMask(heightmapMountains, plateauHeight / 2, random.nextLong(), "paintedMountains");
-
-        land.add(paintedPlateaus);
-        plateaus.init(paintedPlateaus);
-        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
-        mountains.init(paintedMountains);
-        land.add(paintedMountains);
-
-        heightmapPlateaus.add(plateaus, 3f).clampMax(plateauHeight).blur(1, plateaus);
-
-        initRamps();
-
-        heightmapLand.add(heightmapMountains).add(landHeight)
-                .setToValue(spawnLandMask, landHeight).add(heightmapPlateaus).setToValue(spawnPlateauMask, plateauHeight + landHeight)
-                .blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
-
-        heightmap.add(heightmapLand).add(waterHeight);
 
         blurRamps();
     }

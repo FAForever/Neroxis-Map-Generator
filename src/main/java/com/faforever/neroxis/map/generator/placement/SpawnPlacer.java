@@ -23,7 +23,7 @@ public strictfp class SpawnPlacer {
         BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         spawnMask.fillSides(map.getSize() / spawnCount * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
-            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
+            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f).fillEdge(map.getSize() / 8, false);
         }
         Vector2 location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {

@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.Vector4;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
 
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -44,13 +45,6 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     protected Vector4 createValue(float scaleFactor, float... components) {
         assertMatchingDimension(components.length);
         return new Vector4(components[0], components[1], components[2], components[3]).multiply(scaleFactor);
-    }
-
-    @Override
-    protected Vector4[][] getInnerCount() {
-        Vector4[][] innerCount = new Vector4[getSize()][getSize()];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
-        return innerCount;
     }
 
     @Override

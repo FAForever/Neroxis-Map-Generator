@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings({"unchecked", "unused"})
 @Value
 public strictfp class ParameterConstraints {
     Range landDensityRange;

@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
 
     public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -78,10 +78,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     }
 
     protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
-        innerCount[x][y] = val;
-        innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
-        innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
-        innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+        calculateScalarInnerValue(innerCount, x, y, val);
     }
 
     protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {

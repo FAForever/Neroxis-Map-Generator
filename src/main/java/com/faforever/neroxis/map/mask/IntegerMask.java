@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {

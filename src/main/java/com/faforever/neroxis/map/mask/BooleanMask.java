@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -139,12 +139,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        enqueue(() -> setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density));
+        enqueue(() -> {
+            setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
+        });
         return this;
     }
 
     public BooleanMask flipValues(float density) {
-        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> get(x, y) && random.nextFloat() < density));
+        enqueue(() -> {
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> get(x, y) && random.nextFloat() < density);
+        });
         return this;
     }
 
@@ -429,11 +433,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
-    @Override
-    public BooleanMask interpolate() {
-        return blur(1, .35f);
-    }
-
     public BooleanMask blur(int radius, float density) {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
@@ -503,9 +502,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillShape(Vector2 location) {
-        enqueue(() -> {
-            fillCoordinates(getShapeCoordinates(location), !get(location));
-        });
+        enqueue(() -> fillCoordinates(getShapeCoordinates(location), !get(location)));
         return this;
     }
 
@@ -548,9 +545,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasBiggerThan(int maxArea) {
-        enqueue(() -> {
-            subtract(copy().removeAreasSmallerThan(maxArea));
-        });
+        enqueue(() -> subtract(copy().removeAreasSmallerThan(maxArea)));
         return this;
     }
 
@@ -563,9 +558,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
-        enqueue(() -> {
-            subtract(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
-        });
+        enqueue(() -> subtract(this.copy().removeAreasOutsideSizeRange(minSize, maxSize)));
         return this;
     }
 

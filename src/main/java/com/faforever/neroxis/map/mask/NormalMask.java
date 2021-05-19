@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class NormalMask extends Vector3Mask {
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {

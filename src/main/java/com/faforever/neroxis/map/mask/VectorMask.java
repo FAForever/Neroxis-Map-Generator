@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
 
     public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -102,8 +102,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected abstract T createValue(float scaleFactor, float... components);
-
-    protected abstract T[][] getInnerCount();
 
     @Override
     public void addValueAt(int x, int y, T value) {
@@ -218,16 +216,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U clampComponentMin(float floor) {
-        enqueue(() -> {
-            apply((x, y) -> get(x, y).clampMin(floor));
-        });
+        enqueue(() -> apply((x, y) -> get(x, y).clampMin(floor)));
         return (U) this;
     }
 
     public U clampComponentMax(float ceiling) {
-        enqueue(() -> {
-            apply((x, y) -> get(x, y).clampMax(ceiling));
-        });
+        enqueue(() -> apply((x, y) -> get(x, y).clampMax(ceiling)));
         return (U) this;
     }
 
@@ -250,9 +244,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U normalize() {
-        enqueue((dependencies) -> {
-            apply((x, y) -> get(x, y).normalize());
-        });
+        enqueue((dependencies) -> apply((x, y) -> get(x, y).normalize()));
         return (U) this;
     }
 
@@ -375,10 +367,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void calculateComponentInnerValue(int[][] innerCount, int x, int y, int val) {
-        innerCount[x][y] = val;
-        innerCount[x][y] += x > 0 ? innerCount[x - 1][y] : 0;
-        innerCount[x][y] += y > 0 ? innerCount[x][y - 1] : 0;
-        innerCount[x][y] -= x > 0 && y > 0 ? innerCount[x - 1][y - 1] : 0;
+        calculateScalarInnerValue(innerCount, x, y, val);
     }
 
     protected float calculateComponentAreaAverage(int radius, int x, int y, int[][] innerCount) {
@@ -394,6 +383,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         int count = countD + countA - countB - countC;
         int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
         return (float) count / area;
+    }
+
+    protected T[][] getInnerCount() {
+        T[][] innerCount = getNullMask(getSize());
+        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
+        return innerCount;
     }
 
     protected void calculateInnerValue(T[][] innerCount, int x, int y, T val) {
