@@ -355,6 +355,7 @@ public strictfp class MapGenerator {
                     "--blind                optional, set map to blind style which will apply tournament style and remove in game lobby preview\n" +
                     "--unexplored           optional, set map to unexplored style which will apply tournament and blind style and add unexplored fog of war\n" +
                     "--debug                optional, turn on debugging options\n" +
+                    "--visualize            optional, turn on visualization for all masks\n" +
                     "--num-to-gen           optional, number of maps to generate\n" +
                     "--preview-path         optional, path to dump previews to\n");
             validArgs = false;
@@ -382,6 +383,11 @@ public strictfp class MapGenerator {
         if (arguments.containsKey("debug")) {
             Util.DEBUG = true;
             Pipeline.HASH_MASK = true;
+        }
+
+        if (arguments.containsKey("visualize")) {
+            Util.VISUALIZE = true;
+            Util.DEBUG = true;
         }
 
         if (arguments.containsKey("num-to-gen")) {
@@ -481,6 +487,12 @@ public strictfp class MapGenerator {
                     optionsUsed = true;
                 }
             }
+        } else {
+            Util.VISUALIZE = false;
+        }
+
+        if (Util.VISUALIZE) {
+            VisualDebugger.createGUI();
         }
     }
 

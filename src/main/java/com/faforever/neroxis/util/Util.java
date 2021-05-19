@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 public strictfp class Util {
 
     public static boolean DEBUG = false;
+    public static boolean VISUALIZE = false;
 
     public static String getStackTraceLineInClass(Class<?> clazz) {
         return getStackTraceLineInClass(clazz.getCanonicalName());

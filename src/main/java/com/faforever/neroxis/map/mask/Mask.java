@@ -53,7 +53,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
         enqueue(() -> {
         });
-        this.immutable = name != null && name.endsWith(MOCK_NAME);
     }
 
     public Mask(U other, Long seed) {
@@ -62,10 +61,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public Mask(U other, Long seed, String name) {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
-        boolean intendedMutability = immutable;
-        immutable = false;
         init(other);
-        immutable = intendedMutability;
+        immutable = name != null && name.endsWith(MOCK_NAME);
     }
 
     public abstract BufferedImage writeToImage(BufferedImage image);

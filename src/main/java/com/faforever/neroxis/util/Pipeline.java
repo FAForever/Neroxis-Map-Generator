@@ -202,7 +202,7 @@ public strictfp class Pipeline {
             this.method = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (Util.DEBUG) {
+                if (Util.DEBUG || Util.VISUALIZE) {
                     VisualDebugger.visualizeMask(executingMask, method, line);
                 }
                 resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
