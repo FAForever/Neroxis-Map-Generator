@@ -331,8 +331,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int maxX = StrictMath.round(x + radius + 1);
         int minY = StrictMath.round(y - radius);
         int maxY = StrictMath.round(y + radius + 1);
-        for (int x2 = minX; x2 < maxX; x2++) {
-            for (int y2 = minY; y2 < maxY; y2++) {
+        for (int x2 = minX; x2 < maxX; ++x2) {
+            for (int y2 = minY; y2 < maxY; ++y2) {
                 if (inBounds(x2, y2) && maskCopy[x2][y2] != value && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     maskCopy[x2][y2] = value;
                 }
