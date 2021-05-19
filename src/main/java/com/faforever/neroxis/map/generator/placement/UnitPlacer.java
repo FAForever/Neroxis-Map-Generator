@@ -52,8 +52,7 @@ public strictfp class UnitPlacer {
 
     public static final String[] MEDIUM_ENEMY = {
             "/base_template/UEFMedium.lua",
-            "/base_template/AeonMedium.lua",
-            "/base_template/AeonBase.scunits"
+            "/base_template/AeonMedium.lua"
     };
 
     public static final String[] MEDIUM_RECLAIM = {
