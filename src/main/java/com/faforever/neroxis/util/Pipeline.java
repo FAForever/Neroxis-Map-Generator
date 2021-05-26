@@ -125,12 +125,10 @@ public strictfp class Pipeline {
         List<Entry> res = new ArrayList<>();
 
         for (Mask<?, ?> requiredMask : requiredMasks) {
-            for (int i = pipeline.size() - 1; i >= 0; i--) {
-                if (requiredMask.equals(pipeline.get(i).getExecutingMask())) {
-                    res.add(pipeline.get(i));
-                    break;
-                }
-            }
+            pipeline.stream()
+                    .filter(entry -> requiredMask.equals(entry.getExecutingMask()))
+                    .reduce((first, second) -> second)
+                    .ifPresent(res::add);
         }
         return res;
     }
