@@ -71,6 +71,7 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
             }
         }
         mexCount *= mexMultiplier;
+        mexCount = StrictMath.max(mexCount, 9);
         return mexCount * spawnCount;
     }
 }
