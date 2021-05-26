@@ -302,7 +302,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         mountains.init(paintedMountains);
         land.add(paintedMountains);
 
-        heightmapMountains.blur(4, mountains.copy().inflate(64).subtract(mountains.copy().inflate(4)));
+        heightmapMountains.blur(4, mountains.copy().inflate(64).subtract(mountains));
     }
 
     protected void setupPlateauHeightmapPipeline() {
