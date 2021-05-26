@@ -70,6 +70,9 @@ public strictfp class Pipeline {
                                 finalCallingMethod
                         );
                     }
+                    if (Util.DEBUG || Util.VISUALIZE || VisualDebugger.VISUALIZE_ALL) {
+                        VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
+                    }
                 });
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
@@ -200,9 +203,6 @@ public strictfp class Pipeline {
             this.method = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (Util.DEBUG || Util.VISUALIZE) {
-                    VisualDebugger.visualizeMask(executingMask, method, line);
-                }
                 resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
                 if (resultCount > 0) {
                     immutableResult = executingMask.mock();

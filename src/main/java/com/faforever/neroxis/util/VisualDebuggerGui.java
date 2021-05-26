@@ -22,7 +22,7 @@ public strictfp class VisualDebuggerGui {
     private static JList<MaskListItem> list;
     private static JLabel label;
     private static JPanel canvasContainer;
-    private static ImagePanel currentCanvas;
+    private static ImagePanel canvas;
     private static double userZoomScale = 1d;
     private static int mouseX = 0;
     private static int mouseY = 0;
@@ -38,7 +38,7 @@ public strictfp class VisualDebuggerGui {
     }
 
     public static void createGui() {
-        if (frame != null || !VisualDebugger.ENABLED) {
+        if (frame != null) {
             return;
         }
         frame = new JFrame();
@@ -71,6 +71,12 @@ public strictfp class VisualDebuggerGui {
         constraints.gridheight = 1;
 
         contentPane.add(canvasContainer, constraints);
+
+        canvas = new ImagePanel();
+        canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
+        canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
+        canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
+        canvasContainer.add(canvas);
     }
 
     private static void createList() {
@@ -119,11 +125,8 @@ public strictfp class VisualDebuggerGui {
                     ind = i + 1;
                 }
             }
-            ImagePanel canvas = new ImagePanel(mask);
-            canvas.addMouseListener(CANVAS_MOUSE_LISTENER);
-            canvas.addMouseMotionListener(CANVAS_MOUSE_LISTENER);
-            canvas.addMouseWheelListener(CANVAS_MOUSE_LISTENER);
-            listModel.insertElementAt(new MaskListItem(uniqueMaskName, canvas), ind);
+
+            listModel.insertElementAt(new MaskListItem(uniqueMaskName, mask), ind);
             if (list.getSelectedIndex() == -1) {
                 list.setSelectedIndex(ind);
             }
@@ -134,31 +137,25 @@ public strictfp class VisualDebuggerGui {
 
     private static void updateVisibleCanvas(MaskListItem maskListItem) {
         String maskName = maskListItem.getMaskName();
-        ImagePanel canvas = maskListItem.getCanvas();
+        Mask<?, ?> mask = maskListItem.getMask();
         Point locationOnScreen = MouseInfo.getPointerInfo().getLocation();
         Point locationOnComponent = new Point(locationOnScreen);
         SwingUtilities.convertPointFromScreen(locationOnComponent, canvas);
-        ToolTipManager.sharedInstance().mouseMoved(
-                new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
-                        locationOnScreen.x, locationOnScreen.y, 0, false, 0));
-        canvasContainer.removeAll();
-        canvasContainer.add(canvas);
-        currentCanvas = canvas;
+        canvas.setMask(mask);
         setLabel();
         contentPane.revalidate();
         contentPane.repaint();
         frame.setTitle("Mask: " + maskName + ", Size: " + canvas.getImage().getHeight());
-        ToolTipManager.sharedInstance().mouseMoved(
-                new MouseEvent(canvas, -1, System.currentTimeMillis(), 0, locationOnComponent.x, locationOnComponent.y,
-                        locationOnScreen.x, locationOnScreen.y, 0, false, 0));
     }
 
     private static void setLabel() {
-        Mask<?, ?> mask = currentCanvas.getMask();
-        int maskX = (int) ((mouseX - xOffset) / userZoomScale / currentCanvas.getImageZoomScaleX());
-        int maskY = (int) ((mouseY - yOffset) / userZoomScale / currentCanvas.getImageZoomScaleY());
-        if (mask.inBounds(maskX, maskY)) {
-            label.setText(String.format("X: %5d, Y: %5d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
+        Mask<?, ?> mask = canvas.getMask();
+        if (mask != null) {
+            int maskX = (int) ((mouseX - xOffset) / userZoomScale / canvas.getImageZoomScaleX());
+            int maskY = (int) ((mouseY - yOffset) / userZoomScale / canvas.getImageZoomScaleY());
+            if (mask.inBounds(maskX, maskY)) {
+                label.setText(String.format("X: %5d, Y: %5d \t Value: %s", maskX, maskY, mask.get(maskX, maskY).toString()));
+            }
         }
     }
 
@@ -179,14 +176,29 @@ public strictfp class VisualDebuggerGui {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class ImagePanel extends JPanel {
-        private final BufferedImage image;
-        private final Mask<?, ?> mask;
+        private BufferedImage image;
+        private Mask<?, ?> mask;
         private double imageZoomScaleX;
         private double imageZoomScaleY;
 
-        public ImagePanel(Mask<?, ?> mask) {
+        public ImagePanel() {
+            image = new BufferedImage(512, 512, BufferedImage.TYPE_INT_RGB);
+            paintCheckerboard();
+        }
+
+        public void setMask(Mask<?, ?> mask) {
             this.mask = mask;
             image = new BufferedImage(mask.getImmediateSize(), mask.getImmediateSize(), BufferedImage.TYPE_INT_RGB);
+            paintCheckerboard();
+
+            Graphics g = image.getGraphics();
+            g.drawImage(mask.toImage(), 0, 0, this);
+
+            imageZoomScaleX = (double) getWidth() / image.getWidth();
+            imageZoomScaleY = (double) getHeight() / image.getHeight();
+        }
+
+        private void paintCheckerboard() {
             for (int x = 0; x < image.getWidth(); ++x) {
                 for (int y = 0; y < image.getHeight(); ++y) {
                     if ((x / 4 + y / 4) % 2 == 0) {
@@ -196,12 +208,6 @@ public strictfp class VisualDebuggerGui {
                     }
                 }
             }
-
-            Graphics g = image.getGraphics();
-            g.drawImage(mask.toImage(), 0, 0, this);
-
-            imageZoomScaleX = (double) getWidth() / image.getWidth();
-            imageZoomScaleY = (double) getHeight() / image.getHeight();
         }
 
         @Override
@@ -232,7 +238,7 @@ public strictfp class VisualDebuggerGui {
     @Value
     public static class MaskListItem {
         String maskName;
-        ImagePanel canvas;
+        Mask<?, ?> mask;
 
         @Override
         public String toString() {

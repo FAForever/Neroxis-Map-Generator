@@ -794,7 +794,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             setVisualDebug(false);
             function.accept(dependencies);
             setVisualDebug(visualDebug);
-            if (Util.DEBUG && visualDebug) {
+            if ((Util.DEBUG && visualDebug) || (VisualDebugger.VISUALIZE_ALL && !name.contains(MOCK_NAME))) {
                 String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
                 String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
