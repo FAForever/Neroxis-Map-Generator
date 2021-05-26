@@ -43,7 +43,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.symmetrySettings = symmetrySettings;
         this.name = name;
-        this.mask = getEmptyMask(size);
+        this.mask = getZeroMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
@@ -69,11 +69,15 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract T getZeroValue();
 
+    protected abstract void maskFill(T value);
+
+    protected abstract void maskFill(T[][] mask, T value);
+
+    protected abstract void maskFill(T[][] mask);
+
     public abstract U copy();
 
     public abstract U mock();
-
-    public abstract U clear();
 
     public abstract U blur(int radius);
 
@@ -135,6 +139,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return random != null ? random.nextLong() : null;
     }
 
+    public U clear() {
+        enqueue(() -> maskFill(getZeroValue()));
+        return (U) this;
+    }
+
     public U setSize(int newSize) {
         int size = getSize();
         if (newSize != size) {
@@ -142,12 +151,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             enqueue(() -> {
                 if (size == 1) {
                     T value = get(0, 0);
-                    mask = getEmptyMask(newSize);
+                    mask = getNullMask(newSize);
                     maskFill(value);
                 } else {
                     T[][] oldMask = mask;
                     int oldSize = getSize();
-                    mask = getEmptyMask(newSize);
+                    mask = getNullMask(newSize);
                     Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                     set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
                 }
@@ -156,10 +165,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    protected T[][] getEmptyMask(int size) {
-        T[][] empty = getNullMask(size);
-        maskFill(empty, getZeroValue());
-        return empty;
+    protected T[][] getZeroMask(int size) {
+        T[][] zeros = getNullMask(size);
+        maskFill(zeros, getZeroValue());
+        return zeros;
     }
 
     protected T[][] getMaskCopy() {
@@ -333,10 +342,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected int getMinXBound(SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        switch (symmetry) {
-            default:
-                return 0;
-        }
+        return 0;
     }
 
     public ArrayList<Float> getSymmetryRotation(float rot, SymmetryType symmetryType) {
@@ -648,7 +654,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 throw new IllegalArgumentException("Cannot flip non single axis symmetry");
             }
             int size = getSize();
-            T[][] newMask = getEmptyMask(size);
+            T[][] newMask = getNullMask(size);
             apply((x, y) -> {
                 List<Vector2> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
                 newMask[x][y] = get(symmetryPoints.get(0));
@@ -703,23 +709,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         int size = getSize();
         int otherSize = other.getSize();
         int smallerSize = StrictMath.min(size, otherSize);
+        int biggerSize = StrictMath.max(size, otherSize);
         Map<Integer, Integer> coordinateXMap = new LinkedHashMap<>();
         Map<Integer, Integer> coordinateYMap = new LinkedHashMap<>();
-        if (size >= otherSize) {
+        if (smallerSize == otherSize) {
             if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-                int offsetX;
-                int offsetY;
-                if (center) {
-                    offsetX = xCoordinate - smallerSize / 2;
-                    offsetY = yCoordinate - smallerSize / 2;
-                } else {
-                    offsetX = xCoordinate;
-                    offsetY = yCoordinate;
-                }
-                for (int i = 0; i < otherSize; ++i) {
-                    coordinateXMap.put(i, getShiftedValue(i, offsetX, size, wrapEdges));
-                    coordinateYMap.put(i, getShiftedValue(i, offsetY, size, wrapEdges));
-                }
+                generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
                 other.apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
@@ -730,19 +725,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 });
             } else {
                 applyAtSymmetryPoints(xCoordinate, yCoordinate, SymmetryType.SPAWN, (sx, sy) -> {
-                    int offsetX;
-                    int offsetY;
-                    if (center) {
-                        offsetX = sx - smallerSize / 2;
-                        offsetY = sy - smallerSize / 2;
-                    } else {
-                        offsetX = sx;
-                        offsetY = sy;
-                    }
-                    for (int i = 0; i < otherSize; ++i) {
-                        coordinateXMap.put(i, getShiftedValue(i, offsetX, size, wrapEdges));
-                        coordinateYMap.put(i, getShiftedValue(i, offsetY, size, wrapEdges));
-                    }
+                    generateCoordinateMaps(sx, sy, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
@@ -753,19 +736,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 });
             }
         } else {
-            int offsetX;
-            int offsetY;
-            if (center) {
-                offsetX = xCoordinate - smallerSize / 2;
-                offsetY = yCoordinate - smallerSize / 2;
-            } else {
-                offsetX = xCoordinate;
-                offsetY = yCoordinate;
-            }
-            for (int i = 0; i < size; ++i) {
-                coordinateXMap.put(i, getShiftedValue(i, offsetX, otherSize, wrapEdges));
-                coordinateYMap.put(i, getShiftedValue(i, offsetY, otherSize, wrapEdges));
-            }
+            generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
             apply((x, y) -> {
                 int shiftX = coordinateXMap.get(x);
                 int shiftY = coordinateYMap.get(y);
@@ -774,6 +745,22 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     action.accept(x, y, value);
                 }
             });
+        }
+    }
+
+    public void generateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges, int smallerSize, Map<Integer, Integer> coordinateXMap, Map<Integer, Integer> coordinateYMap) {
+        int offsetX;
+        int offsetY;
+        if (center) {
+            offsetX = xCoordinate - smallerSize / 2;
+            offsetY = yCoordinate - smallerSize / 2;
+        } else {
+            offsetX = xCoordinate;
+            offsetY = yCoordinate;
+        }
+        for (int i = 0; i < smallerSize; ++i) {
+            coordinateXMap.put(i, getShiftedValue(i, offsetX, smallerSize, wrapEdges));
+            coordinateYMap.put(i, getShiftedValue(i, offsetY, smallerSize, wrapEdges));
         }
     }
 
@@ -1072,12 +1059,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         enqueue(() -> coordinates.forEach(location -> set(location, value)));
         return (U) this;
     }
-
-    protected abstract void maskFill(T value);
-
-    protected abstract void maskFill(T[][] mask, T value);
-
-    protected abstract void maskFill(T[][] mask);
 
     @Override
     public String toString() {

@@ -347,7 +347,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask cutCorners() {
         enqueue(() -> {
             int size = getSize();
-            Boolean[][] maskCopy = getEmptyMask(size);
+            Boolean[][] maskCopy = getNullMask(size);
             apply((x, y) -> {
                 int count = 0;
                 if (x > 0 && !get(x - 1, y))
@@ -420,7 +420,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public BooleanMask outline() {
         enqueue(() -> {
-            Boolean[][] maskCopy = getEmptyMask(getSize());
+            Boolean[][] maskCopy = getNullMask(getSize());
             apply((x, y) -> maskCopy[x][y] = isEdge(x, y));
             mask = maskCopy;
         });

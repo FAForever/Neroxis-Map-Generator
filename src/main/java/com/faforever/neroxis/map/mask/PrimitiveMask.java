@@ -29,11 +29,6 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
 
     protected abstract T transformAverage(float value);
 
-    public U clear() {
-        enqueue(() -> maskFill(getZeroValue()));
-        return (U) this;
-    }
-
     @Override
     protected void maskFill(T value) {
         maskFill(mask, value);

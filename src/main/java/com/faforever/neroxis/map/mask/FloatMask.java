@@ -251,7 +251,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask gradient() {
         enqueue(() -> {
             int size = getSize();
-            Float[][] maskCopy = getEmptyMask(size);
+            Float[][] maskCopy = getNullMask(size);
             apply((x, y) -> {
                 int xNeg = StrictMath.max(0, x - 1);
                 int xPos = StrictMath.min(size - 1, x + 1);
@@ -269,7 +269,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask supcomGradient() {
         enqueue(() -> {
             int size = getSize();
-            Float[][] maskCopy = getEmptyMask(size);
+            Float[][] maskCopy = getNullMask(size);
             apply((x, y) -> {
                 int xPos = StrictMath.min(size - 1, x + 1);
                 int yPos = StrictMath.min(size - 1, y + 1);
