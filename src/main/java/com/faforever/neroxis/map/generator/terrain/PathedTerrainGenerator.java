@@ -2,7 +2,6 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetryType;
 
 public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
 
@@ -32,13 +31,13 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
     protected void spawnTerrainSetup() {
         int mapSize = map.getSize();
         spawnPlateauMask.setSize(mapSize / 4);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).dilute(.5f, SymmetryType.SPAWN, 8);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
+        spawnPlateauMask.erode(.5f, 4).dilute(.5f, 8);
+        spawnPlateauMask.erode(.5f).setSize(mapSize + 1);
         spawnPlateauMask.blur(4);
 
         spawnLandMask.setSize(mapSize / 4);
-        spawnLandMask.erode(.25f, SymmetryType.SPAWN, mapSize / 128).dilute(.5f, SymmetryType.SPAWN, 4);
-        spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(mapSize + 1);
+        spawnLandMask.erode(.25f, mapSize / 128).dilute(.5f, 4);
+        spawnLandMask.erode(.5f).setSize(mapSize + 1);
         spawnLandMask.blur(4);
 
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);

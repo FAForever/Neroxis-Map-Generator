@@ -4,7 +4,6 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
@@ -39,7 +38,7 @@ public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
         float reclaimDensity = mapParameters.getReclaimDensity();
         largeRockFieldMask.setSize(mapSize / 4);
 
-        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).dilute(.5f, SymmetryType.SPAWN, 8).setSize(mapSize + 1);
+        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f).fillEdge(32, false).dilute(.5f, 8).setSize(mapSize + 1);
         largeRockFieldMask.multiply(passableLand);
     }
 

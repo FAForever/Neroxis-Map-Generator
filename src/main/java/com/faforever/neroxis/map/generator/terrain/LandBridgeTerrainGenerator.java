@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.util.Vector2;
 
@@ -29,7 +28,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
                 pathAroundPoint(land, new Vector2(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
-        land.dilute(.5f, SymmetryType.SPAWN, 8);
+        land.dilute(.5f, 8);
         land.setSize(mapSize + 1);
         land.blur(8);
     }
@@ -46,7 +45,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
 
         pathInEdgeBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
-        plateaus.dilute(.5f, SymmetryType.TERRAIN, 4).setSize(mapSize + 1);
+        plateaus.dilute(.5f, 4).setSize(mapSize + 1);
         plateaus.blur(12);
     }
 }

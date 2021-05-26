@@ -3,7 +3,6 @@ package com.faforever.neroxis.map.generator.terrain;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 
 public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
@@ -43,9 +42,9 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
         connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
-        land.dilute(.5f, SymmetryType.SPAWN, 8).erode(.5f, SymmetryType.SPAWN, 6);
+        land.dilute(.5f, 8).erode(.5f, 6);
         if (mapSize > 512) {
-            land.erode(.5f, SymmetryType.SPAWN, 4);
+            land.erode(.5f, 4);
         }
         land.setSize(mapSize + 1);
         land.blur(mapSize / 64, .75f);

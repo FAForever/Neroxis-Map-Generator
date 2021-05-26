@@ -306,17 +306,17 @@ public strictfp class MapPopulator {
             FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
 
-            accentGround.subtract(highGround).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0);
-            accentPlateau.acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0);
-            slopes.multiply(land).flipValues(.95f).erode(.5f, SymmetryType.SPAWN).acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
-            accentSlopes.subtract(flat).multiply(land).acid(.1f, 0).erode(.5f, SymmetryType.SPAWN).blur(4, .75f).acid(.55f, 0);
-            steepHills.acid(.3f, 0).erode(.2f, SymmetryType.SPAWN);
+            accentGround.subtract(highGround).acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
+            accentPlateau.acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
+            slopes.multiply(land).flipValues(.95f).erode(.5f).acid(.3f, 0).erode(.2f);
+            accentSlopes.subtract(flat).multiply(land).acid(.1f, 0).erode(.5f).blur(4, .75f).acid(.55f, 0);
+            steepHills.acid(.3f, 0).erode(.2f);
             if (waterPresent) {
                 waterBeach.invert().subtract(smallWater).subtract(flatAboveCoast).subtract(inland).inflate(1).add(lowWaterBeach).blur(5, 0.5f).subtract(aboveBeach).subtract(higherFlatAboveCoast).blur(2).blur(1);
             } else {
                 waterBeach.clear();
             }
-            accentRock.acid(.2f, 0).erode(.3f, SymmetryType.SPAWN).acid(.2f, 0).blur(2, .5f).multiply(rock);
+            accentRock.acid(.2f, 0).erode(.3f).acid(.2f, 0).blur(2, .5f).multiply(rock);
 
             accentGround.setSize(mapImageSize);
             accentPlateau.setSize(mapImageSize);
@@ -401,7 +401,7 @@ public strictfp class MapPopulator {
             BooleanMask largeRockFieldMask = new BooleanMask(land, random.nextLong());
             BooleanMask smallRockFieldMask = new BooleanMask(land, random.nextLong());
 
-            treeMask.deflate(6).erode(0.5f).multiply(land.copy().deflate(15).acid(.05f, 0).erode(.85f, SymmetryType.SPAWN).blur(2, .75f).acid(.45f, 0));
+            treeMask.deflate(6).erode(0.5f).multiply(land.copy().deflate(15).acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).multiply(flatEnoughNearRock);
             fieldStoneMask.randomize(.00145f).multiply(flatEnoughNearRock.copy().deflate(1));
             largeRockFieldMask.randomize(.015f).multiply(flatEnoughNearRock);

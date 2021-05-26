@@ -388,6 +388,7 @@ public strictfp class MapGenerator {
         if (arguments.containsKey("visualize")) {
             Util.VISUALIZE = true;
             Util.DEBUG = true;
+            VisualDebugger.createGUI();
         }
 
         if (arguments.containsKey("num-to-gen")) {

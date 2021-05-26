@@ -47,8 +47,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.plannedSize = size;
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
-        enqueue(() -> {
-        });
     }
 
     public Mask(U other, Long seed) {
@@ -689,6 +687,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             for (int y = minY; y < maxY; y++) {
                 maskAction.accept(x, y);
             }
+        }
+        if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+            applySymmetry(SymmetryType.SPAWN);
         }
     }
 

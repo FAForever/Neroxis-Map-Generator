@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.mask.BooleanMask;
 
@@ -35,7 +34,7 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
 
         pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noMountains.setSize(mapSize / 4);
-        noMountains.dilute(.5f, SymmetryType.SPAWN, (int) (maxStepSize * 2)).setSize(mapSize + 1);
+        noMountains.dilute(.5f, (int) (maxStepSize * 2)).setSize(mapSize + 1);
         noMountains.blur(mapSize / 64);
 
         mountains.invert().subtract(noMountains);

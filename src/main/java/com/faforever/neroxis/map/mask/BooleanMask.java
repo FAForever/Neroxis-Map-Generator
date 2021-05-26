@@ -379,14 +379,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask dilute(float strength) {
-        return dilute(strength, SymmetryType.TERRAIN);
+        return dilute(strength, 1);
     }
 
-    public BooleanMask dilute(float strength, SymmetryType symmetryType) {
-        return dilute(strength, symmetryType, 1);
-    }
-
-    public BooleanMask dilute(float strength, SymmetryType symmetryType, int count) {
+    public BooleanMask dilute(float strength, int count) {
+        SymmetryType symmetryType = SymmetryType.SPAWN;
         enqueue(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] maskCopy = getMaskCopy();
@@ -402,14 +399,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask erode(float strength) {
-        return erode(strength, SymmetryType.TERRAIN);
+        return erode(strength, 1);
     }
 
-    public BooleanMask erode(float strength, SymmetryType symmetryType) {
-        return erode(strength, symmetryType, 1);
-    }
-
-    public BooleanMask erode(float strength, SymmetryType symmetryType, int count) {
+    public BooleanMask erode(float strength, int count) {
+        SymmetryType symmetryType = SymmetryType.SPAWN;
         enqueue(() -> {
             for (int i = 0; i < count; i++) {
                 Boolean[][] maskCopy = getMaskCopy();
@@ -703,6 +697,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
             chosenCoordinates.addLast(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
+            if (symmetryType != null) {
+                List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                symmetryPoints.forEach(symPoint -> coordinateList.removeIf((loc) -> symPoint.getDistance(loc) < spacing));
+            }
         }
         return chosenCoordinates;
     }

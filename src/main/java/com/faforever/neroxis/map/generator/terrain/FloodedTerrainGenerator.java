@@ -2,7 +2,6 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 
 public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
@@ -31,7 +30,7 @@ public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
         plateaus.setSize(map.getSize() / 16);
 
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);
-        plateaus.dilute(.5f, SymmetryType.TERRAIN, map.getSize() / 256);
+        plateaus.dilute(.5f, map.getSize() / 256);
         plateaus.setSize(map.getSize() + 1);
         plateaus.blur(16, .25f);
         plateaus.deflate(plateauBrushSize / 4f);

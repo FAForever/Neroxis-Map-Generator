@@ -4,7 +4,6 @@ import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.Vector3;
@@ -140,7 +139,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 3 + 1);
+        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + mapParameters.getMountainDensity()) / 3 * 3 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
@@ -155,11 +154,13 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float scaledLandDensity = mapParameters.getLandDensity() * landDensityRange + landDensityMin;
         int mapSize = map.getSize();
 
+
+        land.startVisualDebugger();
         land.setSize(mapSize / 16);
 
-        land.randomize(scaledLandDensity).blur(2, .75f).erode(.5f, SymmetryType.TERRAIN, mapSize / 256);
+        land.randomize(scaledLandDensity).blur(2, .75f).erode(.5f);
         land.setSize(mapSize / 4);
-        land.dilute(.5f, SymmetryType.TERRAIN, mapSize / 128);
+        land.dilute(.5f, mapSize / 128);
         land.setSize(mapSize + 1);
         land.blur(8, .75f);
 
@@ -176,7 +177,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         plateaus.setSize(map.getSize() / 16);
 
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);
-        plateaus.dilute(.5f, SymmetryType.TERRAIN, map.getSize() / 128);
+        plateaus.dilute(.5f, map.getSize() / 128);
         plateaus.setSize(map.getSize() + 1);
         plateaus.blur(16, .75f);
     }
@@ -189,30 +190,30 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         } else {
             mountains.randomWalk((int) (mapParameters.getMountainDensity() * 100 / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
         }
-        mountains.dilute(.5f, SymmetryType.TERRAIN, 4);
+        mountains.dilute(.5f, 4);
         mountains.setSize(map.getSize() + 1);
     }
 
     protected void spawnTerrainSetup() {
         spawnPlateauMask.setSize(map.getSize() / 4);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN, 4).dilute(.5f, SymmetryType.SPAWN, 8);
-        spawnPlateauMask.erode(.5f, SymmetryType.SPAWN).setSize(map.getSize() + 1);
+        spawnPlateauMask.erode(.5f).dilute(.5f, 8);
+        spawnPlateauMask.erode(.5f).setSize(map.getSize() + 1);
         spawnPlateauMask.blur(4);
 
         spawnLandMask.setSize(map.getSize() / 4);
-        spawnLandMask.erode(.25f, SymmetryType.SPAWN, map.getSize() / 128).dilute(.5f, SymmetryType.SPAWN, 4);
-        spawnLandMask.erode(.5f, SymmetryType.SPAWN).setSize(map.getSize() + 1);
+        spawnLandMask.erode(.25f, map.getSize() / 128).dilute(.5f, 4);
+        spawnLandMask.erode(.5f).setSize(map.getSize() + 1);
         spawnLandMask.blur(4);
 
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(spawnLandMask).add(spawnPlateauMask);
         if (map.getSize() > 512 && mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() <= 4) {
             land.add(spawnLandMask).add(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
-            land.erode(.5f, SymmetryType.SPAWN, 10).add(spawnLandMask.copy().setSize(map.getSize() / 8)).add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
-                    .blur(4, .75f).dilute(.5f, SymmetryType.SPAWN, 5).setSize(map.getSize() + 1);
+            land.erode(.5f, 10).add(spawnLandMask.copy().setSize(map.getSize() / 8)).add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
+                    .blur(4, .75f).dilute(.5f, 5).setSize(map.getSize() + 1);
             land.blur(8, .75f);
         } else {
-            land.dilute(.25f, SymmetryType.SPAWN, 16).blur(2);
+            land.dilute(.25f, 16).blur(2);
         }
 
         ensureSpawnTerrain();
@@ -267,8 +268,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     private void blurRamps() {
-        heightmap.blur(8, ramps.copy().acid(.001f, 4).erode(.25f, SymmetryType.SPAWN, 4))
-                .blur(6, ramps.copy().inflate(2).acid(.01f, 4).erode(.25f, SymmetryType.SPAWN, 4))
+        heightmap.blur(8, ramps.copy().acid(.001f, 4).erode(.25f, 4))
+                .blur(6, ramps.copy().inflate(2).acid(.01f, 4).erode(.25f, 4))
                 .blur(4, ramps.copy().inflate(4))
                 .blur(2, ramps.copy().inflate(8))
                 .clampMin(0f).clampMax(255f);
@@ -336,10 +337,10 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         hills.setSize(map.getSize() / 4);
         valleys.setSize(map.getSize() / 4);
 
-        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 2)
+        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, 2)
                 .setSize(map.getSize() + 1);
         hills.multiply(land.copy().deflate(8)).subtract(plateaus.copy().outline().inflate(8)).subtract(spawnLandMask);
-        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, SymmetryType.SPAWN, 4)
+        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, 4)
                 .setSize(map.getSize() + 1);
         valleys.multiply(plateaus.copy().deflate(8)).subtract(spawnPlateauMask);
 

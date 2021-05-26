@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 
@@ -14,9 +13,9 @@ public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGene
         cliffRockMask.setSize(mapSize / 16);
 
         cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .25f).setSize(mapSize + 1);
-        cliffRockMask.multiply(impassable).dilute(.5f, SymmetryType.SPAWN, 6).subtract(impassable).multiply(passableLand);
+        cliffRockMask.multiply(impassable).dilute(.5f, 6).subtract(impassable).multiply(passableLand);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .1f).setSize(mapSize / 4);
-        treeMask.inflate(2).erode(.5f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
+        treeMask.inflate(2).erode(.5f);
         treeMask.setSize(mapSize + 1);
         treeMask.multiply(passableLand.copy().deflate(8)).fillEdge(8, false);
     }

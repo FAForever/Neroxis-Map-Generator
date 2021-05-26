@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
@@ -37,7 +36,7 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         islands.subtract(land.copy().inflate(32));
 
         land.add(islands);
-        land.dilute(.5f, SymmetryType.SPAWN, 8);
+        land.dilute(.5f, 8);
 
         land.setSize(mapSize + 1);
         land.blur(16);

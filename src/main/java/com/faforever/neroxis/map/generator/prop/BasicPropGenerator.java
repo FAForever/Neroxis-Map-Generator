@@ -4,7 +4,6 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
@@ -40,11 +39,11 @@ public strictfp class BasicPropGenerator extends PropGenerator {
         fieldStoneMask.setSize(mapSize / 4);
 
         cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .5f).setSize(mapSize + 1);
-        cliffRockMask.multiply(impassable).dilute(.5f, SymmetryType.SPAWN, 6).subtract(impassable).multiply(passableLand);
+        cliffRockMask.multiply(impassable).dilute(.5f, 6).subtract(impassable).multiply(passableLand);
         fieldStoneMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .0025f).setSize(mapSize + 1);
         fieldStoneMask.multiply(passableLand).fillEdge(10, false);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
-        treeMask.inflate(2).erode(.5f, SymmetryType.SPAWN).erode(.5f, SymmetryType.SPAWN);
+        treeMask.inflate(2).erode(.5f);
         treeMask.setSize(mapSize + 1);
         treeMask.multiply(passableLand.copy().deflate(8)).fillEdge(8, false);
     }
