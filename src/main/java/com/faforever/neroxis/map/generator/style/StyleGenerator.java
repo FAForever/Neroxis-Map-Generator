@@ -146,10 +146,14 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     }
 
     public String generatorsToString() {
-        return "TerrainGenerator: " + terrainGenerator.getClass().getSimpleName() +
-                "\nTextureGenerator: " + textureGenerator.getClass().getSimpleName() +
-                "\nResourceGenerator: " + resourceGenerator.getClass().getSimpleName() +
-                "\nPropGenerator: " + propGenerator.getClass().getSimpleName() +
-                "\nDecalGenerator: " + decalGenerator.getClass().getSimpleName();
+        if (!mapParameters.isTournamentStyle()) {
+            return "TerrainGenerator: " + terrainGenerator.getClass().getSimpleName() +
+                    "\nTextureGenerator: " + textureGenerator.getClass().getSimpleName() +
+                    "\nResourceGenerator: " + resourceGenerator.getClass().getSimpleName() +
+                    "\nPropGenerator: " + propGenerator.getClass().getSimpleName() +
+                    "\nDecalGenerator: " + decalGenerator.getClass().getSimpleName();
+        } else {
+            return "";
+        }
     }
 }

@@ -19,22 +19,29 @@ public strictfp class MapParameters {
     int hydroCount;
     boolean unexplored;
     boolean blind;
+    boolean tournamentStyle;
     SymmetrySettings symmetrySettings;
     Biome biome;
 
     public String toString() {
-        return "Spawns: " + spawnCount +
-                "\nMap Size: " + mapSize +
-                "\nNum Teams: " + numTeams +
-                "\nBiome: " + biome.getName() +
-                "\nLand Density: " + landDensity +
-                "\nPlateau Density: " + plateauDensity +
-                "\nMountain Density: " + mountainDensity +
-                "\nRamp Density: " + rampDensity +
-                "\nReclaim Density: " + reclaimDensity +
-                "\nMex Density: " + mexDensity +
-                "\nTerrain Symmetry: " + symmetrySettings.getTerrainSymmetry() +
-                "\nTeam Symmetry: " + symmetrySettings.getTeamSymmetry() +
-                "\nSpawn Symmetry: " + symmetrySettings.getSpawnSymmetry();
+        if (!tournamentStyle) {
+            return "Spawns: " + spawnCount +
+                    "\nMap Size: " + mapSize +
+                    "\nNum Teams: " + numTeams +
+                    "\nBiome: " + biome.getName() +
+                    "\nLand Density: " + landDensity +
+                    "\nPlateau Density: " + plateauDensity +
+                    "\nMountain Density: " + mountainDensity +
+                    "\nRamp Density: " + rampDensity +
+                    "\nReclaim Density: " + reclaimDensity +
+                    "\nMex Density: " + mexDensity +
+                    "\nTerrain Symmetry: " + symmetrySettings.getTerrainSymmetry() +
+                    "\nTeam Symmetry: " + symmetrySettings.getTeamSymmetry() +
+                    "\nSpawn Symmetry: " + symmetrySettings.getSpawnSymmetry();
+        } else {
+            return "Spawns: " + spawnCount +
+                    "\nMap Size: " + mapSize +
+                    "\nNum Teams: " + numTeams;
+        }
     }
 }

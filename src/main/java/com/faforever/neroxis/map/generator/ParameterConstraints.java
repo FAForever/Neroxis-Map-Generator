@@ -87,7 +87,7 @@ public strictfp class ParameterConstraints {
         }
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
+    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean tournamentStyle, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
         return MapParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))
@@ -99,6 +99,7 @@ public strictfp class ParameterConstraints {
                 .mapSize(mapSize)
                 .numTeams(numTeams)
                 .hydroCount(spawnCount)
+                .tournamentStyle(tournamentStyle)
                 .blind(blind)
                 .unexplored(unexplored)
                 .symmetrySettings(symmetrySettings)

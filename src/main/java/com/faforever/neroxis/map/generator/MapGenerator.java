@@ -105,7 +105,6 @@ public strictfp class MapGenerator {
             System.out.println(generator.mapStyle.mapParameters.toString());
             System.out.println("Style: " + generator.mapStyle.getName());
             System.out.println(generator.mapStyle.generatorsToString());
-            System.out.println("Done");
             if (!generator.tournamentStyle && generator.previewFolder != null) {
                 SCMapExporter.exportPreview(Paths.get(generator.previewFolder), generator.map);
             }
@@ -294,6 +293,7 @@ public strictfp class MapGenerator {
                 .hydroCount(spawnCount)
                 .unexplored(unexplored)
                 .blind(blind)
+                .tournamentStyle(tournamentStyle)
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
@@ -316,10 +316,10 @@ public strictfp class MapGenerator {
         if (optionsUsed) {
             setMapStyle();
         } else if (styleSpecified) {
-            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, blind, unexplored, symmetrySettings);
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         } else {
             mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
-            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, blind, unexplored, symmetrySettings);
+            mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         }
 
         if (mapName == null) {
@@ -388,7 +388,6 @@ public strictfp class MapGenerator {
         if (arguments.containsKey("visualize")) {
             Util.VISUALIZE = true;
             Util.DEBUG = true;
-            VisualDebugger.createGUI();
         }
 
         if (arguments.containsKey("num-to-gen")) {
