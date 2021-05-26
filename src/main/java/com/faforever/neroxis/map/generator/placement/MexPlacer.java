@@ -20,7 +20,7 @@ public strictfp class MexPlacer {
 
     public void placeMexes(int mexCount, BooleanMask spawnMask, BooleanMask spawnMaskWater) {
         map.getMexes().clear();
-        int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(36f / (mexCount * map.getSpawnCount()), .25f), 2f));
+        int mexSpacing = (int) (map.getSize() / 8 * StrictMath.min(StrictMath.max(40f / (mexCount * map.getSpawnCount()), .25f), 2f));
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
@@ -88,7 +88,7 @@ public strictfp class MexPlacer {
         int expMexCountLeft = possibleExpMexCount;
         int expMexSpacing = 10;
         int expSize = 10;
-        int expSpacing = (int) (map.getSize() / 6 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .75f), 1.75f));
+        int expSpacing = (int) (map.getSize() / 4 * StrictMath.min(StrictMath.max(8f / possibleExpMexCount, .75f), 1.75f));
 
         BooleanMask expansionSpawnMask = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
         expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).multiply(spawnMask);
@@ -136,7 +136,7 @@ public strictfp class MexPlacer {
             }
 
             placeIndividualMexes(expansion, expMexCount, expMexSpacing);
-            spawnMask.fillCircle(expLocation, mexSpacing * 2f * expMexCount / 4f, false);
+            spawnMask.fillCircle(expLocation, mexSpacing * 3f * expMexCount / 4f, false);
             expMexCountLeft -= expMexCount;
         }
     }
