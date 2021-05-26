@@ -154,8 +154,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float scaledLandDensity = mapParameters.getLandDensity() * landDensityRange + landDensityMin;
         int mapSize = map.getSize();
 
-
-        land.startVisualDebugger();
         land.setSize(mapSize / 16);
 
         land.randomize(scaledLandDensity).blur(2, .75f).erode(.5f);
