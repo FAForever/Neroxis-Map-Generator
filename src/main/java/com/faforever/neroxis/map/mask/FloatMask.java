@@ -316,7 +316,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 break;
             }
             Vector3 surfaceNormal = normalMask.get(sampleX, sampleY);
-//            Vector3f surfaceNormal = getNormalAt((int) x, (int) y, 100);
 
             // If the terrain is flat, stop simulating, the snowball cannot roll any further
             if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
