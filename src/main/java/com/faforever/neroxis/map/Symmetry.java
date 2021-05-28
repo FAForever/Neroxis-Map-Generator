@@ -25,7 +25,7 @@ public strictfp enum Symmetry {
     Z(true, 2),
     QUAD(true, 4),
     DIAG(true, 4),
-    NONE(false, 1);
+    NONE(true, 1);
 
     private final int numSymPoints;
     private final boolean perfectSymmetry;
