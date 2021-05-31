@@ -44,7 +44,7 @@ public strictfp class LargeBattlePropGenerator extends ReducedNaturalPropGenerat
         landWreckMask.fillCenter(196, true);
         map.getSpawns().forEach(spawn -> landWreckMask.fillCircle(spawn.getPosition(), 128, false));
         landWreckMask.multiply(passableLand).space(96, 128);
-        landWreckMask.inflate(40f).setSize(mapSize / 4);
+        landWreckMask.inflate(20f).setSize(mapSize / 4);
         landWreckMask.erode(.5f).setSize(mapSize + 1);
         landWreckMask.multiply(passableLand).fillEdge(96, false);
     }
