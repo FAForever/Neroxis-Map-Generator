@@ -253,14 +253,20 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
                 .add(heightmapPlateaus).setToValue(spawnLandMask, landHeight).setToValue(spawnPlateauMask, plateauHeight + landHeight)
                 .blur(1, spawnLandMask.copy().inflate(4)).blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
 
-        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64);
-        noise.addWhiteNoise(plateauHeight / 2).resample(mapSize + 1);
-        noise.addWhiteNoise(1)
-                .subtractAvg().clampMin(0f).setToValue(land.copy().invert().inflate(16), 0f)
-                .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
-                .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
+        heightmap.add(heightmapLand).add(waterHeight);
 
-        heightmap.add(heightmapLand).add(waterHeight).add(noise);
+        if (noise.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64);
+            noise.addWhiteNoise(plateauHeight / 2).resample(mapSize + 1);
+            noise.addWhiteNoise(1)
+                    .subtractAvg().clampMin(0f).setToValue(land.copy().invert().inflate(16), 0f)
+                    .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
+                    .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
+            heightmap.add(noise);
+        }
+
+        noise.startVisualDebugger();
+        heightmap.startVisualDebugger();
 
         blurRamps();
     }
