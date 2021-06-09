@@ -3,13 +3,24 @@ package com.faforever.neroxis.map.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.TriConsumer;
+import com.faforever.neroxis.util.Util;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -845,7 +856,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public U startVisualDebugger(String maskName) {
         visualName = maskName;
         visualDebug = true;
-        VisualDebugger.createGUI();
         show();
         return (U) this;
     }

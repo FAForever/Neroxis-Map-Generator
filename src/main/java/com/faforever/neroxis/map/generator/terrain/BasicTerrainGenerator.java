@@ -265,9 +265,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
             heightmap.add(noise);
         }
 
-        noise.startVisualDebugger();
-        heightmap.startVisualDebugger();
-
         blurRamps();
     }
 

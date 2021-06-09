@@ -2,11 +2,36 @@ package com.faforever.neroxis.map.generator;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.exporter.SCMapExporter;
-import com.faforever.neroxis.map.generator.style.*;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.map.generator.style.BasicStyleGenerator;
+import com.faforever.neroxis.map.generator.style.BigIslandsStyleGenerator;
+import com.faforever.neroxis.map.generator.style.CenterLakeStyleGenerator;
+import com.faforever.neroxis.map.generator.style.DropPlateauStyleGenerator;
+import com.faforever.neroxis.map.generator.style.FloodedStyleGenerator;
+import com.faforever.neroxis.map.generator.style.HighReclaimStyleGenerator;
+import com.faforever.neroxis.map.generator.style.LandBridgeStyleGenerator;
+import com.faforever.neroxis.map.generator.style.LittleMountainStyleGenerator;
+import com.faforever.neroxis.map.generator.style.LowMexStyleGenerator;
+import com.faforever.neroxis.map.generator.style.MountainRangeStyleGenerator;
+import com.faforever.neroxis.map.generator.style.OneIslandStyleGenerator;
+import com.faforever.neroxis.map.generator.style.SmallIslandsStyleGenerator;
+import com.faforever.neroxis.map.generator.style.StyleGenerator;
+import com.faforever.neroxis.map.generator.style.TestStyleGenerator;
+import com.faforever.neroxis.map.generator.style.ValleyStyleGenerator;
+import com.faforever.neroxis.util.ArgumentParser;
+import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.MathUtils;
+import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.RandomUtils;
+import com.faforever.neroxis.util.Util;
+import com.faforever.neroxis.util.Vector2;
 import com.google.common.io.BaseEncoding;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +46,14 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Getter
@@ -489,10 +521,6 @@ public strictfp class MapGenerator {
             }
         } else {
             Util.VISUALIZE = false;
-        }
-
-        if (Util.VISUALIZE) {
-            VisualDebugger.createGUI();
         }
     }
 
