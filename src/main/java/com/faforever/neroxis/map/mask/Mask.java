@@ -127,7 +127,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public int getSize() {
-        if (parallel && !Pipeline.isStarted()) {
+        if (parallel && !Pipeline.isRunning()) {
             return plannedSize;
         } else {
             return mask[0].length;
@@ -798,7 +798,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
-        if (parallel && !Pipeline.isStarted()) {
+        if (parallel && !Pipeline.isRunning()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
                 throw new IllegalArgumentException("Non parallel masks used as dependents");
             }
@@ -830,7 +830,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (!symmetrySettings.equals(otherSymmetrySettings)) {
             throw new IllegalArgumentException(String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings, otherName, otherSymmetrySettings));
         }
-        if (isParallel() && !Pipeline.isStarted() && !other.isParallel()) {
+        if (isParallel() && !Pipeline.isRunning() && !other.isParallel()) {
             throw new IllegalArgumentException(String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
     }
@@ -856,7 +856,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void assertNotPipelined() {
-        if (parallel && !Pipeline.isStarted()) {
+        if (parallel && !Pipeline.isRunning()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }

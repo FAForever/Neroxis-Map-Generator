@@ -9,7 +9,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -29,7 +34,7 @@ public strictfp class Pipeline {
 
     public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
-        if (isStarted()) {
+        if (isRunning()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
         String callingMethod = null;
@@ -100,14 +105,15 @@ public strictfp class Pipeline {
     public static void join() {
         pipeline.forEach(e -> e.getFuture().join());
         System.out.println("Pipeline completed!");
+        started = new CompletableFuture<>();
     }
 
-    public static boolean isStarted() {
+    public static boolean isRunning() {
         return started.isDone();
     }
 
     public static void await(Mask<?, ?>... masks) {
-        if (!isStarted()) {
+        if (!isRunning()) {
             throw new IllegalStateException("Pipeline not started cannot await");
         }
         getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
