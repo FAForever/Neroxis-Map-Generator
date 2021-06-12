@@ -105,7 +105,6 @@ public strictfp class Pipeline {
     public static void join() {
         pipeline.forEach(e -> e.getFuture().join());
         System.out.println("Pipeline completed!");
-        started = new CompletableFuture<>();
     }
 
     public static boolean isRunning() {

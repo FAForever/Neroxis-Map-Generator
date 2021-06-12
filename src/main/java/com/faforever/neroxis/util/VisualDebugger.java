@@ -21,7 +21,7 @@ public strictfp class VisualDebugger {
             createGUI();
             String name = mask.getVisualName();
             name = name == null ? mask.getName() : name;
-            VisualDebuggerGui.update(name + " " + method + " " + line, mask.mock());
+            VisualDebuggerGui.update(name + " " + method + " " + line, mask.copy());
         }
     }
 }
