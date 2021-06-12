@@ -19,7 +19,7 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+        super(Vector2.class, size, seed, symmetrySettings, name, parallel);
     }
 
     public Vector2Mask(Vector2Mask other, Long seed) {
@@ -31,15 +31,15 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+        super(Vector2.class, sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
     }
 
     @Override
@@ -49,23 +49,8 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     @Override
-    protected Vector2[][] getNullMask(int size) {
-        return new Vector2[size][size];
-    }
-
-    @Override
     protected Vector2 getZeroValue() {
         return new Vector2(0f, 0f);
-    }
-
-    @Override
-    public Vector2Mask copy() {
-        return new Vector2Mask(this, getNextSeed(), getName() + "Copy");
-    }
-
-    @Override
-    public Vector2Mask mock() {
-        return new Vector2Mask(this, null, getName() + Mask.MOCK_NAME);
     }
 
     @Override

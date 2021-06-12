@@ -1,11 +1,14 @@
 package com.faforever.neroxis.map.generator.placement;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -97,21 +100,21 @@ public strictfp class MexPlacer {
 
         expMexCount = StrictMath.min((random.nextInt(2) + 3), expMexCountLeft);
 
-        LinkedList<Vector2> expansionLocations = expansionSpawnMask.getRandomCoordinates(expSpacing);
+        List<Vector2> expansionLocations = expansionSpawnMask.getRandomCoordinates(expSpacing);
 
         while (expMexCountLeft > expMexCount) {
             if (expansionLocations.size() == 0) {
                 break;
             }
 
-            expLocation = expansionLocations.removeFirst();
+            expLocation = expansionLocations.remove(0);
 
             while (!isMexExpValid(expLocation, expSize, spawnMask)) {
                 if (expansionLocations.size() == 0) {
                     expLocation = null;
                     break;
                 }
-                expLocation = expansionLocations.removeFirst();
+                expLocation = expansionLocations.remove(0);
             }
 
             if (expLocation == null) {
@@ -143,7 +146,7 @@ public strictfp class MexPlacer {
 
     public void placeIndividualMexes(BooleanMask spawnMask, int numMexes, int mexSpacing) {
         if (numMexes > 0) {
-            LinkedList<Vector2> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
+            List<Vector2> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
             mexLocations.stream().limit(numMexes).forEachOrdered(location -> {
                 int mexID = map.getMexCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 Marker mex = new Marker(String.format("Mex %d", mexID), new Vector3(location.add(.5f, .5f)));

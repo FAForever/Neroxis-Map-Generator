@@ -32,7 +32,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+        super(Float.class, size, seed, symmetrySettings, name, parallel);
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
@@ -48,14 +48,14 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
+        set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor);
     }
 
     public FloatMask(FloatMask other, Long seed) {
-        super(other, seed);
+        this(other, seed, null);
     }
 
     public FloatMask(FloatMask other, Long seed, String name) {
@@ -67,7 +67,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask(BooleanMask other, float low, float high, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             set((x, y) -> source.get(x, y) ? high : low);
@@ -79,7 +79,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, Long seed, String name) {
-        super(other1.getSize(), seed, other1.getSymmetrySettings(), name, other1.isParallel());
+        this(other1.getSize(), seed, other1.getSymmetrySettings(), name, other1.isParallel());
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
         enqueue((dependencies) -> {
@@ -94,7 +94,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
@@ -107,17 +107,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
             set((x, y) -> source.get(x, y).get(index));
         }, other);
-    }
-
-    @Override
-    protected Float[][] getNullMask(int size) {
-        return new Float[size][size];
     }
 
     @Override
@@ -127,45 +122,35 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public FloatMask copy() {
-        return new FloatMask(this, getNextSeed(), getName() + "Copy");
-    }
-
-    @Override
-    public FloatMask mock() {
-        return new FloatMask(this, null, getName() + Mask.MOCK_NAME);
-    }
-
-    @Override
     public Float getZeroValue() {
         return 0f;
     }
 
     @Override
-    public void addValueAt(int x, int y, Float value) {
+    protected void addValueAt(int x, int y, Float value) {
         mask[x][y] += value;
     }
 
     @Override
-    public void subtractValueAt(int x, int y, Float value) {
+    protected void subtractValueAt(int x, int y, Float value) {
         mask[x][y] -= value;
     }
 
     @Override
-    public void multiplyValueAt(int x, int y, Float value) {
+    protected void multiplyValueAt(int x, int y, Float value) {
         mask[x][y] *= value;
     }
 
     @Override
-    public void divideValueAt(int x, int y, Float value) {
+    protected void divideValueAt(int x, int y, Float value) {
         mask[x][y] /= value;
     }
 
-    public Vector3 getNormalAt(int x, int y) {
+    protected Vector3 getNormalAt(int x, int y) {
         return getNormalAt(x, y, 1f);
     }
 
-    public Vector3 getNormalAt(int x, int y, float scale) {
+    protected Vector3 getNormalAt(int x, int y, float scale) {
         if (onBoundary(x, y) || !inBounds(x, y)) {
             return new Vector3(0, 1, 0);
         }
@@ -182,18 +167,18 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale));
+        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
         return this;
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale));
+        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
         return this;
     }
 
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
-        enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue));
+        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
         return this;
     }
 
@@ -234,9 +219,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addDistance(BooleanMask other, float scale) {
+        assertCompatibleMask(other);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(source);
             FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
         }, other);
@@ -244,7 +229,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask sqrt() {
-        enqueue(() -> set((x, y) -> (float) StrictMath.sqrt(get(x, y))));
+        set((x, y) -> (float) StrictMath.sqrt(get(x, y)));
         return this;
     }
 
@@ -290,7 +275,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                 float depositionRate, float maxOffset, float iterationScale) {
         enqueue(() -> {
             int size = getSize();
-            Vector3Mask normalVectorMask = getNormalMask();
+            NormalMask normalVectorMask = getNormalMask();
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(normalVectorMask, maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
@@ -299,7 +284,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
-    private void waterDrop(Vector3Mask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
+    private void waterDrop(NormalMask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
                            float depositionRate, float maxOffset, float iterationScale) {
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
@@ -348,25 +333,20 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
         enqueue(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
-            this.subtract(tempMask2).clampMin(0f);
+            subtract(tempMask2).clampMin(0f);
         });
         return this;
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        enqueue(() -> {
-            subtract(this.copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
-        });
-        return this;
+        return subtract(copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        enqueue(() -> {
-            for (int x = 0; x < levelOfPrecision; x++) {
-                removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
-            }
-            removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
-        });
+        for (int x = 0; x < levelOfPrecision; x++) {
+            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
+        }
+        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
         return this;
     }
 

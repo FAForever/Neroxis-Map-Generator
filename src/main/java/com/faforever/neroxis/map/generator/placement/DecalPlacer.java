@@ -8,7 +8,6 @@ import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -25,7 +24,7 @@ public strictfp class DecalPlacer {
         if (paths != null && paths.length > 0) {
             BooleanMask spawnMaskCopy = new BooleanMask(spawnMask, random.nextLong(), "spawnMaskCopy");
             spawnMaskCopy.limitToSymmetryRegion();
-            LinkedList<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
+            List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 float scale = random.nextFloat() * (maxScale - minScale) + minScale;
                 location.add(.5f, .5f);

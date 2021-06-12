@@ -10,7 +10,7 @@ import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -226,7 +226,7 @@ public strictfp class ImageGenerator {
                         areaToTexture = wholeImage;
                     }
                 }
-                LinkedList<Vector2> possibleLocations = areaToTexture.getAllCoordinatesEqualTo(true, 1);
+                List<Vector2> possibleLocations = areaToTexture.getAllCoordinatesEqualTo(true, 1);
                 int numPossibleLocations = possibleLocations.size();
                 for (int x = 0; x < 5; x++) {
                     Vector2 loc = possibleLocations.get(random.nextInt(numPossibleLocations));

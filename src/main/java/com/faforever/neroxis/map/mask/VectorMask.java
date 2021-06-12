@@ -20,42 +20,23 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
 
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, false);
+    public VectorMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
-    }
-
-    public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
-    }
-
-    public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
-    }
-
-    public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+    public VectorMask(Class<T> objectClass, BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+        this(objectClass, sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         Raster imageRaster = sourceImage.getData();
-
-        enqueue(() ->
-                set((x, y) -> {
-                    float[] components = imageRaster.getPixel(x, y, new float[numImageComponents]);
-                    return createValue(scaleFactor, components);
-                })
-        );
+        set((x, y) -> {
+            float[] components = imageRaster.getPixel(x, y, new float[numImageComponents]);
+            return createValue(scaleFactor, components);
+        });
     }
 
-    public VectorMask(Long seed, String name, FloatMask... components) {
-        super(components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].isParallel());
+    public VectorMask(Class<T> objectClass, Long seed, String name, FloatMask... components) {
+        this(objectClass, components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].isParallel());
         int numComponents = components.length;
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
@@ -68,10 +49,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
                 }
             });
         }, components);
-    }
-
-    public VectorMask(U other, Long seed) {
-        super(other, seed);
     }
 
     public VectorMask(U other, Long seed, String name) {
@@ -104,142 +81,134 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     protected abstract T createValue(float scaleFactor, float... components);
 
     @Override
-    public void addValueAt(int x, int y, T value) {
+    protected void addValueAt(int x, int y, T value) {
         get(x, y).add(value);
     }
 
     @Override
-    public void subtractValueAt(int x, int y, T value) {
+    protected void subtractValueAt(int x, int y, T value) {
         get(x, y).subtract(value);
     }
 
     @Override
-    public void multiplyValueAt(int x, int y, T value) {
+    protected void multiplyValueAt(int x, int y, T value) {
         get(x, y).multiply(value);
     }
 
     @Override
-    public void divideValueAt(int x, int y, T value) {
+    protected void divideValueAt(int x, int y, T value) {
         get(x, y).divide(value);
     }
 
-    public void addScalarAt(Vector2 loc, float value) {
+    protected void addScalarAt(Vector2 loc, float value) {
         addScalarAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
-    public void addScalarAt(int x, int y, float value) {
+    protected void addScalarAt(int x, int y, float value) {
         get(x, y).add(value);
     }
 
-    public void subtractScalarAt(Vector2 loc, float value) {
+    protected void subtractScalarAt(Vector2 loc, float value) {
         subtractScalarAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
-    public void subtractScalarAt(int x, int y, float value) {
+    protected void subtractScalarAt(int x, int y, float value) {
         get(x, y).subtract(value);
     }
 
-    public void multiplyScalarAt(Vector2 loc, float value) {
+    protected void multiplyScalarAt(Vector2 loc, float value) {
         multiplyScalarAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
-    public void multiplyScalarAt(int x, int y, float value) {
+    protected void multiplyScalarAt(int x, int y, float value) {
         get(x, y).multiply(value);
     }
 
-    public void divideScalarAt(Vector2 loc, float value) {
+    protected void divideScalarAt(Vector2 loc, float value) {
         divideScalarAt((int) loc.getX(), (int) loc.getY(), value);
     }
 
-    public void divideScalarAt(int x, int y, float value) {
+    protected void divideScalarAt(int x, int y, float value) {
         get(x, y).divide(value);
     }
 
-    public void setComponentAt(Vector2 loc, float value, int component) {
+    protected void setComponentAt(Vector2 loc, float value, int component) {
         setComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
     }
 
-    public void setComponentAt(int x, int y, float value, int component) {
+    protected void setComponentAt(int x, int y, float value, int component) {
         get(x, y).set(component, value);
     }
 
-    public void addComponentAt(Vector2 loc, float value, int component) {
+    protected void addComponentAt(Vector2 loc, float value, int component) {
         addComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
     }
 
-    public void addComponentAt(int x, int y, float value, int component) {
+    protected void addComponentAt(int x, int y, float value, int component) {
         get(x, y).add(value, component);
     }
 
-    public void subtractComponentAt(Vector2 loc, float value, int component) {
+    protected void subtractComponentAt(Vector2 loc, float value, int component) {
         subtractComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
     }
 
-    public void subtractComponentAt(int x, int y, float value, int component) {
+    protected void subtractComponentAt(int x, int y, float value, int component) {
         get(x, y).subtract(value, component);
     }
 
-    public void multiplyComponentAt(Vector2 loc, float value, int component) {
+    protected void multiplyComponentAt(Vector2 loc, float value, int component) {
         multiplyComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
     }
 
-    public void multiplyComponentAt(int x, int y, float value, int component) {
+    protected void multiplyComponentAt(int x, int y, float value, int component) {
         get(x, y).multiply(value, component);
     }
 
-    public void divideComponentAt(Vector2 loc, float value, int component) {
+    protected void divideComponentAt(Vector2 loc, float value, int component) {
         divideComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
     }
 
-    public void divideComponentAt(int x, int y, float value, int component) {
+    protected void divideComponentAt(int x, int y, float value, int component) {
         get(x, y).divide(value, component);
     }
 
     public U addScalar(float value) {
-        enqueue(() -> addScalar((x, y) -> value));
+        addScalar((x, y) -> value);
         return (U) this;
     }
 
     public U subtractScalar(float value) {
-        enqueue(() -> subtractScalar((x, y) -> value));
+        subtractScalar((x, y) -> value);
         return (U) this;
     }
 
     public U multiplyScalar(float value) {
-        enqueue(() -> multiplyScalar((x, y) -> value));
+        multiplyScalar((x, y) -> value);
         return (U) this;
     }
 
     public U divideScalar(float value) {
-        enqueue(() -> divideScalar((x, y) -> value));
-        return (U) this;
+        return divideScalar((x, y) -> value);
     }
 
     public U clampComponentMin(float floor) {
-        enqueue(() -> apply((x, y) -> get(x, y).clampMin(floor)));
-        return (U) this;
+        return apply((x, y) -> get(x, y).clampMin(floor));
     }
 
     public U clampComponentMax(float ceiling) {
-        enqueue(() -> apply((x, y) -> get(x, y).clampMax(ceiling)));
-        return (U) this;
+        return apply((x, y) -> get(x, y).clampMax(ceiling));
     }
 
     public U randomize(float scale) {
-        T empty = getZeroValue();
-        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> empty.copy().randomize(random, scale)));
-        return (U) this;
+        return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, scale));
     }
 
     public U randomize(float minValue, float maxValue) {
-        T empty = getZeroValue();
-        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> empty.copy().randomize(random, minValue, maxValue)));
-        return (U) this;
+        return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, minValue, maxValue));
     }
 
     public U normalize() {
-        enqueue((dependencies) -> apply((x, y) -> get(x, y).normalize()));
-        return (U) this;
+        return enqueue((dependencies) -> apply((x, y) -> get(x, y).normalize()));
     }
 
     public FloatMask dot(U other) {
@@ -253,91 +222,79 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U blur(int radius) {
-        enqueue(() -> {
+        return enqueue(() -> {
             T[][] innerCount = getInnerCount();
             set((x, y) -> calculateAreaAverage(radius, x, y, innerCount).round().divide(1000));
         });
-        return (U) this;
     }
 
     public U blur(int radius, BooleanMask other) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(limiter);
             T[][] innerCount = getInnerCount();
             set((x, y) -> limiter.get(x, y) ? calculateAreaAverage(radius, x, y, innerCount).round().divide(1000) : get(x, y));
         }, other);
-        return (U) this;
     }
 
     public U blurComponent(int radius, int component) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int[][] innerCount = getComponentInnerCount(component);
             setComponent((x, y) -> calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f, component);
         });
-        return (U) this;
     }
 
     public U blurComponent(int radius, int component, BooleanMask other) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(limiter);
             int[][] innerCount = getComponentInnerCount(component);
             setComponent((x, y) -> limiter.get(x, y) ? calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(x, y).get(component), component);
         }, other);
-        return (U) this;
     }
 
     public U addComponent(float value, int component) {
-        enqueue(() -> addComponent((x, y) -> value, component));
-        return (U) this;
+        return addComponent((x, y) -> value, component);
     }
 
     public U addComponent(FloatMask other, int component) {
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             addComponent(source::get, component);
         }, other);
-        return (U) this;
     }
 
     public U subtractComponent(float value, int component) {
-        enqueue(() -> subtractComponent((x, y) -> value, component));
-        return (U) this;
+        return subtractComponent((x, y) -> value, component);
     }
 
     public U subtractComponent(FloatMask other, int component) {
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             subtractComponent(source::get, component);
         }, other);
-        return (U) this;
     }
 
     public U multiplyComponent(float value, int component) {
-        enqueue(() -> multiplyComponent((x, y) -> value, component));
-        return (U) this;
+        return multiplyComponent((x, y) -> value, component);
     }
 
     public U multiplyComponent(FloatMask other, int component) {
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             multiplyComponent(source::get, component);
         }, other);
-        return (U) this;
     }
 
     public U divideComponent(float value, int component) {
-        enqueue(() -> divideComponent((x, y) -> value, component));
-        return (U) this;
+        return divideComponent((x, y) -> value, component);
     }
 
     public U divideComponent(FloatMask other, int component) {
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             divideComponent(source::get, component);
         }, other);
-        return (U) this;
     }
 
     public FloatMask getComponentMask(int component) {
@@ -413,107 +370,103 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return result.add(countD).add(countA).subtract(countB).subtract(countC).divide(area);
     }
 
-    public void addScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        apply((x, y) -> addScalarAt(x, y, valueFunction.apply(x, y)));
+    public U addScalar(BiFunction<Integer, Integer, Float> valueFunction) {
+        return apply((x, y) -> addScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
-    public void addScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    public U addScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addScalarAt(sx, sy, value));
         });
     }
 
-    public void subtractScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        apply((x, y) -> subtractScalarAt(x, y, valueFunction.apply(x, y)));
+    public U subtractScalar(BiFunction<Integer, Integer, Float> valueFunction) {
+        return apply((x, y) -> subtractScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
-    public void subtractScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    public U subtractScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractScalarAt(sx, sy, value));
         });
     }
 
-    public void multiplyScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        apply((x, y) -> multiplyScalarAt(x, y, valueFunction.apply(x, y)));
+    public U multiplyScalar(BiFunction<Integer, Integer, Float> valueFunction) {
+        return apply((x, y) -> multiplyScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
-    public void multiplyScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    public U multiplyScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyScalarAt(sx, sy, value));
         });
     }
 
-    public void divideScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        apply((x, y) -> divideScalarAt(x, y, valueFunction.apply(x, y)));
+    public U divideScalar(BiFunction<Integer, Integer, Float> valueFunction) {
+        return apply((x, y) -> divideScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
-    public void divideScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    public U divideScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideScalarAt(sx, sy, value));
         });
     }
 
-    protected void setComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component));
+    protected U setComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected void setComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    protected U setComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setComponentAt(sx, sy, value, component));
         });
     }
 
-    protected void addComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component));
+    protected U addComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected void addComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    protected U addComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addComponentAt(sx, sy, value, component));
         });
     }
 
-    protected void subtractComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component));
+    protected U subtractComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected void subtractComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    protected U subtractComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractComponentAt(sx, sy, value, component));
         });
     }
 
-    protected void multiplyComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component));
+    protected U multiplyComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected void multiplyComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyComponentAt(sx, sy, value, component));
         });
     }
 
-    protected void divideComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component));
+    protected U divideComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected void divideComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        applyWithSymmetry(symmetryType, (x, y) -> {
+    protected U divideComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideComponentAt(sx, sy, value, component));
         });
-    }
-
-    protected void maskFill(T value) {
-        maskFill(mask, value);
     }
 
     protected void maskFill(T[][] maskToFill, T value) {
@@ -527,10 +480,11 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     protected void maskFill(T[][] maskToFill) {
-        int maskSize = mask.length;
+        assertNotPipelined();
+        int maskSize = maskToFill.length;
         assertSize(maskSize);
-        for (int x = 0; x < maskSize; ++x) {
-            for (int y = 0; y < maskSize; ++y) {
+        for (int x = 0; x < maskSize; x++) {
+            for (int y = 0; y < maskSize; y++) {
                 maskToFill[x][y] = get(x, y).copy();
             }
         }

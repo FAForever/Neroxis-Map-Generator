@@ -22,11 +22,11 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+        super(Integer.class, size, seed, symmetrySettings, name, parallel);
     }
 
     public IntegerMask(IntegerMask other, Long seed) {
-        super(other, seed);
+        this(other, seed, null);
     }
 
     public IntegerMask(IntegerMask other, Long seed, String name) {
@@ -42,30 +42,15 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> set((x, y) -> imageBuffer.getElem(x + y * size)));
-    }
-
-    @Override
-    protected Integer[][] getNullMask(int size) {
-        return new Integer[size][size];
+        set((x, y) -> imageBuffer.getElem(x + y * size));
     }
 
     @Override
     protected Integer transformAverage(float value) {
         return StrictMath.round(value);
-    }
-
-    @Override
-    public IntegerMask copy() {
-        return new IntegerMask(this, getNextSeed(), getName() + "Copy");
-    }
-
-    @Override
-    public IntegerMask mock() {
-        return new IntegerMask(this, null, getName() + Mask.MOCK_NAME);
     }
 
     @Override
@@ -79,22 +64,22 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public void addValueAt(int x, int y, Integer value) {
+    protected void addValueAt(int x, int y, Integer value) {
         mask[x][y] += value;
     }
 
     @Override
-    public void subtractValueAt(int x, int y, Integer value) {
+    protected void subtractValueAt(int x, int y, Integer value) {
         mask[x][y] -= value;
     }
 
     @Override
-    public void multiplyValueAt(int x, int y, Integer value) {
+    protected void multiplyValueAt(int x, int y, Integer value) {
         mask[x][y] *= value;
     }
 
     @Override
-    public void divideValueAt(int x, int y, Integer value) {
+    protected void divideValueAt(int x, int y, Integer value) {
         mask[x][y] /= value;
     }
 

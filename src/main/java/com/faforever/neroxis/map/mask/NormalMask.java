@@ -9,7 +9,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public strictfp class NormalMask extends Vector3Mask {
+public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -20,7 +20,7 @@ public strictfp class NormalMask extends Vector3Mask {
     }
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+        super(Vector3.class, size, seed, symmetrySettings, name, parallel);
     }
 
     public NormalMask(NormalMask other, Long seed) {
@@ -40,7 +40,7 @@ public strictfp class NormalMask extends Vector3Mask {
     }
 
     public NormalMask(FloatMask other, Long seed, float scale, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -53,29 +53,23 @@ public strictfp class NormalMask extends Vector3Mask {
     }
 
     public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         Raster imageRaster = sourceImage.getData();
-        enqueue(() ->
-                set((x, y) -> {
-                    float[] components = imageRaster.getPixel(x, y, new float[4]);
-                    return createValue(1f, components[3], components[0], components[1]);
-                })
-        );
+        set((x, y) -> {
+            float[] components = imageRaster.getPixel(x, y, new float[4]);
+            return createValue(1f, components[3], components[0], components[1]);
+        });
+    }
+
+    @Override
+    protected Vector3 createValue(float scaleFactor, float... components) {
+        assertMatchingDimension(components.length);
+        return new Vector3(components[0], components[1], components[2]).multiply(scaleFactor);
     }
 
     @Override
     protected Vector3 getZeroValue() {
         return new Vector3(0f, 1f, 0f);
-    }
-
-    @Override
-    public NormalMask copy() {
-        return new NormalMask(this, getNextSeed(), getName() + "Copy");
-    }
-
-    @Override
-    public NormalMask mock() {
-        return new NormalMask(this, null, getName() + Mask.MOCK_NAME);
     }
 
     @Override

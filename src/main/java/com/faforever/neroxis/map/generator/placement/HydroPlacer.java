@@ -8,7 +8,6 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -63,7 +62,7 @@ public strictfp class HydroPlacer {
 
     public void placeIndividualHydros(BooleanMask spawnMask, int numHydros, int hydroSpacing) {
         if (numHydros > 0) {
-            LinkedList<Vector2> hydroLocations = spawnMask.getRandomCoordinates(hydroSpacing);
+            List<Vector2> hydroLocations = spawnMask.getRandomCoordinates(hydroSpacing);
             hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
                 int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
                 Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3(location.add(.5f, .5f)));

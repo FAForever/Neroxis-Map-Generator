@@ -8,12 +8,8 @@ import java.util.Comparator;
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
 
-    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
-    }
-
-    public ComparableMask(U other, Long seed) {
-        super(other, seed);
+    protected ComparableMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
     public ComparableMask(U other, Long seed, String name) {
@@ -68,109 +64,79 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         return Arrays.stream(mask).flatMap(Arrays::stream).max(Comparator.comparing(value -> value)).orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
-    public U init(BooleanMask other, T low, T high) {
-        plannedSize = other.getSize();
-        enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
-            setSize(source.getSize());
-            assertCompatibleMask(source);
-            set((x, y) -> source.get(x, y) ? high : low);
-        }, other);
-        return (U) this;
-    }
-
     public U max(U other) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            assertCompatibleMask(source);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) > 0 ? thisVal : otherVal;
             });
         }, other);
-        return (U) this;
     }
 
     public U clampMax(BooleanMask other, T val) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(source);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.get(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
             });
         }, other);
-        return (U) this;
     }
 
     public U clampMax(T val) {
-        enqueue(() -> {
-            set((x, y) -> {
-                T thisVal = get(x, y);
-                return thisVal.compareTo(val) < 0 ? thisVal : val;
-            });
+        return set((x, y) -> {
+            T thisVal = get(x, y);
+            return thisVal.compareTo(val) < 0 ? thisVal : val;
         });
-        return (U) this;
     }
 
     public U min(U other) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            assertCompatibleMask(source);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) < 0 ? thisVal : otherVal;
             });
         }, other);
-        return (U) this;
     }
 
     public U clampMin(BooleanMask other, T val) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(source);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.get(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
             });
         }, other);
-        return (U) this;
     }
 
     public U clampMin(T val) {
-        enqueue(() -> {
-            set((x, y) -> {
-                T thisVal = get(x, y);
-                return thisVal.compareTo(val) > 0 ? thisVal : val;
-            });
+        return set((x, y) -> {
+            T thisVal = get(x, y);
+            return thisVal.compareTo(val) > 0 ? thisVal : val;
         });
-        return (U) this;
     }
 
     public U threshold(T val) {
-        enqueue(() -> {
-            set((x, y) -> {
-                T thisVal = get(x, y);
-                return thisVal.compareTo(val) > 0 ? getZeroValue() : get(x, y);
-            });
+        return set((x, y) -> {
+            T thisVal = get(x, y);
+            return thisVal.compareTo(val) > 0 ? getZeroValue() : get(x, y);
         });
-        return (U) this;
     }
 
     public U zeroOutsideRange(T min, T max) {
-        enqueue(() -> {
-            set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y));
-        });
-        return (U) this;
+        return set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y));
     }
 
     public U zeroInRange(T min, T max) {
-        enqueue(() -> {
-            set((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x, y));
-        });
-        return (U) this;
+        return set((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x, y));
     }
 
     public BooleanMask convertToBooleanMask(T minValue) {

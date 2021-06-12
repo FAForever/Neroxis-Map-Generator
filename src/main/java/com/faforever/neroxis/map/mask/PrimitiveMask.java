@@ -5,20 +5,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
 
-    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, false);
-    }
-
-    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
-    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
-    }
-
-    public PrimitiveMask(U other, Long seed) {
-        super(other, seed);
+    public PrimitiveMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
     public PrimitiveMask(U other, Long seed, String name) {
@@ -28,11 +16,6 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     protected abstract int[][] getInnerCount();
 
     protected abstract T transformAverage(float value);
-
-    @Override
-    protected void maskFill(T value) {
-        maskFill(mask, value);
-    }
 
     @Override
     protected void maskFill(T[][] maskToFill, T value) {
@@ -47,6 +30,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
 
     @Override
     protected void maskFill(T[][] maskToFill) {
+        assertNotPipelined();
         int maskSize = mask.length;
         assertSize(maskSize);
         for (int r = 0; r < maskSize; ++r) {
@@ -55,21 +39,19 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     }
 
     public U blur(int radius) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int[][] innerCount = getInnerCount();
             set((x, y) -> transformAverage(calculateAreaAverage(radius, x, y, innerCount)));
         });
-        return (U) this;
     }
 
     public U blur(int radius, BooleanMask other) {
-        enqueue(dependencies -> {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            assertCompatibleMask(limiter);
             int[][] innerCount = getInnerCount();
             set((x, y) -> limiter.get(x, y) ? transformAverage(calculateAreaAverage(radius, x, y, innerCount)) : get(x, y));
         }, other);
-        return (U) this;
     }
 
     protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {

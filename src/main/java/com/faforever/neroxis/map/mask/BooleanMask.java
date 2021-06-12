@@ -10,8 +10,13 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
@@ -27,11 +32,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+        super(Boolean.class, size, seed, symmetrySettings, name, parallel);
     }
 
     public BooleanMask(BooleanMask other, Long seed) {
-        super(other, seed);
+        this(other, seed, null);
     }
 
     public BooleanMask(BooleanMask other, Long seed, String name) {
@@ -43,7 +48,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
@@ -55,7 +60,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
@@ -69,22 +74,22 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public void addValueAt(int x, int y, Boolean value) {
+    protected void addValueAt(int x, int y, Boolean value) {
         mask[x][y] |= value;
     }
 
     @Override
-    public void subtractValueAt(int x, int y, Boolean value) {
+    protected void subtractValueAt(int x, int y, Boolean value) {
         mask[x][y] &= !value;
     }
 
     @Override
-    public void multiplyValueAt(int x, int y, Boolean value) {
+    protected void multiplyValueAt(int x, int y, Boolean value) {
         mask[x][y] &= value;
     }
 
     @Override
-    public void divideValueAt(int x, int y, Boolean value) {
+    protected void divideValueAt(int x, int y, Boolean value) {
         mask[x][y] ^= value;
     }
 
@@ -98,11 +103,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return false;
     }
 
-    @Override
-    protected Boolean[][] getNullMask(int size) {
-        return new Boolean[size][size];
-    }
-
     public boolean isEdge(int x, int y) {
         boolean value = get(x, y);
         int size = getSize();
@@ -112,24 +112,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 || (y < size - 1 && get(x, y + 1) != value));
     }
 
-    @Override
-    public BooleanMask copy() {
-        return new BooleanMask(this, getNextSeed(), getName() + "Copy");
-    }
-
-    @Override
-    public BooleanMask mock() {
-        return new BooleanMask(this, null, getName() + Mask.MOCK_NAME);
-    }
-
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue) {
-        plannedSize = other.getSize();
         init(other.convertToBooleanMask(minValue));
         return this;
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue, T maxValue) {
-        plannedSize = other.getSize();
         init(other.convertToBooleanMask(minValue, maxValue));
         return this;
     }
@@ -139,9 +127,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        enqueue(() -> {
-            setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
-        });
+        setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
         return this;
     }
 
@@ -299,7 +285,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask invert() {
-        enqueue(() -> set((x, y) -> !get(x, y)));
+        set((x, y) -> !get(x, y));
         return this;
     }
 
@@ -496,7 +482,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillShape(Vector2 location) {
-        enqueue(() -> fillCoordinates(getShapeCoordinates(location), !get(location)));
+        fillCoordinates(getShapeCoordinates(location), !get(location));
         return this;
     }
 
@@ -539,21 +525,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasBiggerThan(int maxArea) {
-        enqueue(() -> subtract(copy().removeAreasSmallerThan(maxArea)));
+        subtract(copy().removeAreasSmallerThan(maxArea));
         return this;
     }
 
     public BooleanMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
-        enqueue(() -> {
-            removeAreasSmallerThan(minSize);
-            removeAreasBiggerThan(maxSize);
-        });
-        return this;
+        return removeAreasSmallerThan(minSize).removeAreasBiggerThan(maxSize);
     }
 
     public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
-        enqueue(() -> subtract(this.copy().removeAreasOutsideSizeRange(minSize, maxSize)));
-        return this;
+        return subtract(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
     }
 
     public LinkedHashSet<Vector2> getShapeCoordinates(Vector2 location) {
@@ -565,14 +546,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertNotPipelined();
         LinkedHashSet<Vector2> areaHash = new LinkedHashSet<>();
         LinkedHashSet<Vector2> edgeHash = new LinkedHashSet<>();
-        LinkedList<Vector2> queue = new LinkedList<>();
+        List<Vector2> queue = new ArrayList<>();
         LinkedHashSet<Vector2> queueHash = new LinkedHashSet<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
         boolean value = get(location);
         queue.add(location);
         queueHash.add(location);
         while (queue.size() > 0) {
-            Vector2 next = queue.remove();
+            Vector2 next = queue.remove(0);
             queueHash.remove(next);
             if (get(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
@@ -616,76 +597,79 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public int getCount() {
         assertNotPipelined();
-        AtomicInteger cellCount = new AtomicInteger();
-        apply((x, y) -> {
-            if (get(x, y)) {
-                cellCount.incrementAndGet();
+        int count = 0;
+        int size = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (get(x, y)) {
+                    ++count;
+                }
             }
-        });
-        return cellCount.get();
+        }
+        return count;
     }
 
-    public LinkedList<Vector2> getAllCoordinates(int spacing) {
-        LinkedList<Vector2> coordinates = new LinkedList<>();
+    public List<Vector2> getAllCoordinates(int spacing) {
         int size = getSize();
+        List<Vector2> coordinates = new ArrayList<>(size * size);
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
                 Vector2 location = new Vector2(x, y);
-                coordinates.addLast(location);
+                coordinates.add(location);
             }
         }
         return coordinates;
     }
 
-    public LinkedList<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
+    public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
         assertNotPipelined();
-        LinkedList<Vector2> coordinates = new LinkedList<>();
         int size = getSize();
+        List<Vector2> coordinates = new ArrayList<>(size * size);
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
                 if (get(x, y) == value) {
                     Vector2 location = new Vector2(x, y);
-                    coordinates.addLast(location);
+                    coordinates.add(location);
                 }
             }
         }
         return coordinates;
     }
 
-    public LinkedList<Vector2> getSpacedCoordinates(float radius, int spacing) {
-        LinkedList<Vector2> coordinateList = getAllCoordinates(spacing);
+    public List<Vector2> getSpacedCoordinates(float radius, int spacing) {
+        List<Vector2> coordinateList = getAllCoordinates(spacing);
         return spaceCoordinates(radius, coordinateList);
     }
 
-    public LinkedList<Vector2> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
-        LinkedList<Vector2> coordinateList = getAllCoordinatesEqualTo(value, spacing);
+    public List<Vector2> getSpacedCoordinatesEqualTo(boolean value, float radius, int spacing) {
+        List<Vector2> coordinateList = getAllCoordinatesEqualTo(value, spacing);
         return spaceCoordinates(radius, coordinateList);
     }
 
-    private LinkedList<Vector2> spaceCoordinates(float radius, LinkedList<Vector2> coordinateList) {
-        LinkedList<Vector2> chosenCoordinates = new LinkedList<>();
+    private List<Vector2> spaceCoordinates(float radius, List<Vector2> coordinateList) {
+        List<Vector2> chosenCoordinates = new ArrayList<>();
         while (coordinateList.size() > 0) {
-            Vector2 location = coordinateList.removeFirst();
-            chosenCoordinates.addLast(location);
+            Vector2 location = coordinateList.remove(0);
+            chosenCoordinates.add(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < radius);
         }
         return chosenCoordinates;
     }
 
-    public LinkedList<Vector2> getRandomCoordinates(float spacing) {
+    public List<Vector2> getRandomCoordinates(float spacing) {
         return getRandomCoordinates(spacing, SymmetryType.TEAM);
     }
 
-    public LinkedList<Vector2> getRandomCoordinates(float spacing, SymmetryType symmetryType) {
+    public List<Vector2> getRandomCoordinates(float spacing, SymmetryType symmetryType) {
         return getRandomCoordinates(spacing, spacing, symmetryType);
     }
 
-    public LinkedList<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing) {
+    public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing) {
         return getRandomCoordinates(minSpacing, maxSpacing, SymmetryType.TEAM);
     }
 
-    public LinkedList<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
-        LinkedList<Vector2> coordinateList;
+    public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
+        List<Vector2> coordinateList;
         if (symmetryType != null) {
             coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true, 1);
         } else {

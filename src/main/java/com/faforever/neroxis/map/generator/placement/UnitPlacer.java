@@ -9,7 +9,11 @@ import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Random;
 
 public strictfp class UnitPlacer {
     public static final String[] T1_Land = {
@@ -73,7 +77,7 @@ public strictfp class UnitPlacer {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
-            LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
+            List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
             LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
             for (Vector2 location : coordinates) {
                 if (group.getUnits().size() > 400) {
@@ -101,7 +105,7 @@ public strictfp class UnitPlacer {
     public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
         if (types != null && types.length > 0) {
             spawnMask.limitToSymmetryRegion();
-            LinkedList<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
+            List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
             coordinates.forEach((location) -> {
