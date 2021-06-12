@@ -69,9 +69,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     @Override
     public void setCompressedNormal() {
         Pipeline.await(normals);
-        Util.timedRun("com.faforever.neroxis.map.generator", "setCompressedNormal", () -> {
-            map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask()));
-        });
+        Util.timedRun("com.faforever.neroxis.map.generator", "setCompressedNormal", () ->
+                map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask())));
     }
 
     @Override
