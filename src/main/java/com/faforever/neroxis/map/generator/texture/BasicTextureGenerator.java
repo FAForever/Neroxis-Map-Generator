@@ -100,10 +100,10 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
 
         int textureSize = mapParameters.getMapSize() + 1;
         int mapSize = mapParameters.getMapSize();
-        accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(realLand.copy().invert(), 0f).blur(2);
-        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(realPlateaus.copy().invert(), 0f).blur(4);
-        slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .75f).blur(4).clampMax(1f);
-        accentSlopesTexture.setSize(textureSize).addPerlinNoise(mapSize / 32, .5f).setToValue(accentSlopes.copy().invert(), 0f).blur(4);
+        accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).setToValue(realLand.copy().invert(), 0f).blur(2);
+        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).setToValue(realPlateaus.copy().invert(), 0f).blur(8);
+        slopesTexture.init(slopes, 0f, .75f).blur(16).add(slopes, .5f).blur(16).clampMax(1f);
+        accentSlopesTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, .5f).setToValue(accentSlopes.copy().invert(), 0f).blur(16);
         steepHillsTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).setToValue(steepHills.copy().invert(), 0f).blur(8);
         waterBeachTexture.init(realLand.copy().invert().inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
