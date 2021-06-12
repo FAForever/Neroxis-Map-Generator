@@ -73,7 +73,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         spawnSize = 48;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
-        plateauHeight = 5f;
+        plateauHeight = 6f;
         oceanFloor = -16f;
         valleyFloor = -5f;
         landHeight = .1f;
@@ -269,10 +269,17 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     private void blurRamps() {
-        heightmap.blur(8, ramps.copy().acid(.001f, 4).erode(.25f, 4))
-                .blur(6, ramps.copy().inflate(2).acid(.01f, 4).erode(.25f, 4))
-                .blur(4, ramps.copy().inflate(4))
-                .blur(2, ramps.copy().inflate(8))
+        BooleanMask plateauOutlineNoRamps = plateaus.copy().outline().subtract(ramps);
+        BooleanMask inflatedRamps = ramps.copy();
+        heightmap.blur(48, inflatedRamps)
+                .blur(32, inflatedRamps.inflate(8).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(24, inflatedRamps.inflate(8).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(16, inflatedRamps.inflate(16).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(8, inflatedRamps.inflate(16).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
                 .clampMin(0f).clampMax(255f);
     }
 
@@ -291,7 +298,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         ramps.subtract(connections.copy().inflate(64)).inflate(maxStepSize / 2f)
                 .add(connections.copy().inflate(maxStepSize / 2f)).multiply(plateaus.copy().outline())
-                .subtract(mountains).inflate(8);
+                .subtract(mountains).inflate(10);
     }
 
     protected void setupMountainHeightmapPipeline() {
@@ -320,11 +327,11 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         plateaus.init(paintedPlateaus);
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
 
-        heightmapPlateaus.add(plateaus, 3f).clampMax(plateauHeight).blur(1, plateaus);
+        heightmapPlateaus.add(plateaus, 2f).clampMax(plateauHeight).blur(1, plateaus);
 
         BooleanMask plateauBase = new BooleanMask(heightmapPlateaus, 1f, random.nextLong(), "plateauBase");
 
-        heightmapPlateaus.blur(4, plateauBase.copy().inflate(64).subtract(plateauBase.copy().inflate(4)));
+        heightmapPlateaus.blur(4, plateauBase.copy().inflate(96).subtract(plateauBase.copy().inflate(4)));
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {
