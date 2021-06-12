@@ -1,6 +1,10 @@
 package com.faforever.neroxis.map.generator.terrain;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.map.mask.FloatMask;
@@ -57,7 +61,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);
-        unbuildable.init(slope, .1f);
+        unbuildable.init(slope, .05f);
 
         impassable.inflate(4);
 

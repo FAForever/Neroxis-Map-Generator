@@ -18,7 +18,7 @@ public strictfp class FloodedStyleGenerator extends StyleGenerator {
                 .landDensity(0, .5f)
                 .mapSizes(512, 1024)
                 .build();
-        weight = .05f;
+        weight = 0f;
     }
 
     @Override
