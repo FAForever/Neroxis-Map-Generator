@@ -69,9 +69,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         Vector3 maxComponents = getMaxComponents();
         Vector3 minComponents = getMinComponents();
         Vector3 rangeComponents = maxComponents.copy().subtract(minComponents);
-        apply((x, y) -> {
-            imageRaster.setPixel(x, y, get(x, y).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray());
-        });
+        apply((x, y) -> imageRaster.setPixel(x, y, get(x, y).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray()));
         return image;
     }
 }

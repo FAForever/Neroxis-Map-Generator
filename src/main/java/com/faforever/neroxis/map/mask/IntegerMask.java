@@ -45,7 +45,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        set((x, y) -> imageBuffer.getElem(x + y * size));
+        enqueue(() -> set((x, y) -> imageBuffer.getElem(x + y * size)));
     }
 
     @Override

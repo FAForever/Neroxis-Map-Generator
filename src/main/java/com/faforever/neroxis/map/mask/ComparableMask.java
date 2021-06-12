@@ -88,10 +88,10 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public U clampMax(T val) {
-        return set((x, y) -> {
+        return enqueue(() -> set((x, y) -> {
             T thisVal = get(x, y);
             return thisVal.compareTo(val) < 0 ? thisVal : val;
-        });
+        }));
     }
 
     public U min(U other) {
@@ -118,25 +118,25 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public U clampMin(T val) {
-        return set((x, y) -> {
+        return enqueue(() -> set((x, y) -> {
             T thisVal = get(x, y);
             return thisVal.compareTo(val) > 0 ? thisVal : val;
-        });
+        }));
     }
 
     public U threshold(T val) {
-        return set((x, y) -> {
+        return enqueue(() -> set((x, y) -> {
             T thisVal = get(x, y);
             return thisVal.compareTo(val) > 0 ? getZeroValue() : get(x, y);
-        });
+        }));
     }
 
     public U zeroOutsideRange(T min, T max) {
-        return set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y));
+        return enqueue(() -> set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y)));
     }
 
     public U zeroInRange(T min, T max) {
-        return set((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x, y));
+        return enqueue(() -> set((x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x, y)));
     }
 
     public BooleanMask convertToBooleanMask(T minValue) {
@@ -149,14 +149,12 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas", isParallel());
-        localMaxima.initMaxima(this, minValue, maxValue);
-        return localMaxima;
+        return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
     public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "1DMaximas", isParallel());
-        localMaxima.init1DMaxima(this, minValue, maxValue);
-        return localMaxima;
+        return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
     public FloatMask getDistanceFieldForRange(T minValue, T maxValue) {

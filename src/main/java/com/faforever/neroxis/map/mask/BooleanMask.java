@@ -127,8 +127,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
-        return this;
+        return enqueue(() -> setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density));
     }
 
     public BooleanMask flipValues(float density) {
@@ -285,8 +284,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask invert() {
-        set((x, y) -> !get(x, y));
-        return this;
+        return enqueue(() -> set((x, y) -> !get(x, y)));
     }
 
     public BooleanMask inflate(float radius) {
@@ -482,8 +480,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillShape(Vector2 location) {
-        fillCoordinates(getShapeCoordinates(location), !get(location));
-        return this;
+        return enqueue(() -> fillCoordinates(getShapeCoordinates(location), !get(location)));
     }
 
     public BooleanMask fillGaps(int minDist) {
@@ -525,16 +522,15 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask removeAreasBiggerThan(int maxArea) {
-        subtract(copy().removeAreasSmallerThan(maxArea));
-        return this;
+        return enqueue(() -> subtract(copy().removeAreasSmallerThan(maxArea)));
     }
 
     public BooleanMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
-        return removeAreasSmallerThan(minSize).removeAreasBiggerThan(maxSize);
+        return enqueue(() -> removeAreasSmallerThan(minSize).removeAreasBiggerThan(maxSize));
     }
 
     public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
-        return subtract(this.copy().removeAreasOutsideSizeRange(minSize, maxSize));
+        return enqueue(() -> subtract(copy().removeAreasOutsideSizeRange(minSize, maxSize)));
     }
 
     public LinkedHashSet<Vector2> getShapeCoordinates(Vector2 location) {
@@ -669,6 +665,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
+        assertNotPipelined();
         List<Vector2> coordinateList;
         if (symmetryType != null) {
             coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true, 1);
@@ -690,6 +687,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public Vector2 getRandomPosition() {
+        assertNotPipelined();
         List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
         if (coordinates.size() == 0)
             return null;

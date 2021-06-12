@@ -173,18 +173,15 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U addScalar(float value) {
-        addScalar((x, y) -> value);
-        return (U) this;
+        return addScalar((x, y) -> value);
     }
 
     public U subtractScalar(float value) {
-        subtractScalar((x, y) -> value);
-        return (U) this;
+        return subtractScalar((x, y) -> value);
     }
 
     public U multiplyScalar(float value) {
-        multiplyScalar((x, y) -> value);
-        return (U) this;
+        return multiplyScalar((x, y) -> value);
     }
 
     public U divideScalar(float value) {
@@ -192,19 +189,19 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U clampComponentMin(float floor) {
-        return apply((x, y) -> get(x, y).clampMin(floor));
+        return enqueue(() -> apply((x, y) -> get(x, y).clampMin(floor)));
     }
 
     public U clampComponentMax(float ceiling) {
-        return apply((x, y) -> get(x, y).clampMax(ceiling));
+        return enqueue(() -> apply((x, y) -> get(x, y).clampMax(ceiling)));
     }
 
     public U randomize(float scale) {
-        return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, scale));
+        return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, scale)));
     }
 
     public U randomize(float minValue, float maxValue) {
-        return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, minValue, maxValue));
+        return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, minValue, maxValue)));
     }
 
     public U normalize() {
@@ -371,102 +368,102 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public U addScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        return apply((x, y) -> addScalarAt(x, y, valueFunction.apply(x, y)));
+        return enqueue(() -> apply((x, y) -> addScalarAt(x, y, valueFunction.apply(x, y))));
     }
 
     public U addScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addScalarAt(sx, sy, value));
-        });
+        }));
     }
 
     public U subtractScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        return apply((x, y) -> subtractScalarAt(x, y, valueFunction.apply(x, y)));
+        return enqueue(() -> apply((x, y) -> subtractScalarAt(x, y, valueFunction.apply(x, y))));
     }
 
     public U subtractScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractScalarAt(sx, sy, value));
-        });
+        }));
     }
 
     public U multiplyScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        return apply((x, y) -> multiplyScalarAt(x, y, valueFunction.apply(x, y)));
+        return enqueue(() -> apply((x, y) -> multiplyScalarAt(x, y, valueFunction.apply(x, y))));
     }
 
     public U multiplyScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyScalarAt(sx, sy, value));
-        });
+        }));
     }
 
     public U divideScalar(BiFunction<Integer, Integer, Float> valueFunction) {
-        return apply((x, y) -> divideScalarAt(x, y, valueFunction.apply(x, y)));
+        return enqueue(() -> apply((x, y) -> divideScalarAt(x, y, valueFunction.apply(x, y))));
     }
 
     public U divideScalarWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideScalarAt(sx, sy, value));
-        });
+        }));
     }
 
     protected U setComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component));
+        return enqueue(() -> apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
     protected U setComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setComponentAt(sx, sy, value, component));
-        });
+        }));
     }
 
     protected U addComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component));
+        return enqueue(() -> apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
     protected U addComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addComponentAt(sx, sy, value, component));
-        });
+        }));
     }
 
     protected U subtractComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component));
+        return enqueue(() -> apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
     protected U subtractComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractComponentAt(sx, sy, value, component));
-        });
+        }));
     }
 
     protected U multiplyComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component));
+        return enqueue(() -> apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
     protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyComponentAt(sx, sy, value, component));
-        });
+        }));
     }
 
     protected U divideComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component));
+        return enqueue(() -> apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
     protected U divideComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
+        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideComponentAt(sx, sy, value, component));
-        });
+        }));
     }
 
     protected void maskFill(T[][] maskToFill, T value) {

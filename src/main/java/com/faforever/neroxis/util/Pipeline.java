@@ -54,7 +54,6 @@ public strictfp class Pipeline {
                     boolean visualDebug = executingMask.isVisualDebug();
                     executingMask.setVisualDebug(false);
                     function.accept(dependencies);
-                    executingMask.setVisualDebug(visualDebug);
                     long functionTime = System.currentTimeMillis() - startTime;
                     startTime = System.currentTimeMillis();
                     if (HASH_MASK) {
@@ -75,7 +74,8 @@ public strictfp class Pipeline {
                                 finalCallingMethod
                         );
                     }
-                    if (Util.DEBUG || Util.VISUALIZE || VisualDebugger.VISUALIZE_ALL) {
+                    executingMask.setVisualDebug(visualDebug);
+                    if ((Util.DEBUG && visualDebug) || (Util.VISUALIZE && !executingMask.isMock())) {
                         VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
                     }
                 });

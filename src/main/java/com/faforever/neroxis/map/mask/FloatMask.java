@@ -51,7 +51,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor);
+        enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
     public FloatMask(FloatMask other, Long seed) {
@@ -167,19 +167,16 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
-        return this;
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale));
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
-        return this;
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale));
     }
 
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
-        addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
-        return this;
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue));
     }
 
     public FloatMask addPerlinNoise(int resolution, float scale) {
@@ -220,21 +217,19 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask addDistance(BooleanMask other, float scale) {
         assertCompatibleMask(other);
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             FloatMask distanceField = source.getDistanceField();
             add(distanceField.multiply(scale));
         }, other);
-        return this;
     }
 
     public FloatMask sqrt() {
-        set((x, y) -> (float) StrictMath.sqrt(get(x, y)));
-        return this;
+        return enqueue(() -> set((x, y) -> (float) StrictMath.sqrt(get(x, y))));
     }
 
     public FloatMask gradient() {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             Float[][] maskCopy = getNullMask(size);
             apply((x, y) -> {
@@ -248,11 +243,10 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             });
             mask = maskCopy;
         });
-        return this;
     }
 
     public FloatMask supcomGradient() {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             Float[][] maskCopy = getNullMask(size);
             apply((x, y) -> {
@@ -268,12 +262,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             });
             mask = maskCopy;
         });
-        return this;
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             NormalMask normalVectorMask = getNormalMask();
             for (int i = 0; i < numDrops; ++i) {
@@ -281,7 +274,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             }
             applySymmetry(SymmetryType.SPAWN);
         });
-        return this;
     }
 
     private void waterDrop(NormalMask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
@@ -331,23 +323,23 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        enqueue(() -> {
+        return enqueue(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
             subtract(tempMask2).clampMin(0f);
         });
-        return this;
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        return subtract(copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity));
+        return enqueue(() -> subtract(copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity)));
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
-        }
-        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
-        return this;
+        return enqueue(() -> {
+            for (int x = 0; x < levelOfPrecision; x++) {
+                removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
+            }
+            removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
+        });
     }
 
     @Override
@@ -363,16 +355,15 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
-        enqueue(() -> {
+        return enqueue(() -> {
             FloatMask brush = loadBrush(brushName, null);
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
         });
-        return this;
     }
 
     public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             assertSmallerSize(size);
             ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
@@ -384,7 +375,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 addWithOffset(brush, location, true, wrapEdges);
             }
         }, other);
-        return this;
     }
 
     public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
@@ -407,12 +397,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask parabolicMinimization() {
-        enqueue(() -> {
+        return enqueue(() -> {
             addCalculatedParabolicDistance(false);
             addCalculatedParabolicDistance(true);
             sqrt();
         });
-        return this;
     }
 
     public void addCalculatedParabolicDistance(boolean useColumns) {
