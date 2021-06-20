@@ -624,8 +624,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
                 if (get(x, y) == value) {
-                    Vector2 location = new Vector2(x, y);
-                    coordinates.add(location);
+                    coordinates.add(new Vector2(x, y));
                 }
             }
         }
