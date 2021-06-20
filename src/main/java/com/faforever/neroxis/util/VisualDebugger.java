@@ -15,11 +15,9 @@ public strictfp class VisualDebugger {
     }
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
-        if ((mask.isVisualDebug() && Util.DEBUG) || (Util.VISUALIZE && !mask.isMock())) {
-            createGUI();
-            String name = mask.getVisualName();
-            name = name == null ? mask.getName() : name;
-            VisualDebuggerGui.update(name + " " + method + " " + line, mask.copy());
-        }
+        createGUI();
+        String name = mask.getVisualName();
+        name = name == null ? mask.getName() : name;
+        VisualDebuggerGui.update(name + " " + method + " " + line, mask.mock());
     }
 }

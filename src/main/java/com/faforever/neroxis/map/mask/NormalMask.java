@@ -90,7 +90,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     public BufferedImage writeToImage(BufferedImage image) {
         assertSize(image.getHeight());
         WritableRaster imageRaster = image.getRaster();
-        apply((x, y) -> {
+        loop((x, y) -> {
             Vector3 value = get(x, y);
             int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
             int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);

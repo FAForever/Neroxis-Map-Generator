@@ -708,7 +708,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        apply((x, y) -> imageBuffer.setElem(x + y * size, get(x, y) ? 255 : 0));
+        loop((x, y) -> imageBuffer.setElem(x + y * size, get(x, y) ? 255 : 0));
         return image;
     }
 

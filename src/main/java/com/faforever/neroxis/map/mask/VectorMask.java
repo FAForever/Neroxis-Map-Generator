@@ -411,55 +411,55 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }));
     }
 
-    protected U setComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U setComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    protected U setComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U setComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setComponentAt(sx, sy, value, component));
         }));
     }
 
-    protected U addComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U addComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    protected U addComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U addComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addComponentAt(sx, sy, value, component));
         }));
     }
 
-    protected U subtractComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U subtractComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    protected U subtractComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U subtractComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractComponentAt(sx, sy, value, component));
         }));
     }
 
-    protected U multiplyComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U multiplyComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U multiplyComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyComponentAt(sx, sy, value, component));
         }));
     }
 
-    protected U divideComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U divideComponent(BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    protected U divideComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
+    public U divideComponentWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             Float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideComponentAt(sx, sy, value, component));
@@ -492,7 +492,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         int numImageComponents = image.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         WritableRaster imageRaster = image.getRaster();
-        apply((x, y) -> imageRaster.setPixel(x, y, get(x, y).toArray()));
+        loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).toArray()));
         return image;
     }
 

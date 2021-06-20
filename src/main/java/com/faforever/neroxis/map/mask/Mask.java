@@ -47,6 +47,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     @Setter
     private boolean visualDebug;
+    private boolean visible;
     @Getter
     @Setter
     private String visualName;
@@ -54,11 +55,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected Mask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.objectClass = objectClass;
         this.symmetrySettings = symmetrySettings;
-        this.name = name;
+        this.name = name == null ? String.valueOf(hashCode()) : name;
         this.mask = getZeroMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
+        visible = true;
     }
 
     public Mask(U other, Long seed, String name) {
@@ -692,18 +694,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    protected U set(BiFunction<Integer, Integer, T> valueFunction) {
+    public U set(BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> apply((x, y) -> set(x, y, valueFunction.apply(x, y))));
     }
 
-    protected U setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public U setWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
         }));
     }
 
-    protected U apply(BiConsumer<Integer, Integer> maskAction) {
+    public U apply(BiConsumer<Integer, Integer> maskAction) {
         return enqueue(() -> {
             int size = getSize();
             for (int x = 0; x < size; x++) {
@@ -714,7 +716,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    protected U applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
+    public U applyWithSymmetry(SymmetryType symmetryType, BiConsumer<Integer, Integer> maskAction) {
         return enqueue(() -> {
             int minX = getMinXBound(symmetryType);
             int maxX = getMaxXBound(symmetryType);
@@ -738,7 +740,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    protected U applyWithOffset(U other, TriConsumer<Integer, Integer, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    public U applyWithOffset(U other, TriConsumer<Integer, Integer, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();
@@ -783,6 +785,15 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
+    protected void loop(BiConsumer<Integer, Integer> maskAction) {
+        int size = getSize();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                maskAction.accept(x, y);
+            }
+        }
+    }
+
     public void generateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges, int smallerSize, Map<Integer, Integer> coordinateXMap, Map<Integer, Integer> coordinateYMap) {
         int offsetX;
         int offsetY;
@@ -812,11 +823,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             }
             Pipeline.add(this, dependencies, function);
         } else {
-            boolean visualDebug = isVisualDebug();
-            setVisualDebug(false);
+            boolean visibleState = visible;
+            visible = false;
             function.accept(dependencies);
-            setVisualDebug(visualDebug);
-            if ((Util.DEBUG && visualDebug) || (Util.VISUALIZE && !isMock())) {
+            visible = visibleState && !Pipeline.isRunning();
+            if (((Util.DEBUG && isVisualDebug()) || (Util.VISUALIZE && !isMock())) && visible) {
                 String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue", "apply", "applyWithSymmetry");
                 String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);

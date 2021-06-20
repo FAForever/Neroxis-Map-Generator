@@ -197,44 +197,44 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    protected U add(BiFunction<Integer, Integer, T> valueFunction) {
+    public U add(BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> apply((x, y) -> addValueAt(x, y, valueFunction.apply(x, y))));
     }
 
-    protected U addWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public U addWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addValueAt(sx, sy, value));
         }));
     }
 
-    protected U subtract(BiFunction<Integer, Integer, T> valueFunction) {
+    public U subtract(BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> apply((x, y) -> subtractValueAt(x, y, valueFunction.apply(x, y))));
     }
 
-    protected U subtractWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public U subtractWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractValueAt(sx, sy, value));
         }));
     }
 
-    protected U multiply(BiFunction<Integer, Integer, T> valueFunction) {
+    public U multiply(BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> apply((x, y) -> multiplyValueAt(x, y, valueFunction.apply(x, y))));
     }
 
-    protected U multiplyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public U multiplyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyValueAt(sx, sy, value));
         }));
     }
 
-    protected U divide(BiFunction<Integer, Integer, T> valueFunction) {
+    public U divide(BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> apply((x, y) -> divideValueAt(x, y, valueFunction.apply(x, y))));
     }
 
-    protected U divideWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
+    public U divideWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
             T value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideValueAt(sx, sy, value));

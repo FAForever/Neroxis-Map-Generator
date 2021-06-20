@@ -25,6 +25,7 @@ import java.util.List;
 import static com.faforever.neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
 import static com.faforever.neroxis.util.ImageUtils.scaleImage;
 
+@SuppressWarnings("unused")
 @Data
 public strictfp class SCMap {
 

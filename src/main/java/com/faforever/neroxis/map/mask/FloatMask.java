@@ -268,15 +268,14 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                 float depositionRate, float maxOffset, float iterationScale) {
         return enqueue(() -> {
             int size = getSize();
-            NormalMask normalVectorMask = getNormalMask();
             for (int i = 0; i < numDrops; ++i) {
-                waterDrop(normalVectorMask, maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
+                waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
             applySymmetry(SymmetryType.SPAWN);
         });
     }
 
-    private void waterDrop(NormalMask normalMask, int maxIterations, float x, float y, float friction, float speed, float erosionRate,
+    private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
                            float depositionRate, float maxOffset, float iterationScale) {
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
@@ -290,9 +289,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             int sampleX = (int) (x + xOffset);
             int sampleY = (int) (y + yOffset);
             if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
-                break;
+                return;
             }
-            Vector3 surfaceNormal = normalMask.get(sampleX, sampleY);
+            Vector3 surfaceNormal = getNormalAt(sampleX, sampleY);
 
             // If the terrain is flat, stop simulating, the snowball cannot roll any further
             if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
@@ -303,19 +302,20 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             float deposit = sediment * depositionRate * surfaceNormal.getY();
             float erosion = erosionRate * (1 - surfaceNormal.getY()) * StrictMath.min(1, i * iterationScale);
 
-            float sedimentChange = erosion - deposit;
+            float sedimentChange = deposit - erosion;
 
             // Change the sediment on the place this snowball came from
-            subtractValueAt((int) xPrev, (int) yPrev, sedimentChange);
-            sediment += sedimentChange;
+            addValueAt((int) xPrev, (int) yPrev, sedimentChange);
+            sediment -= sedimentChange;
 
-            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * speed;
-            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * speed;
+            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * gravity;
+            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * gravity;
             xPrev = x;
             yPrev = y;
             x += xVelocity;
             y += yVelocity;
         }
+//        addValueAt((int) xPrev, (int) yPrev, sediment);
     }
 
     public Float transformAverage(float value) {
@@ -489,7 +489,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        apply((x, y) -> imageBuffer.setElemFloat(x + y * size, (get(x, y) - offsetFactor) * scaleFactor));
+        loop((x, y) -> imageBuffer.setElemFloat(x + y * size, (get(x, y) - offsetFactor) * scaleFactor));
         return image;
     }
 
