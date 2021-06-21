@@ -398,7 +398,7 @@ public strictfp class MapPopulator {
             }
             FloatMask erosionHeightMask = heightmapBase.copy().resample(erosionResolution).subtractAvg().multiply(10f).addPerlinNoise(erosionResolution / 16, 4f);
             erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
-            NormalMask normal = erosionHeightMask.getNormalMask().startVisualDebugger();
+            NormalMask normal = erosionHeightMask.getNormalMask();
             map.setCompressedNormal(ImageUtils.compressNormal(normal));
         }
 

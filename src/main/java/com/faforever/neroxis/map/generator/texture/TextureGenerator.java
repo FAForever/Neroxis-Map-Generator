@@ -16,10 +16,10 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
 
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters);
-        heightmap = terrainGenerator.getHeightmap().startVisualDebugger();
+        heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
         normals = heightmap.copy().resample(512).addPerlinNoise(64, 12f).blur(1)
-                .addGaussianNoise(.01f).getNormalMask(4f).startVisualDebugger();
+                .addGaussianNoise(.01f).getNormalMask(4f);
     }
 
     public abstract void setTextures();

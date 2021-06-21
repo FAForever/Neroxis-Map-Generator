@@ -21,7 +21,7 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
         super.initialize(map, seed, mapParameters);
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
-        mountainBrushIntensity = 2f;
+        mountainBrushIntensity = 3f;
     }
 
     @Override
@@ -31,7 +31,7 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mapParameters.getMountainDensity());
         mountains.setSize(mapSize / 2);
 
-        mountains.progressiveWalk((int) (normalizedMountainDensity * 4 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8, mapSize / 4);
+        mountains.progressiveWalk((int) (normalizedMountainDensity * 16 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8, mapSize / 4);
         mountains.inflate(2);
 
         mountains.setSize(mapSize + 1);

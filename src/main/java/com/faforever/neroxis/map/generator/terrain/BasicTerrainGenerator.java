@@ -139,7 +139,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + mapParameters.getMountainDensity()) / 3 * 3 + 1);
+        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + mapParameters.getMountainDensity()) / 3 * 2 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
@@ -269,16 +269,16 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     private void blurRamps() {
-        BooleanMask plateauOutlineNoRamps = plateaus.copy().outline().subtract(ramps);
+        BooleanMask NoRamps = plateaus.copy().outline().subtract(ramps).add(mountains);
         BooleanMask inflatedRamps = ramps.copy();
         heightmap.blur(48, inflatedRamps)
-                .blur(32, inflatedRamps.inflate(8).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(32, inflatedRamps.inflate(8).subtract(NoRamps.inflate(4)))
                 .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(24, inflatedRamps.inflate(8).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(24, inflatedRamps.inflate(8).subtract(NoRamps.inflate(4)))
                 .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(16, inflatedRamps.inflate(16).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(16, inflatedRamps.inflate(16).subtract(NoRamps.inflate(4)))
                 .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(8, inflatedRamps.inflate(16).subtract(plateauOutlineNoRamps.inflate(4)))
+                .blur(8, inflatedRamps.inflate(16).subtract(NoRamps.inflate(4)))
                 .blur(4, inflatedRamps.copy().outline().inflate(4))
                 .clampMin(0f).clampMax(255f);
     }
