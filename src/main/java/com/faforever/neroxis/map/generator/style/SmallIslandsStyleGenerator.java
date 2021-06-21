@@ -26,7 +26,6 @@ public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(MapParameters mapParameters, long seed) {
         super.initialize(mapParameters, seed);
-        teamSeparation = mapParameters.getMapSize() / 2;
         terrainGenerator = new SmallIslandsTerrainGenerator();
         propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(),
                 new RockFieldPropGenerator(), new SmallBattlePropGenerator()));

@@ -2,7 +2,11 @@ package com.faforever.neroxis.map.generator.style;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.map.generator.prop.*;
+import com.faforever.neroxis.map.generator.prop.LargeBattlePropGenerator;
+import com.faforever.neroxis.map.generator.prop.NavyWrecksPropGenerator;
+import com.faforever.neroxis.map.generator.prop.NeutralCivPropGenerator;
+import com.faforever.neroxis.map.generator.prop.RockFieldPropGenerator;
+import com.faforever.neroxis.map.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.map.generator.terrain.LandBridgeTerrainGenerator;
 
 import java.util.Arrays;
@@ -28,7 +32,6 @@ public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
         propGenerators.addAll(Arrays.asList(new LargeBattlePropGenerator(), new NavyWrecksPropGenerator(),
                 new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
         int mapSize = mapParameters.getMapSize();
-        teamSeparation = mapSize / 2;
         spawnSeparation = mapSize / 8f;
     }
 }
