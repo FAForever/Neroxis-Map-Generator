@@ -1,14 +1,24 @@
 package com.faforever.neroxis.map.populator;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.PropMaterials;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.exporter.MapExporter;
-import com.faforever.neroxis.map.generator.placement.*;
+import com.faforever.neroxis.map.generator.placement.AIMarkerPlacer;
+import com.faforever.neroxis.map.generator.placement.HydroPlacer;
+import com.faforever.neroxis.map.generator.placement.MexPlacer;
+import com.faforever.neroxis.map.generator.placement.PropPlacer;
+import com.faforever.neroxis.map.generator.placement.SpawnPlacer;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.map.mask.NormalMask;
 import com.faforever.neroxis.map.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
 import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.Util;
 
 import java.awt.image.BufferedImage;
@@ -45,6 +55,7 @@ public strictfp class MapPopulator {
     private boolean keepLayer6;
     private boolean keepLayer7;
     private boolean keepLayer8;
+    private boolean symmetryNeeded;
 
     private BooleanMask resourceMask;
     private BooleanMask waterResourceMask;
@@ -115,14 +126,8 @@ public strictfp class MapPopulator {
             return;
         }
 
-        if (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry")) {
-            System.out.println("Symmetries not Specified");
-            return;
-        }
-
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         outFolderPath = Paths.get(arguments.get("out-folder-path"));
-        symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")), Symmetry.valueOf(arguments.get("spawn-symmetry")));
         populateSpawns = arguments.containsKey("spawns");
         if (populateSpawns) {
             spawnCount = Integer.parseInt(arguments.get("spawns"));
@@ -138,10 +143,6 @@ public strictfp class MapPopulator {
         populateProps = arguments.containsKey("props");
         if (populateProps) {
             propsPath = Paths.get(arguments.get("props"));
-        }
-        erosionNormal = arguments.containsKey("erosion");
-        if (erosionNormal) {
-            erosionResolution = Integer.parseInt(arguments.get("erosion"));
         }
         populateTextures = arguments.containsKey("textures");
         if (populateTextures) {
@@ -161,6 +162,26 @@ public strictfp class MapPopulator {
             mapImageSize = Integer.parseInt(arguments.get("texture-res")) / 128 * 128;
         }
         populateAI = arguments.containsKey("ai");
+        erosionNormal = arguments.containsKey("erosion");
+        if (erosionNormal) {
+            String resolution = arguments.get("erosion");
+            if (resolution != null) {
+                erosionResolution = Integer.parseInt(resolution);
+            }
+        }
+
+        symmetryNeeded = populateAI || populateHydros || populateMexes || populateProps || populateSpawns || populateTextures;
+
+        if (symmetryNeeded && (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry"))) {
+            System.out.println("Symmetries not Specified");
+            return;
+        }
+
+        if (symmetryNeeded) {
+            symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")), Symmetry.valueOf(arguments.get("spawn-symmetry")));
+        } else {
+            symmetrySettings = new SymmetrySettings(Symmetry.NONE);
+        }
     }
 
     public void importMap() {
@@ -174,7 +195,7 @@ public strictfp class MapPopulator {
 
     public void exportMap() {
         long startTime = System.currentTimeMillis();
-        MapExporter.exportMap(outFolderPath, map, true, false);
+        MapExporter.exportMap(outFolderPath, map, true, erosionNormal);
         System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
     }
 
@@ -372,7 +393,13 @@ public strictfp class MapPopulator {
         }
 
         if (erosionNormal) {
-            FloatMask erosionHeightMask = heightmapBase.resample(erosionResolution);
+            if (erosionResolution == 0) {
+                erosionResolution = heightmapBase.getSize();
+            }
+            FloatMask erosionHeightMask = heightmapBase.copy().resample(erosionResolution).subtractAvg().multiply(10f).addPerlinNoise(erosionResolution / 16, 4f);
+            erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
+            NormalMask normal = erosionHeightMask.getNormalMask().startVisualDebugger();
+            map.setCompressedNormal(ImageUtils.compressNormal(normal));
         }
 
         if (populateProps) {
