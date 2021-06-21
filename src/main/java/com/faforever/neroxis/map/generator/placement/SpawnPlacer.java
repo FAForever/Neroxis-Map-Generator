@@ -1,6 +1,12 @@
 package com.faforever.neroxis.map.generator.placement;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
@@ -23,7 +29,7 @@ public strictfp class SpawnPlacer {
         BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         spawnMask.fillSides(map.getSize() / spawnCount * 3 / 2, false).fillCenter(teamSeparation, false).fillEdge(map.getSize() / 16, false).limitToSymmetryRegion();
         if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
-            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f).fillEdge(map.getSize() / 8, false);
+            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f - map.getSize() / 16f);
         }
         Vector2 location = spawnMask.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
