@@ -19,7 +19,7 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
     @Override
     public void initialize(SCMap map, long seed, MapParameters mapParameters) {
         super.initialize(map, seed, mapParameters);
-        mountainBrushSize = 64;
+        mountainBrushSize = 48;
         mountainBrushDensity = .25f;
         mountainBrushIntensity = 4f;
     }
