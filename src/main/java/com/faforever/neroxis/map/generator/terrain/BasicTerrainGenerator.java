@@ -76,7 +76,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         plateauHeight = 6f;
         oceanFloor = -16f;
         valleyFloor = -5f;
-        landHeight = .1f;
+        landHeight = .25f;
 
         mountainBrushSize = map.getSize() < 512 ? 32 : 64;
         mountainBrushDensity = map.getSize() < 512 ? .1f : .05f;
