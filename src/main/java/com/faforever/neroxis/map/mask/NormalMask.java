@@ -61,6 +61,21 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         });
     }
 
+    public NormalMask cross(NormalMask other) {
+        assertCompatibleMask(other);
+        enqueue((dependencies) -> {
+            Vector3Mask source = (Vector3Mask) dependencies.get(0);
+            set((x, y) -> get(x, y).cross(source.get(x, y)));
+        }, other);
+        return this;
+    }
+
+    public NormalMask cross(Vector3 vector) {
+        Vector3 normalizedVector = vector.copy().normalize();
+        enqueue(() -> set((x, y) -> get(x, y).cross(normalizedVector)));
+        return this;
+    }
+
     @Override
     protected Vector3 createValue(float scaleFactor, float... components) {
         assertMatchingDimension(components.length);
@@ -69,6 +84,11 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     @Override
     protected Vector3 getZeroValue() {
+        return new Vector3(0f, 0f, 0f);
+    }
+
+    @Override
+    protected Vector3 getDefaultValue() {
         return new Vector3(0f, 1f, 0f);
     }
 

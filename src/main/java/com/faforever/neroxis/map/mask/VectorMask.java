@@ -254,6 +254,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return addComponent((x, y) -> value, component);
     }
 
+    public U addComponent(BooleanMask other, float value, int component) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            addComponent((x, y) -> source.get(x, y) ? value : 0, component);
+        }, other);
+    }
+
     public U addComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -263,6 +270,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     public U subtractComponent(float value, int component) {
         return subtractComponent((x, y) -> value, component);
+    }
+
+    public U subtractComponent(BooleanMask other, float value, int component) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            subtractComponent((x, y) -> source.get(x, y) ? value : 0, component);
+        }, other);
     }
 
     public U subtractComponent(FloatMask other, int component) {
@@ -276,6 +290,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return multiplyComponent((x, y) -> value, component);
     }
 
+    public U multiplyComponent(BooleanMask other, float value, int component) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            multiplyComponent((x, y) -> source.get(x, y) ? value : 0, component);
+        }, other);
+    }
+
     public U multiplyComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -285,6 +306,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     public U divideComponent(float value, int component) {
         return divideComponent((x, y) -> value, component);
+    }
+
+    public U divideComponent(BooleanMask other, float value, int component) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            divideComponent((x, y) -> source.get(x, y) ? value : 0, component);
+        }, other);
     }
 
     public U divideComponent(FloatMask other, int component) {

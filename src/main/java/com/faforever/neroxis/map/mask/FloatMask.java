@@ -399,7 +399,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public BooleanMask getShadowMask(Vector3 lightDirection) {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
-        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), getSymmetrySettings(), getName() + "Shadow", isParallel());
+        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE), getName() + "Shadow", isParallel());
         shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
             Vector2 location = new Vector2(x, y);
             if (shadowMask.get(location)) {

@@ -53,8 +53,8 @@ public strictfp class Vector3 extends Vector<Vector3> {
         float z = getZ();
         float oZ = other.getZ();
         cross.setX(y * oZ - z * oY);
-        cross.setX(z * oX - x * oZ);
-        cross.setX(x * oY - y * oX);
+        cross.setY(z * oX - x * oZ);
+        cross.setZ(x * oY - y * oX);
         return cross;
     }
 

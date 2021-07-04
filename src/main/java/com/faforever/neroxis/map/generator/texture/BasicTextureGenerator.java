@@ -70,7 +70,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     public void setCompressedDecals() {
         Pipeline.await(normals, shadows);
         Util.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtils.compressShadow(shadows.getFinalMask(), .65f));
+            map.setCompressedShadows(ImageUtils.compressShadow(shadows.getFinalMask(), mapParameters.getBiome().getLightingSettings()));
             map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask()));
         });
     }
@@ -100,8 +100,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         BooleanMask accentRock = new BooleanMask(slope, .75f, "accentRock").inflate(2f);
 
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater);
-        shadows.add(shadowsInWater, 1f).blur(16, shadowsInWater.inflate(8).subtract(realLand)).clampMax(1f);
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
+        shadows.add(shadowsInWater, 1f).blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512))).clampMax(1f);
         int textureSize = mapParameters.getMapSize() + 1;
         int mapSize = mapParameters.getMapSize();
         accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(realWater, 0f).blur(2);

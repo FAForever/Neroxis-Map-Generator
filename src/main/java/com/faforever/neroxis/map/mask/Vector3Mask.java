@@ -68,6 +68,11 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         return this;
     }
 
+    public Vector3Mask cross(Vector3 vector) {
+        set((x, y) -> get(x, y).cross(vector));
+        return this;
+    }
+
     @Override
     protected Vector3 getZeroValue() {
         return new Vector3(0f, 0f, 0f);

@@ -4,6 +4,7 @@ import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.map.mask.NormalMask;
 import com.faforever.neroxis.map.mask.Vector4Mask;
+import com.faforever.neroxis.util.serialized.LightingSettings;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -189,19 +190,23 @@ public strictfp class ImageUtils {
         return getCompressedBytes(size, imageByteBuffer);
     }
 
-    public static byte[] compressShadow(FloatMask mask, float opacityScale) {
+    public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
         int size = mask.getSize();
         int length = size * size * 4;
+        Vector3 shadowFillColor = lightingSettings.getShadowFillColor().copy().add(lightingSettings.getSunAmbience()).divide(4);
+        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 float value = mask.get(x, y);
-                int val = (byte) StrictMath.min(StrictMath.max((1 - value) * 32, 0), 255);
-                int op = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
-                imageByteBuffer.put((byte) val);
-                imageByteBuffer.put((byte) val);
-                imageByteBuffer.put((byte) val);
-                imageByteBuffer.put((byte) op);
+                int r = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getX() * 128, 0), 255);
+                int g = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getY() * 128, 0), 255);
+                int b = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getZ() * 128, 0), 255);
+                int a = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
+                imageByteBuffer.put((byte) r);
+                imageByteBuffer.put((byte) g);
+                imageByteBuffer.put((byte) b);
+                imageByteBuffer.put((byte) a);
             }
         }
         return getCompressedBytes(size, imageByteBuffer);

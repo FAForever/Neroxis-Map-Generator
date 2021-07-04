@@ -45,7 +45,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.objectClass = objectClass;
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
-        this.mask = getZeroMask(size);
+        this.mask = getDefaultMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
@@ -80,6 +80,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public abstract U blur(int radius);
 
     public abstract U blur(int radius, BooleanMask other);
+
+    protected T getDefaultValue() {
+        return getZeroValue();
+    }
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
         return wrapEdges ? (val + offset + size) % size : val + offset - 1;
@@ -156,7 +160,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public U clear() {
-        return enqueue(() -> maskFill(getZeroValue()));
+        return enqueue(() -> maskFill(getDefaultValue()));
     }
 
     public U setSize(int newSize) {
@@ -181,9 +185,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    protected T[][] getZeroMask(int size) {
+    protected T[][] getDefaultMask(int size) {
         T[][] zeros = getNullMask(size);
-        maskFill(zeros, getZeroValue());
+        maskFill(zeros, getDefaultValue());
         return zeros;
     }
 
@@ -835,7 +839,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
         SymmetrySettings symmetrySettings = getSymmetrySettings();
         SymmetrySettings otherSymmetrySettings = other.getSymmetrySettings();
-        if (!symmetrySettings.equals(otherSymmetrySettings)) {
+        if (symmetrySettings.getSpawnSymmetry() != Symmetry.NONE && !symmetrySettings.equals(otherSymmetrySettings)) {
             throw new IllegalArgumentException(String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings, otherName, otherSymmetrySettings));
         }
         if (isParallel() && !Pipeline.isRunning() && !other.isParallel()) {
