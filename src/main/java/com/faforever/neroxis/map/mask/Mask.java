@@ -3,12 +3,7 @@ package com.faforever.neroxis.map.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.TriConsumer;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.VisualDebugger;
+import com.faforever.neroxis.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -16,13 +11,7 @@ import lombok.SneakyThrows;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -63,8 +52,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         visible = true;
     }
 
-    public Mask(U other, Long seed, String name) {
-        this(((Mask<T, U>) other).objectClass, other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public Mask(U other, String name) {
+        this(((Mask<T, U>) other).objectClass, other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         init(other);
     }
 
@@ -97,11 +86,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public T get(Vector3 location) {
-        return get((int) location.getX(), (int) location.getZ());
+        return get(StrictMath.round(location.getX()), StrictMath.round(location.getZ()));
     }
 
     public T get(Vector2 location) {
-        return get((int) location.getX(), (int) location.getY());
+        return get(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
     public T get(int x, int y) {
@@ -109,11 +98,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void set(Vector3 location, T value) {
-        set((int) location.getX(), (int) location.getZ(), value);
+        set(StrictMath.round(location.getX()), StrictMath.round(location.getZ()), value);
     }
 
     protected void set(Vector2 location, T value) {
-        set((int) location.getX(), (int) location.getY(), value);
+        set(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
     }
 
     protected void set(int x, int y, T value) {
@@ -155,13 +144,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @SneakyThrows
     public U copy() {
         Class<?> clazz = getClass();
-        return (U) clazz.getConstructor(clazz, Long.class, String.class).newInstance(this, getNextSeed(), getName() + COPY_NAME);
+        return (U) clazz.getConstructor(clazz, String.class).newInstance(this, getName() + COPY_NAME);
     }
 
     @SneakyThrows
     public U mock() {
         Class<?> clazz = getClass();
-        U mock = (U) clazz.getConstructor(clazz, Long.class, String.class).newInstance(this, null, getName() + MOCK_NAME);
+        U mock = (U) clazz.getConstructor(clazz, String.class).newInstance(this, getName() + MOCK_NAME);
         ((Mask<?, ?>) mock).immutable = true;
         return mock;
     }
@@ -241,7 +230,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public boolean inBounds(Vector2 location) {
-        return inBounds((int) location.getX(), (int) location.getY());
+        return inBounds(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
     public boolean inBounds(int x, int y) {

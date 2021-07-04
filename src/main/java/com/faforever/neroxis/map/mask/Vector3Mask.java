@@ -21,12 +21,12 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         super(Vector3.class, size, seed, symmetrySettings, name, parallel);
     }
 
-    public Vector3Mask(Vector3Mask other, Long seed) {
-        this(other, seed, null);
+    public Vector3Mask(Vector3Mask other) {
+        this(other, null);
     }
 
-    public Vector3Mask(Vector3Mask other, Long seed, String name) {
-        super(other, seed, name);
+    public Vector3Mask(Vector3Mask other, String name) {
+        super(other, name);
     }
 
     public Vector3Mask(NormalMask other, Long seed) {

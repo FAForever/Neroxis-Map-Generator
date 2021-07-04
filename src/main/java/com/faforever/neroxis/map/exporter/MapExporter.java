@@ -8,12 +8,17 @@ import java.nio.file.Path;
 
 public strictfp class MapExporter {
 
-    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportNormals) {
+    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportDecals) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
-            if (exportNormals && map.getCompressedNormal() != null) {
-                SCMapExporter.exportNormals(mapPath, map);
+            if (exportDecals) {
+                if (map.getCompressedNormal() != null) {
+                    SCMapExporter.exportNormals(mapPath, map);
+                }
+                if (map.getCompressedShadows() != null) {
+                    SCMapExporter.exportShadows(mapPath, map);
+                }
             }
             SCMapExporter.exportSCMAP(mapPath, map);
             if (exportPreview) {

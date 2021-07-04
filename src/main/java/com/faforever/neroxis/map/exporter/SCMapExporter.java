@@ -226,6 +226,25 @@ public strictfp class SCMapExporter {
         }
     }
 
+    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
+        byte[] compressedShadows = map.getCompressedShadows();
+        final String fileFormat = "dds";
+        Path decalsPath = Paths.get("env", "decals");
+        Path decalParent = Paths.get("/maps").resolve(map.getName());
+        Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
+        Path writingPath = folderPath.resolve(decalPath);
+        Files.createDirectories(writingPath.getParent());
+        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
+                new Vector2(), new Vector3(), map.getSize(), 1000);
+        shadowDecal.setType(DecalType.WATER_ALBEDO);
+        map.getDecals().add(shadowDecal);
+        try {
+            Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            System.out.print("Could not write the shadow map image\n" + e);
+        }
+    }
+
     private static void writeFloat(float f) throws IOException {
         out.writeInt(swap(Float.floatToRawIntBits(f)));
     }

@@ -9,8 +9,8 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
-    public PrimitiveMask(U other, Long seed, String name) {
-        super(other, seed, name);
+    public PrimitiveMask(U other, String name) {
+        super(other, name);
     }
 
     protected abstract int[][] getInnerCount();

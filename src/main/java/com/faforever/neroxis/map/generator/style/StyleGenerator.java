@@ -86,7 +86,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(() ->
                 generateAIMarkers(terrainGenerator.getPassable(), terrainGenerator.getPassableLand(), terrainGenerator.getPassableWater()));
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedNormal);
+        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);

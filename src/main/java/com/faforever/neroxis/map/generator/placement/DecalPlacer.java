@@ -22,7 +22,7 @@ public strictfp class DecalPlacer {
 
     public void placeDecals(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation, float minScale, float maxScale) {
         if (paths != null && paths.length > 0) {
-            BooleanMask spawnMaskCopy = new BooleanMask(spawnMask, random.nextLong(), "spawnMaskCopy");
+            BooleanMask spawnMaskCopy = new BooleanMask(spawnMask, "spawnMaskCopy");
             spawnMaskCopy.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {

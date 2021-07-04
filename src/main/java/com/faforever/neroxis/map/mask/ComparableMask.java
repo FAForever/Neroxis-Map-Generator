@@ -12,8 +12,8 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
-    public ComparableMask(U other, Long seed, String name) {
-        super(other, seed, name);
+    public ComparableMask(U other, String name) {
+        super(other, name);
     }
 
     public boolean valueAtEqualTo(int x, int y, T value) {
@@ -140,7 +140,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public BooleanMask convertToBooleanMask(T minValue) {
-        return new BooleanMask(this, minValue, getNextSeed(), getName() + "toBoolean");
+        return new BooleanMask(this, minValue, getName() + "toBoolean");
     }
 
     public BooleanMask convertToBooleanMask(T minValue, T maxValue) {

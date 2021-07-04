@@ -25,12 +25,12 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         super(Integer.class, size, seed, symmetrySettings, name, parallel);
     }
 
-    public IntegerMask(IntegerMask other, Long seed) {
-        this(other, seed, null);
+    public IntegerMask(IntegerMask other) {
+        this(other, null);
     }
 
-    public IntegerMask(IntegerMask other, Long seed, String name) {
-        super(other, seed, name);
+    public IntegerMask(IntegerMask other, String name) {
+        super(other, name);
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {

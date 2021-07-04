@@ -10,13 +10,7 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
@@ -35,20 +29,20 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         super(Boolean.class, size, seed, symmetrySettings, name, parallel);
     }
 
-    public BooleanMask(BooleanMask other, Long seed) {
-        this(other, seed, null);
+    public BooleanMask(BooleanMask other) {
+        this(other, (String) null);
     }
 
-    public BooleanMask(BooleanMask other, Long seed, String name) {
-        super(other, seed, name);
+    public BooleanMask(BooleanMask other, String name) {
+        super(other, name);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, Long seed) {
-        this(other, minValue, seed, null);
+    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
+        this(other, minValue, null);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, Long seed, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
@@ -353,7 +347,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask acid(float strength, float size) {
-        BooleanMask holes = new BooleanMask(this, getNextSeed(), getName() + "holes");
+        BooleanMask holes = new BooleanMask(this, getName() + "holes");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         enqueue((dependencies) -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);

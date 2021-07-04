@@ -13,8 +13,8 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         super(objectClass, size, seed, symmetrySettings, name, parallel);
     }
 
-    public OperationsMask(U other, Long seed, String name) {
-        super(other, seed, name);
+    public OperationsMask(U other, String name) {
+        super(other, name);
     }
 
     public abstract T getAvg();

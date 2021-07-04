@@ -23,12 +23,12 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         super(Vector3.class, size, seed, symmetrySettings, name, parallel);
     }
 
-    public NormalMask(NormalMask other, Long seed) {
-        this(other, seed, null);
+    public NormalMask(NormalMask other) {
+        this(other, null);
     }
 
-    public NormalMask(NormalMask other, Long seed, String name) {
-        super(other, seed, name);
+    public NormalMask(NormalMask other, String name) {
+        super(other, name);
     }
 
     public NormalMask(FloatMask other, Long seed) {

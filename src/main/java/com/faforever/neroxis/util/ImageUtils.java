@@ -3,6 +3,7 @@ package com.faforever.neroxis.util;
 import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.map.mask.NormalMask;
+import com.faforever.neroxis.map.mask.Vector4Mask;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -165,6 +166,48 @@ public strictfp class ImageUtils {
                 imageByteBuffer.put((byte) xV);
             }
         }
+        return getCompressedBytes(size, imageByteBuffer);
+    }
+
+    public static byte[] compressVector4(Vector4Mask mask) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector4 value = mask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max(value.getX(), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(value.getY(), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(value.getZ(), 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(value.getW(), 0), 255);
+                imageByteBuffer.put((byte) xV);
+                imageByteBuffer.put((byte) yV);
+                imageByteBuffer.put((byte) zV);
+                imageByteBuffer.put((byte) wV);
+            }
+        }
+        return getCompressedBytes(size, imageByteBuffer);
+    }
+
+    public static byte[] compressShadow(FloatMask mask, float opacityScale) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                float value = mask.get(x, y);
+                int val = (byte) StrictMath.min(StrictMath.max((1 - value) * 32, 0), 255);
+                int op = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
+                imageByteBuffer.put((byte) val);
+                imageByteBuffer.put((byte) val);
+                imageByteBuffer.put((byte) val);
+                imageByteBuffer.put((byte) op);
+            }
+        }
+        return getCompressedBytes(size, imageByteBuffer);
+    }
+
+    private static byte[] getCompressedBytes(int size, ByteBuffer imageByteBuffer) {
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);

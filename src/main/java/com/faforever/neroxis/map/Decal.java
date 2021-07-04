@@ -13,7 +13,7 @@ public strictfp class Decal extends PositionedObject {
     private final String path;
     private final Vector3 rotation;
     private Vector3 scale;
-    private final DecalType type;
+    private DecalType type;
     private float cutOffLOD;
 
     public Decal(String path, Vector2 position, Vector3 rotation, float scale, float cutOffLOD) {

@@ -81,11 +81,11 @@ public strictfp class Vector3 extends Vector<Vector3> {
     }
 
     public float getAzimuth() {
-        return (float) StrictMath.toDegrees(StrictMath.atan2(getZ(), getX()));
+        return (float) StrictMath.atan2(getZ(), getX());
     }
 
     public float getElevation() {
-        return (float) StrictMath.toDegrees(StrictMath.atan2(getY(), StrictMath.sqrt(getX() * getX() + getZ() * getZ())));
+        return (float) StrictMath.atan2(getY(), StrictMath.sqrt(getX() * getX() + getZ() * getZ()));
     }
 
     public Vector3 roundXYToNearestHalfPoint() {

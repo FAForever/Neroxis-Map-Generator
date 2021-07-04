@@ -54,32 +54,32 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
-    public FloatMask(FloatMask other, Long seed) {
-        this(other, seed, null);
+    public FloatMask(FloatMask other) {
+        this(other, null);
     }
 
-    public FloatMask(FloatMask other, Long seed, String name) {
-        super(other, seed, name);
+    public FloatMask(FloatMask other, String name) {
+        super(other, name);
     }
 
-    public FloatMask(BooleanMask other, float low, float high, Long seed) {
-        this(other, low, high, seed, null);
+    public FloatMask(BooleanMask other, float low, float high) {
+        this(other, low, high, null);
     }
 
-    public FloatMask(BooleanMask other, float low, float high, Long seed, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public FloatMask(BooleanMask other, float low, float high, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             set((x, y) -> source.get(x, y) ? high : low);
         }, other);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, Long seed) {
-        this(other1, other2, seed, null);
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2) {
+        this(other1, other2, null);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, Long seed, String name) {
-        this(other1.getSize(), seed, other1.getSymmetrySettings(), name, other1.isParallel());
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, String name) {
+        this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name, other1.isParallel());
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
         enqueue((dependencies) -> {
@@ -89,12 +89,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other1, other2);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, Long seed) {
-        this(other, vector, seed, null);
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector) {
+        this(other, vector, null);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, Long seed, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
@@ -102,12 +102,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, Long seed) {
-        this(other, index, seed, null);
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index) {
+        this(other, index, null);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, Long seed, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
@@ -394,6 +394,31 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         NormalMask normalMask = new NormalMask(this, getNextSeed(), scale, getName() + "Normals");
         normalMask.symmetrySettings = new SymmetrySettings(Symmetry.NONE);
         return normalMask;
+    }
+
+    public BooleanMask getShadowMask(Vector3 lightDirection) {
+        float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
+        float slope = (float) StrictMath.tan(lightDirection.getElevation());
+        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), getSymmetrySettings(), getName() + "Shadow", isParallel());
+        shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
+            Vector2 location = new Vector2(x, y);
+            if (shadowMask.get(location)) {
+                return;
+            }
+            float startHeight = get(location);
+            int dist = 1;
+            location.addPolar(angle, 1);
+            while (inBounds(location)) {
+                if (startHeight - get(location) > dist * slope) {
+                    shadowMask.set(location, true);
+                } else {
+                    break;
+                }
+                location.addPolar(angle, 1);
+                ++dist;
+            }
+        }), this).inflate(1).deflate(1);
+        return shadowMask;
     }
 
     public FloatMask parabolicMinimization() {

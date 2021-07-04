@@ -56,6 +56,7 @@ public strictfp class SCMap {
     private final List<AIMarker> navalRallyMarkers;
     private final List<CubeMap> cubeMaps;
     private byte[] compressedNormal;
+    private byte[] compressedShadows;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)

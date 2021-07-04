@@ -51,8 +51,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, components);
     }
 
-    public VectorMask(U other, Long seed, String name) {
-        super(other, seed, name);
+    public VectorMask(U other, String name) {
+        super(other, name);
     }
 
     @Override
@@ -210,12 +210,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     public FloatMask dot(U other) {
         assertCompatibleMask(other);
-        return new FloatMask(this, other, getNextSeed(), getName() + "dot" + other.getName());
+        return new FloatMask(this, other, getName() + "dot" + other.getName());
     }
 
     public FloatMask dot(T vector) {
         assertMatchingDimension(vector.getDimension());
-        return new FloatMask(this, vector, getNextSeed(), getName() + "dot");
+        return new FloatMask(this, vector, getName() + "dot");
     }
 
     public U blur(int radius) {
@@ -295,7 +295,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public FloatMask getComponentMask(int component) {
-        return new FloatMask(this, component, getNextSeed(), getName() + "Component" + component);
+        return new FloatMask(this, component, getName() + "Component" + component);
     }
 
     public FloatMask[] splitComponentMasks() {
@@ -303,7 +303,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         String name = getName();
         FloatMask[] components = new FloatMask[dimesion];
         for (int i = 0; i < dimesion; ++i) {
-            components[i] = new FloatMask(this, i, getNextSeed(), name + "Component" + i);
+            components[i] = new FloatMask(this, i, name + "Component" + i);
         }
         return components;
     }

@@ -22,12 +22,12 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         super(Vector2.class, size, seed, symmetrySettings, name, parallel);
     }
 
-    public Vector2Mask(Vector2Mask other, Long seed) {
-        this(other, seed, null);
+    public Vector2Mask(Vector2Mask other) {
+        this(other, null);
     }
 
-    public Vector2Mask(Vector2Mask other, Long seed, String name) {
-        super(other, seed, name);
+    public Vector2Mask(Vector2Mask other, String name) {
+        super(other, name);
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
