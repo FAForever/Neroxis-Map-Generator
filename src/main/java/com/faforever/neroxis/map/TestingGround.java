@@ -2,7 +2,8 @@ package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.map.mask.FloatMask;
 import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector3;
+
+import java.util.Random;
 
 public strictfp class TestingGround {
 
@@ -10,15 +11,18 @@ public strictfp class TestingGround {
         Util.DEBUG = true;
         Util.VISUALIZE = true;
 
-        FloatMask test = new FloatMask(512, 0L, new SymmetrySettings(Symmetry.NONE));
+        FloatMask test = new FloatMask(129, new Random().nextLong(), new SymmetrySettings(Symmetry.POINT3));
 
-        test.addPerlinNoise(128, 25);
+        float middle = (test.getSize() - 1) / 2f;
 
-        Vector3 lightDirection = new Vector3(5, 1, 0).normalize();
+        test.addWhiteNoise(10).getNormalMask();
 
-        FloatMask shadows = new FloatMask(test.getShadowMask(lightDirection), 0, .5f, "shadows");
-        shadows.blur(2);
-
-        test.getNormalMask().dot(lightDirection).add(1f).divide(2f).subtract(shadows).clampMin(0f);
+//        Vector2 start = new Vector2(64, 64);
+//        Vector2 end = new Vector2(64 + 128 + 256, 64 + 128 + 256);
+//
+//        test.clear();
+//        test.path(start, end, 1, 5, 128, 64, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+//        test.clear();
+//        test.pathBezier(start, end, 2, 10, 5, 128, 64);
     }
 }

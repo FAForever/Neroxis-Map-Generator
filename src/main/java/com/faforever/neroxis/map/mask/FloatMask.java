@@ -151,14 +151,25 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     protected Vector3 getNormalAt(int x, int y, float scale) {
-        if (onBoundary(x, y) || !inBounds(x, y)) {
-            return new Vector3(0, 1, 0);
+        if (!inBounds(x, y)) {
+            throw new IllegalArgumentException(String.format("Arguments not in bound x: %d y: %d", x, y));
         }
-        return new Vector3(
-                (get(x - 1, y) - get(x + 1, y)) * scale / 2f,
-                1,
-                (get(x, y - 1) - get(x, y + 1)) * scale / 2f
-        ).normalize();
+        float xNormal, yNormal;
+        if (x == 0) {
+            xNormal = (get(x, y) - get(x + 1, y)) * scale;
+        } else if (x == (getSize() - 1)) {
+            xNormal = (get(x - 1, y) - get(x, y)) * scale;
+        } else {
+            xNormal = (get(x - 1, y) - get(x + 1, y)) * scale / 2f;
+        }
+        if (y == 0) {
+            yNormal = (get(x, y) - get(x, y + 1)) * scale;
+        } else if (y == (getSize() - 1)) {
+            yNormal = (get(x, y - 1) - get(x, y)) * scale;
+        } else {
+            yNormal = (get(x, y - 1) - get(x, y + 1)) * scale / 2f;
+        }
+        return new Vector3(xNormal, 1, yNormal).normalize();
     }
 
     @Override

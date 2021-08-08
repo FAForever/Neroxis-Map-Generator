@@ -3,7 +3,12 @@ package com.faforever.neroxis.map.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.TriConsumer;
+import com.faforever.neroxis.util.Util;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -11,7 +16,13 @@ import lombok.SneakyThrows;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -726,10 +737,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
+    protected U applyAtSymmetryPoints(Vector2 location, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
+        return applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), symmetryType, action);
+    }
+
     protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
         action.accept(x, y);
         List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-        symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
+        symPoints.stream().filter(location -> inTeam(location, true)).forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
         return (U) this;
     }
 
@@ -1089,7 +1104,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public U fillCoordinates(Collection<Vector2> coordinates, T value) {
-        return enqueue(() -> coordinates.forEach(location -> set(location, value)));
+        return enqueue(() -> coordinates.forEach(location -> applyAtSymmetryPoints(location, SymmetryType.SPAWN, (x, y) -> set(x, y, value))));
     }
 
     @Override

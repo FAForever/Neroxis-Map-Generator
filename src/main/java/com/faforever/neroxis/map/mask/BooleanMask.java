@@ -3,6 +3,7 @@ package com.faforever.neroxis.map.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.Vector2;
 
 import java.awt.image.BufferedImage;
@@ -10,7 +11,14 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
@@ -222,6 +230,35 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    public BooleanMask pathBezier(Vector2 start, Vector2 end, int minOrder, int maxOrder, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance) {
+        enqueue(() -> {
+            int size = getSize();
+            List<Vector2> checkPoints = new ArrayList<>();
+            checkPoints.add(new Vector2(start));
+            for (int i = 0; i < numMiddlePoints; i++) {
+                Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
+                float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
+                float magnitude = random.nextFloat() * start.getDistance(end) / numMiddlePoints;
+                Vector2 nextLoc = previousLoc.copy().addPolar(angle, magnitude);
+                checkPoints.add(nextLoc);
+            }
+            checkPoints.add(end.copy());
+            checkPoints.forEach(point -> point.round().clampMin(0f).clampMax(size - 1));
+            for (int i = 0; i < checkPoints.size() - 1; i++) {
+                Vector2 location = checkPoints.get(i);
+                Vector2 nextLoc = checkPoints.get(i + 1);
+                BezierCurve bezierCurve = new BezierCurve(random.nextInt(maxOrder - minOrder) + minOrder, random.nextLong());
+                bezierCurve.transformTo(location, nextLoc);
+                List<Vector2> points = new ArrayList<>();
+                for (float j = 0; j <= 1; j += 1f / size) {
+                    points.add(bezierCurve.getPoint(j));
+                }
+                fillCoordinates(points.stream().filter(this::inBounds).collect(Collectors.toList()), true);
+            }
+        });
+        return this;
+    }
+
     public BooleanMask connect(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
         enqueue(() -> {
             path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
@@ -268,9 +305,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask space(float minSpacing, float maxSpacing) {
         enqueue(() -> {
             List<Vector2> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
-            List<Vector2> symmetricCoordinates = new ArrayList<>();
-            coordinates.forEach(coordinate -> symmetricCoordinates.addAll(getSymmetryPoints(coordinate, SymmetryType.SPAWN)));
-            coordinates.addAll(symmetricCoordinates);
             clear();
             fillCoordinates(coordinates, true);
         });
@@ -510,7 +544,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     }
                 }
             });
-            applySymmetry(SymmetryType.SPAWN);
         });
         return this;
     }

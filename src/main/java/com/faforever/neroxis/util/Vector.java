@@ -23,8 +23,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     private final int dimension;
 
     protected Vector(int dimension) {
-        this.dimension = dimension;
-        components = new float[dimension];
+        this(new float[dimension]);
     }
 
     protected Vector(float... components) {
@@ -42,6 +41,10 @@ public abstract strictfp class Vector<T extends Vector<T>> {
         components[i] = value;
     }
 
+    public void set(T other) {
+        System.arraycopy(other.components, 0, components, 0, dimension);
+    }
+
     public T randomize(Random random, float minValue, float maxValue) {
         float range = maxValue - minValue;
         for (int i = 0; i < dimension; ++i) {
@@ -57,6 +60,21 @@ public abstract strictfp class Vector<T extends Vector<T>> {
         return (T) this;
     }
 
+    public T max(float value) {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.max(components[i], value);
+        }
+        return (T) this;
+    }
+
+    public T max(float... values) {
+        assertEqualDimension(values.length);
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.max(components[i], values[i]);
+        }
+        return (T) this;
+    }
+
     public T max(T other) {
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], other.components[i]);
@@ -67,6 +85,21 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     public T clampMin(float floor) {
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], floor);
+        }
+        return (T) this;
+    }
+
+    public T min(float value) {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.min(components[i], value);
+        }
+        return (T) this;
+    }
+
+    public T min(float... values) {
+        assertEqualDimension(values.length);
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.min(components[i], values[i]);
         }
         return (T) this;
     }
@@ -88,6 +121,20 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     public T round() {
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.round(components[i]);
+        }
+        return (T) this;
+    }
+
+    public T floor() {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = (float) StrictMath.floor(components[i]);
+        }
+        return (T) this;
+    }
+
+    public T ceil() {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = (float) StrictMath.ceil(components[i]);
         }
         return (T) this;
     }
@@ -235,6 +282,13 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public float getAngle(T other) {
         return (float) StrictMath.acos(dot(other) / getMagnitude() / other.getMagnitude());
+    }
+
+    public T roundToNearestHalfPoint() {
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.round(components[i] - .5f) + .5f;
+        }
+        return (T) this;
     }
 
     private void assertEqualDimension(int dimension) {

@@ -2,6 +2,7 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.map.Symmetry;
 
+import java.awt.*;
 import java.util.LinkedHashSet;
 
 public strictfp class Vector2 extends Vector<Vector2> {
@@ -24,8 +25,26 @@ public strictfp class Vector2 extends Vector<Vector2> {
         setY(location.getZ());
     }
 
+    public Vector2(Dimension other) {
+        this((float) other.getWidth(), (float) other.getHeight());
+    }
+
+    public Vector2(Point other) {
+        this((float) other.getX(), (float) other.getY());
+    }
+
     public float getX() {
         return components[Vector.X];
+    }
+
+    public void set(Dimension other) {
+        setX((float) other.getWidth());
+        setY((float) other.getHeight());
+    }
+
+    public void set(Point other) {
+        setX((float) other.getX());
+        setY((float) other.getY());
     }
 
     public void setX(float x) {
@@ -82,9 +101,13 @@ public strictfp class Vector2 extends Vector<Vector2> {
         }
     }
 
-    public Vector2 roundToNearestHalfPoint() {
-        setX(StrictMath.round(getX() - .5f) + .5f);
-        setY(StrictMath.round(getY() - .5f) + .5f);
+    public Vector2 rotate(float angle) {
+        float oldX = getX();
+        float oldY = getY();
+        float cos = (float) StrictMath.cos(angle);
+        float sin = (float) StrictMath.sin(angle);
+        setX(oldX * cos - oldY * sin);
+        setY(oldX * sin + oldY * cos);
         return this;
     }
 
