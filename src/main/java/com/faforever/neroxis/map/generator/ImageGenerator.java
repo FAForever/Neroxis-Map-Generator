@@ -3,8 +3,8 @@ package com.faforever.neroxis.map.generator;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.mask.BooleanMask;
-import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ArgumentParser;
 import com.faforever.neroxis.util.Vector2;
 

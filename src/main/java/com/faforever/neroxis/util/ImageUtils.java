@@ -1,15 +1,22 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.jsquish.Squish;
-import com.faforever.neroxis.map.mask.FloatMask;
-import com.faforever.neroxis.map.mask.NormalMask;
-import com.faforever.neroxis.map.mask.Vector4Mask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.NormalMask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.*;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

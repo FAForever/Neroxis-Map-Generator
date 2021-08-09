@@ -4,7 +4,7 @@ import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
 public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {

@@ -1,9 +1,22 @@
 package com.faforever.neroxis.map.transformer;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Decal;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetrySource;
+import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.Unit;
+import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.importer.MapImporter;
-import com.faforever.neroxis.map.mask.IntegerMask;
+import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.ArgumentParser;
 import com.faforever.neroxis.util.Util;
 import com.faforever.neroxis.util.Vector2;
@@ -12,7 +25,14 @@ import com.faforever.neroxis.util.Vector3;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public strictfp class MapTransformer {

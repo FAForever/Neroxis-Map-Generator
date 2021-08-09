@@ -1,13 +1,21 @@
 package com.faforever.neroxis.map.populator;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.PropMaterials;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.exporter.MapExporter;
-import com.faforever.neroxis.map.generator.placement.*;
+import com.faforever.neroxis.map.generator.placement.AIMarkerPlacer;
+import com.faforever.neroxis.map.generator.placement.HydroPlacer;
+import com.faforever.neroxis.map.generator.placement.MexPlacer;
+import com.faforever.neroxis.map.generator.placement.PropPlacer;
+import com.faforever.neroxis.map.generator.placement.SpawnPlacer;
 import com.faforever.neroxis.map.importer.MapImporter;
-import com.faforever.neroxis.map.mask.BooleanMask;
-import com.faforever.neroxis.map.mask.FloatMask;
-import com.faforever.neroxis.map.mask.NormalMask;
-import com.faforever.neroxis.map.mask.Vector4Mask;
+import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.NormalMask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
 import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.ImageUtils;

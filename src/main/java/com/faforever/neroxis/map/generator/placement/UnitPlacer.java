@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;

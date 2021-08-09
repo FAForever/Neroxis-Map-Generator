@@ -7,7 +7,7 @@ import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
 import java.util.ArrayList;

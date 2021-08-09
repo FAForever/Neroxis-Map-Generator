@@ -4,9 +4,9 @@ import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.mask.BooleanMask;
-import com.faforever.neroxis.map.mask.FloatMask;
-import com.faforever.neroxis.map.mask.NormalMask;
+import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.NormalMask;
 import lombok.Getter;
 
 @Getter

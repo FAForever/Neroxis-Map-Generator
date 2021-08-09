@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.map.generator.placement.PropPlacer;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import lombok.Getter;
 
 @Getter

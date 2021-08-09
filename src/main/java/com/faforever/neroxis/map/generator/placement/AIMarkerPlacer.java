@@ -3,7 +3,7 @@ package com.faforever.neroxis.map.generator.placement;
 import com.faforever.neroxis.map.AIMarker;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package com.faforever.neroxis.brushes;
 
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.mask.FloatMask;
 import lombok.Data;
 
 import javax.imageio.ImageIO;

@@ -1,6 +1,6 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.map.mask.Mask;
+import com.faforever.neroxis.mask.Mask;
 
 public strictfp class VisualDebugger {
 

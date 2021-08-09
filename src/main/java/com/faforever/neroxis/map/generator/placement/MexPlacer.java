@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 

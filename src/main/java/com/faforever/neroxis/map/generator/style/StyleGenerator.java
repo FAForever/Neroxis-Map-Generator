@@ -15,7 +15,7 @@ import com.faforever.neroxis.map.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.map.generator.texture.TextureGenerator;
-import com.faforever.neroxis.map.mask.BooleanMask;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Util;
 import lombok.Getter;

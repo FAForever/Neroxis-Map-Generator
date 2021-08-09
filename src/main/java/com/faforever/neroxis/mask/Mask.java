@@ -1,4 +1,4 @@
-package com.faforever.neroxis.map.mask;
+package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -744,7 +744,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiConsumer<Integer, Integer> action) {
         action.accept(x, y);
         List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-        symPoints.stream().filter(location -> inTeam(location, true)).forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
+        symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
         return (U) this;
     }
 

@@ -1,8 +1,8 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.map.mask.FloatMask;
-import com.faforever.neroxis.map.mask.Mask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;

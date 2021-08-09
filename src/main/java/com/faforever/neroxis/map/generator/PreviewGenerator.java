@@ -1,7 +1,11 @@
 package com.faforever.neroxis.map.generator;
 
-import com.faforever.neroxis.map.*;
-import com.faforever.neroxis.map.mask.FloatMask;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.TerrainMaterials;
+import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;

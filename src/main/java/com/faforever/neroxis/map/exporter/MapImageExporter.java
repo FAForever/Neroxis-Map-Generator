@@ -5,9 +5,9 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.map.importer.SaveImporter;
-import com.faforever.neroxis.map.mask.BooleanMask;
-import com.faforever.neroxis.map.mask.FloatMask;
-import com.faforever.neroxis.map.mask.Vector4Mask;
+import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
 
 import java.io.File;
@@ -21,7 +21,7 @@ import java.util.Random;
 
 import static com.faforever.neroxis.util.ImageUtils.writePNGFromMask;
 
-public strictfp class MapImageWriter {
+public strictfp class MapImageExporter {
 
     public static boolean DEBUG = false;
 
@@ -46,13 +46,13 @@ public strictfp class MapImageWriter {
 
         Locale.setDefault(Locale.ROOT);
 
-        MapImageWriter mapImageWriter = new MapImageWriter();
+        MapImageExporter mapImageExporter = new MapImageExporter();
 
-        mapImageWriter.interpretArguments(args);
+        mapImageExporter.interpretArguments(args);
 
-        System.out.println("Creating map image files at " + mapImageWriter.inMapPath);
-        mapImageWriter.importMap();
-        mapImageWriter.writeMapImages();
+        System.out.println("Creating map image files at " + mapImageExporter.inMapPath);
+        mapImageExporter.importMap();
+        mapImageExporter.writeMapImages();
     }
 
     public void interpretArguments(String[] args) {
