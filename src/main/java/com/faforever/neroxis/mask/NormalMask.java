@@ -20,7 +20,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Vector3.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public NormalMask(NormalMask other) {
@@ -59,6 +59,11 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
             float[] components = imageRaster.getPixel(x, y, new float[4]);
             return createValue(1f, components[3], components[0], components[1]);
         });
+    }
+
+    @Override
+    protected Vector3[][] getNullMask(int size) {
+        return new Vector3[size][size];
     }
 
     public NormalMask cross(NormalMask other) {

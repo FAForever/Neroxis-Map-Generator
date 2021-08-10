@@ -19,7 +19,7 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Vector2.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public Vector2Mask(Vector2Mask other) {
@@ -39,13 +39,18 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(Vector2.class, sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
     }
 
     @Override
     protected Vector2 createValue(float scaleFactor, float... components) {
         assertMatchingDimension(components.length);
         return new Vector2(components[0], components[1]).multiply(scaleFactor);
+    }
+
+    @Override
+    protected Vector2[][] getNullMask(int size) {
+        return new Vector2[size][size];
     }
 
     @Override

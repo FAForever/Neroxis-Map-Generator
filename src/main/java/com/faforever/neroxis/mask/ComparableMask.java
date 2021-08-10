@@ -2,14 +2,11 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
 
-    protected ComparableMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(objectClass, size, seed, symmetrySettings, name, parallel);
+    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public ComparableMask(U other, String name) {
@@ -56,13 +53,9 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
                 && (y < getSize() - 1 && valueAtLessThanEqualTo(x, y + 1, value))));
     }
 
-    public T getMin() {
-        return Arrays.stream(mask).flatMap(Arrays::stream).min(Comparator.comparing(value -> value)).orElseThrow(() -> new IllegalStateException("Empty Mask"));
-    }
+    public abstract T getMin();
 
-    public T getMax() {
-        return Arrays.stream(mask).flatMap(Arrays::stream).max(Comparator.comparing(value -> value)).orElseThrow(() -> new IllegalStateException("Empty Mask"));
-    }
+    public abstract T getMax();
 
     public U max(U other) {
         assertCompatibleMask(other);

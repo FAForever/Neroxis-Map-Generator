@@ -18,7 +18,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Vector3.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public Vector3Mask(Vector3Mask other) {
@@ -34,7 +34,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(NormalMask other, Long seed, String name) {
-        super(Vector3.class, other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.get(0);
             set((x, y) -> source.get(x, y).copy());
@@ -50,7 +50,12 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(Vector3.class, sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+    }
+
+    @Override
+    protected Vector3[][] getNullMask(int size) {
+        return new Vector3[size][size];
     }
 
     @Override

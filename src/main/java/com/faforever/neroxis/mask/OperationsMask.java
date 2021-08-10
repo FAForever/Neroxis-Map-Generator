@@ -9,8 +9,8 @@ import java.util.function.BiFunction;
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
 
-    protected OperationsMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(objectClass, size, seed, symmetrySettings, name, parallel);
+    protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public OperationsMask(U other, String name) {
