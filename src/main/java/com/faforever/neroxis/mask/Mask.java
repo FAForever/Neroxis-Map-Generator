@@ -136,7 +136,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         int size = getSize();
         if (newSize != size) {
             plannedSize = newSize;
-            return setSizeInternal(newSize);
+            return enqueue(() -> setSizeInternal(newSize));
         } else {
             return (U) this;
         }
@@ -778,7 +778,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             function.accept(dependencies);
             visible = visibleState && !Pipeline.isRunning();
             if (((Util.DEBUG && isVisualDebug()) || (Util.VISUALIZE && !isMock())) && visible) {
-                String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue", "apply", "applyWithSymmetry");
+                String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
                 String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
             }

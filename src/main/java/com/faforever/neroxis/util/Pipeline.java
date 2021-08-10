@@ -41,7 +41,7 @@ public strictfp class Pipeline {
         String callingLine = null;
 
         if (Util.DEBUG) {
-            callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.map", "enqueue");
+            callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue");
             callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
         }
 
