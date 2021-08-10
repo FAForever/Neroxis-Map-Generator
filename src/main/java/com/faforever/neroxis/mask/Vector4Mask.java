@@ -18,7 +18,7 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     }
 
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Vector4.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public Vector4Mask(Vector4Mask other) {
@@ -38,7 +38,12 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     }
 
     public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        super(Vector4.class, sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+    }
+
+    @Override
+    protected Vector4[][] getNullMask(int size) {
+        return new Vector4[size][size];
     }
 
     @Override

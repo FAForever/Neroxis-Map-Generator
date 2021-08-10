@@ -14,7 +14,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +31,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected static final String MOCK_NAME = "Mock";
     protected static final String COPY_NAME = "Copy";
 
-    private final Class<T> objectClass;
     @Getter
     private final String name;
     protected final Random random;
@@ -43,7 +41,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     @Setter
     private boolean parallel;
-    protected T[][] mask;
     @Getter
     @Setter
     private boolean visualDebug;
@@ -52,21 +49,22 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Setter
     private String visualName;
 
-    protected Mask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        this.objectClass = objectClass;
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
-        this.mask = getDefaultMask(size);
         this.plannedSize = size;
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
         visible = true;
+        initializeMask(size);
     }
 
     public Mask(U other, String name) {
-        this(((Mask<T, U>) other).objectClass, other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         init(other);
     }
+
+    protected abstract void initializeMask(int size);
 
     public boolean isMock() {
         return name.contains(MOCK_NAME);
@@ -80,13 +78,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract T getZeroValue();
 
-    protected U maskFill(T value) {
-        return enqueue(() -> maskFill(mask, value));
-    }
-
-    protected abstract void maskFill(T[][] mask, T value);
-
-    protected abstract void maskFill(T[][] mask);
+    protected abstract U fill(T value);
 
     public abstract U blur(int radius);
 
@@ -108,9 +100,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return get(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
-    public T get(int x, int y) {
-        return mask[x][y];
-    }
+    public abstract T get(int x, int y);
 
     protected void set(Vector3 location, T value) {
         set(StrictMath.round(location.getX()), StrictMath.round(location.getZ()), value);
@@ -120,9 +110,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         set(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
     }
 
-    protected void set(int x, int y, T value) {
-        mask[x][y] = value;
-    }
+    protected abstract void set(int x, int y, T value);
 
     protected static Map<Integer, Integer> getSymmetricScalingCoordinateMap(int currentSize, int scaledSize) {
         float scale = (float) currentSize / scaledSize;
@@ -140,20 +128,22 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (parallel && !Pipeline.isRunning()) {
             return plannedSize;
         } else {
-            return mask[0].length;
+            return getImmediateSize();
         }
     }
 
-    public int getImmediateSize() {
-        return mask[0].length;
+    public U setSize(int newSize) {
+        int size = getSize();
+        if (newSize != size) {
+            plannedSize = newSize;
+            return setSizeInternal(newSize);
+        } else {
+            return (U) this;
+        }
     }
 
     protected Long getNextSeed() {
         return random != null ? random.nextLong() : null;
-    }
-
-    protected T[][] getNullMask(int size) {
-        return (T[][]) Array.newInstance(objectClass, size, size);
     }
 
     @SneakyThrows
@@ -170,58 +160,26 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return mock;
     }
 
+    public abstract int getImmediateSize();
+
     public U clear() {
-        return enqueue(() -> maskFill(getDefaultValue()));
+        return enqueue(() -> fill(getDefaultValue()));
     }
 
-    public U setSize(int newSize) {
-        int size = getSize();
-        if (newSize != size) {
-            plannedSize = newSize;
-            return enqueue(() -> {
-                if (size == 1) {
-                    T value = get(0, 0);
-                    mask = getNullMask(newSize);
-                    maskFill(value);
-                } else {
-                    T[][] oldMask = mask;
-                    int oldSize = getSize();
-                    mask = getNullMask(newSize);
-                    Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                    set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
-                }
-            });
-        } else {
-            return (U) this;
-        }
-    }
-
-    protected T[][] getDefaultMask(int size) {
-        T[][] zeros = getNullMask(size);
-        maskFill(zeros, getDefaultValue());
-        return zeros;
-    }
-
-    protected T[][] getMaskCopy() {
-        int size = getSize();
-        T[][] copy = getNullMask(size);
-        maskFill(copy);
-        return copy;
-    }
+    protected abstract U setSizeInternal(int newSize);
 
     public U init(U other) {
         plannedSize = other.getSize();
-        return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
-            mask = source.getMaskCopy();
-        }, other);
+        return copyFrom(other);
     }
+
+    protected abstract U copyFrom(U other);
 
     public U init(BooleanMask other, T falseValue, T trueValue) {
         plannedSize = other.getSize();
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            mask = getNullMask(source.getSize());
+            initializeMask(source.getSize());
             set((x, y) -> source.get(x, y) ? trueValue : falseValue);
         }, other);
     }
@@ -680,22 +638,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U applySymmetry() {
         return applySymmetry(SymmetryType.SPAWN);
-    }
-
-    public U flip(SymmetryType symmetryType) {
-        return enqueue(() -> {
-            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-            if (symmetry.getNumSymPoints() != 2) {
-                throw new IllegalArgumentException("Cannot flip non single axis symmetry");
-            }
-            int size = getSize();
-            T[][] newMask = getNullMask(size);
-            apply((x, y) -> {
-                List<Vector2> symmetryPoints = getSymmetryPoints(x, y, symmetryType);
-                newMask[x][y] = get(symmetryPoints.get(0));
-            });
-            this.mask = newMask;
-        });
     }
 
     public U set(BiFunction<Integer, Integer, T> valueFunction) {

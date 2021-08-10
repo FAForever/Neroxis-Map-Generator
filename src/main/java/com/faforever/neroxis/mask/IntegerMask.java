@@ -9,9 +9,11 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Map;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
+    private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -22,7 +24,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Integer.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public IntegerMask(IntegerMask other) {
@@ -31,6 +33,11 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     public IntegerMask(IntegerMask other, String name) {
         super(other, name);
+    }
+
+    @Override
+    protected void initializeMask(int size) {
+        mask = new int[size][size];
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
@@ -59,8 +66,78 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    protected IntegerMask fill(Integer value) {
+        int maskSize = mask.length;
+        mask[0][0] = value;
+        for (int i = 1; i < maskSize; i += i) {
+            System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
+        }
+        for (int r = 1; r < maskSize; ++r) {
+            System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+        }
+        return this;
+    }
+
+    protected IntegerMask fill(int[][] maskToFillFrom) {
+        assertNotPipelined();
+        int maskSize = maskToFillFrom.length;
+        mask = new int[maskSize][maskSize];
+        for (int r = 0; r < maskSize; ++r) {
+            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
+        }
+        return this;
+    }
+
+    @Override
+    public Integer get(int x, int y) {
+        return mask[x][y];
+    }
+
+    @Override
+    protected void set(int x, int y, Integer value) {
+        mask[x][y] = value;
+    }
+
+    @Override
+    public int getImmediateSize() {
+        return mask.length;
+    }
+
+    @Override
+    protected IntegerMask setSizeInternal(int newSize) {
+        return enqueue(() -> {
+            int oldSize = getSize();
+            if (oldSize == 1) {
+                int value = get(0, 0);
+                initializeMask(newSize);
+                fill(value);
+            } else if (oldSize != newSize) {
+                int[][] oldMask = mask;
+                initializeMask(newSize);
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+            }
+        });
+    }
+
+    @Override
+    protected IntegerMask copyFrom(IntegerMask other) {
+        return enqueue((dependencies) -> fill(((IntegerMask) dependencies.get(0)).mask), other);
+    }
+
+    @Override
     public Integer getSum() {
-        return Arrays.stream(mask).flatMap(Arrays::stream).reduce(Integer::sum).orElseThrow(() -> new IllegalStateException("Empty Mask"));
+        return Arrays.stream(mask).flatMapToInt(Arrays::stream).sum();
+    }
+
+    @Override
+    public Integer getMin() {
+        return Arrays.stream(mask).flatMapToInt(Arrays::stream).min().orElseThrow(() -> new IllegalStateException("Empty Mask"));
+    }
+
+    @Override
+    public Integer getMax() {
+        return Arrays.stream(mask).flatMapToInt(Arrays::stream).max().orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override

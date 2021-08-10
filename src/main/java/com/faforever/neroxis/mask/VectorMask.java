@@ -14,18 +14,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
+    protected T[][] mask;
 
-    public VectorMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(objectClass, size, seed, symmetrySettings, name, parallel);
+    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public VectorMask(Class<T> objectClass, BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
-        this(objectClass, sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+    public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         Raster imageRaster = sourceImage.getData();
@@ -35,8 +37,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         });
     }
 
-    public VectorMask(Class<T> objectClass, Long seed, String name, FloatMask... components) {
-        this(objectClass, components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].isParallel());
+    public VectorMask(Long seed, String name, FloatMask... components) {
+        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].isParallel());
         int numComponents = components.length;
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
@@ -64,6 +66,61 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     public T getAvg() {
         int size = getSize();
         return getSum().divide(size);
+    }
+
+
+    @Override
+    protected void initializeMask(int size) {
+        mask = getNullMask(size);
+        fill(getDefaultValue());
+    }
+
+    @Override
+    protected U fill(T value) {
+        int maskSize = getSize();
+        for (int x = 0; x < maskSize; ++x) {
+            for (int y = 0; y < maskSize; ++y) {
+                set(x, y, value);
+            }
+        }
+        return (U) this;
+    }
+
+    @Override
+    public T get(int x, int y) {
+        return mask[x][y].copy();
+    }
+
+    @Override
+    protected void set(int x, int y, T value) {
+        mask[x][y] = value.copy();
+    }
+
+    @Override
+    public int getImmediateSize() {
+        return mask.length;
+    }
+
+    @Override
+    protected U setSizeInternal(int newSize) {
+        return enqueue(() -> {
+            int oldSize = getSize();
+            if (oldSize == 1) {
+                T value = get(0, 0);
+                mask = getNullMask(newSize);
+                fill(value);
+            } else if (oldSize != newSize) {
+                T[][] oldMask = mask;
+                mask = getNullMask(newSize);
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+            }
+        });
+    }
+
+    @Override
+    protected U copyFrom(U other) {
+        return enqueue((dependencies) -> fill(((U) dependencies.get(0)).mask), other);
     }
 
     public float getMaxMagnitude() {
@@ -494,26 +551,19 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }));
     }
 
-    protected void maskFill(T[][] maskToFill, T value) {
-        int maskSize = maskToFill.length;
-        for (int x = 0; x < maskSize; ++x) {
-            for (int y = 0; y < maskSize; ++y) {
-                maskToFill[x][y] = value.copy();
-            }
-        }
-    }
-
-    @Override
-    protected void maskFill(T[][] maskToFill) {
+    protected U fill(T[][] maskToFillFrom) {
         assertNotPipelined();
-        int maskSize = maskToFill.length;
-        assertSize(maskSize);
+        int maskSize = maskToFillFrom.length;
+        mask = getNullMask(maskSize);
         for (int x = 0; x < maskSize; x++) {
             for (int y = 0; y < maskSize; y++) {
-                maskToFill[x][y] = get(x, y).copy();
+                set(x, y, maskToFillFrom[x][y]);
             }
         }
+        return (U) this;
     }
+
+    protected abstract T[][] getNullMask(int size);
 
     @Override
     public BufferedImage writeToImage(BufferedImage image) {

@@ -17,11 +17,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
+    private float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -32,7 +35,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(Float.class, size, seed, symmetrySettings, name, parallel);
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
@@ -60,6 +63,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask(FloatMask other, String name) {
         super(other, name);
+    }
+
+    @Override
+    protected void initializeMask(int size) {
+        mask = new float[size][size];
     }
 
     public FloatMask(BooleanMask other, float low, float high) {
@@ -127,6 +135,66 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    protected FloatMask fill(Float value) {
+        int maskSize = mask.length;
+        mask[0][0] = value;
+        for (int i = 1; i < maskSize; i += i) {
+            System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
+        }
+        for (int r = 1; r < maskSize; ++r) {
+            System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+        }
+        return this;
+    }
+
+    protected FloatMask fill(float[][] maskToFillFrom) {
+        assertNotPipelined();
+        int maskSize = maskToFillFrom.length;
+        mask = new float[maskSize][maskSize];
+        for (int r = 0; r < maskSize; ++r) {
+            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
+        }
+        return this;
+    }
+
+    @Override
+    public Float get(int x, int y) {
+        return mask[x][y];
+    }
+
+    @Override
+    protected void set(int x, int y, Float value) {
+        mask[x][y] = value;
+    }
+
+    @Override
+    public int getImmediateSize() {
+        return mask.length;
+    }
+
+    @Override
+    protected FloatMask setSizeInternal(int newSize) {
+        return enqueue(() -> {
+            int oldSize = getSize();
+            if (oldSize == 1) {
+                float value = get(0, 0);
+                initializeMask(newSize);
+                fill(value);
+            } else if (oldSize != newSize) {
+                float[][] oldMask = mask;
+                initializeMask(newSize);
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+            }
+        });
+    }
+
+    @Override
+    protected FloatMask copyFrom(FloatMask other) {
+        return enqueue((dependencies) -> fill(((FloatMask) dependencies.get(0)).mask), other);
+    }
+
+    @Override
     protected void addValueAt(int x, int y, Float value) {
         mask[x][y] += value;
     }
@@ -174,7 +242,17 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getSum() {
-        return Arrays.stream(mask).flatMap(Arrays::stream).reduce(Float::sum).orElseThrow(() -> new IllegalStateException("Empty Mask"));
+        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).sum();
+    }
+
+    @Override
+    public Float getMin() {
+        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).min().orElseThrow(() -> new IllegalStateException("Empty Mask"));
+    }
+
+    @Override
+    public Float getMax() {
+        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).max().orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     public FloatMask addGaussianNoise(float scale) {
@@ -242,7 +320,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask gradient() {
         return enqueue(() -> {
             int size = getSize();
-            Float[][] maskCopy = getNullMask(size);
+            float[][] newMask = new float[size][size];
             apply((x, y) -> {
                 int xNeg = StrictMath.max(0, x - 1);
                 int xPos = StrictMath.min(size - 1, x + 1);
@@ -250,16 +328,16 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 int yPos = StrictMath.min(size - 1, y + 1);
                 float xSlope = (get(xPos, y) - get(xNeg, y)) / (xPos - xNeg);
                 float ySlope = (get(x, yPos) - get(x, yNeg)) / (yPos - yNeg);
-                maskCopy[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
+                newMask[x][y] = (float) StrictMath.sqrt(xSlope * xSlope + ySlope * ySlope);
             });
-            mask = maskCopy;
+            mask = newMask;
         });
     }
 
     public FloatMask supcomGradient() {
         return enqueue(() -> {
             int size = getSize();
-            Float[][] maskCopy = getNullMask(size);
+            float[][] newMask = new float[size][size];
             apply((x, y) -> {
                 int xPos = StrictMath.min(size - 1, x + 1);
                 int yPos = StrictMath.min(size - 1, y + 1);
@@ -269,9 +347,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float yPosSlope = StrictMath.abs(get(x, y) - get(x, yPos));
                 float xNegSlope = StrictMath.abs(get(x, y) - get(xNeg, y));
                 float yNegSlope = StrictMath.abs(get(x, y) - get(x, yNeg));
-                maskCopy[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
+                newMask[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
             });
-            mask = maskCopy;
+            mask = newMask;
         });
     }
 

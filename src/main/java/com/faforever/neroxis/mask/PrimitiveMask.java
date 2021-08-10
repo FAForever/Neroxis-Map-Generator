@@ -5,8 +5,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
 
-    public PrimitiveMask(Class<T> objectClass, int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(objectClass, size, seed, symmetrySettings, name, parallel);
+    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        super(size, seed, symmetrySettings, name, parallel);
     }
 
     public PrimitiveMask(U other, String name) {
@@ -16,27 +16,6 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     protected abstract int[][] getInnerCount();
 
     protected abstract T transformAverage(float value);
-
-    @Override
-    protected void maskFill(T[][] maskToFill, T value) {
-        int maskSize = maskToFill.length;
-        for (int r = 0; r < maskSize; ++r) {
-            maskToFill[r][0] = value;
-            for (int i = 1; i < maskSize; i += i) {
-                System.arraycopy(maskToFill[r], 0, maskToFill[r], i, StrictMath.min((maskSize - i), i));
-            }
-        }
-    }
-
-    @Override
-    protected void maskFill(T[][] maskToFill) {
-        assertNotPipelined();
-        int maskSize = mask.length;
-        assertSize(maskSize);
-        for (int r = 0; r < maskSize; ++r) {
-            System.arraycopy(mask[r], 0, maskToFill[r], 0, maskSize);
-        }
-    }
 
     public U blur(int radius) {
         return enqueue(() -> {
