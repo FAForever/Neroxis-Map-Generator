@@ -109,7 +109,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
                 T value = get(0, 0);
                 mask = getNullMask(newSize);
                 fill(value);
-            } else {
+            } else if (oldSize != newSize) {
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);

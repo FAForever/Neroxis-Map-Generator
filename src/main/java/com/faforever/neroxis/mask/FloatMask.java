@@ -180,7 +180,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float value = get(0, 0);
                 initializeMask(newSize);
                 fill(value);
-            } else {
+            } else if (oldSize != newSize) {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);

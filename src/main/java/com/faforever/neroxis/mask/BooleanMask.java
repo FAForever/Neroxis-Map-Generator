@@ -145,7 +145,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 boolean value = get(0, 0);
                 initializeMask(newSize);
                 fill(value);
-            } else {
+            } else if (oldSize != newSize) {
                 boolean[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
