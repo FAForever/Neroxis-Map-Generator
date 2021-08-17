@@ -142,6 +142,7 @@ public strictfp class MapGenerator {
             }
             count++;
         }
+        Pipeline.shutdown();
     }
 
     public void setValidTerrainSymmetry() {
