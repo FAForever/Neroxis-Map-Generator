@@ -204,24 +204,26 @@ public strictfp class VisualDebuggerGui {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            if (canvas.mask != null) {
 
-            imageZoomFactor.setX((float) getWidth() / image.getWidth());
-            imageZoomFactor.setY((float) getHeight() / image.getHeight());
-            Vector2 fullScalingVector = getFullScalingVector();
-            Vector2 imageOffset = fractionalImageOffset.copy().multiply(canvas.mask.getSize());
+                imageZoomFactor.setX((float) getWidth() / image.getWidth());
+                imageZoomFactor.setY((float) getHeight() / image.getHeight());
+                Vector2 fullScalingVector = getFullScalingVector();
+                Vector2 imageOffset = fractionalImageOffset.copy().multiply(canvas.mask.getSize());
 
-            AffineTransform at = new AffineTransform();
-            at.scale(fullScalingVector.getX(), fullScalingVector.getY());
-            at.translate(imageOffset.getX(), imageOffset.getY());
-            AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            BufferedImage newImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-            op.filter(image, newImage);
+                AffineTransform at = new AffineTransform();
+                at.scale(fullScalingVector.getX(), fullScalingVector.getY());
+                at.translate(imageOffset.getX(), imageOffset.getY());
+                AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                BufferedImage newImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+                op.filter(image, newImage);
 
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.drawImage(newImage, 0, 0, this);
-            g2d.dispose();
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.drawImage(newImage, 0, 0, this);
+                g2d.dispose();
 
-            setLabel();
+                setLabel();
+            }
         }
     }
 
