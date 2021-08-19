@@ -10,10 +10,12 @@ import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public strictfp class UnitPlacer {
     public static final String[] T1_Land = {
@@ -64,6 +66,8 @@ public strictfp class UnitPlacer {
             "/base_template/UEFMediumReclaim.lua"
     };
 
+    public static final int MAX_UNIT_COUNT = 800;
+
     private final Random random;
 
     public UnitPlacer(long seed) {
@@ -77,22 +81,22 @@ public strictfp class UnitPlacer {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
-            List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation);
             LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
+            int numUnitsInTemplate = units.values().stream().mapToInt(Collection::size).sum();
+            List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation).stream()
+                    .limit((MAX_UNIT_COUNT - army.getNumUnits()) / numUnitsInTemplate)
+                    .collect(Collectors.toList());
             for (Vector2 location : coordinates) {
-                if (group.getUnits().size() > 400) {
-                    break;
-                }
-                BaseTemplate base = new BaseTemplate(location, army, group, units);
-                base.addUnits();
+                BaseTemplate base = new BaseTemplate(location, units);
+                base.addUnits(army, group);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> {
-                    BaseTemplate symBase = new BaseTemplate(symmetryPoint, army, group, base.getUnits());
+                    BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.getUnits());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
                         symBase.flip(spawnMask.getSymmetrySettings().getSpawnSymmetry());
                     }
-                    symBase.addUnits();
+                    symBase.addUnits(army, group);
                 });
             }
         }
@@ -105,10 +109,12 @@ public strictfp class UnitPlacer {
     public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation, float maxSeparation) {
         if (types != null && types.length > 0) {
             spawnMask.limitToSymmetryRegion();
-            List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
+            List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation).stream()
+                    .limit((MAX_UNIT_COUNT - army.getNumUnits()) / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints())
+                    .collect(Collectors.toList());
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
-            coordinates.forEach((location) -> {
+            for (Vector2 location : coordinates) {
                 location.add(.5f, .5f);
                 int groupID = group.getUnitCount();
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
@@ -119,7 +125,7 @@ public strictfp class UnitPlacer {
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     group.addUnit(new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i), type, symmetryPoints.get(i), symmetryRotation.get(i)));
                 }
-            });
+            }
         }
     }
 

@@ -20,14 +20,15 @@ import java.util.LinkedHashSet;
 @Value
 public strictfp class BaseTemplate {
     Vector2 center;
-    Army army;
-    Group group;
     LinkedHashMap<String, LinkedHashSet<Vector2>> units;
 
-    public BaseTemplate(Vector2 center, Army army, Group group, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
+    public BaseTemplate(Vector2 center, String templateFile) throws IOException {
         this.center = center;
-        this.army = army;
-        this.group = group;
+        this.units = BaseTemplate.loadUnits(templateFile);
+    }
+
+    public BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
+        this.center = center;
         this.units = units;
     }
 
@@ -74,7 +75,7 @@ public strictfp class BaseTemplate {
         return units;
     }
 
-    public void addUnits() {
+    public void addUnits(Army army, Group group) {
         units.forEach((name, positions) ->
                 positions.forEach(position ->
                         group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, new Vector2(position).add(center), 0))));

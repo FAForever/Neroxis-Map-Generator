@@ -2,12 +2,12 @@ package com.faforever.neroxis.map;
 
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public strictfp class Army {
     private final String id;
-    private final ArrayList<Group> groups;
+    private final List<Group> groups;
 
     public Group getGroup(String id) {
         return groups.stream().filter(group -> group.getId().equals(id)).findFirst().orElse(null);
@@ -23,5 +23,9 @@ public strictfp class Army {
 
     public int getGroupCount() {
         return groups.size();
+    }
+
+    public int getNumUnits() {
+        return groups.stream().mapToInt(group -> group.getUnits().size()).sum();
     }
 }
