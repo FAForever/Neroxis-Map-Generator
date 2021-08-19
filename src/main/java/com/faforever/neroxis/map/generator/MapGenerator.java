@@ -368,6 +368,7 @@ public strictfp class MapGenerator {
             System.out.println("map-gen usage:\n" +
                     "--help                 produce help message\n" +
                     "--styles               list styles\n" +
+                    "--weights              list styles and weights based on the given parameters\n" +
                     "--biomes               list biomes\n" +
                     "--folder-path arg      optional, set the target folder for the generated map\n" +
                     "--seed arg             optional, set the seed for the generated map\n" +
@@ -467,6 +468,22 @@ public strictfp class MapGenerator {
 
         if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new IllegalArgumentException("spawnCount is not a multiple of number of teams");
+        }
+
+        if (arguments.containsKey("weights")) {
+            List<StyleGenerator> generators = productionStyles.stream()
+                    .filter(generator -> {
+                        ParameterConstraints constraints = generator.getParameterConstraints();
+                        return constraints.getMapSizes().contains(mapSize)
+                                && constraints.getNumTeamsRange().contains(numTeams)
+                                && constraints.getSpawnCountRange().contains(spawnCount);
+                    }).collect(Collectors.toList());
+            float totalWeights = (float) generators.stream().mapToDouble(StyleGenerator::getWeight).sum();
+            String styleWeights = generators.stream().map(generator -> String.format("%s: %.2f", generator.getName(), generator.getWeight() / totalWeights))
+                    .collect(Collectors.joining(", "));
+            System.out.println("Style Weights: " + styleWeights);
+            validArgs = false;
+            return;
         }
 
         randomizeOptions();
