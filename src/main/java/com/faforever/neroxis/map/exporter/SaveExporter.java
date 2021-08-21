@@ -1,9 +1,19 @@
 package com.faforever.neroxis.map.exporter;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.Vector3;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -17,9 +27,13 @@ public strictfp class SaveExporter {
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("Scenario = {\n");
-        out.writeBytes("  next_area_id = '1',\n");
+        out.writeBytes("  next_area_id = '0',\n");
         out.writeBytes("  Props = {},\n");
-        out.writeBytes("  Areas = {},\n");
+        out.writeBytes("  Areas = {\n");
+        out.writeBytes("    ['AREA_1'] = {\n");
+        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( 0, 0, %d, %d ),\n", map.getSize(), map.getSize()));
+        out.writeBytes("    },\n");
+        out.writeBytes("  },\n");
         out.writeBytes("  MasterChain = {\n");
         out.writeBytes("    ['_MASTERCHAIN_'] = {\n");
         out.writeBytes("      Markers = {\n");
