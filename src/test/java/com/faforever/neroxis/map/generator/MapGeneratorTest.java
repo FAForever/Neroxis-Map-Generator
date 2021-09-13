@@ -18,7 +18,11 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static com.faforever.neroxis.util.ImageUtils.compareImages;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MapGeneratorTest {
 
@@ -288,7 +292,7 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityStyleSpecified() throws Exception {
-        List<StyleGenerator> styles = instance.getMapStyles();
+        List<StyleGenerator> styles = MapGenerator.MAP_STYLES;
         for (StyleGenerator styleGenerator : styles) {
             Pipeline.reset();
             instance = new MapGenerator();
