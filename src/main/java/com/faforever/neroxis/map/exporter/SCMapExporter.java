@@ -1,7 +1,15 @@
 package com.faforever.neroxis.map.exporter;
 
 import com.faforever.neroxis.jsquish.Squish;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.CubeMap;
+import com.faforever.neroxis.map.Decal;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.DecalType;
+import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SkyBox;
+import com.faforever.neroxis.map.TerrainMaterials;
+import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.map.generator.PreviewGenerator;
 import com.faforever.neroxis.util.DDSHeader;
 import com.faforever.neroxis.util.Vector2;
@@ -11,8 +19,16 @@ import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
 
 import javax.imageio.ImageIO;
-import java.awt.image.*;
-import java.io.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.RenderedImage;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
@@ -213,7 +229,7 @@ public strictfp class SCMapExporter {
         byte[] compressedNormal = map.getCompressedNormal();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getName());
+        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
         Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
@@ -230,7 +246,7 @@ public strictfp class SCMapExporter {
         byte[] compressedShadows = map.getCompressedShadows();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getName());
+        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
         Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());

@@ -62,6 +62,11 @@ public strictfp class MapGenerator {
 
     public static final String VERSION;
     public static final BaseEncoding NAME_ENCODER = BaseEncoding.base32().omitPadding().lowerCase();
+    public static final List<StyleGenerator> MAP_STYLES = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
+            new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
+            new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
+            new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator()));
+    public static final List<StyleGenerator> PRODUCTION_STYLES = MAP_STYLES.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     private static int NUM_TO_GEN = 1;
 
@@ -71,11 +76,6 @@ public strictfp class MapGenerator {
     }
 
     private final int numBins = 127;
-    private final List<StyleGenerator> mapStyles = Collections.unmodifiableList(Arrays.asList(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(),
-            new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(),
-            new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
-            new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator()));
-    private final List<StyleGenerator> productionStyles = mapStyles.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     //read from cli args
     private String pathToFolder = ".";
@@ -249,7 +249,7 @@ public strictfp class MapGenerator {
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
             optionsUsed = true;
         } else if (optionBytes.length == 4) {
-            mapStyle = mapStyles.get(optionBytes[3]);
+            mapStyle = MAP_STYLES.get(optionBytes[3]);
             styleSpecified = true;
         }
     }
@@ -330,7 +330,7 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, mapParameters, new BasicStyleGenerator());
+        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, PRODUCTION_STYLES, mapParameters, new BasicStyleGenerator());
     }
 
     public void interpretArguments(String[] args) throws Exception {
@@ -351,7 +351,7 @@ public strictfp class MapGenerator {
         } else if (styleSpecified) {
             mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         } else {
-            mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
+            mapStyle = RandomUtils.selectRandomMatchingGenerator(random, PRODUCTION_STYLES, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
             mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         }
 
@@ -397,7 +397,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("styles")) {
-            System.out.println("Valid Styles:\n" + productionStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
+            System.out.println("Valid Styles:\n" + PRODUCTION_STYLES.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
             validArgs = false;
             return;
         }
@@ -471,7 +471,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("weights")) {
-            List<StyleGenerator> generators = productionStyles.stream()
+            List<StyleGenerator> generators = PRODUCTION_STYLES.stream()
                     .filter(generator -> {
                         ParameterConstraints constraints = generator.getParameterConstraints();
                         return constraints.getMapSizes().contains(mapSize)
@@ -491,7 +491,7 @@ public strictfp class MapGenerator {
         if (!tournamentStyle) {
 
             if (arguments.containsKey("style") && arguments.get("style") != null) {
-                mapStyle = mapStyles.stream().filter(style -> style.getName().equals(arguments.get("style").toUpperCase(Locale.ROOT)))
+                mapStyle = MAP_STYLES.stream().filter(style -> style.getName().equals(arguments.get("style").toUpperCase(Locale.ROOT)))
                         .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style"));
                 styleSpecified = true;
             }
@@ -576,7 +576,7 @@ public strictfp class MapGenerator {
                     (byte) mapParameters.getHydroCount(),
                     (byte) mapParameters.getSymmetrySettings().getTerrainSymmetry().ordinal()};
         } else if (styleSpecified) {
-            int styleIndex = mapStyles.indexOf(mapStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
+            int styleIndex = MAP_STYLES.indexOf(MAP_STYLES.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
             optionArray = new byte[]{(byte) mapParameters.getSpawnCount(),
                     (byte) (mapParameters.getMapSize() / 64),

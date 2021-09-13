@@ -44,6 +44,12 @@ public strictfp class ParameterConstraints {
                 && biomes.contains(mapParameters.getBiome().getName());
     }
 
+    public boolean matches(int mapSize, int numTeams, int spawnCount) {
+        return mapSizes.contains(mapSize)
+                && numTeamsRange.contains(numTeams)
+                && spawnCountRange.contains(spawnCount);
+    }
+
     public MapParameters randomizeParameters(Random random, MapParameters mapParameters) throws Exception {
         return MapParameters.builder()
                 .spawnCount(mapParameters.getSpawnCount())

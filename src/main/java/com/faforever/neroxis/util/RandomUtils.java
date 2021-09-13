@@ -2,7 +2,6 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.generator.ElementGenerator;
-import com.faforever.neroxis.map.generator.ParameterConstraints;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +55,7 @@ public strictfp class RandomUtils {
                                                                                int spawnCount, int mapSize, int numTeams,
                                                                                T defaultGenerator) {
         List<T> matchingGenerators = generators.stream()
-                .filter(generator -> {
-                    ParameterConstraints constraints = generator.getParameterConstraints();
-                    return constraints.getMapSizes().contains(mapSize)
-                            && constraints.getNumTeamsRange().contains(numTeams)
-                            && constraints.getSpawnCountRange().contains(spawnCount);
-                })
+                .filter(generator -> generator.getParameterConstraints().matches(mapSize, numTeams, spawnCount))
                 .collect(Collectors.toList());
         return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
     }
