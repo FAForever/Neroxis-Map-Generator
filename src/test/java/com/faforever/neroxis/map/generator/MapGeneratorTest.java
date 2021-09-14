@@ -292,7 +292,7 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityStyleSpecified() throws Exception {
-        List<StyleGenerator> styles = MapGenerator.MAP_STYLES;
+        List<StyleGenerator> styles = instance.getMapStyles();
         for (StyleGenerator styleGenerator : styles) {
             Pipeline.reset();
             instance = new MapGenerator();
