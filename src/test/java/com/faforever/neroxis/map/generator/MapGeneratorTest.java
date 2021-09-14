@@ -9,21 +9,24 @@ import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.MathUtils;
 import com.faforever.neroxis.util.Pipeline;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Paths;
 import java.util.List;
 
 import static com.faforever.neroxis.util.ImageUtils.compareImages;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
 
     String folderPath = ".";
@@ -56,7 +59,7 @@ public class MapGeneratorTest {
             "--num-teams", Integer.toString(numTeams)};
     private MapGenerator instance;
 
-    @Before
+    @BeforeEach
     public void setup() {
         instance = new MapGenerator();
     }
@@ -67,12 +70,12 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), roundedLandDensity, 0);
-        assertEquals(instance.getPlateauDensity(), roundedPlateauDensity, 0);
-        assertEquals(instance.getMountainDensity(), roundedMountainDensity, 0);
-        assertEquals(instance.getRampDensity(), roundedRampDensity, 0);
-        assertEquals(instance.getReclaimDensity(), roundedReclaimDensity, 0);
-        assertEquals(instance.getMexDensity(), roundedMexDensity, 0);
+        assertEquals(instance.getLandDensity(), roundedLandDensity);
+        assertEquals(instance.getPlateauDensity(), roundedPlateauDensity);
+        assertEquals(instance.getMountainDensity(), roundedMountainDensity);
+        assertEquals(instance.getRampDensity(), roundedRampDensity);
+        assertEquals(instance.getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(instance.getMexDensity(), roundedMexDensity);
         assertEquals(instance.getMapSize(), mapSize);
     }
 
@@ -407,7 +410,7 @@ public class MapGeneratorTest {
                 mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         Pipeline.reset();
         FileUtils.deleteRecursiveIfExists(Paths.get(instance.getMapName()));

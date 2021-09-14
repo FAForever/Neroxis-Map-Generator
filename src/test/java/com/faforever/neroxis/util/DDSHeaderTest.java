@@ -1,9 +1,13 @@
 package com.faforever.neroxis.util;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+@Execution(ExecutionMode.CONCURRENT)
 public class DDSHeaderTest {
 
     public static final byte[] DDS_HEADER_1 = {68, 68, 83, 32, 124, 0, 0, 0, 7, 16, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
