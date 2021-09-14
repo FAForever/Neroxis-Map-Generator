@@ -68,10 +68,6 @@ tasks.withType(Test) {
 
 test {
     useJUnitPlatform()
-    testLogging {
-        events "failed"
-        showStandardStreams = true
-    }
     systemProperties = [
             'junit.jupiter.execution.parallel.enabled': true
     ]
