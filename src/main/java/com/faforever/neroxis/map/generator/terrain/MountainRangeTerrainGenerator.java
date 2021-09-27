@@ -12,7 +12,7 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
                 .landDensity(.75f, 1f)
                 .mountainDensity(.5f, 1)
                 .mexDensity(.375f, 1)
-                .mapSizes(256, 512)
+                .mapSizes(256, 768)
                 .build();
     }
 

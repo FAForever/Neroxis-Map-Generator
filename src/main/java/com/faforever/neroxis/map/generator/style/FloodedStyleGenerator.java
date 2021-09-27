@@ -16,7 +16,7 @@ public strictfp class FloodedStyleGenerator extends StyleGenerator {
         parameterConstraints = ParameterConstraints.builder()
                 .plateauDensity(0, .25f)
                 .landDensity(0, .5f)
-                .mapSizes(512, 1024)
+                .mapSizes(384, 1024)
                 .build();
         weight = 0f;
     }

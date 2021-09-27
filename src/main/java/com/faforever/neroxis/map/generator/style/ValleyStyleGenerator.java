@@ -20,7 +20,7 @@ public strictfp class ValleyStyleGenerator extends StyleGenerator {
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.75f, 1f)
                 .mountainDensity(.5f, 1)
-                .mapSizes(512, 1024)
+                .mapSizes(384, 1024)
                 .build();
     }
 

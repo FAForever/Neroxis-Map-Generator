@@ -21,7 +21,7 @@ public strictfp class ParameterConstraints {
     Range reclaimDensityRange;
     Range mexDensityRange;
     Range spawnCountRange;
-    List<Integer> mapSizes;
+    Range mapSizeRange;
     Range numTeamsRange;
     Range hydroCountRange;
     List<String> biomes;
@@ -40,12 +40,12 @@ public strictfp class ParameterConstraints {
                 && hydroCountRange.contains(mapParameters.getHydroCount())
                 && numTeamsRange.contains(mapParameters.getNumTeams())
                 && spawnCountRange.contains(mapParameters.getSpawnCount())
-                && mapSizes.contains(mapParameters.getMapSize())
+                && mapSizeRange.contains(mapParameters.getMapSize())
                 && biomes.contains(mapParameters.getBiome().getName());
     }
 
     public boolean matches(int mapSize, int numTeams, int spawnCount) {
-        return mapSizes.contains(mapSize)
+        return mapSizeRange.contains(mapSize)
                 && numTeamsRange.contains(numTeams)
                 && spawnCountRange.contains(spawnCount);
     }
@@ -121,14 +121,14 @@ public strictfp class ParameterConstraints {
         Range reclaimDensityRange = Range.of(0, 1);
         Range mexDensityRange = Range.of(0, 1);
         Range spawnCountRange = Range.of(0, 16);
-        List<Integer> mapSizes = Arrays.asList(256, 512, 1024);
+        Range mapSizeRange = Range.of(0, 2048);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
         List<String> biomes = new ArrayList<>(Biomes.BIOMES_LIST);
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
-                    rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange, mapSizes,
+                    rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange, mapSizeRange,
                     numTeamsRange, hydroCountRange, biomes);
         }
 
@@ -167,8 +167,8 @@ public strictfp class ParameterConstraints {
             return this;
         }
 
-        public ParameterConstraintsBuilder mapSizes(Integer... sizes) {
-            mapSizes = Arrays.asList(sizes);
+        public ParameterConstraintsBuilder mapSizes(float min, float max) {
+            mapSizeRange = Range.of(min, max);
             return this;
         }
 

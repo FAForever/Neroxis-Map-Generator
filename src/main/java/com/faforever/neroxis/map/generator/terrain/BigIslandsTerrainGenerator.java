@@ -11,7 +11,7 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)
                 .plateauDensity(0, .5f)
-                .mapSizes(1024)
+                .mapSizes(768, 1024)
                 .build();
         weight = 2;
     }

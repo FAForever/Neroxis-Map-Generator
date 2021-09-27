@@ -17,8 +17,10 @@ public strictfp class ScriptGenerator {
 
     private static String generateDefaultScript() {
         return "local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')\n" +
+                "local ScenarioFramework = import('/lua/ScenarioFramework.lua')\n" +
                 "function OnPopulate()\n" +
                 "ScenarioUtils.InitializeArmies()\n" +
+                "ScenarioFramework.SetPlayableArea('AREA_1' , false)\n" +
                 "end\n" +
                 "function OnStart(self)\n" +
                 "end";

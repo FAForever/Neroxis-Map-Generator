@@ -20,7 +20,7 @@ public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
                 .landDensity(.25f, .75f)
                 .mexDensity(.5f, 1f)
                 .reclaimDensity(.5f, 1f)
-                .mapSizes(1024)
+                .mapSizes(768, 1024)
                 .numTeams(2, 4)
                 .build();
     }

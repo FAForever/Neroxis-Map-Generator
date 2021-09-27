@@ -456,7 +456,7 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("map-size") && arguments.get("map-size") != null) {
-            mapSize = Integer.parseInt(arguments.get("map-size"));
+            mapSize = StrictMath.round(Integer.parseInt(arguments.get("map-size")) / 64f) * 64;
         }
 
         if (arguments.containsKey("seed") && arguments.get("seed") != null) {
@@ -475,7 +475,7 @@ public strictfp class MapGenerator {
             List<StyleGenerator> generators = productionStyles.stream()
                     .filter(generator -> {
                         ParameterConstraints constraints = generator.getParameterConstraints();
-                        return constraints.getMapSizes().contains(mapSize)
+                        return constraints.getMapSizeRange().contains(mapSize)
                                 && constraints.getNumTeamsRange().contains(numTeams)
                                 && constraints.getSpawnCountRange().contains(spawnCount);
                     }).collect(Collectors.toList());

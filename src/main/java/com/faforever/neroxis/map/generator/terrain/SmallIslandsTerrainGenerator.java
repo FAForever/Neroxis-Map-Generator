@@ -14,7 +14,7 @@ public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerato
                 .landDensity(0f, .5f)
                 .plateauDensity(0, .5f)
                 .mexDensity(.5f, 1)
-                .mapSizes(1024)
+                .mapSizes(768, 1024)
                 .build();
     }
 

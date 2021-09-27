@@ -1,9 +1,16 @@
 package com.faforever.neroxis.map.importer;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
@@ -33,6 +40,12 @@ public strictfp class SaveImporter {
         Path savePath = mapFiles[0].toPath();
 
         LuaValue lua = LuaLoader.loadFile(savePath).get("Scenario");
+        try {
+            LuaTable areaTable = lua.get("Areas").get("AREA_1").get("rectangle").checktable();
+            map.setPlayableArea(new Vector4(areaTable.get(1).tofloat(), areaTable.get(2).tofloat(), areaTable.get(3).tofloat(), areaTable.get(4).tofloat()));
+        } catch (Exception ignored) {
+        }
+
         LuaTable markers = lua.get("MasterChain").get("_MASTERCHAIN_").get("Markers").checktable();
         LuaValue key = LuaValue.NIL;
         while (markers.next(key) != LuaValue.NIL) {

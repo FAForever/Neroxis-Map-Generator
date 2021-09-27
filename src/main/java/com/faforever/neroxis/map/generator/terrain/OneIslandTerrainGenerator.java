@@ -10,7 +10,7 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     public OneIslandTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)
-                .mapSizes(512, 1024)
+                .mapSizes(384, 1024)
                 .build();
     }
 

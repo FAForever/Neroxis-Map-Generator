@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.evaluator.MapEvaluator;
+import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.FileUtils;
@@ -82,6 +83,27 @@ public class MapGeneratorTest {
         assertEquals(instance.getMexDensity(), roundedMexDensity);
         assertEquals(instance.getMapSize(), mapSize);
     }
+
+    @Test
+    public void TestParseMapSizes() throws Exception {
+        for (int i = 0; i < 2048; ++i) {
+            instance.interpretArguments(new String[]{"--map-size", String.valueOf(i)});
+
+            assertEquals(StrictMath.round(i / 64f) * 64, instance.getMapSize());
+        }
+    }
+
+    @Test
+    public void TestMapExportedToProperSize() throws Exception {
+        instance.interpretArguments(new String[]{"--map-size", "384"});
+
+        SCMap map = instance.generate();
+
+        MapExporter.exportMap(Paths.get("."), map, false, false, false);
+
+        assertEquals(512, map.getSize());
+    }
+
 
     @Test
     public void TestDeterminism() throws Exception {

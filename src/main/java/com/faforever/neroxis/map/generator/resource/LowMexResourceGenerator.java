@@ -7,7 +7,7 @@ public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
     public LowMexResourceGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                 .mexDensity(0f, .25f)
-                .mapSizes(512)
+                .mapSizes(384, 768)
                 .spawnCount(0, 4)
                 .build();
     }

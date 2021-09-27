@@ -6,6 +6,7 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -60,7 +61,8 @@ public strictfp class SCMap {
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)
-    private int size; // must be a power of 2. 512 equals a 10x10km Map
+    private int size; // must be a power of 2 when exported. 512 equals a 10x10km Map
+    private Vector4 playableArea;
     private int minorVersion = 56;
     private String description = "";
     private String terrainShaderPath = "TTerrainXP";
@@ -96,6 +98,7 @@ public strictfp class SCMap {
     public SCMap(int size, Biome biome) {
         this.size = size;
         this.biome = biome;
+        playableArea = new Vector4(0, 0, size, size);
         spawns = new ArrayList<>();
         mexes = new ArrayList<>();
         hydros = new ArrayList<>();
@@ -424,19 +427,21 @@ public strictfp class SCMap {
         cubeMaps.add(cubeMap);
     }
 
-    public void changeMapSize(int contentSize, int boundsSize, Vector2 centerOffset) {
+    public void changeMapSize(int contentSize, int boundsSize, Vector2 boundOffset) {
         int oldSize = size;
-        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - (float) contentSize / 2, centerOffset.getY() - (float) contentSize / 2);
+        Vector2 topLeftOffset = new Vector2(boundOffset.getX() - (float) contentSize / 2, boundOffset.getY() - (float) contentSize / 2);
         float contentScale = (float) contentSize / (float) oldSize;
         float boundsScale = (float) boundsSize / (float) contentSize;
 
         if (contentScale != 1) {
             scaleMapContent(contentScale);
             this.size = contentSize;
+            playableArea.multiply(contentScale);
         }
 
         if (boundsScale != 1) {
             scaleMapBounds(boundsScale, topLeftOffset);
+            playableArea.add(topLeftOffset.getX(), topLeftOffset.getY(), topLeftOffset.getX(), topLeftOffset.getY());
             this.size = boundsSize;
         }
 

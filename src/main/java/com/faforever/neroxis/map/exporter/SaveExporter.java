@@ -8,6 +8,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.Vector4;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -25,13 +26,15 @@ public strictfp class SaveExporter {
     public static void exportSave(Path folderPath, SCMap map) throws IOException {
         file = folderPath.resolve(map.getFilePrefix() + "_save.lua").toFile();
         boolean status = file.createNewFile();
+        Vector4 playableArea = map.getPlayableArea();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("Scenario = {\n");
         out.writeBytes("  next_area_id = '0',\n");
         out.writeBytes("  Props = {},\n");
         out.writeBytes("  Areas = {\n");
         out.writeBytes("    ['AREA_1'] = {\n");
-        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( 0, 0, %d, %d ),\n", map.getSize(), map.getSize()));
+        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( %d, %d, %d, %d ),\n",
+                (int) playableArea.getX(), (int) playableArea.getY(), (int) playableArea.getZ(), (int) playableArea.getW()));
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
         out.writeBytes("  MasterChain = {\n");

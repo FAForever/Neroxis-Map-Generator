@@ -2,7 +2,14 @@ package com.faforever.neroxis.map.generator.style;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.map.generator.prop.*;
+import com.faforever.neroxis.map.generator.prop.BasicPropGenerator;
+import com.faforever.neroxis.map.generator.prop.EnemyCivPropGenerator;
+import com.faforever.neroxis.map.generator.prop.HighReclaimPropGenerator;
+import com.faforever.neroxis.map.generator.prop.LargeBattlePropGenerator;
+import com.faforever.neroxis.map.generator.prop.NavyWrecksPropGenerator;
+import com.faforever.neroxis.map.generator.prop.NeutralCivPropGenerator;
+import com.faforever.neroxis.map.generator.prop.RockFieldPropGenerator;
+import com.faforever.neroxis.map.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.map.generator.resource.LowMexResourceGenerator;
 import com.faforever.neroxis.map.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.map.generator.terrain.LittleMountainTerrainGenerator;
@@ -17,7 +24,7 @@ public strictfp class LowMexStyleGenerator extends StyleGenerator {
         name = "LOW_MEX";
         parameterConstraints = ParameterConstraints.builder()
                 .mexDensity(0f, .25f)
-                .mapSizes(256, 512)
+                .mapSizes(256, 640)
                 .spawnCount(0, 4)
                 .numTeams(2, 2)
                 .build();

@@ -2,7 +2,13 @@ package com.faforever.neroxis.map.generator.style;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.map.generator.prop.*;
+import com.faforever.neroxis.map.generator.prop.BasicPropGenerator;
+import com.faforever.neroxis.map.generator.prop.EnemyCivPropGenerator;
+import com.faforever.neroxis.map.generator.prop.HighReclaimPropGenerator;
+import com.faforever.neroxis.map.generator.prop.LargeBattlePropGenerator;
+import com.faforever.neroxis.map.generator.prop.NeutralCivPropGenerator;
+import com.faforever.neroxis.map.generator.prop.RockFieldPropGenerator;
+import com.faforever.neroxis.map.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.map.generator.terrain.MountainRangeTerrainGenerator;
 
 import java.util.Arrays;
@@ -16,7 +22,7 @@ public strictfp class MountainRangeStyleGenerator extends StyleGenerator {
                 .mountainDensity(.5f, 1)
                 .plateauDensity(0, .5f)
                 .mexDensity(.375f, 1)
-                .mapSizes(256, 512)
+                .mapSizes(256, 640)
                 .build();
     }
 

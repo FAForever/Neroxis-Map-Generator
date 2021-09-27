@@ -13,7 +13,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
                 .landDensity(0f, .5f)
                 .rampDensity(.75f, 1f)
                 .mexDensity(.25f, 1)
-                .mapSizes(512, 1024)
+                .mapSizes(384, 1024)
                 .build();
     }
 

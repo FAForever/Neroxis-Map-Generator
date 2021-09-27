@@ -19,6 +19,7 @@ import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
@@ -217,7 +218,12 @@ public strictfp class SCMapExporter {
     public static void exportPreview(Path folderPath, SCMap map) throws IOException {
         final String fileFormat = "png";
         File previewFile = folderPath.resolve(map.getFilePrefix() + "_preview." + fileFormat).toFile();
-        RenderedImage renderedImage = PreviewGenerator.addMarkers(map.getPreview(), map);
+        BufferedImage mapPreview = map.getPreview();
+        BufferedImage previewCopy = new BufferedImage(mapPreview.getWidth(), mapPreview.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics previewCopyGraphics = previewCopy.getGraphics();
+        previewCopyGraphics.drawImage(mapPreview, 0, 0, null);
+        previewCopyGraphics.dispose();
+        RenderedImage renderedImage = PreviewGenerator.addMarkers(previewCopy, map);
         try {
             ImageIO.write(renderedImage, fileFormat, previewFile);
         } catch (IOException e) {
@@ -225,7 +231,8 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
+    public static void exportNormals(Path folderPath, SCMap map, Vector2 centerOffset, float size) throws IOException {
+        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - size / 2, centerOffset.getY() - size / 2);
         byte[] compressedNormal = map.getCompressedNormal();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
@@ -234,7 +241,7 @@ public strictfp class SCMapExporter {
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
         map.getDecals().add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
-                new Vector2(), new Vector3(), map.getSize(), 1000));
+                topLeftOffset, new Vector3(), size, 1000));
         try {
             Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
         } catch (IOException e) {
@@ -242,7 +249,8 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
+    public static void exportShadows(Path folderPath, SCMap map, Vector2 centerOffset, float size) throws IOException {
+        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - size / 2, centerOffset.getY() - size / 2);
         byte[] compressedShadows = map.getCompressedShadows();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
@@ -251,7 +259,7 @@ public strictfp class SCMapExporter {
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
         Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
-                new Vector2(), new Vector3(), map.getSize(), 1000);
+                topLeftOffset, new Vector3(), size, 1000);
         shadowDecal.setType(DecalType.WATER_ALBEDO);
         map.getDecals().add(shadowDecal);
         try {
