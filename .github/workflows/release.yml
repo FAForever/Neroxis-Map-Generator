@@ -27,7 +27,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew --stacktrace build
+      run: xvfb-run --auto-servernum ./gradlew --stacktrace build
 
     - name: Create Jar
       run: ./gradlew --stacktrace shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}

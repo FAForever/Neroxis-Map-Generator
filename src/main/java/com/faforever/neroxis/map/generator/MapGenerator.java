@@ -603,7 +603,7 @@ public strictfp class MapGenerator {
     public void save() {
         try {
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(folderPath, map, !tournamentStyle, true);
+            MapExporter.exportMap(folderPath, map, !tournamentStyle, true, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             if (!tournamentStyle && Util.DEBUG) {

@@ -1,14 +1,11 @@
 package com.faforever.neroxis.map.evaluator;
 
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.PositionedObject;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetrySource;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
@@ -40,13 +37,6 @@ public strictfp class MapEvaluator {
     private IntegerMask heightMask;
     private SymmetrySettings symmetrySettings;
     private boolean reverseSide;
-    private float textureScore;
-    private float terrainScore;
-    private float spawnScore;
-    private float mexScore;
-    private float hydroScore;
-    private float unitScore;
-    private float propScore;
 
     public static void main(String[] args) throws IOException {
 
@@ -183,8 +173,9 @@ public strictfp class MapEvaluator {
         evaluateUnits();
     }
 
-    public static float getLocationListScore(List<Vector3> locations, Mask<?, ?> mask) {
+    public static float getPositionedObjectScore(List<? extends PositionedObject> objects, Mask<?, ?> mask) {
         float locationScore = 0f;
+        List<Vector3> locations = objects.stream().map(PositionedObject::getPosition).collect(Collectors.toList());
         Set<Vector3> locationsSet = new HashSet<>(locations);
         while (locationsSet.size() > 0) {
             Vector3 location = locations.remove(0);
@@ -207,15 +198,22 @@ public strictfp class MapEvaluator {
     }
 
     public static float getMaskScore(Mask<?, ?> mask) {
+        String visualName = "diff" + mask.getVisualName();
         if (mask instanceof FloatMask) {
             FloatMask difference = (FloatMask) mask.copy();
-            difference.startVisualDebugger("diff");
+            difference.startVisualDebugger(visualName);
             difference.applySymmetry(SymmetryType.SPAWN, false);
             difference.show();
-            return (float) StrictMath.sqrt(difference.subtract((FloatMask) mask).multiply(difference).getSum());
+            return (float) StrictMath.sqrt(difference.subtract((FloatMask) mask).multiply(difference).show().getSum());
+        } else if (mask instanceof IntegerMask) {
+            IntegerMask difference = (IntegerMask) mask.copy();
+            difference.startVisualDebugger(visualName);
+            difference.applySymmetry(SymmetryType.SPAWN, false);
+            difference.show();
+            return (float) StrictMath.sqrt(difference.subtract((IntegerMask) mask).multiply(difference).getSum());
         } else if (mask instanceof BooleanMask) {
             BooleanMask difference = (BooleanMask) mask.copy();
-            difference.startVisualDebugger("diff");
+            difference.startVisualDebugger(visualName);
             difference.applySymmetry(SymmetryType.SPAWN, false);
             difference.show();
             return difference.subtract((BooleanMask) mask).getCount();
@@ -226,15 +224,15 @@ public strictfp class MapEvaluator {
     public void evaluateTerrain() {
         long sTime = System.currentTimeMillis();
         heightMask = new IntegerMask(map.getHeightmap(), null, symmetrySettings, "heightMask");
-        terrainScore = getMaskScore(heightMask);
-        System.out.println(String.format("Terrain Score: %.2f", terrainScore));
+        float terrainScore = getMaskScore(heightMask);
+        System.out.printf("Terrain Score: %.2f%n", terrainScore);
 
         IntegerMask textureMasksLowMask = new IntegerMask(map.getTextureMasksLow(), null, symmetrySettings, "textureMasksLow");
         IntegerMask textureMasksHighMask = new IntegerMask(map.getTextureMasksHigh(), null, symmetrySettings, "textureMasksHigh");
-        textureScore = 0;
+        float textureScore = 0;
         textureScore += getMaskScore(textureMasksLowMask);
         textureScore += getMaskScore(textureMasksHighMask);
-        System.out.println(String.format("Texture Score: %.2f", textureScore));
+        System.out.printf("Texture Score: %.2f%n", textureScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateTerrain\n",
                     System.currentTimeMillis() - sTime);
@@ -243,8 +241,8 @@ public strictfp class MapEvaluator {
 
     public void evaluateSpawns() {
         long sTime = System.currentTimeMillis();
-        spawnScore = getLocationListScore(map.getSpawns().stream().map(Spawn::getPosition).collect(Collectors.toList()), heightMask);
-        System.out.println(String.format("Spawn Score: %.2f", spawnScore));
+        float spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
+        System.out.printf("Spawn Score: %.2f%n", spawnScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateSpawns\n",
                     System.currentTimeMillis() - sTime);
@@ -253,8 +251,8 @@ public strictfp class MapEvaluator {
 
     public void evaluateMexes() {
         long sTime = System.currentTimeMillis();
-        mexScore = getLocationListScore(map.getMexes().stream().map(Marker::getPosition).collect(Collectors.toList()), heightMask);
-        System.out.println(String.format("Mex Score: %.2f", mexScore));
+        float mexScore = getPositionedObjectScore(map.getMexes(), heightMask);
+        System.out.printf("Mex Score: %.2f%n", mexScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateMexes\n",
                     System.currentTimeMillis() - sTime);
@@ -263,8 +261,8 @@ public strictfp class MapEvaluator {
 
     public void evaluateHydros() {
         long sTime = System.currentTimeMillis();
-        hydroScore = getLocationListScore(map.getHydros().stream().map(Marker::getPosition).collect(Collectors.toList()), heightMask);
-        System.out.println(String.format("Hydro Score: %.2f", hydroScore));
+        float hydroScore = getPositionedObjectScore(map.getHydros(), heightMask);
+        System.out.printf("Hydro Score: %.2f%n", hydroScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateHydros\n",
                     System.currentTimeMillis() - sTime);
@@ -273,8 +271,8 @@ public strictfp class MapEvaluator {
 
     public void evaluateProps() {
         long sTime = System.currentTimeMillis();
-        propScore = getLocationListScore(map.getProps().stream().map(Prop::getPosition).collect(Collectors.toList()), heightMask);
-        System.out.println(String.format("Prop Score: %.2f", propScore));
+        float propScore = getPositionedObjectScore(map.getProps(), heightMask);
+        System.out.printf("Prop Score: %.2f%n", propScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateProps\n",
                     System.currentTimeMillis() - sTime);
@@ -283,9 +281,9 @@ public strictfp class MapEvaluator {
 
     public void evaluateUnits() {
         long sTime = System.currentTimeMillis();
-        unitScore = getLocationListScore(map.getArmies().stream().flatMap(army -> army.getGroups().stream()
-                .flatMap(group -> group.getUnits().stream())).map(Unit::getPosition).collect(Collectors.toList()), heightMask);
-        System.out.println(String.format("Unit Score: %.2f", unitScore));
+        float unitScore = getPositionedObjectScore(map.getArmies().stream().flatMap(army -> army.getGroups().stream()
+                .flatMap(group -> group.getUnits().stream())).collect(Collectors.toList()), heightMask);
+        System.out.printf("Unit Score: %.2f%n", unitScore);
         if (DEBUG) {
             System.out.printf("Done: %4d ms, evaluateUnits\n",
                     System.currentTimeMillis() - sTime);

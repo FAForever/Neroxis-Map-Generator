@@ -60,7 +60,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public Mask(U other, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), name.contains(MOCK_NAME) ? null : other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         init(other);
     }
 
@@ -846,10 +846,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    public void show() {
+    public U show() {
         if (!parallel) {
             VisualDebugger.visualizeMask(this, "show");
         }
+        return (U) this;
     }
 
     public U fillSides(int extent, T value) {

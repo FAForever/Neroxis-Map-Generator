@@ -24,7 +24,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected FloatMask heightmapMountains;
     protected FloatMask heightmapLand;
     protected FloatMask heightmapOcean;
-    protected FloatMask noise;
+    protected FloatMask heightMapNoise;
 
     protected int spawnSize;
     protected float waterHeight;
@@ -69,7 +69,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         heightmapMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains", true);
         heightmapLand = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand", true);
         heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean", true);
-        noise = new FloatMask(1, random.nextLong(), symmetrySettings, "noise", true);
+        heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "noise", true);
 
         spawnSize = 48;
         waterHeight = mapParameters.getBiome().getWaterSettings().getElevation();
@@ -108,6 +108,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         mountainSetup();
         symmetrySetup();
         spawnTerrainSetup();
+        enforceSymmetry();
         setupHeightmapPipeline();
     }
 
@@ -227,6 +228,19 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         land.add(plateaus).add(spawnLandMask).add(spawnPlateauMask);
     }
 
+    protected void enforceSymmetry() {
+        SymmetrySettings symmetrySettings = heightmap.getSymmetrySettings();
+        if (!symmetrySettings.getTerrainSymmetry().isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+            land.applySymmetry();
+            mountains.applySymmetry();
+            plateaus.applySymmetry();
+            ramps.applySymmetry();
+            hills.applySymmetry();
+            valleys.applySymmetry();
+            connections.applySymmetry();
+        }
+    }
+
     protected void setupHeightmapPipeline() {
         int mapSize = map.getSize();
         int numBrushes = Brushes.GENERATOR_BRUSHES.size();
@@ -244,7 +258,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         heightmap.setSize(mapSize + 1);
         heightmapLand.setSize(mapSize + 1);
         heightmapOcean.setSize(mapSize + 1);
-        noise.setSize(mapSize / 128);
+        heightMapNoise.setSize(mapSize / 128);
 
         heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
                 .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0f).blur(4, deepWater).blur(1);
@@ -255,14 +269,14 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         heightmap.add(heightmapLand).add(waterHeight);
 
-        if (noise.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
-            noise.addWhiteNoise(plateauHeight / 2).resample(mapSize / 64);
-            noise.addWhiteNoise(plateauHeight / 2).resample(mapSize + 1);
-            noise.addWhiteNoise(1)
+        if (heightMapNoise.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
+            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
+            heightMapNoise.addWhiteNoise(1)
                     .subtractAvg().clampMin(0f).setToValue(land.copy().invert().inflate(16), 0f)
                     .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
                     .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
-            heightmap.add(noise);
+            heightmap.add(heightMapNoise);
         }
 
         blurRamps();

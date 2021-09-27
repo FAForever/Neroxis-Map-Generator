@@ -4,7 +4,10 @@ import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.evaluator.MapEvaluator;
 import com.faforever.neroxis.map.generator.style.StyleGenerator;
+import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.MathUtils;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import java.awt.image.BufferedImage;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.util.ImageUtils.compareImages;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -94,26 +98,7 @@ public class MapGeneratorTest {
             String[] hashArray2 = Pipeline.getHashArray().clone();
 
             assertArrayEquals(hashArray1, hashArray2);
-            assertEquals(map1.getName(), map2.getName());
-            assertEquals(map1.toString(), map2.toString());
-            assertEquals(map1.getSpawns(), map2.getSpawns());
-            assertEquals(map1.getMexes(), map2.getMexes());
-            assertEquals(map1.getHydros(), map2.getHydros());
-            assertEquals(map1.getArmies(), map2.getArmies());
-            assertEquals(map1.getProps(), map2.getProps());
-            assertEquals(map1.getDecals(), map2.getDecals());
-            assertEquals(map1.getBiome(), map2.getBiome());
-            assertEquals(map1.getSize(), map2.getSize());
-            assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-            assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-            assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-            assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-            assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-            assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-            assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-            assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-            assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-            assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+            assertSCMapEquality(map1, map2);
         }
     }
 
@@ -129,24 +114,22 @@ public class MapGeneratorTest {
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
-        assertEquals(map1.getName(), map2.getName());
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+        assertSCMapEquality(map1, map2);
+    }
+
+    @Test
+    public void TestEqualityWithVisualizationMapNameKeyword() throws Exception {
+        instance.interpretArguments(keywordArgs);
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+        instance = new MapGenerator();
+
+        String[] args = {"--map-name", map1.getName(), "--visualize"};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -165,26 +148,10 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
-        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -233,26 +200,10 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
-        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -271,26 +222,10 @@ public class MapGeneratorTest {
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
-        assertEquals(map1.getName(), map2.getName());
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -314,26 +249,10 @@ public class MapGeneratorTest {
             long generationTime2 = instance.getGenerationTime();
             long seed2 = instance.getSeed();
 
-            assertEquals(map1.getName(), map2.getName());
             assertEquals(generationTime1, generationTime2);
             assertEquals(seed1, seed2);
-            assertEquals(map1.getSpawns(), map2.getSpawns());
-            assertEquals(map1.getMexes(), map2.getMexes());
-            assertEquals(map1.getHydros(), map2.getHydros());
-            assertEquals(map1.getArmies(), map2.getArmies());
-            assertEquals(map1.getProps(), map2.getProps());
-            assertEquals(map1.getBiome(), map2.getBiome());
-            assertEquals(map1.getSize(), map2.getSize());
-            assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-            assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-            assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-            assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-            assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-            assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-            assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-            assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-            assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-            assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+
+            assertSCMapEquality(map1, map2);
         }
     }
 
@@ -357,28 +276,27 @@ public class MapGeneratorTest {
             long generationTime2 = instance.getGenerationTime();
             long seed2 = instance.getSeed();
 
-            assertEquals(map1.getName(), map2.getName());
             assertEquals(generationTime1, generationTime2);
             assertEquals(seed1, seed2);
-            assertEquals(map1.getSpawns(), map2.getSpawns());
-            assertEquals(map1.getMexes(), map2.getMexes());
-            assertEquals(map1.getHydros(), map2.getHydros());
-            assertEquals(map1.getArmies(), map2.getArmies());
-            assertEquals(map1.getProps(), map2.getProps());
-            assertEquals(map1.getBiome(), map2.getBiome());
-            assertEquals(map1.getSize(), map2.getSize());
-            assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-            assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-            assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-            assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-            assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-            assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-            assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-            assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-            assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-            assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+
+            assertSCMapEquality(map1, map2);
         }
     }
+
+//    @Test
+//    public void TestStyleSymmetry() throws Exception {
+//        List<StyleGenerator> styles = instance.getMapStyles();
+//        for (StyleGenerator styleGenerator : styles) {
+//            for (int i = 0; i < 5; ++i) {
+//                Pipeline.reset();
+//                instance = new MapGenerator();
+//
+//                instance.interpretArguments(new String[]{"--style", styleGenerator.getName(), "--map-size", "256"});
+//                SCMap map1 = instance.generate();
+//                assertSCMapSymmetry(map1, instance.getSymmetrySettings(), styleGenerator.getName());
+//            }
+//        }
+//    }
 
     @Test
     public void TestUnexploredNoUnits() throws Exception {
@@ -408,6 +326,38 @@ public class MapGeneratorTest {
 
         assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
                 mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
+    }
+
+    private void assertSCMapEquality(SCMap map1, SCMap map2) {
+        assertEquals(map1.getName(), map2.getName());
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getArmies(), map2.getArmies());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+    }
+
+    private void assertSCMapSymmetry(SCMap map, SymmetrySettings symmetrySettings, String name) {
+        FloatMask heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale());
+        assertEquals(0, MapEvaluator.getMaskScore(heightMask));
+        assertEquals(0, MapEvaluator.getPositionedObjectScore(map.getSpawns(), heightMask));
+        assertEquals(0, MapEvaluator.getPositionedObjectScore(map.getMexes(), heightMask));
+        assertEquals(0, MapEvaluator.getPositionedObjectScore(map.getHydros(), heightMask));
+        assertEquals(0, MapEvaluator.getPositionedObjectScore(map.getProps(), heightMask));
+        assertEquals(0, MapEvaluator.getPositionedObjectScore(map.getArmies().stream().flatMap(army -> army.getGroups().stream()
+                .flatMap(group -> group.getUnits().stream())).collect(Collectors.toList()), heightMask));
     }
 
     @AfterEach

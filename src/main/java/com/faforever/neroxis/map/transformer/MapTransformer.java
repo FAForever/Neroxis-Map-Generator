@@ -228,7 +228,7 @@ public strictfp class MapTransformer {
 
     public void exportMap() {
         long startTime = System.currentTimeMillis();
-        MapExporter.exportMap(outFolderPath, map, true, false);
+        MapExporter.exportMap(outFolderPath, map, true, false, false);
         System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
     }
 
