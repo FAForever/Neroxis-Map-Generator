@@ -66,7 +66,11 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
             spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
             teamSeparation = map.getSize() / 2;
         } else {
-            spawnSeparation = random.nextInt(map.getSize() / 2 / mapParameters.getNumTeams() - map.getSize() / 16 + 1) + map.getSize() / 16f;
+            if (mapParameters.getNumTeams() < 8) {
+                spawnSeparation = random.nextInt(map.getSize() / 2 / mapParameters.getNumTeams() - map.getSize() / 16) + map.getSize() / 16f;
+            } else {
+                spawnSeparation = 0;
+            }
             teamSeparation = StrictMath.min(map.getSize() / mapParameters.getNumTeams(), 256);
         }
 
