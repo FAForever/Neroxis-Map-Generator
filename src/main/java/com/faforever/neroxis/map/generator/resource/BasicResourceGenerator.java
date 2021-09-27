@@ -57,9 +57,9 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
         } else {
             mexCount = (int) (6 + 7 * mexDensity);
         }
-        if (mapSize < 512) {
+        if (mapSize < 384) {
             mexMultiplier = .5f;
-        } else if (mapSize > 512) {
+        } else if (mapSize >= 768) {
             if (spawnCount <= 4) {
                 mexMultiplier = 1.75f;
             } else if (spawnCount <= 6) {
