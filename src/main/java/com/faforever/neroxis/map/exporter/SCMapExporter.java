@@ -61,8 +61,8 @@ public strictfp class SCMapExporter {
         writeShort((short) 0); // unknown
 
         DDSHeader previewDDSHeader = new DDSHeader();
-        previewDDSHeader.setWidth(256);
-        previewDDSHeader.setHeight(256);
+        previewDDSHeader.setWidth(map.getPreview().getWidth());
+        previewDDSHeader.setHeight(map.getPreview().getHeight());
         previewDDSHeader.setRGBBitCount(32);
         previewDDSHeader.setRBitMask(0x00FF0000);
         previewDDSHeader.setGBitMask(0x0000FF00);
