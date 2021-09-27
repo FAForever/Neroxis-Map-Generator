@@ -434,6 +434,7 @@ public strictfp class MapGenerator {
 
         if (arguments.containsKey("preview-path")) {
             previewFolder = arguments.get("preview-path");
+            Files.createDirectories(Paths.get(previewFolder));
         }
 
         if (arguments.containsKey("map-name") && arguments.get("map-name") != null) {
