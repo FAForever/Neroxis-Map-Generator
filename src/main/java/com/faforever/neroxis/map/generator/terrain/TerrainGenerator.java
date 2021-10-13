@@ -52,6 +52,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     @Override
     public void setupPipeline() {
         terrainSetup();
+        //ensure heightmap is symmetric
+        heightmap.applySymmetry();
         passableSetup();
     }
 

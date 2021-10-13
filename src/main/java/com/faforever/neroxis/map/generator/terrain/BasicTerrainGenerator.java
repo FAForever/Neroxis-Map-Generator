@@ -280,7 +280,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         }
 
         blurRamps();
-        heightmap.applySymmetry();
     }
 
     private void blurRamps() {
@@ -314,8 +313,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         ramps.subtract(connections.copy().inflate(64)).inflate(maxStepSize / 2f)
                 .add(connections.copy().inflate(maxStepSize / 2f)).multiply(plateaus.copy().outline())
                 .subtract(mountains).inflate(10);
-
-        ramps.applySymmetry();
     }
 
     protected void setupMountainHeightmapPipeline() {

@@ -428,10 +428,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private void markInRadius(float radius, boolean[][] maskCopy, int x, int y, boolean value) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
-        int minX = StrictMath.round(x - radius);
-        int maxX = StrictMath.round(x + radius + 1);
-        int minY = StrictMath.round(y - radius);
-        int maxY = StrictMath.round(y + radius + 1);
+        int searchRange = (int) StrictMath.ceil(radius);
+        int minX = x - searchRange;
+        int maxX = x + searchRange + 1;
+        int minY = y - searchRange;
+        int maxY = y + searchRange + 1;
         for (int x2 = minX; x2 < maxX; ++x2) {
             for (int y2 = minY; y2 < maxY; ++y2) {
                 if (inBounds(x2, y2) && maskCopy[x2][y2] != value && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
