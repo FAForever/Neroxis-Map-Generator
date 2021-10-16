@@ -19,8 +19,6 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     public static final int A = 3;
 
     protected final float[] components;
-    @Getter
-    private final int dimension;
 
     protected Vector(int dimension) {
         this(new float[dimension]);
@@ -28,10 +26,13 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     protected Vector(float... components) {
         this.components = components;
-        dimension = components.length;
     }
 
     public abstract T copy();
+
+    public int getDimension() {
+        return components.length;
+    }
 
     public float get(int i) {
         return components[i];
@@ -42,11 +43,12 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public void set(T other) {
-        System.arraycopy(other.components, 0, components, 0, dimension);
+        System.arraycopy(other.components, 0, components, 0, getDimension());
     }
 
     public T randomize(Random random, float minValue, float maxValue) {
         float range = maxValue - minValue;
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = random.nextFloat() * range + minValue;
         }
@@ -54,6 +56,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T randomize(Random random, float scale) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = random.nextFloat() * scale;
         }
@@ -61,6 +64,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T max(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], value);
         }
@@ -69,6 +73,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T max(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], values[i]);
         }
@@ -76,6 +81,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T max(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], other.components[i]);
         }
@@ -83,6 +89,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T clampMin(float floor) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.max(components[i], floor);
         }
@@ -90,6 +97,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T min(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.min(components[i], value);
         }
@@ -98,6 +106,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T min(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.min(components[i], values[i]);
         }
@@ -105,6 +114,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T min(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.min(components[i], other.components[i]);
         }
@@ -112,6 +122,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T clampMax(float ceiling) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.min(components[i], ceiling);
         }
@@ -119,6 +130,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T round() {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.round(components[i]);
         }
@@ -126,6 +138,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T floor() {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = (float) StrictMath.floor(components[i]);
         }
@@ -133,6 +146,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T ceil() {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = (float) StrictMath.ceil(components[i]);
         }
@@ -141,6 +155,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T normalize() {
         float magnitude = getMagnitude();
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] /= magnitude;
         }
@@ -149,6 +164,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public float getMagnitude() {
         float sum = 0;
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             sum += components[i] * components[i];
         }
@@ -156,6 +172,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T add(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] += other.components[i];
         }
@@ -164,6 +181,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T add(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] += values[i];
         }
@@ -171,6 +189,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T add(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] += value;
         }
@@ -183,6 +202,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T subtract(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] -= other.components[i];
         }
@@ -191,6 +211,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T subtract(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] -= values[i];
         }
@@ -198,6 +219,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T subtract(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] -= value;
         }
@@ -210,6 +232,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T multiply(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] *= other.components[i];
         }
@@ -218,6 +241,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T multiply(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] *= values[i];
         }
@@ -225,6 +249,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T multiply(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] *= value;
         }
@@ -237,6 +262,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T divide(T other) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] /= other.components[i];
         }
@@ -245,6 +271,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public T divide(float... values) {
         assertEqualDimension(values.length);
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] /= values[i];
         }
@@ -252,6 +279,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T divide(float value) {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] /= value;
         }
@@ -265,6 +293,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public float getDistance(T other) {
         float sum = 0;
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             float diff = components[i] - other.components[i];
             sum += diff * diff;
@@ -274,6 +303,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public float dot(T other) {
         float sum = 0;
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             sum += components[i] * other.components[i];
         }
@@ -285,6 +315,7 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     public T roundToNearestHalfPoint() {
+        int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.round(components[i] - .5f) + .5f;
         }
@@ -292,8 +323,9 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     }
 
     private void assertEqualDimension(int dimension) {
-        if (dimension != this.dimension) {
-            throw new IllegalArgumentException(String.format("Dimensions do not match: This %d other %d", this.dimension, dimension));
+        int thisDimension = getDimension();
+        if (dimension != thisDimension) {
+            throw new IllegalArgumentException(String.format("Dimensions do not match: This %d other %d", thisDimension, dimension));
         }
     }
 
