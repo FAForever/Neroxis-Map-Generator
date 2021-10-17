@@ -8,12 +8,17 @@ import com.faforever.neroxis.util.Vector;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -50,7 +55,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> set((x, y) -> imageBuffer.getElemFloat(x + y * size) * scaleFactor));
+        enqueue(() -> set(point -> imageBuffer.getElemFloat(point.x + point.y * size) * scaleFactor));
     }
 
     public FloatMask(FloatMask other) {
@@ -74,7 +79,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            set((x, y) -> source.get(x, y) ? high : low);
+            set(point -> source.get(point) ? high : low);
         }, other);
     }
 
@@ -89,7 +94,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         enqueue((dependencies) -> {
             U source1 = (U) dependencies.get(0);
             U source2 = (U) dependencies.get(1);
-            set((x, y) -> source1.get(x, y).dot(source2.get(x, y)));
+            set(point -> source1.get(point).dot(source2.get(point)));
         }, other1, other2);
     }
 
@@ -102,7 +107,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
-            set((x, y) -> source.get(x, y).dot(vector));
+            set(point -> source.get(point).dot(vector));
         }, other);
     }
 
@@ -115,7 +120,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             U source = (U) dependencies.get(0);
-            set((x, y) -> source.get(x, y).get(index));
+            set(point -> source.get(point).get(index));
         }, other);
     }
 
@@ -180,7 +185,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                set(point -> oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]);
             }
         });
     }
@@ -210,8 +215,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         mask[x][y] /= value;
     }
 
-    protected Vector3 getNormalAt(int x, int y) {
-        return getNormalAt(x, y, 1f);
+    protected Vector3 getNormalAt(Point point, float scale) {
+        return getNormalAt(point.x, point.y, scale);
     }
 
     protected Vector3 getNormalAt(int x, int y, float scale) {
@@ -252,16 +257,16 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask addGaussianNoise(float scale) {
-        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale));
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> (float) random.nextGaussian() * scale));
     }
 
     public FloatMask addWhiteNoise(float scale) {
-        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale));
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * scale));
     }
 
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
-        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue));
+        return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * range + minValue));
     }
 
     public FloatMask addPerlinNoise(int resolution, float scale) {
@@ -275,7 +280,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue((dependencies) -> {
             Vector2Mask source = (Vector2Mask) dependencies.get(0);
-            noise.set((x, y) -> {
+            noise.set(point -> {
+                int x = point.x;
+                int y = point.y;
                 int xLow = (int) (x / gradientScale);
                 float dXLow = x / gradientScale - xLow;
                 int xHigh = xLow + 1;
@@ -294,7 +301,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             float noiseMin = noise.getMin();
             float noiseMax = noise.getMax();
             float noiseRange = noiseMax - noiseMin;
-            noise.set((x, y) -> (noise.get(x, y) - noiseMin) / noiseRange * scale);
+            noise.set(point -> (noise.get(point) - noiseMin) / noiseRange * scale);
         }, gradientVectors);
         enqueue((dependencies) -> add((FloatMask) dependencies.get(0)), noise);
         return this;
@@ -310,14 +317,16 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask sqrt() {
-        return enqueue(() -> set((x, y) -> (float) StrictMath.sqrt(get(x, y))));
+        return enqueue(() -> set(point -> (float) StrictMath.sqrt(get(point))));
     }
 
     public FloatMask gradient() {
         return enqueue(() -> {
             int size = getSize();
             float[][] newMask = new float[size][size];
-            apply((x, y) -> {
+            apply(point -> {
+                int x = point.x;
+                int y = point.y;
                 int xNeg = StrictMath.max(0, x - 1);
                 int xPos = StrictMath.min(size - 1, x + 1);
                 int yNeg = StrictMath.max(0, y - 1);
@@ -334,7 +343,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             int size = getSize();
             float[][] newMask = new float[size][size];
-            apply((x, y) -> {
+            apply(point -> {
+                int x = point.x;
+                int y = point.y;
                 int xPos = StrictMath.min(size - 1, x + 1);
                 int yPos = StrictMath.min(size - 1, y + 1);
                 int xNeg = StrictMath.max(0, x - 1);
@@ -376,7 +387,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
                 return;
             }
-            Vector3 surfaceNormal = getNormalAt(sampleX, sampleY);
+            Vector3 surfaceNormal = getNormalAt(sampleX, sampleY, 1f);
 
             // If the terrain is flat, stop simulating, the snowball cannot roll any further
             if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
@@ -431,7 +442,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, StrictMath.round(get(x, y) * 1000)));
+        apply(point -> calculateInnerValue(innerCount, point.x, point.y, StrictMath.round(get(point) * 1000)));
         return innerCount;
     }
 
@@ -485,8 +496,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
         BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE), getName() + "Shadow", isParallel());
-        shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
-            Vector2 location = new Vector2(x, y);
+        shadowMask.enqueue(dependencies -> shadowMask.apply(point -> {
+            Vector2 location = new Vector2(point);
             if (shadowMask.get(location)) {
                 return;
             }
@@ -599,7 +610,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((point) -> imageBuffer.setElemFloat(point.x + point.y * size, (get(point) - offsetFactor) * scaleFactor));
+        loop(point -> imageBuffer.setElemFloat(point.x + point.y * size, (get(point) - offsetFactor) * scaleFactor));
         return image;
     }
 
@@ -607,7 +618,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(get(x, y)));
+        applyWithSymmetry(SymmetryType.SPAWN, point -> bytes.putFloat(get(point)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

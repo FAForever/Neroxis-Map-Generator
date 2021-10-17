@@ -4,7 +4,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.Vector2;
 
-import java.util.function.BiFunction;
+import java.awt.*;
+import java.util.function.Function;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
@@ -19,11 +20,27 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     public abstract T getAvg();
 
+    protected void addValueAt(Point point, T value) {
+        addValueAt(point.x, point.y, value);
+    }
+
     protected abstract void addValueAt(int x, int y, T value);
+
+    protected void subtractValueAt(Point point, T value) {
+        addValueAt(point.x, point.y, value);
+    }
 
     protected abstract void subtractValueAt(int x, int y, T value);
 
+    protected void multiplyValueAt(Point point, T value) {
+        addValueAt(point.x, point.y, value);
+    }
+
     protected abstract void multiplyValueAt(int x, int y, T value);
+
+    protected void divideValueAt(Point point, T value) {
+        addValueAt(point.x, point.y, value);
+    }
 
     protected abstract void divideValueAt(int x, int y, T value);
 
@@ -41,7 +58,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            add((x, y) -> source.get(x, y) ? value : getZeroValue());
+            add(point -> source.get(point) ? value : getZeroValue());
         }, other);
     }
 
@@ -51,12 +68,12 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            add((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+            add(point -> source.get(point) ? vals.get(point) : getZeroValue());
         }, other, values);
     }
 
     public U add(T val) {
-        return add((x, y) -> val);
+        return add(point -> val);
     }
 
     public U addWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
@@ -75,7 +92,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     }
 
     public U subtract(T val) {
-        return enqueue(() -> subtract((x, y) -> val));
+        return enqueue(() -> subtract(point -> val));
     }
 
     public U subtract(U other) {
@@ -90,7 +107,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            subtract((x, y) -> source.get(x, y) ? value : getZeroValue());
+            subtract(point -> source.get(point) ? value : getZeroValue());
         }, other);
     }
 
@@ -100,7 +117,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            subtract((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+            subtract(point -> source.get(point) ? vals.get(point) : getZeroValue());
         }, other, values);
     }
 
@@ -124,14 +141,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     }
 
     public U multiply(T val) {
-        return enqueue(() -> multiply((x, y) -> val));
+        return enqueue(() -> multiply(point -> val));
     }
 
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            multiply((x, y) -> source.get(x, y) ? value : getZeroValue());
+            multiply(point -> source.get(point) ? value : getZeroValue());
         }, other);
     }
 
@@ -141,7 +158,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            multiply((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+            multiply(point -> source.get(point) ? vals.get(point) : getZeroValue());
         }, other, values);
     }
 
@@ -165,14 +182,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     }
 
     public U divide(T val) {
-        return enqueue(() -> divide((x, y) -> val));
+        return enqueue(() -> divide(point -> val));
     }
 
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            divide((x, y) -> source.get(x, y) ? value : getZeroValue());
+            divide(point -> source.get(point) ? value : getZeroValue());
         }, other);
     }
 
@@ -182,7 +199,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            divide((x, y) -> source.get(x, y) ? vals.get(x, y) : getZeroValue());
+            divide(point -> source.get(point) ? vals.get(point) : getZeroValue());
         }, other, values);
     }
 
@@ -197,47 +214,47 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    public U add(BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> apply((x, y) -> addValueAt(x, y, valueFunction.apply(x, y))));
+    public U add(Function<Point, T> valueFunction) {
+        return enqueue(() -> apply(point -> addValueAt(point, valueFunction.apply(point))));
     }
 
-    public U addWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addValueAt(sx, sy, value));
+    public U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            T value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, spoint -> addValueAt(spoint, value));
         }));
     }
 
-    public U subtract(BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> apply((x, y) -> subtractValueAt(x, y, valueFunction.apply(x, y))));
+    public U subtract(Function<Point, T> valueFunction) {
+        return enqueue(() -> apply(point -> subtractValueAt(point, valueFunction.apply(point))));
     }
 
-    public U subtractWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractValueAt(sx, sy, value));
+    public U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            T value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, spoint -> subtractValueAt(spoint, value));
         }));
     }
 
-    public U multiply(BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> apply((x, y) -> multiplyValueAt(x, y, valueFunction.apply(x, y))));
+    public U multiply(Function<Point, T> valueFunction) {
+        return enqueue(() -> apply(point -> multiplyValueAt(point, valueFunction.apply(point))));
     }
 
-    public U multiplyWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyValueAt(sx, sy, value));
+    public U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            T value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyValueAt(spoint, value));
         }));
     }
 
-    public U divide(BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> apply((x, y) -> divideValueAt(x, y, valueFunction.apply(x, y))));
+    public U divide(Function<Point, T> valueFunction) {
+        return enqueue(() -> apply(point -> divideValueAt(point, valueFunction.apply(point))));
     }
 
-    public U divideWithSymmetry(SymmetryType symmetryType, BiFunction<Integer, Integer, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideValueAt(sx, sy, value));
+    public U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            T value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point.x, point.y, symmetryType, spoint -> divideValueAt(spoint, value));
         }));
     }
 

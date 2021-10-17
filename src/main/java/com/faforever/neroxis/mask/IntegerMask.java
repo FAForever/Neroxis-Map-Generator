@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
@@ -52,7 +52,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> set((x, y) -> imageBuffer.getElem(x + y * size)));
+        enqueue(() -> set(point -> imageBuffer.getElem(point.x + point.y * size)));
     }
 
     @Override
@@ -115,7 +115,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 int[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                set(point -> oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]);
             }
         });
     }
@@ -169,7 +169,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
+        apply(point -> calculateInnerValue(innerCount, point.x, point.y, get(point)));
         return innerCount;
     }
 
@@ -190,14 +190,14 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((point) -> imageBuffer.setElem(point.x + point.y * size, (int) (get(point) * scaleFactor)));
+        loop(point -> imageBuffer.setElem(point.x + point.y * size, (int) (get(point) * scaleFactor)));
         return image;
     }
 
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putInt(get(x, y)));
+        applyWithSymmetry(SymmetryType.SPAWN, point -> bytes.putInt(get(point)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

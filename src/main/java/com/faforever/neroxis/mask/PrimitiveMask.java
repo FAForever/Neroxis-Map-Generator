@@ -2,7 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
 
     public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
@@ -20,7 +20,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     public U blur(int radius) {
         return enqueue(() -> {
             int[][] innerCount = getInnerCount();
-            set((x, y) -> transformAverage(calculateAreaAverage(radius, x, y, innerCount)));
+            set(point -> transformAverage(calculateAreaAverage(radius, point.x, point.y, innerCount)));
         });
     }
 
@@ -29,7 +29,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
             int[][] innerCount = getInnerCount();
-            set((x, y) -> limiter.get(x, y) ? transformAverage(calculateAreaAverage(radius, x, y, innerCount)) : get(x, y));
+            set(point -> limiter.get(point) ? transformAverage(calculateAreaAverage(radius, point.x, point.y, innerCount)) : get(point));
         }, other);
     }
 

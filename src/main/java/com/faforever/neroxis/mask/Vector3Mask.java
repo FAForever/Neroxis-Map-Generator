@@ -37,7 +37,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.get(0);
-            set((x, y) -> source.get(x, y).copy());
+            set(point -> source.get(point).copy());
         }, other);
     }
 
@@ -68,13 +68,13 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
             Vector3Mask source = (Vector3Mask) dependencies.get(0);
-            set((x, y) -> get(x, y).cross(source.get(x, y)));
+            set(point -> get(point).cross(source.get(point)));
         }, other);
         return this;
     }
 
     public Vector3Mask cross(Vector3 vector) {
-        set((x, y) -> get(x, y).cross(vector));
+        set(point -> get(point).cross(vector));
         return this;
     }
 
@@ -91,7 +91,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         Vector3 maxComponents = getMaxComponents();
         Vector3 minComponents = getMinComponents();
         Vector3 rangeComponents = maxComponents.copy().subtract(minComponents);
-        loop((point) -> imageRaster.setPixel(point.x, point.y, get(point).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray()));
+        loop(point -> imageRaster.setPixel(point.x, point.y, get(point).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray()));
         return image;
     }
 }
