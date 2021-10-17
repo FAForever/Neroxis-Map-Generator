@@ -524,7 +524,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask cutCorners() {
         enqueue(() -> {
             int size = getSize();
-            long[] maskCopy = new long[minimumArraySize(size)];
+            long[] maskCopy = getMaskCopy();
             apply((x, y) -> {
                 int count = 0;
                 if (x > 0 && !get(x - 1, y)) {
@@ -543,8 +543,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 int bitIndex = bitIndex(x, y, size);
                 if (count > 1) {
                     setBit(bitIndex, false, maskCopy);
-                } else {
-                    setBit(bitIndex, getBit(bitIndex, mask), maskCopy);
                 }
             });
             mask = maskCopy;
