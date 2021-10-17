@@ -3,25 +3,16 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.TriConsumer;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.VisualDebugger;
+import com.faforever.neroxis.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -99,6 +90,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public T get(Vector2 location) {
         return get(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
+
+    public T get(Point point) {
+        return get(point.x, point.y);
+    }
+
+    ;
 
     public abstract T get(int x, int y);
 
@@ -735,11 +732,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    protected void loop(BiConsumer<Integer, Integer> maskAction) {
+    protected void loop(Consumer<Point> maskAction) {
         int size = getSize();
+        Point point = new Point();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                maskAction.accept(x, y);
+                point.setLocation(x, y);
+                maskAction.accept(point);
             }
         }
     }

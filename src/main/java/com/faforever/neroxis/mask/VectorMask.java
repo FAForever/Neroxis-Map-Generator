@@ -570,7 +570,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         int numImageComponents = image.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         WritableRaster imageRaster = image.getRaster();
-        loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).toArray()));
+        loop((point) -> imageRaster.setPixel(point.x, point.y, get(point).toArray()));
         return image;
     }
 

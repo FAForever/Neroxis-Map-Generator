@@ -190,7 +190,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((x, y) -> imageBuffer.setElem(x + y * size, (int) (get(x, y) * scaleFactor)));
+        loop((point) -> imageBuffer.setElem(point.x + point.y * size, (int) (get(point) * scaleFactor)));
         return image;
     }
 

@@ -11,14 +11,7 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -901,7 +894,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((x, y) -> imageBuffer.setElem(x + y * size, get(x, y) ? 255 : 0));
+        loop((point) -> imageBuffer.setElem(point.x + point.y * size, get(point) ? 255 : 0));
         return image;
     }
 
