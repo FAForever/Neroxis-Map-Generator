@@ -36,7 +36,7 @@ public strictfp class AIMarkerPlacer {
             }
         });
         coordinates.removeAll(unusedCoordinates);
-        coordinates.forEach(location -> location.add(.5f, .5f));
+        coordinates.forEach(location -> location.roundToNearestHalfPoint());
         List<Vector2> coordinatesList = new ArrayList<>(coordinates);
         coordinates.forEach((location) -> {
             AIMarker aiMarker = new AIMarker(String.format(nameFormat, coordinatesList.indexOf(location)), location, new LinkedHashSet<>());
@@ -59,7 +59,7 @@ public strictfp class AIMarkerPlacer {
         float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
         List<Vector2> airCoordinates = new BooleanMask(map.getSize() + 1, null, null).getSpacedCoordinates(airMarkerSpacing, (int) airMarkerSpacing / 8);
-        airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(String.format("AirPN%d", airCoordinates.indexOf(location)), location.add(.5f, .5f), new LinkedHashSet<>())));
+        airCoordinates.forEach((location) -> map.addAirMarker(new AIMarker(String.format("AirPN%d", airCoordinates.indexOf(location)), location.roundToNearestHalfPoint(), new LinkedHashSet<>())));
         map.getAirAIMarkers().forEach(aiMarker -> map.getAirAIMarkers().forEach(aiMarker1 -> {
             if (aiMarker != aiMarker1 && aiMarker.getPosition().getXZDistance(aiMarker1.getPosition()) < airMarkerConnectionDistance) {
                 aiMarker.addNeighbor(aiMarker1.getId());

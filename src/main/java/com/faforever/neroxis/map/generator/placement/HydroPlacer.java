@@ -65,7 +65,7 @@ public strictfp class HydroPlacer {
             List<Vector2> hydroLocations = spawnMask.getRandomCoordinates(hydroSpacing);
             hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
                 int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-                Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3(location.add(.5f, .5f)));
+                Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3(location.roundToNearestHalfPoint()));
                 map.addHydro(hydro);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);

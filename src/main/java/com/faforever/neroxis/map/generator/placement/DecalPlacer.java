@@ -27,7 +27,7 @@ public strictfp class DecalPlacer {
             List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 float scale = random.nextFloat() * (maxScale - minScale) + minScale;
-                location.add(.5f, .5f);
+                location.roundToNearestHalfPoint();
                 Vector3 rotation = new Vector3(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
                 Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000);
                 map.addDecal(decal);

@@ -29,7 +29,7 @@ public strictfp class PropPlacer {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
-                location.add(.5f, .5f);
+                location.roundToNearestHalfPoint();
                 Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);

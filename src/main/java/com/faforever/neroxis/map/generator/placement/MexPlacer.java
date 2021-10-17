@@ -1,10 +1,6 @@
 package com.faforever.neroxis.map.generator.placement;
 
-import com.faforever.neroxis.map.AIMarker;
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
-import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
@@ -149,7 +145,7 @@ public strictfp class MexPlacer {
             List<Vector2> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
             mexLocations.stream().limit(numMexes).forEachOrdered(location -> {
                 int mexID = map.getMexCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-                Marker mex = new Marker(String.format("Mex %d", mexID), new Vector3(location.add(.5f, .5f)));
+                Marker mex = new Marker(String.format("Mex %d", mexID), new Vector3(location.roundToNearestHalfPoint()));
                 map.addMex(mex);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(mex.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);

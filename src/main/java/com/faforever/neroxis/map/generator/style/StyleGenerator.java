@@ -30,19 +30,14 @@ import static com.faforever.neroxis.util.RandomUtils.selectRandomMatchingGenerat
 public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
-    @Getter
     protected TerrainGenerator terrainGenerator = new BasicTerrainGenerator();
     protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
-    @Getter
     protected TextureGenerator textureGenerator = new BasicTextureGenerator();
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
-    @Getter
     protected ResourceGenerator resourceGenerator = new BasicResourceGenerator();
     protected final List<PropGenerator> propGenerators = new ArrayList<>();
-    @Getter
     protected PropGenerator propGenerator = new BasicPropGenerator();
     protected final List<DecalGenerator> decalGenerators = new ArrayList<>();
-    @Getter
     protected DecalGenerator decalGenerator = new BasicDecalGenerator();
     @Getter
     protected String name;

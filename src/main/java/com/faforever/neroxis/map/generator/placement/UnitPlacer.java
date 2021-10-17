@@ -6,15 +6,11 @@ import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.Vector;
 import com.faforever.neroxis.util.Vector2;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public strictfp class UnitPlacer {
@@ -85,6 +81,7 @@ public strictfp class UnitPlacer {
             int numUnitsInTemplate = units.values().stream().mapToInt(Collection::size).sum();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation).stream()
                     .limit((MAX_UNIT_COUNT - army.getNumUnits()) / numUnitsInTemplate)
+                    .peek(Vector::roundToNearestHalfPoint)
                     .collect(Collectors.toList());
             for (Vector2 location : coordinates) {
                 BaseTemplate base = new BaseTemplate(location, units);
@@ -111,11 +108,11 @@ public strictfp class UnitPlacer {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation).stream()
                     .limit((MAX_UNIT_COUNT - army.getNumUnits()) / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints())
+                    .peek(Vector2::roundToNearestHalfPoint)
                     .collect(Collectors.toList());
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
             for (Vector2 location : coordinates) {
-                location.add(.5f, .5f);
                 int groupID = group.getUnitCount();
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type, location, rot);
                 group.addUnit(unit);
