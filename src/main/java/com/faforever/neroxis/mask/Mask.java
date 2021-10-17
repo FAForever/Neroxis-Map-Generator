@@ -702,7 +702,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected U applyAtSymmetryPoints(Point point, SymmetryType symmetryType, Consumer<Point> action) {
         action.accept(point);
         List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
-        symPoints.forEach(symPoint -> action.accept(new Point((int) symPoint.getX(), (int) symPoint.getY())));
+        symPoints.forEach(symPoint -> {
+            point.setLocation(symPoint.getX(), symPoint.getY());
+            action.accept(point);
+        });
         return (U) this;
     }
 
