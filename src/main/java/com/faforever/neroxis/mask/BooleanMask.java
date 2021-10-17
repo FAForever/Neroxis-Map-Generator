@@ -540,9 +540,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     count++;
                 }
 
-                int bitIndex = bitIndex(x, y, size);
                 if (count > 1) {
-                    setBit(bitIndex, false, maskCopy);
+                    setBit(bitIndex(x, y, size), false, maskCopy);
                 }
             });
             mask = maskCopy;
