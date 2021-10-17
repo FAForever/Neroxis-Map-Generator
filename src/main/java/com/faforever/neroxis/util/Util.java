@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 
 public strictfp class Util {
 
+    public static boolean VERBOSE = false;
     public static boolean DEBUG = false;
     public static boolean VISUALIZE = false;
 
@@ -27,7 +28,7 @@ public strictfp class Util {
         for (StackTraceElement ste : stackTrace) {
             String className = ste.getClassName();
             String packName = className.substring(0, className.lastIndexOf("."));
-            if (packName.contains(packageName)) {
+            if (packName.startsWith(packageName)) {
                 return ste.getFileName() + ":" + ste.getLineNumber();
             }
         }
@@ -73,9 +74,9 @@ public strictfp class Util {
         return methods;
     }
 
-    public static String getStackTraceParentClass() {
+    private static String getStackTraceParentClass() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        return stackTrace[1].getClassName();
+        return stackTrace[2].getClassName();
     }
 
     public static void timedRun(Runnable runnable) {
@@ -90,7 +91,7 @@ public strictfp class Util {
 
     public static void timedRun(String packageName, String description, Runnable runnable) {
         long sTime = System.currentTimeMillis();
-        if (DEBUG) {
+        if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n",
                     description,
                     Util.getStackTraceLineInPackage(packageName));
