@@ -70,7 +70,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     private static int minimumArraySize(int size) {
-        return (int) StrictMath.ceil((float) size * size / BOOLEANS_PER_LONG);
+        return (int) StrictMath.ceil((double) size * size / BOOLEANS_PER_LONG);
     }
 
     private static int arrayIndex(int bitIndex) {
