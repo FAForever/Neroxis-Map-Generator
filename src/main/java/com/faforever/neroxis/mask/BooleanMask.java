@@ -12,14 +12,8 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -835,7 +829,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
         assertNotPipelined();
         int size = getSize();
-        List<Vector2> coordinates = new ArrayList<>(size * size);
+        int numPossibleCoordinates;
+        int numTrue = getCount();
+        if (value) {
+            numPossibleCoordinates = numTrue;
+        } else {
+            numPossibleCoordinates = size * size - numTrue;
+        }
+        List<Vector2> coordinates = new ArrayList<>(numPossibleCoordinates / spacing);
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
                 if (get(x, y) == value) {
