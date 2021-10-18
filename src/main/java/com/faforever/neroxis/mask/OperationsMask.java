@@ -27,19 +27,19 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     protected abstract void addValueAt(int x, int y, T value);
 
     protected void subtractValueAt(Point point, T value) {
-        addValueAt(point.x, point.y, value);
+        subtractValueAt(point.x, point.y, value);
     }
 
     protected abstract void subtractValueAt(int x, int y, T value);
 
     protected void multiplyValueAt(Point point, T value) {
-        addValueAt(point.x, point.y, value);
+        multiplyValueAt(point.x, point.y, value);
     }
 
     protected abstract void multiplyValueAt(int x, int y, T value);
 
     protected void divideValueAt(Point point, T value) {
-        addValueAt(point.x, point.y, value);
+        divideValueAt(point.x, point.y, value);
     }
 
     protected abstract void divideValueAt(int x, int y, T value);
