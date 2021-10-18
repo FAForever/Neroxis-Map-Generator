@@ -2,7 +2,9 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.Vector2;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
@@ -11,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
@@ -52,7 +54,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> set((x, y) -> imageBuffer.getElem(x + y * size)));
+        enqueue(() -> apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size))));
     }
 
     @Override
@@ -90,11 +92,35 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer get(int x, int y) {
-        return mask[x][y];
+        return getPrimitive(x, y);
     }
 
     @Override
     protected void set(int x, int y, Integer value) {
+        setPrimitive(x, y, value);
+    }
+
+    public int getPrimitive(Vector2 location) {
+        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+    }
+
+    protected void setPrimitive(Vector2 location, int value) {
+        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+    }
+
+    public int getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    protected void setPrimitive(Point point, int value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    public int getPrimitive(int x, int y) {
+        return mask[x][y];
+    }
+
+    protected void setPrimitive(int x, int y, int value) {
         mask[x][y] = value;
     }
 
@@ -108,14 +134,14 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return enqueue(() -> {
             int oldSize = getSize();
             if (oldSize == 1) {
-                int value = get(0, 0);
+                int value = getPrimitive(0, 0);
                 initializeMask(newSize);
                 fill(value);
             } else if (oldSize != newSize) {
                 int[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                apply(point -> setPrimitive(point, oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]));
             }
         });
     }
@@ -169,7 +195,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y)));
+        apply(point -> calculateInnerValue(innerCount, point, getPrimitive(point)));
         return innerCount;
     }
 
@@ -190,14 +216,14 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((x, y) -> imageBuffer.setElem(x + y * size, (int) (get(x, y) * scaleFactor)));
+        loop(point -> imageBuffer.setElem(point.x + point.y * size, (int) (getPrimitive(point) * scaleFactor)));
         return image;
     }
 
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putInt(get(x, y)));
+        applyWithSymmetry(SymmetryType.SPAWN, point -> bytes.putInt(getPrimitive(point)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

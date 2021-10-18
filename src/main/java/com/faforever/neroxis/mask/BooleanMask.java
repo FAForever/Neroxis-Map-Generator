@@ -6,19 +6,14 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.Vector2;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -58,7 +53,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue));
+            apply(point -> setPrimitive(point, source.valueAtGreaterThanEqualTo(point, minValue)));
         }, other);
     }
 
@@ -70,16 +65,20 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            set((x, y) -> source.valueAtGreaterThanEqualTo(x, y, minValue) && source.valueAtLessThanEqualTo(x, y, maxValue));
+            apply(point -> setPrimitive(point, source.valueAtGreaterThanEqualTo(point, minValue) && source.valueAtLessThanEqualTo(point, maxValue)));
         }, other);
     }
 
     private static int minimumArraySize(int size) {
-        return (int) StrictMath.ceil((float) size * size / BOOLEANS_PER_LONG);
+        return (int) StrictMath.ceil((double) size * size / BOOLEANS_PER_LONG);
     }
 
     private static int arrayIndex(int bitIndex) {
         return (int) StrictMath.floor((float) bitIndex / BOOLEANS_PER_LONG);
+    }
+
+    private static int bitIndex(Point point, int size) {
+        return bitIndex(point.x, point.y, size);
     }
 
     private static int bitIndex(int x, int y, int size) {
@@ -111,7 +110,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected void addValueAt(int x, int y, Boolean value) {
-        set(x, y, value | get(x, y));
+        setPrimitive(x, y, value | getPrimitive(x, y));
     }
 
     @Override
@@ -127,7 +126,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected void subtractValueAt(int x, int y, Boolean value) {
-        set(x, y, !value & get(x, y));
+        setPrimitive(x, y, !value & getPrimitive(x, y));
     }
 
     @Override
@@ -143,7 +142,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected void multiplyValueAt(int x, int y, Boolean value) {
-        set(x, y, value & get(x, y));
+        setPrimitive(x, y, value & getPrimitive(x, y));
     }
 
     @Override
@@ -159,7 +158,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected void divideValueAt(int x, int y, Boolean value) {
-        set(x, y, value ^ get(x, y));
+        setPrimitive(x, y, value ^ getPrimitive(x, y));
     }
 
     @Override
@@ -184,11 +183,35 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     public Boolean get(int x, int y) {
-        return getBit(x, y, getSize(), mask);
+        return getPrimitive(x, y);
     }
 
     @Override
     protected void set(int x, int y, Boolean value) {
+        setPrimitive(x, y, value);
+    }
+
+    public boolean getPrimitive(Vector2 location) {
+        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+    }
+
+    protected void setPrimitive(Vector2 location, boolean value) {
+        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+    }
+
+    public boolean getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    protected void setPrimitive(Point point, boolean value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    public boolean getPrimitive(int x, int y) {
+        return getBit(x, y, getSize(), mask);
+    }
+
+    protected void setPrimitive(int x, int y, boolean value) {
         setBit(x, y, value, getSize(), mask);
     }
 
@@ -198,6 +221,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private static boolean getBit(int bitIndex, long[] mask) {
         return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
+    }
+
+    private static void setBit(Point point, boolean value, int size, long[] mask) {
+        setBit(point.x, point.y, value, size, mask);
     }
 
     private static void setBit(int x, int y, boolean value, int size, long[] mask) {
@@ -222,14 +249,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return enqueue(() -> {
             int oldSize = getSize();
             if (oldSize == 1) {
-                boolean value = get(0, 0);
+                boolean value = getPrimitive(0, 0);
                 initializeMask(newSize);
                 fill(value);
             } else if (oldSize != newSize) {
                 long[] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                set((x, y) -> getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask));
+                apply(point -> setPrimitive(point, getBit(coordinateMap.get(point.x), coordinateMap.get(point.y), oldSize, oldMask)));
             }
         });
     }
@@ -267,13 +294,17 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    public boolean isEdge(Point point) {
+        return isEdge(point.x, point.y);
+    }
+
     public boolean isEdge(int x, int y) {
-        boolean value = get(x, y);
+        boolean value = getPrimitive(x, y);
         int size = getSize();
-        return ((x > 0 && get(x - 1, y) != value)
-                || (y > 0 && get(x, y - 1) != value)
-                || (x < size - 1 && get(x + 1, y) != value)
-                || (y < size - 1 && get(x, y + 1) != value));
+        return ((x > 0 && getPrimitive(x - 1, y) != value)
+                || (y > 0 && getPrimitive(x, y - 1) != value)
+                || (x < size - 1 && getPrimitive(x + 1, y) != value)
+                || (y < size - 1 && getPrimitive(x, y + 1) != value));
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue) {
@@ -291,11 +322,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
-        return enqueue(() -> setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density));
+        return enqueue(() -> setWithSymmetry(symmetryType, point -> random.nextFloat() < density));
     }
 
     public BooleanMask flipValues(float density) {
-        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, (x, y) -> get(x, y) && random.nextFloat() < density));
+        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getPrimitive(point) && random.nextFloat() < density));
         return this;
     }
 
@@ -310,7 +341,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
                 for (int j = 0; j < numSteps; j++) {
                     if (inBounds(x, y)) {
-                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
+                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, spoint -> setPrimitive(spoint, true));
                     }
                     switch (random.nextInt(4)) {
                         case 0:
@@ -373,7 +404,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
                     List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
                     if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
-                        applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
+                        applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN, spoint -> setPrimitive(spoint, true));
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
                     float angle = oldAngle * .5f + location.angleTo(nextLoc) * .5f + (random.nextFloat() - .5f) * 2f * maxAngleError;
@@ -439,7 +470,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 directions.remove(regressiveDir);
                 for (int j = 0; j < numSteps; j++) {
                     if (inBounds(x, y)) {
-                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> set(sx, sy, true));
+                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, spoint -> setPrimitive(spoint, true));
                     }
                     switch (directions.get(random.nextInt(directions.size()))) {
                         case 0:
@@ -481,9 +512,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask inflate(float radius) {
         enqueue(() -> {
             long[] maskCopy = getMaskCopy();
-            apply((x, y) -> {
-                if (get(x, y) && isEdge(x, y)) {
-                    markInRadius(radius, maskCopy, x, y, true);
+            apply(point -> {
+                if (getPrimitive(point) && isEdge(point)) {
+                    markInRadius(radius, maskCopy, point, true);
                 }
             });
             mask = maskCopy;
@@ -494,9 +525,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask deflate(float radius) {
         enqueue(() -> {
             long[] maskCopy = getMaskCopy();
-            apply((x, y) -> {
-                if (!get(x, y) && isEdge(x, y)) {
-                    markInRadius(radius, maskCopy, x, y, false);
+            apply(point -> {
+                if (!getPrimitive(point) && isEdge(point)) {
+                    markInRadius(radius, maskCopy, point, false);
                 }
             });
             mask = maskCopy;
@@ -504,7 +535,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
-    private void markInRadius(float radius, long[] maskCopy, int x, int y, boolean value) {
+    private void markInRadius(float radius, long[] maskCopy, Point point, boolean value) {
+        int x = point.x;
+        int y = point.y;
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         int searchRange = (int) StrictMath.ceil(radius);
         int minX = x - searchRange;
@@ -525,24 +558,25 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         enqueue(() -> {
             int size = getSize();
             long[] maskCopy = getMaskCopy();
-            apply((x, y) -> {
+            apply(point -> {
+                int x = point.x;
+                int y = point.y;
                 int count = 0;
-                if (x > 0 && !get(x - 1, y)) {
+                if (x > 0 && !getPrimitive(x - 1, y)) {
                     count++;
                 }
-                if (y > 0 && !get(x, y - 1)) {
+                if (y > 0 && !getPrimitive(x, y - 1)) {
                     count++;
                 }
-                if (x < size - 1 && !get(x + 1, y)) {
+                if (x < size - 1 && !getPrimitive(x + 1, y)) {
                     count++;
                 }
-                if (y < size - 1 && !get(x, y + 1)) {
+                if (y < size - 1 && !getPrimitive(x, y + 1)) {
                     count++;
                 }
 
-                int bitIndex = bitIndex(x, y, size);
                 if (count > 1) {
-                    setBit(bitIndex, false, maskCopy);
+                    setBit(bitIndex(point, size), false, maskCopy);
                 }
             });
             mask = maskCopy;
@@ -570,9 +604,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
-                applyWithSymmetry(symmetryType, (x, y) -> {
-                    if (!get(x, y) && random.nextFloat() < strength && isEdge(x, y)) {
-                        applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setBit(sx, sy, true, size, maskCopy));
+                applyWithSymmetry(symmetryType, point -> {
+                    if (!getPrimitive(point) && random.nextFloat() < strength && isEdge(point)) {
+                        applyAtSymmetryPoints(point, symmetryType, spoint -> setBit(spoint, true, size, maskCopy));
                     }
                 });
                 mask = maskCopy;
@@ -591,9 +625,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
-                applyWithSymmetry(symmetryType, (x, y) -> {
-                    if (get(x, y) && random.nextFloat() < strength && isEdge(x, y)) {
-                        applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setBit(sx, sy, false, size, maskCopy));
+                applyWithSymmetry(symmetryType, point -> {
+                    if (getPrimitive(point) && random.nextFloat() < strength && isEdge(point)) {
+                        applyAtSymmetryPoints(point, symmetryType, spoint -> setBit(spoint, false, size, maskCopy));
                     }
                 });
                 mask = maskCopy;
@@ -606,7 +640,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         enqueue(() -> {
             int size = getSize();
             long[] maskCopy = new long[minimumArraySize(size)];
-            apply((x, y) -> setBit(x, y, isEdge(x, y), size, maskCopy));
+            apply(point -> setBit(point, isEdge(point), size, maskCopy));
             mask = maskCopy;
         });
         return this;
@@ -615,7 +649,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask blur(int radius, float density) {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
-            set((x, y) -> calculateAreaAverage(radius, x, y, innerCount) >= density);
+            apply(point -> setPrimitive(point, calculateAreaAverage(radius, point, innerCount) >= density));
         });
         return this;
     }
@@ -637,9 +671,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
-            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                T value = source.get(x, y);
-                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMax(x, y);
+            setWithSymmetry(SymmetryType.SPAWN, point -> {
+                T value = source.get(point);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMax(point);
             });
         }, other);
         return this;
@@ -649,9 +683,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
-            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                T value = source.get(x, y);
-                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMax(x, y);
+            setWithSymmetry(SymmetryType.SPAWN, point -> {
+                T value = source.get(point);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMax(point);
             });
         }, other);
         return this;
@@ -665,7 +699,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         enqueue(() -> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
-            set((x, y) -> get(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
+            apply(point -> {
+                int x = point.x;
+                int y = point.y;
+                setPrimitive(point, getPrimitive(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
+            });
         });
         return this;
     }
@@ -681,7 +719,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask fillShape(Vector2 location) {
-        return enqueue(() -> fillCoordinates(getShapeCoordinates(location), !get(location)));
+        return enqueue(() -> fillCoordinates(getShapeCoordinates(location), !getPrimitive(location)));
     }
 
     public BooleanMask fillGaps(int minDist) {
@@ -705,11 +743,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask removeAreasSmallerThan(int minArea) {
         enqueue(() -> {
             int size = getSize();
-            Set<Vector2> seen = new HashSet<>(size * size * 2);
-            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                Vector2 location = new Vector2(x, y);
+            Set<Vector2> seen = new HashSet<>(size * size, 1f);
+            applyWithSymmetry(SymmetryType.SPAWN, point -> {
+                Vector2 location = new Vector2(point);
                 if (!seen.contains(location)) {
-                    boolean value = get(location);
+                    boolean value = getPrimitive(location);
                     Set<Vector2> coordinates = getShapeCoordinates(location, minArea);
                     seen.addAll(coordinates);
                     if (coordinates.size() < minArea) {
@@ -745,13 +783,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         List<Vector2> queue = new ArrayList<>();
         LinkedHashSet<Vector2> queueHash = new LinkedHashSet<>();
         List<int[]> edges = Arrays.asList(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
-        boolean value = get(location);
+        boolean value = getPrimitive(location);
         queue.add(location);
         queueHash.add(location);
         while (queue.size() > 0) {
             Vector2 next = queue.remove(0);
             queueHash.remove(next);
-            if (get(next) == value && !areaHash.contains(next)) {
+            if (getPrimitive(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
                 edges.forEach((e) -> {
                     Vector2 newLocation = new Vector2(next.getX() + e[0], next.getY() + e[1]);
@@ -760,7 +798,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                         queueHash.add(newLocation);
                     }
                 });
-            } else if (get(next) != value) {
+            } else if (getPrimitive(next) != value) {
                 edgeHash.add(next);
             }
             if (areaHash.size() > maxSize) {
@@ -774,7 +812,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, get(x, y) ? 1 : 0));
+        apply(point -> calculateInnerValue(innerCount, point, getPrimitive(point) ? 1 : 0));
         return innerCount;
     }
 
@@ -815,10 +853,17 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
         assertNotPipelined();
         int size = getSize();
-        List<Vector2> coordinates = new ArrayList<>(size * size);
+        int numPossibleCoordinates;
+        int numTrue = getCount();
+        if (value) {
+            numPossibleCoordinates = numTrue;
+        } else {
+            numPossibleCoordinates = size * size - numTrue;
+        }
+        List<Vector2> coordinates = new ArrayList<>(numPossibleCoordinates / spacing);
         for (int x = 0; x < size; x += spacing) {
             for (int y = 0; y < size; y += spacing) {
-                if (get(x, y) == value) {
+                if (getPrimitive(x, y) == value) {
                     coordinates.add(new Vector2(x, y));
                 }
             }
@@ -902,7 +947,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertSize(image.getHeight());
         int size = getSize();
         DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop((x, y) -> imageBuffer.setElem(x + y * size, get(x, y) ? 255 : 0));
+        loop(point -> imageBuffer.setElem(point.x + point.y * size, getPrimitive(point) ? 255 : 0));
         return image;
     }
 
@@ -910,7 +955,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size);
-        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(get(x, y) ? (byte) 1 : 0));
+        applyWithSymmetry(SymmetryType.SPAWN, point -> bytes.put(getPrimitive(point) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

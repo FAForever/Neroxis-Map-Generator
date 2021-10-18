@@ -1,10 +1,6 @@
 package com.faforever.neroxis.map.generator;
 
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.TerrainMaterials;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ImageUtils;
 import com.faforever.neroxis.util.serialized.LightingSettings;
@@ -95,7 +91,7 @@ public strictfp class PreviewGenerator {
             for (int x = 0; x < PREVIEW_SIZE; x++) {
                 image.getRaster().getPixel(x, y, origRGBA);
 
-                float coefficient = reflectance.get(x, y) + ambientCoefficient;
+                float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
 
                 newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().getX() * coefficient) + lightingSettings.getSunAmbience().getX());
                 newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().getY() * coefficient) + lightingSettings.getSunAmbience().getY());
@@ -105,7 +101,7 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
                 newRGBA[1] = StrictMath.max(StrictMath.min(newRGBA[1], 255), 0);
                 newRGBA[2] = StrictMath.max(StrictMath.min(newRGBA[2], 255), 0);
-                newRGBA[3] = (int) StrictMath.max(StrictMath.min(textureLayer.get(x, y) * 255, 255), 0);
+                newRGBA[3] = (int) StrictMath.max(StrictMath.min(textureLayer.getPrimitive(x, y) * 255, 255), 0);
 
                 image.getRaster().setPixel(x, y, newRGBA);
             }
@@ -134,9 +130,9 @@ public strictfp class PreviewGenerator {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 
-                float weight = StrictMath.min(StrictMath.max((waterheight - heightmap.get(x, y)) / (waterheight - abyssheight), 0), 1);
+                float weight = StrictMath.min(StrictMath.max((waterheight - heightmap.getPrimitive(x, y)) / (waterheight - abyssheight), 0), 1);
 
-                float coefficient = reflectance.get(x, y) + ambientCoefficient;
+                float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
 
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
@@ -147,7 +143,7 @@ public strictfp class PreviewGenerator {
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);
-                newRGBA[3] = waterheight > heightmap.get(x, y) ? (int) (191 * weight + 32) : 0;
+                newRGBA[3] = waterheight > heightmap.getPrimitive(x, y) ? (int) (191 * weight + 32) : 0;
 
                 layer.getRaster().setPixel(x, y, newRGBA);
             }
