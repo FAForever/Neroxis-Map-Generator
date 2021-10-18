@@ -254,7 +254,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     public U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point.x, point.y, symmetryType, spoint -> divideValueAt(spoint, value));
+            applyAtSymmetryPoints(point, symmetryType, spoint -> divideValueAt(spoint, value));
         }));
     }
 

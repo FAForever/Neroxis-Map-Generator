@@ -3,11 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.VisualDebugger;
+import com.faforever.neroxis.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -15,13 +11,8 @@ import lombok.SneakyThrows;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -639,7 +630,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return enqueue(() -> apply(point -> {
             if (inHalf(point.x, point.y, angle)) {
                 T value = get(point);
-                applyAtSymmetryPoints(point.x, point.y, SymmetryType.SPAWN, spoint -> set(spoint, value));
+                applyAtSymmetryPoints(point, SymmetryType.SPAWN, spoint -> set(spoint, value));
             }
         }));
     }
