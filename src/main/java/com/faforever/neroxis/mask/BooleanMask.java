@@ -53,7 +53,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            set(point -> source.valueAtGreaterThanEqualTo(point.x, point.y, minValue));
+            set(point -> source.valueAtGreaterThanEqualTo(point, minValue));
         }, other);
     }
 
@@ -65,7 +65,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            set(point -> source.valueAtGreaterThanEqualTo(point.x, point.y, minValue) && source.valueAtLessThanEqualTo(point.x, point.y, maxValue));
+            set(point -> source.valueAtGreaterThanEqualTo(point, minValue) && source.valueAtLessThanEqualTo(point.x, point.y, maxValue));
         }, other);
     }
 
@@ -625,7 +625,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask blur(int radius, float density) {
         enqueue(() -> {
             int[][] innerCount = getInnerCount();
-            set(point -> calculateAreaAverage(radius, point.x, point.y, innerCount) >= density);
+            set(point -> calculateAreaAverage(radius, point, innerCount) >= density);
         });
         return this;
     }
@@ -788,7 +788,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply(point -> calculateInnerValue(innerCount, point.x, point.y, get(point) ? 1 : 0));
+        apply(point -> calculateInnerValue(innerCount, point, get(point) ? 1 : 0));
         return innerCount;
     }
 

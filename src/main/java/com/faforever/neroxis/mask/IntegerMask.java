@@ -169,7 +169,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     protected int[][] getInnerCount() {
         int[][] innerCount = new int[getSize()][getSize()];
-        apply(point -> calculateInnerValue(innerCount, point.x, point.y, get(point)));
+        apply(point -> calculateInnerValue(innerCount, point, get(point)));
         return innerCount;
     }
 

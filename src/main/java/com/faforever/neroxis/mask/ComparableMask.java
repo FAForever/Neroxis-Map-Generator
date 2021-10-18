@@ -15,20 +15,40 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         super(other, name);
     }
 
+    public boolean valueAtEqualTo(Point point, T value) {
+        return valueAtEqualTo(point.x, point.y, value);
+    }
+
     public boolean valueAtEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) == 0;
+    }
+
+    public boolean valueAtLessThan(Point point, T value) {
+        return valueAtLessThan(point.x, point.y, value);
     }
 
     public boolean valueAtLessThan(int x, int y, T value) {
         return get(x, y).compareTo(value) < 0;
     }
 
+    public boolean valueAtLessThanEqualTo(Point point, T value) {
+        return valueAtLessThanEqualTo(point.x, point.y, value);
+    }
+
     public boolean valueAtLessThanEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) <= 0;
     }
 
+    public boolean valueAtGreaterThan(Point point, T value) {
+        return valueAtGreaterThan(point.x, point.y, value);
+    }
+
     public boolean valueAtGreaterThan(int x, int y, T value) {
         return get(x, y).compareTo(value) > 0;
+    }
+
+    public boolean valueAtGreaterThanEqualTo(Point point, T value) {
+        return valueAtGreaterThanEqualTo(point.x, point.y, value);
     }
 
     public boolean valueAtGreaterThanEqualTo(int x, int y, T value) {
@@ -135,11 +155,11 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public U zeroOutsideRange(T min, T max) {
-        return enqueue(() -> set(point -> valueAtLessThan(point.x, point.y, min) || valueAtGreaterThan(point.x, point.y, max) ? getZeroValue() : get(point)));
+        return enqueue(() -> set(point -> valueAtLessThan(point, min) || valueAtGreaterThan(point, max) ? getZeroValue() : get(point)));
     }
 
     public U zeroInRange(T min, T max) {
-        return enqueue(() -> set(point -> valueAtGreaterThanEqualTo(point.x, point.y, min) && valueAtLessThan(point.x, point.y, max) ? getZeroValue() : get(point.x, point.y)));
+        return enqueue(() -> set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(point)));
     }
 
     public BooleanMask convertToBooleanMask(T minValue) {

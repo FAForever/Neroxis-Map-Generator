@@ -14,11 +14,8 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -442,7 +439,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     protected int[][] getInnerCount() {
         int size = getSize();
         int[][] innerCount = new int[size][size];
-        apply(point -> calculateInnerValue(innerCount, point.x, point.y, StrictMath.round(get(point) * 1000)));
+        apply(point -> calculateInnerValue(innerCount, point, StrictMath.round(get(point) * 1000)));
         return innerCount;
     }
 

@@ -315,7 +315,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     public U blur(int radius) {
         return enqueue(() -> {
             T[][] innerCount = getInnerCount();
-            set(point -> calculateAreaAverage(radius, point.x, point.y, innerCount).round().divide(1000));
+            set(point -> calculateAreaAverage(radius, point, innerCount).round().divide(1000));
         });
     }
 
@@ -324,14 +324,14 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
             T[][] innerCount = getInnerCount();
-            set(point -> limiter.get(point) ? calculateAreaAverage(radius, point.x, point.y, innerCount).round().divide(1000) : get(point));
+            set(point -> limiter.get(point) ? calculateAreaAverage(radius, point, innerCount).round().divide(1000) : get(point));
         }, other);
     }
 
     public U blurComponent(int radius, int component) {
         return enqueue(() -> {
             int[][] innerCount = getComponentInnerCount(component);
-            setComponent(point -> calculateComponentAreaAverage(radius, point.x, point.y, innerCount) / 1000f, component);
+            setComponent(point -> calculateComponentAreaAverage(radius, point, innerCount) / 1000f, component);
         });
     }
 
@@ -340,7 +340,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
             int[][] innerCount = getComponentInnerCount(component);
-            setComponent(point -> limiter.get(point) ? calculateComponentAreaAverage(radius, point.x, point.y, innerCount) / 1000f : get(point).get(component), component);
+            setComponent(point -> limiter.get(point) ? calculateComponentAreaAverage(radius, point, innerCount) / 1000f : get(point).get(component), component);
         }, other);
     }
 
@@ -432,12 +432,20 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     protected int[][] getComponentInnerCount(int component) {
         int[][] innerCount = new int[getSize()][getSize()];
-        apply(point -> calculateComponentInnerValue(innerCount, point.x, point.y, StrictMath.round(get(point).get(component) * 1000)));
+        apply(point -> calculateComponentInnerValue(innerCount, point, StrictMath.round(get(point).get(component) * 1000)));
         return innerCount;
+    }
+
+    protected void calculateComponentInnerValue(int[][] innerCount, Point point, int val) {
+        calculateComponentInnerValue(innerCount, point.x, point.y, val);
     }
 
     protected void calculateComponentInnerValue(int[][] innerCount, int x, int y, int val) {
         calculateScalarInnerValue(innerCount, x, y, val);
+    }
+
+    protected float calculateComponentAreaAverage(int radius, Point point, int[][] innerCount) {
+        return calculateComponentAreaAverage(radius, point.x, point.y, innerCount);
     }
 
     protected float calculateComponentAreaAverage(int radius, int x, int y, int[][] innerCount) {
@@ -457,8 +465,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     protected T[][] getInnerCount() {
         T[][] innerCount = getNullMask(getSize());
-        apply(point -> calculateInnerValue(innerCount, point.x, point.y, get(point)));
+        apply(point -> calculateInnerValue(innerCount, point, get(point)));
         return innerCount;
+    }
+
+    protected void calculateInnerValue(T[][] innerCount, Point point, T val) {
+        calculateInnerValue(innerCount, point.x, point.y, val);
     }
 
     protected void calculateInnerValue(T[][] innerCount, int x, int y, T val) {
@@ -472,6 +484,10 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         if (x > 0 && y > 0) {
             innerCount[x][y].subtract(innerCount[x - 1][y - 1]);
         }
+    }
+
+    protected T calculateAreaAverage(int radius, Point point, T[][] innerCount) {
+        return calculateAreaAverage(radius, point.x, point.y, innerCount);
     }
 
     protected T calculateAreaAverage(int radius, int x, int y, T[][] innerCount) {

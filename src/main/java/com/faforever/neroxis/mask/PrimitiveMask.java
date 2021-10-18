@@ -2,6 +2,8 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
+import java.awt.*;
+
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
 
@@ -20,7 +22,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
     public U blur(int radius) {
         return enqueue(() -> {
             int[][] innerCount = getInnerCount();
-            set(point -> transformAverage(calculateAreaAverage(radius, point.x, point.y, innerCount)));
+            set(point -> transformAverage(calculateAreaAverage(radius, point, innerCount)));
         });
     }
 
@@ -29,12 +31,20 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.get(0);
             int[][] innerCount = getInnerCount();
-            set(point -> limiter.get(point) ? transformAverage(calculateAreaAverage(radius, point.x, point.y, innerCount)) : get(point));
+            set(point -> limiter.get(point) ? transformAverage(calculateAreaAverage(radius, point, innerCount)) : get(point));
         }, other);
+    }
+
+    protected void calculateInnerValue(int[][] innerCount, Point point, int val) {
+        calculateInnerValue(innerCount, point.x, point.y, val);
     }
 
     protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
         calculateScalarInnerValue(innerCount, x, y, val);
+    }
+
+    protected float calculateAreaAverage(int radius, Point point, int[][] innerCount) {
+        return calculateAreaAverage(radius, point.x, point.y, innerCount);
     }
 
     protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
