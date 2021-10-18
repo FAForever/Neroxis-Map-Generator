@@ -205,6 +205,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return inBounds(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
+    public boolean inBounds(Point point) {
+        return inBounds(point.x, point.y);
+    }
+
     public boolean inBounds(int x, int y) {
         int size = getSize();
         return x >= 0 && x < size && y >= 0 && y < size;

@@ -574,10 +574,10 @@ public strictfp class SCMap {
         checkMaskSize(mask3, textureMasksWidth);
         for (int x = 0; x < textureMasksWidth; x++) {
             for (int y = 0; y < textureMasksWidth; y++) {
-                int val0 = convertToRawTextureValue(mask0.get(x, y));
-                int val1 = convertToRawTextureValue(mask1.get(x, y));
-                int val2 = convertToRawTextureValue(mask2.get(x, y));
-                int val3 = convertToRawTextureValue(mask3.get(x, y));
+                int val0 = convertToRawTextureValue(mask0.getPrimitive(x, y));
+                int val1 = convertToRawTextureValue(mask1.getPrimitive(x, y));
+                int val2 = convertToRawTextureValue(mask2.getPrimitive(x, y));
+                int val3 = convertToRawTextureValue(mask3.getPrimitive(x, y));
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
