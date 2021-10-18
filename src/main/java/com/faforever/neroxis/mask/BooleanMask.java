@@ -65,7 +65,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
-            apply(point -> setPrimitive(point, source.valueAtGreaterThanEqualTo(point, minValue) && source.valueAtLessThanEqualTo(point.x, point.y, maxValue)));
+            apply(point -> setPrimitive(point, source.valueAtGreaterThanEqualTo(point, minValue) && source.valueAtLessThanEqualTo(point, maxValue)));
         }, other);
     }
 
