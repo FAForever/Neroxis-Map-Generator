@@ -8,11 +8,9 @@
 	"/env/ancient-earth/props/trees/oak1_s4_prop.bp",
 	"/env/ancient-earth/props/trees/fallmix1oak1_s3_prop.bp",
 	"/env/ancient-earth/props/trees/fallmix1oak1_s4_prop.bp",
-	"/env/ancient-earth/props/trees/yellowgreenmix1oak1_s3_prop.bp",
-	"/env/ancient-earth/props/trees/yellowgreenmix1oak1_s4_prop.bp",
 	"/env/ancient-earth/props/trees/bronzeyellow1oak1_s3_prop.bp",
 	"/env/ancient-earth/props/trees/bronzeyellow1oak1_s4_prop.bp",
-	"/env/ancient-earth/props/trees/yellowgreen1oak1_s3_prop.bp",
+	"/env/ancient-earth/props/trees/yellowgreenmix1oak1_s3_prop.bp",
 	"/env/ancient-earth/props/trees/yellowgreen1oak1_s4_prop.bp"
   ],
   "rocks": [

@@ -1,5 +1,38 @@
 {
+  "previewColors": [
+    -10802148,
+    -11855349,
+    -12446714,
+    -11722475,
+    -11329514,
+    -10802148,
+    -12774645,
+    -13100527,
+    -12904176
+  ],
+  "normalScales": [
+    16.0,
+    4.0,
+    12.25,
+    13.75,
+    13.75,
+    9.5,
+    4.0,
+    1.0,
+    6.0
+  ],
   "name": "Brimstone",
+  "normalPaths": [
+    "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
+    "/env/Evergreen/layers/grass000_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    "/env/red barrens/layers/rb_cracked02_normal.dds",
+    "/env/red barrens/layers/rb_sand_normal.dds",
+    "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
+    "/env/Desert/Layers/Des_sandLight_normal.dds",
+    "/env/red barrens/layers/rb_rock09_normal.dds",
+    "/env/red barrens/layers/rb_rock06_normal.dds"
+  ],
   "texturePaths": [
     "/env/red barrens/layers/rb_gravel01_albedo.dds",
     "/env/ancient-earth/layers/sandlight002_maroon_tint_albedo.dds",
@@ -23,65 +56,5 @@
     11.0,
     12.0,
     128.0
-  ],
-  "normalPaths": [
-    "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
-    "/env/Evergreen/layers/grass000_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
-    "/env/red barrens/layers/rb_cracked02_normal.dds",
-    "/env/red barrens/layers/rb_sand_normal.dds",
-    "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/red barrens/layers/rb_rock09_normal.dds",
-    "/env/red barrens/layers/rb_rock06_normal.dds"
-  ],
-  "normalScales": [
-    16.0,
-    4.0,
-    12.25,
-    13.75,
-    13.75,
-    9.5,
-    4.0,
-    1.0,
-    6.0
-  ],
-  "previewColors": [
-    {
-      "value": -10802148,
-      "falpha": 0.0
-    },
-    {
-      "value": -11855349,
-      "falpha": 0.0
-    },
-    {
-      "value": -12446714,
-      "falpha": 0.0
-    },
-    {
-      "value": -11722475,
-      "falpha": 0.0
-    },
-    {
-      "value": -11329514,
-      "falpha": 0.0
-    },
-    {
-      "value": -12961746,
-      "falpha": 0.0
-    },
-    {
-      "value": -12774645,
-      "falpha": 0.0
-    },
-    {
-      "value": -13100527,
-      "falpha": 0.0
-    },
-    {
-      "value": -12904176,
-      "falpha": 0.0
-    }
   ]
 }
