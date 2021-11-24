@@ -369,11 +369,24 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             Vector2 location = new Vector2(start);
             BooleanMask brush = loadBrush(brushName, null)
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
+            float targetX = target.getX();
+            float targetY = target.getY();
+            if (wrapEdges) {
+                int maskSize = getSize();
+                int halfSize = maskSize / 2;
+                float startX = start.getX();
+                float startY = start.getY();
+                if (targetX - startX > halfSize) targetX -= maskSize;
+                if (startX - targetX > halfSize) targetX += maskSize;
+                if (targetY - startY > halfSize) targetY -= maskSize;
+                if (startY - targetY > halfSize) targetY += maskSize;
+            }
+
             for (int i = 0; i < numberOfUses; i++) {
                 addWithOffset(brush, location, true, wrapEdges);
-                int dx = (target.getX() > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
-                int dy = (target.getY() > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
-                location.add(dx, dy);
+                int dx = (targetX > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
+                int dy = (targetY > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
+                location.add(new Vector2(dx, dy));
             }
         });
         return this;
