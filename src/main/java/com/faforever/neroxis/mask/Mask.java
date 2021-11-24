@@ -3,7 +3,11 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.Util;
+import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -11,8 +15,13 @@ import lombok.SneakyThrows;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -80,7 +89,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
-        return wrapEdges ? (val + offset + size) % size : val + offset - 1;
+        return wrapEdges ? (val + offset + size) % size : val + offset;
     }
 
     public T get(Vector3 location) {
@@ -704,6 +713,24 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
+    protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType, Consumer<Point> action) {
+        return applyAtSymmetryPointsWithOutOfBounds((int) location.getX(), (int) location.getY(), symmetryType, action);
+    }
+
+    protected U applyAtSymmetryPointsWithOutOfBounds(int x, int y, SymmetryType symmetryType, Consumer<Point> action) {
+        return applyAtSymmetryPointsWithOutOfBounds(new Point(x, y), symmetryType, action);
+    }
+
+    protected U applyAtSymmetryPointsWithOutOfBounds(Point point, SymmetryType symmetryType, Consumer<Point> action) {
+        action.accept(point);
+        List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(point.x, point.y, symmetryType);
+        symPoints.forEach(symPoint -> {
+            point.setLocation(symPoint.getX(), symPoint.getY());
+            action.accept(point);
+        });
+        return (U) this;
+    }
+
     public U applyWithOffset(U other, BiConsumer<Point, T> action, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
@@ -714,7 +741,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             Map<Integer, Integer> coordinateYMap = new LinkedHashMap<>();
             if (smallerSize == otherSize) {
                 if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-                    generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
+                    generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, otherSize, size, coordinateXMap, coordinateYMap);
                     other.apply(point -> {
                         int shiftX = coordinateXMap.get(point.x);
                         int shiftY = coordinateYMap.get(point.y);
@@ -724,8 +751,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                         }
                     });
                 } else {
-                    applyAtSymmetryPoints(xCoordinate, yCoordinate, SymmetryType.SPAWN, spoint -> {
-                        generateCoordinateMaps(spoint.x, spoint.y, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
+                    applyAtSymmetryPointsWithOutOfBounds(xCoordinate, yCoordinate, SymmetryType.SPAWN, spoint -> {
+                        generateCoordinateMaps(spoint.x, spoint.y, center, wrapEdges, otherSize, size, coordinateXMap, coordinateYMap);
                         other.apply(point -> {
                             int shiftX = coordinateXMap.get(point.x);
                             int shiftY = coordinateYMap.get(point.y);
@@ -736,7 +763,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     });
                 }
             } else {
-                generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, smallerSize, coordinateXMap, coordinateYMap);
+                generateCoordinateMaps(xCoordinate, yCoordinate, center, wrapEdges, size, otherSize, coordinateXMap, coordinateYMap);
                 apply(point -> {
                     int shiftX = coordinateXMap.get(point.x);
                     int shiftY = coordinateYMap.get(point.y);
@@ -760,19 +787,19 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    public void generateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges, int smallerSize, Map<Integer, Integer> coordinateXMap, Map<Integer, Integer> coordinateYMap) {
+    public void generateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges, int fromSize, int toSize, Map<Integer, Integer> coordinateXMap, Map<Integer, Integer> coordinateYMap) {
         int offsetX;
         int offsetY;
         if (center) {
-            offsetX = xCoordinate - smallerSize / 2;
-            offsetY = yCoordinate - smallerSize / 2;
+            offsetX = xCoordinate - fromSize / 2;
+            offsetY = yCoordinate - fromSize / 2;
         } else {
             offsetX = xCoordinate;
             offsetY = yCoordinate;
         }
-        for (int i = 0; i < smallerSize; ++i) {
-            coordinateXMap.put(i, getShiftedValue(i, offsetX, smallerSize, wrapEdges));
-            coordinateYMap.put(i, getShiftedValue(i, offsetY, smallerSize, wrapEdges));
+        for (int i = 0; i < fromSize; ++i) {
+            coordinateXMap.put(i, getShiftedValue(i, offsetX, toSize, wrapEdges));
+            coordinateYMap.put(i, getShiftedValue(i, offsetY, toSize, wrapEdges));
         }
     }
 

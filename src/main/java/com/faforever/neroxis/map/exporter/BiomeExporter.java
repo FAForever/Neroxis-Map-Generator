@@ -6,7 +6,11 @@ import com.faforever.neroxis.util.DDSReader;
 import com.faforever.neroxis.util.FileUtils;
 
 import java.awt.*;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,9 +29,11 @@ public strictfp class BiomeExporter {
         filename = folderPath.resolve(biomeName).resolve("WaterSettings.scmwtr").toString();
         FileUtils.serialize(filename, biome.getWaterSettings());
 
+        Integer[] previewColors = biome.getTerrainMaterials().getPreviewColors();
+        String[] texturePaths = biome.getTerrainMaterials().getTexturePaths();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
-            if (biome.getTerrainMaterials().getPreviewColors()[i] == null && !biome.getTerrainMaterials().getTexturePaths()[i].isEmpty()) {
-                biome.getTerrainMaterials().getPreviewColors()[i] = getTexturePreviewColor(envDir, biome.getTerrainMaterials().getTexturePaths()[i]);
+            if (previewColors[i] == null && !texturePaths[i].isEmpty()) {
+                previewColors[i] = getTexturePreviewColor(envDir, texturePaths[i]);
             }
         }
         biome.getTerrainMaterials().setName(biomeName);
