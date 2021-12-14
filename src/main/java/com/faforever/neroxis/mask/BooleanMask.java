@@ -12,8 +12,14 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -376,10 +382,22 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 int halfSize = maskSize / 2;
                 float startX = start.getX();
                 float startY = start.getY();
-                if (targetX - startX > halfSize) targetX -= maskSize;
-                if (startX - targetX > halfSize) targetX += maskSize;
-                if (targetY - startY > halfSize) targetY -= maskSize;
-                if (startY - targetY > halfSize) targetY += maskSize;
+                float distanceToMidX = targetX - startX;
+                float distanceToMidY = targetY - startY;
+                if (StrictMath.abs(distanceToMidX) > halfSize) {
+                    if (distanceToMidX > 0) {
+                        targetX -= maskSize;
+                    } else {
+                        targetX += maskSize;
+                    }
+                }
+                if (StrictMath.abs(distanceToMidY) > halfSize) {
+                    if (distanceToMidY > 0) {
+                        targetY -= maskSize;
+                    } else {
+                        targetY += maskSize;
+                    }
+                }
             }
 
             for (int i = 0; i < numberOfUses; i++) {
