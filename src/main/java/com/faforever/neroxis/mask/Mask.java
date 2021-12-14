@@ -337,22 +337,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return getSymmetryRotation(rot, SymmetryType.SPAWN);
     }
 
-    private Vector2 getRotatedPoint(float x, float y, float angle) {
-        float halfSize = getSize() / 2f;
-        float xOffset = x - halfSize;
-        float yOffset = y - halfSize;
-        double cosAngle = StrictMath.cos(angle);
-        double sinAngle = StrictMath.sin(angle);
-        float newX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
-        float newY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
-        return new Vector2(newX, newY);
-    }
-
-    protected int getMinXBound(SymmetryType symmetryType) {
-        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        return 0;
-    }
-
     public ArrayList<Float> getSymmetryRotation(float rot, SymmetryType symmetryType) {
         ArrayList<Float> symmetryRotation = new ArrayList<>();
         final float xRotation = (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
@@ -417,6 +401,22 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                 break;
         }
         return symmetryRotation;
+    }
+
+    private Vector2 getRotatedPoint(float x, float y, float angle) {
+        float halfSize = getSize() / 2f;
+        float xOffset = x - halfSize;
+        float yOffset = y - halfSize;
+        double cosAngle = StrictMath.cos(angle);
+        double sinAngle = StrictMath.sin(angle);
+        float newX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
+        float newY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
+        return new Vector2(newX, newY);
+    }
+
+    protected int getMinXBound(SymmetryType symmetryType) {
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return 0;
     }
 
     protected int getMinYBound(int x, SymmetryType symmetryType) {

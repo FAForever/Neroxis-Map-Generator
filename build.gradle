@@ -143,3 +143,14 @@ task detectorJar(type: ShadowJar) {
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
 }
+
+task reshaderJar(type: ShadowJar) {
+    getArchiveBaseName().set('MapReshader')
+    from(sourceSets.main.output) {
+        manifest {
+            attributes 'Main-Class': 'com.faforever.neroxis.map.reshader.MapReshader'
+        }
+    }
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+}

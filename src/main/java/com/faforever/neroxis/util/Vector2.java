@@ -72,10 +72,10 @@ public strictfp class Vector2 extends Vector<Vector2> {
     public LinkedHashSet<Vector2> getLine(Vector2 location) {
         LinkedHashSet<Vector2> line = new LinkedHashSet<>();
         Vector2 currentPoint = this;
-        while (currentPoint.getDistance(location) > .1) {
+        while (currentPoint.getDistance(location) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.angleTo(location);
-            currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)), (float) (currentPoint.getY() + StrictMath.sin(angle))).round();
+            currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)), (float) (currentPoint.getY() + StrictMath.sin(angle)));
         }
         return line;
     }

@@ -2,7 +2,17 @@ package com.faforever.neroxis.map.importer;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.jsquish.Squish;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.CubeMap;
+import com.faforever.neroxis.map.Decal;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.DecalMaterials;
+import com.faforever.neroxis.map.DecalType;
+import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.PropMaterials;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SkyBox;
+import com.faforever.neroxis.map.TerrainMaterials;
+import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.util.DDSHeader;
 import com.faforever.neroxis.util.Vector2;
 import com.faforever.neroxis.util.Vector3;
@@ -13,7 +23,12 @@ import com.faforever.neroxis.util.serialized.WaterSettings;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
@@ -30,11 +45,10 @@ public strictfp class SCMapImporter {
         File dir = folderPath.toFile();
 
         File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-        assert mapFiles != null;
-        if (mapFiles.length == 0) {
-            System.out.println("No SCMap file in map folder");
-            return null;
+        if (mapFiles == null || mapFiles.length == 0) {
+            throw new IllegalArgumentException("Folder does not contain an scmap file");
         }
+
         file = mapFiles[0];
 
         in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
