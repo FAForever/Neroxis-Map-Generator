@@ -99,7 +99,7 @@ public class MapGeneratorTest {
 
         SCMap map = instance.generate();
 
-        MapExporter.exportMap(Paths.get("."), map, false, false, false);
+        MapExporter.exportMap(Paths.get("."), map, false, false);
 
         assertEquals(512, map.getSize());
     }
