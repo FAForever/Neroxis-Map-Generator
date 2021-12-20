@@ -23,9 +23,9 @@
 
    -------------------------------------------------------------------------- */
 
-package com.faforever.neroxis.jsquish;
+package com.faforever.neroxis.util.jsquish;
 
-import com.faforever.neroxis.jsquish.Squish.CompressionType;
+import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
 final strictfp class ColourSet {
 

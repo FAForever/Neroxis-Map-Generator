@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
 
 public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
 
@@ -45,7 +45,7 @@ public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
     @Override
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
-        Util.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getRocks(), .5f, 3f);

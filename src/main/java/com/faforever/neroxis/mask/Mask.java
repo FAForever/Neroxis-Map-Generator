@@ -3,11 +3,11 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
 import com.faforever.neroxis.util.VisualDebugger;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -45,7 +45,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @Setter
     private boolean visualDebug;
     private boolean visible;
-    @Getter
     @Setter
     private String visualName;
 
@@ -56,7 +55,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
         visible = true;
-        initializeMask(size);
+        enqueue(() -> initializeMask(size));
     }
 
     public Mask(U other, String name) {
@@ -90,6 +89,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
         return wrapEdges ? (val + offset + size) % size : val + offset;
+    }
+
+    public String getVisualName() {
+        return visualName != null ? visualName : (name != null ? name : toString());
     }
 
     public T get(Vector3 location) {
@@ -232,12 +235,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return x == 0 || x == size - 1 || y == 0 || y == size - 1;
     }
 
-    public List<Vector2> getSymmetryPoints(Vector3 v, SymmetryType symmetryType) {
-        return getSymmetryPoints(new Vector2(v), symmetryType);
+    public List<Vector2> getSymmetryPoints(Vector3 point, SymmetryType symmetryType) {
+        return getSymmetryPoints(new Vector2(point), symmetryType);
     }
 
-    public List<Vector2> getSymmetryPoints(Vector2 v, SymmetryType symmetryType) {
-        return getSymmetryPoints(v.getX(), v.getY(), symmetryType);
+    public List<Vector2> getSymmetryPoints(Vector2 point, SymmetryType symmetryType) {
+        return getSymmetryPoints(point.getX(), point.getY(), symmetryType);
     }
 
     public List<Vector2> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
@@ -250,8 +253,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return getSymmetryPointsWithOutOfBounds(new Vector2(v), symmetryType);
     }
 
-    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector2 v, SymmetryType symmetryType) {
-        return getSymmetryPointsWithOutOfBounds(v.getX(), v.getY(), symmetryType);
+    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector2 point, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(point.getX(), point.getY(), symmetryType);
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
@@ -820,9 +823,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             visible = false;
             function.accept(dependencies);
             visible = visibleState && !Pipeline.isRunning();
-            if (((Util.DEBUG && isVisualDebug()) || (Util.VISUALIZE && !isMock())) && visible) {
-                String callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
-                String callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map");
+            if (((DebugUtils.DEBUG && isVisualDebug()) || (DebugUtils.VISUALIZE && !isMock())) && visible) {
+                String callingMethod = DebugUtils.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
+                String callingLine = DebugUtils.getStackTraceLineInPackage("com.faforever.neroxis.map");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
             }
         }
@@ -983,12 +986,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    public U fillCircle(Vector3 v, float radius, T value) {
-        return fillCircle(new Vector2(v), radius, value);
+    public U fillCircle(Vector3 center, float radius, T value) {
+        return fillCircle(center.getX(), center.getZ(), radius, value);
     }
 
-    public U fillCircle(Vector2 v, float radius, T value) {
-        return fillCircle(v.getX(), v.getY(), radius, value);
+    public U fillCircle(Vector2 center, float radius, T value) {
+        return fillCircle(center.getX(), center.getY(), radius, value);
     }
 
     public U fillCircle(float x, float y, float radius, T value) {
@@ -1014,16 +1017,16 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    public U fillSquare(Vector2 v, int extent, T value) {
-        return fillSquare((int) v.getX(), (int) v.getY(), extent, value);
+    public U fillSquare(Vector2 topLeft, int extent, T value) {
+        return fillSquare((int) topLeft.getX(), (int) topLeft.getY(), extent, value);
     }
 
     public U fillSquare(int x, int y, int extent, T value) {
         return enqueue(() -> fillRect(x, y, extent, extent, value));
     }
 
-    public U fillRect(Vector2 v, int width, int height, T value) {
-        return fillRect((int) v.getX(), (int) v.getY(), width, height, value);
+    public U fillRect(Vector2 topLeft, int width, int height, T value) {
+        return fillRect((int) topLeft.getX(), (int) topLeft.getY(), width, height, value);
     }
 
     public U fillRect(int x, int y, int width, int height, T value) {
@@ -1038,8 +1041,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return fillRect(smallX, smallZ, bigX - smallX, bigZ - smallZ, value);
     }
 
-    public U fillParallelogram(Vector2 v, int width, int height, int xSlope, int ySlope, T value) {
-        return fillParallelogram((int) v.getX(), (int) v.getY(), width, height, xSlope, ySlope, value);
+    public U fillParallelogram(Vector2 topLeft, int width, int height, int xSlope, int ySlope, T value) {
+        return fillParallelogram((int) topLeft.getX(), (int) topLeft.getY(), width, height, xSlope, ySlope, value);
     }
 
     public U fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, T value) {

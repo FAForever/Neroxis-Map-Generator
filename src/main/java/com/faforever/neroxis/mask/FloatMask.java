@@ -4,9 +4,9 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.MathUtils;
-import com.faforever.neroxis.util.Vector;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,8 +14,11 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;

@@ -4,7 +4,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

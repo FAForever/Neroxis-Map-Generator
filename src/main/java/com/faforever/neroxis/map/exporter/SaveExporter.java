@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.Vector4;
+import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.vector.Vector4;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;

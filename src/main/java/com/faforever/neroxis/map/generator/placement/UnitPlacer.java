@@ -6,11 +6,16 @@ import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Vector;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public strictfp class UnitPlacer {

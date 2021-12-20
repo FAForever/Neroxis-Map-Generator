@@ -5,7 +5,13 @@ import com.dslplatform.json.PrettifyOutputStream;
 import com.dslplatform.json.runtime.Settings;
 import lombok.SneakyThrows;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +21,6 @@ import java.util.stream.Stream;
 public strictfp class FileUtils {
 
     private static final DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
-//    private static final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {
@@ -66,28 +71,22 @@ public strictfp class FileUtils {
      * @return the deserialized object
      */
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
-//        BufferedReader bufferedReader;
         InputStream inputStream;
         URL resource;
         if ((inputStream = FileUtils.class.getResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
         } else if ((resource = FileUtils.class.getResource(path)) != null) {
             return dslJson.deserialize(clazz, resource.openStream());
-//            bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
         } else {
             return dslJson.deserialize(clazz, new FileInputStream(path));
-//            bufferedReader = new BufferedReader(new FileReader(Paths.get(path).toFile()));
         }
-//        return objectMapper.readValue(bufferedReader, clazz);
     }
 
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
-//        return objectMapper.readValue(new BufferedReader(new InputStreamReader(inputStream)), clazz);
         return dslJson.deserialize(clazz, inputStream);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {
         dslJson.serialize(obj, new PrettifyOutputStream(new FileOutputStream(filename)));
-//        objectMapper.writeValue(Paths.get(filename).toFile(), obj);
     }
 }

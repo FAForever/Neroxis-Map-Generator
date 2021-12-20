@@ -1,6 +1,6 @@
 package com.faforever.neroxis.map;
 
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector3;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

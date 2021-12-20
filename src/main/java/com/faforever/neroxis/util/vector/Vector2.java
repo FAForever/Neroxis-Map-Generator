@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util;
+package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
 

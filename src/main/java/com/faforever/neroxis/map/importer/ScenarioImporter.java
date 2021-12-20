@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.importer;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.LuaLoader;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 import org.luaj.vm2.LuaValue;
 
 import java.io.File;

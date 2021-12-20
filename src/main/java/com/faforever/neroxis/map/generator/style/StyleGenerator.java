@@ -16,8 +16,8 @@ import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.map.generator.texture.TextureGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -104,10 +104,10 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     @Override
     public void setupPipeline() {
-        Util.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () ->
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () ->
                 spawnPlacer.placeSpawns(mapParameters.getSpawnCount(), spawnSeparation, teamSeparation, mapParameters.getSymmetrySettings()));
 
-        Util.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, mapParameters, terrainGenerator);
             textureGenerator = selectRandomMatchingGenerator(random, textureGenerators, mapParameters, textureGenerator);
             resourceGenerator = selectRandomMatchingGenerator(random, resourceGenerators, mapParameters, resourceGenerator);
@@ -131,7 +131,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
 
     protected void generateAIMarkers(BooleanMask passable, BooleanMask passableLand, BooleanMask passableWater) {
         Pipeline.await(passable, passableLand, passableWater);
-        Util.timedRun("com.faforever.neroxis.map.generator", "placeAIMarkers", () -> {
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeAIMarkers", () -> {
             CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(), "AmphPN%d"));
             CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(), "LandPN%d"));
             CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(() -> AIMarkerPlacer.placeAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(), "NavyPN%d"));
@@ -141,7 +141,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     }
 
     protected void setHeights() {
-        Util.timedRun("com.faforever.neroxis.map.generator", "setPlacements", () -> map.setHeights());
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "setPlacements", () -> map.setHeights());
     }
 
     public String generatorsToString() {

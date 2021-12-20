@@ -1,7 +1,6 @@
 package com.faforever.neroxis.map.importer;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
@@ -13,12 +12,13 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
 import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.map.WaveGenerator;
-import com.faforever.neroxis.util.DDSHeader;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.Vector4;
+import com.faforever.neroxis.util.dds.DDSHeader;
+import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.vector.Vector4;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -32,8 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import static com.faforever.neroxis.jsquish.Squish.decompressImage;
-import static com.faforever.neroxis.util.Swapper.swap;
+import static com.faforever.neroxis.util.EndianSwapper.swap;
+import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
 
 public strictfp class SCMapImporter {
 

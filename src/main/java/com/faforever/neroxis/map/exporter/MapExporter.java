@@ -1,7 +1,7 @@
 package com.faforever.neroxis.map.exporter;
 
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.io.IOException;
 import java.nio.file.Files;

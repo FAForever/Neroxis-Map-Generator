@@ -1,7 +1,6 @@
-package com.faforever.neroxis.util;
+package com.faforever.neroxis.util.vector;
 
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.Random;

@@ -23,7 +23,7 @@
 
    -------------------------------------------------------------------------- */
 
-package com.faforever.neroxis.jsquish;
+package com.faforever.neroxis.util.jsquish;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;

@@ -3,7 +3,7 @@ package com.faforever.neroxis.util;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-public strictfp class Util {
+public strictfp class DebugUtils {
 
     public static boolean VERBOSE = false;
     public static boolean DEBUG = false;
@@ -59,6 +59,12 @@ public strictfp class Util {
         return "not found";
     }
 
+    public static String getStackTraceTopMethodInPackage(String packageName) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        return Arrays.stream(stackTrace).filter(stackTraceElement -> stackTraceElement.getClassName().contains(packageName))
+                .reduce((first, second) -> second).map(StackTraceElement::getMethodName).orElse("not found");
+    }
+
     public static LinkedHashSet<String> getStackTraceMethods(Class<?> clazz) {
         return getStackTraceMethods(clazz.getCanonicalName());
     }
@@ -94,14 +100,14 @@ public strictfp class Util {
         if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n",
                     description,
-                    Util.getStackTraceLineInPackage(packageName));
+                    DebugUtils.getStackTraceLineInPackage(packageName));
         }
         runnable.run();
         if (DEBUG) {
             System.out.printf("Done %s: %4d ms, %s\n",
                     description,
                     System.currentTimeMillis() - sTime,
-                    Util.getStackTraceLineInPackage(packageName));
+                    DebugUtils.getStackTraceLineInPackage(packageName));
         }
     }
 }

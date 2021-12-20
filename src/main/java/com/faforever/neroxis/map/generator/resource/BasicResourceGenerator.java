@@ -5,8 +5,8 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
 
 public strictfp class BasicResourceGenerator extends ResourceGenerator {
     protected BooleanMask resourceMask;
@@ -33,7 +33,7 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
     @Override
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
-        Util.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
             mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroPlacer.placeHydros(mapParameters.getHydroCount(), resourceMask.getFinalMask().deflate(8));
         });

@@ -2,8 +2,8 @@ package com.faforever.neroxis.map.exporter;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.TerrainMaterials;
-import com.faforever.neroxis.util.DDSReader;
 import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.dds.DDSReader;
 
 import java.awt.*;
 import java.io.DataOutputStream;

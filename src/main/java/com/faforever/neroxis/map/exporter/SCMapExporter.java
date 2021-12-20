@@ -1,6 +1,5 @@
 package com.faforever.neroxis.map.exporter;
 
-import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
@@ -11,12 +10,13 @@ import com.faforever.neroxis.map.SkyBox;
 import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.map.generator.PreviewGenerator;
-import com.faforever.neroxis.util.DDSHeader;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.Vector4;
+import com.faforever.neroxis.util.dds.DDSHeader;
+import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serialized.LightingSettings;
 import com.faforever.neroxis.util.serialized.WaterSettings;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -37,8 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import static com.faforever.neroxis.jsquish.Squish.compressImage;
-import static com.faforever.neroxis.util.Swapper.swap;
+import static com.faforever.neroxis.util.EndianSwapper.swap;
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public strictfp class SCMapExporter {
 

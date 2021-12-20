@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util;
+package com.faforever.neroxis.util.dds;
 
 public final strictfp class DDSReader {
 

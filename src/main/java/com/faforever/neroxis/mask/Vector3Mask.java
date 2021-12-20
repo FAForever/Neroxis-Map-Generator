@@ -1,7 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;

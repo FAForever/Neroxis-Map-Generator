@@ -26,12 +26,12 @@ import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.generator.style.TestStyleGenerator;
 import com.faforever.neroxis.map.generator.style.ValleyStyleGenerator;
 import com.faforever.neroxis.util.ArgumentParser;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.MathUtils;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.RandomUtils;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 import com.google.common.io.BaseEncoding;
 import lombok.Getter;
 import lombok.Setter;
@@ -415,13 +415,13 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("debug")) {
-            Util.DEBUG = true;
+            DebugUtils.DEBUG = true;
             Pipeline.HASH_MASK = true;
         }
 
         if (arguments.containsKey("visualize")) {
-            Util.VISUALIZE = true;
-            Util.DEBUG = true;
+            DebugUtils.VISUALIZE = true;
+            DebugUtils.DEBUG = true;
         }
 
         if (arguments.containsKey("num-to-gen")) {
@@ -539,7 +539,7 @@ public strictfp class MapGenerator {
                 }
             }
         } else {
-            Util.VISUALIZE = false;
+            DebugUtils.VISUALIZE = false;
         }
     }
 
@@ -606,7 +606,7 @@ public strictfp class MapGenerator {
             MapExporter.exportMap(folderPath, map, !tournamentStyle, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
-            if (!tournamentStyle && Util.DEBUG) {
+            if (!tournamentStyle && DebugUtils.DEBUG) {
                 startTime = System.currentTimeMillis();
                 Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
                 SCMapExporter.exportSCMapString(folderPath, mapName, map);
@@ -625,7 +625,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 

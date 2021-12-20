@@ -1,9 +1,13 @@
 package com.faforever.neroxis.map.generator.placement;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.List;
 import java.util.Random;

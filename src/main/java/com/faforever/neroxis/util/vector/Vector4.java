@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util;
+package com.faforever.neroxis.util.vector;
 
 public strictfp class Vector4 extends Vector<Vector4> {
 

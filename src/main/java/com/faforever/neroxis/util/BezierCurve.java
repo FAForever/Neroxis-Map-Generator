@@ -1,5 +1,6 @@
 package com.faforever.neroxis.util;
 
+import com.faforever.neroxis.util.vector.Vector2;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

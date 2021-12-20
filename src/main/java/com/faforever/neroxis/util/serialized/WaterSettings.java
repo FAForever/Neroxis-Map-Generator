@@ -1,8 +1,8 @@
 package com.faforever.neroxis.util.serialized;
 
 import com.dslplatform.json.CompiledJson;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.faforever.neroxis.map.SCMap.*;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_COUNT;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_MOVEMENTS;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_REPEATS;
+import static com.faforever.neroxis.map.SCMap.WAVE_TEXTURE_PATHS;
 
 /**
  * Used in disk operations to be converted into a material later

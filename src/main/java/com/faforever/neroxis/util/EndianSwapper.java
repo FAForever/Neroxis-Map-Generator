@@ -1,6 +1,6 @@
 package com.faforever.neroxis.util;
 
-public strictfp class Swapper {
+public strictfp class EndianSwapper {
 
     public static short swap(short value) {
         int b1 = value & 0xff;

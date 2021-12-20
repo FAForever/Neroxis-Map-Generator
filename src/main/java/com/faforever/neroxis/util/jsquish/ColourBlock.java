@@ -23,11 +23,13 @@
 
    -------------------------------------------------------------------------- */
 
-package com.faforever.neroxis.jsquish;
+package com.faforever.neroxis.util.jsquish;
 
 import java.util.Arrays;
 
-import static com.faforever.neroxis.jsquish.CompressorColourFit.*;
+import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_X;
+import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Y;
+import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Z;
 import static java.lang.Math.round;
 
 final strictfp class ColourBlock {

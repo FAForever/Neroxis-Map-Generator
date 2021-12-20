@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.io.IOException;
 import java.nio.file.Paths;

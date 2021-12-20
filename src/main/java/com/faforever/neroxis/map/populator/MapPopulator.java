@@ -17,9 +17,9 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.FileUtils;
 import com.faforever.neroxis.util.ImageUtils;
-import com.faforever.neroxis.util.Util;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -113,7 +113,7 @@ public strictfp class MapPopulator {
         }
 
         if (arguments.containsKey("debug")) {
-            Util.DEBUG = true;
+            DebugUtils.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {

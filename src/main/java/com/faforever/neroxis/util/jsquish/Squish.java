@@ -23,7 +23,7 @@
 
    -------------------------------------------------------------------------- */
 
-package com.faforever.neroxis.jsquish;
+package com.faforever.neroxis.util.jsquish;
 
 import lombok.Getter;
 

@@ -42,9 +42,9 @@ public strictfp class Pipeline {
         String callingMethod = null;
         String callingLine = null;
 
-        if (Util.DEBUG) {
-            callingMethod = Util.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue");
-            callingLine = Util.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
+        if (DebugUtils.DEBUG) {
+            callingMethod = DebugUtils.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue");
+            callingLine = DebugUtils.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
         }
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
@@ -66,7 +66,7 @@ public strictfp class Pipeline {
                                 }
                             }
                             long hashTime = System.currentTimeMillis() - startTime;
-                            if (Util.DEBUG) {
+                            if (DebugUtils.DEBUG) {
                                 System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
                                         functionTime,
                                         hashTime,
@@ -77,7 +77,7 @@ public strictfp class Pipeline {
                                 );
                             }
                             executingMask.setVisualDebug(visualDebug);
-                            if ((Util.DEBUG && visualDebug) || (Util.VISUALIZE && !executingMask.isMock())) {
+                            if ((DebugUtils.DEBUG && visualDebug) || (DebugUtils.VISUALIZE && !executingMask.isMock())) {
                                 VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
                             }
                         },
@@ -92,14 +92,15 @@ public strictfp class Pipeline {
     public static void start() {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
+            PipelineDebugger.setPipeline(pipeline);
             pipeline.forEach(entry -> System.out.printf("Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
                     entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getExecutingMask().getName(),
                     entry.getLine(),
-                    entry.getMethod()
+                    entry.getMethodName()
             ));
         }
         started.complete(null);
@@ -133,15 +134,15 @@ public strictfp class Pipeline {
     }
 
     public static List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
-        List<Entry> res = new ArrayList<>();
+        List<Entry> dependencies = new ArrayList<>();
 
         for (Mask<?, ?> requiredMask : requiredMasks) {
             pipeline.stream()
                     .filter(entry -> requiredMask.equals(entry.getExecutingMask()))
                     .reduce((first, second) -> second)
-                    .ifPresent(res::add);
+                    .ifPresent(dependencies::add);
         }
-        return res;
+        return dependencies;
     }
 
     /**
@@ -197,13 +198,13 @@ public strictfp class Pipeline {
     }
 
     @Getter
-    private static strictfp class Entry {
+    public static strictfp class Entry {
         private final Mask<?, ?> executingMask;
-        private final Set<Entry> dependencies;
+        private final Set<Entry> dependencies = new HashSet<>();
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
         private final int index;
-        private final String method;
+        private final String methodName;
         private final String line;
         private Mask<?, ?> immutableResult;
         private long resultCount = 0;
@@ -212,8 +213,8 @@ public strictfp class Pipeline {
         public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
-            this.dependencies = new HashSet<>(dependencies);
-            this.method = method;
+            this.dependencies.addAll(dependencies);
+            this.methodName = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
                 resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
@@ -224,6 +225,9 @@ public strictfp class Pipeline {
         }
 
         public synchronized Mask<?, ?> getResult(Mask<?, ?> requestingMask) {
+            if (!future.isDone()) {
+                throw new IllegalStateException("Entry not done computing");
+            }
             if (requestingMask.equals(executingMask)) {
                 return executingMask;
             }

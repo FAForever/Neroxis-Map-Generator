@@ -3,7 +3,7 @@ package com.faforever.neroxis.map.generator;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector3;
 
 public strictfp class ScriptGenerator {
 

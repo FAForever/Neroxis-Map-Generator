@@ -12,9 +12,9 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -82,7 +82,7 @@ public strictfp class MapEvaluator {
         }
 
         if (arguments.containsKey("debug")) {
-            Util.DEBUG = true;
+            DebugUtils.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {
@@ -212,7 +212,7 @@ public strictfp class MapEvaluator {
         } else {
             throw new IllegalArgumentException("Not a supported Mask type");
         }
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             maskCopy.startVisualDebugger(visualName).show();
         }
         return totalError / mask.getSize() / mask.getSize();
@@ -221,7 +221,7 @@ public strictfp class MapEvaluator {
     public void evaluateTerrain() {
         long sTime = System.currentTimeMillis();
         terrainScore = getMaskScore(heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateTerrain\n",
                     System.currentTimeMillis() - sTime);
         }
@@ -231,7 +231,7 @@ public strictfp class MapEvaluator {
         long sTime = System.currentTimeMillis();
         spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
         oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateSpawns\n",
                     System.currentTimeMillis() - sTime);
         }
@@ -240,7 +240,7 @@ public strictfp class MapEvaluator {
     public void evaluateMexes() {
         long sTime = System.currentTimeMillis();
         mexScore = getPositionedObjectScore(map.getMexes(), heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateMexes\n",
                     System.currentTimeMillis() - sTime);
         }
@@ -249,7 +249,7 @@ public strictfp class MapEvaluator {
     public void evaluateHydros() {
         long sTime = System.currentTimeMillis();
         hydroScore = getPositionedObjectScore(map.getHydros(), heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateHydros\n",
                     System.currentTimeMillis() - sTime);
         }
@@ -258,7 +258,7 @@ public strictfp class MapEvaluator {
     public void evaluateProps() {
         long sTime = System.currentTimeMillis();
         propScore = getPositionedObjectScore(map.getProps(), heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateProps\n",
                     System.currentTimeMillis() - sTime);
         }
@@ -268,7 +268,7 @@ public strictfp class MapEvaluator {
         long sTime = System.currentTimeMillis();
         unitScore = getPositionedObjectScore(map.getArmies().stream().flatMap(army -> army.getGroups().stream()
                 .flatMap(group -> group.getUnits().stream())).collect(Collectors.toList()), heightMask);
-        if (Util.DEBUG) {
+        if (DebugUtils.DEBUG) {
             System.out.printf("Done: %4d ms, evaluateUnits\n",
                     System.currentTimeMillis() - sTime);
         }

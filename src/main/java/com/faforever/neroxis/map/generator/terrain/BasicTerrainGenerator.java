@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector3;
 
 public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected BooleanMask spawnLandMask;

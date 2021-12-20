@@ -8,8 +8,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
         if (!mapParameters.isUnexplored()) {
             generateUnitExclusionMasks();
             Pipeline.await(civReclaimMask);
-            Util.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
+            DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
                 Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
                 Group civilianInitial = new Group("INITIAL", new ArrayList<>());
                 civilian.addGroup(civilianInitial);

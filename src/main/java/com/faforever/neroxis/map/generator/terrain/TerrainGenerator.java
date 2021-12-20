@@ -8,9 +8,9 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -44,9 +44,9 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
 
     public void setHeightmapImage() {
         Pipeline.await(heightmap);
-        Util.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> {
-            heightmap.getFinalMask().writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale());
-        });
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () ->
+                heightmap.getFinalMask().writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale())
+        );
     }
 
     @Override

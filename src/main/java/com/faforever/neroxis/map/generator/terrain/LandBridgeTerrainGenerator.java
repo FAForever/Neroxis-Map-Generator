@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector2;
 
 public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
 

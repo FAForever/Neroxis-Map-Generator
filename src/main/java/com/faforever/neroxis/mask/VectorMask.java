@@ -2,8 +2,8 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Vector;
-import com.faforever.neroxis.util.Vector2;
+import com.faforever.neroxis.util.vector.Vector;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

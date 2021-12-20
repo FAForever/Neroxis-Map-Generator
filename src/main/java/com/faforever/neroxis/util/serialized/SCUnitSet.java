@@ -1,8 +1,8 @@
 package com.faforever.neroxis.util.serialized;
 
 import com.dslplatform.json.CompiledJson;
-import com.faforever.neroxis.util.Vector3;
-import com.faforever.neroxis.util.Vector4;
+import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.vector.Vector4;
 import lombok.Data;
 import lombok.Value;
 

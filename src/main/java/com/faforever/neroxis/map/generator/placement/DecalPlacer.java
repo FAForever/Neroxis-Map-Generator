@@ -4,8 +4,8 @@ import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;

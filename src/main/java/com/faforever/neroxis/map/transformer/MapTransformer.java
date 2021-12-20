@@ -18,9 +18,9 @@ import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.Util;
-import com.faforever.neroxis.util.Vector2;
-import com.faforever.neroxis.util.Vector3;
+import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -111,7 +111,7 @@ public strictfp class MapTransformer {
         }
 
         if (arguments.containsKey("debug")) {
-            Util.DEBUG = true;
+            DebugUtils.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {

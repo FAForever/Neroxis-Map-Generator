@@ -1,10 +1,14 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.jsquish.Squish;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
+import com.faforever.neroxis.util.dds.DDSHeader;
+import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serialized.LightingSettings;
+import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static com.faforever.neroxis.jsquish.Squish.compressImage;
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public strictfp class ImageUtils {
 

@@ -23,16 +23,16 @@
 
    -------------------------------------------------------------------------- */
 
-package com.faforever.neroxis.jsquish;
+package com.faforever.neroxis.util.jsquish;
 
-import com.faforever.neroxis.jsquish.Squish.CompressionType;
+import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
-import static com.faforever.neroxis.jsquish.ColourBlock.writeColourBlock3;
-import static com.faforever.neroxis.jsquish.ColourBlock.writeColourBlock4;
-import static com.faforever.neroxis.jsquish.SingleColourLookup3.LOOKUP_5_3;
-import static com.faforever.neroxis.jsquish.SingleColourLookup3.LOOKUP_6_3;
-import static com.faforever.neroxis.jsquish.SingleColourLookup4.LOOKUP_5_4;
-import static com.faforever.neroxis.jsquish.SingleColourLookup4.LOOKUP_6_4;
+import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock3;
+import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock4;
+import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_5_3;
+import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_6_3;
+import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_5_4;
+import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_6_4;
 import static java.lang.Math.round;
 
 final strictfp class CompressorSingleColour extends CompressorColourFit {

@@ -1,8 +1,8 @@
 package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.util.DebugUtils;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.Util;
 
 public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGenerator {
 
@@ -23,7 +23,7 @@ public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGene
     @Override
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
-        Util.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
