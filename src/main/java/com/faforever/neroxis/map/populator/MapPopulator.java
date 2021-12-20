@@ -195,7 +195,7 @@ public strictfp class MapPopulator {
 
     public void exportMap() {
         long startTime = System.currentTimeMillis();
-        MapExporter.exportMap(outFolderPath, map, true, erosionNormal, false);
+        MapExporter.exportMap(outFolderPath, map, true, erosionNormal);
         System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
     }
 

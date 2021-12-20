@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 public strictfp class MapExporter {
 
-    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportDecals, boolean blackPlaneProtection) {
+    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportDecals) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
@@ -18,10 +18,6 @@ public strictfp class MapExporter {
             Vector2 boundOffset = new Vector2(compatibleMapSize / 2f, compatibleMapSize / 2f);
 
             map.changeMapSize(mapSize, compatibleMapSize, boundOffset);
-
-            if (blackPlaneProtection) {
-                map.getHeightmap().getRaster().setPixel(0, 0, new int[]{0});
-            }
 
             if (exportDecals) {
                 if (map.getCompressedNormal() != null) {
