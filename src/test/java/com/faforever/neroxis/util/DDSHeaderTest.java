@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util;
 
 
+import com.faforever.neroxis.util.dds.DDSHeader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
