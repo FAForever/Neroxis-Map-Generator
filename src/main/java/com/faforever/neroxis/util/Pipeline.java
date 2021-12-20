@@ -93,7 +93,6 @@ public strictfp class Pipeline {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
         if (DebugUtils.DEBUG) {
-            PipelineDebugger.setPipeline(pipeline);
             pipeline.forEach(entry -> System.out.printf("Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
                     entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
