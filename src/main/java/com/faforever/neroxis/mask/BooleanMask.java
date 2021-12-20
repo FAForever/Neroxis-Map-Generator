@@ -12,8 +12,14 @@ import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -369,11 +375,36 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             Vector2 location = new Vector2(start);
             BooleanMask brush = loadBrush(brushName, null)
                     .setSize(size).convertToBooleanMask(minValue, maxValue);
+            float targetX = target.getX();
+            float targetY = target.getY();
+            if (wrapEdges) {
+                int maskSize = getSize();
+                int halfSize = maskSize / 2;
+                float startX = start.getX();
+                float startY = start.getY();
+                float distanceToMidX = targetX - startX;
+                float distanceToMidY = targetY - startY;
+                if (StrictMath.abs(distanceToMidX) > halfSize) {
+                    if (distanceToMidX > 0) {
+                        targetX -= maskSize;
+                    } else {
+                        targetX += maskSize;
+                    }
+                }
+                if (StrictMath.abs(distanceToMidY) > halfSize) {
+                    if (distanceToMidY > 0) {
+                        targetY -= maskSize;
+                    } else {
+                        targetY += maskSize;
+                    }
+                }
+            }
+
             for (int i = 0; i < numberOfUses; i++) {
                 addWithOffset(brush, location, true, wrapEdges);
-                int dx = (target.getX() > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
-                int dy = (target.getY() > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
-                location.add(dx, dy);
+                int dx = (targetX > location.getX() ? 1 : -1) * random.nextInt(maxStepSize + 1);
+                int dy = (targetY > location.getY() ? 1 : -1) * random.nextInt(maxStepSize + 1);
+                location.add(new Vector2(dx, dy));
             }
         });
         return this;
