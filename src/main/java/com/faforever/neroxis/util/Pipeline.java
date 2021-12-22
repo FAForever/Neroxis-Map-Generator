@@ -1,6 +1,8 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.ui.PipelineDebugger;
+import com.faforever.neroxis.ui.VisualDebugger;
 import lombok.Getter;
 
 import java.io.File;
@@ -43,7 +45,7 @@ public strictfp class Pipeline {
         String callingLine = null;
 
         if (DebugUtils.DEBUG) {
-            callingMethod = DebugUtils.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue");
+            callingMethod = DebugUtils.getStackTraceTopMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtils.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
         }
 
@@ -77,7 +79,7 @@ public strictfp class Pipeline {
                                 );
                             }
                             executingMask.setVisualDebug(visualDebug);
-                            if ((DebugUtils.DEBUG && visualDebug) || (DebugUtils.VISUALIZE && !executingMask.isMock())) {
+                            if ((DebugUtils.DEBUG && visualDebug)) {
                                 VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
                             }
                         },
@@ -92,6 +94,11 @@ public strictfp class Pipeline {
     public static void start() {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
+        if (DebugUtils.VISUALIZE) {
+            PipelineDebugger.setPipeline(pipeline);
+            PipelineDebugger.createGui();
+        }
+
         if (DebugUtils.DEBUG) {
             pipeline.forEach(entry -> System.out.printf("Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
@@ -206,7 +213,6 @@ public strictfp class Pipeline {
         private final String methodName;
         private final String line;
         private Mask<?, ?> immutableResult;
-        private long resultCount = 0;
 
 
         public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
@@ -215,12 +221,7 @@ public strictfp class Pipeline {
             this.dependencies.addAll(dependencies);
             this.methodName = method;
             this.line = line;
-            this.future = future.thenRunAsync(() -> {
-                resultCount = dependants.stream().filter(dep -> !executingMask.equals(dep.getExecutingMask())).count();
-                if (resultCount > 0) {
-                    immutableResult = executingMask.mock();
-                }
-            });
+            this.future = future.thenRunAsync(() -> immutableResult = executingMask.mock());
         }
 
         public synchronized Mask<?, ?> getResult(Mask<?, ?> requestingMask) {
@@ -230,14 +231,7 @@ public strictfp class Pipeline {
             if (requestingMask.equals(executingMask)) {
                 return executingMask;
             }
-            --resultCount;
-            Mask<?, ?> result = immutableResult;
-            if (resultCount == 0) {
-                immutableResult = null;
-            } else if (resultCount < 0) {
-                throw new IllegalStateException("More results asked for than dependants");
-            }
-            return result;
+            return immutableResult;
         }
 
         public String toString() {
