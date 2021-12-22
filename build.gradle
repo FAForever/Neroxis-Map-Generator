@@ -100,6 +100,7 @@ shadowJar {
                 "Implementation-Version": generatorVersion,
                 "Impletementation-Title": "Neroxis Map Generator"
     }
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task populatorJar(type: ShadowJar) {
@@ -111,6 +112,7 @@ task populatorJar(type: ShadowJar) {
     }
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task evaluatorJar(type: ShadowJar) {
@@ -122,6 +124,7 @@ task evaluatorJar(type: ShadowJar) {
     }
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task transformerJar(type: ShadowJar) {
@@ -133,6 +136,7 @@ task transformerJar(type: ShadowJar) {
     }
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task detectorJar(type: ShadowJar) {
@@ -144,6 +148,7 @@ task detectorJar(type: ShadowJar) {
     }
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task reshaderJar(type: ShadowJar) {
@@ -155,4 +160,5 @@ task reshaderJar(type: ShadowJar) {
     }
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
