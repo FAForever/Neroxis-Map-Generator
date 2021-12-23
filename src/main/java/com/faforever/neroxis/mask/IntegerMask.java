@@ -57,7 +57,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         enqueue(() -> apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size))));
     }
 
-    protected int transformAverage(float value) {
+    private int transformAverage(float value) {
         return StrictMath.round(value);
     }
 

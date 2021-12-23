@@ -449,7 +449,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
-            forceSymmetry(SymmetryType.SPAWN);
+            applySymmetry(SymmetryType.SPAWN);
         });
     }
 
@@ -495,7 +495,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }
     }
 
-    protected float transformAverage(float value) {
+    private float transformAverage(float value) {
         return value / 1000f;
     }
 

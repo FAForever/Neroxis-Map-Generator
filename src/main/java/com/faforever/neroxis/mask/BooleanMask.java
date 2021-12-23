@@ -867,7 +867,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return innerCount;
     }
 
-    protected boolean transformAverage(float value, float threshold) {
+    private boolean transformAverage(float value, float threshold) {
         return value >= threshold;
     }
 
