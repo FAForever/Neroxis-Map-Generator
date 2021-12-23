@@ -1,4 +1,4 @@
-package com.faforever.neroxis.map;
+package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.util.DebugUtils;
 

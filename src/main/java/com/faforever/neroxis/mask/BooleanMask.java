@@ -104,6 +104,26 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
+    protected void addValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value | getPrimitive(x, y));
+    }
+
+    @Override
+    protected void subtractValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, !value & getPrimitive(x, y));
+    }
+
+    @Override
+    protected void multiplyValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value & getPrimitive(x, y));
+    }
+
+    @Override
+    protected void divideValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value ^ getPrimitive(x, y));
+    }
+
+    @Override
     public BooleanMask add(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -112,11 +132,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask[i] |= source.mask[i];
             }
         }, other);
-    }
-
-    @Override
-    protected void addValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, value | getPrimitive(x, y));
     }
 
     @Override
@@ -131,11 +146,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    protected void subtractValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, !value & getPrimitive(x, y));
-    }
-
-    @Override
     public BooleanMask multiply(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -144,11 +154,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask[i] &= source.mask[i];
             }
         }, other);
-    }
-
-    @Override
-    protected void multiplyValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, value & getPrimitive(x, y));
     }
 
     @Override
@@ -162,9 +167,32 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
+
     @Override
-    protected void divideValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, value ^ getPrimitive(x, y));
+    public BooleanMask blur(int radius) {
+        return blur(radius, .5f);
+    }
+
+    @Override
+    public BooleanMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            int[][] innerCount = getInnerCount();
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount), .5f));
+                }
+            });
+        }, other);
+    }
+
+    public BooleanMask blur(int radius, float density) {
+        enqueue(() -> {
+            int[][] innerCount = getInnerCount();
+            apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount), density)));
+        });
+        return this;
     }
 
     @Override
@@ -677,14 +705,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
-    public BooleanMask blur(int radius, float density) {
-        enqueue(() -> {
-            int[][] innerCount = getInnerCount();
-            apply(point -> setPrimitive(point, calculateAreaAverage(radius, point, innerCount) >= density));
-        });
-        return this;
-    }
-
     private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask addWithOffset(T other, U minValue, U maxValue, Vector2 location, boolean wrapEdges) {
         addWithOffset(other.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
         return this;
@@ -847,9 +867,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return innerCount;
     }
 
-    @Override
-    protected Boolean transformAverage(float value) {
-        return value > .5f;
+    private boolean transformAverage(float value, float threshold) {
+        return value >= threshold;
     }
 
     public FloatMask getDistanceField() {
