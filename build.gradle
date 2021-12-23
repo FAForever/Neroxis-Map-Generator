@@ -85,7 +85,7 @@ dependencies {
     implementation('com.dslplatform:dsl-json-java8:1.9.8')
     implementation('org.jgrapht:jgrapht-core:1.5.1')
     implementation('com.github.tomnelson:jungrapht-visualization:1.3')
-    compileOnly('org.projectlombok:lombok:1.18.14')
+    compileOnly('org.projectlombok:lombok:1.18.22')
     annotationProcessor('org.projectlombok:lombok:1.18.14')
     annotationProcessor('com.dslplatform:dsl-json-java8:1.9.8')
 
