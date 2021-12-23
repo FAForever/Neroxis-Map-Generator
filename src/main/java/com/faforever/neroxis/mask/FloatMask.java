@@ -239,6 +239,64 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         mask[x][y] /= value;
     }
 
+    @Override
+    public FloatMask add(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] += source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public FloatMask subtract(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] -= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public FloatMask multiply(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] *= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public FloatMask divide(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] /= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public FloatMask blur(int radius) {
+        return enqueue(() -> {
+            int[][] innerCount = getInnerCount();
+            apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+        });
+    }
+
+    @Override
+    public FloatMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            int[][] innerCount = getInnerCount();
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
+                }
+            });
+        }, other);
+    }
+
     protected Vector3 getNormalAt(Point point, float scale) {
         return getNormalAt(point.x, point.y, scale);
     }
@@ -391,7 +449,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
-            applySymmetry(SymmetryType.SPAWN);
+            forceSymmetry(SymmetryType.SPAWN);
         });
     }
 
@@ -435,10 +493,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             x += xVelocity;
             y += yVelocity;
         }
-//        addValueAt((int) xPrev, (int) yPrev, sediment);
     }
 
-    public Float transformAverage(float value) {
+    protected float transformAverage(float value) {
         return value / 1000f;
     }
 

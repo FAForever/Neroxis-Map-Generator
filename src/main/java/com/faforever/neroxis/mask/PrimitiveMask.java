@@ -17,24 +17,6 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
 
     protected abstract int[][] getInnerCount();
 
-    protected abstract T transformAverage(float value);
-
-    public U blur(int radius) {
-        return enqueue(() -> {
-            int[][] innerCount = getInnerCount();
-            set(point -> transformAverage(calculateAreaAverage(radius, point, innerCount)));
-        });
-    }
-
-    public U blur(int radius, BooleanMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            int[][] innerCount = getInnerCount();
-            set(point -> limiter.get(point) ? transformAverage(calculateAreaAverage(radius, point, innerCount)) : get(point));
-        }, other);
-    }
-
     protected void calculateInnerValue(int[][] innerCount, Point point, int val) {
         calculateInnerValue(innerCount, point.x, point.y, val);
     }
@@ -43,11 +25,11 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         calculateScalarInnerValue(innerCount, x, y, val);
     }
 
-    protected float calculateAreaAverage(int radius, Point point, int[][] innerCount) {
-        return calculateAreaAverage(radius, point.x, point.y, innerCount);
+    protected float calculateAreaAverageAsInts(int radius, Point point, int[][] innerCount) {
+        return calculateAreaAverageAsInts(radius, point.x, point.y, innerCount);
     }
 
-    protected float calculateAreaAverage(int radius, int x, int y, int[][] innerCount) {
+    protected float calculateAreaAverageAsInts(int radius, int x, int y, int[][] innerCount) {
         int size = getSize();
         int xLeft = StrictMath.max(0, x - radius);
         int xRight = StrictMath.min(size - 1, x + radius);

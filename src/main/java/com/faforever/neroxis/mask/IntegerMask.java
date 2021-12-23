@@ -57,8 +57,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         enqueue(() -> apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size))));
     }
 
-    @Override
-    protected Integer transformAverage(float value) {
+    protected int transformAverage(float value) {
         return StrictMath.round(value);
     }
 
@@ -184,6 +183,64 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     protected void divideValueAt(int x, int y, Integer value) {
         mask[x][y] /= value;
+    }
+
+    @Override
+    public IntegerMask add(IntegerMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            IntegerMask source = (IntegerMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] += source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public IntegerMask subtract(IntegerMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            IntegerMask source = (IntegerMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] -= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public IntegerMask multiply(IntegerMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            IntegerMask source = (IntegerMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] *= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public IntegerMask divide(IntegerMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            IntegerMask source = (IntegerMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] /= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    public IntegerMask blur(int radius) {
+        return enqueue(() -> {
+            int[][] innerCount = getInnerCount();
+            apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+        });
+    }
+
+    @Override
+    public IntegerMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            int[][] innerCount = getInnerCount();
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
+                }
+            });
+        }, other);
     }
 
     @Override
