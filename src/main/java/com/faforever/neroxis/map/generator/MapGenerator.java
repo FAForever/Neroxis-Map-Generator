@@ -634,13 +634,13 @@ public strictfp class MapGenerator {
         StringBuilder descriptionBuilder = new StringBuilder();
         if (!tournamentStyle) {
             descriptionBuilder.append("Seed: ").append(seed).append("\n");
-            descriptionBuilder.append(mapStyle.mapParameters.toString());
+            descriptionBuilder.append(mapStyle.mapParameters.toString()).append("\n");
             descriptionBuilder.append("Style: ").append(mapStyle.getName()).append("\n");
-            descriptionBuilder.append(mapStyle.generatorsToString());
+            descriptionBuilder.append(mapStyle.generatorsToString()).append("\n");
         }
 
         if (tournamentStyle) {
-            descriptionBuilder.append(String.format("Map originally generated at %s UTC.",
+            descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
                     DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
                             .format(Instant.ofEpochSecond(generationTime).atZone(ZoneOffset.UTC))));
         }
@@ -653,7 +653,7 @@ public strictfp class MapGenerator {
             map.setCartographicMapLandEndColor(1);
             descriptionBuilder.append("Use with the Unexplored Maps Mod for best experience");
         }
-        map.setDescription(descriptionBuilder.toString().replace("\n", "; "));
+        map.setDescription(descriptionBuilder.toString().replace("\n", "\\r\\n"));
 
         ScriptGenerator.generateScript(map);
 
