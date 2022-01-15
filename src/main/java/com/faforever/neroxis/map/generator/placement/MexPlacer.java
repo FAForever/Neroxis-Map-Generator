@@ -50,7 +50,12 @@ public strictfp class MexPlacer {
         for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
             BooleanMask playerSpawnMask = new BooleanMask(spawnMask.getSize(), 0L, spawnMask.getSymmetrySettings());
-            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 2f, true).multiply(spawnMask).fillEdge(map.getSize() / 16, false);
+            playerSpawnMask.fillCircle(spawn.getPosition(), map.getSize() / 4f, true).multiply(spawnMask).fillEdge(map.getSize() / 16, false);
+            map.getSpawns().forEach(otherSpawn -> {
+                if (otherSpawn.getTeamID() == spawn.getTeamID() && !spawn.equals(otherSpawn)) {
+                    playerSpawnMask.fillCircle(otherSpawn.getPosition(), map.getSize() / 8f, false);
+                }
+            });
             if (mexCount < 6) {
                 placeIndividualMexes(playerSpawnMask, numPlayerMexes, mexSpacing * 2);
             } else {

@@ -823,7 +823,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             boolean visibleState = visible;
             visible = false;
             function.accept(dependencies);
-            visible = visibleState && !Pipeline.isRunning();
+            visible = visibleState;
             if (((DebugUtils.DEBUG && isVisualDebug()) || (DebugUtils.VISUALIZE && !isMock())) && visible) {
                 String callingMethod = DebugUtils.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
                 String callingLine = DebugUtils.getStackTraceLineInPackage("com.faforever.neroxis.map");
@@ -888,13 +888,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U startVisualDebugger(String maskName) {
         visualName = maskName;
-        visualDebug = true;
+        visualDebug = DebugUtils.DEBUG;
+        visible = true;
         show();
         return (U) this;
     }
 
     public U show() {
-        if (!parallel) {
+        if (!parallel && (((DebugUtils.DEBUG && isVisualDebug()) || (DebugUtils.VISUALIZE && !isMock())) && visible)) {
             VisualDebugger.visualizeMask(this, "show");
         }
         return (U) this;

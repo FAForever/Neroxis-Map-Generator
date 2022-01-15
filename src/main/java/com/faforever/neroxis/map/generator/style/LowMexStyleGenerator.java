@@ -28,6 +28,7 @@ public strictfp class LowMexStyleGenerator extends StyleGenerator {
                 .spawnCount(0, 4)
                 .numTeams(2, 2)
                 .build();
+        weight = .5f;
     }
 
     @Override
