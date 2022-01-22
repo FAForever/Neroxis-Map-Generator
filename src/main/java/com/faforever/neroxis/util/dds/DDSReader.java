@@ -94,27 +94,9 @@ public final strictfp class DDSReader {
         if (mipmapLevel > 0 && mipmapLevel < mipmap) {
             for (int i = 0; i < mipmapLevel; i++) {
                 switch (type) {
-                    case DXT1:
-                        offset += 8 * ((width + 3) / 4) * ((height + 3) / 4);
-                        break;
-                    case DXT2:
-                    case DXT3:
-                    case DXT4:
-                    case DXT5:
-                        offset += 16 * ((width + 3) / 4) * ((height + 3) / 4);
-                        break;
-                    case A1R5G5B5:
-                    case X1R5G5B5:
-                    case A4R4G4B4:
-                    case X4R4G4B4:
-                    case R5G6B5:
-                    case R8G8B8:
-                    case A8B8G8R8:
-                    case X8B8G8R8:
-                    case A8R8G8B8:
-                    case X8R8G8B8:
-                        offset += (type & 0xFF) * width * height;
-                        break;
+                    case DXT1 -> offset += 8 * ((width + 3) / 4) * ((height + 3) / 4);
+                    case DXT2, DXT3, DXT4, DXT5 -> offset += 16 * ((width + 3) / 4) * ((height + 3) / 4);
+                    case A1R5G5B5, X1R5G5B5, A4R4G4B4, X4R4G4B4, R5G6B5, R8G8B8, A8B8G8R8, X8B8G8R8, A8R8G8B8, X8R8G8B8 -> offset += (type & 0xFF) * width * height;
                 }
                 width /= 2;
                 height /= 2;
@@ -123,40 +105,24 @@ public final strictfp class DDSReader {
             if (height <= 0) height = 1;
         }
 
-        switch (type) {
-            case DXT1:
-                return decodeDXT1(width, height, offset, buffer, order);
-            case DXT2:
-                return decodeDXT2(width, height, offset, buffer, order);
-            case DXT3:
-                return decodeDXT3(width, height, offset, buffer, order);
-            case DXT4:
-                return decodeDXT4(width, height, offset, buffer, order);
-            case DXT5:
-                return decodeDXT5(width, height, offset, buffer, order);
-            case A1R5G5B5:
-                return readA1R5G5B5(width, height, offset, buffer, order);
-            case X1R5G5B5:
-                return readX1R5G5B5(width, height, offset, buffer, order);
-            case A4R4G4B4:
-                return readA4R4G4B4(width, height, offset, buffer, order);
-            case X4R4G4B4:
-                return readX4R4G4B4(width, height, offset, buffer, order);
-            case R5G6B5:
-                return readR5G6B5(width, height, offset, buffer, order);
-            case R8G8B8:
-                return readR8G8B8(width, height, offset, buffer, order);
-            case A8B8G8R8:
-                return readA8B8G8R8(width, height, offset, buffer, order);
-            case X8B8G8R8:
-                return readX8B8G8R8(width, height, offset, buffer, order);
-            case A8R8G8B8:
-                return readA8R8G8B8(width, height, offset, buffer, order);
-            case X8R8G8B8:
-                return readX8R8G8B8(width, height, offset, buffer, order);
-            default:
-                return null;
-        }
+        return switch (type) {
+            case DXT1 -> decodeDXT1(width, height, offset, buffer, order);
+            case DXT2 -> decodeDXT2(width, height, offset, buffer, order);
+            case DXT3 -> decodeDXT3(width, height, offset, buffer, order);
+            case DXT4 -> decodeDXT4(width, height, offset, buffer, order);
+            case DXT5 -> decodeDXT5(width, height, offset, buffer, order);
+            case A1R5G5B5 -> readA1R5G5B5(width, height, offset, buffer, order);
+            case X1R5G5B5 -> readX1R5G5B5(width, height, offset, buffer, order);
+            case A4R4G4B4 -> readA4R4G4B4(width, height, offset, buffer, order);
+            case X4R4G4B4 -> readX4R4G4B4(width, height, offset, buffer, order);
+            case R5G6B5 -> readR5G6B5(width, height, offset, buffer, order);
+            case R8G8B8 -> readR8G8B8(width, height, offset, buffer, order);
+            case A8B8G8R8 -> readA8B8G8R8(width, height, offset, buffer, order);
+            case X8B8G8R8 -> readX8B8G8R8(width, height, offset, buffer, order);
+            case A8R8G8B8 -> readA8R8G8B8(width, height, offset, buffer, order);
+            case X8R8G8B8 -> readX8R8G8B8(width, height, offset, buffer, order);
+            default -> null;
+        };
     }
 
     private static int getType(byte[] buffer) {
@@ -502,18 +468,13 @@ public final strictfp class DDSReader {
     }
 
     private static int getDXTColor(int c0, int c1, int a, int t, Order order) {
-        switch (t) {
-            case 0:
-                return getDXTColor1(c0, a, order);
-            case 1:
-                return getDXTColor1(c1, a, order);
-            case 2:
-                return (c0 > c1) ? getDXTColor2_1(c0, c1, a, order) : getDXTColor1_1(c0, c1, a, order);
-            case 3:
-                return (c0 > c1) ? getDXTColor2_1(c1, c0, a, order) : 0;
-            default:
-                return 0;
-        }
+        return switch (t) {
+            case 0 -> getDXTColor1(c0, a, order);
+            case 1 -> getDXTColor1(c1, a, order);
+            case 2 -> (c0 > c1) ? getDXTColor2_1(c0, c1, a, order) : getDXTColor1_1(c0, c1, a, order);
+            case 3 -> (c0 > c1) ? getDXTColor2_1(c1, c0, a, order) : 0;
+            default -> 0;
+        };
     }
 
     private static int getDXTColor2_1(int c0, int c1, int a, Order order) {
@@ -540,46 +501,28 @@ public final strictfp class DDSReader {
     }
 
     private static int getDXT5Alpha(int a0, int a1, int t) {
-        if (a0 > a1) switch (t) {
-            case 0:
-                return a0;
-            case 1:
-                return a1;
-            case 2:
-                return (6 * a0 + a1) / 7;
-            case 3:
-                return (5 * a0 + 2 * a1) / 7;
-            case 4:
-                return (4 * a0 + 3 * a1) / 7;
-            case 5:
-                return (3 * a0 + 4 * a1) / 7;
-            case 6:
-                return (2 * a0 + 5 * a1) / 7;
-            case 7:
-                return (a0 + 6 * a1) / 7;
-            default:
-                return 0;
-        }
-        else switch (t) {
-            case 0:
-                return a0;
-            case 1:
-                return a1;
-            case 2:
-                return (4 * a0 + a1) / 5;
-            case 3:
-                return (3 * a0 + 2 * a1) / 5;
-            case 4:
-                return (2 * a0 + 3 * a1) / 5;
-            case 5:
-                return (a0 + 4 * a1) / 5;
-            case 6:
-                return 0;
-            case 7:
-                return 255;
-            default:
-                return 0;
-        }
+        if (a0 > a1) return switch (t) {
+            case 0 -> a0;
+            case 1 -> a1;
+            case 2 -> (6 * a0 + a1) / 7;
+            case 3 -> (5 * a0 + 2 * a1) / 7;
+            case 4 -> (4 * a0 + 3 * a1) / 7;
+            case 5 -> (3 * a0 + 4 * a1) / 7;
+            case 6 -> (2 * a0 + 5 * a1) / 7;
+            case 7 -> (a0 + 6 * a1) / 7;
+            default -> 0;
+        };
+        else return switch (t) {
+            case 0 -> a0;
+            case 1 -> a1;
+            case 2 -> (4 * a0 + a1) / 5;
+            case 3 -> (3 * a0 + 2 * a1) / 5;
+            case 4 -> (2 * a0 + 3 * a1) / 5;
+            case 5 -> (a0 + 4 * a1) / 5;
+            case 6 -> 0;
+            case 7 -> 255;
+            default -> 0;
+        };
     }
 
     private static final class Order {

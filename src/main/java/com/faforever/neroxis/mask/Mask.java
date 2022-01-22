@@ -264,20 +264,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         List<Vector2> symmetryPoints = new ArrayList<>(numSymPoints - 1);
         int size = getSize();
         switch (symmetry) {
-            case POINT2:
-                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                break;
-            case POINT4:
+            case POINT2 -> symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
+            case POINT4 -> {
                 symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 symmetryPoints.add(new Vector2(y, size - x - 1));
                 symmetryPoints.add(new Vector2(size - y - 1, x));
-                break;
-            case POINT6:
-            case POINT8:
-            case POINT10:
-            case POINT12:
-            case POINT14:
-            case POINT16:
+            }
+            case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
                 symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 for (int i = 1; i < numSymPoints / 2; i++) {
                     float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
@@ -286,32 +279,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
                     symmetryPoints.add(antiRotated);
                 }
-                break;
-            case POINT3:
-            case POINT5:
-            case POINT7:
-            case POINT9:
-            case POINT11:
-            case POINT13:
-            case POINT15:
+            }
+            case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
                 for (int i = 1; i < numSymPoints; i++) {
                     Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
                     symmetryPoints.add(rotated);
                 }
-                break;
-            case X:
-                symmetryPoints.add(new Vector2(size - x - 1, y));
-                break;
-            case Z:
-                symmetryPoints.add(new Vector2(x, size - y - 1));
-                break;
-            case XZ:
-                symmetryPoints.add(new Vector2(y, x));
-                break;
-            case ZX:
-                symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-                break;
-            case QUAD:
+            }
+            case X -> symmetryPoints.add(new Vector2(size - x - 1, y));
+            case Z -> symmetryPoints.add(new Vector2(x, size - y - 1));
+            case XZ -> symmetryPoints.add(new Vector2(y, x));
+            case ZX -> symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
+            case QUAD -> {
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
                     symmetryPoints.add(new Vector2(x, size - y - 1));
                     symmetryPoints.add(new Vector2(size - x - 1, y));
@@ -321,8 +300,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     symmetryPoints.add(new Vector2(x, size - y - 1));
                     symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 }
-                break;
-            case DIAG:
+            }
+            case DIAG -> {
                 if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
                     symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
                     symmetryPoints.add(new Vector2(y, x));
@@ -332,7 +311,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
                     symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
                 }
-                break;
+            }
         }
         return symmetryPoints;
     }
@@ -349,39 +328,20 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         Symmetry teamSymmetry = symmetrySettings.getTeamSymmetry();
         switch (symmetry) {
-            case POINT2:
-            case Z:
-            case X:
-                symmetryRotation.add(rot + (float) StrictMath.PI);
-                break;
-            case POINT4:
+            case POINT2, X, Z -> symmetryRotation.add(rot + (float) StrictMath.PI);
+            case POINT4 -> {
                 symmetryRotation.add(rot + (float) StrictMath.PI);
                 symmetryRotation.add(rot + (float) StrictMath.PI / 2);
                 symmetryRotation.add(rot - (float) StrictMath.PI / 2);
-                break;
-            case POINT3:
-            case POINT5:
-            case POINT6:
-            case POINT7:
-            case POINT8:
-            case POINT9:
-            case POINT10:
-            case POINT11:
-            case POINT12:
-            case POINT13:
-            case POINT14:
-            case POINT15:
-            case POINT16:
+            }
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
                 int numSymPoints = symmetry.getNumSymPoints();
                 for (int i = 1; i < numSymPoints; i++) {
                     symmetryRotation.add(rot + (float) (2 * StrictMath.PI * i / numSymPoints));
                 }
-                break;
-            case XZ:
-            case ZX:
-                symmetryRotation.add(diagRotation);
-                break;
-            case QUAD:
+            }
+            case XZ, ZX -> symmetryRotation.add(diagRotation);
+            case QUAD -> {
                 if (teamSymmetry == Symmetry.Z) {
                     symmetryRotation.add(zRotation);
                     symmetryRotation.add(xRotation);
@@ -391,8 +351,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     symmetryRotation.add(zRotation);
                     symmetryRotation.add(rot + (float) StrictMath.PI);
                 }
-                break;
-            case DIAG:
+            }
+            case DIAG -> {
                 if (teamSymmetry == Symmetry.ZX) {
                     symmetryRotation.add(diagRotation);
                     symmetryRotation.add(diagRotation);
@@ -402,7 +362,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     symmetryRotation.add(diagRotation);
                     symmetryRotation.add(rot + (float) StrictMath.PI);
                 }
-                break;
+            }
         }
         return symmetryRotation;
     }
@@ -425,29 +385,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected int getMinYBound(int x, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        switch (symmetry) {
-            case POINT2:
-            case POINT3:
-            case POINT4:
-            case POINT5:
-            case POINT6:
-            case POINT7:
-            case POINT8:
-            case POINT9:
-            case POINT10:
-            case POINT11:
-            case POINT12:
-            case POINT13:
-            case POINT14:
-            case POINT15:
-            case POINT16:
-                return getMinYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
-            case DIAG:
-            case XZ:
-                return x;
-            default:
-                return 0;
-        }
+        return switch (symmetry) {
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> getMinYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
+            case DIAG, XZ -> x;
+            default -> 0;
+        };
     }
 
     public U resample(int newSize) {
@@ -471,32 +413,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected int getMaxYBound(int x, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
-        switch (symmetry) {
-            case POINT3:
-            case POINT5:
-            case POINT6:
-            case POINT7:
-            case POINT8:
-            case POINT9:
-            case POINT10:
-            case POINT11:
-            case POINT12:
-            case POINT13:
-            case POINT14:
-            case POINT15:
-            case POINT16:
-                return getMaxYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
-            case ZX:
-            case DIAG:
-                return size - x;
-            case Z:
-            case POINT2:
-            case POINT4:
-            case QUAD:
-                return size / 2 + 1;
-            default:
-                return size;
-        }
+        return switch (symmetry) {
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> getMaxYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
+            case ZX, DIAG -> size - x;
+            case Z, POINT2, POINT4, QUAD -> size / 2 + 1;
+            default -> size;
+        };
     }
 
     private int getMaxXFromAngle(float angle) {
@@ -594,29 +516,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     protected int getMaxXBound(SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
-        switch (symmetry) {
-            case POINT3:
-            case POINT5:
-            case POINT6:
-            case POINT7:
-            case POINT8:
-            case POINT9:
-            case POINT10:
-            case POINT11:
-            case POINT12:
-            case POINT13:
-            case POINT14:
-            case POINT15:
-            case POINT16:
-                return StrictMath.max(getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
-            case POINT4:
-            case X:
-            case QUAD:
-            case DIAG:
-                return size / 2;
-            default:
-                return size;
-        }
+        return switch (symmetry) {
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> StrictMath.max(getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
+            case POINT4, X, QUAD, DIAG -> size / 2;
+            default -> size;
+        };
     }
 
     public U applySymmetry(SymmetryType symmetryType) {
@@ -909,18 +813,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return enqueue(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
-                case Z:
-                    fillRect(0, 0, extent / 2, size, value).fillRect(size - extent / 2, 0, size - extent / 2, size, value);
-                    break;
-                case X:
-                    fillRect(0, 0, size, extent / 2, value).fillRect(0, size - extent / 2, size, extent / 2, value);
-                    break;
-                case XZ:
-                    fillParallelogram(0, 0, size, extent * 3 / 4, 0, -1, value).fillParallelogram(size - extent * 3 / 4, size, size, extent * 3 / 4, 0, -1, value);
-                    break;
-                case ZX:
-                    fillParallelogram(size - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, size - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
-                    break;
+                case Z -> fillRect(0, 0, extent / 2, size, value).fillRect(size - extent / 2, 0, size - extent / 2, size, value);
+                case X -> fillRect(0, 0, size, extent / 2, value).fillRect(0, size - extent / 2, size, extent / 2, value);
+                case XZ -> fillParallelogram(0, 0, size, extent * 3 / 4, 0, -1, value).fillParallelogram(size - extent * 3 / 4, size, size, extent * 3 / 4, 0, -1, value);
+                case ZX -> fillParallelogram(size - extent * 3 / 4, 0, extent * 3 / 4, extent * 3 / 4, 1, 0, value).fillParallelogram(-extent * 3 / 4, size - extent * 3 / 4, extent * 3 / 4, extent * 3 / 4, 1, 0, value);
             }
             applySymmetry(symmetryType);
         });
@@ -934,36 +830,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return enqueue(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
-                case POINT2:
-                case POINT3:
-                case POINT4:
-                case POINT5:
-                case POINT6:
-                case POINT7:
-                case POINT8:
-                case POINT9:
-                case POINT10:
-                case POINT11:
-                case POINT12:
-                case POINT13:
-                case POINT14:
-                case POINT15:
-                case POINT16:
-                    fillCircle((float) size / 2, (float) size / 2, extent * 3 / 4f, value);
-                    break;
-                case Z:
-                    fillRect(0, size / 2 - extent / 2, size, extent, value);
-                    break;
-                case X:
-                    fillRect(size / 2 - extent / 2, 0, extent, size, value);
-                    break;
-                case XZ:
-                    fillDiagonal(extent * 3 / 4, false, value);
-                    break;
-                case ZX:
-                    fillDiagonal(extent * 3 / 4, true, value);
-                    break;
-                case DIAG:
+                case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> fillCircle((float) size / 2, (float) size / 2, extent * 3 / 4f, value);
+                case Z -> fillRect(0, size / 2 - extent / 2, size, extent, value);
+                case X -> fillRect(size / 2 - extent / 2, 0, extent, size, value);
+                case XZ -> fillDiagonal(extent * 3 / 4, false, value);
+                case ZX -> fillDiagonal(extent * 3 / 4, true, value);
+                case DIAG -> {
                     if (symmetrySettings.getTeamSymmetry() == Symmetry.DIAG) {
                         fillDiagonal(extent * 3 / 8, false, value);
                         fillDiagonal(extent * 3 / 8, true, value);
@@ -972,8 +844,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                         fillDiagonal(extent * 3 / 16, true, value);
                         fillCenter(extent, value, SymmetryType.TEAM);
                     }
-                    break;
-                case QUAD:
+                }
+                case QUAD -> {
                     if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
                         fillRect(size / 2 - extent / 4, 0, extent / 2, size, value);
                         fillRect(0, size / 2 - extent / 4, size, extent / 2, value);
@@ -982,7 +854,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                         fillRect(0, size / 2 - extent / 8, size, extent / 4, value);
                         fillCenter(extent, value, SymmetryType.TEAM);
                     }
-                    break;
+                }
             }
             applySymmetry(SymmetryType.SPAWN);
         });

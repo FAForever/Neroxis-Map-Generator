@@ -378,18 +378,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                         applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, spoint -> setPrimitive(spoint, true));
                     }
                     switch (random.nextInt(4)) {
-                        case 0:
-                            x++;
-                            break;
-                        case 1:
-                            x--;
-                            break;
-                        case 2:
-                            y++;
-                            break;
-                        case 3:
-                            y--;
-                            break;
+                        case 0 -> x++;
+                        case 1 -> x--;
+                        case 2 -> y++;
+                        case 3 -> y--;
                     }
                 }
             }
@@ -532,18 +524,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                         applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, spoint -> setPrimitive(spoint, true));
                     }
                     switch (directions.get(random.nextInt(directions.size()))) {
-                        case 0:
-                            x++;
-                            break;
-                        case 1:
-                            x--;
-                            break;
-                        case 2:
-                            y++;
-                            break;
-                        case 3:
-                            y--;
-                            break;
+                        case 0 -> x++;
+                        case 1 -> x--;
+                        case 2 -> y++;
+                        case 3 -> y--;
                     }
                 }
             }

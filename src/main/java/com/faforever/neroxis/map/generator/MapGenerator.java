@@ -146,17 +146,11 @@ public strictfp class MapGenerator {
     }
 
     public void setValidTerrainSymmetry() {
-        List<Symmetry> terrainSymmetries;
-        switch (spawnCount) {
-            case 2:
-            case 4:
-                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
-                        Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
-                break;
-            default:
-                terrainSymmetries = new ArrayList<>(Arrays.asList(Symmetry.values()));
-                break;
-        }
+        List<Symmetry> terrainSymmetries = switch (spawnCount) {
+            case 2, 4 -> new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
+                    Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
+            default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
+        };
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
         if (numTeams > 1) {
@@ -267,21 +261,7 @@ public strictfp class MapGenerator {
         List<Symmetry> spawns;
         List<Symmetry> teams;
         switch (terrainSymmetry) {
-            case POINT2:
-            case POINT3:
-            case POINT4:
-            case POINT5:
-            case POINT6:
-            case POINT7:
-            case POINT8:
-            case POINT9:
-            case POINT10:
-            case POINT11:
-            case POINT12:
-            case POINT13:
-            case POINT14:
-            case POINT15:
-            case POINT16:
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
                         Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
                         Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16));
@@ -289,19 +269,19 @@ public strictfp class MapGenerator {
                         Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
                         Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16,
                         Symmetry.XZ, Symmetry.ZX, Symmetry.X, Symmetry.Z, Symmetry.QUAD, Symmetry.DIAG));
-                break;
-            case QUAD:
+            }
+            case QUAD -> {
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
                 teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.X, Symmetry.Z, Symmetry.QUAD));
-                break;
-            case DIAG:
+            }
+            case DIAG -> {
                 spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));
                 teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
-                break;
-            default:
+            }
+            default -> {
                 spawns = new ArrayList<>(Collections.singletonList(terrainSymmetry));
                 teams = new ArrayList<>(Collections.singletonList(terrainSymmetry));
-                break;
+            }
         }
         if (numTeams > 1) {
             spawns.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());

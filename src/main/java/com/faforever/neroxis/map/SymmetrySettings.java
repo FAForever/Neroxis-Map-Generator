@@ -17,13 +17,10 @@ public strictfp class SymmetrySettings {
     }
 
     public Symmetry getSymmetry(SymmetryType symmetryType) {
-        switch (symmetryType) {
-            case TEAM:
-                return teamSymmetry;
-            case TERRAIN:
-                return terrainSymmetry;
-            default:
-                return spawnSymmetry;
-        }
+        return switch (symmetryType) {
+            case TEAM -> teamSymmetry;
+            case TERRAIN -> terrainSymmetry;
+            default -> spawnSymmetry;
+        };
     }
 }

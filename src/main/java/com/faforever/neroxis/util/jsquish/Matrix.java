@@ -125,15 +125,11 @@ final strictfp class Matrix {
         }
 
         // pick the column with this component
-        switch (mi) {
-            case 0:
-                return new Vec(u[0], u[1], u[2]);
-            case 1:
-            case 3:
-                return new Vec(u[1], u[3], u[4]);
-            default:
-                return new Vec(u[2], u[4], u[5]);
-        }
+        return switch (mi) {
+            case 0 -> new Vec(u[0], u[1], u[2]);
+            case 1, 3 -> new Vec(u[1], u[3], u[4]);
+            default -> new Vec(u[2], u[4], u[5]);
+        };
     }
 
     private static Vec getMultiplicity2Evector(final Matrix matrix, final float evalue) {
@@ -160,18 +156,12 @@ final strictfp class Matrix {
         }
 
         // pick the first eigenvector based on this index
-        switch (mi) {
-            case 0:
-            case 1:
-                return new Vec(-m[1], m[0], 0.0f);
-            case 2:
-                return new Vec(m[2], 0.0f, -m[0]);
-            case 3:
-            case 4:
-                return new Vec(0.0f, -m[4], m[3]);
-            default:
-                return new Vec(0.0f, -m[5], m[4]);
-        }
+        return switch (mi) {
+            case 0, 1 -> new Vec(-m[1], m[0], 0.0f);
+            case 2 -> new Vec(m[2], 0.0f, -m[0]);
+            case 3, 4 -> new Vec(0.0f, -m[4], m[3]);
+            default -> new Vec(0.0f, -m[5], m[4]);
+        };
     }
 
     static Vec computePrincipleComponent(final Matrix matrix) {

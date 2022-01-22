@@ -86,18 +86,12 @@ public strictfp class Vector2 extends Vector<Vector2> {
 
     public void flip(Vector2 center, Symmetry symmetry) {
         switch (symmetry) {
-            case X:
-                setX(2 * center.getX() - getX());
-                break;
-            case Z:
-                setY(2 * center.getY() - getY());
-                break;
-            case XZ:
-            case ZX:
-            case POINT2:
+            case X -> setX(2 * center.getX() - getX());
+            case Z -> setY(2 * center.getY() - getY());
+            case XZ, ZX, POINT2 -> {
                 setX(2 * center.getX() - getX());
                 setY(2 * center.getY() - getY());
-                break;
+            }
         }
     }
 

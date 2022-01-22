@@ -70,17 +70,17 @@ public strictfp class SaveImporter {
         Vector3 location;
         List<String> neighbors;
         switch (type.toString()) {
-            case "Mass":
+            case "Mass" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addMex(new Marker(id, location));
-                break;
-            case "Hydrocarbon":
+            }
+            case "Hydrocarbon" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addHydro(new Marker(id, location));
-                break;
-            case "Blank Marker":
+            }
+            case "Blank Marker" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 if (id.contains("ARMY")) {
@@ -88,56 +88,56 @@ public strictfp class SaveImporter {
                 } else {
                     map.addBlank(new Marker(id, location));
                 }
-                break;
-            case "Air Path Node":
+            }
+            case "Air Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
-                break;
-            case "Amphibious Path Node":
+            }
+            case "Amphibious Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
-                break;
-            case "Water Path Node":
+            }
+            case "Water Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
-                break;
-            case "Naval Area":
+            }
+            case "Naval Area" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavalAreaMarker(new AIMarker(id, location, new LinkedHashSet<>()));
-                break;
-            case "Expansion Area":
+            }
+            case "Expansion Area" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
-                break;
-            case "Large Expansion Area":
+            }
+            case "Large Expansion Area" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLargeExpansionMarker(new AIMarker(id, location, new LinkedHashSet<>()));
-                break;
-            case "Land Path Node":
+            }
+            case "Land Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
-                break;
-            case "Rally Point":
+            }
+            case "Rally Point" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
-                break;
-            case "Naval Rally Point":
+            }
+            case "Naval Rally Point" -> {
                 locTable = marker.get("position").checktable();
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
                 map.addNavyRallyMarker(new AIMarker(id, location, new LinkedHashSet<>()));
-                break;
+            }
         }
     }
 

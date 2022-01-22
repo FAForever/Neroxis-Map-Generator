@@ -162,43 +162,20 @@ public strictfp class MapTransformer {
                 if (symmetry == Symmetry.POINT2) {
                     useAngle = true;
                     switch (SymmetrySource.valueOf(source)) {
-                        case TOP:
-                            angle = 270;
-                            break;
-                        case BOTTOM:
-                            angle = 90;
-                            break;
-                        case LEFT:
-                            angle = 180;
-                            break;
-                        case TOP_LEFT:
-                            angle = 225;
-                            break;
-                        case TOP_RIGHT:
-                            angle = 315;
-                            break;
-                        case BOTTOM_LEFT:
-                            angle = 135;
-                            break;
-                        case BOTTOM_RIGHT:
-                            angle = 45;
-                            break;
-                        default:
-                            angle = 0;
-                            break;
+                        case TOP -> angle = 270;
+                        case BOTTOM -> angle = 90;
+                        case LEFT -> angle = 180;
+                        case TOP_LEFT -> angle = 225;
+                        case TOP_RIGHT -> angle = 315;
+                        case BOTTOM_LEFT -> angle = 135;
+                        case BOTTOM_RIGHT -> angle = 45;
+                        default -> angle = 0;
                     }
                 } else {
                     useAngle = false;
                     switch (SymmetrySource.valueOf(arguments.get("source"))) {
-                        case BOTTOM:
-                        case BOTTOM_RIGHT:
-                        case BOTTOM_LEFT:
-                        case RIGHT:
-                            reverseSide = true;
-                            break;
-                        default:
-                            reverseSide = false;
-                            break;
+                        case BOTTOM, BOTTOM_RIGHT, BOTTOM_LEFT, RIGHT -> reverseSide = true;
+                        default -> reverseSide = false;
                     }
                 }
             }
