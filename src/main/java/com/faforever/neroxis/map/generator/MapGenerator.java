@@ -655,15 +655,20 @@ public strictfp class MapGenerator {
         }
         map.setDescription(descriptionBuilder.toString().replace("\n", "\\r\\n"));
 
-        ScriptGenerator.generateScript(map);
+        int mapSize = map.getSize();
+        int compatibleMapSize = (int) StrictMath.pow(2, StrictMath.ceil(StrictMath.log(mapSize) / StrictMath.log(2)));
+        Vector2 boundOffset = new Vector2(compatibleMapSize / 2f, compatibleMapSize / 2f);
 
-        System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+        map.changeMapSize(mapSize, compatibleMapSize, boundOffset);
 
         map.addBlank(new Marker(mapName, new Vector2(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, new int[0]));
         map.setName(mapName);
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
+        ScriptGenerator.generateScript(map);
+
+        System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
         return map;
     }

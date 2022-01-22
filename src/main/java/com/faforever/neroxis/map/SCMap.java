@@ -445,7 +445,9 @@ public strictfp class SCMap {
             this.size = boundsSize;
         }
 
-        moveObjects(contentScale, topLeftOffset);
+        if (contentScale != 1 || boundsScale != 1) {
+            moveObjects(contentScale, topLeftOffset);
+        }
     }
 
     private void moveObjects(float contentScale, Vector2 offset) {

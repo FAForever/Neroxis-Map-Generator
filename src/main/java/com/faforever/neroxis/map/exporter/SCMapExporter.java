@@ -231,8 +231,9 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportNormals(Path folderPath, SCMap map, Vector2 centerOffset, float size) throws IOException {
-        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - size / 2, centerOffset.getY() - size / 2);
+    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
+        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
         byte[] compressedNormal = map.getCompressedNormal();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
@@ -249,8 +250,9 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportShadows(Path folderPath, SCMap map, Vector2 centerOffset, float size) throws IOException {
-        Vector2 topLeftOffset = new Vector2(centerOffset.getX() - size / 2, centerOffset.getY() - size / 2);
+    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
+        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
         byte[] compressedShadows = map.getCompressedShadows();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
