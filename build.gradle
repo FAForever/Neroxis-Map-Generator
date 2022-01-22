@@ -8,7 +8,7 @@ plugins {
 group 'net.com.faforever.neroxis'
 version "${version}"
 
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_15
 
 
 // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle
