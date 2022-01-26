@@ -1,7 +1,9 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.ui.GraphMethod;
+import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
@@ -18,6 +20,11 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         this(size, seed, symmetrySettings, name, false);
     }
 
+    @GraphMethod
+    @GraphParameter(name = "parallel", value = "true")
+    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
+    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "name", nullable = true)
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }

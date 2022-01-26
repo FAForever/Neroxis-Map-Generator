@@ -1,9 +1,11 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.ui.GraphMethod;
+import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -41,6 +43,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @GraphMethod
+    @GraphParameter(name = "parallel", value = "true")
+    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
+    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "name", nullable = true)
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -49,7 +55,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other, (String) null);
     }
 
-    @GraphMethod
     public BooleanMask(BooleanMask other, String name) {
         super(other, name);
     }
@@ -173,7 +178,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             }
         }, other);
     }
-
 
     @Override
     @GraphMethod
@@ -833,6 +837,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             });
         });
         return this;
+    }
+
+    public FloatMask convertToFloatMask(float low, float high) {
+        return new FloatMask(this, low, high, getName() + "toFloat");
+    }
+
+    public IntegerMask convertToIntegerMask(int low, int high) {
+        return new IntegerMask(this, low, high, getName() + "toInteger");
     }
 
     @GraphMethod

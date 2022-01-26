@@ -35,7 +35,7 @@ public strictfp class EntryGraphPanel extends JPanel {
             .layoutAlgorithm(SugiyamaLayoutAlgorithm.<EntryVertex, EntryEdge>builder()
                     .layering(Layering.NETWORK_SIMPLEX)
                     .build())
-            .layoutSize(new Dimension(10000, 10000))
+            .layoutSize(new Dimension(1000, 1000))
             .graphMouse(graphMouse)
             .build();
     private final VisualizationScrollPane entryGraphPane = new VisualizationScrollPane(entryGraphViewer);
@@ -46,6 +46,9 @@ public strictfp class EntryGraphPanel extends JPanel {
 
     public EntryGraphPanel(List<Pipeline.Entry> entries) {
         entries.forEach(entry -> {
+            if (entry.getExecutingMask().isMock()) {
+                return;
+            }
             EntryVertex fromVertex = new EntryVertex(entry);
             entryGraph.addVertex(fromVertex);
             entry.getDependants().forEach(dependant -> {

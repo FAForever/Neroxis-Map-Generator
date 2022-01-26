@@ -1,9 +1,11 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.ui.GraphMethod;
+import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -36,6 +38,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(size, seed, symmetrySettings, name, false);
     }
 
+    @GraphMethod
+    @GraphParameter(name = "parallel", value = "true")
+    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
+    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "name", nullable = true)
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }

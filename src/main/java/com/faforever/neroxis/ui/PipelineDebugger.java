@@ -57,8 +57,8 @@ public strictfp class PipelineDebugger {
 
     private static void createGraphCanvas() {
         EntryGraphPanel graphCanvas = new EntryGraphPanel(pipeline);
-        graphCanvas.setMinimumSize(new Dimension(350, 350));
-        graphCanvas.setPreferredSize(new Dimension(350, 350));
+        graphCanvas.setMinimumSize(new Dimension(450, 450));
+        graphCanvas.setPreferredSize(new Dimension(450, 450));
         graphCanvas.setEntryVertexSelectionAction(entry -> {
             mainEntryPanel.setEntry(entry);
             frame.setTitle(String.format("Mask: %s MaskSize: %d", entry.getExecutingMask().getName(), entry.getImmutableResult().getSize()));

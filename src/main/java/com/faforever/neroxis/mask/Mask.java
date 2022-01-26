@@ -12,7 +12,6 @@ import com.faforever.neroxis.util.vector.Vector3;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -50,6 +49,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     private boolean mock;
     @Setter
     private String visualName;
+    public int mockCount;
 
     protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.symmetrySettings = symmetrySettings;
@@ -195,7 +195,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @GraphMethod
     public U init(U other) {
         plannedSize = other.getSize();
-        return copyFrom((U) other);
+        return copyFrom(other);
     }
 
     protected abstract U copyFrom(U other);
@@ -816,11 +816,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
-    @GraphMethod
     public U fillSides(int extent, T value) {
         return fillSides(extent, value, SymmetryType.TEAM);
     }
 
+    @GraphMethod
     public U fillSides(int extent, T value, SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();
@@ -834,11 +834,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    @GraphMethod
     public U fillCenter(int extent, T value) {
         return fillCenter(extent, value, SymmetryType.SPAWN);
     }
 
+    @GraphMethod
     public U fillCenter(int extent, T value, SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();

@@ -1,8 +1,10 @@
 package com.faforever.neroxis.graph.domain;
 
-import lombok.Value;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Value
+@Getter
+@RequiredArgsConstructor
 public class MaskMethodEdge {
-    int index;
+    private final String parameterName;
 }

@@ -115,6 +115,7 @@ public strictfp class Pipeline {
 
     public static void join() {
         pipeline.forEach(e -> e.getFuture().join());
+        pipeline.forEach(e -> System.out.println(e.executingMask.getName() + ": " + e.executingMask.mockCount));
         System.out.println("Pipeline completed!");
     }
 

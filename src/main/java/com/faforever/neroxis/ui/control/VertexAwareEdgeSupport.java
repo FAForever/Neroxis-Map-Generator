@@ -47,15 +47,18 @@ public class VertexAwareEdgeSupport<V, E> implements EdgeSupport<V, E> {
     @Override
     public void endEdgeCreate(VisualizationServer<V, E> vv, V endVertex) {
         Objects.requireNonNull(vv.getVisualizationModel().getGraph(), "graph must be non-null");
-        if (startVertex != null) {
-            Graph<V, E> graph = vv.getVisualizationModel().getGraph();
-            graph.addEdge(startVertex, endVertex, edgeFactory.apply(startVertex, endVertex));
-            vv.getEdgeSpatial().recalculate();
+        try {
+            if (startVertex != null) {
+                Graph<V, E> graph = vv.getVisualizationModel().getGraph();
+                graph.addEdge(startVertex, endVertex, edgeFactory.apply(startVertex, endVertex));
+                vv.getEdgeSpatial().recalculate();
+            }
+        } finally {
+            startVertex = null;
+            edgeEffects.endEdgeEffects(vv);
+            edgeEffects.endArrowEffects(vv);
+            vv.repaint();
         }
-        startVertex = null;
-        edgeEffects.endEdgeEffects(vv);
-        edgeEffects.endArrowEffects(vv);
-        vv.repaint();
     }
 
     @Override

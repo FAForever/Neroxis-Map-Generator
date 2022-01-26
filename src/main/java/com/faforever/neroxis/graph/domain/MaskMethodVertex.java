@@ -1,7 +1,8 @@
 package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.mask.Mask;
-import lombok.EqualsAndHashCode;
+import com.faforever.neroxis.ui.GraphParameter;
+import com.faforever.neroxis.util.MaskReflectUtil;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -9,13 +10,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
-public class MaskMethodVertex extends MaskGraphVertex {
-    private Mask<?, ?> executor;
-
-    public MaskMethodVertex(int index) {
-        super(index);
-    }
+public class MaskMethodVertex extends MaskGraphVertex<Method> {
+    private MaskGraphVertex<?> executor;
 
     public void setExecutable(Method method) {
         if (method != null) {
@@ -31,30 +27,50 @@ public class MaskMethodVertex extends MaskGraphVertex {
             throw new IllegalStateException("Executable is not yet set");
         }
 
-        if (parameterName.equals("this") && executable.getDeclaringClass().isAssignableFrom(parameterValue.getClass())) {
-            executor = (Mask<?, ?>) parameterValue;
+        if (parameterValue != null
+                && parameterName.equals("executor")
+                && MaskGraphVertex.class.isAssignableFrom(parameterValue.getClass())
+                && executable.getDeclaringClass().isAssignableFrom(((MaskGraphVertex<?>) parameterValue).getResultClass())) {
+            executor = (MaskGraphVertex<?>) parameterValue;
+            checkFullyDefined();
         } else {
             super.setParameter(parameterName, parameterValue);
         }
+    }
 
-        fullyDefined = fullyDefined && executor != null;
+    @Override
+    protected void checkFullyDefined() {
+        fullyDefined = executor != null && Arrays.stream(executable.getParameters()).allMatch(param -> parameterValues.containsKey(param.getName())
+                || Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> param.getName().equals(annotation.name()))
+                .anyMatch(annotation -> annotation.nullable() || !annotation.value().equals("") || !annotation.contextSupplier().equals(GraphContext.SupplierType.USER_SPECIFIED)));
     }
 
     public void clearParameter(String parameterName) {
-        if (parameterName.equals("this")) {
+        if (parameterName.equals("executor")) {
             executor = null;
+            checkFullyDefined();
         } else {
             super.clearParameter(parameterName);
         }
-        fullyDefined = false;
     }
 
-    public Mask<?, ?> call() throws InvocationTargetException, IllegalAccessException {
-        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> getParameter(parameter.getName())).toArray();
-        return (Mask<?, ?>) ((Method) executable).invoke(executor, args);
+    public Mask<?, ?> call(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
+        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
+            try {
+                return getParameterFinalValue(parameter, graphContext);
+            } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        }).toArray();
+        return (Mask<?, ?>) executable.invoke(executor.getResult(), args);
+    }
+
+    @Override
+    public Class<? extends Mask<?, ?>> getResultClass() {
+        return executable == null ? null : (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
     }
 
     public String toString() {
-        return executable == null ? String.valueOf(index) : executable.getName();
+        return executable == null ? String.valueOf(hashCode()) : executable.getName();
     }
 }

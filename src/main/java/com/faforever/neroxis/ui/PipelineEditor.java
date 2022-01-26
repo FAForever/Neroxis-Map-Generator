@@ -1,6 +1,7 @@
 package com.faforever.neroxis.ui;
 
 import com.faforever.neroxis.ui.panel.PipelinePanel;
+import com.faforever.neroxis.util.DebugUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ public strictfp class PipelineEditor {
     private PipelinePanel pipelinePanel = new PipelinePanel();
 
     public static void main(String[] args) {
+        DebugUtil.DEBUG = true;
         new PipelineEditor().createGui();
     }
 

@@ -1,10 +1,13 @@
 package com.faforever.neroxis.ui.model;
 
+import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.MaskReflectUtil;
 
 import javax.swing.table.AbstractTableModel;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,12 +15,12 @@ import java.util.List;
 
 public class GraphVertexParameterTableModel extends AbstractTableModel {
 
-    private final List<Parameter> items = new ArrayList<>();
-    private MaskGraphVertex vertex;
+    private final List<Parameter> parameters = new ArrayList<>();
+    private MaskGraphVertex<?> vertex;
 
     @Override
     public int getRowCount() {
-        return items.size();
+        return parameters.size();
     }
 
     @Override
@@ -27,28 +30,21 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return String.class;
-            case 1:
-                return Class.class;
-            case 2:
-                return Object.class;
-        }
-        return Object.class;
+        return switch (columnIndex) {
+            case 0 -> String.class;
+            case 1 -> Class.class;
+            default -> Object.class;
+        };
     }
 
     @Override
     public String getColumnName(int column) {
-        switch (column) {
-            case 0:
-                return "Parameter Name";
-            case 1:
-                return "Parameter Class";
-            case 2:
-                return "Parameter Value";
-        }
-        return null;
+        return switch (column) {
+            case 0 -> "Parameter Name";
+            case 1 -> "Parameter Class";
+            case 2 -> "Parameter Value";
+            default -> null;
+        };
     }
 
     @Override
@@ -56,43 +52,51 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
         if (columnIndex != 2) {
             return false;
         }
-        Parameter item = items.get(rowIndex);
-        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualParameterClass(vertex.getMaskClass(), item));
+
+        Parameter parameter = parameters.get(rowIndex);
+
+        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), parameter));
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        if (columnIndex != 2) {
+        if (columnIndex != 2 || vertex.getExecutable() == null || !isCellEditable(rowIndex, columnIndex)) {
             return;
         }
 
-        vertex.setParameter(items.get(rowIndex).getName(), Boolean.valueOf((String) aValue));
+        vertex.setParameter(parameters.get(rowIndex).getName(), aValue);
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Parameter item = items.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return item.getName();
-            case 1:
-                return vertex == null ? null : MaskReflectUtil.getActualParameterClass(vertex.getMaskClass(), item);
-            case 2:
-                return vertex == null ? null : vertex.getParameter(item.getName());
-        }
-        return null;
+        Parameter item = parameters.get(rowIndex);
+        return switch (columnIndex) {
+            case 0 -> item.getName();
+            case 1 -> vertex == null ? null : MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), item);
+            case 2 -> vertex == null ? null : vertex.getParameter(item);
+            default -> null;
+        };
     }
 
-    public void setParameters(Parameter... parameters) {
-        int previousNumRows = items.size();
-        items.clear();
-        fireTableRowsDeleted(0, previousNumRows);
-        items.addAll(Arrays.asList(parameters));
-        fireTableRowsInserted(0, items.size());
-    }
-
-    public void setVertex(MaskGraphVertex vertex) {
+    public void setVertex(MaskGraphVertex<?> vertex) {
         this.vertex = vertex;
-        setParameters();
+        updateTableModel();
+    }
+
+    public void updateTableModel() {
+        fireTableRowsDeleted(0, parameters.size());
+        parameters.clear();
+        if (vertex != null) {
+            Executable executable = vertex.getExecutable();
+            if (executable != null) {
+                for (Parameter parameter : executable.getParameters()) {
+                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).noneMatch(annotation -> parameter.getName().equals(annotation.name())
+                            && (!annotation.value().equals("") || !annotation.contextSupplier().equals(GraphContext.SupplierType.USER_SPECIFIED)))) {
+                        parameters.add(parameter);
+                    }
+                }
+                fireTableRowsInserted(0, parameters.size());
+            }
+        }
     }
 }
