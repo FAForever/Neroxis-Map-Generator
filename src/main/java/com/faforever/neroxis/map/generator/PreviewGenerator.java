@@ -1,10 +1,14 @@
 package com.faforever.neroxis.map.generator;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.ImageUtils;
-import com.faforever.neroxis.util.serialized.LightingSettings;
-import com.faforever.neroxis.util.serialized.WaterSettings;
+import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.serial.LightingSettings;
+import com.faforever.neroxis.util.serial.WaterSettings;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -15,8 +19,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static com.faforever.neroxis.util.ImageUtils.readImage;
-import static com.faforever.neroxis.util.ImageUtils.scaleImage;
+import static com.faforever.neroxis.util.ImageUtil.readImage;
+import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 public strictfp class PreviewGenerator {
 
@@ -73,7 +77,7 @@ public strictfp class PreviewGenerator {
         markers.forEach(marker -> {
             int x = (int) (marker.getPosition().getX() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2);
             int y = (int) (marker.getPosition().getZ() / map.getSize() * PREVIEW_SIZE - markerImage.getHeight(null) / 2);
-            if (ImageUtils.inImageBounds(x, y, preview)) {
+            if (ImageUtil.inImageBounds(x, y, preview)) {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
             }
         });

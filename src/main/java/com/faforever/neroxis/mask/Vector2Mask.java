@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
 
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {

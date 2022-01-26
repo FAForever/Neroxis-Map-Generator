@@ -1,7 +1,7 @@
 package com.faforever.neroxis.map.importer;
 
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +20,6 @@ public strictfp class ScriptImporter {
         }
 
         Path scriptPath = mapFiles[0].toPath();
-        map.setScript(FileUtils.readFile(scriptPath.toString()));
+        map.setScript(FileUtil.readFile(scriptPath.toString()));
     }
 }

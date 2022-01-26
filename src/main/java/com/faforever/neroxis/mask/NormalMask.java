@@ -1,14 +1,13 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -31,16 +30,16 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         super(other, name);
     }
 
-    public NormalMask(FloatMask other, Long seed) {
-        this(other, seed, 1f, null);
+    public NormalMask(FloatMask other) {
+        this(other, 1f, null);
     }
 
-    public NormalMask(FloatMask other, Long seed, float scale) {
-        this(other, seed, scale, null);
+    public NormalMask(FloatMask other, float scale) {
+        this(other, scale, null);
     }
 
-    public NormalMask(FloatMask other, Long seed, float scale, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public NormalMask(FloatMask other, float scale, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -89,18 +88,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     @Override
     protected Vector3 getZeroValue() {
-        return new Vector3(0f, 0f, 0f);
-    }
-
-    @Override
-    protected Vector3 getDefaultValue() {
         return new Vector3(0f, 1f, 0f);
-    }
-
-    @Override
-    public NormalMask getFinalMask() {
-        Pipeline.await(this);
-        return copy();
     }
 
     @Override

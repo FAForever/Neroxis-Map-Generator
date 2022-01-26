@@ -1,5 +1,7 @@
 package com.faforever.neroxis.ui;
 
+import com.faforever.neroxis.ui.panel.EntryGraphPanel;
+import com.faforever.neroxis.ui.panel.EntryPanel;
 import com.faforever.neroxis.util.Pipeline;
 
 import javax.swing.*;
@@ -9,9 +11,7 @@ import java.util.List;
 
 public strictfp class PipelineDebugger {
     private static JFrame frame;
-    private static EntryCanvas mainEntryCanvas;
-    private static List<EntryCanvas> dependencyEntryCanvases;
-    private static EntryGraphCanvas graphCanvas;
+    private static EntryPanel mainEntryPanel;
     private static List<Pipeline.Entry> pipeline;
 
     public static void setPipeline(List<Pipeline.Entry> pipeline) {
@@ -39,7 +39,6 @@ public strictfp class PipelineDebugger {
 
     private static void createMaskCanvases() {
         createMainMaskCanvas();
-        createDependencyMaskCanvases();
     }
 
     private static void createMainMaskCanvas() {
@@ -52,63 +51,23 @@ public strictfp class PipelineDebugger {
         constraints.gridheight = 4;
         constraints.weighty = 1;
 
-        mainEntryCanvas = new EntryCanvas(new Dimension(450, 450));
+        mainEntryPanel = new EntryPanel(new Dimension(450, 450));
 
-        frame.add(mainEntryCanvas, constraints);
-    }
-
-    private static void createDependencyMaskCanvases() {
-        dependencyEntryCanvases = new ArrayList<>();
-        GridBagConstraints constraints1 = new GridBagConstraints();
-        constraints1.fill = GridBagConstraints.BOTH;
-        constraints1.gridx = 1;
-        constraints1.weightx = 1;
-        constraints1.gridy = 0;
-        constraints1.weighty = 1;
-
-        EntryCanvas entryCanvas1 = new EntryCanvas(new Dimension(250, 250));
-
-        GridBagConstraints constraints2 = new GridBagConstraints();
-        constraints2.fill = GridBagConstraints.BOTH;
-        constraints2.gridx = 2;
-        constraints2.weightx = 1;
-        constraints2.gridy = 0;
-        constraints2.weighty = 1;
-
-        EntryCanvas entryCanvas2 = new EntryCanvas(new Dimension(250, 250));
-
-        frame.add(entryCanvas1, constraints1);
-        frame.add(entryCanvas2, constraints2);
-
-        dependencyEntryCanvases.add(entryCanvas1);
-        dependencyEntryCanvases.add(entryCanvas2);
+        frame.add(mainEntryPanel, constraints);
     }
 
     private static void createGraphCanvas() {
-        graphCanvas = new EntryGraphCanvas(pipeline);
-        graphCanvas.setMinimumSize(new Dimension(350, 350));
-        graphCanvas.setPreferredSize(new Dimension(350, 350));
+        EntryGraphPanel graphCanvas = new EntryGraphPanel(pipeline);
+        graphCanvas.setMinimumSize(new Dimension(450, 450));
+        graphCanvas.setPreferredSize(new Dimension(450, 450));
         graphCanvas.setEntryVertexSelectionAction(entry -> {
-            mainEntryCanvas.setEntry(entry);
-            int dependencyCount = 0;
+            mainEntryPanel.setEntry(entry);
             List<Pipeline.Entry> dependencies = new ArrayList<>(entry.getDependencies());
             dependencies.stream().filter(dependency -> dependency.getExecutingMask().equals(entry.getExecutingMask())).findFirst()
                     .ifPresent(dependency -> {
                         dependencies.remove(dependency);
                         dependencies.add(0, dependency);
                     });
-            for (Pipeline.Entry dependency : dependencies) {
-                if (dependencyCount >= dependencyEntryCanvases.size()) {
-                    break;
-                }
-                EntryCanvas dependencyCanvas = dependencyEntryCanvases.get(dependencyCount);
-                dependencyCanvas.setEntry(dependency);
-                dependencyCanvas.setVisible(true);
-                dependencyCount++;
-            }
-            for (int i = entry.getDependencies().size(); i < dependencyEntryCanvases.size(); i++) {
-                dependencyEntryCanvases.get(i).setVisible(false);
-            }
             frame.setTitle(String.format("Mask: %s MaskSize: %d", entry.getExecutingMask().getName(), entry.getImmutableResult().getSize()));
         });
 

@@ -14,7 +14,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public OperationsMask(U other, String name) {
+    protected OperationsMask(U other, String name) {
         super(other, name);
     }
 
@@ -76,14 +76,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return add(point -> val);
     }
 
-    public U addWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
-        return addWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
+    public U addWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
+        return addWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    public U addWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    public U addWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            applyWithOffset(source, this::addValueAt, xCoordinate, yCoordinate, center, wrapEdges);
+            applyWithOffset(source, this::addValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
@@ -121,14 +121,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other, values);
     }
 
-    public U subtractWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
-        return subtractWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
+    public U subtractWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
+        return subtractWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    public U subtractWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            applyWithOffset(source, this::subtractValueAt, xCoordinate, yCoordinate, center, wrapEdges);
+            applyWithOffset(source, this::subtractValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
@@ -162,14 +162,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other, values);
     }
 
-    public U multiplyWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
-        return multiplyWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
+    public U multiplyWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
+        return multiplyWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    public U multiplyWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            applyWithOffset(source, this::multiplyValueAt, xCoordinate, yCoordinate, center, wrapEdges);
+            applyWithOffset(source, this::multiplyValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
@@ -203,55 +203,55 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other, values);
     }
 
-    public U divideWithOffset(U other, Vector2 loc, boolean centered, boolean wrapEdges) {
-        return divideWithOffset(other, (int) loc.getX(), (int) loc.getY(), centered, wrapEdges);
+    public U divideWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
+        return divideWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    public U divideWithOffset(U other, int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges) {
+    public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            applyWithOffset(source, this::divideValueAt, xCoordinate, yCoordinate, center, wrapEdges);
+            applyWithOffset(source, this::divideValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    public U add(Function<Point, T> valueFunction) {
+    protected U add(Function<Point, T> valueFunction) {
         return enqueue(() -> apply(point -> addValueAt(point, valueFunction.apply(point))));
     }
 
-    public U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+    protected U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addValueAt(spoint, value));
         }));
     }
 
-    public U subtract(Function<Point, T> valueFunction) {
+    protected U subtract(Function<Point, T> valueFunction) {
         return enqueue(() -> apply(point -> subtractValueAt(point, valueFunction.apply(point))));
     }
 
-    public U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+    protected U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractValueAt(spoint, value));
         }));
     }
 
-    public U multiply(Function<Point, T> valueFunction) {
+    protected U multiply(Function<Point, T> valueFunction) {
         return enqueue(() -> apply(point -> multiplyValueAt(point, valueFunction.apply(point))));
     }
 
-    public U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+    protected U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyValueAt(spoint, value));
         }));
     }
 
-    public U divide(Function<Point, T> valueFunction) {
+    protected U divide(Function<Point, T> valueFunction) {
         return enqueue(() -> apply(point -> divideValueAt(point, valueFunction.apply(point))));
     }
 
-    public U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
+    protected U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideValueAt(spoint, value));

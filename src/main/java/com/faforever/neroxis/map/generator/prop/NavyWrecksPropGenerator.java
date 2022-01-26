@@ -9,7 +9,7 @@ import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.map.generator.placement.UnitPlacer;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public strictfp class NavyWrecksPropGenerator extends ReducedNaturalPropGenerato
         if (!mapParameters.isUnexplored()) {
             generateUnitExclusionMasks();
             Pipeline.await(t2NavyWreckMask, navyFactoryWreckMask);
-            DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+            DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17", new ArrayList<>());
                 Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
                 army17.addGroup(army17Wreckage);

@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.exporter;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.TerrainMaterials;
-import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.dds.DDSReader;
 
 import java.awt.*;
@@ -24,10 +24,10 @@ public strictfp class BiomeExporter {
         Files.createDirectories(folderPath.resolve(biomeName));
 
         filename = folderPath.resolve(biomeName).resolve("Light.scmlighting").toString();
-        FileUtils.serialize(filename, biome.getLightingSettings());
+        FileUtil.serialize(filename, biome.getLightingSettings());
 
         filename = folderPath.resolve(biomeName).resolve("WaterSettings.scmwtr").toString();
-        FileUtils.serialize(filename, biome.getWaterSettings());
+        FileUtil.serialize(filename, biome.getWaterSettings());
 
         Integer[] previewColors = biome.getTerrainMaterials().getPreviewColors();
         String[] texturePaths = biome.getTerrainMaterials().getTexturePaths();
@@ -39,7 +39,7 @@ public strictfp class BiomeExporter {
         biome.getTerrainMaterials().setName(biomeName);
 
         filename = folderPath.resolve(biomeName).resolve("materials.json").toString();
-        FileUtils.serialize(filename, biome.getTerrainMaterials());
+        FileUtil.serialize(filename, biome.getTerrainMaterials());
     }
 
     public static Integer getTexturePreviewColor(Path envDir, String texturePath) throws IOException {

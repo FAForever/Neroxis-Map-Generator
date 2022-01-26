@@ -18,7 +18,7 @@ import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -111,7 +111,7 @@ public strictfp class MapTransformer {
         }
 
         if (arguments.containsKey("debug")) {
-            DebugUtils.DEBUG = true;
+            DebugUtil.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {
@@ -283,27 +283,27 @@ public strictfp class MapTransformer {
         IntegerMask textureMasksHighMask = new IntegerMask(map.getTextureMasksHigh(), null, symmetrySettings, "textureMasksHigh");
 
         if (!useAngle) {
-            previewMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            normalMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            waterMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            waterFoamMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            waterFlatnessMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            waterDepthBiasMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            terrainTypeMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            textureMasksLowMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            textureMasksHighMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
-            heightMask.applySymmetry(SymmetryType.SPAWN, reverseSide);
+            previewMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            normalMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            waterMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            waterFoamMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            waterFlatnessMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            waterDepthBiasMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            terrainTypeMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            textureMasksLowMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            textureMasksHighMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            heightMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
         } else {
-            previewMask.applySymmetry(angle);
-            normalMask.applySymmetry(angle);
-            waterMask.applySymmetry(angle);
-            waterFoamMask.applySymmetry(angle);
-            waterFlatnessMask.applySymmetry(angle);
-            waterDepthBiasMask.applySymmetry(angle);
-            terrainTypeMask.applySymmetry(angle);
-            textureMasksLowMask.applySymmetry(angle);
-            textureMasksHighMask.applySymmetry(angle);
-            heightMask.applySymmetry(angle);
+            previewMask.forceSymmetry(angle);
+            normalMask.forceSymmetry(angle);
+            waterMask.forceSymmetry(angle);
+            waterFoamMask.forceSymmetry(angle);
+            waterFlatnessMask.forceSymmetry(angle);
+            waterDepthBiasMask.forceSymmetry(angle);
+            terrainTypeMask.forceSymmetry(angle);
+            textureMasksLowMask.forceSymmetry(angle);
+            textureMasksHighMask.forceSymmetry(angle);
+            heightMask.forceSymmetry(angle);
         }
         previewMask.writeToImage(map.getPreview());
         normalMask.writeToImage(map.getNormalMap());

@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import static com.faforever.neroxis.util.ImageUtils.writePNGFromMask;
+import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
 
 public strictfp class MapImageExporter {
 

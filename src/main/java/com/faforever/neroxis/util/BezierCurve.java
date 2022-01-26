@@ -39,7 +39,7 @@ public strictfp class BezierCurve {
         int numControlPoints = order + 1;
         Integer[] coefficients = new Integer[numControlPoints];
         for (int i = 0; i < numControlPoints; ++i) {
-            coefficients[i] = MathUtils.binomialCoefficient(order, i);
+            coefficients[i] = MathUtil.binomialCoefficient(order, i);
         }
         return coefficients;
     }

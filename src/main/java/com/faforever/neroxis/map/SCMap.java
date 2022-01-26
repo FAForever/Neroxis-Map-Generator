@@ -3,7 +3,7 @@ package com.faforever.neroxis.map;
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.util.ImageUtils;
+import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.faforever.neroxis.util.ImageUtils.insertImageIntoNewImageOfSize;
-import static com.faforever.neroxis.util.ImageUtils.scaleImage;
+import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
+import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 @SuppressWarnings("unused")
 @Data
@@ -493,7 +493,7 @@ public strictfp class SCMap {
         positionedObjects.forEach(positionedObject -> {
             Vector2 newPosition = new Vector2(positionedObject.getPosition()).multiply(distanceScale).add(offset).roundToNearestHalfPoint();
             positionedObject.setPosition(new Vector3(newPosition));
-            if (ImageUtils.inImageBounds(newPosition, heightmap)) {
+            if (ImageUtil.inImageBounds(newPosition, heightmap)) {
                 repositionedObjects.add(positionedObject);
             }
         });
@@ -524,7 +524,7 @@ public strictfp class SCMap {
     private void setObjectHeights(Collection<? extends PositionedObject> positionedObjects) {
         positionedObjects.forEach(positionedObject -> {
             Vector2 position = new Vector2(positionedObject.getPosition());
-            if (ImageUtils.inImageBounds(position, heightmap)) {
+            if (ImageUtil.inImageBounds(position, heightmap)) {
                 positionedObject.getPosition().setY(heightmap.getRaster().getPixel((int) position.getX(), (int) position.getY(), new int[]{0})[0] * heightMapScale);
             }
         });

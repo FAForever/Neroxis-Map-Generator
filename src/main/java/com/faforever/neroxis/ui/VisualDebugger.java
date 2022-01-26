@@ -1,16 +1,17 @@
 package com.faforever.neroxis.ui;
 
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.ui.panel.EntryPanel;
 import lombok.Value;
 
 import javax.swing.*;
 import java.awt.*;
 
 public strictfp class VisualDebugger {
-    private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
+    private static DefaultListModel<MaskListItem> listModel;
     private static JFrame frame;
     private static JList<MaskListItem> list;
-    private static EntryCanvas canvas;
+    private static EntryPanel canvas;
 
     public static void visualizeMask(Mask<?, ?> mask, String method) {
         visualizeMask(mask, method, null);
@@ -34,15 +35,17 @@ public strictfp class VisualDebugger {
         frame = new JFrame();
         frame.setLayout(new GridBagLayout());
 
-        createList();
-        createCanvas();
+        setupList();
+        setupCanvas();
 
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
-    private static void createCanvas() {
+    private static void setupCanvas() {
+        canvas = new EntryPanel(new Dimension(650, 650));
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 1;
@@ -50,12 +53,11 @@ public strictfp class VisualDebugger {
         constraints.gridy = 0;
         constraints.weighty = 1;
 
-        canvas = new EntryCanvas(new Dimension(650, 650));
-
         frame.add(canvas, constraints);
     }
 
-    private static void createList() {
+    private static void setupList() {
+        listModel = new DefaultListModel<>();
         list = new JList<>(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.addListSelectionListener(event -> {

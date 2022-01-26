@@ -3,9 +3,9 @@ package com.faforever.neroxis.biomes;
 import com.faforever.neroxis.map.DecalMaterials;
 import com.faforever.neroxis.map.PropMaterials;
 import com.faforever.neroxis.map.TerrainMaterials;
-import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.serialized.LightingSettings;
-import com.faforever.neroxis.util.serialized.WaterSettings;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.serial.LightingSettings;
+import com.faforever.neroxis.util.serial.WaterSettings;
 import lombok.Data;
 
 import java.io.File;
@@ -42,21 +42,21 @@ public strictfp class Biomes {
 
         TerrainMaterials terrainMaterials;
         try {
-            terrainMaterials = FileUtils.deserialize(folderPath + "materials.json", TerrainMaterials.class);
+            terrainMaterials = FileUtil.deserialize(folderPath + "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %smaterials.json\n", folderPath), e);
         }
 
         PropMaterials propMaterials;
         try {
-            propMaterials = FileUtils.deserialize(folderPath + "props.json", PropMaterials.class);
+            propMaterials = FileUtil.deserialize(folderPath + "props.json", PropMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %sprops.json\n", folderPath), e);
         }
 
         DecalMaterials decalMaterials;
         try {
-            decalMaterials = FileUtils.deserialize(folderPath + "decals.json", DecalMaterials.class);
+            decalMaterials = FileUtil.deserialize(folderPath + "decals.json", DecalMaterials.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
         }
@@ -64,7 +64,7 @@ public strictfp class Biomes {
         // Water parameters
         WaterSettings waterSettings;
         try {
-            waterSettings = FileUtils.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
+            waterSettings = FileUtil.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %s WaterSettings\n", folderPath), e);
         }
@@ -72,7 +72,7 @@ public strictfp class Biomes {
         // Lighting settings
         LightingSettings lightingSettings;
         try {
-            lightingSettings = FileUtils.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);
+            lightingSettings = FileUtil.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);
         } catch (IOException e) {
             throw new Exception(String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
         }
