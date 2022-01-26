@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-public strictfp class FileUtils {
+public strictfp class FileUtil {
 
     private static final DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
 
@@ -30,7 +30,7 @@ public strictfp class FileUtils {
 
         if (Files.isDirectory(path)) {
             Stream<Path> files = Files.list(path);
-            files.forEach(FileUtils::deleteRecursiveIfExists);
+            files.forEach(FileUtil::deleteRecursiveIfExists);
             files.close();
         }
 
@@ -47,9 +47,9 @@ public strictfp class FileUtils {
         BufferedReader bufferedReader;
         InputStream inputStream;
         URL resource;
-        if ((inputStream = FileUtils.class.getResourceAsStream(filePath)) != null) {
+        if ((inputStream = FileUtil.class.getResourceAsStream(filePath)) != null) {
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        } else if ((resource = FileUtils.class.getResource(filePath)) != null) {
+        } else if ((resource = FileUtil.class.getResource(filePath)) != null) {
             bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
         } else {
             bufferedReader = new BufferedReader(new FileReader(Paths.get(filePath).toFile()));
@@ -73,9 +73,9 @@ public strictfp class FileUtils {
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
         InputStream inputStream;
         URL resource;
-        if ((inputStream = FileUtils.class.getResourceAsStream(path)) != null) {
+        if ((inputStream = FileUtil.class.getResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
-        } else if ((resource = FileUtils.class.getResource(path)) != null) {
+        } else if ((resource = FileUtil.class.getResource(path)) != null) {
             return dslJson.deserialize(clazz, resource.openStream());
         } else {
             return dslJson.deserialize(clazz, new FileInputStream(path));

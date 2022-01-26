@@ -52,7 +52,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
-        this(other, minValue, null);
+        this(other, minValue, (String) null);
     }
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
@@ -63,12 +63,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed) {
-        this(other, minValue, maxValue, seed, null);
+    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue) {
+        this(other, minValue, maxValue, null);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue, Long seed, String name) {
-        this(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             apply(point -> setPrimitive(point, source.valueAtGreaterThanEqualTo(point, minValue) && source.valueAtLessThanEqualTo(point, maxValue)));
@@ -349,6 +349,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue, T maxValue) {
         init(other.convertToBooleanMask(minValue, maxValue));
         return this;
+    }
+
+    public FloatMask convertToFloatMask(float falseValue, float trueValue) {
+        return new FloatMask(this, falseValue, trueValue, getName() + "ToFloat");
+    }
+
+    public IntegerMask convertToIntegerMask(int falseValue, int trueValue) {
+        return new IntegerMask(this, falseValue, trueValue, getName() + "ToInteger");
     }
 
     public BooleanMask randomize(float density) {
@@ -689,8 +697,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
-    private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask addWithOffset(T other, U minValue, U maxValue, Vector2 location, boolean wrapEdges) {
-        addWithOffset(other.convertToBooleanMask(minValue, maxValue), location, true, wrapEdges);
+    private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask addWithOffset(T other, U minValue, U maxValue, Vector2 offset, boolean wrapEdges) {
+        addWithOffset(other.convertToBooleanMask(minValue, maxValue), offset, true, wrapEdges);
         return this;
     }
 

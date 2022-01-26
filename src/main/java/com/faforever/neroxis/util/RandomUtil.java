@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public strictfp class RandomUtils {
+public strictfp class RandomUtil {
 
     public static boolean andRandomBoolean(Random random, int numToAnd) {
         for (int i = 0; i < numToAnd; i++) {

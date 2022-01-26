@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicDecalGenerator extends DecalGenerator {
@@ -30,7 +30,7 @@ public strictfp class BasicDecalGenerator extends DecalGenerator {
     @Override
     public void placeDecals() {
         Pipeline.await(fieldDecal, slopeDecal);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeDecals", () -> {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeDecals", () -> {
             decalPlacer.placeDecals(fieldDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getFieldNormals(), 32, 32, 24, 32);
             decalPlacer.placeDecals(fieldDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getFieldAlbedos(), 64, 128, 24, 32);
             decalPlacer.placeDecals(slopeDecal.getFinalMask(), mapParameters.getBiome().getDecalMaterials().getSlopeNormals(), 16, 32, 16, 32);

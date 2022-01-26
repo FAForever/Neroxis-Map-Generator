@@ -3,7 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.MathUtils;
+import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -71,11 +71,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         mask = new float[size][size];
     }
 
-    public FloatMask(BooleanMask other, float low, float high) {
+    protected FloatMask(BooleanMask other, float low, float high) {
         this(other, low, high, null);
     }
 
-    public FloatMask(BooleanMask other, float low, float high, String name) {
+    protected FloatMask(BooleanMask other, float low, float high, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -377,8 +377,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float topRight = new Vector2(dXLow, dYHigh).dot(source.get(xLow, yHigh));
                 float bottomLeft = new Vector2(dXHigh, dYLow).dot(source.get(xHigh, yLow));
                 float bottomRight = new Vector2(dXHigh, dYHigh).dot(source.get(xHigh, yHigh));
-                noise.setPrimitive(point, MathUtils.smootherStep(MathUtils.smootherStep(topLeft, bottomLeft, dXLow),
-                        MathUtils.smootherStep(topRight, bottomRight, dXLow), dYLow));
+                noise.setPrimitive(point, MathUtil.smootherStep(MathUtil.smootherStep(topLeft, bottomLeft, dXLow),
+                        MathUtil.smootherStep(topRight, bottomRight, dXLow), dYLow));
             });
             float noiseMin = noise.getMin();
             float noiseMax = noise.getMax();
@@ -449,7 +449,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             for (int i = 0; i < numDrops; ++i) {
                 waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
             }
-            applySymmetry(SymmetryType.SPAWN);
+            forceSymmetry(SymmetryType.SPAWN);
         });
     }
 
@@ -499,15 +499,15 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return value / 1000f;
     }
 
-    public FloatMask removeAreasOutsideIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
+    public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
         return enqueue(() -> {
-            FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minIntensity, maxIntensity).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
+            FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minValue, maxValue).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
             subtract(tempMask2).clampMin(0f);
         });
     }
 
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        return enqueue(() -> subtract(copy().removeAreasOutsideIntensityAndSize(minSize, maxSize, minIntensity, maxIntensity)));
+        return enqueue(() -> subtract(copy().removeAreasOutsideRangeAndSize(minSize, maxSize, minIntensity, maxIntensity)));
     }
 
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
@@ -568,7 +568,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public NormalMask getNormalMask(float scale) {
-        NormalMask normalMask = new NormalMask(this, getNextSeed(), scale, getName() + "Normals");
+        NormalMask normalMask = new NormalMask(this, scale, getName() + "Normals");
         normalMask.symmetrySettings = new SymmetrySettings(Symmetry.NONE);
         return normalMask;
     }
@@ -606,7 +606,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    public void addCalculatedParabolicDistance(boolean useColumns) {
+    private void addCalculatedParabolicDistance(boolean useColumns) {
         assertNotPipelined();
         int size = getSize();
         for (int i = 0; i < size; i++) {

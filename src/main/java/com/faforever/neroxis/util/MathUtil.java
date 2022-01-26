@@ -1,6 +1,6 @@
 package com.faforever.neroxis.util;
 
-public strictfp class MathUtils {
+public strictfp class MathUtil {
 
     public static float discretePercentage(float percent, int numBins) {
         return binPercentage(percent, numBins) / (float) numBins;

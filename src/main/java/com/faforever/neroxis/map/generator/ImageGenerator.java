@@ -15,8 +15,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import static com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMask;
-import static com.faforever.neroxis.util.ImageUtils.writeAutoScaledPNGFromMasks;
+import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMask;
+import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMasks;
 
 public strictfp class ImageGenerator {
 

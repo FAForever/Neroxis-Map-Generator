@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util.serialized;
+package com.faforever.neroxis.util.serial;
 
 import com.dslplatform.json.CompiledJson;
 import com.faforever.neroxis.util.vector.Vector2;

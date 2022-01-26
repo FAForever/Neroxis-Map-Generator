@@ -11,7 +11,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public ComparableMask(U other, String name) {
+    protected ComparableMask(U other, String name) {
         super(other, name);
     }
 
@@ -167,7 +167,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
     }
 
     public BooleanMask convertToBooleanMask(T minValue, T maxValue) {
-        return new BooleanMask(this, minValue, maxValue, getNextSeed(), getName() + "toBoolean");
+        return new BooleanMask(this, minValue, maxValue, getName() + "toBoolean");
     }
 
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {

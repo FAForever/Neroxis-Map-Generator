@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
@@ -37,7 +37,7 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
 
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = mapParameters.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);

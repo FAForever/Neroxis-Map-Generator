@@ -9,9 +9,9 @@ import com.faforever.neroxis.map.evaluator.MapEvaluator;
 import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.ImageUtils;
-import com.faforever.neroxis.util.MathUtils;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.faforever.neroxis.util.ImageUtils.compareImages;
+import static com.faforever.neroxis.util.ImageUtil.compareImages;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,12 +43,12 @@ public class MapGeneratorTest {
     float rampDensity = .5649f;
     float reclaimDensity = .1354f;
     float mexDensity = .7325f;
-    float roundedLandDensity = MathUtils.discretePercentage(landDensity, 127);
-    float roundedPlateauDensity = MathUtils.discretePercentage(plateauDensity, 127);
-    float roundedMountainDensity = MathUtils.discretePercentage(mountainDensity, 127);
-    float roundedRampDensity = MathUtils.discretePercentage(rampDensity, 127);
-    float roundedReclaimDensity = MathUtils.discretePercentage(reclaimDensity, 127);
-    float roundedMexDensity = MathUtils.discretePercentage(mexDensity, 127);
+    float roundedLandDensity = MathUtil.discretePercentage(landDensity, 127);
+    float roundedPlateauDensity = MathUtil.discretePercentage(plateauDensity, 127);
+    float roundedMountainDensity = MathUtil.discretePercentage(mountainDensity, 127);
+    float roundedRampDensity = MathUtil.discretePercentage(rampDensity, 127);
+    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
+    float roundedMexDensity = MathUtil.discretePercentage(mexDensity, 127);
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs = {"--folder-path", ".",
@@ -343,7 +343,7 @@ public class MapGeneratorTest {
         instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});
         SCMap map = instance.generate();
 
-        BufferedImage blankPreview = ImageUtils.readImage(PreviewGenerator.BLANK_PREVIEW);
+        BufferedImage blankPreview = ImageUtil.readImage(PreviewGenerator.BLANK_PREVIEW);
         BufferedImage mapPreview = map.getPreview();
 
         assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
@@ -385,7 +385,7 @@ public class MapGeneratorTest {
     @AfterEach
     public void cleanup() {
         Pipeline.reset();
-        FileUtils.deleteRecursiveIfExists(Paths.get(instance.getMapName()));
+        FileUtil.deleteRecursiveIfExists(Paths.get(instance.getMapName()));
     }
 
 }

@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.generator.PreviewGenerator;
 import com.faforever.neroxis.map.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.DebugUtils;
-import com.faforever.neroxis.util.ImageUtils;
+import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     @Override
     public void setTextures() {
         Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture, normals);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
         });
@@ -69,9 +69,9 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     @Override
     public void setCompressedDecals() {
         Pipeline.await(normals, shadows);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtils.compressShadow(shadows.getFinalMask(), mapParameters.getBiome().getLightingSettings()));
-            map.setCompressedNormal(ImageUtils.compressNormal(normals.getFinalMask()));
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), mapParameters.getBiome().getLightingSettings()));
+            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
 
@@ -80,7 +80,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         Pipeline.await(accentGroundPreviewTexture, accentPlateauPreviewTexture, slopesPreviewTexture,
                 accentSlopesPreviewTexture, steepHillsPreviewTexture, waterBeachPreviewTexture, rockPreviewTexture,
                 accentRockPreviewTexture, reflectance, heightmapPreview);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
                         accentGroundPreviewTexture.getFinalMask(), accentPlateauPreviewTexture.getFinalMask(), slopesPreviewTexture.getFinalMask(), accentSlopesPreviewTexture.getFinalMask(),
