@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ui;
 
-import com.faforever.neroxis.ui.panel.EntryGraphCanvas;
+import com.faforever.neroxis.ui.panel.EntryGraphPanel;
 import com.faforever.neroxis.ui.panel.EntryPanel;
 import com.faforever.neroxis.util.Pipeline;
 
@@ -56,7 +56,7 @@ public strictfp class PipelineDebugger {
     }
 
     private static void createGraphCanvas() {
-        EntryGraphCanvas graphCanvas = new EntryGraphCanvas(pipeline);
+        EntryGraphPanel graphCanvas = new EntryGraphPanel(pipeline);
         graphCanvas.setMinimumSize(new Dimension(350, 350));
         graphCanvas.setPreferredSize(new Dimension(350, 350));
         graphCanvas.setEntryVertexSelectionAction(entry -> {

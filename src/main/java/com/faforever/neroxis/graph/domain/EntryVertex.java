@@ -1,4 +1,4 @@
-package com.faforever.neroxis.graph;
+package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.util.Pipeline;
 import lombok.Value;

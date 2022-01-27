@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ui.panel;
 
-import com.faforever.neroxis.graph.EntryEdge;
-import com.faforever.neroxis.graph.EntryVertex;
+import com.faforever.neroxis.graph.domain.EntryEdge;
+import com.faforever.neroxis.graph.domain.EntryVertex;
 import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,14 +20,13 @@ import org.jungrapht.visualization.selection.MutableSelectedState;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public strictfp class EntryGraphCanvas extends JPanel {
+public strictfp class EntryGraphPanel extends JPanel {
     private final DefaultModalGraphMouse<EntryVertex, EntryEdge> graphMouse = DefaultModalGraphMouse.<EntryVertex, EntryEdge>builder()
             .vertexSelectionOnly(true)
             .build();
@@ -45,7 +44,7 @@ public strictfp class EntryGraphCanvas extends JPanel {
     @Setter
     private Consumer<Pipeline.Entry> entryVertexSelectionAction;
 
-    public EntryGraphCanvas(List<Pipeline.Entry> entries) {
+    public EntryGraphPanel(List<Pipeline.Entry> entries) {
         entries.forEach(entry -> {
             EntryVertex fromVertex = new EntryVertex(entry);
             entryGraph.addVertex(fromVertex);
@@ -82,7 +81,7 @@ public strictfp class EntryGraphCanvas extends JPanel {
 
         graphMouse.setMode(Modal.Mode.PICKING);
         entryGraphViewer.setGraphMouse(graphMouse);
-        entryGraphViewer.getSelectedVertexState().addItemListener(new VertexSelectionListener());
+        entryGraphViewer.getSelectedVertexState().addItemListener(this::vertexSelected);
         JComponent graphComponent = entryGraphViewer.getComponent();
         graphComponent.addKeyListener(new EntryGraphKeyListener());
         RenderContext<EntryVertex, EntryEdge> renderContext = entryGraphViewer.getRenderContext();
@@ -110,18 +109,14 @@ public strictfp class EntryGraphCanvas extends JPanel {
         add(entryGraphPane, constraints);
     }
 
-    private class VertexSelectionListener implements ItemListener {
-
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                Pipeline.Entry entry = ((EntryVertex) e.getItem()).getEntry();
-                entryVertexSelectionAction.accept(entry);
-                detailsLabel.setText(String.format("%s -> %s.%s(%s)", entry.getLine(), entry.getExecutingMask().getName(), entry.getMethodName(),
-                        entry.getDependencies().stream().filter(dependecy -> !dependecy.getExecutingMask().equals(entry.getExecutingMask()))
-                                .map(dependency -> dependency.getExecutingMask().getName())
-                                .collect(Collectors.joining(", "))));
-            }
+    public void vertexSelected(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            Pipeline.Entry entry = ((EntryVertex) e.getItem()).getEntry();
+            entryVertexSelectionAction.accept(entry);
+            detailsLabel.setText(String.format("%s -> %s.%s(%s)", entry.getLine(), entry.getExecutingMask().getName(), entry.getMethodName(),
+                    entry.getDependencies().stream().filter(dependecy -> !dependecy.getExecutingMask().equals(entry.getExecutingMask()))
+                            .map(dependency -> dependency.getExecutingMask().getName())
+                            .collect(Collectors.joining(", "))));
         }
     }
 

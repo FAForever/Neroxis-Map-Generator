@@ -3,6 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.ui.VisualDebugger;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -141,6 +142,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
+    @GraphMethod
     public U setSize(int newSize) {
         int size = getSize();
         if (newSize != size) {
@@ -156,11 +158,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     @SneakyThrows
+    @GraphMethod
     public U copy() {
         return copy(getName() + COPY_NAME);
     }
 
     @SneakyThrows
+    @GraphMethod
     public U copy(String maskName) {
         Class<?> clazz = getClass();
         return (U) clazz.getConstructor(clazz, String.class).newInstance(this, maskName);
@@ -181,19 +185,22 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract int getImmediateSize();
 
+    @GraphMethod
     public U clear() {
         return enqueue(() -> fill(getZeroValue()));
     }
 
     protected abstract U setSizeInternal(int newSize);
 
+    @GraphMethod
     public U init(U other) {
         plannedSize = other.getSize();
-        return copyFrom(other);
+        return copyFrom((U) other);
     }
 
     protected abstract U copyFrom(U other);
 
+    @GraphMethod
     public U init(BooleanMask other, T falseValue, T trueValue) {
         plannedSize = other.getSize();
         return enqueue(dependencies -> {
@@ -203,6 +210,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }, other);
     }
 
+    @GraphMethod
     public U setToValue(BooleanMask area, T value) {
         assertCompatibleMask(area);
         return enqueue(dependencies -> {
@@ -211,6 +219,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }, area);
     }
 
+    @GraphMethod
     public U setToValues(BooleanMask area, U values) {
         assertCompatibleMask(area);
         assertCompatibleMask(values);
@@ -399,6 +408,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         };
     }
 
+    @GraphMethod
     public U resample(int newSize) {
         int size = getSize();
         if (newSize != size) {
@@ -563,6 +573,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }));
     }
 
+    @GraphMethod
     public U forceSymmetry() {
         return forceSymmetry(SymmetryType.SPAWN);
     }
@@ -805,6 +816,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
+    @GraphMethod
     public U fillSides(int extent, T value) {
         return fillSides(extent, value, SymmetryType.TEAM);
     }
@@ -822,6 +834,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
+    @GraphMethod
     public U fillCenter(int extent, T value) {
         return fillCenter(extent, value, SymmetryType.SPAWN);
     }

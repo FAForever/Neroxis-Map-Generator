@@ -3,6 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -240,6 +241,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask add(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -249,6 +251,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask subtract(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -258,6 +261,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask multiply(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -267,6 +271,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask divide(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -276,6 +281,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask blur(int radius) {
         return enqueue(() -> {
             int[][] innerCount = getInnerCount();
@@ -284,6 +290,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -338,19 +345,23 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).max().orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
+    @GraphMethod
     public FloatMask addGaussianNoise(float scale) {
         return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> (float) random.nextGaussian() * scale));
     }
 
+    @GraphMethod
     public FloatMask addWhiteNoise(float scale) {
         return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * scale));
     }
 
+    @GraphMethod
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
         return enqueue(() -> addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * range + minValue));
     }
 
+    @GraphMethod
     public FloatMask addPerlinNoise(int resolution, float scale) {
         int size = getSize();
         int gradientSize = size / resolution;
@@ -389,6 +400,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
+    @GraphMethod
     public FloatMask addDistance(BooleanMask other, float scale) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -398,10 +410,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    @GraphMethod
     public FloatMask sqrt() {
         return enqueue(() -> apply(point -> setPrimitive(point, (float) StrictMath.sqrt(getPrimitive(point)))));
     }
 
+    @GraphMethod
     public FloatMask gradient() {
         return enqueue(() -> {
             int size = getSize();
@@ -421,6 +435,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    @GraphMethod
     public FloatMask supcomGradient() {
         return enqueue(() -> {
             int size = getSize();
@@ -499,6 +514,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return value / 1000f;
     }
 
+    @GraphMethod
     public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
         return enqueue(() -> {
             FloatMask tempMask2 = copy().init(this.copy().convertToBooleanMask(minValue, maxValue).removeAreasOutsideSizeRange(minSize, maxSize).invert(), 0f, 1f);
@@ -506,10 +522,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    @GraphMethod
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
         return enqueue(() -> subtract(copy().removeAreasOutsideRangeAndSize(minSize, maxSize, minIntensity, maxIntensity)));
     }
 
+    @GraphMethod
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
         return enqueue(() -> {
             for (int x = 0; x < levelOfPrecision; x++) {
@@ -527,6 +545,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return innerCount;
     }
 
+    @GraphMethod
     public FloatMask getDistanceFieldForRange(float minValue, float maxValue) {
         return convertToBooleanMask(minValue, maxValue).getDistanceField();
     }
@@ -539,6 +558,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    @GraphMethod
     public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -554,6 +574,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    @GraphMethod
     public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -563,10 +584,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
+    @GraphMethod
     public NormalMask getNormalMask() {
         return getNormalMask(1f);
     }
 
+    @GraphMethod
     public NormalMask getNormalMask(float scale) {
         NormalMask normalMask = new NormalMask(this, scale, getName() + "Normals");
         normalMask.symmetrySettings = new SymmetrySettings(Symmetry.NONE);
@@ -598,6 +621,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return shadowMask;
     }
 
+    @GraphMethod
     public FloatMask parabolicMinimization() {
         return enqueue(() -> {
             addCalculatedParabolicDistance(false);

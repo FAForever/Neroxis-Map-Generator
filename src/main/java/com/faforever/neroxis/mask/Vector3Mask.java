@@ -1,6 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
@@ -64,6 +65,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         return new Vector3(components[0], components[1], components[2]).multiply(scaleFactor);
     }
 
+    @GraphMethod
     public Vector3Mask cross(Vector3Mask other) {
         assertCompatibleMask(other);
         enqueue((dependencies) -> {
@@ -73,6 +75,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         return this;
     }
 
+    @GraphMethod
     public Vector3Mask cross(Vector3 vector) {
         set(point -> get(point).cross(vector));
         return this;

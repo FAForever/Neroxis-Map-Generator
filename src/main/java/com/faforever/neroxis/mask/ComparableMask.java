@@ -1,6 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.ui.GraphMethod;
 
 import java.awt.*;
 
@@ -87,6 +88,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     public abstract T getMax();
 
+    @GraphMethod
     public U max(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -99,6 +101,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }, other);
     }
 
+    @GraphMethod
     public U clampMax(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -110,6 +113,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }, other);
     }
 
+    @GraphMethod
     public U clampMax(T val) {
         return enqueue(() -> set(point -> {
             T thisVal = get(point);
@@ -117,6 +121,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }));
     }
 
+    @GraphMethod
     public U min(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -129,6 +134,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }, other);
     }
 
+    @GraphMethod
     public U clampMin(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -140,6 +146,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }, other);
     }
 
+    @GraphMethod
     public U clampMin(T val) {
         return enqueue(() -> set(point -> {
             T thisVal = get(point);
@@ -147,6 +154,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }));
     }
 
+    @GraphMethod
     public U threshold(T val) {
         return enqueue(() -> set(point -> {
             T thisVal = get(point);
@@ -154,32 +162,39 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         }));
     }
 
+    @GraphMethod
     public U zeroOutsideRange(T min, T max) {
         return enqueue(() -> set(point -> valueAtLessThan(point, min) || valueAtGreaterThan(point, max) ? getZeroValue() : get(point)));
     }
 
+    @GraphMethod
     public U zeroInRange(T min, T max) {
         return enqueue(() -> set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(point)));
     }
 
+    @GraphMethod
     public BooleanMask convertToBooleanMask(T minValue) {
         return new BooleanMask(this, minValue, getName() + "toBoolean");
     }
 
+    @GraphMethod
     public BooleanMask convertToBooleanMask(T minValue, T maxValue) {
         return new BooleanMask(this, minValue, maxValue, getName() + "toBoolean");
     }
 
+    @GraphMethod
     public BooleanMask getLocalMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas", isParallel());
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
+    @GraphMethod
     public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "1DMaximas", isParallel());
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
+    @GraphMethod
     public FloatMask getDistanceFieldForRange(T minValue, T maxValue) {
         return convertToBooleanMask(minValue, maxValue).getDistanceField();
     }

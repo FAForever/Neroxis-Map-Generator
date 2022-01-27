@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -266,52 +267,64 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         get(x, y).divide(value, component);
     }
 
+    @GraphMethod
     public U addScalar(float value) {
         return addScalar(point -> value);
     }
 
+    @GraphMethod
     public U subtractScalar(float value) {
         return subtractScalar(point -> value);
     }
 
+    @GraphMethod
     public U multiplyScalar(float value) {
         return multiplyScalar(point -> value);
     }
 
+    @GraphMethod
     public U divideScalar(float value) {
         return divideScalar(point -> value);
     }
 
+    @GraphMethod
     public U clampComponentMin(float floor) {
         return enqueue(() -> apply(point -> get(point).clampMin(floor)));
     }
 
+    @GraphMethod
     public U clampComponentMax(float ceiling) {
         return enqueue(() -> apply(point -> get(point).clampMax(ceiling)));
     }
 
+    @GraphMethod
     public U randomize(float scale) {
         return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, scale)));
     }
 
+    @GraphMethod
     public U randomize(float minValue, float maxValue) {
         return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, minValue, maxValue)));
     }
 
+    @GraphMethod
     public U normalize() {
         return enqueue((dependencies) -> apply(point -> get(point).normalize()));
     }
 
+    @GraphMethod
     public FloatMask dot(U other) {
         assertCompatibleMask(other);
         return new FloatMask(this, other, getName() + "dot" + other.getName());
     }
 
+    @GraphMethod
     public FloatMask dot(T vector) {
         assertMatchingDimension(vector.getDimension());
         return new FloatMask(this, vector, getName() + "dot");
     }
 
+    @GraphMethod
     public U blur(int radius) {
         return enqueue(() -> {
             T[][] innerCount = getInnerCount();
@@ -319,6 +332,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         });
     }
 
+    @GraphMethod
     public U blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -328,6 +342,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U blurComponent(int radius, int component) {
         return enqueue(() -> {
             int[][] innerCount = getComponentInnerCount(component);
@@ -335,6 +350,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         });
     }
 
+    @GraphMethod
     public U blurComponent(int radius, int component, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -344,10 +360,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U addComponent(float value, int component) {
         return addComponent(point -> value, component);
     }
 
+    @GraphMethod
     public U addComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -355,6 +373,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U addComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -362,10 +381,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U subtractComponent(float value, int component) {
         return subtractComponent(point -> value, component);
     }
 
+    @GraphMethod
     public U subtractComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -373,6 +394,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U subtractComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -380,10 +402,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U multiplyComponent(float value, int component) {
         return multiplyComponent(point -> value, component);
     }
 
+    @GraphMethod
     public U multiplyComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -391,6 +415,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U multiplyComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -398,10 +423,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U divideComponent(float value, int component) {
         return divideComponent(point -> value, component);
     }
 
+    @GraphMethod
     public U divideComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -409,6 +436,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public U divideComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -416,6 +444,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
+    @GraphMethod
     public FloatMask getComponentMask(int component) {
         return new FloatMask(this, component, getName() + "Component" + component);
     }

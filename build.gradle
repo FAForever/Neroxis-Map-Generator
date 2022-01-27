@@ -10,6 +10,9 @@ version "${version}"
 
 sourceCompatibility = JavaVersion.VERSION_15
 
+compileJava.options.compilerArgs.add '-parameters'
+compileTestJava.options.compilerArgs.add '-parameters'
+
 
 // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle
 tasks.withType(Test) {

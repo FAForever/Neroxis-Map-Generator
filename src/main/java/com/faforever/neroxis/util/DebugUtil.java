@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 public strictfp class DebugUtil {
 
@@ -8,36 +9,80 @@ public strictfp class DebugUtil {
     public static boolean DEBUG = false;
     public static boolean VISUALIZE = false;
 
+    public static String getStackTraceLineInClass(Class<?> clazz) {
+        return getStackTraceLineInClass(clazz.getCanonicalName());
+    }
+
+    public static String getStackTraceLineInClass(String className) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().equals(className)) {
+                return ste.getFileName() + ":" + ste.getLineNumber();
+            }
+        }
+        return "not found";
+    }
+
     public static String getStackTraceLineInPackage(String packageName) {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream
-                .filter(stackTraceElement -> {
-                    String className = stackTraceElement.getClassName();
-                    String packName = className.substring(0, className.lastIndexOf("."));
-                    return packName.startsWith(packageName);
-                })
-                .findFirst()
-                .map(stackFrame -> stackFrame.getFileName() + ":" + stackFrame.getLineNumber())
-                .orElse("not found"));
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            String className = ste.getClassName();
+            String packName = className.substring(0, className.lastIndexOf("."));
+            if (packName.startsWith(packageName)) {
+                return ste.getFileName() + ":" + ste.getLineNumber();
+            }
+        }
+        return "not found";
+    }
+
+    public static String getStackTraceMethod(Class<?> clazz) {
+        return getStackTraceMethod(clazz.getCanonicalName());
+    }
+
+    public static String getStackTraceMethod(String className) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().equals(className)) {
+                return ste.getMethodName();
+            }
+        }
+        return "not found";
     }
 
     public static String getStackTraceMethodInPackage(String packageName, String... excludedMethodNames) {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream
-                .filter(stackTraceElement -> stackTraceElement.getClassName().contains(packageName)
-                        && Arrays.stream(excludedMethodNames).noneMatch(excludedMethod -> stackTraceElement.getMethodName().contains(excludedMethod)))
-                .findFirst()
-                .map(StackWalker.StackFrame::getMethodName)
-                .orElse("not found"));
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().contains(packageName) && Arrays.stream(excludedMethodNames).noneMatch(excluded -> ste.getMethodName().equals(excluded))) {
+                return ste.getMethodName();
+            }
+        }
+        return "not found";
     }
 
-    public static String getStackTraceTopMethodInPackage(String packageName, String... excludedClasses) {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream
-                .filter(stackTraceElement -> stackTraceElement.getClassName().contains(packageName)
-                        && Arrays.stream(excludedClasses).noneMatch(excludedClass -> stackTraceElement.getClassName().contains(excludedClass)))
-                .reduce((first, second) -> second).map(StackWalker.StackFrame::getMethodName).orElse("not found"));
+    public static String getStackTraceTopMethodInPackage(String packageName) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        return Arrays.stream(stackTrace).filter(stackTraceElement -> stackTraceElement.getClassName().contains(packageName))
+                .reduce((first, second) -> second).map(StackTraceElement::getMethodName).orElse("not found");
+    }
+
+    public static LinkedHashSet<String> getStackTraceMethods(Class<?> clazz) {
+        return getStackTraceMethods(clazz.getCanonicalName());
+    }
+
+    public static LinkedHashSet<String> getStackTraceMethods(String className) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        LinkedHashSet<String> methods = new LinkedHashSet<>();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getClassName().equals(className)) {
+                methods.add(ste.getMethodName());
+            }
+        }
+        return methods;
     }
 
     private static String getStackTraceParentClass() {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream.skip(3).findFirst().map(StackWalker.StackFrame::getClassName).orElse("No Parent."));
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        return stackTrace[2].getClassName();
     }
 
     public static void timedRun(Runnable runnable) {
@@ -46,8 +91,8 @@ public strictfp class DebugUtil {
     }
 
     public static void timedRun(String description, Runnable runnable) {
-        String className = getStackTraceParentClass();
-        timedRun(className.substring(0, className.lastIndexOf(".")), description, runnable);
+        String packageName = getStackTraceParentClass();
+        timedRun(packageName.substring(0, packageName.lastIndexOf(".")), description, runnable);
     }
 
     public static void timedRun(String packageName, String description, Runnable runnable) {

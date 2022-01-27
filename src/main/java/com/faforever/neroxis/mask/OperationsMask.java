@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.awt.*;
@@ -46,6 +47,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     public abstract T getSum();
 
+    @GraphMethod
     public U add(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -54,6 +56,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U add(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -62,6 +65,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U add(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -72,6 +76,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other, values);
     }
 
+    @GraphMethod
     public U add(T val) {
         return add(point -> val);
     }
@@ -80,6 +85,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return addWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
+    @GraphMethod
     public U addWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -87,14 +93,17 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U subtractAvg() {
         return enqueue(() -> subtract(getAvg()));
     }
 
+    @GraphMethod
     public U subtract(T val) {
         return enqueue(() -> subtract(point -> val));
     }
 
+    @GraphMethod
     public U subtract(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -103,6 +112,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U subtract(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -111,6 +121,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U subtract(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -125,6 +136,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return subtractWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
+    @GraphMethod
     public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -132,6 +144,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U multiply(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -140,10 +153,12 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U multiply(T val) {
         return enqueue(() -> multiply(point -> val));
     }
 
+    @GraphMethod
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -152,6 +167,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U multiply(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -166,6 +182,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return multiplyWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
+    @GraphMethod
     public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -173,6 +190,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U divide(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -181,10 +199,12 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U divide(T val) {
         return enqueue(() -> divide(point -> val));
     }
 
+    @GraphMethod
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -193,6 +213,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    @GraphMethod
     public U divide(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -207,6 +228,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return divideWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
+    @GraphMethod
     public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
