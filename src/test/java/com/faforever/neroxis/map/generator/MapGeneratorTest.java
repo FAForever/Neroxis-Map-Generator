@@ -9,12 +9,14 @@ import com.faforever.neroxis.map.evaluator.MapEvaluator;
 import com.faforever.neroxis.map.exporter.MapExporter;
 import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -133,21 +135,6 @@ public class MapGeneratorTest {
         instance = new MapGenerator();
 
         String[] args = {"--map-name", map1.getName()};
-        instance.interpretArguments(args);
-        SCMap map2 = instance.generate();
-
-        assertSCMapEquality(map1, map2);
-    }
-
-    @Test
-    public void TestEqualityWithVisualizationMapNameKeyword() throws Exception {
-        instance.interpretArguments(keywordArgs);
-        SCMap map1 = instance.generate();
-
-        Pipeline.reset();
-        instance = new MapGenerator();
-
-        String[] args = {"--map-name", map1.getName(), "--visualize"};
         instance.interpretArguments(args);
         SCMap map2 = instance.generate();
 
@@ -365,6 +352,22 @@ public class MapGeneratorTest {
                 mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
+    @Test
+    @Disabled
+    public void TestEqualityWithVisualizationMapNameKeyword() throws Exception {
+        instance.interpretArguments(keywordArgs);
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+        instance = new MapGenerator();
+
+        String[] args = {"--map-name", map1.getName(), "--visualize"};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertSCMapEquality(map1, map2);
+    }
+
     private void assertSCMapEquality(SCMap map1, SCMap map2) {
         assertEquals(map1.getName(), map2.getName());
         assertEquals(map1.getSpawns(), map2.getSpawns());
@@ -399,6 +402,8 @@ public class MapGeneratorTest {
 
     @AfterEach
     public void cleanup() {
+        DebugUtil.VISUALIZE = false;
+        DebugUtil.DEBUG = false;
         Pipeline.reset();
         FileUtil.deleteRecursiveIfExists(Paths.get(instance.getMapName()));
     }
