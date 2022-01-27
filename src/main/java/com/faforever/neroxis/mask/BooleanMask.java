@@ -365,14 +365,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
-    public FloatMask convertToFloatMask(float falseValue, float trueValue) {
-        return new FloatMask(this, falseValue, trueValue, getName() + "ToFloat");
-    }
-
-    public IntegerMask convertToIntegerMask(int falseValue, int trueValue) {
-        return new IntegerMask(this, falseValue, trueValue, getName() + "ToInteger");
-    }
-
     @GraphMethod
     public BooleanMask randomize(float density) {
         return randomize(density, SymmetryType.TERRAIN);

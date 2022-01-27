@@ -50,7 +50,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     private boolean mock;
     @Setter
     private String visualName;
-    public int mockCount;
 
     protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         this.symmetrySettings = symmetrySettings;
