@@ -24,7 +24,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         normals = heightmap.copy().resample(512).addPerlinNoise(64, 12f)
                 .addGaussianNoise(.025f).blur(1).getNormalMask(2f);
         shadowsMask = heightmap.copy().resample(512).getShadowMask(mapParameters.getBiome().getLightingSettings().getSunDirection());
-        shadows = new FloatMask(shadowsMask, 0, 1f, heightmap.getName() + "Shadows").blur(2);
+        shadows = shadowsMask.convertToFloatMask(0, 1).blur(2);
     }
 
     public abstract void setTextures();

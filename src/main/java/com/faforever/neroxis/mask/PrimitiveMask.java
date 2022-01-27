@@ -11,7 +11,7 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public PrimitiveMask(U other, String name) {
+    protected PrimitiveMask(U other, String name) {
         super(other, name);
     }
 

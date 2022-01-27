@@ -6,7 +6,7 @@ import com.faforever.neroxis.util.vector.Vector4;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
 
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {

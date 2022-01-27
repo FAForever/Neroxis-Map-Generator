@@ -26,11 +26,11 @@ import com.faforever.neroxis.map.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.generator.style.TestStyleGenerator;
 import com.faforever.neroxis.map.generator.style.ValleyStyleGenerator;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.DebugUtils;
-import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.MathUtils;
+import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.RandomUtils;
+import com.faforever.neroxis.util.RandomUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.google.common.io.BaseEncoding;
 import lombok.Getter;
@@ -233,12 +233,12 @@ public strictfp class MapGenerator {
 
         if (optionBytes.length == 12) {
             biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3]));
-            landDensity = MathUtils.normalizeBin(optionBytes[4], numBins);
-            plateauDensity = MathUtils.normalizeBin(optionBytes[5], numBins);
-            mountainDensity = MathUtils.normalizeBin(optionBytes[6], numBins);
-            rampDensity = MathUtils.normalizeBin(optionBytes[7], numBins);
-            reclaimDensity = MathUtils.normalizeBin(optionBytes[8], numBins);
-            mexDensity = MathUtils.normalizeBin(optionBytes[9], numBins);
+            landDensity = MathUtil.normalizeBin(optionBytes[4], numBins);
+            plateauDensity = MathUtil.normalizeBin(optionBytes[5], numBins);
+            mountainDensity = MathUtil.normalizeBin(optionBytes[6], numBins);
+            rampDensity = MathUtil.normalizeBin(optionBytes[7], numBins);
+            reclaimDensity = MathUtil.normalizeBin(optionBytes[8], numBins);
+            mexDensity = MathUtil.normalizeBin(optionBytes[9], numBins);
             hydroCount = optionBytes[10];
             terrainSymmetry = Symmetry.values()[optionBytes[11]];
             optionsUsed = true;
@@ -310,7 +310,7 @@ public strictfp class MapGenerator {
                 .symmetrySettings(symmetrySettings)
                 .biome(biome)
                 .build();
-        mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, mapParameters, new BasicStyleGenerator());
+        mapStyle = RandomUtil.selectRandomMatchingGenerator(random, productionStyles, mapParameters, new BasicStyleGenerator());
     }
 
     public void interpretArguments(String[] args) throws Exception {
@@ -331,7 +331,7 @@ public strictfp class MapGenerator {
         } else if (styleSpecified) {
             mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         } else {
-            mapStyle = RandomUtils.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
+            mapStyle = RandomUtil.selectRandomMatchingGenerator(random, productionStyles, spawnCount, mapSize, numTeams, new BasicStyleGenerator());
             mapParameters = mapStyle.getParameterConstraints().initParameters(random, spawnCount, mapSize, numTeams, tournamentStyle, blind, unexplored, symmetrySettings);
         }
 
@@ -340,7 +340,7 @@ public strictfp class MapGenerator {
         }
 
         folderPath = Paths.get(pathToFolder);
-        FileUtils.deleteRecursiveIfExists(folderPath.resolve(mapName));
+        FileUtil.deleteRecursiveIfExists(folderPath.resolve(mapName));
     }
 
     private void interpretArguments(Map<String, String> arguments) throws Exception {
@@ -395,13 +395,13 @@ public strictfp class MapGenerator {
         }
 
         if (arguments.containsKey("debug")) {
-            DebugUtils.DEBUG = true;
+            DebugUtil.DEBUG = true;
             Pipeline.HASH_MASK = true;
         }
 
         if (arguments.containsKey("visualize")) {
-            DebugUtils.VISUALIZE = true;
-            DebugUtils.DEBUG = true;
+            DebugUtil.VISUALIZE = true;
+            DebugUtil.DEBUG = true;
         }
 
         if (arguments.containsKey("num-to-gen")) {
@@ -479,32 +479,32 @@ public strictfp class MapGenerator {
 
             if (!styleSpecified) {
                 if (arguments.containsKey("land-density") && arguments.get("land-density") != null) {
-                    landDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
+                    landDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("land-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("plateau-density") && arguments.get("plateau-density") != null) {
-                    plateauDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
+                    plateauDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("plateau-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mountain-density") && arguments.get("mountain-density") != null) {
-                    mountainDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
+                    mountainDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("mountain-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("ramp-density") && arguments.get("ramp-density") != null) {
-                    rampDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
+                    rampDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("ramp-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("reclaim-density") && arguments.get("reclaim-density") != null) {
-                    reclaimDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
+                    reclaimDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("reclaim-density")), numBins);
                     optionsUsed = true;
                 }
 
                 if (arguments.containsKey("mex-density") && arguments.get("mex-density") != null) {
-                    mexDensity = MathUtils.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
+                    mexDensity = MathUtil.discretePercentage(Float.parseFloat(arguments.get("mex-density")), numBins);
                     optionsUsed = true;
                 }
 
@@ -519,19 +519,19 @@ public strictfp class MapGenerator {
                 }
             }
         } else {
-            DebugUtils.VISUALIZE = false;
+            DebugUtil.VISUALIZE = false;
         }
     }
 
     private void randomizeOptions() throws Exception {
         random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
-        landDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
-        plateauDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
-        mountainDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
-        rampDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
-        reclaimDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
-        mexDensity = MathUtils.discretePercentage(random.nextFloat(), numBins);
+        landDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
+        plateauDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
+        mountainDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
+        rampDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
+        reclaimDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
+        mexDensity = MathUtil.discretePercentage(random.nextFloat(), numBins);
         hydroCount = spawnCount >= 4 ? spawnCount + random.nextInt(spawnCount / 4) * 2 : (mapSize <= 512 ? spawnCount : spawnCount * (random.nextInt(3) + 1));
         setValidTerrainSymmetry();
         biome = Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size())));
@@ -548,12 +548,12 @@ public strictfp class MapGenerator {
                     (byte) (mapParameters.getMapSize() / 64),
                     (byte) mapParameters.getNumTeams(),
                     (byte) Biomes.BIOMES_LIST.indexOf(mapParameters.getBiome().getName()),
-                    (byte) MathUtils.binPercentage(mapParameters.getLandDensity(), numBins),
-                    (byte) MathUtils.binPercentage(mapParameters.getPlateauDensity(), numBins),
-                    (byte) MathUtils.binPercentage(mapParameters.getMountainDensity(), numBins),
-                    (byte) MathUtils.binPercentage(mapParameters.getRampDensity(), numBins),
-                    (byte) MathUtils.binPercentage(mapParameters.getReclaimDensity(), numBins),
-                    (byte) MathUtils.binPercentage(mapParameters.getMexDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getLandDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getPlateauDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getMountainDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getRampDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getReclaimDensity(), numBins),
+                    (byte) MathUtil.binPercentage(mapParameters.getMexDensity(), numBins),
                     (byte) mapParameters.getHydroCount(),
                     (byte) mapParameters.getSymmetrySettings().getTerrainSymmetry().ordinal()};
         } else if (styleSpecified) {
@@ -586,7 +586,7 @@ public strictfp class MapGenerator {
             MapExporter.exportMap(folderPath, map, !tournamentStyle, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
-            if (!tournamentStyle && DebugUtils.DEBUG) {
+            if (!tournamentStyle && DebugUtil.DEBUG) {
                 startTime = System.currentTimeMillis();
                 Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
                 SCMapExporter.exportSCMapString(folderPath, mapName, map);
@@ -605,7 +605,7 @@ public strictfp class MapGenerator {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
-        if (DebugUtils.DEBUG) {
+        if (DebugUtil.DEBUG) {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 

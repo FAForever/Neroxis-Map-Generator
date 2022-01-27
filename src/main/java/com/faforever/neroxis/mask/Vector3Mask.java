@@ -6,7 +6,7 @@ import com.faforever.neroxis.util.vector.Vector3;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
-@SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
 
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -29,12 +29,12 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         super(other, name);
     }
 
-    public Vector3Mask(NormalMask other, Long seed) {
-        this(other, seed, null);
+    public Vector3Mask(NormalMask other) {
+        this(other, null);
     }
 
-    public Vector3Mask(NormalMask other, Long seed, String name) {
-        super(other.getSize(), seed, other.getSymmetrySettings(), name, other.isParallel());
+    public Vector3Mask(NormalMask other, String name) {
+        super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.get(0);
             set(point -> source.get(point).copy());

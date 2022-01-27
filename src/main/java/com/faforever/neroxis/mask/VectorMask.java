@@ -54,7 +54,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, components);
     }
 
-    public VectorMask(U other, String name) {
+    protected VectorMask(U other, String name) {
         super(other, name);
     }
 
@@ -73,7 +73,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     @Override
     protected void initializeMask(int size) {
         mask = getNullMask(size);
-        fill(getDefaultValue());
+        fill(getZeroValue());
     }
 
     @Override
@@ -505,99 +505,99 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return result.add(countD).add(countA).subtract(countB).subtract(countC).divide(area);
     }
 
-    public U addScalar(Function<Point, Float> valueFunction) {
+    protected U addScalar(Function<Point, Float> valueFunction) {
         return enqueue(() -> apply(point -> addScalarAt(point, valueFunction.apply(point))));
     }
 
-    public U addScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
+    protected U addScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addScalarAt(spoint, value));
         }));
     }
 
-    public U subtractScalar(Function<Point, Float> valueFunction) {
+    protected U subtractScalar(Function<Point, Float> valueFunction) {
         return enqueue(() -> apply(point -> subtractScalarAt(point, valueFunction.apply(point))));
     }
 
-    public U subtractScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
+    protected U subtractScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractScalarAt(spoint, value));
         }));
     }
 
-    public U multiplyScalar(Function<Point, Float> valueFunction) {
+    protected U multiplyScalar(Function<Point, Float> valueFunction) {
         return enqueue(() -> apply(point -> multiplyScalarAt(point, valueFunction.apply(point))));
     }
 
-    public U multiplyScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
+    protected U multiplyScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyScalarAt(spoint, value));
         }));
     }
 
-    public U divideScalar(Function<Point, Float> valueFunction) {
+    protected U divideScalar(Function<Point, Float> valueFunction) {
         return enqueue(() -> apply(point -> divideScalarAt(point, valueFunction.apply(point))));
     }
 
-    public U divideScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
+    protected U divideScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideScalarAt(spoint, value));
         }));
     }
 
-    public U setComponent(Function<Point, Float> valueFunction, int component) {
+    protected U setComponent(Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> apply(point -> setComponentAt(point, valueFunction.apply(point), component)));
     }
 
-    public U setComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
+    protected U setComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> setComponentAt(spoint, value, component));
         }));
     }
 
-    public U addComponent(Function<Point, Float> valueFunction, int component) {
+    protected U addComponent(Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> apply(point -> addComponentAt(point, valueFunction.apply(point), component)));
     }
 
-    public U addComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
+    protected U addComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addComponentAt(spoint, value, component));
         }));
     }
 
-    public U subtractComponent(Function<Point, Float> valueFunction, int component) {
+    protected U subtractComponent(Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> apply(point -> subtractComponentAt(point, valueFunction.apply(point), component)));
     }
 
-    public U subtractComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
+    protected U subtractComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractComponentAt(spoint, value, component));
         }));
     }
 
-    public U multiplyComponent(Function<Point, Float> valueFunction, int component) {
+    protected U multiplyComponent(Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> apply(point -> multiplyComponentAt(point, valueFunction.apply(point), component)));
     }
 
-    public U multiplyComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
+    protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyComponentAt(spoint, value, component));
         }));
     }
 
-    public U divideComponent(Function<Point, Float> valueFunction, int component) {
+    protected U divideComponent(Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> apply(point -> divideComponentAt(point, valueFunction.apply(point), component)));
     }
 
-    public U divideComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
+    protected U divideComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
         return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideComponentAt(spoint, value, component));

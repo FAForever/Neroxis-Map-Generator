@@ -1,7 +1,7 @@
-package com.faforever.neroxis.ui;
+package com.faforever.neroxis.ui.panel;
 
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.util.MathUtils;
+import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -14,12 +14,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
-public class EntryCanvas extends JPanel {
+public class EntryPanel extends JPanel {
     private final JLabel titleLabel = new JLabel();
     private final JLabel valueLabel = new JLabel();
     private final ImagePanel imagePanel = new ImagePanel();
 
-    public EntryCanvas(Dimension minSize) {
+    public EntryPanel(Dimension minSize) {
         setMinimumSize(minSize);
         setPreferredSize(minSize);
         setLayout(new GridBagLayout());
@@ -73,6 +73,11 @@ public class EntryCanvas extends JPanel {
         setValueLabel();
     }
 
+    public void refresh() {
+        repaint();
+        setValueLabel();
+    }
+
     private void setValueLabel() {
         if (imagePanel.mask != null) {
             Vector2 maskCoords = imagePanel.getMouseOnMask();
@@ -101,11 +106,15 @@ public class EntryCanvas extends JPanel {
 
         public void setMask(Mask<?, ?> mask) {
             this.mask = mask;
-            image = new BufferedImage(mask.getImmediateSize(), mask.getImmediateSize(), BufferedImage.TYPE_INT_RGB);
-            paintCheckerboard();
+            if (mask != null) {
+                image = new BufferedImage(mask.getSize(), mask.getSize(), BufferedImage.TYPE_INT_RGB);
+                paintCheckerboard();
 
-            Graphics g = image.getGraphics();
-            g.drawImage(mask.toImage(), 0, 0, this);
+                Graphics g = image.getGraphics();
+                g.drawImage(mask.toImage(), 0, 0, this);
+            } else {
+                image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+            }
         }
 
         public Vector2 getMouseOnMask() {
@@ -169,7 +178,7 @@ public class EntryCanvas extends JPanel {
                 if (mask != null) {
                     lastMousePosition.set(e.getPoint());
                     Vector2 oldMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
-                    userZoomLevel = (float) StrictMath.min(StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0), MathUtils.log2(imagePanel.mask.getSize()));
+                    userZoomLevel = (float) StrictMath.min(StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0), MathUtil.log2(imagePanel.mask.getSize()));
                     Vector2 newMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
                     fractionalImageOffset.subtract(oldMousePositionOnMask).add(newMousePositionOnMask);
                     boundOffset();

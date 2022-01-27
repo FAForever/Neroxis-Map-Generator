@@ -4,9 +4,9 @@ import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.util.FileUtils;
+import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.LuaLoader;
-import com.faforever.neroxis.util.serialized.SCUnitSet;
+import com.faforever.neroxis.util.serial.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Value;
 import org.luaj.vm2.LuaTable;
@@ -43,7 +43,7 @@ public strictfp class BaseTemplate {
 
     private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(String scunitsFile) throws IOException {
         LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
-        SCUnitSet scUnitSet = FileUtils.deserialize(BaseTemplate.class.getResourceAsStream(scunitsFile), SCUnitSet.class);
+        SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scunitsFile), SCUnitSet.class);
         for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
             unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
             if (units.containsKey(unit.getID())) {

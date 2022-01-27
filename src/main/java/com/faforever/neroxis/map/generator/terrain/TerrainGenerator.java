@@ -8,7 +8,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.generator.ElementGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.DebugUtils;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
@@ -44,7 +44,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
 
     public void setHeightmapImage() {
         Pipeline.await(heightmap);
-        DebugUtils.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () ->
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () ->
                 heightmap.getFinalMask().writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale())
         );
     }
@@ -53,12 +53,12 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     public void setupPipeline() {
         terrainSetup();
         //ensure heightmap is symmetric
-        heightmap.applySymmetry();
+        heightmap.forceSymmetry();
         passableSetup();
     }
 
     protected void passableSetup() {
-        BooleanMask actualLand = new BooleanMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), "actualLand");
+        BooleanMask actualLand = heightmap.convertToBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);

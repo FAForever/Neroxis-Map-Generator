@@ -37,6 +37,18 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         super(other, name);
     }
 
+    protected IntegerMask(BooleanMask other, int low, int high) {
+        this(other, low, high, null);
+    }
+
+    protected IntegerMask(BooleanMask other, int low, int high, String name) {
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> setPrimitive(point, source.getPrimitive(point) ? high : low));
+        }, other);
+    }
+
     @Override
     protected void initializeMask(int size) {
         mask = new int[size][size];

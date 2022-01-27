@@ -17,9 +17,9 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.DebugUtils;
-import com.faforever.neroxis.util.FileUtils;
-import com.faforever.neroxis.util.ImageUtils;
+import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -113,7 +113,7 @@ public strictfp class MapPopulator {
         }
 
         if (arguments.containsKey("debug")) {
-            DebugUtils.DEBUG = true;
+            DebugUtil.DEBUG = true;
         }
 
         if (!arguments.containsKey("in-folder-path")) {
@@ -211,8 +211,8 @@ public strictfp class MapPopulator {
         Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
         FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings, map.getHeightMapScale(), "heightmapBase");
-        heightmapBase = new FloatMask(heightmapBase);
-        heightmapBase.applySymmetry(SymmetryType.SPAWN);
+        heightmapBase = heightmapBase.copy();
+        heightmapBase.forceSymmetry(SymmetryType.SPAWN);
         heightmapBase.writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale());
         float waterHeight;
         if (waterPresent) {
@@ -223,12 +223,12 @@ public strictfp class MapPopulator {
 
         BooleanMask land = new BooleanMask(heightmapBase, waterHeight);
         BooleanMask plateaus = new BooleanMask(heightmapBase, waterHeight + 3f);
-        FloatMask slope = new FloatMask(heightmapBase).gradient();
+        FloatMask slope = heightmapBase.copy().gradient();
         BooleanMask impassable = new BooleanMask(slope, .9f);
         BooleanMask ramps = new BooleanMask(slope, .25f).subtract(impassable);
         BooleanMask passable = impassable.copy().invert();
-        BooleanMask passableLand = new BooleanMask(land);
-        BooleanMask passableWater = new BooleanMask(land).invert();
+        BooleanMask passableLand = land.copy();
+        BooleanMask passableWater = land.copy().invert();
 
         if (populateSpawns) {
             if (spawnCount > 0) {
@@ -243,8 +243,8 @@ public strictfp class MapPopulator {
         }
 
         if (populateMexes || populateHydros) {
-            resourceMask = new BooleanMask(land);
-            waterResourceMask = new BooleanMask(land).invert();
+            resourceMask = land.copy();
+            waterResourceMask = land.copy().invert();
 
             resourceMask.subtract(impassable).deflate(8).subtract(ramps);
             resourceMask.fillEdge(16, false).fillCenter(16, false);
@@ -287,15 +287,15 @@ public strictfp class MapPopulator {
             map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
-            BooleanMask water = new BooleanMask(land.copy().invert());
-            BooleanMask flat = new BooleanMask(slope, .05f).invert();
-            BooleanMask inland = new BooleanMask(land);
-            BooleanMask highGround = new BooleanMask(heightmapBase, waterHeight + 3f);
-            BooleanMask aboveBeach = new BooleanMask(heightmapBase, waterHeight + 1.5f);
-            BooleanMask aboveBeachEdge = new BooleanMask(heightmapBase, waterHeight + 3f);
-            BooleanMask flatAboveCoast = new BooleanMask(heightmapBase, waterHeight + 0.29f);
-            BooleanMask higherFlatAboveCoast = new BooleanMask(heightmapBase, waterHeight + 1.2f);
-            BooleanMask lowWaterBeach = new BooleanMask(heightmapBase, waterHeight);
+            BooleanMask water = land.copy().invert();
+            BooleanMask flat = slope.convertToBooleanMask(.05f).invert();
+            BooleanMask inland = land.copy();
+            BooleanMask highGround = heightmapBase.convertToBooleanMask(waterHeight + 3f);
+            BooleanMask aboveBeach = heightmapBase.convertToBooleanMask(waterHeight + 1.5f);
+            BooleanMask aboveBeachEdge = heightmapBase.convertToBooleanMask(waterHeight + 3f);
+            BooleanMask flatAboveCoast = heightmapBase.convertToBooleanMask(waterHeight + .29f);
+            BooleanMask higherFlatAboveCoast = heightmapBase.convertToBooleanMask(waterHeight + 1.2f);
+            BooleanMask lowWaterBeach = heightmapBase.convertToBooleanMask(waterHeight);
             BooleanMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
             BooleanMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
             BooleanMask smallWaterBeach = smallWater.copy().subtract(tinyWater).inflate(2).add(tinyWater);
@@ -311,8 +311,8 @@ public strictfp class MapPopulator {
             smallWaterBeachTexture.init(smallWaterBeach, 0f, 1f).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
 
             BooleanMask waterBeach = new BooleanMask(heightmapBase, waterHeight + 1f);
-            BooleanMask accentGround = new BooleanMask(land);
-            BooleanMask accentPlateau = new BooleanMask(plateaus);
+            BooleanMask accentGround = land.copy();
+            BooleanMask accentPlateau = plateaus.copy();
             BooleanMask slopes = new BooleanMask(slope, .1f);
             BooleanMask accentSlopes = new BooleanMask(slope, .75f).invert();
             BooleanMask steepHills = new BooleanMask(slope, .55f);
@@ -364,28 +364,28 @@ public strictfp class MapPopulator {
             accentRockTexture.init(accentRock, 0f, 1f).clampMin(0f).blur(8).add(accentRock, .65f).blur(4).add(accentRock, .5f).blur(1).clampMax(1f);
 
             if (keepLayer1) {
-                accentGroundTexture = new FloatMask(textureMasksLow[0], null);
+                accentGroundTexture = textureMasksLow[0].copy();
             }
             if (keepLayer2) {
-                accentPlateauTexture = new FloatMask(textureMasksLow[1], null);
+                accentPlateauTexture = textureMasksLow[1].copy();
             }
             if (keepLayer3) {
-                slopesTexture = new FloatMask(textureMasksLow[2], null);
+                slopesTexture = textureMasksLow[2].copy();
             }
             if (keepLayer4) {
-                accentSlopesTexture = new FloatMask(textureMasksLow[3], null);
+                accentSlopesTexture = textureMasksLow[3].copy();
             }
             if (keepLayer5) {
-                steepHillsTexture = new FloatMask(textureMasksHigh[4], null);
+                steepHillsTexture = textureMasksHigh[4].copy();
             }
             if (keepLayer6) {
-                waterBeachTexture = new FloatMask(textureMasksHigh[5], null);
+                waterBeachTexture = textureMasksHigh[5].copy();
             }
             if (keepLayer7) {
-                rockTexture = new FloatMask(textureMasksHigh[6], null);
+                rockTexture = textureMasksHigh[6].copy();
             }
             if (keepLayer8) {
-                accentRockTexture = new FloatMask(textureMasksHigh[7], null);
+                accentRockTexture = textureMasksHigh[7].copy();
             }
 
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
@@ -399,7 +399,7 @@ public strictfp class MapPopulator {
             FloatMask erosionHeightMask = heightmapBase.copy().resample(erosionResolution).subtractAvg().multiply(10f).addPerlinNoise(erosionResolution / 16, 4f);
             erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
             NormalMask normal = erosionHeightMask.getNormalMask();
-            map.setCompressedNormal(ImageUtils.compressNormal(normal));
+            map.setCompressedNormal(ImageUtil.compressNormal(normal));
         }
 
         if (populateProps) {
@@ -408,7 +408,7 @@ public strictfp class MapPopulator {
             PropMaterials propMaterials;
 
             try {
-                propMaterials = FileUtils.deserialize(propsPath.toString(), PropMaterials.class);
+                propMaterials = FileUtil.deserialize(propsPath.toString(), PropMaterials.class);
             } catch (IOException e) {
                 throw new Exception("An error occured while loading props\n", e);
             }
@@ -422,11 +422,11 @@ public strictfp class MapPopulator {
             nearSteepHills.inflate(6).add(flatEnoughNearRock.copy().inflate(16).multiply(nearSteepHills.copy().inflate(11).subtract(flatEnough))).multiply(land.copy().deflate(10));
             flatEnoughNearRock.inflate(7).add(nearSteepHills).multiply(flatish);
 
-            BooleanMask treeMask = new BooleanMask(flatEnough);
-            BooleanMask cliffRockMask = new BooleanMask(land);
-            BooleanMask fieldStoneMask = new BooleanMask(land);
-            BooleanMask largeRockFieldMask = new BooleanMask(land);
-            BooleanMask smallRockFieldMask = new BooleanMask(land);
+            BooleanMask treeMask = flatEnough.copy();
+            BooleanMask cliffRockMask = land.copy();
+            BooleanMask fieldStoneMask = land.copy();
+            BooleanMask largeRockFieldMask = land.copy();
+            BooleanMask smallRockFieldMask = land.copy();
 
             treeMask.deflate(6).erode(0.5f).multiply(land.copy().deflate(15).acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0));
             cliffRockMask.randomize(.017f).multiply(flatEnoughNearRock);
@@ -434,7 +434,7 @@ public strictfp class MapPopulator {
             largeRockFieldMask.randomize(.015f).multiply(flatEnoughNearRock);
             smallRockFieldMask.randomize(.015f).multiply(flatEnoughNearRock);
 
-            BooleanMask noProps = new BooleanMask(impassable);
+            BooleanMask noProps = impassable.copy();
 
             for (int i = 0; i < map.getSpawnCount(); i++) {
                 noProps.fillCircle(map.getSpawn(i).getPosition(), 30, true);

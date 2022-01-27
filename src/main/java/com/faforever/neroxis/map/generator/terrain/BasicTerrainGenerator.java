@@ -116,9 +116,9 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         if (!mapParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
             float halfSize = map.getSize() / 2f;
             int forceRadius = mapParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
-            land.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
-            plateaus.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
-            mountains.limitToCenteredCircle(halfSize).applySymmetry().inflate(forceRadius).deflate(forceRadius);
+            land.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
+            plateaus.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
+            mountains.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
         }
     }
 
@@ -231,13 +231,13 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected void enforceSymmetry() {
         SymmetrySettings symmetrySettings = heightmap.getSymmetrySettings();
         if (!symmetrySettings.getTerrainSymmetry().isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-            land.applySymmetry();
-            mountains.applySymmetry();
-            plateaus.applySymmetry();
-            ramps.applySymmetry();
-            hills.applySymmetry();
-            valleys.applySymmetry();
-            connections.applySymmetry();
+            land.forceSymmetry();
+            mountains.forceSymmetry();
+            plateaus.forceSymmetry();
+            ramps.forceSymmetry();
+            hills.forceSymmetry();
+            valleys.forceSymmetry();
+            connections.forceSymmetry();
         }
     }
 

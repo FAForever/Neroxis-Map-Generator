@@ -5,7 +5,7 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serialized.LightingSettings;
+import com.faforever.neroxis.util.serial.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
-public strictfp class ImageUtils {
+public strictfp class ImageUtil {
 
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
         if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {
@@ -54,7 +54,7 @@ public strictfp class ImageUtils {
     }
 
     public static BufferedImage readImage(String resource) throws IOException {
-        InputStream inputStream = ImageUtils.class.getResourceAsStream(resource);
+        InputStream inputStream = ImageUtil.class.getResourceAsStream(resource);
         return ImageIO.read(inputStream);
     }
 
