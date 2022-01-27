@@ -16,7 +16,6 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -350,22 +349,6 @@ public class MapGeneratorTest {
 
         assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
                 mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
-    }
-
-    @Test
-    @Disabled
-    public void TestEqualityWithVisualizationMapNameKeyword() throws Exception {
-        instance.interpretArguments(keywordArgs);
-        SCMap map1 = instance.generate();
-
-        Pipeline.reset();
-        instance = new MapGenerator();
-
-        String[] args = {"--map-name", map1.getName(), "--visualize"};
-        instance.interpretArguments(args);
-        SCMap map2 = instance.generate();
-
-        assertSCMapEquality(map1, map2);
     }
 
     private void assertSCMapEquality(SCMap map1, SCMap map2) {
