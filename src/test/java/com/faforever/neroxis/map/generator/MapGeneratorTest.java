@@ -155,6 +155,21 @@ public class MapGeneratorTest {
     }
 
     @Test
+    public void TestEqualityWithDebugMapNameKeyword() throws Exception {
+        instance.interpretArguments(keywordArgs);
+        SCMap map1 = instance.generate();
+
+        Pipeline.reset();
+        instance = new MapGenerator();
+
+        String[] args = {"--map-name", map1.getName(), "--debug"};
+        instance.interpretArguments(args);
+        SCMap map2 = instance.generate();
+
+        assertSCMapEquality(map1, map2);
+    }
+
+    @Test
     public void TestEqualityTournamentStyle() throws Exception {
         instance.interpretArguments(new String[]{"--tournament-style", "--map-size", "256"});
         SCMap map1 = instance.generate();
