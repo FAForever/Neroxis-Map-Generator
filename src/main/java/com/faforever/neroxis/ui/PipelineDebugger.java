@@ -60,7 +60,7 @@ public strictfp class PipelineDebugger {
         graphCanvas.setMinimumSize(new Dimension(450, 450));
         graphCanvas.setPreferredSize(new Dimension(450, 450));
         graphCanvas.setEntryVertexSelectionAction(entry -> {
-            mainEntryPanel.setEntry(entry);
+            mainEntryPanel.setMask(entry.getImmutableResult());
             frame.setTitle(String.format("Mask: %s MaskSize: %d", entry.getExecutingMask().getName(), entry.getImmutableResult().getSize()));
         });
 

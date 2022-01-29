@@ -29,6 +29,7 @@ public class GraphSerializationUtil {
     private static final String EXECUTABLE_ATTRIBUTE = "executable";
     private static final String PARAMETER_COUNT_ATTRIBUTE = "parameterCount";
     private static final String PARAMETER_NAME_ATTRIBUTE = "parameterName";
+    private static final String RESULT_NAME_ATTRIBUTE = "resultName";
 
     static {
         EXPORTER.setVertexAttributeProvider(GraphSerializationUtil::getAttributeMap);
@@ -82,12 +83,13 @@ public class GraphSerializationUtil {
     }
 
     private static MaskMethodEdge getMaskMethodEdgeFromAttributes(Map<String, Attribute> attributeMap) {
-        return new MaskMethodEdge(attributeMap.get(PARAMETER_NAME_ATTRIBUTE).getValue());
+        return new MaskMethodEdge(attributeMap.get(RESULT_NAME_ATTRIBUTE).getValue(), attributeMap.get(PARAMETER_NAME_ATTRIBUTE).getValue());
     }
 
     private static Map<String, Attribute> getAttributeMap(MaskMethodEdge maskMethodEdge) {
         Map<String, Attribute> attributeMap = new LinkedHashMap<>();
         attributeMap.put(PARAMETER_NAME_ATTRIBUTE, DefaultAttribute.createAttribute(maskMethodEdge.getParameterName()));
+        attributeMap.put(RESULT_NAME_ATTRIBUTE, DefaultAttribute.createAttribute(maskMethodEdge.getResultName()));
         return attributeMap;
     }
 
@@ -102,7 +104,7 @@ public class GraphSerializationUtil {
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
             if (!Mask.class.isAssignableFrom(MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), parameter))) {
-                attributeMap.put(PARAMETER_VALUE_PREFIX + i, objectToAttribute(vertex.getParameter(parameter)));
+                attributeMap.put(PARAMETER_VALUE_PREFIX + i, objectToAttribute(vertex.getParameterExpression(parameter)));
             }
             attributeMap.put(PARAMETER_CLASS_PREFIX + i, DefaultAttribute.createAttribute(parameter.getType().getName()));
         }

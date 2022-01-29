@@ -8,10 +8,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 @Getter
-public class MaskConstructorVertex<T extends Mask<?, ?>> extends MaskGraphVertex<Constructor<T>> {
+public strictfp class MaskConstructorVertex<T extends Mask<?, ?>> extends MaskGraphVertex<Constructor<T>> {
 
     @Override
-    public Mask<?, ?> call(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+    protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
         Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
             try {
                 return getParameterFinalValue(parameter, graphContext);
@@ -19,11 +19,6 @@ public class MaskConstructorVertex<T extends Mask<?, ?>> extends MaskGraphVertex
                 throw new RuntimeException(e);
             }
         }).toArray();
-        return ((Constructor<? extends Mask<?, ?>>) executable).newInstance(args);
-    }
-
-    @Override
-    public Class<? extends Mask<?, ?>> getResultClass() {
-        return executorClass;
+        results.put(SELF, ((Constructor<? extends Mask<?, ?>>) executable).newInstance(args));
     }
 }

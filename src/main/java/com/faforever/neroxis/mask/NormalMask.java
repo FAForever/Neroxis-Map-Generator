@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.ui.GraphParameter;
@@ -23,8 +22,8 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     @GraphMethod
     @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
-    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "seed", value = "random.nextLong()")
+    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     @GraphParameter(name = "name", nullable = true)
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
@@ -47,12 +46,12 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, scale, null);
     }
 
-    public NormalMask(FloatMask other, float scale, String name) {
+    protected NormalMask(FloatMask other, float scale, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            set(point -> source.getNormalAt(point, scale));
+            set(point -> source.calculateNormalAt(point, scale));
         }, other);
     }
 
@@ -77,18 +76,16 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     @GraphMethod
     public NormalMask cross(NormalMask other) {
         assertCompatibleMask(other);
-        enqueue((dependencies) -> {
+        return enqueue(dependencies -> {
             Vector3Mask source = (Vector3Mask) dependencies.get(0);
             set(point -> get(point).cross(source.get(point)));
         }, other);
-        return this;
     }
 
     @GraphMethod
     public NormalMask cross(Vector3 vector) {
         Vector3 normalizedVector = vector.copy().normalize();
-        enqueue(() -> set(point -> get(point).cross(normalizedVector)));
-        return this;
+        return enqueue(() -> set(point -> get(point).cross(normalizedVector)));
     }
 
     @Override

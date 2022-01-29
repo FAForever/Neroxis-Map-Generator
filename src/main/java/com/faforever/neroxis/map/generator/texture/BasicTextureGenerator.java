@@ -124,6 +124,6 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         rockPreviewTexture = rockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         accentRockPreviewTexture = accentRockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        reflectance = heightmap.copy().getNormalMask(8f).resample(PreviewGenerator.PREVIEW_SIZE).dot(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
+        reflectance = heightmap.copy().copyAsNormalMask(8f).resample(PreviewGenerator.PREVIEW_SIZE).copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
     }
 }

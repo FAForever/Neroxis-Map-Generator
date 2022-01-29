@@ -16,51 +16,51 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         super(other, name);
     }
 
-    public boolean valueAtEqualTo(Point point, T value) {
+    protected boolean valueAtEqualTo(Point point, T value) {
         return valueAtEqualTo(point.x, point.y, value);
     }
 
-    public boolean valueAtEqualTo(int x, int y, T value) {
+    protected boolean valueAtEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) == 0;
     }
 
-    public boolean valueAtLessThan(Point point, T value) {
+    protected boolean valueAtLessThan(Point point, T value) {
         return valueAtLessThan(point.x, point.y, value);
     }
 
-    public boolean valueAtLessThan(int x, int y, T value) {
+    protected boolean valueAtLessThan(int x, int y, T value) {
         return get(x, y).compareTo(value) < 0;
     }
 
-    public boolean valueAtLessThanEqualTo(Point point, T value) {
+    protected boolean valueAtLessThanEqualTo(Point point, T value) {
         return valueAtLessThanEqualTo(point.x, point.y, value);
     }
 
-    public boolean valueAtLessThanEqualTo(int x, int y, T value) {
+    protected boolean valueAtLessThanEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) <= 0;
     }
 
-    public boolean valueAtGreaterThan(Point point, T value) {
+    protected boolean valueAtGreaterThan(Point point, T value) {
         return valueAtGreaterThan(point.x, point.y, value);
     }
 
-    public boolean valueAtGreaterThan(int x, int y, T value) {
+    protected boolean valueAtGreaterThan(int x, int y, T value) {
         return get(x, y).compareTo(value) > 0;
     }
 
-    public boolean valueAtGreaterThanEqualTo(Point point, T value) {
+    protected boolean valueAtGreaterThanEqualTo(Point point, T value) {
         return valueAtGreaterThanEqualTo(point.x, point.y, value);
     }
 
-    public boolean valueAtGreaterThanEqualTo(int x, int y, T value) {
+    protected boolean valueAtGreaterThanEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) >= 0;
     }
 
-    public boolean isLocalMax(Point point) {
+    protected boolean isLocalMax(Point point) {
         return isLocalMax(point.x, point.y);
     }
 
-    public boolean isLocalMax(int x, int y) {
+    protected boolean isLocalMax(int x, int y) {
         T value = get(x, y);
         return ((x > 0 && valueAtLessThanEqualTo(x - 1, y, value))
                 && (x < getSize() - 1 && valueAtLessThanEqualTo(x + 1, y, value))
@@ -72,11 +72,11 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
                 && valueAtLessThanEqualTo(x + 1, y + 1, value));
     }
 
-    public boolean isLocal1DMax(Point point) {
+    protected boolean isLocal1DMax(Point point) {
         return isLocal1DMax(point.x, point.y);
     }
 
-    public boolean isLocal1DMax(int x, int y) {
+    protected boolean isLocal1DMax(int x, int y) {
         T value = get(x, y);
         return (((x > 0 && valueAtLessThanEqualTo(x - 1, y, value))
                 && (x < getSize() - 1 && valueAtLessThanEqualTo(x + 1, y, value)))
@@ -172,30 +172,30 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         return enqueue(() -> set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(point)));
     }
 
-    @GraphMethod
-    public BooleanMask convertToBooleanMask(T minValue) {
+    @GraphMethod(returnsSelf = false)
+    public BooleanMask copyAsBooleanMask(T minValue) {
         return new BooleanMask(this, minValue, getName() + "toBoolean");
     }
 
-    @GraphMethod
-    public BooleanMask convertToBooleanMask(T minValue, T maxValue) {
+    @GraphMethod(returnsSelf = false)
+    public BooleanMask copyAsBooleanMask(T minValue, T maxValue) {
         return new BooleanMask(this, minValue, maxValue, getName() + "toBoolean");
     }
 
-    @GraphMethod
-    public BooleanMask getLocalMaximums(T minValue, T maxValue) {
+    @GraphMethod(returnsSelf = false)
+    public BooleanMask copyAsLocalMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas", isParallel());
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
-    @GraphMethod
-    public BooleanMask getLocal1DMaximums(T minValue, T maxValue) {
+    @GraphMethod(returnsSelf = false)
+    public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "1DMaximas", isParallel());
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
-    @GraphMethod
-    public FloatMask getDistanceFieldForRange(T minValue, T maxValue) {
-        return convertToBooleanMask(minValue, maxValue).getDistanceField();
+    @GraphMethod(returnsSelf = false)
+    public FloatMask copyAsDistanceFieldForRange(T minValue, T maxValue) {
+        return copyAsBooleanMask(minValue, maxValue).getDistanceField();
     }
 }

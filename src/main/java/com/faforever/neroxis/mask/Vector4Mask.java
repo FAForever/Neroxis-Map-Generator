@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.ui.GraphParameter;
@@ -22,8 +21,8 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
 
     @GraphMethod
     @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
-    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "seed", value = "random.nextLong()")
+    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     @GraphParameter(name = "name", nullable = true)
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);

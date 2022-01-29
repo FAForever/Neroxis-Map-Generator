@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -44,8 +43,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
-    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "seed", value = "random.nextLong()")
+    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     @GraphParameter(name = "name", nullable = true)
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
@@ -202,11 +201,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     public BooleanMask blur(int radius, float density) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int[][] innerCount = getInnerCount();
             apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount), density)));
         });
-        return this;
     }
 
     @Override
@@ -318,7 +316,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected BooleanMask copyFrom(BooleanMask other) {
-        return enqueue((dependencies) -> {
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             fill(source.mask, source.maskBooleanSize);
         }, other);
@@ -334,7 +332,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     protected BooleanMask fill(long[] arrayToFillFrom, int maskBooleanSize) {
-        assertNotPipelined();
         int arraySize = arrayToFillFrom.length;
         mask = new long[arraySize];
         this.maskBooleanSize = maskBooleanSize;
@@ -356,12 +353,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue) {
-        init(other.convertToBooleanMask(minValue));
+        init(other.copyAsBooleanMask(minValue));
         return this;
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other, T minValue, T maxValue) {
-        init(other.convertToBooleanMask(minValue, maxValue));
+        init(other.copyAsBooleanMask(minValue, maxValue));
         return this;
     }
 
@@ -370,20 +367,18 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return randomize(density, SymmetryType.TERRAIN);
     }
 
-    @GraphMethod
     public BooleanMask randomize(float density, SymmetryType symmetryType) {
         return enqueue(() -> setWithSymmetry(symmetryType, point -> random.nextFloat() < density));
     }
 
     @GraphMethod
     public BooleanMask flipValues(float density) {
-        enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getPrimitive(point) && random.nextFloat() < density));
-        return this;
+        return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getPrimitive(point) && random.nextFloat() < density));
     }
 
     @GraphMethod
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
-        enqueue(() -> {
+        return enqueue(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
                 int minXBound = getMinXBound(SymmetryType.TERRAIN);
@@ -404,15 +399,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             }
         });
-        return this;
     }
 
     public BooleanMask guidedWalkWithBrush(Vector2 start, Vector2 target, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
-        enqueue(() -> {
+        return enqueue(() -> {
             Vector2 location = new Vector2(start);
             BooleanMask brush = loadBrush(brushName, null)
-                    .setSize(size).convertToBooleanMask(minValue, maxValue);
+                    .setSize(size).copyAsBooleanMask(minValue, maxValue);
             float targetX = target.getX();
             float targetY = target.getY();
             if (wrapEdges) {
@@ -445,11 +439,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 location.add(new Vector2(dx, dy));
             }
         });
-        return this;
     }
 
     public BooleanMask path(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             List<Vector2> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2(start));
@@ -486,11 +479,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             }
         });
-        return this;
     }
 
     public BooleanMask pathBezier(Vector2 start, Vector2 end, int minOrder, int maxOrder, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             List<Vector2> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2(start));
@@ -515,23 +507,21 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 fillCoordinates(points.stream().filter(this::inBounds).collect(Collectors.toList()), true);
             }
         });
-        return this;
     }
 
     public BooleanMask connect(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints, float midPointMaxDistance, float midPointMinDistance, float maxAngleError, SymmetryType symmetryType) {
-        enqueue(() -> {
+        return enqueue(() -> {
             path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
                 List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
                 path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError, symmetryType);
             }
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask progressiveWalk(int numWalkers, int numSteps) {
-        enqueue(() -> {
+        return enqueue(() -> {
             for (int i = 0; i < numWalkers; i++) {
                 int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN)) + getMinXBound(SymmetryType.TERRAIN);
                 int y = random.nextInt(getMaxYBound(x, SymmetryType.TERRAIN) - getMinYBound(x, SymmetryType.TERRAIN) + 1) + getMinYBound(x, SymmetryType.TERRAIN);
@@ -551,17 +541,15 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             }
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask space(float minSpacing, float maxSpacing) {
-        enqueue(() -> {
+        return enqueue(() -> {
             List<Vector2> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
             clear();
             fillCoordinates(coordinates, true);
         });
-        return this;
     }
 
     @GraphMethod
@@ -575,7 +563,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     public BooleanMask inflate(float radius) {
-        enqueue(() -> {
+        return enqueue(() -> {
             long[] maskCopy = getMaskCopy();
             apply(point -> {
                 if (getPrimitive(point) && isEdge(point)) {
@@ -584,12 +572,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             });
             mask = maskCopy;
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask deflate(float radius) {
-        enqueue(() -> {
+        return enqueue(() -> {
             long[] maskCopy = getMaskCopy();
             apply(point -> {
                 if (!getPrimitive(point) && isEdge(point)) {
@@ -598,7 +585,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             });
             mask = maskCopy;
         });
-        return this;
     }
 
     private void markInRadius(float radius, long[] maskCopy, Point point, boolean value) {
@@ -622,7 +608,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     public BooleanMask cutCorners() {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             long[] maskCopy = getMaskCopy();
             apply(point -> {
@@ -648,18 +634,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             });
             mask = maskCopy;
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask acid(float strength, float size) {
         BooleanMask holes = new BooleanMask(this, getName() + "holes");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
-        enqueue((dependencies) -> {
+        return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             subtract(source);
         }, holes);
-        return this;
     }
 
     @GraphMethod
@@ -670,7 +654,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @GraphMethod
     public BooleanMask dilute(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
@@ -682,7 +666,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask = maskCopy;
             }
         });
-        return this;
     }
 
     @GraphMethod
@@ -693,7 +676,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @GraphMethod
     public BooleanMask erode(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
@@ -705,55 +688,49 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask = maskCopy;
             }
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask outline() {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             long[] maskCopy = new long[minimumArraySize(size)];
             apply(point -> setBit(point, isEdge(point), size, maskCopy));
             mask = maskCopy;
         });
-        return this;
     }
 
     private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask addWithOffset(T other, U minValue, U maxValue, Vector2 offset, boolean wrapEdges) {
-        addWithOffset(other.convertToBooleanMask(minValue, maxValue), offset, true, wrapEdges);
-        return this;
+        return addWithOffset(other.copyAsBooleanMask(minValue, maxValue), offset, true, wrapEdges);
     }
 
     public BooleanMask addBrush(Vector2 location, String brushName, float minValue, float maxValue, int size) {
-        enqueue(() -> {
+        return enqueue(() -> {
             FloatMask brush = loadBrush(brushName, null).setSize(size);
             addWithOffset(brush, minValue, maxValue, location, false);
         });
-        return this;
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask initMaxima(ComparableMask<T, U> other, T minValue, T maxValue) {
         assertCompatibleMask(other);
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
             setWithSymmetry(SymmetryType.SPAWN, point -> {
                 T value = source.get(point);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMax(point);
             });
         }, other);
-        return this;
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init1DMaxima(ComparableMask<T, U> other, T minValue, T maxValue) {
         assertCompatibleMask(other);
-        enqueue(dependencies -> {
+        return enqueue(dependencies -> {
             ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
             setWithSymmetry(SymmetryType.SPAWN, point -> {
                 T value = source.get(point);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMax(point);
             });
         }, other);
-        return this;
     }
 
     @GraphMethod
@@ -763,7 +740,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int minXBound = getMinXBound(symmetryType);
             int maxXBound = getMaxXBound(symmetryType);
             apply(point -> {
@@ -772,18 +749,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 setPrimitive(point, getPrimitive(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType) || y >= getMaxYBound(x, symmetryType)));
             });
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask limitToCenteredCircle(float circleRadius) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "symmetryLimit");
             symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
             multiply(symmetryLimit);
         });
-        return this;
     }
 
 
@@ -793,27 +768,25 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @GraphMethod
     public BooleanMask fillGaps(int minDist) {
-        enqueue(() -> {
-            BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
+        return enqueue(() -> {
+            BooleanMask filledGaps = getDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             add(filledGaps);
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask widenGaps(int minDist) {
-        enqueue(() -> {
-            BooleanMask filledGaps = getDistanceField().getLocalMaximums(1f, minDist / 2f);
+        return enqueue(() -> {
+            BooleanMask filledGaps = getDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             subtract(filledGaps);
         });
-        return this;
     }
 
     @GraphMethod
     public BooleanMask removeAreasSmallerThan(int minArea) {
-        enqueue(() -> {
+        return enqueue(() -> {
             int size = getSize();
             Set<Vector2> seen = new HashSet<>(size * size, 1f);
             applyWithSymmetry(SymmetryType.SPAWN, point -> {
@@ -828,14 +801,15 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             });
         });
-        return this;
     }
 
-    public FloatMask convertToFloatMask(float low, float high) {
+    @GraphMethod(returnsSelf = false)
+    public FloatMask copyAsFloatMask(float low, float high) {
         return new FloatMask(this, low, high, getName() + "toFloat");
     }
 
-    public IntegerMask convertToIntegerMask(int low, int high) {
+    @GraphMethod(returnsSelf = false)
+    public IntegerMask copyAsIntegerMask(int low, int high) {
         return new IntegerMask(this, low, high, getName() + "toInteger");
     }
 

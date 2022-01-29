@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
-public @interface GraphParameters {
+public strictfp @interface GraphParameters {
     GraphParameter[] value();
 }

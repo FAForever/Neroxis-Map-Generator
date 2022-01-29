@@ -20,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Executable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,57 +40,67 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
         GraphElementAccessor<MaskGraphVertex<?>, MaskMethodEdge> pickSupport = vv.getPickSupport();
         if (pickSupport != null) {
 
-            final MaskGraphVertex<?> vertex = pickSupport.getVertex(layoutModel, lp);
+            final MaskGraphVertex<?> picked = pickSupport.getVertex(layoutModel, lp);
             final MaskMethodEdge edge = pickSupport.getEdge(layoutModel, lp);
             final MutableSelectedState<MaskGraphVertex<?>> pickedVertexState = vv.getSelectedVertexState();
             final MutableSelectedState<MaskMethodEdge> pickedEdgeState = vv.getSelectedEdgeState();
 
             JPopupMenu popup = new JPopupMenu();
-            if (vertex != null) {
+            if (picked != null) {
                 popup.add(
                         new AbstractAction("Edit Vertex") {
                             public void actionPerformed(ActionEvent e) {
                                 pickedVertexState.clear();
-                                pickedVertexState.select(vertex);
+                                pickedVertexState.select(picked);
                                 vv.repaint();
                             }
                         });
-                Set<MaskGraphVertex<?>> picked = vv.getSelectedVertices();
-                if (picked.size() == 1) {
+                Set<MaskGraphVertex<?>> selectedVerticies = vv.getSelectedVertices();
+                if (selectedVerticies.size() == 1) {
                     JMenu menu = new JMenu("Set as Parameter");
-                    picked.stream().findFirst().ifPresent(other -> {
-                        if (other == vertex) {
+                    selectedVerticies.stream().findFirst().ifPresent(selected -> {
+                        if (selected == picked) {
                             return;
                         }
 
-                        Executable executable = other.getExecutable();
-                        if (executable != null) {
-                            Arrays.stream(executable.getParameters())
-                                    .filter(parameter -> other.getParameter(parameter) == null)
-                                    .filter(parameter -> MaskReflectUtil.getActualParameterClass(other.getExecutorClass(), parameter).isAssignableFrom(vertex.getResultClass()))
-                                    .forEach(parameter -> menu.add(
-                                            new AbstractAction(parameter.getName()) {
-                                                public void actionPerformed(ActionEvent e) {
-                                                    graph.addEdge(vertex, other, new MaskMethodEdge(parameter.getName()));
-                                                    vv.repaint();
-                                                    vv.fireStateChanged();
-                                                }
-                                            }));
+                        List<String> resultNames = picked.getResultNames();
+                        if (!resultNames.isEmpty()) {
+                            Executable executable = selected.getExecutable();
+                            if (executable != null) {
+                                resultNames.forEach(resultName -> {
+                                    JMenu resultMenu = new JMenu(resultName);
+                                    Arrays.stream(executable.getParameters())
+                                            .filter(parameter -> MaskReflectUtil.getActualParameterClass(selected.getExecutorClass(), parameter).isAssignableFrom(picked.getResultClass(resultName)))
+                                            .forEach(parameter -> resultMenu.add(
+                                                    new AbstractAction(parameter.getName()) {
+                                                        public void actionPerformed(ActionEvent e) {
+                                                            graph.addEdge(picked, selected, new MaskMethodEdge(resultName, parameter.getName()));
+                                                            vv.repaint();
+                                                            vv.fireStateChanged();
+                                                        }
+                                                    }));
+
+                                    if (selected instanceof MaskMethodVertex
+                                            && Objects.equals(picked.getResultClass(resultName), selected.getExecutorClass())
+                                            && graph.outgoingEdgesOf(picked).stream().noneMatch(outEdge -> "executor".equals(outEdge.getParameterName()) && resultName.equals(outEdge.getResultName()))
+                                    ) {
+                                        resultMenu.add(
+                                                new AbstractAction("executor") {
+                                                    public void actionPerformed(ActionEvent e) {
+                                                        graph.addEdge(picked, selected, new MaskMethodEdge(resultName, "executor"));
+                                                        vv.repaint();
+                                                        vv.fireStateChanged();
+                                                    }
+                                                });
+                                    }
+                                    if (resultMenu.getItemCount() > 0) {
+                                        menu.add(resultMenu);
+                                    }
+                                });
+                            }
                         }
 
-                        if (other instanceof MaskMethodVertex
-                                && Objects.equals(vertex.getResultClass(), other.getExecutorClass())
-                                && graph.outgoingEdgesOf(vertex).stream().noneMatch(outEdge -> "executor".equals(outEdge.getParameterName()))
-                        ) {
-                            menu.add(
-                                    new AbstractAction("executor") {
-                                        public void actionPerformed(ActionEvent e) {
-                                            graph.addEdge(vertex, other, new MaskMethodEdge("executor"));
-                                            vv.repaint();
-                                            vv.fireStateChanged();
-                                        }
-                                    });
-                        }
+
                     });
                     if (menu.getItemCount() > 0) {
                         popup.add(menu);
@@ -98,8 +109,8 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
                 popup.add(
                         new AbstractAction("Delete Vertex") {
                             public void actionPerformed(ActionEvent e) {
-                                pickedVertexState.deselect(vertex);
-                                graph.removeVertex(vertex);
+                                pickedVertexState.deselect(picked);
+                                graph.removeVertex(picked);
                                 vv.getVertexSpatial().recalculate();
                                 vv.repaint();
                                 vv.fireStateChanged();
@@ -127,8 +138,6 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
                                 graph.addVertex(newVertex);
                                 Point2D p2d = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(p);
                                 vv.getVisualizationModel().getLayoutModel().set(newVertex, p2d.getX(), p2d.getY());
-                                vv.getSelectedVertexState().clear();
-                                vv.getSelectedVertexState().select(newVertex);
                                 vv.repaint();
                                 vv.fireStateChanged();
                             }

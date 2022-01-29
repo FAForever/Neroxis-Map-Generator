@@ -122,7 +122,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     protected U copyFrom(U other) {
-        return enqueue((dependencies) -> fill(((U) dependencies.get(0)).mask), other);
+        return enqueue(dependencies -> fill(((U) dependencies.get(0)).mask), other);
     }
 
     public float getMaxMagnitude() {
@@ -309,17 +309,17 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod
     public U normalize() {
-        return enqueue((dependencies) -> apply(point -> get(point).normalize()));
+        return enqueue(dependencies -> apply(point -> get(point).normalize()));
     }
 
-    @GraphMethod
-    public FloatMask dot(U other) {
+    @GraphMethod(returnsSelf = false)
+    public FloatMask copyAsDotProduct(U other) {
         assertCompatibleMask(other);
         return new FloatMask(this, other, getName() + "dot" + other.getName());
     }
 
     @GraphMethod
-    public FloatMask dot(T vector) {
+    public FloatMask copyAsDotProduct(T vector) {
         assertMatchingDimension(vector.getDimension());
         return new FloatMask(this, vector, getName() + "dot");
     }
@@ -444,8 +444,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         }, other);
     }
 
-    @GraphMethod
-    public FloatMask getComponentMask(int component) {
+    @GraphMethod(returnsSelf = false)
+    public FloatMask copyAsComponentMask(int component) {
         return new FloatMask(this, component, getName() + "Component" + component);
     }
 
@@ -634,7 +634,6 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected U fill(T[][] maskToFillFrom) {
-        assertNotPipelined();
         int maskSize = maskToFillFrom.length;
         mask = getNullMask(maskSize);
         for (int x = 0; x < maskSize; x++) {

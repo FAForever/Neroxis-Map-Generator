@@ -58,7 +58,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     }
 
     protected void passableSetup() {
-        BooleanMask actualLand = heightmap.convertToBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
+        BooleanMask actualLand = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);

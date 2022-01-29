@@ -288,14 +288,14 @@ public strictfp class MapPopulator {
             map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
 
             BooleanMask water = land.copy().invert();
-            BooleanMask flat = slope.convertToBooleanMask(.05f).invert();
+            BooleanMask flat = slope.copyAsBooleanMask(.05f).invert();
             BooleanMask inland = land.copy();
-            BooleanMask highGround = heightmapBase.convertToBooleanMask(waterHeight + 3f);
-            BooleanMask aboveBeach = heightmapBase.convertToBooleanMask(waterHeight + 1.5f);
-            BooleanMask aboveBeachEdge = heightmapBase.convertToBooleanMask(waterHeight + 3f);
-            BooleanMask flatAboveCoast = heightmapBase.convertToBooleanMask(waterHeight + .29f);
-            BooleanMask higherFlatAboveCoast = heightmapBase.convertToBooleanMask(waterHeight + 1.2f);
-            BooleanMask lowWaterBeach = heightmapBase.convertToBooleanMask(waterHeight);
+            BooleanMask highGround = heightmapBase.copyAsBooleanMask(waterHeight + 3f);
+            BooleanMask aboveBeach = heightmapBase.copyAsBooleanMask(waterHeight + 1.5f);
+            BooleanMask aboveBeachEdge = heightmapBase.copyAsBooleanMask(waterHeight + 3f);
+            BooleanMask flatAboveCoast = heightmapBase.copyAsBooleanMask(waterHeight + .29f);
+            BooleanMask higherFlatAboveCoast = heightmapBase.copyAsBooleanMask(waterHeight + 1.2f);
+            BooleanMask lowWaterBeach = heightmapBase.copyAsBooleanMask(waterHeight);
             BooleanMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
             BooleanMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
             BooleanMask smallWaterBeach = smallWater.copy().subtract(tinyWater).inflate(2).add(tinyWater);
@@ -398,7 +398,7 @@ public strictfp class MapPopulator {
             }
             FloatMask erosionHeightMask = heightmapBase.copy().resample(erosionResolution).subtractAvg().multiply(10f).addPerlinNoise(erosionResolution / 16, 4f);
             erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
-            NormalMask normal = erosionHeightMask.getNormalMask();
+            NormalMask normal = erosionHeightMask.copyAsNormalMask();
             map.setCompressedNormal(ImageUtil.compressNormal(normal));
         }
 

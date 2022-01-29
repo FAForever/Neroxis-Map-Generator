@@ -3,9 +3,11 @@ package com.faforever.neroxis.ui.panel;
 import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.ui.control.MaskGraphEditingModalGraphMouse;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.GraphSerializationUtil;
 import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
@@ -29,7 +31,10 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -59,7 +64,7 @@ public strictfp class PipelinePanel extends JPanel {
         graph.addGraphListener(new GraphListener<>() {
             @Override
             public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-                e.getEdgeTarget().setParameter(e.getEdge().getParameterName(), e.getEdgeSource());
+                e.getEdgeTarget().setParameter(e.getEdge().getParameterName(), new MaskVertexResult(e.getEdge().getResultName(), e.getEdgeSource()));
                 vertexEditPanel.updatePanel();
             }
 
@@ -71,10 +76,14 @@ public strictfp class PipelinePanel extends JPanel {
 
             @Override
             public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+                graphViewer.getSelectedVertexState().clear();
+                graphViewer.getSelectedVertexState().select(e.getVertex());
             }
 
             @Override
             public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+                MaskGraphVertex<?> vertex = e.getVertex();
+                graphViewer.getSelectedVertexState().deselect(vertex);
             }
         });
         setLayout(new GridBagLayout());
@@ -98,7 +107,7 @@ public strictfp class PipelinePanel extends JPanel {
 
             if (vertex.getExecutorClass() == null || vertex.getExecutable() == null) {
                 return Color.RED;
-            } else if (!vertex.isFullyDefined()) {
+            } else if (vertex.isNotDefined()) {
                 return Color.CYAN;
             } else {
                 return Color.GREEN;
@@ -107,7 +116,11 @@ public strictfp class PipelinePanel extends JPanel {
 
         Function<MaskMethodEdge, Paint> edgePaintFunction = edge -> {
             if ("executor".equals(edge.getParameterName())) {
-                return Color.RED;
+                if (MaskGraphVertex.SELF.equals(edge.getResultName())) {
+                    return Color.RED;
+                } else {
+                    return Color.BLUE;
+                }
             }
 
             return Color.BLACK;
@@ -115,7 +128,7 @@ public strictfp class PipelinePanel extends JPanel {
         renderContext.setEdgeDrawPaintFunction(edgePaintFunction);
         renderContext.setArrowFillPaintFunction(edgePaintFunction);
         renderContext.setArrowDrawPaintFunction(edgePaintFunction);
-        renderContext.setEdgeLabelFunction(MaskMethodEdge::getParameterName);
+        renderContext.setEdgeLabelFunction(edge -> String.format("%s -> %s", edge.getResultName(), edge.getParameterName()));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -173,22 +186,24 @@ public strictfp class PipelinePanel extends JPanel {
         runButton.setText("Test Run");
         runButton.addActionListener(e -> {
             Pipeline.reset();
+            List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
             rawGraph.forEach(maskGraphVertex -> {
                 maskGraphVertex.resetResult();
                 if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
-                    graph.removeVertex(maskGraphVertex);
+                    verticesToRemove.add(maskGraphVertex);
                 }
             });
-            rawGraph.forEach(vertex -> {
+            graphViewer.getVisualizationModel().getGraph().removeAllVertices(verticesToRemove);
+            DebugUtil.timedRun("Setup pipeline", () -> rawGraph.forEach(vertex -> {
                 try {
-                    vertex.prepareResult(new GraphContext(0L, new SymmetrySettings(Symmetry.POINT2)));
+                    vertex.prepareResults(new GraphContext(new Random().nextLong(), new SymmetrySettings(Symmetry.POINT2)));
                 } catch (InvocationTargetException | IllegalAccessException | InstantiationException ex) {
                     throw new RuntimeException(ex);
                 }
-            });
+            }));
             Pipeline.start();
             Pipeline.join();
-            graphViewer.getSelectedVertices().stream().findFirst().map(MaskGraphVertex::getEntry).ifPresent(entryPanel::setEntry);
+            graphViewer.getSelectedVertices().stream().findFirst().map(vertex -> vertex.getImmutableResult(MaskGraphVertex.SELF)).ifPresent(entryPanel::setMask);
         });
 
         buttonPanel.add(runButton);
@@ -250,11 +265,11 @@ public strictfp class PipelinePanel extends JPanel {
         if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof MaskGraphVertex) {
             MaskGraphVertex<?> vertex = (MaskGraphVertex<?>) e.getItem();
             vertexEditPanel.setVertex(vertex);
-            if (vertex.getEntry() != null) {
-                entryPanel.setEntry(vertex.getEntry());
-            } else if (vertex.getResult() != null) {
-                entryPanel.setMask(vertex.getResult());
+            if (vertex.getExecutable() != null && vertex.isComputed()) {
+                entryPanel.setMask(vertex.getImmutableResult(MaskGraphVertex.SELF));
             }
+        } else if (e.getStateChange() == ItemEvent.DESELECTED && e.getItem() instanceof MaskGraphVertex) {
+            vertexEditPanel.setVertex(null);
         }
     }
 }

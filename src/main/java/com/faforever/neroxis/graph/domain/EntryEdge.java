@@ -4,7 +4,7 @@ import com.faforever.neroxis.util.Pipeline;
 import lombok.Value;
 
 @Value
-public class EntryEdge {
+public strictfp class EntryEdge {
     EntryVertex from;
     EntryVertex to;
     Pipeline.Entry entry;

@@ -14,7 +14,7 @@ public strictfp class AIMarkerPlacer {
 
     public static void placeAIMarkers(BooleanMask passable, List<AIMarker> markers, String nameFormat) {
         LinkedHashSet<Vector2> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
-        coordinates.addAll(passable.getDistanceField().getLocalMaximums(8f, (float) passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
+        coordinates.addAll(passable.getDistanceField().copyAsLocalMaximums(8f, (float) passable.getSize()).getSpacedCoordinatesEqualTo(true, 16, 4));
         LinkedHashSet<Vector2> unusedCoordinates = new LinkedHashSet<>();
         coordinates.forEach(location -> {
             if (!unusedCoordinates.contains(location)) {

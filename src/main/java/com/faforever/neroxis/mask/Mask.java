@@ -158,13 +158,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     @SneakyThrows
-    @GraphMethod
+    @GraphMethod(returnsSelf = false)
     public U copy() {
         return copy(getName() + COPY_NAME);
     }
 
     @SneakyThrows
-    @GraphMethod
+    @GraphMethod(returnsSelf = false)
     public U copy(String maskName) {
         Class<?> clazz = getClass();
         return (U) clazz.getConstructor(clazz, String.class).newInstance(this, maskName);
@@ -433,7 +433,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return switch (symmetry) {
             case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> getMaxYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
             case ZX, DIAG -> size - x;
-            case Z, POINT2, POINT4, QUAD -> size / 2 + 1;
+            case Z, POINT2, POINT4, QUAD -> size / 2 + size % 2;
             default -> size;
         };
     }

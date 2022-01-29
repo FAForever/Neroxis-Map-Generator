@@ -11,6 +11,7 @@ import com.faforever.neroxis.ui.renderer.StringListCellRenderer;
 import com.faforever.neroxis.ui.renderer.StringTableCellRenderer;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import lombok.Setter;
+import org.jgrapht.Graph;
 import org.jungrapht.visualization.VisualizationViewer;
 
 import javax.swing.*;
@@ -200,8 +201,14 @@ public class MaskGraphVertexEditPanel extends JPanel {
     }
 
     public void updatePanel() {
+        Graph<MaskGraphVertex<?>, MaskMethodEdge> graph = visualizationViewer.getVisualizationModel().getGraph();
+        if (vertex != null && !graph.containsVertex(vertex)) {
+            setVertex(null);
+            return;
+        }
+
         ready = false;
-        boolean hasNoEdges = vertex != null && visualizationViewer.getVisualizationModel().getGraph().incomingEdgesOf(vertex).isEmpty();
+        boolean hasNoEdges = vertex != null && graph.incomingEdgesOf(vertex).isEmpty();
         maskExecutableComboBox.setEnabled(hasNoEdges);
         maskClassComboBox.setEnabled(hasNoEdges);
         maskClassComboBox.setSelectedItem(vertex == null ? null : vertex.getExecutorClass());
@@ -209,8 +216,8 @@ public class MaskGraphVertexEditPanel extends JPanel {
         parameterTableModel.setVertex(vertex);
 
         String resultClassName = "";
-        if (vertex != null && vertex.getResultClass() != null) {
-            resultClassName = vertex.getResultClass().getSimpleName();
+        if (vertex != null && vertex.getResultClass(MaskGraphVertex.SELF) != null) {
+            resultClassName = vertex.getResultClass(MaskGraphVertex.SELF).getSimpleName();
         }
         returnLabel.setText(resultClassName);
 

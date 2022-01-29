@@ -1,6 +1,7 @@
 package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.ui.GraphMethod;
 import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import lombok.Getter;
@@ -10,8 +11,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Getter
-public class MaskMethodVertex extends MaskGraphVertex<Method> {
-    private MaskGraphVertex<?> executor;
+public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
+    public static final String NEW_MASK = "newMask";
+
+    private MaskVertexResult executor;
 
     public void setExecutable(Method method) {
         if (method != null) {
@@ -20,6 +23,10 @@ public class MaskMethodVertex extends MaskGraphVertex<Method> {
             }
         }
         super.setExecutable(method);
+        if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
+            results.put(NEW_MASK, null);
+            resultClasses.put(NEW_MASK, (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType()));
+        }
     }
 
     public void setParameter(String parameterName, Object parameterValue) {
@@ -29,32 +36,32 @@ public class MaskMethodVertex extends MaskGraphVertex<Method> {
 
         if (parameterValue != null
                 && parameterName.equals("executor")
-                && MaskGraphVertex.class.isAssignableFrom(parameterValue.getClass())
-                && executable.getDeclaringClass().isAssignableFrom(((MaskGraphVertex<?>) parameterValue).getResultClass())) {
-            executor = (MaskGraphVertex<?>) parameterValue;
-            checkFullyDefined();
+                && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass())
+                && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
+            executor = (MaskVertexResult) parameterValue;
         } else {
             super.setParameter(parameterName, parameterValue);
         }
     }
 
     @Override
-    protected void checkFullyDefined() {
-        fullyDefined = executor != null && Arrays.stream(executable.getParameters()).allMatch(param -> parameterValues.containsKey(param.getName())
+    public boolean isNotDefined() {
+        return executor == null
+                || !Arrays.stream(executable.getParameters()).allMatch(param -> nonMaskParameters.containsKey(param.getName())
+                || maskParameters.containsKey(param.getName())
                 || Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> param.getName().equals(annotation.name()))
-                .anyMatch(annotation -> annotation.nullable() || !annotation.value().equals("") || !annotation.contextSupplier().equals(GraphContext.SupplierType.USER_SPECIFIED)));
+                .anyMatch(annotation -> annotation.nullable() || !annotation.value().equals("")));
     }
 
     public void clearParameter(String parameterName) {
         if (parameterName.equals("executor")) {
             executor = null;
-            checkFullyDefined();
         } else {
             super.clearParameter(parameterName);
         }
     }
 
-    public Mask<?, ?> call(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
+    protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
         Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
             try {
                 return getParameterFinalValue(parameter, graphContext);
@@ -62,12 +69,13 @@ public class MaskMethodVertex extends MaskGraphVertex<Method> {
                 throw new RuntimeException(e);
             }
         }).toArray();
-        return (Mask<?, ?>) executable.invoke(executor.getResult(), args);
-    }
-
-    @Override
-    public Class<? extends Mask<?, ?>> getResultClass() {
-        return executable == null ? null : (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
+        Mask<?, ?> result = (Mask<?, ?>) executable.invoke(executor.getResult(), args);
+        if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
+            results.put(NEW_MASK, result);
+            results.put(SELF, executor.getResult());
+        } else {
+            results.put(SELF, result);
+        }
     }
 
     public String toString() {

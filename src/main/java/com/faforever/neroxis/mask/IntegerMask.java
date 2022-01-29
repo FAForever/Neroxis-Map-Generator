@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.ui.GraphMethod;
@@ -30,8 +29,8 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @GraphMethod
     @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", contextSupplier = GraphContext.SupplierType.SEED)
-    @GraphParameter(name = "symmetrySettings", contextSupplier = GraphContext.SupplierType.SYMMETRY_SETTINGS)
+    @GraphParameter(name = "seed", value = "random.nextLong()")
+    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     @GraphParameter(name = "name", nullable = true)
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
@@ -167,7 +166,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     protected IntegerMask copyFrom(IntegerMask other) {
-        return enqueue((dependencies) -> fill(((IntegerMask) dependencies.get(0)).mask), other);
+        return enqueue(dependencies -> fill(((IntegerMask) dependencies.get(0)).mask), other);
     }
 
     @Override

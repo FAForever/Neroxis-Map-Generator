@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class MaskMethodEdge {
+public strictfp class MaskMethodEdge {
+    private final String resultName;
     private final String parameterName;
 }

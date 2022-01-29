@@ -220,7 +220,7 @@ public strictfp class ImageGenerator {
                 FloatMask chainTexture = new FloatMask(size, random.nextLong(), new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
                 if(a > 0.75 * levelOfDetail && tooEmpty) {
                     FloatMask wholeImageTexture = redMask.copy().add(greenMask).add(blueMask);
-                    areaToTexture = wholeImageTexture.convertToBooleanMask(0f, 0.1f);
+                    areaToTexture = wholeImageTexture.copyAsBooleanMask(0f, 0.1f);
                     if(areaToTexture.getCount() < size * 3) {
                         tooEmpty = false;
                         areaToTexture = wholeImage;
