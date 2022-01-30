@@ -321,7 +321,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         heightmapMountains.setSize(map.getSize() + 1);
         heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity, mountainBrushIntensity, false);
 
-        BooleanMask paintedMountains = new BooleanMask(heightmapMountains, plateauHeight / 2, "paintedMountains");
+        BooleanMask paintedMountains = heightmapMountains.copyAsBooleanMask(plateauHeight / 2);
 
         mountains.init(paintedMountains);
         land.add(paintedMountains);
@@ -335,7 +335,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         heightmapPlateaus.setSize(map.getSize() + 1);
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
 
-        BooleanMask paintedPlateaus = new BooleanMask(heightmapPlateaus, plateauHeight - 3, "paintedPlateaus");
+        BooleanMask paintedPlateaus = heightmapPlateaus.copyAsBooleanMask(plateauHeight - 3);
 
         land.add(paintedPlateaus);
         plateaus.init(paintedPlateaus);
@@ -343,7 +343,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         heightmapPlateaus.add(plateaus, 2f).clampMax(plateauHeight).blur(1, plateaus);
 
-        BooleanMask plateauBase = new BooleanMask(heightmapPlateaus, 1f, "plateauBase");
+        BooleanMask plateauBase = heightmapPlateaus.copyAsBooleanMask(1f);
 
         heightmapPlateaus.blur(4, plateauBase.copy().inflate(96).subtract(plateauBase.copy().inflate(4)));
     }

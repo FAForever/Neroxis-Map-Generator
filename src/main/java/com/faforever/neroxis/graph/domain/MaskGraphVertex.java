@@ -5,6 +5,7 @@ import com.faforever.neroxis.ui.GraphParameter;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +31,9 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     protected final Map<String, Class<? extends Mask<?, ?>>> resultClasses = new LinkedHashMap<>();
     @Getter
     protected T executable;
+    @Getter
+    @Setter
+    protected String identifier;
     @Getter
     protected Class<? extends Mask<?, ?>> executorClass;
 

@@ -3,6 +3,7 @@ package com.faforever.neroxis.ui.panel;
 import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -24,6 +25,7 @@ import org.jungrapht.visualization.control.EditingModalGraphMouse;
 import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.SugiyamaLayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.sugiyama.Layering;
+import org.jungrapht.visualization.renderers.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,14 +66,30 @@ public strictfp class PipelinePanel extends JPanel {
         graph.addGraphListener(new GraphListener<>() {
             @Override
             public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-                e.getEdgeTarget().setParameter(e.getEdge().getParameterName(), new MaskVertexResult(e.getEdge().getResultName(), e.getEdgeSource()));
+                MaskMethodEdge edge = e.getEdge();
+                MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
+                edgeTarget.setParameter(edge.getParameterName(), new MaskVertexResult(edge.getResultName(), e.getEdgeSource()));
                 vertexEditPanel.updatePanel();
+                if (MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())) {
+                    MaskGraphVertex<?> nextVertex = edgeTarget;
+                    while (nextVertex != null) {
+                        nextVertex.setIdentifier(e.getEdgeSource().getIdentifier());
+                        nextVertex = graph.outgoingEdgesOf(nextVertex).stream().filter(methodEdge ->
+                                        MaskGraphVertex.SELF.equals(methodEdge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(methodEdge.getParameterName())
+                                ).map(graph::getEdgeTarget)
+                                .findFirst()
+                                .orElse(null);
+                    }
+                    graphViewer.repaint();
+                }
             }
 
             @Override
             public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-                e.getEdgeTarget().clearParameter(e.getEdge().getParameterName());
+                MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
+                edgeTarget.clearParameter(e.getEdge().getParameterName());
                 vertexEditPanel.updatePanel();
+                graphViewer.repaint();
             }
 
             @Override
@@ -115,7 +133,7 @@ public strictfp class PipelinePanel extends JPanel {
         });
 
         Function<MaskMethodEdge, Paint> edgePaintFunction = edge -> {
-            if ("executor".equals(edge.getParameterName())) {
+            if (MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())) {
                 if (MaskGraphVertex.SELF.equals(edge.getResultName())) {
                     return Color.RED;
                 } else {
@@ -128,7 +146,9 @@ public strictfp class PipelinePanel extends JPanel {
         renderContext.setEdgeDrawPaintFunction(edgePaintFunction);
         renderContext.setArrowFillPaintFunction(edgePaintFunction);
         renderContext.setArrowDrawPaintFunction(edgePaintFunction);
-        renderContext.setEdgeLabelFunction(edge -> String.format("%s -> %s", edge.getResultName(), edge.getParameterName()));
+        renderContext.setVertexLabelFunction(vertex -> String.format("<html>%s<br/>%s</html>", vertex.getIdentifier(), vertex.getExecutable() == null ? "" : vertex.getExecutable().getName()));
+        renderContext.setVertexLabelPosition(Renderer.VertexLabel.Position.W);
+        graphViewer.setEdgeToolTipFunction(edge -> String.format("%s -> %s", edge.getResultName(), edge.getParameterName()));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -175,9 +195,8 @@ public strictfp class PipelinePanel extends JPanel {
         JButton layoutButton = new JButton();
         layoutButton.setText("Layout Graph");
         layoutButton.addActionListener(e -> {
-            LayoutAlgorithm<MaskGraphVertex<?>> layoutAlgorithm = graphViewer.getVisualizationModel().getLayoutAlgorithm();
-            graphViewer.getVisualizationModel().getLayoutModel().setSize(100, 100);
-            layoutAlgorithm.visit(graphViewer.getVisualizationModel().getLayoutModel());
+            removeUnusedVertices();
+            layoutGraph();
         });
 
         buttonPanel.add(layoutButton);
@@ -186,14 +205,7 @@ public strictfp class PipelinePanel extends JPanel {
         runButton.setText("Test Run");
         runButton.addActionListener(e -> {
             Pipeline.reset();
-            List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
-            rawGraph.forEach(maskGraphVertex -> {
-                maskGraphVertex.resetResult();
-                if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
-                    verticesToRemove.add(maskGraphVertex);
-                }
-            });
-            graphViewer.getVisualizationModel().getGraph().removeAllVertices(verticesToRemove);
+            removeUnusedVertices();
             DebugUtil.timedRun("Setup pipeline", () -> rawGraph.forEach(vertex -> {
                 try {
                     vertex.prepareResults(new GraphContext(new Random().nextLong(), new SymmetrySettings(Symmetry.POINT2)));
@@ -219,9 +231,7 @@ public strictfp class PipelinePanel extends JPanel {
                     graph.removeAllVertices(vertices);
                     GraphSerializationUtil.importGraph(graph, file);
                     vertexEditPanel.setVertex(null);
-                    refreshGraph();
-                    layoutButton.doClick();
-                    graphViewer.repaint();
+                    layoutGraph();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -233,6 +243,7 @@ public strictfp class PipelinePanel extends JPanel {
         JButton exportButton = new JButton();
         exportButton.setText("Export");
         exportButton.addActionListener(e -> {
+            removeUnusedVertices();
             int returnValue = fileChooser.showOpenDialog(this);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
@@ -255,6 +266,24 @@ public strictfp class PipelinePanel extends JPanel {
         constraints.weighty = 0;
 
         add(buttonPanel, constraints);
+    }
+
+    private void layoutGraph() {
+        LayoutAlgorithm<MaskGraphVertex<?>> layoutAlgorithm = graphViewer.getVisualizationModel().getLayoutAlgorithm();
+        graphViewer.getVisualizationModel().getLayoutModel().setSize(100, 100);
+        layoutAlgorithm.visit(graphViewer.getVisualizationModel().getLayoutModel());
+        graphViewer.repaint();
+    }
+
+    private void removeUnusedVertices() {
+        List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
+        rawGraph.forEach(maskGraphVertex -> {
+            maskGraphVertex.resetResult();
+            if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
+                verticesToRemove.add(maskGraphVertex);
+            }
+        });
+        graphViewer.getVisualizationModel().getGraph().removeAllVertices(verticesToRemove);
     }
 
     private void refreshGraph() {

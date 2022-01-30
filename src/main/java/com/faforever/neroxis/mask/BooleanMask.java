@@ -42,10 +42,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @GraphMethod
+    @GraphParameter(name = "name", nullable = true)
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
-    @GraphParameter(name = "name", nullable = true)
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -58,11 +58,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         super(other, name);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
+    protected <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
         this(other, minValue, (String) null);
     }
 
-    public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
+    protected <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
@@ -769,7 +769,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @GraphMethod
     public BooleanMask fillGaps(int minDist) {
         return enqueue(() -> {
-            BooleanMask filledGaps = getDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
+            BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             add(filledGaps);
         });
@@ -778,7 +778,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @GraphMethod
     public BooleanMask widenGaps(int minDist) {
         return enqueue(() -> {
-            BooleanMask filledGaps = getDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
+            BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
             filledGaps.inflate(minDist / 2f);
             subtract(filledGaps);
         });
@@ -808,9 +808,17 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return new FloatMask(this, low, high, getName() + "toFloat");
     }
 
+    public FloatMask copyAsFloatMask(float low, float high, String name) {
+        return new FloatMask(this, low, high, name);
+    }
+
     @GraphMethod(returnsSelf = false)
     public IntegerMask copyAsIntegerMask(int low, int high) {
-        return new IntegerMask(this, low, high, getName() + "toInteger");
+        return copyAsIntegerMask(low, high, getName() + "toInteger");
+    }
+
+    public IntegerMask copyAsIntegerMask(int low, int high, String name) {
+        return new IntegerMask(this, low, high, name);
     }
 
     @GraphMethod
@@ -877,10 +885,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return value >= threshold;
     }
 
-    @GraphMethod
-    public FloatMask getDistanceField() {
+    @GraphMethod(returnsSelf = false)
+    public FloatMask copyAsDistanceField() {
+        return copyAsDistanceField(getName() + "DistanceField");
+    }
+
+    public FloatMask copyAsDistanceField(String name) {
         int size = getSize();
-        FloatMask distanceField = new FloatMask(this, (float) (size * size), 0f, getName() + "DistanceField");
+        FloatMask distanceField = new FloatMask(this, (float) (size * size), 0f, name);
         distanceField.parabolicMinimization();
         return distanceField;
     }

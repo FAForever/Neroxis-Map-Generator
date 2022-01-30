@@ -164,7 +164,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     @SneakyThrows
-    @GraphMethod(returnsSelf = false)
     public U copy(String maskName) {
         Class<?> clazz = getClass();
         return (U) clazz.getConstructor(clazz, String.class).newInstance(this, maskName);

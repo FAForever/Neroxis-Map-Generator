@@ -38,10 +38,10 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @GraphMethod
+    @GraphParameter(name = "name", nullable = true)
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
-    @GraphParameter(name = "name", nullable = true)
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -409,7 +409,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            FloatMask distanceField = source.getDistanceField();
+            FloatMask distanceField = source.copyAsDistanceField();
             add(distanceField.multiply(scale));
         }, other);
     }
@@ -547,11 +547,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int[][] innerCount = new int[size][size];
         apply(point -> calculateInnerValue(innerCount, point, StrictMath.round(getPrimitive(point) * 1000)));
         return innerCount;
-    }
-
-    @GraphMethod
-    public FloatMask copyAsDistanceFieldForRange(float minValue, float maxValue) {
-        return copyAsBooleanMask(minValue, maxValue).getDistanceField();
     }
 
     @GraphMethod

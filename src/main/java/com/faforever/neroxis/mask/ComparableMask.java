@@ -174,12 +174,20 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsBooleanMask(T minValue) {
-        return new BooleanMask(this, minValue, getName() + "toBoolean");
+        return copyAsBooleanMask(minValue, getName() + "toBoolean");
+    }
+
+    public BooleanMask copyAsBooleanMask(T minValue, String name) {
+        return new BooleanMask(this, minValue, name);
     }
 
     @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsBooleanMask(T minValue, T maxValue) {
-        return new BooleanMask(this, minValue, maxValue, getName() + "toBoolean");
+        return copyAsBooleanMask(minValue, maxValue, getName() + "toBoolean");
+    }
+
+    public BooleanMask copyAsBooleanMask(T minValue, T maxValue, String name) {
+        return new BooleanMask(this, minValue, maxValue, name);
     }
 
     @GraphMethod(returnsSelf = false)
@@ -188,14 +196,22 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
-    @GraphMethod(returnsSelf = false)
-    public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "1DMaximas", isParallel());
+    public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue, String name) {
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name, isParallel());
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
     @GraphMethod(returnsSelf = false)
+    public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue) {
+        return copyAsLocal1DMaximums(minValue, maxValue, getName() + "1DMaximas");
+    }
+
+    public FloatMask copyAsDistanceFieldForRange(T minValue, T maxValue, String name) {
+        return copyAsBooleanMask(minValue, maxValue).copyAsDistanceField();
+    }
+
+    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDistanceFieldForRange(T minValue, T maxValue) {
-        return copyAsBooleanMask(minValue, maxValue).getDistanceField();
+        return copyAsDistanceFieldForRange(minValue, maxValue, getName() + "DistanceField");
     }
 }

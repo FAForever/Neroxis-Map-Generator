@@ -30,6 +30,7 @@ public class GraphSerializationUtil {
     private static final String PARAMETER_COUNT_ATTRIBUTE = "parameterCount";
     private static final String PARAMETER_NAME_ATTRIBUTE = "parameterName";
     private static final String RESULT_NAME_ATTRIBUTE = "resultName";
+    private static final String IDENTIFIER_NAME_ATTRIBUTE = "identifier";
 
     static {
         EXPORTER.setVertexAttributeProvider(GraphSerializationUtil::getAttributeMap);
@@ -75,6 +76,7 @@ public class GraphSerializationUtil {
             for (int i = 0; i < parameterCount; ++i) {
                 vertex.setParameter(parameters[i].getName(), parameterValues[i]);
             }
+            vertex.setIdentifier(attributeMap.get(IDENTIFIER_NAME_ATTRIBUTE).getValue());
 
             return vertex;
         } catch (Exception e) {
@@ -97,6 +99,7 @@ public class GraphSerializationUtil {
         Map<String, Attribute> attributeMap = new LinkedHashMap<>();
         attributeMap.put(VERTEX_CLASS_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getClass().getName()));
         attributeMap.put(MASK_CLASS_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getExecutorClass().getName()));
+        attributeMap.put(IDENTIFIER_NAME_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getIdentifier()));
         if (vertex instanceof MaskMethodVertex) {
             attributeMap.put(EXECUTABLE_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getExecutable().getName()));
         }

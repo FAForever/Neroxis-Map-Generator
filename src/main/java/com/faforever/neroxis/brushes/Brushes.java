@@ -33,7 +33,7 @@ public strictfp class Brushes {
             return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), 1f, brushPath);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Could not load brush");
+            throw new RuntimeException(String.format("Could not load brush: %s", brushPath));
         }
     }
 }

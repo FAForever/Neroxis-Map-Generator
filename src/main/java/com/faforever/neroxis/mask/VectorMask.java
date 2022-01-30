@@ -314,14 +314,22 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDotProduct(U other) {
-        assertCompatibleMask(other);
-        return new FloatMask(this, other, getName() + "dot" + other.getName());
+        return copyAsDotProduct(other, getName() + "dot" + other.getName());
     }
 
-    @GraphMethod
+    public FloatMask copyAsDotProduct(U other, String name) {
+        assertCompatibleMask(other);
+        return new FloatMask(this, other, name);
+    }
+
+    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDotProduct(T vector) {
+        return copyAsDotProduct(vector, getName() + "Dot");
+    }
+
+    public FloatMask copyAsDotProduct(T vector, String name) {
         assertMatchingDimension(vector.getDimension());
-        return new FloatMask(this, vector, getName() + "dot");
+        return new FloatMask(this, vector, name);
     }
 
     @GraphMethod
@@ -446,7 +454,11 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod(returnsSelf = false)
     public FloatMask copyAsComponentMask(int component) {
-        return new FloatMask(this, component, getName() + "Component" + component);
+        return copyAsComponentMask(component, getName() + "Component" + component);
+    }
+
+    public FloatMask copyAsComponentMask(int component, String name) {
+        return new FloatMask(this, component, name);
     }
 
     public FloatMask[] splitComponentMasks() {

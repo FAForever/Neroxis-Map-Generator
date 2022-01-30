@@ -13,6 +13,7 @@ import java.util.Arrays;
 @Getter
 public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     public static final String NEW_MASK = "newMask";
+    public static final String EXECUTOR = "executor";
 
     private MaskVertexResult executor;
 
@@ -35,7 +36,7 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         }
 
         if (parameterValue != null
-                && parameterName.equals("executor")
+                && EXECUTOR.equals(parameterName)
                 && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass())
                 && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
             executor = (MaskVertexResult) parameterValue;
@@ -54,7 +55,7 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     public void clearParameter(String parameterName) {
-        if (parameterName.equals("executor")) {
+        if (EXECUTOR.equals(parameterName)) {
             executor = null;
         } else {
             super.clearParameter(parameterName);

@@ -221,11 +221,11 @@ public strictfp class MapPopulator {
             waterHeight = heightmapBase.getMin();
         }
 
-        BooleanMask land = new BooleanMask(heightmapBase, waterHeight);
-        BooleanMask plateaus = new BooleanMask(heightmapBase, waterHeight + 3f);
+        BooleanMask land = heightmapBase.copyAsBooleanMask(waterHeight);
+        BooleanMask plateaus = heightmapBase.copyAsBooleanMask(waterHeight + 3f);
         FloatMask slope = heightmapBase.copy().gradient();
-        BooleanMask impassable = new BooleanMask(slope, .9f);
-        BooleanMask ramps = new BooleanMask(slope, .25f).subtract(impassable);
+        BooleanMask impassable = slope.copyAsBooleanMask(.9f);
+        BooleanMask ramps = slope.copyAsBooleanMask(.25f).subtract(impassable);
         BooleanMask passable = impassable.copy().invert();
         BooleanMask passableLand = land.copy();
         BooleanMask passableWater = land.copy().invert();
@@ -310,14 +310,14 @@ public strictfp class MapPopulator {
 
             smallWaterBeachTexture.init(smallWaterBeach, 0f, 1f).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
 
-            BooleanMask waterBeach = new BooleanMask(heightmapBase, waterHeight + 1f);
+            BooleanMask waterBeach = heightmapBase.copyAsBooleanMask(waterHeight + 1f);
             BooleanMask accentGround = land.copy();
             BooleanMask accentPlateau = plateaus.copy();
-            BooleanMask slopes = new BooleanMask(slope, .1f);
-            BooleanMask accentSlopes = new BooleanMask(slope, .75f).invert();
-            BooleanMask steepHills = new BooleanMask(slope, .55f);
-            BooleanMask rock = new BooleanMask(slope, 1.25f);
-            BooleanMask accentRock = new BooleanMask(slope, 1.25f);
+            BooleanMask slopes = slope.copyAsBooleanMask(.1f);
+            BooleanMask accentSlopes = slope.copyAsBooleanMask(.75f).invert();
+            BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
+            BooleanMask rock = slope.copyAsBooleanMask(1.25f);
+            BooleanMask accentRock = slope.copyAsBooleanMask(1.25f);
             FloatMask waterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentGroundTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
             FloatMask accentPlateauTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
@@ -413,10 +413,10 @@ public strictfp class MapPopulator {
                 throw new Exception("An error occured while loading props\n", e);
             }
 
-            BooleanMask flatEnough = new BooleanMask(slope, .02f);
-            BooleanMask flatish = new BooleanMask(slope, .042f);
-            BooleanMask nearSteepHills = new BooleanMask(slope, .55f);
-            BooleanMask flatEnoughNearRock = new BooleanMask(slope, 1.25f);
+            BooleanMask flatEnough = slope.copyAsBooleanMask(.02f);
+            BooleanMask flatish = slope.copyAsBooleanMask(.042f);
+            BooleanMask nearSteepHills = slope.copyAsBooleanMask(.55f);
+            BooleanMask flatEnoughNearRock = slope.copyAsBooleanMask(1.25f);
             flatEnough.invert().multiply(land).erode(.15f);
             flatish.invert().multiply(land).erode(.15f);
             nearSteepHills.inflate(6).add(flatEnoughNearRock.copy().inflate(16).multiply(nearSteepHills.copy().inflate(11).subtract(flatEnough))).multiply(land.copy().deflate(10));

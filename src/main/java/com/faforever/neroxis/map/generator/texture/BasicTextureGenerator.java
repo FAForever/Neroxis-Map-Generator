@@ -39,8 +39,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, mapParameters, terrainGenerator);
         SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        realLand = new BooleanMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation(), "realLand");
-        realPlateaus = new BooleanMask(heightmap, mapParameters.getBiome().getWaterSettings().getElevation() + 3f, "realPlateaus");
+        realLand = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
+        realPlateaus = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
@@ -92,12 +92,12 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     }
 
     protected void setupTexturePipeline() {
-        BooleanMask flat = new BooleanMask(slope, .05f, "flat").invert();
-        BooleanMask slopes = new BooleanMask(slope, .15f, "slopes");
-        BooleanMask accentSlopes = new BooleanMask(slope, .55f, "accentSlopes").invert().subtract(flat);
-        BooleanMask steepHills = new BooleanMask(slope, .55f, "steepHills");
-        BooleanMask rock = new BooleanMask(slope, .75f, "rock");
-        BooleanMask accentRock = new BooleanMask(slope, .75f, "accentRock").inflate(2f);
+        BooleanMask flat = slope.copyAsBooleanMask(.05f).invert();
+        BooleanMask slopes = slope.copyAsBooleanMask(.15f);
+        BooleanMask accentSlopes = slope.copyAsBooleanMask(.55f).invert().subtract(flat);
+        BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
+        BooleanMask rock = slope.copyAsBooleanMask(.75f);
+        BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
 
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));

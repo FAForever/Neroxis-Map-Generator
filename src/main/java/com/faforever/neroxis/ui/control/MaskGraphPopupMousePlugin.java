@@ -82,12 +82,12 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
 
                                     if (selected instanceof MaskMethodVertex
                                             && Objects.equals(picked.getResultClass(resultName), selected.getExecutorClass())
-                                            && graph.outgoingEdgesOf(picked).stream().noneMatch(outEdge -> "executor".equals(outEdge.getParameterName()) && resultName.equals(outEdge.getResultName()))
+                                            && graph.outgoingEdgesOf(picked).stream().noneMatch(outEdge -> MaskMethodVertex.EXECUTOR.equals(outEdge.getParameterName()) && resultName.equals(outEdge.getResultName()))
                                     ) {
                                         resultMenu.add(
-                                                new AbstractAction("executor") {
+                                                new AbstractAction(MaskMethodVertex.EXECUTOR) {
                                                     public void actionPerformed(ActionEvent e) {
-                                                        graph.addEdge(picked, selected, new MaskMethodEdge(resultName, "executor"));
+                                                        graph.addEdge(picked, selected, new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
                                                         vv.repaint();
                                                         vv.fireStateChanged();
                                                     }
@@ -111,6 +111,7 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
                             public void actionPerformed(ActionEvent e) {
                                 pickedVertexState.deselect(picked);
                                 graph.removeVertex(picked);
+                                vv.getEdgeSpatial().recalculate();
                                 vv.getVertexSpatial().recalculate();
                                 vv.repaint();
                                 vv.fireStateChanged();
@@ -123,6 +124,7 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
                                 pickedEdgeState.deselect(edge);
                                 graph.removeEdge(edge);
                                 vv.getEdgeSpatial().recalculate();
+                                vv.getVertexSpatial().recalculate();
                                 vv.repaint();
                                 vv.fireStateChanged();
                             }
@@ -153,8 +155,6 @@ public class MaskGraphPopupMousePlugin extends AbstractPopupGraphMousePlugin {
                                 graph.addVertex(newVertex);
                                 Point2D p2d = vv.getRenderContext().getMultiLayerTransformer().inverseTransform(p);
                                 vv.getVisualizationModel().getLayoutModel().set(newVertex, p2d.getX(), p2d.getY());
-                                vv.getSelectedVertexState().clear();
-                                vv.getSelectedVertexState().select(newVertex);
                                 vv.repaint();
                                 vv.fireStateChanged();
                             }

@@ -21,10 +21,10 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     @GraphMethod
+    @GraphParameter(name = "name", nullable = true)
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
-    @GraphParameter(name = "name", nullable = true)
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
