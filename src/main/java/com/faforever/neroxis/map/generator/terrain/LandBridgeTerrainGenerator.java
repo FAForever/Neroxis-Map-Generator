@@ -2,7 +2,7 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
-import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -22,10 +22,9 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
         int numPaths = 32 / mapParameters.getSpawnCount();
 
         land.setSize(mapSize + 1);
-        connectTeammates(land, 8, 2, maxStepSize);
-        connectTeams(land, 0, 2, 1, maxStepSize);
-        map.getSpawns().forEach(spawn ->
-                pathAroundPoint(land, new Vector2(spawn.getPosition()), maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f)));
+        MapMaskMethods.connectTeammates(map, random.nextLong(), land, 8, 2, maxStepSize);
+        MapMaskMethods.connectTeams(map, random.nextLong(), land, 0, 2, 1, maxStepSize);
+        MapMaskMethods.pathAroundSpawns(map, random.nextLong(), land, maxStepSize, numPaths, 4, mapSize / 6, (float) (StrictMath.PI / 2f));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
         land.dilute(.5f, 8);
@@ -43,7 +42,7 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
         int bound = mapSize / 4;
         plateaus.setSize(mapSize + 1);
 
-        pathInEdgeBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInEdgeBounds(random.nextLong(), plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
         plateaus.dilute(.5f, 4).setSize(mapSize + 1);
         plateaus.blur(12);

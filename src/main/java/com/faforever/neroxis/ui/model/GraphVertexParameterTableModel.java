@@ -54,7 +54,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), parameter));
+        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()));
     }
 
     @Override
@@ -63,16 +63,24 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
             return;
         }
 
-        vertex.setParameter(parameters.get(rowIndex).getName(), aValue);
+        Parameter parameter = parameters.get(rowIndex);
+
+        if (MaskReflectUtil.classIsNumeric(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))
+                && String.class.equals(aValue.getClass())
+                && ((String) aValue).startsWith(".")) {
+            aValue = "0" + aValue;
+        }
+
+        vertex.setParameter(parameter.getName(), aValue);
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Parameter item = parameters.get(rowIndex);
+        Parameter parameter = parameters.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> item.getName();
-            case 1 -> vertex == null ? null : MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), item);
-            case 2 -> vertex == null ? null : vertex.getParameterExpression(item);
+            case 0 -> parameter.getName();
+            case 1 -> vertex == null ? null : MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType());
+            case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
             default -> null;
         };
     }

@@ -4,6 +4,7 @@ import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
@@ -36,11 +37,11 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = mapSize / 128f;
         land.setSize(mapSize + 1);
 
-        pathInCenterBounds(land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), land, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         land.add(connections.copy().fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
                 .inflate(mapSize / 64f).blur(12, .125f));
-        connectTeamsAroundCenter(land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
-        connectTeammates(land, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), land, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
+        MapMaskMethods.connectTeammates(map, random.nextLong(), land, maxMiddlePoints, numTeammateConnections, maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
         land.dilute(.5f, 8).erode(.5f, 6);
         if (mapSize > 512) {
@@ -59,8 +60,8 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        connectTeams(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
-        connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        MapMaskMethods.connectTeams(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize);
+        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 }
 

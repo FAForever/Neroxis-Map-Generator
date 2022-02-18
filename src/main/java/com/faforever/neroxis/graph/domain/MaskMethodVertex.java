@@ -17,17 +17,27 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
 
     private MaskVertexResult executor;
 
-    public void setExecutable(Method method) {
-        if (method != null) {
-            if (!Mask.class.isAssignableFrom(method.getReturnType())) {
-                throw new IllegalArgumentException("Method does not return a subclass of Mask");
-            }
+    public MaskMethodVertex(Method executable, Class<? extends Mask<?, ?>> executorClass) {
+        super(executable, executorClass);
+
+        if (!Mask.class.isAssignableFrom(executable.getReturnType())) {
+            throw new IllegalArgumentException("Method does not return a subclass of Mask");
         }
-        super.setExecutable(method);
+
         if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
             results.put(NEW_MASK, null);
             resultClasses.put(NEW_MASK, (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType()));
         }
+    }
+
+    @Override
+    public String getExecutableName() {
+        return executable.getName();
+    }
+
+    @Override
+    public Class<? extends Mask<?, ?>> getReturnedClass() {
+        return (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
     }
 
     public void setParameter(String parameterName, Object parameterValue) {
@@ -39,6 +49,11 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
                 && EXECUTOR.equals(parameterName)
                 && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass())
                 && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
+
+            if (executor != null) {
+                throw new IllegalStateException("executor already set");
+            }
+
             executor = (MaskVertexResult) parameterValue;
         } else {
             super.setParameter(parameterName, parameterValue);
@@ -80,6 +95,6 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     public String toString() {
-        return executable == null ? String.valueOf(hashCode()) : executable.getName();
+        return executable.getName();
     }
 }

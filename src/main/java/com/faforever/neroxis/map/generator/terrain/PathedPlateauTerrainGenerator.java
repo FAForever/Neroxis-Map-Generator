@@ -1,6 +1,7 @@
 package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp abstract class PathedPlateauTerrainGenerator extends BasicTerrainGenerator {
 
@@ -14,7 +15,7 @@ public strictfp abstract class PathedPlateauTerrainGenerator extends BasicTerrai
         int bound = 0;
         plateaus.setSize(mapSize + 1);
 
-        pathInCenterBounds(plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), plateaus, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256f).setSize(mapSize / 4);
         plateaus.dilute(.5f, 4).setSize(mapSize + 1);
         plateaus.blur(12);

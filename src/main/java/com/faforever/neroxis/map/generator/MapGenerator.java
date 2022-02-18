@@ -255,43 +255,6 @@ public strictfp class MapGenerator {
         unexplored = parameters.get(2);
     }
 
-    public void setSymmetrySettings() {
-        Symmetry spawnSymmetry;
-        Symmetry teamSymmetry;
-        List<Symmetry> spawns;
-        List<Symmetry> teams;
-        switch (terrainSymmetry) {
-            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
-                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
-                        Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
-                        Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
-                        Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11,
-                        Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16,
-                        Symmetry.XZ, Symmetry.ZX, Symmetry.X, Symmetry.Z, Symmetry.QUAD, Symmetry.DIAG));
-            }
-            case QUAD -> {
-                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.QUAD));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.X, Symmetry.Z, Symmetry.QUAD));
-            }
-            case DIAG -> {
-                spawns = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.DIAG));
-                teams = new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
-            }
-            default -> {
-                spawns = new ArrayList<>(Collections.singletonList(terrainSymmetry));
-                teams = new ArrayList<>(Collections.singletonList(terrainSymmetry));
-            }
-        }
-        if (numTeams > 1) {
-            spawns.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
-            teams.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
-        }
-        spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
-        teamSymmetry = teams.get(random.nextInt(teams.size()));
-        symmetrySettings = new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
-    }
-
     private void setMapStyle() {
         mapParameters = MapParameters.builder()
                 .spawnCount(spawnCount)
@@ -324,7 +287,7 @@ public strictfp class MapGenerator {
             return;
         }
 
-        setSymmetrySettings();
+        symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, terrainSymmetry, numTeams);
 
         if (optionsUsed) {
             setMapStyle();

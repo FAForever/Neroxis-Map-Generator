@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -38,7 +39,7 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
         land.invert();
         BooleanMask noLand = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand", true);
 
-        pathInCenterBounds(noLand, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), noLand, maxStepSize, numWalkers, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.dilute(.5f, 10).setSize(mapSize + 1);
         noLand.blur(mapSize / 64, .5f);

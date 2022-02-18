@@ -14,5 +14,7 @@ public strictfp @interface GraphParameter {
 
     String value() default "";
 
+    String description() default "";
+
     boolean nullable() default false;
 }

@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ui;
 
-import com.faforever.neroxis.ui.panel.EntryGraphPanel;
-import com.faforever.neroxis.ui.panel.EntryPanel;
+import com.faforever.neroxis.ui.components.EntryGraphPanel;
+import com.faforever.neroxis.ui.components.EntryPanel;
 import com.faforever.neroxis.util.Pipeline;
 
 import javax.swing.*;

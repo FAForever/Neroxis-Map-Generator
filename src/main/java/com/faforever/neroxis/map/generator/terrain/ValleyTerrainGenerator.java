@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
@@ -42,7 +43,7 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
         mountains.setSize(mapSize + 1);
         BooleanMask noMountains = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains", true);
 
-        pathInCenterBounds(noMountains, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), noMountains, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         noMountains.setSize(mapSize / 4);
         noMountains.dilute(.5f, (int) (maxStepSize * 2)).setSize(mapSize + 1);
         noMountains.blur(mapSize / 64).inflate(mountainBrushSize / 16f);

@@ -20,26 +20,17 @@ public strictfp enum DecalType {
     }
 
     public static DecalType of(int typeNum) {
-        switch (typeNum) {
-            case 1:
-                return ALBEDO;
-            case 2:
-                return NORMALS;
-            case 3:
-                return WATER_MASK;
-            case 4:
-                return WATER_ALBEDO;
-            case 5:
-                return WATER_NORMALS;
-            case 6:
-                return GLOW;
-            case 7:
-                return ALPHA_NORMALS;
-            case 8:
-                return GLOW_MASK;
-            default:
-                return null;
-        }
+        return switch (typeNum) {
+            case 1 -> ALBEDO;
+            case 2 -> NORMALS;
+            case 3 -> WATER_MASK;
+            case 4 -> WATER_ALBEDO;
+            case 5 -> WATER_NORMALS;
+            case 6 -> GLOW;
+            case 7 -> ALPHA_NORMALS;
+            case 8 -> GLOW_MASK;
+            default -> null;
+        };
     }
 
     public int getTypeNum() {

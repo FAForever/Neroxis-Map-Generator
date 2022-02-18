@@ -647,6 +647,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @GraphMethod
+    public BooleanMask splat(float strength, float size) {
+        BooleanMask holes = new BooleanMask(this, getName() + "splat");
+        holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            add(source);
+        }, holes);
+    }
+
+    @GraphMethod
     public BooleanMask dilute(float strength) {
         return dilute(strength, 1);
     }

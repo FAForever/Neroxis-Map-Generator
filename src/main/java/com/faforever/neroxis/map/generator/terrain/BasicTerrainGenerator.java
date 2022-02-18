@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public strictfp class BasicTerrainGenerator extends TerrainGenerator {
@@ -144,8 +145,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
-        connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
+        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 
     protected void landSetup() {
@@ -305,9 +306,9 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         ramps.setSize(map.getSize() + 1);
 
         if (map.getSize() >= 512) {
-            pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         } else {
-            pathInEdgeBounds(ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
         }
 
         ramps.subtract(connections.copy().inflate(64)).inflate(maxStepSize / 2f)

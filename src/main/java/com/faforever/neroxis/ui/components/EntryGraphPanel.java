@@ -1,4 +1,4 @@
-package com.faforever.neroxis.ui.panel;
+package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.graph.domain.EntryEdge;
 import com.faforever.neroxis.graph.domain.EntryVertex;

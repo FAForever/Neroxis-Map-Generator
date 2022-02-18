@@ -1,12 +1,15 @@
-package com.faforever.neroxis.ui.panel;
+package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.graph.domain.GraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodEdgeComparator;
 import com.faforever.neroxis.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.graph.domain.MaskVertexResult;
+import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.generator.SymmetrySelector;
 import com.faforever.neroxis.ui.control.MaskGraphEditingModalGraphMouse;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.GraphSerializationUtil;
@@ -22,9 +25,10 @@ import org.jungrapht.visualization.RenderContext;
 import org.jungrapht.visualization.VisualizationScrollPane;
 import org.jungrapht.visualization.VisualizationViewer;
 import org.jungrapht.visualization.control.EditingModalGraphMouse;
+import org.jungrapht.visualization.layout.algorithms.HierarchicalMinCrossLayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
-import org.jungrapht.visualization.layout.algorithms.SugiyamaLayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.sugiyama.Layering;
+import org.jungrapht.visualization.layout.model.LayoutModel;
 import org.jungrapht.visualization.renderers.Renderer;
 
 import javax.swing.*;
@@ -34,21 +38,25 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public strictfp class PipelinePanel extends JPanel {
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> rawGraph = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
     private final DefaultListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> graph = new DefaultListenableGraph<>(rawGraph);
     private final VisualizationViewer<MaskGraphVertex<?>, MaskMethodEdge> graphViewer = VisualizationViewer.builder(graph)
-            .layoutAlgorithm(SugiyamaLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder()
-                    .layering(Layering.NETWORK_SIMPLEX)
+            .layoutAlgorithm(HierarchicalMinCrossLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder()
+                    .edgeComparator(new MaskMethodEdgeComparator())
+                    .layering(Layering.TOP_DOWN)
                     .build())
-            .layoutSize(new Dimension(100, 100))
+            .layoutSize(new Dimension(1000, 1000))
+            .viewSize(new Dimension(750, 750))
             .build();
     private final MaskGraphEditingModalGraphMouse graphMouse = MaskGraphEditingModalGraphMouse.builder()
             .renderContextSupplier(graphViewer::getRenderContext)
@@ -56,11 +64,15 @@ public strictfp class PipelinePanel extends JPanel {
             .build();
     private final VisualizationScrollPane pipelineGraphPane = new VisualizationScrollPane(graphViewer);
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
-    private final EntryPanel entryPanel = new EntryPanel(new Dimension(450, 450));
+    private final EntryPanel entryPanel = new EntryPanel(new Dimension(550, 550));
     private final JFileChooser fileChooser = new JFileChooser();
     @Getter
     @Setter
     private Consumer<Pipeline.Entry> entryVertexSelectionAction;
+    private final JComboBox<Integer> mapSizeComboBox = new JComboBox<>();
+    private final JComboBox<Integer> spawnCountComboBox = new JComboBox<>();
+    private final JComboBox<Integer> numTeamsComboBox = new JComboBox<>();
+    private final JComboBox<Symmetry> terrainSymmetryComboBox = new JComboBox<>();
 
     public PipelinePanel() {
         graph.addGraphListener(new GraphListener<>() {
@@ -68,9 +80,9 @@ public strictfp class PipelinePanel extends JPanel {
             public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
                 MaskMethodEdge edge = e.getEdge();
                 MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
-                edgeTarget.setParameter(edge.getParameterName(), new MaskVertexResult(edge.getResultName(), e.getEdgeSource()));
-                vertexEditPanel.updatePanel();
-                if (MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())) {
+                String parameterName = edge.getParameterName();
+                edgeTarget.setParameter(parameterName, new MaskVertexResult(edge.getResultName(), e.getEdgeSource()));
+                if (MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(parameterName)) {
                     MaskGraphVertex<?> nextVertex = edgeTarget;
                     while (nextVertex != null) {
                         nextVertex.setIdentifier(e.getEdgeSource().getIdentifier());
@@ -82,6 +94,7 @@ public strictfp class PipelinePanel extends JPanel {
                     }
                     graphViewer.repaint();
                 }
+                vertexEditPanel.updatePanel();
             }
 
             @Override
@@ -108,6 +121,7 @@ public strictfp class PipelinePanel extends JPanel {
         setupGraph();
         setupEntryPanel();
         setupVertexEditPanel();
+        setupMapOptions();
         setupButtons();
     }
 
@@ -123,10 +137,9 @@ public strictfp class PipelinePanel extends JPanel {
                 return Color.YELLOW;
             }
 
-            if (vertex.getExecutorClass() == null || vertex.getExecutable() == null) {
+
+            if (vertex.isNotDefined()) {
                 return Color.RED;
-            } else if (vertex.isNotDefined()) {
-                return Color.CYAN;
             } else {
                 return Color.GREEN;
             }
@@ -146,18 +159,17 @@ public strictfp class PipelinePanel extends JPanel {
         renderContext.setEdgeDrawPaintFunction(edgePaintFunction);
         renderContext.setArrowFillPaintFunction(edgePaintFunction);
         renderContext.setArrowDrawPaintFunction(edgePaintFunction);
-        renderContext.setVertexLabelFunction(vertex -> String.format("<html>%s<br/>%s</html>", vertex.getIdentifier(), vertex.getExecutable() == null ? "" : vertex.getExecutable().getName()));
-        renderContext.setVertexLabelPosition(Renderer.VertexLabel.Position.W);
+        renderContext.setVertexLabelFunction(vertex -> String.format("<html>%s<br/>%s</html>", vertex.getIdentifier(), vertex.getExecutableName()));
+        renderContext.setVertexLabelPosition(Renderer.VertexLabel.Position.E);
         graphViewer.setEdgeToolTipFunction(edge -> String.format("%s -> %s", edge.getResultName(), edge.getParameterName()));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 2;
-        constraints.gridwidth = 2;
-        constraints.weightx = 1;
+        constraints.gridx = 1;
+        constraints.weightx = 2;
         constraints.gridy = 0;
         constraints.weighty = 1;
-        constraints.gridheight = 2;
+        constraints.gridheight = 5;
 
         add(pipelineGraphPane, constraints);
     }
@@ -165,12 +177,11 @@ public strictfp class PipelinePanel extends JPanel {
     private void setupEntryPanel() {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 4;
-        constraints.gridwidth = 2;
+        constraints.gridx = 2;
         constraints.weightx = 1;
         constraints.gridy = 0;
         constraints.weighty = 1;
-        constraints.gridheight = 2;
+        constraints.gridheight = 5;
 
         add(entryPanel, constraints);
     }
@@ -179,13 +190,79 @@ public strictfp class PipelinePanel extends JPanel {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
-        constraints.gridwidth = 2;
-        constraints.weightx = 0;
+        constraints.weightx = .5;
         constraints.gridy = 0;
         constraints.weighty = 1;
 
         vertexEditPanel.setVisualizationViewer(graphViewer);
         add(vertexEditPanel, constraints);
+    }
+
+    private void setupMapOptions() {
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.setLayout(new GridLayout(0, 2));
+
+        JLabel mapSizeLabel = new JLabel();
+        mapSizeLabel.setText("Map Size");
+
+        optionsPanel.add(mapSizeLabel);
+        optionsPanel.add(mapSizeComboBox);
+        IntStream.range(4, 17).forEach(i -> mapSizeComboBox.addItem(i * 64));
+
+        JLabel spawnCountLabel = new JLabel();
+        spawnCountLabel.setText("Spawn Count");
+
+        optionsPanel.add(spawnCountLabel);
+        optionsPanel.add(spawnCountComboBox);
+        IntStream.range(2, 17).forEach(spawnCountComboBox::addItem);
+        spawnCountComboBox.addActionListener(e -> {
+                    Object selected = numTeamsComboBox.getSelectedItem();
+                    numTeamsComboBox.removeAllItems();
+                    IntStream.range(1, 9).filter(i -> ((int) spawnCountComboBox.getSelectedItem() % i) == 0)
+                            .forEach(numTeamsComboBox::addItem);
+                    if (selected != null) {
+                        numTeamsComboBox.setSelectedItem(selected);
+                    }
+                }
+        );
+
+        JLabel numTeamsLabel = new JLabel();
+        numTeamsLabel.setText("Num Teams");
+
+        optionsPanel.add(numTeamsLabel);
+        optionsPanel.add(numTeamsComboBox);
+        numTeamsComboBox.addActionListener(e -> {
+                    Object selected = terrainSymmetryComboBox.getSelectedItem();
+                    terrainSymmetryComboBox.removeAllItems();
+                    if (numTeamsComboBox.getSelectedItem() != null) {
+                        Arrays.stream(Symmetry.values())
+                                .filter(symmetry -> (symmetry.getNumSymPoints() % (int) numTeamsComboBox.getSelectedItem()) == 0)
+                                .forEach(terrainSymmetryComboBox::addItem);
+                        if (selected != null) {
+                            terrainSymmetryComboBox.setSelectedItem(selected);
+                        }
+                    }
+                }
+
+        );
+
+        spawnCountComboBox.setSelectedIndex(0);
+
+        JLabel terrainSymmetryLabel = new JLabel();
+        terrainSymmetryLabel.setText("Terrain Symmetry");
+
+        optionsPanel.add(terrainSymmetryLabel);
+
+        optionsPanel.add(terrainSymmetryComboBox);
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.weightx = .25;
+        constraints.gridy = 3;
+        constraints.weighty = 0;
+
+        add(optionsPanel, constraints);
     }
 
     private void setupButtons() {
@@ -194,10 +271,7 @@ public strictfp class PipelinePanel extends JPanel {
 
         JButton layoutButton = new JButton();
         layoutButton.setText("Layout Graph");
-        layoutButton.addActionListener(e -> {
-            removeUnusedVertices();
-            layoutGraph();
-        });
+        layoutButton.addActionListener(e -> layoutGraph());
 
         buttonPanel.add(layoutButton);
 
@@ -206,9 +280,20 @@ public strictfp class PipelinePanel extends JPanel {
         runButton.addActionListener(e -> {
             Pipeline.reset();
             removeUnusedVertices();
+            Random random = new Random();
+            int numTeams = (int) numTeamsComboBox.getSelectedItem();
+            SymmetrySettings symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, (Symmetry) terrainSymmetryComboBox.getSelectedItem(), numTeams);
+            MapParameters mapParameters = MapParameters.builder()
+                    .mapSize((Integer) mapSizeComboBox.getSelectedItem())
+                    .numTeams(numTeams)
+                    .spawnCount((Integer) spawnCountComboBox.getSelectedItem())
+                    .symmetrySettings(symmetrySettings)
+                    .build();
+
+            GraphContext graphContext = new GraphContext(random.nextLong(), mapParameters);
             DebugUtil.timedRun("Setup pipeline", () -> rawGraph.forEach(vertex -> {
                 try {
-                    vertex.prepareResults(new GraphContext(new Random().nextLong(), new SymmetrySettings(Symmetry.POINT2)));
+                    vertex.prepareResults(graphContext);
                 } catch (InvocationTargetException | IllegalAccessException | InstantiationException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -260,9 +345,8 @@ public strictfp class PipelinePanel extends JPanel {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
-        constraints.gridwidth = 2;
-        constraints.weightx = 1;
-        constraints.gridy = 1;
+        constraints.weightx = 0;
+        constraints.gridy = 4;
         constraints.weighty = 0;
 
         add(buttonPanel, constraints);
@@ -270,8 +354,10 @@ public strictfp class PipelinePanel extends JPanel {
 
     private void layoutGraph() {
         LayoutAlgorithm<MaskGraphVertex<?>> layoutAlgorithm = graphViewer.getVisualizationModel().getLayoutAlgorithm();
-        graphViewer.getVisualizationModel().getLayoutModel().setSize(100, 100);
-        layoutAlgorithm.visit(graphViewer.getVisualizationModel().getLayoutModel());
+        LayoutModel<MaskGraphVertex<?>> layoutModel = graphViewer.getVisualizationModel().getLayoutModel();
+        layoutModel.setGraph(graph);
+        layoutModel.setSize(100, 100);
+        layoutAlgorithm.visit(layoutModel);
         graphViewer.repaint();
     }
 
@@ -284,10 +370,6 @@ public strictfp class PipelinePanel extends JPanel {
             }
         });
         graphViewer.getVisualizationModel().getGraph().removeAllVertices(verticesToRemove);
-    }
-
-    private void refreshGraph() {
-        graphViewer.getVisualizationModel().setGraph(graph, true);
     }
 
     private void vertexSelected(ItemEvent e) {

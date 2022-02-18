@@ -1,8 +1,7 @@
-package com.faforever.neroxis.ui.panel;
+package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MathUtil;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import javax.swing.*;
@@ -20,60 +19,31 @@ public class EntryPanel extends JPanel {
     private final ImagePanel imagePanel = new ImagePanel();
 
     public EntryPanel(Dimension minSize) {
-        setMinimumSize(minSize);
         setPreferredSize(minSize);
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
         setupImagePanel();
         setupLabels();
     }
 
     private void setupImagePanel() {
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 1;
-        constraints.gridy = 1;
-        constraints.weighty = 1;
-
-        add(imagePanel, constraints);
+        add(imagePanel, BorderLayout.CENTER);
     }
 
     private void setupLabels() {
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        GridBagConstraints titleConstraints = new GridBagConstraints();
-        titleConstraints.fill = GridBagConstraints.BOTH;
-        titleConstraints.gridx = 0;
-        titleConstraints.weightx = 1;
-        titleConstraints.gridy = 0;
-        titleConstraints.weighty = 0;
 
-        add(titleLabel, titleConstraints);
+        add(titleLabel, BorderLayout.NORTH);
 
         valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        GridBagConstraints valueConstraints = new GridBagConstraints();
-        valueConstraints.fill = GridBagConstraints.BOTH;
-        valueConstraints.gridx = 0;
-        valueConstraints.weightx = 1;
-        valueConstraints.gridy = 2;
-        valueConstraints.weighty = 0;
+        valueLabel.setMinimumSize(new Dimension(100, 25));
+        valueLabel.setPreferredSize(new Dimension(100, 25));
+        valueLabel.setMaximumSize(new Dimension(100, 25));
 
-        add(valueLabel, valueConstraints);
-    }
-
-    public void setEntry(Pipeline.Entry entry) {
-        titleLabel.setText(String.format("%s: %s", entry.getExecutingMask().getName(), entry.getMethodName()));
-        imagePanel.setMask(entry.getImmutableResult());
-        repaint();
-        setValueLabel();
+        add(valueLabel, BorderLayout.SOUTH);
     }
 
     public void setMask(Mask<?, ?> mask) {
         imagePanel.setMask(mask);
-        repaint();
-        setValueLabel();
-    }
-
-    public void refresh() {
         repaint();
         setValueLabel();
     }

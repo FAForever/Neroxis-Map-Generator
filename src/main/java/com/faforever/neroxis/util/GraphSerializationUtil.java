@@ -1,9 +1,11 @@
 package com.faforever.neroxis.util;
 
+import com.faforever.neroxis.graph.domain.MapMaskMethodVertex;
 import com.faforever.neroxis.graph.domain.MaskConstructorVertex;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import org.jgrapht.Graph;
 import org.jgrapht.nio.Attribute;
@@ -14,7 +16,6 @@ import org.jgrapht.nio.dot.DOTImporter;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,11 +42,11 @@ public class GraphSerializationUtil {
 
     private static MaskGraphVertex<?> getMaskGraphVertexFromAttributes(Map<String, Attribute> attributeMap) {
         if (attributeMap.isEmpty()) {
-            return new MaskMethodVertex();
+            return new MaskConstructorVertex(null);
         }
         try {
-            Class<?> vertexClass = getClassFromString(attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
-            Class<?> maskClass = getClassFromString(attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());
+            Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
+            Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());
             int parameterCount = Integer.parseInt(attributeMap.get(PARAMETER_COUNT_ATTRIBUTE).getValue());
             Class<?>[] parameterTypes = new Class[parameterCount];
             String[] parameterValues = new String[parameterCount];
@@ -59,15 +60,11 @@ public class GraphSerializationUtil {
 
             MaskGraphVertex<?> vertex;
             if (MaskConstructorVertex.class.equals(vertexClass)) {
-                MaskConstructorVertex<?> constructorVertex = new MaskConstructorVertex<>();
-                constructorVertex.setExecutorClass((Class<? extends Mask<?, ?>>) maskClass);
-                constructorVertex.setExecutable((Constructor) maskClass.getConstructor(parameterTypes));
-                vertex = constructorVertex;
+                vertex = new MaskConstructorVertex(maskClass.getConstructor(parameterTypes));
             } else if (MaskMethodVertex.class.equals(vertexClass)) {
-                MaskMethodVertex methodVertex = new MaskMethodVertex();
-                methodVertex.setExecutorClass((Class<? extends Mask<?, ?>>) maskClass);
-                methodVertex.setExecutable(maskClass.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes));
-                vertex = methodVertex;
+                vertex = new MaskMethodVertex(maskClass.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes), maskClass);
+            } else if (MapMaskMethodVertex.class.equals(vertexClass)) {
+                vertex = new MapMaskMethodVertex(MapMaskMethods.class.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes));
             } else {
                 throw new IllegalArgumentException(String.format("Unrecognized vertex class: %s", vertexClass.getName()));
             }
@@ -85,6 +82,9 @@ public class GraphSerializationUtil {
     }
 
     private static MaskMethodEdge getMaskMethodEdgeFromAttributes(Map<String, Attribute> attributeMap) {
+        if (attributeMap.isEmpty()) {
+            return new MaskMethodEdge(null, null);
+        }
         return new MaskMethodEdge(attributeMap.get(RESULT_NAME_ATTRIBUTE).getValue(), attributeMap.get(PARAMETER_NAME_ATTRIBUTE).getValue());
     }
 
@@ -100,13 +100,13 @@ public class GraphSerializationUtil {
         attributeMap.put(VERTEX_CLASS_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getClass().getName()));
         attributeMap.put(MASK_CLASS_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getExecutorClass().getName()));
         attributeMap.put(IDENTIFIER_NAME_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getIdentifier()));
-        if (vertex instanceof MaskMethodVertex) {
+        if (vertex instanceof MaskMethodVertex || vertex instanceof MapMaskMethodVertex) {
             attributeMap.put(EXECUTABLE_ATTRIBUTE, DefaultAttribute.createAttribute(vertex.getExecutable().getName()));
         }
         Parameter[] parameters = vertex.getExecutable().getParameters();
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
-            if (!Mask.class.isAssignableFrom(MaskReflectUtil.getActualParameterClass(vertex.getExecutorClass(), parameter))) {
+            if (!Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))) {
                 attributeMap.put(PARAMETER_VALUE_PREFIX + i, objectToAttribute(vertex.getParameterExpression(parameter)));
             }
             attributeMap.put(PARAMETER_CLASS_PREFIX + i, DefaultAttribute.createAttribute(parameter.getType().getName()));

@@ -2,6 +2,7 @@ package com.faforever.neroxis.map.generator.terrain;
 
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
 
@@ -19,8 +20,8 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         int bound = mapSize / 4;
         ramps.setSize(mapSize + 1);
 
-        pathInEdgeBounds(ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
-        pathInCenterBounds(ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
 
         ramps.subtract(connections.copy().inflate(32)).inflate(maxStepSize / 2f).multiply(plateaus.copy().outline())
                 .add(connections.copy().inflate(maxStepSize / 2f).multiply(plateaus.copy().outline()))

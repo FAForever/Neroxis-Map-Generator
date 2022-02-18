@@ -3,7 +3,7 @@ package com.faforever.neroxis.map.generator.terrain;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
 
@@ -29,7 +29,7 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
         BooleanMask islands = new BooleanMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands", true);
 
         land.setSize(mapSize + 1);
-        map.getSpawns().forEach(spawn -> pathAroundPoint(land, new Vector2(spawn.getPosition()), maxStepSize, numPaths, maxMiddlePoints, bound, (float) StrictMath.PI / 2));
+        MapMaskMethods.pathAroundSpawns(map, random.nextLong(), land, maxStepSize, numPaths, maxMiddlePoints, bound, (float) StrictMath.PI / 2);
         land.inflate(maxStepSize).setSize(mapSize / 4);
 
         islands.randomWalk((int) (normalizedLandDensity * 20 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 2, mapSize * 4);

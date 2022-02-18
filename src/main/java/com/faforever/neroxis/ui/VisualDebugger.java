@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ui;
 
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.ui.panel.EntryPanel;
+import com.faforever.neroxis.ui.components.EntryPanel;
 import lombok.Value;
 
 import javax.swing.*;

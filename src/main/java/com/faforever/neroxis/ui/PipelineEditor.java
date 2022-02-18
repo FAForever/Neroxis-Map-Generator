@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ui;
 
-import com.faforever.neroxis.ui.panel.PipelinePanel;
+import com.faforever.neroxis.ui.components.PipelinePanel;
 import com.faforever.neroxis.util.DebugUtil;
 
 import javax.swing.*;
@@ -8,7 +8,6 @@ import java.awt.*;
 
 public strictfp class PipelineEditor {
     private JFrame frame = new JFrame();
-    private PipelinePanel pipelinePanel = new PipelinePanel();
 
     public static void main(String[] args) {
         DebugUtil.DEBUG = true;
@@ -27,7 +26,7 @@ public strictfp class PipelineEditor {
     }
 
     private void createGraphCanvas() {
-        pipelinePanel = new PipelinePanel();
+        PipelinePanel pipelinePanel = new PipelinePanel();
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;

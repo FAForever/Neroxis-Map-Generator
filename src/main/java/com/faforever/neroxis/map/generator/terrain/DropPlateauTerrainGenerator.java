@@ -3,6 +3,7 @@ package com.faforever.neroxis.map.generator.terrain;
 import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.generator.ParameterConstraints;
+import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
 
@@ -32,8 +33,8 @@ public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator
 
         connections.setSize(mapSize + 1);
 
-        connectTeamsAroundCenter(connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
-        connectTeammates(connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
+        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
     }
 
     @Override
