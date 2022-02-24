@@ -17,6 +17,7 @@ local.properties
 build/
 debug/
 debugMap/
+*neroxis_map_generator*
 
 # External tool builders
 .externalToolBuilders/
