@@ -50,6 +50,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/libs/NeroxisGen_${{ github.event.inputs.version }}.jar
+        asset_path: generator/build/libs/NeroxisGen_${{ github.event.inputs.version }}.jar
         asset_name: NeroxisGen_${{ github.event.inputs.version }}.jar
         asset_content_type: application/zip
