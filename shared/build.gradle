@@ -72,10 +72,9 @@ repositories {
 dependencies {
     implementation("org.luaj:luaj-jse:3.0.1")
     implementation('com.dslplatform:dsl-json-java8:1.9.9')
-    implementation('org.springframework:spring-expression:5.3.15') {
-        exclude group: 'org.springframework', module: 'spring-core'
-    }
+    implementation('org.springframework:spring-expression:5.3.15')
 
+    api('org.jgrapht:jgrapht-core:1.5.1')
     api('org.jgrapht:jgrapht-io:1.5.1')
 
     compileOnly('org.projectlombok:lombok:1.18.22')

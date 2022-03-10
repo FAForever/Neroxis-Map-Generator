@@ -26,8 +26,8 @@ import org.jungrapht.visualization.RenderContext;
 import org.jungrapht.visualization.VisualizationScrollPane;
 import org.jungrapht.visualization.VisualizationViewer;
 import org.jungrapht.visualization.control.EditingModalGraphMouse;
-import org.jungrapht.visualization.layout.algorithms.HierarchicalMinCrossLayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
+import org.jungrapht.visualization.layout.algorithms.SugiyamaLayoutAlgorithm;
 import org.jungrapht.visualization.layout.algorithms.sugiyama.Layering;
 import org.jungrapht.visualization.layout.model.LayoutModel;
 import org.jungrapht.visualization.renderers.Renderer;
@@ -52,9 +52,11 @@ public strictfp class PipelinePanel extends JPanel {
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> rawGraph = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
     private final DefaultListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> graph = new DefaultListenableGraph<>(rawGraph);
     private final VisualizationViewer<MaskGraphVertex<?>, MaskMethodEdge> graphViewer = VisualizationViewer.builder(graph)
-            .layoutAlgorithm(HierarchicalMinCrossLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder()
+            .layoutAlgorithm(SugiyamaLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder()
+                    .straightenEdges(true)
+                    .favoredEdgePredicate(maskMethodEdge -> maskMethodEdge.getResultName().equals(MaskGraphVertex.SELF))
                     .edgeComparator(new MaskMethodEdgeComparator())
-                    .layering(Layering.TOP_DOWN)
+                    .layering(Layering.NETWORK_SIMPLEX)
                     .build())
             .layoutSize(new Dimension(1000, 1000))
             .viewSize(new Dimension(750, 750))

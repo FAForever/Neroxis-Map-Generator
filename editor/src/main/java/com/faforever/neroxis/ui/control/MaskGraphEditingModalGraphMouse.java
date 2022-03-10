@@ -2,7 +2,6 @@ package com.faforever.neroxis.ui.control;
 
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
-import lombok.extern.slf4j.Slf4j;
 import org.jungrapht.visualization.MultiLayerTransformer;
 import org.jungrapht.visualization.RenderContext;
 import org.jungrapht.visualization.control.AbstractGraphMousePlugin;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@Slf4j
 public class MaskGraphEditingModalGraphMouse extends DefaultModalGraphMouse<MaskGraphVertex<?>, MaskMethodEdge>
         implements ModalGraphMouse {
 
