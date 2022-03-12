@@ -35,7 +35,6 @@ public strictfp class MapEvaluator {
     private SCMap map;
 
     private FloatMask heightMask;
-    private SymmetrySettings symmetrySettings;
     private boolean saveReport;
 
     float terrainScore;
@@ -46,7 +45,7 @@ public strictfp class MapEvaluator {
     float unitScore;
     boolean oddVsEven;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         Locale.setDefault(Locale.ROOT);
 
@@ -68,16 +67,15 @@ public strictfp class MapEvaluator {
     }
 
     public void interpretArguments(String[] args) {
-        interpretArguments(ArgumentParser.parse(args));
-    }
-
-    private void interpretArguments(Map<String, String> arguments) {
+        Map<String, String> arguments = ArgumentParser.parse(args);
         if (arguments.containsKey("help")) {
-            System.out.println("com.faforever.neroxis.map-transformer usage:\n" +
-                    "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the map\n" +
-                    "--out-folder-path arg  required, set the output folder for the symmetry report\n" +
-                    "--debug                optional, turn on debugging options\n");
+            System.out.println("""
+                    com.faforever.neroxis.map-transformer usage:
+                    --help                 produce help message
+                    --in-folder-path arg   required, set the input folder for the map
+                    --out-folder-path arg  required, set the output folder for the symmetry report
+                    --debug                optional, turn on debugging options
+                    """);
             return;
         }
 
@@ -114,7 +112,7 @@ public strictfp class MapEvaluator {
     public void evaluate() {
         List<Symmetry> symmetries = Arrays.stream(Symmetry.values()).filter(symmetry -> symmetry.getNumSymPoints() == 2).collect(Collectors.toList());
         for (Symmetry symmetry : symmetries) {
-            symmetrySettings = new SymmetrySettings(symmetry);
+            SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
             heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(), "heightMask");
             evaluateTerrain();
             evaluateSpawns();

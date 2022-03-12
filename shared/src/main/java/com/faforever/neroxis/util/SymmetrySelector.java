@@ -5,7 +5,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,8 +37,8 @@ public class SymmetrySelector {
                 teams = new ArrayList<>(Arrays.asList(POINT2, Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
             }
             default -> {
-                spawns = new ArrayList<>(Collections.singletonList(terrainSymmetry));
-                teams = new ArrayList<>(Collections.singletonList(terrainSymmetry));
+                spawns = new ArrayList<>(List.of(terrainSymmetry));
+                teams = new ArrayList<>(List.of(terrainSymmetry));
             }
         }
         if (numTeams > 1) {

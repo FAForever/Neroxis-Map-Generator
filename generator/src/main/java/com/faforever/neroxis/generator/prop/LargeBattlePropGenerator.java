@@ -1,10 +1,10 @@
 package com.faforever.neroxis.generator.prop;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
@@ -28,9 +28,9 @@ public strictfp class LargeBattlePropGenerator extends ReducedNaturalPropGenerat
     }
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, terrainGenerator);
+        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
@@ -60,7 +60,7 @@ public strictfp class LargeBattlePropGenerator extends ReducedNaturalPropGenerat
 
     @Override
     public void placeUnits() {
-        if (!mapParameters.isUnexplored()) {
+        if (!generatorParameters.isUnexplored()) {
             generateUnitExclusionMasks();
             Pipeline.await(landWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {

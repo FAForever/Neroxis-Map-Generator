@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -85,28 +84,27 @@ public strictfp class MapTransformer {
     }
 
     public void interpretArguments(String[] args) {
-        interpretArguments(ArgumentParser.parse(args));
-    }
-
-    private void interpretArguments(Map<String, String> arguments) {
+        Map<String, String> arguments = ArgumentParser.parse(args);
         if (arguments.containsKey("help")) {
-            System.out.println("map-transformer usage:\n" +
-                    "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the map\n" +
-                    "--out-folder-path arg  required, set the output folder for the transformed map\n" +
-                    "--symmetry arg         optional, set the symmetry for the map(" + Arrays.toString(Symmetry.values()) + ")\n" +
-                    "--source arg           required for symmetry, set which half to use as base for forced symmetry (" + Arrays.toString(SymmetrySource.values()) + ", {ANGLE})\n" +
-                    "--marker               optional, force spawn, mex, hydro, and ai marker symmetry\n" +
-                    "--props                optional, force prop symmetry\n" +
-                    "--decals               optional, force decal symmetry\n" +
-                    "--units                optional, force unit symmetry\n" +
-                    "--terrain              optional, force terrain symmetry\n" +
-                    "--all                  optional, force symmetry for all components\n" +
-                    "--resize arg           optional, resize the whole map's placement of features/details to arg size (512 = 10 km x 10 km map)\n" +
-                    "--map-size arg         optional, resize the map bounds to arg size (512 = 10 km x 10 km map) *Must be a power of 2\n" +
-                    "--x arg                optional, set arg x-coordinate for the center of the map's placement of features/details\n" +
-                    "--z arg                optional, set arg z-coordinate for the center of the map's placement of features/details\n" +
-                    "--debug                optional, turn on debugging options\n");
+            System.out.println("""
+                    map-transformer usage:
+                    --help                 produce help message
+                    --in-folder-path arg   required, set the input folder for the map
+                    --out-folder-path arg  required, set the output folder for the transformed map
+                    --symmetry arg         optional, set the symmetry for the map(" + Arrays.toString(Symmetry.values()) + ")
+                    --source arg           required for symmetry, set which half to use as base for forced symmetry (" + Arrays.toString(SymmetrySource.values()) + ", {ANGLE})
+                    --marker               optional, force spawn, mex, hydro, and ai marker symmetry
+                    --props                optional, force prop symmetry
+                    --decals               optional, force decal symmetry
+                    --units                optional, force unit symmetry
+                    --terrain              optional, force terrain symmetry
+                    --all                  optional, force symmetry for all components
+                    --resize arg           optional, resize the whole map's placement of features/details to arg size (512 = 10 km x 10 km map)
+                    --map-size arg         optional, resize the map bounds to arg size (512 = 10 km x 10 km map) *Must be a power of 2
+                    --x arg                optional, set arg x-coordinate for the center of the map's placement of features/details
+                    --z arg                optional, set arg z-coordinate for the center of the map's placement of features/details
+                    --debug                optional, turn on debugging options
+                    """);
             return;
         }
 

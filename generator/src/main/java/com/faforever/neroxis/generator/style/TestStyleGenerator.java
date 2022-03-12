@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import lombok.Getter;
 
 @Getter
@@ -12,8 +12,8 @@ public strictfp class TestStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected void initialize(MapParameters mapParameters, long seed) {
-        super.initialize(mapParameters, seed);
+    protected void initialize(GeneratorParameters generatorParameters, long seed) {
+        super.initialize(generatorParameters, seed);
     }
 }
 

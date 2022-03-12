@@ -7,11 +7,11 @@ public strictfp abstract class PathedPlateauTerrainGenerator extends BasicTerrai
 
     @Override
     protected void plateausSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 16;
-        int numPaths = (int) (12 * mapParameters.getPlateauDensity()) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numPaths = (int) (12 * generatorParameters.getPlateauDensity()) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = 0;
         plateaus.setSize(mapSize + 1);
 

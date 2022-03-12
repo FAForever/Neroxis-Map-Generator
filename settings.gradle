@@ -2,5 +2,6 @@ rootProject.name = 'NeroxisGen'
 include 'shared'
 include 'generator'
 include 'modifier'
-include 'editor'
+include 'mapgeneditor'
+include 'utilities'
 

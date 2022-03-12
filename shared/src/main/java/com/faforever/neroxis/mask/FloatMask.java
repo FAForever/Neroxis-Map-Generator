@@ -455,7 +455,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float yPosSlope = StrictMath.abs(getPrimitive(x, y) - getPrimitive(x, yPos));
                 float xNegSlope = StrictMath.abs(getPrimitive(x, y) - getPrimitive(xNeg, y));
                 float yNegSlope = StrictMath.abs(getPrimitive(x, y) - getPrimitive(x, yNeg));
-                newMask[x][y] = Collections.max(Arrays.asList(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
+                newMask[x][y] = Collections.max(List.of(xPosSlope, yPosSlope, xNegSlope, yNegSlope));
             });
             mask = newMask;
         });

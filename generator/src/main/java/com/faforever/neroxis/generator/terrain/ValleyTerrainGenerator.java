@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -18,8 +18,8 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
     }
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters) {
+        super.initialize(map, seed, generatorParameters);
         mountainBrushSize = 48;
         mountainBrushDensity = .25f;
         mountainBrushIntensity = 4f;
@@ -33,9 +33,9 @@ public strictfp class ValleyTerrainGenerator extends PathedPlateauTerrainGenerat
 
     @Override
     protected void mountainSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         int mapSize = map.getSize();
-        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mapParameters.getMountainDensity());
+        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(generatorParameters.getMountainDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry().getNumSymPoints());

@@ -21,11 +21,13 @@ public class MapReshader {
         Map<String, String> parsedArgs = ArgumentParser.parse(args);
 
         if (parsedArgs.containsKey("help")) {
-            System.out.println("map-reshader usage:\n" +
-                    "--help                 produce help message\n" +
-                    "--in-map-path arg      required, set the input folder for the map\n" +
-                    "--out-map-path arg     required, set the output folder for the transformed map\n" +
-                    "--shader arg           required, set the shader for the map\n");
+            System.out.println("""
+                    map-reshader usage:
+                    --help                 produce help message
+                    --in-map-path arg      required, set the input folder for the map
+                    --out-map-path arg     required, set the output folder for the transformed map
+                    --shader arg           required, set the shader for the map
+                    """);
             return;
         }
 

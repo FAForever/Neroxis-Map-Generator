@@ -20,7 +20,7 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
 
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = mapParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.getReclaimDensity();
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
         fieldStoneMask.setSize(mapSize / 4);
@@ -38,7 +38,7 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = mapParameters.getBiome();
+            Biome biome = generatorParameters.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getBoulders(), 30f);

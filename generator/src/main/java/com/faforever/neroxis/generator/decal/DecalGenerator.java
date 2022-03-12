@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.decal;
 
 import com.faforever.neroxis.generator.ElementGenerator;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.placement.DecalPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -13,8 +13,8 @@ public abstract strictfp class DecalGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected BooleanMask passableLand;
 
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters);
         this.slope = terrainGenerator.getSlope();
         this.passableLand = terrainGenerator.getPassableLand();
         decalPlacer = new DecalPlacer(map, random.nextLong());

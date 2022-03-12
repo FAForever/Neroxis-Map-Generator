@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.ElementGenerator;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.placement.PropPlacer;
 import com.faforever.neroxis.map.placement.UnitPlacer;
@@ -17,8 +17,8 @@ public abstract strictfp class PropGenerator extends ElementGenerator {
     protected BooleanMask unbuildable;
     protected BooleanMask passableLand;
 
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters);
         this.impassable = terrainGenerator.getImpassable();
         this.unbuildable = terrainGenerator.getUnbuildable();
         this.passableLand = terrainGenerator.getPassableLand();

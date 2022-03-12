@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Range;
 import lombok.Value;
@@ -30,18 +29,18 @@ public strictfp class ParameterConstraints {
         return new ParameterConstraintsBuilder();
     }
 
-    public boolean matches(MapParameters mapParameters) {
-        return landDensityRange.contains(mapParameters.getLandDensity())
-                && mountainDensityRange.contains(mapParameters.getMountainDensity())
-                && plateauDensityRange.contains(mapParameters.getPlateauDensity())
-                && rampDensityRange.contains(mapParameters.getRampDensity())
-                && reclaimDensityRange.contains(mapParameters.getReclaimDensity())
-                && mexDensityRange.contains(mapParameters.getMexDensity())
-                && hydroCountRange.contains(mapParameters.getHydroCount())
-                && numTeamsRange.contains(mapParameters.getNumTeams())
-                && spawnCountRange.contains(mapParameters.getSpawnCount())
-                && mapSizeRange.contains(mapParameters.getMapSize())
-                && biomes.contains(mapParameters.getBiome().getName());
+    public boolean matches(GeneratorParameters generatorParameters) {
+        return landDensityRange.contains(generatorParameters.getLandDensity())
+                && mountainDensityRange.contains(generatorParameters.getMountainDensity())
+                && plateauDensityRange.contains(generatorParameters.getPlateauDensity())
+                && rampDensityRange.contains(generatorParameters.getRampDensity())
+                && reclaimDensityRange.contains(generatorParameters.getReclaimDensity())
+                && mexDensityRange.contains(generatorParameters.getMexDensity())
+                && hydroCountRange.contains(generatorParameters.getHydroCount())
+                && numTeamsRange.contains(generatorParameters.getNumTeams())
+                && spawnCountRange.contains(generatorParameters.getSpawnCount())
+                && mapSizeRange.contains(generatorParameters.getMapSize())
+                && biomes.contains(generatorParameters.getBiome().getName());
     }
 
     public boolean matches(int mapSize, int numTeams, int spawnCount) {
@@ -50,51 +49,51 @@ public strictfp class ParameterConstraints {
                 && spawnCountRange.contains(spawnCount);
     }
 
-    public MapParameters randomizeParameters(Random random, MapParameters mapParameters) throws Exception {
-        return MapParameters.builder()
-                .spawnCount(mapParameters.getSpawnCount())
+    public GeneratorParameters randomizeParameters(Random random, GeneratorParameters generatorParameters) throws Exception {
+        return GeneratorParameters.builder()
+                .spawnCount(generatorParameters.getSpawnCount())
                 .landDensity(landDensityRange.getRandomFloat(random))
                 .plateauDensity(plateauDensityRange.getRandomFloat(random))
                 .mountainDensity(mountainDensityRange.getRandomFloat(random))
                 .rampDensity(rampDensityRange.getRandomFloat(random))
                 .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
                 .mexDensity(mexDensityRange.getRandomFloat(random))
-                .mapSize(mapParameters.getMapSize())
-                .numTeams(mapParameters.getNumTeams())
-                .hydroCount(mapParameters.getHydroCount())
+                .mapSize(generatorParameters.getMapSize())
+                .numTeams(generatorParameters.getNumTeams())
+                .hydroCount(generatorParameters.getHydroCount())
                 .blind(false)
                 .unexplored(false)
-                .symmetrySettings(mapParameters.getSymmetrySettings())
+                .symmetrySettings(generatorParameters.getSymmetrySettings())
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();
     }
 
-    public MapParameters mapToLevel(float level, MapParameters mapParameters, Random random) {
+    public GeneratorParameters mapToLevel(float level, GeneratorParameters generatorParameters, Random random) {
         try {
-            return MapParameters.builder()
-                    .spawnCount(mapParameters.getSpawnCount())
+            return GeneratorParameters.builder()
+                    .spawnCount(generatorParameters.getSpawnCount())
                     .landDensity(landDensityRange.map(level))
                     .plateauDensity(plateauDensityRange.map(level))
                     .mountainDensity(mountainDensityRange.map(level))
                     .rampDensity(rampDensityRange.map(level))
                     .reclaimDensity(reclaimDensityRange.map(level))
                     .mexDensity(mexDensityRange.map(level))
-                    .mapSize(mapParameters.getMapSize())
-                    .numTeams(mapParameters.getNumTeams())
-                    .hydroCount(mapParameters.getHydroCount())
+                    .mapSize(generatorParameters.getMapSize())
+                    .numTeams(generatorParameters.getNumTeams())
+                    .hydroCount(generatorParameters.getHydroCount())
                     .blind(false)
                     .unexplored(false)
-                    .symmetrySettings(mapParameters.getSymmetrySettings())
+                    .symmetrySettings(generatorParameters.getSymmetrySettings())
                     .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
-            return mapParameters;
+            return generatorParameters;
         }
     }
 
-    public MapParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean tournamentStyle, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
-        return MapParameters.builder()
+    public GeneratorParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean tournamentStyle, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
+        return GeneratorParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))
                 .plateauDensity(plateauDensityRange.getRandomFloat(random))

@@ -15,9 +15,9 @@ public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
     @Override
     protected int getMexCount() {
         int mexCount;
-        int mapSize = mapParameters.getMapSize();
-        int spawnCount = mapParameters.getSpawnCount();
-        float mexDensity = parameterConstraints.getMexDensityRange().normalize(mapParameters.getMexDensity());
+        int mapSize = generatorParameters.getMapSize();
+        int spawnCount = generatorParameters.getSpawnCount();
+        float mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.getMexDensity());
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
             mexCount = (int) (10 + 2 * mexDensity);

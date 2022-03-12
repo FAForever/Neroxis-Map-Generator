@@ -10,6 +10,7 @@ application {
 dependencies {
     implementation project(':shared')
     implementation('commons-codec:commons-codec:1.15')
+    implementation('org.jgrapht:jgrapht-io:1.5.1')
 }
 
 shadowJar {

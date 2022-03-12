@@ -18,9 +18,9 @@ public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator 
 
     @Override
     protected void landSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(mapParameters.getLandDensity());
+        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         int maxMiddlePoints = 4;
         int numPaths = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 8);

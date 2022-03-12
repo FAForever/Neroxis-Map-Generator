@@ -84,30 +84,28 @@ public strictfp class MapPopulator {
     }
 
     public void interpretArguments(String[] args) {
-        interpretArguments(ArgumentParser.parse(args));
-    }
-
-    private void interpretArguments(Map<String, String> arguments) {
+        Map<String, String> arguments = ArgumentParser.parse(args);
         if (arguments.containsKey("help")) {
-            System.out.println("map-populator usage:\n" +
-                    "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the map\n" +
-                    "--out-folder-path arg  required, set the output folder for the populated map\n" +
-                    "--team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)\n" +
-                    "--spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)\n" +
-                    "--spawns arg           optional, populate arg spawns\n" +
-                    "--mexes arg            optional, populate arg mexes per player\n" +
-                    "--hydros arg           optional, populate arg hydros per player\n" +
-                    "--props arg            optional, populate props arg is the path to the props json\n" +
-                    "--wrecks               optional, populate wrecks\n" +
-                    "--textures arg         optional, populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)\n" +
-                    " - ie: to populate all texture layers except layer 7, use: --textures 1234568\n" +
-                    " - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock" +
-                    "--decals               optional, populate decals\n" +
-                    "--erosion arg          optional, add map wide erosion normal at arg resolution\n" +
-                    "--ai                   optional, populate ai markers\n" +
-                    "--keep-current-decals  optional, prevents decals currently on the map from being deleted\n" +
-                    "--debug                optional, turn on debugging options\n");
+            System.out.println("""
+                    map-populator usage:
+                    --help                 produce help message
+                    --in-folder-path arg   required, set the input folder for the map
+                    --out-folder-path arg  required, set the output folder for the populated map
+                    --team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)
+                    --spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)
+                    --spawns arg           optional, populate arg spawns
+                    --mexes arg            optional, populate arg mexes per player
+                    --hydros arg           optional, populate arg hydros per player
+                    --props arg            optional, populate props arg is the path to the props json
+                    --wrecks               optional, populate wrecks
+                    --textures arg         optional, populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)
+                     - ie: to populate all texture layers except layer 7, use: --textures 1234568
+                     - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock--decals               optional, populate decals
+                    --erosion arg          optional, add map wide erosion normal at arg resolution
+                    --ai                   optional, populate ai markers
+                    --keep-current-decals  optional, prevents decals currently on the map from being deleted
+                    --debug                optional, turn on debugging options
+                    """);
             return;
         }
 
