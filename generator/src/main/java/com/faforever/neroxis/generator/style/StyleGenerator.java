@@ -13,11 +13,13 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.AIMarkerPlacer;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.SymmetrySelector;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -43,10 +45,12 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected float spawnSeparation;
     protected int teamSeparation;
     private SpawnPlacer spawnPlacer;
+    private SymmetrySettings symmetrySettings;
 
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         this.generatorParameters = generatorParameters;
         random = new Random(seed);
+        symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, generatorParameters.getTerrainSymmetry(), generatorParameters.getNumTeams());
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         map.setUnexplored(generatorParameters.isUnexplored());
         map.setGeneratePreview(!generatorParameters.isBlind());
@@ -104,7 +108,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     @Override
     public void setupPipeline() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () ->
-                spawnPlacer.placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation, generatorParameters.getSymmetrySettings()));
+                spawnPlacer.placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation, symmetrySettings));
 
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, generatorParameters, terrainGenerator);
@@ -114,13 +118,13 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
             decalGenerator = selectRandomMatchingGenerator(random, decalGenerators, generatorParameters, decalGenerator);
         });
 
-        terrainGenerator.initialize(map, random.nextLong(), generatorParameters);
+        terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();
 
-        textureGenerator.initialize(map, random.nextLong(), generatorParameters, terrainGenerator);
-        resourceGenerator.initialize(map, random.nextLong(), generatorParameters, terrainGenerator);
-        propGenerator.initialize(map, random.nextLong(), generatorParameters, terrainGenerator);
-        decalGenerator.initialize(map, random.nextLong(), generatorParameters, terrainGenerator);
+        textureGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+        resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+        decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
 
         resourceGenerator.setupPipeline();
         textureGenerator.setupPipeline();

@@ -52,9 +52,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected float mountainBrushDensity;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters) {
-        super.initialize(map, seed, generatorParameters);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         spawnLandMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask", true);
         spawnPlateauMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask", true);
         land = new BooleanMask(1, random.nextLong(), symmetrySettings, "land", true);
@@ -114,9 +113,9 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void symmetrySetup() {
-        if (!generatorParameters.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+        if (!symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
             float halfSize = map.getSize() / 2f;
-            int forceRadius = generatorParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+            int forceRadius = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
             land.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
             plateaus.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
             mountains.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
@@ -186,9 +185,9 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         mountains.setSize(map.getSize() / 4);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (generatorParameters.getMountainDensity() * 100 / generatorParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
+            mountains.progressiveWalk((int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
         } else {
-            mountains.randomWalk((int) (generatorParameters.getMountainDensity() * 100 / generatorParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
+            mountains.randomWalk((int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
         }
         mountains.dilute(.5f, 4);
         mountains.setSize(map.getSize() + 1);
@@ -207,7 +206,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(spawnLandMask).add(spawnPlateauMask);
-        if (map.getSize() > 512 && generatorParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() <= 4) {
+        if (map.getSize() > 512 && symmetrySettings.getSpawnSymmetry().getNumSymPoints() <= 4) {
             land.add(spawnLandMask).add(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
             land.erode(.5f, 10).add(spawnLandMask.copy().setSize(map.getSize() / 8)).add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
                     .blur(4, .75f).dilute(.5f, 5).setSize(map.getSize() + 1);
@@ -301,7 +300,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected void initRamps() {
         float maxStepSize = map.getSize() / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / generatorParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints();
+        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
         int bound = map.getSize() / 4;
         ramps.setSize(map.getSize() + 1);
 
@@ -350,7 +349,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {
-        int numSymPoints = generatorParameters.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         String brushValley = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         String brushHill = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 

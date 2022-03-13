@@ -29,9 +29,8 @@ public strictfp class NavyWrecksPropGenerator extends ReducedNaturalPropGenerato
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", true);
         navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask", true);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);

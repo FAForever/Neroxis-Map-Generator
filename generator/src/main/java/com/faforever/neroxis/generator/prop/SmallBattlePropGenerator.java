@@ -27,9 +27,8 @@ public strictfp class SmallBattlePropGenerator extends ReducedNaturalPropGenerat
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }

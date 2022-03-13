@@ -20,9 +20,8 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask noCivs;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
 
         noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings);

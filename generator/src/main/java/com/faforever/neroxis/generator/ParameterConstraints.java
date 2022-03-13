@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.Range;
 import lombok.Value;
 
@@ -22,7 +22,6 @@ public strictfp class ParameterConstraints {
     Range spawnCountRange;
     Range mapSizeRange;
     Range numTeamsRange;
-    Range hydroCountRange;
     List<String> biomes;
 
     public static ParameterConstraintsBuilder builder() {
@@ -36,7 +35,6 @@ public strictfp class ParameterConstraints {
                 && rampDensityRange.contains(generatorParameters.getRampDensity())
                 && reclaimDensityRange.contains(generatorParameters.getReclaimDensity())
                 && mexDensityRange.contains(generatorParameters.getMexDensity())
-                && hydroCountRange.contains(generatorParameters.getHydroCount())
                 && numTeamsRange.contains(generatorParameters.getNumTeams())
                 && spawnCountRange.contains(generatorParameters.getSpawnCount())
                 && mapSizeRange.contains(generatorParameters.getMapSize())
@@ -60,10 +58,9 @@ public strictfp class ParameterConstraints {
                 .mexDensity(mexDensityRange.getRandomFloat(random))
                 .mapSize(generatorParameters.getMapSize())
                 .numTeams(generatorParameters.getNumTeams())
-                .hydroCount(generatorParameters.getHydroCount())
                 .blind(false)
                 .unexplored(false)
-                .symmetrySettings(generatorParameters.getSymmetrySettings())
+                .terrainSymmetry(generatorParameters.getTerrainSymmetry())
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();
     }
@@ -80,10 +77,9 @@ public strictfp class ParameterConstraints {
                     .mexDensity(mexDensityRange.map(level))
                     .mapSize(generatorParameters.getMapSize())
                     .numTeams(generatorParameters.getNumTeams())
-                    .hydroCount(generatorParameters.getHydroCount())
                     .blind(false)
                     .unexplored(false)
-                    .symmetrySettings(generatorParameters.getSymmetrySettings())
+                    .terrainSymmetry(generatorParameters.getTerrainSymmetry())
                     .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                     .build();
         } catch (Exception e) {
@@ -92,7 +88,7 @@ public strictfp class ParameterConstraints {
         }
     }
 
-    public GeneratorParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean tournamentStyle, boolean blind, boolean unexplored, SymmetrySettings symmetrySettings) throws Exception {
+    public GeneratorParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, boolean tournamentStyle, boolean blind, boolean unexplored, Symmetry terrainSymmetry) throws Exception {
         return GeneratorParameters.builder()
                 .spawnCount(spawnCount)
                 .landDensity(landDensityRange.getRandomFloat(random))
@@ -103,11 +99,10 @@ public strictfp class ParameterConstraints {
                 .mexDensity(mexDensityRange.getRandomFloat(random))
                 .mapSize(mapSize)
                 .numTeams(numTeams)
-                .hydroCount(spawnCount)
                 .tournamentStyle(tournamentStyle)
                 .blind(blind)
                 .unexplored(unexplored)
-                .symmetrySettings(symmetrySettings)
+                .terrainSymmetry(terrainSymmetry)
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();
     }
@@ -128,7 +123,7 @@ public strictfp class ParameterConstraints {
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
                     rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange, mapSizeRange,
-                    numTeamsRange, hydroCountRange, biomes);
+                    numTeamsRange, biomes);
         }
 
         public ParameterConstraintsBuilder landDensity(float min, float max) {

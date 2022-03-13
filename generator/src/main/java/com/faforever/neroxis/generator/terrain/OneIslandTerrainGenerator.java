@@ -16,8 +16,8 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters) {
-        super.initialize(map, seed, generatorParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;
@@ -25,7 +25,6 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     protected void landSetup() {
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         int mapSize = map.getSize();
         float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         int minMiddlePoints = 2;

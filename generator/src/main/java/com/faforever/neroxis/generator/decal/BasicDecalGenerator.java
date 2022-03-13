@@ -13,9 +13,8 @@ public strictfp class BasicDecalGenerator extends DecalGenerator {
     protected BooleanMask slopeDecal;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal", true);
         slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal", true);
     }

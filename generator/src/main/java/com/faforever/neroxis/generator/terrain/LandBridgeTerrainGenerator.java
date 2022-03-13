@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
@@ -34,7 +33,6 @@ public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator 
 
     @Override
     protected void plateausSetup() {
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 2;

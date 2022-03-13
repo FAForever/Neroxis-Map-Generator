@@ -30,9 +30,8 @@ public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
         noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }

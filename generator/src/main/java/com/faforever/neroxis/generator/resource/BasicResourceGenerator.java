@@ -13,9 +13,8 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
     protected BooleanMask waterResourceMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = generatorParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", true);
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
     }
@@ -35,7 +34,7 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
         Pipeline.await(resourceMask, waterResourceMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
             mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            hydroPlacer.placeHydros(generatorParameters.getHydroCount(), resourceMask.getFinalMask().deflate(8));
+            hydroPlacer.placeHydros(generatorParameters.getSpawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }
 

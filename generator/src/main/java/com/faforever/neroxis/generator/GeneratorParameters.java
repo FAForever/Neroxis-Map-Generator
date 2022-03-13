@@ -35,9 +35,7 @@ public strictfp class GeneratorParameters {
                     "\nRamp Density: " + rampDensity +
                     "\nReclaim Density: " + reclaimDensity +
                     "\nMex Density: " + mexDensity +
-                    "\nTerrain Symmetry: " + symmetrySettings.getTerrainSymmetry() +
-                    "\nTeam Symmetry: " + symmetrySettings.getTeamSymmetry() +
-                    "\nSpawn Symmetry: " + symmetrySettings.getSpawnSymmetry();
+                    "\nTerrain Symmetry: " + terrainSymmetry;
         } else {
             return "Spawns: " + spawnCount +
                     "\nMap Size: " + mapSize +

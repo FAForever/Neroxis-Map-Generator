@@ -22,11 +22,11 @@ public strictfp class GraphContext {
     private final GeneratorParameters generatorParameters;
     private final int mapSize;
 
-    public GraphContext(long seed, GeneratorParameters generatorParameters) {
+    public GraphContext(long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
         this.generatorParameters = generatorParameters;
+        this.symmetrySettings = symmetrySettings;
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         mapSize = generatorParameters.getMapSize();
-        symmetrySettings = generatorParameters.getSymmetrySettings();
         random = new Random(seed);
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
