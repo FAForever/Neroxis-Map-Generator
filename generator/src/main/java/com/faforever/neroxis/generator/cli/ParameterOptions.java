@@ -17,7 +17,6 @@ public strictfp class ParameterOptions {
     @Spec
     CommandLine.Model.CommandSpec spec;
 
-    private Long seed;
     private Float landDensity;
     private Float plateauDensity;
     private Float mountainDensity;
@@ -26,11 +25,6 @@ public strictfp class ParameterOptions {
     private Float mexDensity;
     private Symmetry terrainSymmetry;
     private Biome biome;
-
-    @Option(names = "--seed", description = "Seed for the generated map")
-    public void setSeed(Long seed) {
-        this.seed = seed;
-    }
 
     @Option(names = "--land-density", description = "Land density for the generated map. Min: 0 Max: 1")
     public void setLandDensity(float density) {

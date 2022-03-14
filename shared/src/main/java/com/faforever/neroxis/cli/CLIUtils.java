@@ -40,7 +40,7 @@ public class CLIUtils {
         if (value % 64 != 0) {
             throw new CommandLine.ParameterException(
                     spec.commandLine(),
-                    "Must be a multiple of 64"
+                    "Map size ust be a multiple of 64"
             );
         }
 

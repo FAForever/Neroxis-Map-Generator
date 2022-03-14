@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import picocli.CommandLine;
 
 import java.nio.file.Paths;
 
@@ -57,14 +58,14 @@ public class VisualizationTest {
 
     @Test
     public void TestEqualityWithVisualizationMapNameKeyword() throws Exception {
-        instance.interpretArguments(keywordArgs);
+        new CommandLine(instance).parseArgs(keywordArgs);
         SCMap map1 = instance.generate();
 
         Pipeline.reset();
         instance = new MapGenerator();
 
         String[] args = {"--map-name", map1.getName(), "--visualize"};
-        instance.interpretArguments(args);
+        new CommandLine(instance).parseArgs(args);
         SCMap map2 = instance.generate();
 
         assertSCMapEquality(map1, map2);

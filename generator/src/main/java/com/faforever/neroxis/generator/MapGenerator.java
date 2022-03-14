@@ -65,45 +65,49 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private static final String VERSION = new VersionProvider().getVersion()[0];
     public static final int NUM_BINS = 127;
-    private static final List<StyleGenerator> MAP_STYLES = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
-    private static final List<StyleGenerator> PRODUCTION_STYLES = MAP_STYLES.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
+    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
+    private final List<StyleGenerator> productionStyles = mapStyles.stream().filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator)).collect(Collectors.toList());
 
     @Spec
     private CommandLine.Model.CommandSpec spec;
 
-    //Set during generation
+    // Set during generation
     private SCMap map;
-    private long seed;
     private long generationTime;
     private Random random;
     private GeneratorParameters generatorParameters;
-    private GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
 
-    //read from cli args
+    // Read from cli args
     private Path folderPath;
     private Path previewFolder;
+    private Long seed;
     private String mapName;
     private int spawnCount;
     private int mapSize;
     private int numTeams;
     private Visibility visibility;
     private StyleGenerator mapStyle;
-    @ArgGroup(heading = "Options that control map generation%n")
+    @ArgGroup(heading = "Options that control map generation%n", exclusive = false)
     private ParameterOptions parameterOptions;
 
-    @Option(names = {"--folder-path"}, defaultValue = ".", description = "Folder to save the map in", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    @Option(names = "--seed", description = "Seed for the generated map")
+    public void setSeed(Long seed) {
+        this.seed = seed;
+    }
+
+    @Option(names = "--folder-path", defaultValue = ".", description = "Folder to save the map in", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     public void setFolderPath(Path folderPath) throws IOException {
         CLIUtils.checkWritableDirectory(folderPath, spec);
         this.folderPath = folderPath;
     }
 
-    @Option(names = {"--preview-path"}, description = "Folder to save the map previews to")
+    @Option(names = "--preview-path", description = "Folder to save the map previews to")
     public void setPreviewFolder(Path previewFolder) throws IOException {
         CLIUtils.checkWritableDirectory(previewFolder, spec);
         this.previewFolder = previewFolder;
     }
 
-    @Option(names = {"--map-name"}, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options")
+    @Option(names = "--map-name", description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options")
     public void setMapName(String mapName) {
         this.mapName = mapName;
     }
@@ -145,7 +149,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     @Option(names = "--style", description = "Style for the generated map")
     public void setMapStyle(String style) {
-        mapStyle = MAP_STYLES.stream()
+        mapStyle = mapStyles.stream()
                 .filter(mapStyle -> mapStyle.getName().equals(style.toUpperCase(Locale.ROOT)))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style"));
@@ -160,34 +164,34 @@ public strictfp class MapGenerator implements Callable<Integer> {
     @Command(name = "styles", aliases = {"--styles"}, description = "Prints the styles available",
             versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     public void printStyles() {
-        System.out.println(PRODUCTION_STYLES.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
+        System.out.println(productionStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
     }
 
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
         int exitCode = new CommandLine(new MapGenerator()).execute(args);
         System.out.printf("Execution done: %d ms\n", System.currentTimeMillis() - startTime);
+        Pipeline.shutdown();
         System.exit(exitCode);
     }
 
     @Override
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
-        Pipeline.reset();
-        seed = new Random().nextLong();
 
+        GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
         if (mapName != null) {
-            parseMapName(mapName);
+            parseMapName(mapName, generatorParametersBuilder);
         } else {
             checkParameters();
             setGenerationTimeIfNecessary();
-            populateRequiredGeneratorParametersFromOptions();
+            populateRequiredGeneratorParametersFromOptions(generatorParametersBuilder);
 
-            randomizeOptions();
+            randomizeOptions(generatorParametersBuilder);
         }
 
-        setStyleAndParameters();
-        generateMapName();
+        setStyleAndParameters(generatorParametersBuilder);
+        encodeMapName();
 
         FileUtil.deleteRecursiveIfExists(folderPath.resolve(mapName));
         System.out.println(mapName);
@@ -199,7 +203,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
         if (visibility == null) {
             System.out.printf("Seed: %d%n", seed);
-            System.out.println(mapStyle.generatorParameters.toString());
+            System.out.println(mapStyle.getGeneratorParameters().toString());
             System.out.printf("Style: %s%n", mapStyle.getName());
             System.out.println(mapStyle.generatorsToString());
 
@@ -208,27 +212,31 @@ public strictfp class MapGenerator implements Callable<Integer> {
             }
         }
 
-        Pipeline.shutdown();
         return 0;
     }
 
-    private void setStyleAndParameters() {
+    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (mapStyle == null) {
-            overwriteOptionalGeneratorParametersFromOptions();
+            overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
-            mapStyle = StyleGenerator.selectRandomMatchingGenerator(random, PRODUCTION_STYLES, generatorParameters, new BasicStyleGenerator());
+            mapStyle = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
         } else {
             generatorParameters = mapStyle.getParameterConstraints().initParameters(random, generatorParametersBuilder);
         }
     }
 
-    private void populateRequiredGeneratorParametersFromOptions() {
+    private void populateRequiredGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        if (seed == null || visibility != null) {
+            seed = new Random().nextLong();
+        }
+
         generatorParametersBuilder.mapSize(mapSize);
         generatorParametersBuilder.numTeams(numTeams);
         generatorParametersBuilder.spawnCount(spawnCount);
+        generatorParametersBuilder.visibility(visibility);
     }
 
-    private void overwriteOptionalGeneratorParametersFromOptions() {
+    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (parameterOptions != null) {
             if (parameterOptions.getBiome() != null) {
                 generatorParametersBuilder.biome(parameterOptions.getBiome());
@@ -279,17 +287,14 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void setValidTerrainSymmetry() {
-        GeneratorParameters tempGeneratorParameters = generatorParametersBuilder.build();
-        List<Symmetry> terrainSymmetries = switch (tempGeneratorParameters.getSpawnCount()) {
+    private Symmetry getValidTerrainSymmetry() {
+        List<Symmetry> terrainSymmetries = switch (spawnCount) {
             case 2, 4 -> new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
                     Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
             default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
         };
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
-        int numTeams = tempGeneratorParameters.getNumTeams();
-        int spawnCount = tempGeneratorParameters.getSpawnCount();
         if (numTeams > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
             terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 || symmetry.getNumSymPoints() > spawnCount * 4);
@@ -300,10 +305,10 @@ public strictfp class MapGenerator implements Callable<Integer> {
         if (numTeams == 2 && random.nextFloat() < .75f) {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
-        generatorParametersBuilder.terrainSymmetry(terrainSymmetries.get(random.nextInt(terrainSymmetries.size())));
+        return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
     }
 
-    private void parseMapName(String mapName) {
+    private void parseMapName(String mapName, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         this.mapName = mapName;
 
         String[] nameArgs = verifyMapName(mapName);
@@ -320,7 +325,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
         if (nameArgs.length >= 6) {
             String optionString = nameArgs[5];
-            parseOptions(GeneratedMapNameEncoder.decode(optionString));
+            parseOptions(GeneratedMapNameEncoder.decode(optionString), generatorParametersBuilder);
         }
     }
 
@@ -364,7 +369,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void parseOptions(byte[] optionBytes) {
+    private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (optionBytes.length > 0) {
             if (optionBytes[0] <= 16) {
                 generatorParametersBuilder.spawnCount(optionBytes[0]);
@@ -378,7 +383,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.numTeams(optionBytes[2]);
         }
 
-        randomizeOptions();
+        randomizeOptions(generatorParametersBuilder);
 
         if (optionBytes.length == 11) {
             generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3])));
@@ -391,15 +396,16 @@ public strictfp class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
         } else if (optionBytes.length == 4) {
             if (generationTime == 0) {
-                mapStyle = MAP_STYLES.get(optionBytes[3]);
+                mapStyle = mapStyles.get(optionBytes[3]);
             } else {
                 visibility = Visibility.values()[optionBytes[3]];
+                generatorParametersBuilder.visibility(visibility);
             }
         }
     }
 
 
-    private void randomizeOptions() {
+    private void randomizeOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
@@ -409,58 +415,54 @@ public strictfp class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
-        setValidTerrainSymmetry();
+        generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
-    private void generateMapName() {
+    private void encodeMapName() {
         CommandLine.ParseResult parseResult = spec.commandLine().getParseResult();
+        if (this.mapName == null) {
 
-        String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
-        ByteBuffer seedBuffer = ByteBuffer.allocate(8);
-        seedBuffer.putLong(seed);
-        String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
-        byte[] optionArray;
-        if (parameterOptions != null) {
-            optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                    (byte) (generatorParameters.getMapSize() / 64),
-                    (byte) generatorParameters.getNumTeams(),
-                    (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome().getName()),
-                    (byte) MathUtil.binPercentage(generatorParameters.getLandDensity(), NUM_BINS),
-                    (byte) MathUtil.binPercentage(generatorParameters.getPlateauDensity(), NUM_BINS),
-                    (byte) MathUtil.binPercentage(generatorParameters.getMountainDensity(), NUM_BINS),
-                    (byte) MathUtil.binPercentage(generatorParameters.getRampDensity(), NUM_BINS),
-                    (byte) MathUtil.binPercentage(generatorParameters.getReclaimDensity(), NUM_BINS),
-                    (byte) MathUtil.binPercentage(generatorParameters.getMexDensity(), NUM_BINS),
-                    (byte) generatorParameters.getTerrainSymmetry().ordinal()};
-        } else if (visibility != null) {
-            optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                    (byte) (generatorParameters.getMapSize() / 64),
-                    (byte) generatorParameters.getNumTeams(),
-                    (byte) visibility.ordinal()};
-        } else if (parseResult.hasMatchedOption("--style")) {
-            int styleIndex = MAP_STYLES.indexOf(MAP_STYLES.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
-                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
-            optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                    (byte) (generatorParameters.getMapSize() / 64),
-                    (byte) generatorParameters.getNumTeams(),
-                    (byte) styleIndex};
-        } else {
-            optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                    (byte) (generatorParameters.getMapSize() / 64),
-                    (byte) generatorParameters.getNumTeams()};
+            String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
+            ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+            seedBuffer.putLong(seed);
+            String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
+            byte[] optionArray;
+            if (parameterOptions != null) {
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                        (byte) (generatorParameters.getMapSize() / 64),
+                        (byte) generatorParameters.getNumTeams(),
+                        (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome().getName()),
+                        (byte) MathUtil.binPercentage(generatorParameters.getLandDensity(), NUM_BINS),
+                        (byte) MathUtil.binPercentage(generatorParameters.getPlateauDensity(), NUM_BINS),
+                        (byte) MathUtil.binPercentage(generatorParameters.getMountainDensity(), NUM_BINS),
+                        (byte) MathUtil.binPercentage(generatorParameters.getRampDensity(), NUM_BINS),
+                        (byte) MathUtil.binPercentage(generatorParameters.getReclaimDensity(), NUM_BINS),
+                        (byte) MathUtil.binPercentage(generatorParameters.getMexDensity(), NUM_BINS),
+                        (byte) generatorParameters.getTerrainSymmetry().ordinal()};
+            } else if (visibility != null) {
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                        (byte) (generatorParameters.getMapSize() / 64),
+                        (byte) generatorParameters.getNumTeams(),
+                        (byte) visibility.ordinal()};
+            } else if (parseResult.hasMatchedOption("--style")) {
+                int styleIndex = mapStyles.indexOf(mapStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
+                        .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                        (byte) (generatorParameters.getMapSize() / 64),
+                        (byte) generatorParameters.getNumTeams(),
+                        (byte) styleIndex};
+            } else {
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                        (byte) (generatorParameters.getMapSize() / 64),
+                        (byte) generatorParameters.getNumTeams()};
+            }
+            String optionString = GeneratedMapNameEncoder.encode(optionArray);
+            if (visibility != null) {
+                String timeString = GeneratedMapNameEncoder.encode(ByteBuffer.allocate(8).putLong(generationTime).array());
+                optionString += "_" + timeString;
+            }
+            mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
         }
-        String optionString = GeneratedMapNameEncoder.encode(optionArray);
-        if (visibility != null) {
-            String timeString = GeneratedMapNameEncoder.encode(ByteBuffer.allocate(8).putLong(generationTime).array());
-            optionString += "_" + timeString;
-        }
-        String mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
-
-        if (this.mapName != null && !this.mapName.equals(mapName)) {
-            throw new IllegalStateException(String.format("Mapname not reproduced: Original name `%s` This name `%s`", this.mapName, mapName));
-        }
-
-        this.mapName = mapName;
     }
 
     public void save() {

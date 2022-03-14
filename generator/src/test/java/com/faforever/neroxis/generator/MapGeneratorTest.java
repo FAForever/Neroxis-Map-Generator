@@ -17,8 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -32,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
 
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaebsicfsuqek5aijq_";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaebsicfsuqek5cm";
     String folderPath = ".";
     long seed = 1234;
     byte spawnCount = 2;
@@ -69,40 +71,40 @@ public class MapGeneratorTest {
     }
 
     @Test
-    public void TestParseMapName() throws Exception {
-        instance.interpretArguments("--folder-path", ".", "--map-name", mapName);
+    public void TestParseMapName() {
+        new CommandLine(instance).execute("--folder-path", ".", "--map-name", mapName);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), roundedLandDensity);
-        assertEquals(instance.getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(instance.getMountainDensity(), roundedMountainDensity);
-        assertEquals(instance.getRampDensity(), roundedRampDensity);
-        assertEquals(instance.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(instance.getMexDensity(), roundedMexDensity);
-        assertEquals(instance.getMapSize(), mapSize);
+        assertEquals(instance.getFolderPath().toString(), folderPath);
+        assertEquals(instance.getGeneratorParameters().getLandDensity(), roundedLandDensity);
+        assertEquals(instance.getGeneratorParameters().getPlateauDensity(), roundedPlateauDensity);
+        assertEquals(instance.getGeneratorParameters().getMountainDensity(), roundedMountainDensity);
+        assertEquals(instance.getGeneratorParameters().getRampDensity(), roundedRampDensity);
+        assertEquals(instance.getGeneratorParameters().getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(instance.getGeneratorParameters().getMexDensity(), roundedMexDensity);
+        assertEquals(instance.getGeneratorParameters().getMapSize(), mapSize);
     }
 
     @Test
-    public void TestParseKeywordArgs() throws Exception {
-        instance.interpretArguments(keywordArgs);
+    public void TestParseKeywordArgs() {
+        new CommandLine(instance).execute(keywordArgs);
 
         assertEquals(instance.getSeed(), seed);
-        assertEquals(instance.getPathToFolder(), folderPath);
-        assertEquals(instance.getLandDensity(), roundedLandDensity);
-        assertEquals(instance.getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(instance.getMountainDensity(), roundedMountainDensity);
-        assertEquals(instance.getRampDensity(), roundedRampDensity);
-        assertEquals(instance.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(instance.getMexDensity(), roundedMexDensity);
-        assertEquals(instance.getMapSize(), mapSize);
+        assertEquals(instance.getFolderPath().toString(), folderPath);
+        assertEquals(instance.getGeneratorParameters().getLandDensity(), roundedLandDensity);
+        assertEquals(instance.getGeneratorParameters().getPlateauDensity(), roundedPlateauDensity);
+        assertEquals(instance.getGeneratorParameters().getMountainDensity(), roundedMountainDensity);
+        assertEquals(instance.getGeneratorParameters().getRampDensity(), roundedRampDensity);
+        assertEquals(instance.getGeneratorParameters().getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(instance.getGeneratorParameters().getMexDensity(), roundedMexDensity);
+        assertEquals(instance.getGeneratorParameters().getMapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);
     }
 
     @Test
-    public void TestParseMapSizes() throws Exception {
-        for (int i = 0; i < 2048; ++i) {
-            instance.interpretArguments(new String[]{"--map-size", String.valueOf(i)});
+    public void TestParseMapSizes() {
+        for (int i = 0; i < 2048; i += 64) {
+            new CommandLine(instance).parseArgs("--map-size", String.valueOf(i));
 
             assertEquals(StrictMath.round(i / 64f) * 64, instance.getMapSize());
         }
@@ -110,9 +112,9 @@ public class MapGeneratorTest {
 
     @Test
     public void TestMapExportedToProperSize() throws Exception {
-        instance.interpretArguments(new String[]{"--map-size", "384"});
+        new CommandLine(instance).execute("--map-size", "384");
 
-        SCMap map = instance.generate();
+        SCMap map = instance.getMap();
 
         MapExporter.exportMap(Paths.get("."), map, false, false);
 
@@ -122,66 +124,62 @@ public class MapGeneratorTest {
 
     @Test
     public void TestDeterminism() throws Exception {
-        instance.interpretArguments(keywordArgs);
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute(keywordArgs);
+        SCMap map1 = instance.getMap();
         String[] hashArray1 = Pipeline.getHashArray().clone();
 
         for (int i = 0; i < 5; i++) {
-            Pipeline.reset();
             instance = new MapGenerator();
 
-            instance.interpretArguments(keywordArgs);
-            SCMap map2 = instance.generate();
+            new CommandLine(instance).execute(keywordArgs);
+            SCMap map2 = instance.getMap();
             String[] hashArray2 = Pipeline.getHashArray().clone();
 
-            assertArrayEquals(hashArray1, hashArray2);
             assertSCMapEquality(map1, map2);
+            assertArrayEquals(hashArray1, hashArray2);
         }
     }
 
     @Test
     public void TestEqualityMapNameKeyword() throws Exception {
-        instance.interpretArguments(keywordArgs);
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute(keywordArgs);
+        SCMap map1 = instance.getMap();
 
-        Pipeline.reset();
         instance = new MapGenerator();
 
         String[] args = {"--map-name", map1.getName()};
-        instance.interpretArguments(args);
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute(args);
+        SCMap map2 = instance.getMap();
 
         assertSCMapEquality(map1, map2);
     }
 
     @Test
     public void TestEqualityWithDebugMapNameKeyword() throws Exception {
-        instance.interpretArguments(keywordArgs);
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute(keywordArgs);
+        SCMap map1 = instance.getMap();
 
-        Pipeline.reset();
         instance = new MapGenerator();
 
         String[] args = {"--map-name", map1.getName(), "--debug"};
-        instance.interpretArguments(args);
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute(args);
+        SCMap map2 = instance.getMap();
 
         assertSCMapEquality(map1, map2);
     }
 
     @Test
-    public void TestEqualityTournamentStyle() throws Exception {
-        instance.interpretArguments(new String[]{"--tournament-style", "--map-size", "256"});
-        SCMap map1 = instance.generate();
+    public void TestEqualityTournamentStyle() {
+        new CommandLine(instance).execute("--tournament-style", "--map-size", "256");
+        SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
         long seed1 = instance.getSeed();
 
-        Pipeline.reset();
         instance = new MapGenerator();
 
-        instance.interpretArguments(new String[]{"--map-name", mapName});
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
@@ -193,23 +191,22 @@ public class MapGeneratorTest {
 
     @Test
     public void TestInequalityTournamentStyle() throws Exception {
-        instance.interpretArguments(new String[]{"--tournament-style", "--map-size", "256"});
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute("--tournament-style", "--map-size", "256");
+        SCMap map1 = instance.getMap();
         long generationTime1 = instance.getGenerationTime();
         long seed1 = instance.getSeed();
 
-        Pipeline.reset();
         Thread.sleep(1000);
         instance = new MapGenerator();
 
-        instance.interpretArguments(new String[]{"--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256"});
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256");
+        SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
         assertNotEquals(map1.getName(), map2.getName());
         assertNotEquals(generationTime1, generationTime2);
-        assertEquals(seed1, seed2);
+        assertNotEquals(seed1, seed2);
         assertNotEquals(map1.getSpawns(), map2.getSpawns());
         assertNotEquals(map1.getMexes(), map2.getMexes());
         assertNotEquals(map1.getHydros(), map2.getHydros());
@@ -223,17 +220,16 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityBlind() throws Exception {
-        instance.interpretArguments(new String[]{"--blind", "--map-size", "256"});
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute("--blind", "--map-size", "256");
+        SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
         long seed1 = instance.getSeed();
 
-        Pipeline.reset();
         instance = new MapGenerator();
 
-        instance.interpretArguments(new String[]{"--map-name", mapName});
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
@@ -245,17 +241,16 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityUnexplored() throws Exception {
-        instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});
-        SCMap map1 = instance.generate();
+        new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+        SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
         long seed1 = instance.getSeed();
 
-        Pipeline.reset();
         instance = new MapGenerator();
 
-        instance.interpretArguments(new String[]{"--map-name", mapName});
-        SCMap map2 = instance.generate();
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
         long seed2 = instance.getSeed();
 
@@ -267,81 +262,65 @@ public class MapGeneratorTest {
 
     @Test
     public void TestEqualityStyleSpecified() throws Exception {
-        List<StyleGenerator> styles = instance.getMapStyles();
+        List<StyleGenerator> styles = instance.getProductionStyles();
         for (StyleGenerator styleGenerator : styles) {
-            Pipeline.reset();
-            instance = new MapGenerator();
+            for (int i = 0; i < 3; i++) {
+                instance = new MapGenerator();
 
-            instance.interpretArguments(new String[]{"--style", styleGenerator.getName(), "--map-size", "256"});
-            SCMap map1 = instance.generate();
-            String mapName = instance.getMapName();
-            long generationTime1 = instance.getGenerationTime();
-            long seed1 = instance.getSeed();
+                new CommandLine(instance).execute("--style", styleGenerator.getName(), "--map-size", "256");
+                SCMap map1 = instance.getMap();
+                String mapName = instance.getMapName();
+                long generationTime1 = instance.getGenerationTime();
+                long seed1 = instance.getSeed();
 
-            Pipeline.reset();
-            instance = new MapGenerator();
+                instance = new MapGenerator();
 
-            instance.interpretArguments(new String[]{"--map-name", mapName});
-            SCMap map2 = instance.generate();
-            long generationTime2 = instance.getGenerationTime();
-            long seed2 = instance.getSeed();
+                new CommandLine(instance).execute("--map-name", mapName);
+                SCMap map2 = instance.getMap();
+                long generationTime2 = instance.getGenerationTime();
+                long seed2 = instance.getSeed();
 
-            assertEquals(generationTime1, generationTime2);
-            assertEquals(seed1, seed2);
+                assertEquals(generationTime1, generationTime2);
+                assertEquals(seed1, seed2);
 
-            assertSCMapEquality(map1, map2);
+                assertSCMapEquality(map1, map2);
+            }
         }
     }
 
     @Test
     public void TestEqualityBiomeSpecified() throws Exception {
         for (String name : Biomes.BIOMES_LIST) {
-            Pipeline.reset();
-            instance = new MapGenerator();
+            for (int i = 0; i < 3; i++) {
+                instance = new MapGenerator();
 
-            instance.interpretArguments(new String[]{"--biome", name, "--map-size", "256"});
-            SCMap map1 = instance.generate();
-            String mapName = instance.getMapName();
-            long generationTime1 = instance.getGenerationTime();
-            long seed1 = instance.getSeed();
+                new CommandLine(instance).execute("--biome", name, "--map-size", "256");
+                SCMap map1 = instance.getMap();
+                String mapName = instance.getMapName();
+                long generationTime1 = instance.getGenerationTime();
+                long seed1 = instance.getSeed();
 
-            Pipeline.reset();
-            instance = new MapGenerator();
+                instance = new MapGenerator();
 
-            instance.interpretArguments(new String[]{"--map-name", mapName});
-            SCMap map2 = instance.generate();
-            long generationTime2 = instance.getGenerationTime();
-            long seed2 = instance.getSeed();
+                new CommandLine(instance).execute("--map-name", mapName);
+                SCMap map2 = instance.getMap();
+                long generationTime2 = instance.getGenerationTime();
+                long seed2 = instance.getSeed();
 
-            assertEquals(generationTime1, generationTime2);
-            assertEquals(seed1, seed2);
+                assertEquals(generationTime1, generationTime2);
+                assertEquals(seed1, seed2);
 
-            assertSCMapEquality(map1, map2);
+                assertSCMapEquality(map1, map2);
+            }
         }
     }
-
-//    @Test
-//    public void TestStyleSymmetry() throws Exception {
-//        List<StyleGenerator> styles = instance.getMapStyles();
-//        for (StyleGenerator styleGenerator : styles) {
-//            for (int i = 0; i < 5; ++i) {
-//                Pipeline.reset();
-//                instance = new MapGenerator();
-//
-//                instance.interpretArguments(new String[]{"--style", styleGenerator.getName(), "--map-size", "256"});
-//                SCMap map1 = instance.generate();
-//                assertSCMapSymmetry(map1, instance.getSymmetrySettings(), styleGenerator.getName());
-//            }
-//        }
-//    }
 
     @Test
     public void TestUnexploredNoUnits() throws Exception {
         for (int i = 0; i < 10; ++i) {
-            Pipeline.reset();
             instance = new MapGenerator();
-            instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});
-            SCMap map = instance.generate();
+            new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+            SCMap map = instance.getMap();
 
             for (Army army : map.getArmies()) {
                 for (Group group : army.getGroups()) {
@@ -353,10 +332,9 @@ public class MapGeneratorTest {
 
     @Test
     public void TestUnexploredPreview() throws Exception {
-        Pipeline.reset();
         instance = new MapGenerator();
-        instance.interpretArguments(new String[]{"--unexplored", "--map-size", "256"});
-        SCMap map = instance.generate();
+        new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+        SCMap map = instance.getMap();
 
         BufferedImage blankPreview = ImageUtil.readImage(PreviewGenerator.BLANK_PREVIEW);
         BufferedImage mapPreview = map.getPreview();
@@ -389,8 +367,9 @@ public class MapGeneratorTest {
     @AfterEach
     public void cleanup() {
         DebugUtil.DEBUG = false;
-        Pipeline.reset();
-        FileUtil.deleteRecursiveIfExists(Paths.get(instance.getMapName()));
+        if (instance.getMapName() != null) {
+            FileUtil.deleteRecursiveIfExists(Path.of(instance.getMapName()));
+        }
     }
 
 }

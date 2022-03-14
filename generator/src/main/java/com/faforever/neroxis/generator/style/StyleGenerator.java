@@ -54,7 +54,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, generatorParameters.getTerrainSymmetry(), generatorParameters.getNumTeams());
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         map.setUnexplored(generatorParameters.getVisibility() == Visibility.UNEXPLORED);
-        map.setGeneratePreview(generatorParameters.getVisibility() == Visibility.BLIND || map.isUnexplored());
+        map.setGeneratePreview(generatorParameters.getVisibility() != Visibility.BLIND && !map.isUnexplored());
 
         Pipeline.reset();
 
