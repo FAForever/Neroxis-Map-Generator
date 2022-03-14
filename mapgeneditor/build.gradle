@@ -8,6 +8,7 @@ application {
 }
 
 dependencies {
+    implementation project(':shared')
     implementation project(':generator')
     implementation('com.github.tomnelson:jungrapht-visualization:1.3')
 }

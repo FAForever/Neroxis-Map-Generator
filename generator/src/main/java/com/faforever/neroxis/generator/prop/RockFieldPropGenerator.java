@@ -22,7 +22,7 @@ public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         largeRockFieldMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "largeRockFieldMask", true);
     }
 

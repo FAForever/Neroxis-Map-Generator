@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
@@ -21,7 +22,7 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
 
         noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings);
@@ -59,7 +60,7 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void placeUnits() {
-        if (!generatorParameters.isUnexplored()) {
+        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
             Pipeline.await(civReclaimMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {

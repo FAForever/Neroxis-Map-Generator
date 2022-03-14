@@ -14,7 +14,7 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", true);
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
     }

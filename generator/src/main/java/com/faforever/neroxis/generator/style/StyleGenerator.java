@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
 import com.faforever.neroxis.generator.decal.DecalGenerator;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
@@ -52,8 +53,8 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, generatorParameters.getTerrainSymmetry(), generatorParameters.getNumTeams());
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
-        map.setUnexplored(generatorParameters.isUnexplored());
-        map.setGeneratePreview(!generatorParameters.isBlind());
+        map.setUnexplored(generatorParameters.getVisibility() == Visibility.UNEXPLORED);
+        map.setGeneratePreview(generatorParameters.getVisibility() == Visibility.BLIND || map.isUnexplored());
 
         Pipeline.reset();
 
@@ -148,7 +149,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     }
 
     public String generatorsToString() {
-        if (!generatorParameters.isTournamentStyle()) {
+        if (generatorParameters.getVisibility() == null) {
             return "TerrainGenerator: " + terrainGenerator.getClass().getSimpleName() +
                     "\nTextureGenerator: " + textureGenerator.getClass().getSimpleName() +
                     "\nResourceGenerator: " + resourceGenerator.getClass().getSimpleName() +

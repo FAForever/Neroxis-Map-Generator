@@ -17,14 +17,12 @@ public strictfp class GeneratorParameters {
     float mexDensity;
     int mapSize;
     int numTeams;
-    boolean unexplored;
-    boolean blind;
-    boolean tournamentStyle;
+    Visibility visibility;
     Symmetry terrainSymmetry;
     Biome biome;
 
     public String toString() {
-        if (!tournamentStyle) {
+        if (visibility == null) {
             return "Spawns: " + spawnCount +
                     "\nMap Size: " + mapSize +
                     "\nNum Teams: " + numTeams +
