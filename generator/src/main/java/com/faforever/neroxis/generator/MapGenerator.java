@@ -38,6 +38,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -76,6 +78,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
     private long generationTime;
     private Random random;
     private GeneratorParameters generatorParameters;
+    private StyleGenerator styleGenerator;
 
     // Read from cli args
     private Path folderPath;
@@ -86,7 +89,8 @@ public strictfp class MapGenerator implements Callable<Integer> {
     private int mapSize;
     private int numTeams;
     private Visibility visibility;
-    private StyleGenerator mapStyle;
+    @Option(names = "--style", description = "Style for the generated map. Values: ${COMPLETION_CANDIDATES}")
+    private MapStyle mapStyle;
     @ArgGroup(heading = "Options that control map generation%n", exclusive = false)
     private ParameterOptions parameterOptions;
 
@@ -147,14 +151,6 @@ public strictfp class MapGenerator implements Callable<Integer> {
         this.visibility = Visibility.UNEXPLORED;
     }
 
-    @Option(names = "--style", description = "Style for the generated map")
-    public void setMapStyle(String style) {
-        mapStyle = mapStyles.stream()
-                .filter(mapStyle -> mapStyle.getName().equals(style.toUpperCase(Locale.ROOT)))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style"));
-    }
-
     @Option(names = "--debug", description = "Enable debugging")
     public void setDebugging(boolean debug) {
         DebugUtil.DEBUG = debug;
@@ -164,7 +160,10 @@ public strictfp class MapGenerator implements Callable<Integer> {
     @Command(name = "styles", aliases = {"--styles"}, description = "Prints the styles available",
             versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     public void printStyles() {
-        System.out.println(productionStyles.stream().map(StyleGenerator::getName).collect(Collectors.joining("\n")));
+        System.out.println(Arrays.stream(MapStyle.values())
+                .filter(MapStyle::isProduction)
+                .map(MapStyle::toString)
+                .collect(Collectors.joining("\n")));
     }
 
     public static void main(String[] args) {
@@ -203,9 +202,9 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
         if (visibility == null) {
             System.out.printf("Seed: %d%n", seed);
-            System.out.println(mapStyle.getGeneratorParameters().toString());
-            System.out.printf("Style: %s%n", mapStyle.getName());
-            System.out.println(mapStyle.generatorsToString());
+            System.out.println(styleGenerator.getGeneratorParameters().toString());
+            System.out.printf("Style: %s%n", mapStyle);
+            System.out.println(styleGenerator.generatorsToString());
 
             if (previewFolder != null) {
                 SCMapExporter.exportPreview(previewFolder, map);
@@ -215,13 +214,30 @@ public strictfp class MapGenerator implements Callable<Integer> {
         return 0;
     }
 
-    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         if (mapStyle == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
-            mapStyle = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
+            List<StyleGenerator> productionStyles = Arrays.stream(MapStyle.values())
+                    .filter(MapStyle::isProduction)
+                    .map(MapStyle::getGeneratorClass)
+                    .map(clazz -> {
+                        try {
+                            return clazz.getConstructor().newInstance();
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList());
+            Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
+                    .collect(Collectors.toMap(
+                            MapStyle::getGeneratorClass,
+                            style -> style
+                    ));
+            styleGenerator = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
+            mapStyle = styleMap.get(styleGenerator.getClass());
         } else {
-            generatorParameters = mapStyle.getParameterConstraints().initParameters(random, generatorParametersBuilder);
+            styleGenerator = mapStyle.getGeneratorClass().getConstructor().newInstance();
+            generatorParameters = styleGenerator.getParameterConstraints().initParameters(random, generatorParametersBuilder);
         }
     }
 
@@ -396,7 +412,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
         } else if (optionBytes.length == 4) {
             if (generationTime == 0) {
-                mapStyle = mapStyles.get(optionBytes[3]);
+                mapStyle = MapStyle.values()[optionBytes[3]];
             } else {
                 visibility = Visibility.values()[optionBytes[3]];
                 generatorParametersBuilder.visibility(visibility);
@@ -445,12 +461,10 @@ public strictfp class MapGenerator implements Callable<Integer> {
                         (byte) generatorParameters.getNumTeams(),
                         (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
-                int styleIndex = mapStyles.indexOf(mapStyles.stream().filter(styleGenerator -> mapStyle.getName().equals(styleGenerator.getName()))
-                        .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported Map Style")));
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
                         (byte) (generatorParameters.getMapSize() / 64),
                         (byte) generatorParameters.getNumTeams(),
-                        (byte) styleIndex};
+                        (byte) mapStyle.ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
                         (byte) (generatorParameters.getMapSize() / 64),
@@ -494,14 +508,14 @@ public strictfp class MapGenerator implements Callable<Integer> {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 
-        map = mapStyle.generate(generatorParameters, random.nextLong());
+        map = styleGenerator.generate(generatorParameters, random.nextLong());
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {
             descriptionBuilder.append("Seed: ").append(seed).append("\n");
-            descriptionBuilder.append(mapStyle.generatorParameters.toString()).append("\n");
-            descriptionBuilder.append("Style: ").append(mapStyle.getName()).append("\n");
-            descriptionBuilder.append(mapStyle.generatorsToString()).append("\n");
+            descriptionBuilder.append(styleGenerator.getGeneratorParameters().toString()).append("\n");
+            descriptionBuilder.append("Style: ").append(mapStyle).append("\n");
+            descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
         } else {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
                     DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
@@ -546,8 +560,8 @@ public strictfp class MapGenerator implements Callable<Integer> {
             FileOutputStream out = new FileOutputStream(outFile);
             String summaryString = "Seed: " + seed +
                     "\n" + generatorParameters.toString() +
-                    "\nStyle: " + mapStyle.getName() +
-                    "\n" + mapStyle.generatorsToString();
+                    "\nStyle: " + mapStyle +
+                    "\n" + styleGenerator.generatorsToString();
             out.write(summaryString.getBytes());
             out.flush();
             out.close();

@@ -168,15 +168,6 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
     }
 
-    public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
-                                                                               int spawnCount, int mapSize, int numTeams,
-                                                                               T defaultGenerator) {
-        List<T> matchingGenerators = generators.stream()
-                .filter(generator -> generator.getParameterConstraints().matches(mapSize, numTeams, spawnCount))
-                .collect(Collectors.toList());
-        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
-    }
-
     private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
                                                                                     T defaultGenerator) {
         if (generators.size() > 0) {
