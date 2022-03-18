@@ -1,8 +1,8 @@
 package com.faforever.neroxis.utilities;
 
+import com.faforever.neroxis.exporter.BiomeExporter;
+import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.exporter.BiomeExporter;
-import com.faforever.neroxis.map.importer.MapImporter;
 import com.faforever.neroxis.util.ArgumentParser;
 
 import java.io.File;

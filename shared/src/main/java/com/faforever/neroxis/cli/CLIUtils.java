@@ -21,7 +21,8 @@ public class CLIUtils {
         return MathUtil.discretePercentage(percent, numBins);
     }
 
-    public static int convertMapSizeString(String string, CommandLine.Model.CommandSpec spec) {
+    public static int convertGeneratorMapSizeString(String string, CommandLine.Model.CommandSpec spec) {
+        int value;
         if (string.endsWith("km")) {
             String kmString = string.replace("km", "");
             float kmValue = Float.parseFloat(kmString);
@@ -29,18 +30,49 @@ public class CLIUtils {
             if (kmValue % 1.25f != 0) {
                 throw new CommandLine.ParameterException(
                         spec.commandLine(),
-                        "Must be a multiple of 1.25km"
+                        "Size must be a multiple of 1.25km"
                 );
             }
 
-            return (int) (kmValue * 51.2);
+            value = (int) (kmValue * 51.2);
+        } else {
+            value = Integer.parseInt(string);
         }
 
-        int value = Integer.parseInt(string);
         if (value % 64 != 0) {
             throw new CommandLine.ParameterException(
                     spec.commandLine(),
-                    "Map size ust be a multiple of 64"
+                    "Size ust be a multiple of 64"
+            );
+        }
+
+        return value;
+    }
+
+    public static int convertMapSizeString(String string, CommandLine.Model.CommandSpec spec) {
+        if (string.endsWith("km")) {
+            String kmString = string.replace("km", "");
+            float kmValue = Float.parseFloat(kmString);
+            return (int) (kmValue * 51.2);
+        }
+
+        return Integer.parseInt(string);
+    }
+
+    public static int convertMapSizeStringStrict(String string, CommandLine.Model.CommandSpec spec) {
+        int value;
+        if (string.endsWith("km")) {
+            String kmString = string.replace("km", "");
+            float kmValue = Float.parseFloat(kmString);
+            value = (int) (kmValue * 51.2);
+        } else {
+            value = Integer.parseInt(string);
+        }
+
+        if (StrictMath.log(value) / StrictMath.log(2) % 1 != 0) {
+            throw new CommandLine.ParameterException(
+                    spec.commandLine(),
+                    "Size must be a power of 2"
             );
         }
 

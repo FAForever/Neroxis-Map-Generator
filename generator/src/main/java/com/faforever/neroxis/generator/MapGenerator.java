@@ -2,8 +2,13 @@ package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.CLIUtils;
+import com.faforever.neroxis.cli.DebugMixin;
+import com.faforever.neroxis.cli.OutputFolderMixin;
+import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.exporter.MapExporter;
+import com.faforever.neroxis.exporter.SCMapExporter;
+import com.faforever.neroxis.exporter.ScriptGenerator;
 import com.faforever.neroxis.generator.cli.ParameterOptions;
-import com.faforever.neroxis.generator.cli.VersionProvider;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
@@ -23,9 +28,6 @@ import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.map.exporter.MapExporter;
-import com.faforever.neroxis.map.exporter.SCMapExporter;
-import com.faforever.neroxis.map.exporter.ScriptGenerator;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
@@ -81,97 +83,61 @@ public strictfp class MapGenerator implements Callable<Integer> {
     private StyleGenerator styleGenerator;
 
     // Read from cli args
-    private Path folderPath;
-    private Path previewFolder;
+    @Option(names = "--seed", description = "Seed for the generated map")
     private Long seed;
+    @Option(names = "--map-name", description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options")
     private String mapName;
+    @Option(names = "--spawn-count", defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private int spawnCount;
-    private int mapSize;
+    @Option(names = "--num-teams", defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private int numTeams;
+    @Option(names = "--visibility", description = "Visibility for the generated map. Values: ${COMPLETION-CANDIDATES}")
     private Visibility visibility;
     @Option(names = "--style", description = "Style for the generated map. Values: ${COMPLETION_CANDIDATES}")
     private MapStyle mapStyle;
     @ArgGroup(heading = "Options that control map generation%n", exclusive = false)
     private ParameterOptions parameterOptions;
+    @CommandLine.Mixin
+    private OutputFolderMixin outputFolderMixin;
+    @CommandLine.Mixin
+    private DebugMixin debugMixin;
 
-    @Option(names = "--seed", description = "Seed for the generated map")
-    public void setSeed(Long seed) {
-        this.seed = seed;
-    }
-
-    @Option(names = "--folder-path", defaultValue = ".", description = "Folder to save the map in", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    public void setFolderPath(Path folderPath) throws IOException {
-        CLIUtils.checkWritableDirectory(folderPath, spec);
-        this.folderPath = folderPath;
-    }
+    private int mapSize;
+    private Path previewFolder;
 
     @Option(names = "--preview-path", description = "Folder to save the map previews to")
-    public void setPreviewFolder(Path previewFolder) throws IOException {
+    private void setPreviewFolder(Path previewFolder) throws IOException {
         CLIUtils.checkWritableDirectory(previewFolder, spec);
         this.previewFolder = previewFolder;
     }
 
-    @Option(names = "--map-name", description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options")
-    public void setMapName(String mapName) {
-        this.mapName = mapName;
-    }
-
-    @Option(names = "--spawn-count", defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    public void setSpawnCount(int spawnCount) {
-        this.spawnCount = spawnCount;
-    }
-
     @Option(names = "--map-size", defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    public void setMapSize(String mapSizeString) {
-        this.mapSize = CLIUtils.convertMapSizeString(mapSizeString, spec);
-    }
-
-    @Option(names = "--num-teams", defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    public void setNumTeams(int numTeams) {
-        this.numTeams = numTeams;
-    }
-
-    @Option(names = "--visibility", description = "Visibility for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    public void setVisibility(Visibility visibility) {
-        this.visibility = visibility;
+    private void setMapSize(String mapSizeString) {
+        this.mapSize = CLIUtils.convertGeneratorMapSizeString(mapSizeString, spec);
     }
 
     @Option(names = "--tournament-style", hidden = true, description = "Remove the preview.png and add time of original generation to map")
-    public void setTournamentStyle(boolean value) {
+    private void setTournamentStyle(boolean value) {
         this.visibility = Visibility.TOURNAMENT;
     }
 
     @Option(names = "--blind", hidden = true, description = "Remove the preview.png, add time of original generation to map, and remove in game lobby preview")
-    public void setBlind(boolean value) {
+    private void setBlind(boolean value) {
         this.visibility = Visibility.BLIND;
     }
 
     @Option(names = "--unexplored", hidden = true, description = "Remove the preview.png, add time of original generation to map, remove in game lobby preview, and add unexplored fog of war")
-    public void setUnexplored(boolean value) {
+    private void setUnexplored(boolean value) {
         this.visibility = Visibility.UNEXPLORED;
-    }
-
-    @Option(names = "--debug", description = "Enable debugging")
-    public void setDebugging(boolean debug) {
-        DebugUtil.DEBUG = debug;
-        Pipeline.HASH_MASK = debug;
     }
 
     @Command(name = "styles", aliases = {"--styles"}, description = "Prints the styles available",
             versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-    public void printStyles() {
+    private void printStyles() {
         System.out.println(Arrays.stream(MapStyle.values())
                 .filter(MapStyle::isProduction)
                 .map(MapStyle::toString)
                 .collect(Collectors.joining("\n")));
-    }
-
-    public static void main(String[] args) {
-        long startTime = System.currentTimeMillis();
-        int exitCode = new CommandLine(new MapGenerator()).execute(args);
-        System.out.printf("Execution done: %d ms\n", System.currentTimeMillis() - startTime);
-        Pipeline.shutdown();
-        System.exit(exitCode);
     }
 
     @Override
@@ -192,13 +158,13 @@ public strictfp class MapGenerator implements Callable<Integer> {
         setStyleAndParameters(generatorParametersBuilder);
         encodeMapName();
 
-        FileUtil.deleteRecursiveIfExists(folderPath.resolve(mapName));
+        FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
         System.out.println(mapName);
 
         generate();
         save();
 
-        System.out.printf("Saving map to %s%n", folderPath.resolve(mapName).toAbsolutePath());
+        System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
 
         if (visibility == null) {
             System.out.printf("Seed: %d%n", seed);
@@ -479,18 +445,19 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    public void save() {
+    private void save() {
         try {
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(folderPath, map, visibility == null, true);
+            Path outputPath = outputFolderMixin.getOutputPath();
+            MapExporter.exportMap(outputPath, map, visibility == null, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             if (visibility == null && DebugUtil.DEBUG) {
                 startTime = System.currentTimeMillis();
-                Files.createDirectory(folderPath.resolve(mapName).resolve("debug"));
-                SCMapExporter.exportSCMapString(folderPath, mapName, map);
-                Pipeline.toFile(folderPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
-                toFile(folderPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
+                Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
+                SCMapExporter.exportSCMapString(outputPath, mapName, map);
+                Pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+                toFile(outputPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
                 System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
             }
 
@@ -500,7 +467,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    public SCMap generate() throws Exception {
+    private SCMap generate() throws Exception {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
@@ -552,7 +519,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         return map;
     }
 
-    public void toFile(Path path) throws IOException {
+    private void toFile(Path path) throws IOException {
         Files.deleteIfExists(path);
         File outFile = path.toFile();
         boolean status = outFile.createNewFile();
@@ -566,5 +533,16 @@ public strictfp class MapGenerator implements Callable<Integer> {
             out.flush();
             out.close();
         }
+    }
+
+    public static void main(String[] args) {
+        DebugUtil.timedRun("Execution", () -> {
+            CommandLine commandLine = new CommandLine(new MapGenerator());
+            commandLine.setAbbreviatedOptionsAllowed(true);
+            commandLine.execute(args);
+            Pipeline.shutdown();
+        });
+
+        System.exit(0);
     }
 }

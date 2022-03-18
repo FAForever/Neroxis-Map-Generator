@@ -439,13 +439,13 @@ public strictfp class SCMap {
             playableArea.multiply(contentScale);
         }
 
-        if (boundsScale != 1) {
+        if (boundsScale != 1 && topLeftOffset.getX() != 0 && topLeftOffset.getY() != 0) {
             scaleMapBounds(boundsScale, topLeftOffset);
             playableArea.add(topLeftOffset.getX(), topLeftOffset.getY(), topLeftOffset.getX(), topLeftOffset.getY());
             this.size = boundsSize;
         }
 
-        if (contentScale != 1 || boundsScale != 1) {
+        if (contentScale != 1 || (boundsScale != 1 && topLeftOffset.getX() != 0 && topLeftOffset.getY() != 0)) {
             moveObjects(contentScale, topLeftOffset);
         }
     }

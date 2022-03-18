@@ -1,9 +1,9 @@
 package com.faforever.neroxis.utilities;
 
+import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.importer.MapImporter;
 
 import java.io.IOException;
 import java.nio.file.Paths;

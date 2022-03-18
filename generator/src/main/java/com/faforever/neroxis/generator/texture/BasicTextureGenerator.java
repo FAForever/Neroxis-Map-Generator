@@ -1,10 +1,10 @@
 package com.faforever.neroxis.generator.texture;
 
+import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.exporter.PreviewGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;

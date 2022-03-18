@@ -1,11 +1,11 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
+import com.faforever.neroxis.exporter.MapExporter;
+import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.exporter.MapExporter;
-import com.faforever.neroxis.map.exporter.PreviewGenerator;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
