@@ -15,7 +15,6 @@ import java.util.Arrays;
 public strictfp class BigIslandsStyleGenerator extends StyleGenerator {
 
     public BigIslandsStyleGenerator() {
-        name = "BIG_ISLANDS";
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)

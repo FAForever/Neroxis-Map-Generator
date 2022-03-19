@@ -12,7 +12,6 @@ import java.util.Arrays;
 public strictfp class FloodedStyleGenerator extends StyleGenerator {
 
     public FloodedStyleGenerator() {
-        name = "FLOODED";
         parameterConstraints = ParameterConstraints.builder()
                 .plateauDensity(0, .25f)
                 .landDensity(0, .5f)

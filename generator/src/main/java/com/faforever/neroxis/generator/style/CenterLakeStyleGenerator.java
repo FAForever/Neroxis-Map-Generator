@@ -15,7 +15,6 @@ import java.util.Arrays;
 public strictfp class CenterLakeStyleGenerator extends StyleGenerator {
 
     public CenterLakeStyleGenerator() {
-        name = "CENTER_LAKE";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .5f)
                 .rampDensity(.75f, 1f)

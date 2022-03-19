@@ -15,10 +15,6 @@ import java.util.Arrays;
 @Getter
 public strictfp class BasicStyleGenerator extends StyleGenerator {
 
-    public BasicStyleGenerator() {
-        name = "BASIC";
-    }
-
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);

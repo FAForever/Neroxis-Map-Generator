@@ -7,7 +7,6 @@ import lombok.Getter;
 public strictfp class TestStyleGenerator extends StyleGenerator {
 
     public TestStyleGenerator() {
-        name = "TEST";
         weight = 0;
     }
 

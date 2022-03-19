@@ -13,7 +13,6 @@ import java.util.Arrays;
 public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
 
     public SmallIslandsStyleGenerator() {
-        name = "SMALL_ISLANDS";
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .5f)

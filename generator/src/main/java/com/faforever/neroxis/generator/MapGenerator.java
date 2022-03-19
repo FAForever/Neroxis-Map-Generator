@@ -467,7 +467,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private SCMap generate() throws Exception {
+    private void generate() {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
@@ -515,8 +515,6 @@ public strictfp class MapGenerator implements Callable<Integer> {
         ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
-
-        return map;
     }
 
     private void toFile(Path path) throws IOException {

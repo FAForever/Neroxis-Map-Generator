@@ -16,7 +16,6 @@ import java.util.Arrays;
 public strictfp class MountainRangeStyleGenerator extends StyleGenerator {
 
     public MountainRangeStyleGenerator() {
-        name = "MOUNTAIN_RANGE";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.75f, 1f)
                 .mountainDensity(.5f, 1)

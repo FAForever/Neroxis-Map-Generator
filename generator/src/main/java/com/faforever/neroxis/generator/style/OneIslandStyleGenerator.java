@@ -14,7 +14,6 @@ import java.util.Arrays;
 public strictfp class OneIslandStyleGenerator extends StyleGenerator {
 
     public OneIslandStyleGenerator() {
-        name = "ONE_ISLAND";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(0f, .75f)
                 .plateauDensity(0f, .75f)

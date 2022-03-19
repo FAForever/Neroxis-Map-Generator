@@ -14,7 +14,6 @@ import java.util.Arrays;
 public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
 
     public LandBridgeStyleGenerator() {
-        name = "LAND_BRIDGE";
         weight = 2;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.25f, .75f)

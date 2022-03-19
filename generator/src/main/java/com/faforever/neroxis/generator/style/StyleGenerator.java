@@ -21,7 +21,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +40,6 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected PropGenerator propGenerator = new BasicPropGenerator();
     protected final List<DecalGenerator> decalGenerators = new ArrayList<>();
     protected DecalGenerator decalGenerator = new BasicDecalGenerator();
-    @Getter
-    protected String name;
     protected float spawnSeparation;
     protected int teamSeparation;
     private SpawnPlacer spawnPlacer;

@@ -16,7 +16,6 @@ import java.util.Arrays;
 public strictfp class DropPlateauStyleGenerator extends StyleGenerator {
 
     public DropPlateauStyleGenerator() {
-        name = "DROP_PLATEAU";
         weight = .5f;
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.5f, 1f)

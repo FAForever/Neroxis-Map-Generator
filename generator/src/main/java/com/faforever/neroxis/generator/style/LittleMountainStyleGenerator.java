@@ -16,7 +16,6 @@ import java.util.Arrays;
 public strictfp class LittleMountainStyleGenerator extends StyleGenerator {
 
     public LittleMountainStyleGenerator() {
-        name = "LITTLE_MOUNTAIN";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.5f, 1f)
                 .mountainDensity(.25f, 1)

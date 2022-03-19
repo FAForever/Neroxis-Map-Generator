@@ -21,7 +21,6 @@ import java.util.Arrays;
 public strictfp class LowMexStyleGenerator extends StyleGenerator {
 
     public LowMexStyleGenerator() {
-        name = "LOW_MEX";
         parameterConstraints = ParameterConstraints.builder()
                 .mexDensity(0f, .25f)
                 .mapSizes(256, 640)

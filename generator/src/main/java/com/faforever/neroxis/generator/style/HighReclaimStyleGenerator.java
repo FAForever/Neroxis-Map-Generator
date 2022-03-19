@@ -13,7 +13,6 @@ import java.util.Arrays;
 public strictfp class HighReclaimStyleGenerator extends StyleGenerator {
 
     public HighReclaimStyleGenerator() {
-        name = "HIGH_RECLAIM";
         weight = .25f;
         parameterConstraints = ParameterConstraints.builder()
                 .mountainDensity(.75f, 1f)

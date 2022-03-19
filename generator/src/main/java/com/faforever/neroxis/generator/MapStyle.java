@@ -21,22 +21,21 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum MapStyle {
-    BASIC(BasicStyleGenerator.class, 1, true),
-    BIG_ISLANDS(BigIslandsStyleGenerator.class, 4, true),
-    CENTER_LAKE(CenterLakeStyleGenerator.class, 1, true),
-    DROP_PLATEAU(DropPlateauStyleGenerator.class, .5f, true),
-    FLOODED(FloodedStyleGenerator.class, .01f, true),
-    HIGH_RECLAIM(HighReclaimStyleGenerator.class, .25f, true),
-    LAND_BRIDGE(LandBridgeStyleGenerator.class, 2, true),
-    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, 1, true),
-    LOW_MEX(LowMexStyleGenerator.class, .5f, true),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, 1, true),
-    ONE_ISLAND(OneIslandStyleGenerator.class, 1, true),
-    SMALL_ISLANDS(SmallIslandsStyleGenerator.class, 4, true),
-    VALLEY(ValleyStyleGenerator.class, 1, true),
-    TEST(TestStyleGenerator.class, 0, false);
+    BASIC(BasicStyleGenerator.class, true),
+    BIG_ISLANDS(BigIslandsStyleGenerator.class, true),
+    CENTER_LAKE(CenterLakeStyleGenerator.class, true),
+    DROP_PLATEAU(DropPlateauStyleGenerator.class, true),
+    FLOODED(FloodedStyleGenerator.class, true),
+    HIGH_RECLAIM(HighReclaimStyleGenerator.class, true),
+    LAND_BRIDGE(LandBridgeStyleGenerator.class, true),
+    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, true),
+    LOW_MEX(LowMexStyleGenerator.class, true),
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, true),
+    ONE_ISLAND(OneIslandStyleGenerator.class, true),
+    SMALL_ISLANDS(SmallIslandsStyleGenerator.class, true),
+    VALLEY(ValleyStyleGenerator.class, true),
+    TEST(TestStyleGenerator.class, false);
 
     private final Class<? extends StyleGenerator> generatorClass;
-    private final float weight;
     private final boolean production;
 }

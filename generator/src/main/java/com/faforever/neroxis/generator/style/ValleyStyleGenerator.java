@@ -16,7 +16,6 @@ import java.util.Arrays;
 public strictfp class ValleyStyleGenerator extends StyleGenerator {
 
     public ValleyStyleGenerator() {
-        name = "VALLEY";
         parameterConstraints = ParameterConstraints.builder()
                 .landDensity(.75f, 1f)
                 .mountainDensity(.5f, 1)
