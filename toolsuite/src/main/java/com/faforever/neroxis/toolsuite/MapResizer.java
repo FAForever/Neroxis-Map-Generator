@@ -45,12 +45,12 @@ public strictfp class MapResizer implements Callable<Integer> {
 
     @Option(names = "--scaled-size", required = true, description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km)")
     private void setScaledSize(String mapSizeString) {
-        this.scaledSize = CLIUtils.convertMapSizeString(mapSizeString, spec);
+        this.scaledSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.NONE, spec);
     }
 
-    @Option(names = "--map-size", required = true, description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids")
+    @Option(names = "--map-size", required = true, description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids")
     private void setNewMapSize(String mapSizeString) {
-        this.newMapSize = CLIUtils.convertMapSizeString(mapSizeString, spec);
+        this.newMapSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.POWER_OF_2, spec);
     }
 
     @Override

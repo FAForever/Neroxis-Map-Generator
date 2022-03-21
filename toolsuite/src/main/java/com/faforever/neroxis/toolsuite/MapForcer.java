@@ -51,9 +51,9 @@ public strictfp class MapForcer implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin;
     @Mixin
     private DebugMixin debugMixin;
-    @Option(names = "--symmetry", description = "Symmetry to force on the map. Values: ${COMPLETION_CANDIDATES}")
+    @Option(names = "--symmetry", description = "Symmetry to force on the map. Values: ${COMPLETION-CANDIDATES}")
     private Symmetry symmetry;
-    @Option(names = "--source", description = "Which part of the map to use as the base. Values: ${COMPLETION_CANDIDATES}", completionCandidates = SourceCompletionCandidates.class)
+    @Option(names = "--source", description = "Which part of the map to use as the base. Values: ${COMPLETION-CANDIDATES}", completionCandidates = SourceCompletionCandidates.class)
     private String source;
 
     private IntegerMask heightMask;

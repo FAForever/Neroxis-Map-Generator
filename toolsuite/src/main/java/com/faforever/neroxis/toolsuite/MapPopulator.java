@@ -1,5 +1,7 @@
 package com.faforever.neroxis.toolsuite;
 
+import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
@@ -20,19 +22,15 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
-import com.faforever.neroxis.util.ArgumentParser;
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
+import lombok.Getter;
 import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 @CommandLine.Command(
         name = "populate",
@@ -40,7 +38,10 @@ import java.util.Random;
         description = "Populate various map properties based on the heightmap",
         versionProvider = VersionProvider.class,
         usageHelpAutoWidth = true)
-public strictfp class MapPopulator {
+public strictfp class MapPopulator implements Callable<Integer> {
+
+    @CommandLine.Spec
+    private CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
@@ -48,164 +49,56 @@ public strictfp class MapPopulator {
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
     private DebugMixin debugMixin;
+    @CommandLine.Option(names = "--ai", description = "Populate AI markers")
+    private boolean populateAI;
+    @CommandLine.Option(names = "--textures", defaultValue = "1,2,3,4,5,6,7,8", split = ",", description = """
+            populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)
+            default is to populate all 8 layers
+            ie: to populate all texture layers except layer 7, use: --textures 1,2,3,4,5,6,8
+            texture  layers definitions: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock
+            """)
+    private Set<Integer> texturesToPopulate;
+    @CommandLine.Option(names = "--texture-size", description = "Size of the textures in pixels to use")
+    private Integer textureImageSize;
+    @CommandLine.Option(names = "--erosion", description = "Resolution in pixels to use for an erosion map. If not specified no erosion map will be generated")
+    private Integer erosionResolution;
+    @CommandLine.Option(names = "--shadow", description = "Resolution in pixels to use for a shadow map. If not specified no shadow map will be generated")
+    private Integer shadowResolution;
+    @CommandLine.ArgGroup(heading = "Options that require a symmetry be specified%n", exclusive = false)
+    private SymmetryRequiredSettings symmetryRequiredSettings;
+
+    @Getter
+    private static class SymmetryRequiredSettings {
+        @CommandLine.Option(names = "--terrain-symmetry", required = true, description = "symmetry of the terrain. Values: ${COMPLETION-CANDIDATES}")
+        private Symmetry terrainSymmetry;
+        @CommandLine.Option(names = "--team-symmetry", required = true, description = "symmetry of the teams. Values: ${COMPLETION-CANDIDATES}")
+        private Symmetry teamSymmetry;
+        @CommandLine.Option(names = "--spawns", description = "Populate X spawns on the map")
+        private Integer spawnCount;
+        @CommandLine.Option(names = "--mexes-per-player", description = "Populate X mexes per player on the map")
+        private Integer mexCountPerPlayer;
+        @CommandLine.Option(names = "--hydros-per-player", description = "Populate X hydros per player on the map")
+        private Integer hydroCountPerPlayer;
+        private Biome biome;
+
+        @CommandLine.Option(names = "--biome", description = "Name of included biome or path to custom biome folder")
+        private void setBiome(String pathOrBiome) {
+            biome = Biomes.loadBiome(pathOrBiome);
+        }
+    }
 
     private SCMap map;
-    private Path propsPath;
-    private boolean populateSpawns;
-    private boolean populateMexes;
-    private boolean populateHydros;
-    private boolean populateProps;
-    private boolean populateAI;
-    private int spawnCount;
-    private int mexCountPerPlayer;
-    private int hydroCountPerPlayer;
-    private boolean populateTextures;
-    private int mapImageSize;
-    private boolean erosionNormal;
-    private int erosionResolution;
-    private boolean keepLayer1;
-    private boolean keepLayer2;
-    private boolean keepLayer3;
-    private boolean keepLayer4;
-    private boolean keepLayer5;
-    private boolean keepLayer6;
-    private boolean keepLayer7;
-    private boolean keepLayer8;
-
     private BooleanMask resourceMask;
     private BooleanMask waterResourceMask;
 
-    private SymmetrySettings symmetrySettings;
-
-    public static void main(String[] args) throws Exception {
-
-        Locale.setDefault(Locale.ROOT);
-
-        MapPopulator populator = new MapPopulator();
-
-        populator.interpretArguments(args);
-
-        populator.importMap();
-        populator.populate();
-        populator.exportMap();
-        System.out.println("Terrain Symmetry: " + populator.symmetrySettings.getTerrainSymmetry());
-        System.out.println("Team Symmetry: " + populator.symmetrySettings.getTeamSymmetry());
-        System.out.println("Spawn Symmetry: " + populator.symmetrySettings.getSpawnSymmetry());
-        System.out.println("Done");
+    public Integer call() throws IOException {
+        map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
+        populate();
+        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true, erosionResolution != null);
+        return 0;
     }
 
-    public void interpretArguments(String[] args) {
-        Map<String, String> arguments = ArgumentParser.parse(args);
-        if (arguments.containsKey("help")) {
-            System.out.println("""
-                    map-populator usage:
-                    --help                 produce help message
-                    --in-folder-path arg   required, set the input folder for the map
-                    --out-folder-path arg  required, set the output folder for the populated map
-                    --team-symmetry arg    required, set the symmetry for the teams(X, Z, XZ, ZX)
-                    --spawn-symmetry arg   required, set the symmetry for the spawns(POINT, X, Z, XZ, ZX)
-                    --spawns arg           optional, populate arg spawns
-                    --mexes arg            optional, populate arg mexes per player
-                    --hydros arg           optional, populate arg hydros per player
-                    --props arg            optional, populate props arg is the path to the props json
-                    --wrecks               optional, populate wrecks
-                    --textures arg         optional, populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)
-                     - ie: to populate all texture layers except layer 7, use: --textures 1234568
-                     - texture  layers 1-8 are: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock--decals               optional, populate decals
-                    --erosion arg          optional, add map wide erosion normal at arg resolution
-                    --ai                   optional, populate ai markers
-                    --keep-current-decals  optional, prevents decals currently on the map from being deleted
-                    --debug                optional, turn on debugging options
-                    """);
-            return;
-        }
-
-        if (arguments.containsKey("debug")) {
-            DebugUtil.DEBUG = true;
-        }
-
-        if (!arguments.containsKey("in-folder-path")) {
-            System.out.println("Input Folder not Specified");
-            return;
-        }
-
-        if (!arguments.containsKey("out-folder-path")) {
-            System.out.println("Output Folder not Specified");
-            return;
-        }
-
-        populateSpawns = arguments.containsKey("spawns");
-        if (populateSpawns) {
-            spawnCount = Integer.parseInt(arguments.get("spawns"));
-        }
-        populateMexes = arguments.containsKey("mexes");
-        if (populateMexes) {
-            mexCountPerPlayer = Integer.parseInt(arguments.get("mexes"));
-        }
-        populateHydros = arguments.containsKey("hydros");
-        if (populateHydros) {
-            hydroCountPerPlayer = Integer.parseInt(arguments.get("hydros"));
-        }
-        populateProps = arguments.containsKey("props");
-        if (populateProps) {
-            propsPath = Paths.get(arguments.get("props"));
-        }
-        populateTextures = arguments.containsKey("textures");
-        if (populateTextures) {
-            String whichTextures = arguments.get("textures");
-            if (whichTextures != null) {
-                keepLayer1 = !whichTextures.contains("1");
-                keepLayer2 = !whichTextures.contains("2");
-                keepLayer3 = !whichTextures.contains("3");
-                keepLayer4 = !whichTextures.contains("4");
-                keepLayer5 = !whichTextures.contains("5");
-                keepLayer6 = !whichTextures.contains("6");
-                keepLayer7 = !whichTextures.contains("7");
-                keepLayer8 = !whichTextures.contains("8");
-            }
-        }
-        if (arguments.containsKey("texture-res")) {
-            mapImageSize = Integer.parseInt(arguments.get("texture-res"));
-        }
-        populateAI = arguments.containsKey("ai");
-        erosionNormal = arguments.containsKey("erosion");
-        if (erosionNormal) {
-            String resolution = arguments.get("erosion");
-            if (resolution != null) {
-                erosionResolution = Integer.parseInt(resolution);
-            }
-        }
-
-        boolean symmetryNeeded = populateAI || populateHydros || populateMexes || populateProps || populateSpawns || populateTextures;
-
-        if (symmetryNeeded && (!arguments.containsKey("team-symmetry") || !arguments.containsKey("spawn-symmetry"))) {
-            System.out.println("Symmetries not Specified");
-            return;
-        }
-
-        if (symmetryNeeded) {
-            symmetrySettings = new SymmetrySettings(Symmetry.valueOf(arguments.get("spawn-symmetry")), Symmetry.valueOf(arguments.get("team-symmetry")), Symmetry.valueOf(arguments.get("spawn-symmetry")));
-        } else {
-            symmetrySettings = new SymmetrySettings(Symmetry.NONE);
-        }
-    }
-
-    public void importMap() {
-        try {
-            map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error while importing the map.");
-        }
-    }
-
-    public void exportMap() {
-        long startTime = System.currentTimeMillis();
-        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true, erosionNormal);
-        System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
-    }
-
-    public void populate() throws Exception {
+    public void populate() {
         /*SupComSlopeValues
         const float FlatHeight = 0.002f;
         const float NonFlatHeight = 0.30f;
@@ -213,6 +106,7 @@ public strictfp class MapPopulator {
         const float UnpassableHeight = 0.75f;
         const float ScaleHeight = 256;
         */
+        SymmetrySettings symmetrySettings = new SymmetrySettings(symmetryRequiredSettings.getTerrainSymmetry(), symmetryRequiredSettings.getTeamSymmetry(), symmetryRequiredSettings.getTerrainSymmetry());
 
         Random random = new Random();
         boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
@@ -236,7 +130,8 @@ public strictfp class MapPopulator {
         BooleanMask passableLand = land.copy();
         BooleanMask passableWater = land.copy().invert();
 
-        if (populateSpawns) {
+        Integer spawnCount = symmetryRequiredSettings.getSpawnCount();
+        if (spawnCount != null) {
             if (spawnCount > 0) {
                 SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
                 float spawnSeparation = StrictMath.max(random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
@@ -248,7 +143,9 @@ public strictfp class MapPopulator {
             }
         }
 
-        if (populateMexes || populateHydros) {
+        Integer mexCountPerPlayer = symmetryRequiredSettings.getMexCountPerPlayer();
+        Integer hydroCountPerPlayer = symmetryRequiredSettings.getHydroCountPerPlayer();
+        if (mexCountPerPlayer != null || hydroCountPerPlayer != null) {
             resourceMask = land.copy();
             waterResourceMask = land.copy().invert();
 
@@ -257,7 +154,7 @@ public strictfp class MapPopulator {
             waterResourceMask.subtract(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false);
         }
 
-        if (populateMexes) {
+        if (mexCountPerPlayer != null) {
             if (mexCountPerPlayer > 0) {
                 MexPlacer mexPlacer = new MexPlacer(map, random.nextLong());
 
@@ -267,7 +164,7 @@ public strictfp class MapPopulator {
             }
         }
 
-        if (populateHydros) {
+        if (hydroCountPerPlayer != null) {
             if (hydroCountPerPlayer > 0) {
                 HydroPlacer hydroPlacer = new HydroPlacer(map, random.nextLong());
 
@@ -277,7 +174,7 @@ public strictfp class MapPopulator {
             }
         }
 
-        if (populateTextures) {
+        if (!texturesToPopulate.isEmpty()) {
 
             int smallWaterSizeLimit = 9000;
 
@@ -286,12 +183,12 @@ public strictfp class MapPopulator {
             FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(), symmetrySettings, 1f, "TextureMasksHigh")
                     .subtractScalar(128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
 
-            if (mapImageSize == 0 || mapImageSize > map.getSize()) {
-                mapImageSize = map.getSize();
+            if (textureImageSize == null) {
+                textureImageSize = map.getSize();
             }
 
-            map.setTextureMasksLow(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
-            map.setTextureMasksHigh(new BufferedImage(mapImageSize, mapImageSize, BufferedImage.TYPE_INT_ARGB));
+            map.setTextureMasksLow(new BufferedImage(textureImageSize, textureImageSize, BufferedImage.TYPE_INT_ARGB));
+            map.setTextureMasksHigh(new BufferedImage(textureImageSize, textureImageSize, BufferedImage.TYPE_INT_ARGB));
 
             BooleanMask water = land.copy().invert();
             BooleanMask flat = slope.copyAsBooleanMask(.05f).invert();
@@ -305,14 +202,14 @@ public strictfp class MapPopulator {
             BooleanMask tinyWater = water.copy().removeAreasBiggerThan(StrictMath.min(smallWaterSizeLimit / 4 + 750, smallWaterSizeLimit * 2 / 3));
             BooleanMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
             BooleanMask smallWaterBeach = smallWater.copy().subtract(tinyWater).inflate(2).add(tinyWater);
-            FloatMask smallWaterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
+            FloatMask smallWaterBeachTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
 
             inland.deflate(2);
             flatAboveCoast.multiply(flat);
             higherFlatAboveCoast.multiply(flat);
             lowWaterBeach.invert().subtract(smallWater).inflate(6).subtract(aboveBeach);
             smallWaterBeach.subtract(flatAboveCoast).blur(2, 0.5f).subtract(aboveBeach).subtract(higherFlatAboveCoast).blur(1);
-            smallWaterBeach.setSize(mapImageSize);
+            smallWaterBeach.setSize(textureImageSize);
 
             smallWaterBeachTexture.init(smallWaterBeach, 0f, 1f).blur(8).clampMax(0.35f).add(smallWaterBeach, 1f).blur(4).clampMax(0.65f).add(smallWaterBeach, 1f).blur(1).add(smallWaterBeach, 1f).clampMax(1f);
 
@@ -324,14 +221,14 @@ public strictfp class MapPopulator {
             BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
             BooleanMask rock = slope.copyAsBooleanMask(1.25f);
             BooleanMask accentRock = slope.copyAsBooleanMask(1.25f);
-            FloatMask waterBeachTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentGroundTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentPlateauTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask slopesTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentSlopesTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask steepHillsTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask rockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentRockTexture = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings);
+            FloatMask waterBeachTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask accentGroundTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask accentPlateauTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask slopesTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask accentSlopesTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask steepHillsTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask rockTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask accentRockTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
 
             accentGround.subtract(highGround).acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
             accentPlateau.acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
@@ -345,16 +242,16 @@ public strictfp class MapPopulator {
             }
             accentRock.acid(.2f, 0).erode(.3f).acid(.2f, 0).blur(2, .5f).multiply(rock);
 
-            accentGround.setSize(mapImageSize);
-            accentPlateau.setSize(mapImageSize);
-            slopes.setSize(mapImageSize);
-            accentSlopes.setSize(mapImageSize);
-            steepHills.setSize(mapImageSize);
-            waterBeach.setSize(mapImageSize);
-            aboveBeachEdge.setSize(mapImageSize);
-            rock.setSize(mapImageSize);
-            accentRock.setSize(mapImageSize);
-            smallWater.setSize(mapImageSize);
+            accentGround.setSize(textureImageSize);
+            accentPlateau.setSize(textureImageSize);
+            slopes.setSize(textureImageSize);
+            accentSlopes.setSize(textureImageSize);
+            steepHills.setSize(textureImageSize);
+            waterBeach.setSize(textureImageSize);
+            aboveBeachEdge.setSize(textureImageSize);
+            rock.setSize(textureImageSize);
+            accentRock.setSize(textureImageSize);
+            smallWater.setSize(textureImageSize);
             accentGroundTexture.init(accentGround, 0f, 1f).blur(8).add(accentGround, .65f).blur(4).add(accentGround, .5f).blur(1).clampMax(1f);
             accentPlateauTexture.init(accentPlateau, 0f, 1f).blur(8).add(accentPlateau, .65f).blur(4).add(accentPlateau, .5f).blur(1).clampMax(1f);
             slopesTexture.init(slopes, 0f, 1f).blur(8).add(slopes, .65f).blur(4).add(slopes, .5f).blur(1).clampMax(1f);
@@ -369,55 +266,47 @@ public strictfp class MapPopulator {
             rockTexture.init(rock, 0f, 1f).blur(8).clampMax(0.2f).add(rock, .65f).blur(4).clampMax(0.3f).add(rock, .5f).blur(1).add(rock, 1f).clampMax(1f);
             accentRockTexture.init(accentRock, 0f, 1f).clampMin(0f).blur(8).add(accentRock, .65f).blur(4).add(accentRock, .5f).blur(1).clampMax(1f);
 
-            if (keepLayer1) {
-                accentGroundTexture = textureMasksLow[0].copy();
+            if (!texturesToPopulate.contains(1)) {
+                accentGroundTexture = textureMasksLow[0].copy().resample(textureImageSize);
             }
-            if (keepLayer2) {
-                accentPlateauTexture = textureMasksLow[1].copy();
+            if (!texturesToPopulate.contains(2)) {
+                accentPlateauTexture = textureMasksLow[1].copy().resample(textureImageSize);
             }
-            if (keepLayer3) {
-                slopesTexture = textureMasksLow[2].copy();
+            if (!texturesToPopulate.contains(3)) {
+                slopesTexture = textureMasksLow[2].copy().resample(textureImageSize);
             }
-            if (keepLayer4) {
-                accentSlopesTexture = textureMasksLow[3].copy();
+            if (!texturesToPopulate.contains(4)) {
+                accentSlopesTexture = textureMasksLow[3].copy().resample(textureImageSize);
             }
-            if (keepLayer5) {
-                steepHillsTexture = textureMasksHigh[4].copy();
+            if (!texturesToPopulate.contains(5)) {
+                steepHillsTexture = textureMasksHigh[0].copy().resample(textureImageSize);
             }
-            if (keepLayer6) {
-                waterBeachTexture = textureMasksHigh[5].copy();
+            if (!texturesToPopulate.contains(6)) {
+                waterBeachTexture = textureMasksHigh[1].copy().resample(textureImageSize);
             }
-            if (keepLayer7) {
-                rockTexture = textureMasksHigh[6].copy();
+            if (!texturesToPopulate.contains(7)) {
+                rockTexture = textureMasksHigh[2].copy().resample(textureImageSize);
             }
-            if (keepLayer8) {
-                accentRockTexture = textureMasksHigh[7].copy();
+            if (!texturesToPopulate.contains(8)) {
+                accentRockTexture = textureMasksHigh[3].copy().resample(textureImageSize);
             }
 
             map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
         }
 
-        if (erosionNormal) {
-            if (erosionResolution == 0) {
-                erosionResolution = heightmapBase.getSize();
-            }
+        if (erosionResolution != null) {
             FloatMask erosionHeightMask = heightmapBase.copy().resample(erosionResolution).subtractAvg().multiply(10f).addPerlinNoise(erosionResolution / 16, 4f);
             erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
             NormalMask normal = erosionHeightMask.copyAsNormalMask();
             map.setCompressedNormal(ImageUtil.compressNormal(normal));
         }
 
-        if (populateProps) {
+        Biome biome = symmetryRequiredSettings.getBiome();
+        if (biome != null) {
             map.getProps().clear();
             PropPlacer propPlacer = new PropPlacer(map, random.nextLong());
-            PropMaterials propMaterials;
-
-            try {
-                propMaterials = FileUtil.deserialize(propsPath.toString(), PropMaterials.class);
-            } catch (IOException e) {
-                throw new Exception("An error occured while loading props\n", e);
-            }
+            PropMaterials propMaterials = biome.getPropMaterials();
 
             BooleanMask flatEnough = slope.copyAsBooleanMask(.02f);
             BooleanMask flatish = slope.copyAsBooleanMask(.042f);
@@ -463,6 +352,8 @@ public strictfp class MapPopulator {
             if (propMaterials.getBoulders() != null && propMaterials.getBoulders().length > 0) {
                 propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.getBoulders(), 30f);
             }
+
+            map.setBiome(biome);
         }
 
         if (populateAI) {

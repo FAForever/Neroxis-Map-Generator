@@ -1,36 +1,28 @@
 package com.faforever.neroxis.generator.cli;
 
+import com.faforever.neroxis.generator.Visibility;
 import lombok.Getter;
-import picocli.CommandLine;
 
 import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Spec;
 
 @Getter
 @SuppressWarnings("unused")
 public strictfp class VisibilityOptions {
-    @Spec
-    CommandLine.Model.CommandSpec spec;
+    @Option(names = "--visibility", order = 1, description = "Visibility for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    private Visibility visibility;
 
-    private boolean tournamentStyle;
-    private boolean blind;
-    private boolean unexplored;
-
-    @Option(names = "--tournament-style", description = "Remove the preview.png and add time of original generation to map")
-    public void setTournamentStyle(boolean value) {
-        this.tournamentStyle = value;
+    @Option(names = "--tournament-style", order = 2, hidden = true, description = "Remove the preview.png and add time of original generation to map")
+    private void setTournamentStyle(boolean value) {
+        this.visibility = Visibility.TOURNAMENT;
     }
 
-    @Option(names = "--blind", description = "Remove the preview.png, add time of original generation to map, and remove in game lobby preview")
-    public void setBlind(boolean value) {
-        this.tournamentStyle = value;
-        this.blind = value;
+    @Option(names = "--blind", order = 3, hidden = true, description = "Remove the preview.png, add time of original generation to map, and remove in game lobby preview")
+    private void setBlind(boolean value) {
+        this.visibility = Visibility.BLIND;
     }
 
-    @Option(names = "--unexplored", description = "Remove the preview.png, add time of original generation to map, remove in game lobby preview, and add unexplored fog of war")
-    public void setUnexplored(boolean value) {
-        this.tournamentStyle = value;
-        this.blind = value;
-        this.unexplored = value;
+    @Option(names = "--unexplored", order = 4, hidden = true, description = "Remove the preview.png, add time of original generation to map, remove in game lobby preview, and add unexplored fog of war")
+    private void setUnexplored(boolean value) {
+        this.visibility = Visibility.UNEXPLORED;
     }
 }
