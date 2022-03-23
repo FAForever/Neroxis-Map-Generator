@@ -98,7 +98,7 @@ public strictfp class MapPopulator implements Callable<Integer> {
         return 0;
     }
 
-    public void populate() {
+    public void populate() throws IOException {
         /*SupComSlopeValues
         const float FlatHeight = 0.002f;
         const float NonFlatHeight = 0.30f;

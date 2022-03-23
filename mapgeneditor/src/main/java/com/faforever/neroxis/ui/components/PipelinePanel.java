@@ -290,10 +290,10 @@ public strictfp class PipelinePanel extends JPanel {
                     .mapSize((Integer) mapSizeComboBox.getSelectedItem())
                     .numTeams(numTeams)
                     .spawnCount((Integer) spawnCountComboBox.getSelectedItem())
-                    .symmetrySettings(symmetrySettings)
+                    .terrainSymmetry((Symmetry) terrainSymmetryComboBox.getSelectedItem())
                     .build();
 
-            GraphContext graphContext = new GraphContext(random.nextLong(), generatorParameters);
+            GraphContext graphContext = new GraphContext(random.nextLong(), generatorParameters, symmetrySettings);
             DebugUtil.timedRun("Setup pipeline", () -> rawGraph.forEach(vertex -> {
                 try {
                     vertex.prepareResults(graphContext);

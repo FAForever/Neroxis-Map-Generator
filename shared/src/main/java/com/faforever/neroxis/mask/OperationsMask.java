@@ -100,7 +100,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     @GraphMethod
     public U subtract(T val) {
-        return enqueue(() -> subtract(point -> val));
+        return subtract(point -> val);
     }
 
     @GraphMethod
@@ -155,7 +155,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     @GraphMethod
     public U multiply(T val) {
-        return enqueue(() -> multiply(point -> val));
+        return multiply(point -> val);
     }
 
     @GraphMethod
@@ -201,7 +201,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     @GraphMethod
     public U divide(T val) {
-        return enqueue(() -> divide(point -> val));
+        return divide(point -> val);
     }
 
     @GraphMethod
@@ -237,47 +237,47 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     }
 
     protected U add(Function<Point, T> valueFunction) {
-        return enqueue(() -> apply(point -> addValueAt(point, valueFunction.apply(point))));
+        return apply(point -> addValueAt(point, valueFunction.apply(point)));
     }
 
     protected U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addValueAt(spoint, value));
-        }));
+        });
     }
 
     protected U subtract(Function<Point, T> valueFunction) {
-        return enqueue(() -> apply(point -> subtractValueAt(point, valueFunction.apply(point))));
+        return apply(point -> subtractValueAt(point, valueFunction.apply(point)));
     }
 
     protected U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractValueAt(spoint, value));
-        }));
+        });
     }
 
     protected U multiply(Function<Point, T> valueFunction) {
-        return enqueue(() -> apply(point -> multiplyValueAt(point, valueFunction.apply(point))));
+        return apply(point -> multiplyValueAt(point, valueFunction.apply(point)));
     }
 
     protected U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyValueAt(spoint, value));
-        }));
+        });
     }
 
     protected U divide(Function<Point, T> valueFunction) {
-        return enqueue(() -> apply(point -> divideValueAt(point, valueFunction.apply(point))));
+        return apply(point -> divideValueAt(point, valueFunction.apply(point)));
     }
 
     protected U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideValueAt(spoint, value));
-        }));
+        });
     }
 
     protected void calculateScalarInnerValue(int[][] innerCount, int x, int y, int val) {

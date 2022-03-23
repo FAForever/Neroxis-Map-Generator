@@ -52,14 +52,14 @@ public class CLIUtils {
     public static void checkWritableDirectory(Path path, CommandLine.Model.CommandSpec spec) {
         File folder = path.toFile();
 
-        if (!folder.isDirectory()) {
+        if (folder.exists() && !folder.isDirectory()) {
             throw new CommandLine.ParameterException(
                     spec.commandLine(),
                     String.format("%s is not a directory", folder.getPath())
             );
         }
 
-        if (!folder.canWrite()) {
+        if (folder.exists() && !folder.canWrite()) {
             throw new CommandLine.ParameterException(
                     spec.commandLine(),
                     String.format("%s cannot be written to", folder.getPath())

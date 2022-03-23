@@ -8,7 +8,6 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
-import com.faforever.neroxis.generator.cli.BasicOptions;
 import com.faforever.neroxis.generator.cli.ParameterOptions;
 import com.faforever.neroxis.generator.cli.TuningOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
@@ -87,8 +86,23 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     @CommandLine.Option(names = "--map-name", order = 1, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored")
     private String mapName;
-    @CommandLine.ArgGroup(heading = "Options required to generate maps from scratch%n", order = 1, exclusive = false)
-    private BasicOptions basicOptions;
+    @CommandLine.Option(names = "--seed", order = 2, description = "Seed for the generated map")
+    private Long seed;
+    @CommandLine.Option(names = "--spawn-count", order = 4, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    private Integer spawnCount;
+    @CommandLine.Option(names = "--num-teams", order = 5, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    private Integer numTeams;
+    private Integer mapSize;
+
+    @CommandLine.Option(names = "--map-size", order = 3, defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    public void setMapSize(String mapSizeString) {
+        this.mapSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.DISCRETE_64, spec);
+    }
+
+    public void setMapSize(int mapSize) {
+        this.mapSize = mapSize;
+    }
+
     @CommandLine.ArgGroup(order = 2)
     private TuningOptions tuningOptions = new TuningOptions();
     @CommandLine.Mixin
@@ -141,7 +155,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
         Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions()).map(VisibilityOptions::getVisibility).orElse(null);
         if (visibility == null) {
-            System.out.printf("Seed: %d%n", basicOptions.getSeed());
+            System.out.printf("Seed: %d%n", seed);
             System.out.println(styleGenerator.getGeneratorParameters().toString());
             System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
             System.out.println(styleGenerator.generatorsToString());
@@ -183,13 +197,13 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private void populateRequiredGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions()).map(VisibilityOptions::getVisibility).orElse(null);
-        if (basicOptions.getSeed() == null || visibility != null) {
-            basicOptions.setSeed(new Random().nextLong());
+        if (seed == null || visibility != null) {
+            seed = new Random().nextLong();
         }
 
-        generatorParametersBuilder.mapSize(basicOptions.getMapSize());
-        generatorParametersBuilder.numTeams(basicOptions.getNumTeams());
-        generatorParametersBuilder.spawnCount(basicOptions.getSpawnCount());
+        generatorParametersBuilder.mapSize(mapSize);
+        generatorParametersBuilder.numTeams(numTeams);
+        generatorParametersBuilder.spawnCount(spawnCount);
         generatorParametersBuilder.visibility(visibility);
     }
 
@@ -230,8 +244,6 @@ public strictfp class MapGenerator implements Callable<Integer> {
     }
 
     private void checkParameters() {
-        int spawnCount = basicOptions.getSpawnCount();
-        int numTeams = basicOptions.getNumTeams();
         if (spawnCount % numTeams != 0) {
             throw new CommandLine.ParameterException(
                     spec.commandLine(),
@@ -250,17 +262,16 @@ public strictfp class MapGenerator implements Callable<Integer> {
     }
 
     private Symmetry getValidTerrainSymmetry() {
-        List<Symmetry> terrainSymmetries = switch (basicOptions.getSpawnCount()) {
+        List<Symmetry> terrainSymmetries = switch (spawnCount) {
             case 2, 4 -> new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6,
                     Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
             default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
         };
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
-        int numTeams = basicOptions.getNumTeams();
         if (numTeams > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
-            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 || symmetry.getNumSymPoints() > basicOptions.getSpawnCount() * 4);
+            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 || symmetry.getNumSymPoints() > spawnCount * 4);
         } else {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
@@ -273,14 +284,13 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private void parseMapName(String mapName, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         this.mapName = mapName;
-        basicOptions = new BasicOptions();
 
         String[] nameArgs = verifyMapName(mapName);
 
         String seedString = nameArgs[4];
         byte[] seedBytes = GeneratedMapNameEncoder.decode(seedString);
         ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
-        basicOptions.setSeed(seedWrapper.getLong());
+        seed = seedWrapper.getLong();
 
         if (nameArgs.length >= 7) {
             String timeString = nameArgs[6];
@@ -335,21 +345,18 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (optionBytes.length > 0) {
-            int spawnCount = optionBytes[0];
+            spawnCount = (int) optionBytes[0];
             if (spawnCount <= 16) {
-                basicOptions.setSpawnCount(spawnCount);
                 generatorParametersBuilder.spawnCount(spawnCount);
             }
         }
         if (optionBytes.length > 1) {
-            int mapSize = optionBytes[1] * 64;
-            basicOptions.setMapSize(mapSize);
+            mapSize = optionBytes[1] * 64;
             generatorParametersBuilder.mapSize(mapSize);
         }
 
         if (optionBytes.length > 2) {
-            int numTeams = optionBytes[2];
-            basicOptions.setNumTeams(numTeams);
+            numTeams = (int) optionBytes[2];
             generatorParametersBuilder.numTeams(numTeams);
         }
 
@@ -376,7 +383,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
 
     private void randomizeOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
+        random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.plateauDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
@@ -395,7 +402,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
             String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
             ByteBuffer seedBuffer = ByteBuffer.allocate(8);
-            seedBuffer.putLong(basicOptions.getSeed());
+            seedBuffer.putLong(seed);
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
             if (tuningOptions.getParameterOptions() != null) {
@@ -470,7 +477,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {
-            descriptionBuilder.append("Seed: ").append(basicOptions.getSeed()).append("\n");
+            descriptionBuilder.append("Seed: ").append(seed).append("\n");
             descriptionBuilder.append(styleGenerator.getGeneratorParameters().toString()).append("\n");
             descriptionBuilder.append("Style: ").append(tuningOptions.getMapStyle()).append("\n");
             descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
@@ -514,7 +521,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         boolean status = outFile.createNewFile();
         if (status) {
             FileOutputStream out = new FileOutputStream(outFile);
-            String summaryString = "Seed: " + basicOptions.getSeed() +
+            String summaryString = "Seed: " + seed +
                     "\n" + generatorParameters.toString() +
                     "\nStyle: " + tuningOptions.getMapStyle() +
                     "\n" + styleGenerator.generatorsToString();

@@ -115,10 +115,10 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     @GraphMethod
     public U clampMax(T val) {
-        return enqueue(() -> set(point -> {
+        return set(point -> {
             T thisVal = get(point);
             return thisVal.compareTo(val) < 0 ? thisVal : val;
-        }));
+        });
     }
 
     @GraphMethod
@@ -148,28 +148,28 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     @GraphMethod
     public U clampMin(T val) {
-        return enqueue(() -> set(point -> {
+        return set(point -> {
             T thisVal = get(point);
             return thisVal.compareTo(val) > 0 ? thisVal : val;
-        }));
+        });
     }
 
     @GraphMethod
     public U threshold(T val) {
-        return enqueue(() -> set(point -> {
+        return set(point -> {
             T thisVal = get(point);
-            return thisVal.compareTo(val) > 0 ? getZeroValue() : get(point);
-        }));
+            return thisVal.compareTo(val) > 0 ? getZeroValue() : thisVal;
+        });
     }
 
     @GraphMethod
     public U zeroOutsideRange(T min, T max) {
-        return enqueue(() -> set(point -> valueAtLessThan(point, min) || valueAtGreaterThan(point, max) ? getZeroValue() : get(point)));
+        return set(point -> valueAtLessThan(point, min) || valueAtGreaterThan(point, max) ? getZeroValue() : get(point));
     }
 
     @GraphMethod
     public U zeroInRange(T min, T max) {
-        return enqueue(() -> set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(point)));
+        return set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(point));
     }
 
     @GraphMethod(returnsSelf = false)

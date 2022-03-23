@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.serial.LightingSettings;
 import com.faforever.neroxis.util.serial.WaterSettings;
@@ -29,6 +30,15 @@ public strictfp class PreviewGenerator {
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";
     private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
     private static final String ARMY_IMAGE = "/images/map_markers/army.png";
+
+    public static void generatePreview(SCMap map, SymmetrySettings symmetrySettings) throws IOException {
+        FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);
+        FloatMask sunReflectance = heightmap.copyAsNormalMask().copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection());
+        List<FloatMask> textureMasks = new ArrayList<>();
+        textureMasks.addAll(List.of(new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1).splitComponentMasks()));
+        textureMasks.addAll(List.of(new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1).splitComponentMasks()));
+        generatePreview(heightmap, sunReflectance, map, textureMasks.toArray(new FloatMask[0]));
+    }
 
     public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map, FloatMask... textureMasks) throws IOException {
         if (textureMasks.length != 8) {
