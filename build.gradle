@@ -29,7 +29,6 @@ allprojects {
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': true
         ]
-        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     }
 
     // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle
