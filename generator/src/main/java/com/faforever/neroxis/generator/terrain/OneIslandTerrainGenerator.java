@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
@@ -16,8 +16,8 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;
@@ -25,9 +25,8 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     protected void landSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(mapParameters.getLandDensity());
+        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
@@ -56,7 +55,7 @@ public strictfp class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 2;
-        int numTeamConnections = (int) ((mapParameters.getRampDensity() + mapParameters.getPlateauDensity() + (1 - mapParameters.getMountainDensity())) / 3 * 2 + 2);
+        int numTeamConnections = (int) ((generatorParameters.getRampDensity() + generatorParameters.getPlateauDensity() + (1 - generatorParameters.getMountainDensity())) / 3 * 2 + 2);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 

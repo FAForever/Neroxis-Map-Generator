@@ -82,6 +82,10 @@ public strictfp class FileUtil {
         }
     }
 
+    public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {
+        return deserialize(path.toString(), clazz);
+    }
+
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
         return dslJson.deserialize(clazz, inputStream);
     }

@@ -12,7 +12,6 @@ import com.faforever.neroxis.util.vector.Vector3;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -62,7 +61,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected Mask(U other, String name) {
-        this(other.getSize(), StringUtils.endsWith(name, MOCK_NAME) ? null : other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         init(other);
     }
 
@@ -91,7 +90,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public boolean isMock() {
-        return StringUtils.endsWith(name, MOCK_NAME) || mock;
+        return (name != null && name.endsWith(MOCK_NAME)) || mock;
     }
 
     public T get(Vector3 location) {
@@ -186,7 +185,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     @GraphMethod
     public U clear() {
-        return enqueue(() -> fill(getZeroValue()));
+        return fill(getZeroValue());
     }
 
     protected abstract U setSizeInternal(int newSize);
@@ -545,18 +544,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U forceSymmetry(SymmetryType symmetryType, boolean reverse) {
         if (!reverse) {
-            return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            return applyWithSymmetry(symmetryType, point -> {
                 T value = get(point);
                 applyAtSymmetryPoints(point, symmetryType, spoint -> set(spoint, value));
-            }));
+            });
         } else {
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
                 throw new IllegalArgumentException("Symmetry has more than two symmetry points");
             }
-            return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+            return applyWithSymmetry(symmetryType, point -> {
                 List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
                 symPoints.forEach(symmetryPoint -> set(point, get(symmetryPoint)));
-            }));
+            });
         }
     }
 
@@ -564,12 +563,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
             throw new IllegalArgumentException("Spawn Symmetry must equal POINT2");
         }
-        return enqueue(() -> apply(point -> {
+        return apply(point -> {
             if (inHalf(point.x, point.y, angle)) {
                 T value = get(point);
                 applyAtSymmetryPoints(point, SymmetryType.SPAWN, spoint -> set(spoint, value));
             }
-        }));
+        });
     }
 
     @GraphMethod
@@ -578,14 +577,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U set(Function<Point, T> valueFunction) {
-        return enqueue(() -> apply(point -> set(point, valueFunction.apply(point))));
+        return apply(point -> set(point, valueFunction.apply(point)));
     }
 
     protected U setWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> set(spoint, value));
-        }));
+        });
     }
 
     protected U apply(Consumer<Point> maskAction) {
@@ -620,13 +619,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U applyAtSymmetryPoints(Point point, SymmetryType symmetryType, Consumer<Point> action) {
-        action.accept(point);
-        List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
-        symPoints.forEach(symPoint -> {
-            point.setLocation(symPoint.getX(), symPoint.getY());
+        return enqueue(() -> {
             action.accept(point);
+            List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
+            symPoints.forEach(symPoint -> {
+                point.setLocation(symPoint.getX(), symPoint.getY());
+                action.accept(point);
+            });
         });
-        return (U) this;
     }
 
     protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType, Consumer<Point> action) {
@@ -638,13 +638,14 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U applyAtSymmetryPointsWithOutOfBounds(Point point, SymmetryType symmetryType, Consumer<Point> action) {
-        action.accept(point);
-        List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(point.x, point.y, symmetryType);
-        symPoints.forEach(symPoint -> {
-            point.setLocation(symPoint.getX(), symPoint.getY());
+        return enqueue(() -> {
             action.accept(point);
+            List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(point.x, point.y, symmetryType);
+            symPoints.forEach(symPoint -> {
+                point.setLocation(symPoint.getX(), symPoint.getY());
+                action.accept(point);
+            });
         });
-        return (U) this;
     }
 
     protected U applyWithOffset(U other, BiConsumer<Point, T> action, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
@@ -693,6 +694,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected void loop(Consumer<Point> maskAction) {
+        assertNotPipelined();
         int size = getSize();
         Point point = new Point();
         for (int x = 0; x < size; x++) {
@@ -720,7 +722,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U enqueue(Runnable function) {
-        return enqueue((ignored) -> function.run());
+        return enqueue(ignored -> function.run());
     }
 
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
@@ -979,7 +981,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U fillCoordinates(Collection<Vector2> coordinates, T value) {
-        return enqueue(() -> coordinates.forEach(location -> applyAtSymmetryPoints(location, SymmetryType.SPAWN, point -> set(point, value))));
+        coordinates.forEach(location -> applyAtSymmetryPoints(location, SymmetryType.SPAWN, point -> set(point, value)));
+        return (U) this;
     }
 
     @Override

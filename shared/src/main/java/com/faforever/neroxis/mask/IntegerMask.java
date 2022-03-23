@@ -58,7 +58,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     protected void initializeMask(int size) {
-        mask = new int[size][size];
+        enqueue(() -> mask = new int[size][size]);
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
@@ -73,7 +73,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
-        enqueue(() -> apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size))));
+        apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size)));
     }
 
     private int transformAverage(float value) {
@@ -87,15 +87,16 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     protected IntegerMask fill(Integer value) {
-        int maskSize = mask.length;
-        mask[0][0] = value;
-        for (int i = 1; i < maskSize; i += i) {
-            System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
-        }
-        for (int r = 1; r < maskSize; ++r) {
-            System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
-        }
-        return this;
+        return enqueue(() -> {
+            int maskSize = mask.length;
+            mask[0][0] = value;
+            for (int i = 1; i < maskSize; i += i) {
+                System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
+            }
+            for (int r = 1; r < maskSize; ++r) {
+                System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+            }
+        });
     }
 
     protected IntegerMask fill(int[][] maskToFillFrom) {
@@ -247,10 +248,8 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     @GraphMethod
     public IntegerMask blur(int radius) {
-        return enqueue(() -> {
-            int[][] innerCount = getInnerCount();
-            apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
-        });
+        int[][] innerCount = getInnerCount();
+        return apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
     }
 
     @Override
@@ -270,6 +269,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getAvg() {
+        assertNotPipelined();
         int size = getSize();
         return getSum() / size / size;
     }

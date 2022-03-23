@@ -10,7 +10,7 @@ import lombok.Data;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,14 +27,14 @@ public strictfp class Biomes {
             "Mars", "Moonlight", "Prayer", "Stones", "Syrtis", "WindingRiver", "Wonder");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
-    public static Biome loadBiome(String folderPath) throws Exception {
+    public static Biome loadBiome(String folderPath) {
         if (Biomes.class.getResourceAsStream(CUSTOM_BIOMES_DIR + folderPath) != null) {
             folderPath = CUSTOM_BIOMES_DIR + folderPath;
             if (!folderPath.endsWith("/")) {
                 folderPath += "/";
             }
         } else {
-            folderPath = Paths.get(folderPath).toString();
+            folderPath = Path.of(folderPath).toString();
             if (!folderPath.endsWith(File.separator)) {
                 folderPath += File.separator;
             }
@@ -44,21 +44,21 @@ public strictfp class Biomes {
         try {
             terrainMaterials = FileUtil.deserialize(folderPath + "materials.json", TerrainMaterials.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %smaterials.json\n", folderPath), e);
+            throw new RuntimeException(String.format("An error occurred while loading %smaterials.json\n", folderPath), e);
         }
 
         PropMaterials propMaterials;
         try {
             propMaterials = FileUtil.deserialize(folderPath + "props.json", PropMaterials.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %sprops.json\n", folderPath), e);
+            throw new RuntimeException(String.format("An error occurred while loading %sprops.json\n", folderPath), e);
         }
 
         DecalMaterials decalMaterials;
         try {
             decalMaterials = FileUtil.deserialize(folderPath + "decals.json", DecalMaterials.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
+            throw new RuntimeException(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
         }
 
         // Water parameters
@@ -66,7 +66,7 @@ public strictfp class Biomes {
         try {
             waterSettings = FileUtil.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %s WaterSettings\n", folderPath), e);
+            throw new RuntimeException(String.format("An error occurred while loading %s WaterSettings\n", folderPath), e);
         }
 
         // Lighting settings
@@ -74,7 +74,7 @@ public strictfp class Biomes {
         try {
             lightingSettings = FileUtil.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);
         } catch (IOException e) {
-            throw new Exception(String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
+            throw new RuntimeException(String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
         }
 
         return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, decalMaterials, waterSettings, lightingSettings);

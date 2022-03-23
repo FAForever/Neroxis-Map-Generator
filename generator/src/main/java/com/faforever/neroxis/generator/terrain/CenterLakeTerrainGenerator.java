@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -19,8 +19,8 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
     }
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = 32;
         mountainBrushDensity = .05f;
         mountainBrushIntensity = 10;
@@ -28,9 +28,8 @@ public strictfp class CenterLakeTerrainGenerator extends PathedTerrainGenerator 
 
     @Override
     protected void landSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(mapParameters.getLandDensity());
+        float normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - normalizedLandDensity) + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();

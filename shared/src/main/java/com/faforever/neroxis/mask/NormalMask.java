@@ -85,7 +85,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     @GraphMethod
     public NormalMask cross(Vector3 vector) {
         Vector3 normalizedVector = vector.copy().normalize();
-        return enqueue(() -> set(point -> get(point).cross(normalizedVector)));
+        return set(point -> get(point).cross(normalizedVector));
     }
 
     @Override

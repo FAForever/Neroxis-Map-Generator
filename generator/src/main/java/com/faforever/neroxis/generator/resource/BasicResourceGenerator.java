@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.resource;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -13,9 +13,8 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
     protected BooleanMask waterResourceMask;
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", true);
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
     }
@@ -35,16 +34,16 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
         Pipeline.await(resourceMask, waterResourceMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
             mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
-            hydroPlacer.placeHydros(mapParameters.getHydroCount(), resourceMask.getFinalMask().deflate(8));
+            hydroPlacer.placeHydros(generatorParameters.getSpawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }
 
     @Override
     protected int getMexCount() {
         int mexCount;
-        int mapSize = mapParameters.getMapSize();
-        int spawnCount = mapParameters.getSpawnCount();
-        float mexDensity = mapParameters.getMexDensity();
+        int mapSize = generatorParameters.getMapSize();
+        int spawnCount = generatorParameters.getSpawnCount();
+        float mexDensity = generatorParameters.getMexDensity();
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
             mexCount = (int) (10 + 20 * mexDensity);

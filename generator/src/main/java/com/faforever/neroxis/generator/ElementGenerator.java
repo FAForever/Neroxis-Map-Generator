@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
 import lombok.Getter;
 
 import java.util.Random;
@@ -10,16 +10,18 @@ import java.util.Random;
 public abstract strictfp class ElementGenerator {
     protected SCMap map;
     protected Random random;
-    protected MapParameters mapParameters;
+    protected GeneratorParameters generatorParameters;
+    protected SymmetrySettings symmetrySettings;
 
     protected ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
     protected float weight = 1;
 
     public abstract void setupPipeline();
 
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
         this.map = map;
         this.random = new Random(seed);
-        this.mapParameters = mapParameters;
+        this.generatorParameters = generatorParameters;
+        this.symmetrySettings = symmetrySettings;
     }
 }

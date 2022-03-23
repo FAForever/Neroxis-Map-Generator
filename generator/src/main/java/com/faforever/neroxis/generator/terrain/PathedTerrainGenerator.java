@@ -1,14 +1,15 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 
     @Override
@@ -16,7 +17,7 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (mapParameters.getRampDensity() * 20) / mapParameters.getSymmetrySettings().getTerrainSymmetry().getNumSymPoints();
+        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
         int bound = mapSize / 4;
         ramps.setSize(mapSize + 1);
 

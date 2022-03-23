@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -17,9 +17,8 @@ public strictfp class BasicPropGenerator extends PropGenerator {
     protected BooleanMask noProps;
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", true);
         cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", true);
         fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", true);
@@ -33,7 +32,7 @@ public strictfp class BasicPropGenerator extends PropGenerator {
 
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = mapParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.getReclaimDensity();
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
         fieldStoneMask.setSize(mapSize / 4);
@@ -70,7 +69,7 @@ public strictfp class BasicPropGenerator extends PropGenerator {
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = mapParameters.getBiome();
+            Biome biome = generatorParameters.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 2.5f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getBoulders(), 30f);

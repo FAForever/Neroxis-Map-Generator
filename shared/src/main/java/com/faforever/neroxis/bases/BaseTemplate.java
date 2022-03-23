@@ -13,9 +13,9 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 @Value
 public strictfp class BaseTemplate {
@@ -49,7 +49,7 @@ public strictfp class BaseTemplate {
             if (units.containsKey(unit.getID())) {
                 units.get(unit.getID()).add(new Vector2(unit.getPos()));
             } else {
-                units.put(unit.getID(), new LinkedHashSet<>(Collections.singletonList(new Vector2(unit.getPos()))));
+                units.put(unit.getID(), new LinkedHashSet<>(List.of(new Vector2(unit.getPos()))));
             }
         }
         return units;
@@ -69,7 +69,7 @@ public strictfp class BaseTemplate {
             if (units.containsKey(type)) {
                 units.get(type).add(position);
             } else {
-                units.put(type, new LinkedHashSet<>(Collections.singletonList(position)));
+                units.put(type, new LinkedHashSet<>(List.of(position)));
             }
         }
         return units;

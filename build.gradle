@@ -13,8 +13,12 @@ allprojects {
     }
 
     dependencies {
+        implementation('info.picocli:picocli:4.6.3')
+
         compileOnly('org.projectlombok:lombok:1.18.22')
+
         annotationProcessor('org.projectlombok:lombok:1.18.22')
+        annotationProcessor('info.picocli:picocli-codegen:4.6.3')
 
         testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
         testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
@@ -25,11 +29,11 @@ allprojects {
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': true
         ]
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
     }
 
     // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle
     tasks.withType(Test) {
-
         String ANSI_BOLD_WHITE = "\u001B[0;1m"
         String ANSI_RESET = "\u001B[0m"
         String ANSI_BLACK = "\u001B[30m"

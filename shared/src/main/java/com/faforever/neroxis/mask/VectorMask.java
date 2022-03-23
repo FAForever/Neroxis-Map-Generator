@@ -66,6 +66,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     public T getAvg() {
+        assertNotPipelined();
         int size = getSize();
         return getSum().divide(size);
     }
@@ -73,19 +74,13 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     protected void initializeMask(int size) {
-        mask = getNullMask(size);
+        enqueue(() -> mask = getNullMask(size));
         fill(getZeroValue());
     }
 
     @Override
     protected U fill(T value) {
-        int maskSize = getSize();
-        for (int x = 0; x < maskSize; ++x) {
-            for (int y = 0; y < maskSize; ++y) {
-                set(x, y, value);
-            }
-        }
-        return (U) this;
+        return set(point -> value);
     }
 
     @Override
@@ -289,22 +284,22 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod
     public U clampComponentMin(float floor) {
-        return enqueue(() -> apply(point -> get(point).clampMin(floor)));
+        return apply(point -> get(point).clampMin(floor));
     }
 
     @GraphMethod
     public U clampComponentMax(float ceiling) {
-        return enqueue(() -> apply(point -> get(point).clampMax(ceiling)));
+        return apply(point -> get(point).clampMax(ceiling));
     }
 
     @GraphMethod
     public U randomize(float scale) {
-        return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, scale)));
+        return setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, scale));
     }
 
     @GraphMethod
     public U randomize(float minValue, float maxValue) {
-        return enqueue(() -> setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, minValue, maxValue)));
+        return setWithSymmetry(SymmetryType.SPAWN, point -> getZeroValue().randomize(random, minValue, maxValue));
     }
 
     @GraphMethod
@@ -334,10 +329,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod
     public U blur(int radius) {
-        return enqueue(() -> {
-            T[][] innerCount = getInnerCount();
-            set(point -> calculateAreaAverage(radius, point, innerCount).round().divide(1000));
-        });
+        T[][] innerCount = getInnerCount();
+        return set(point -> calculateAreaAverage(radius, point, innerCount).round().divide(1000));
     }
 
     @GraphMethod
@@ -352,10 +345,8 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @GraphMethod
     public U blurComponent(int radius, int component) {
-        return enqueue(() -> {
-            int[][] innerCount = getComponentInnerCount(component);
-            setComponent(point -> calculateComponentAreaAverage(radius, point, innerCount) / 1000f, component);
-        });
+        int[][] innerCount = getComponentInnerCount(component);
+        return setComponent(point -> calculateComponentAreaAverage(radius, point, innerCount) / 1000f, component);
     }
 
     @GraphMethod
@@ -547,25 +538,25 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected U addScalar(Function<Point, Float> valueFunction) {
-        return enqueue(() -> apply(point -> addScalarAt(point, valueFunction.apply(point))));
+        return apply(point -> addScalarAt(point, valueFunction.apply(point)));
     }
 
     protected U addScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addScalarAt(spoint, value));
-        }));
+        });
     }
 
     protected U subtractScalar(Function<Point, Float> valueFunction) {
-        return enqueue(() -> apply(point -> subtractScalarAt(point, valueFunction.apply(point))));
+        return apply(point -> subtractScalarAt(point, valueFunction.apply(point)));
     }
 
     protected U subtractScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractScalarAt(spoint, value));
-        }));
+        });
     }
 
     protected U multiplyScalar(Function<Point, Float> valueFunction) {
@@ -573,43 +564,43 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected U multiplyScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyScalarAt(spoint, value));
-        }));
+        });
     }
 
     protected U divideScalar(Function<Point, Float> valueFunction) {
-        return enqueue(() -> apply(point -> divideScalarAt(point, valueFunction.apply(point))));
+        return apply(point -> divideScalarAt(point, valueFunction.apply(point)));
     }
 
     protected U divideScalarWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideScalarAt(spoint, value));
-        }));
+        });
     }
 
     protected U setComponent(Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> apply(point -> setComponentAt(point, valueFunction.apply(point), component)));
+        return apply(point -> setComponentAt(point, valueFunction.apply(point), component));
     }
 
     protected U setComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> setComponentAt(spoint, value, component));
-        }));
+        });
     }
 
     protected U addComponent(Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> apply(point -> addComponentAt(point, valueFunction.apply(point), component)));
+        return apply(point -> addComponentAt(point, valueFunction.apply(point), component));
     }
 
     protected U addComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> addComponentAt(spoint, value, component));
-        }));
+        });
     }
 
     protected U subtractComponent(Function<Point, Float> valueFunction, int component) {
@@ -617,32 +608,32 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected U subtractComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> subtractComponentAt(spoint, value, component));
-        }));
+        });
     }
 
     protected U multiplyComponent(Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> apply(point -> multiplyComponentAt(point, valueFunction.apply(point), component)));
+        return apply(point -> multiplyComponentAt(point, valueFunction.apply(point), component));
     }
 
     protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyComponentAt(spoint, value, component));
-        }));
+        });
     }
 
     protected U divideComponent(Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> apply(point -> divideComponentAt(point, valueFunction.apply(point), component)));
+        return apply(point -> divideComponentAt(point, valueFunction.apply(point), component));
     }
 
     protected U divideComponentWithSymmetry(SymmetryType symmetryType, Function<Point, Float> valueFunction, int component) {
-        return enqueue(() -> applyWithSymmetry(symmetryType, point -> {
+        return applyWithSymmetry(symmetryType, point -> {
             Float value = valueFunction.apply(point);
             applyAtSymmetryPoints(point, symmetryType, spoint -> divideComponentAt(spoint, value, component));
-        }));
+        });
     }
 
     protected U fill(T[][] maskToFillFrom) {

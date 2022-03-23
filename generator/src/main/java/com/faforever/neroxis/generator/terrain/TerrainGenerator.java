@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.ElementGenerator;
-import com.faforever.neroxis.map.MapParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -23,9 +23,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     protected abstract void terrainSetup();
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
         slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
         impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
@@ -51,7 +50,7 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
     }
 
     protected void passableSetup() {
-        BooleanMask actualLand = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
+        BooleanMask actualLand = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation());
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);

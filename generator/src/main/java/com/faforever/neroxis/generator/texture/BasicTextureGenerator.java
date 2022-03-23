@@ -1,10 +1,10 @@
 package com.faforever.neroxis.generator.texture;
 
+import com.faforever.neroxis.exporter.PreviewGenerator;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.exporter.PreviewGenerator;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -36,11 +36,10 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask reflectance;
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, mapParameters, terrainGenerator);
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
-        realLand = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation());
-        realPlateaus = heightmap.copyAsBooleanMask(mapParameters.getBiome().getWaterSettings().getElevation() + 3f);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        realLand = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation());
+        realPlateaus = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
@@ -70,7 +69,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     public void setCompressedDecals() {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), mapParameters.getBiome().getLightingSettings()));
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), generatorParameters.getBiome().getLightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
@@ -102,8 +101,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
         shadows.add(shadowsInWater, 1f).blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512))).clampMax(1f);
-        int textureSize = mapParameters.getMapSize() + 1;
-        int mapSize = mapParameters.getMapSize();
+        int textureSize = generatorParameters.getMapSize() + 1;
+        int mapSize = generatorParameters.getMapSize();
         accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(realWater, 0f).blur(2);
         accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(realPlateaus.copy().invert(), 0f).blur(8);
         slopesTexture.init(slopes, 0f, .75f).blur(16).add(slopes, .5f).blur(16).clampMax(1f);

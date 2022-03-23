@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.MapParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
@@ -17,8 +17,8 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
     }
 
     @Override
-    public void initialize(SCMap map, long seed, MapParameters mapParameters) {
-        super.initialize(map, seed, mapParameters);
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
         mountainBrushIntensity = 3f;
@@ -26,9 +26,8 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
 
     @Override
     protected void mountainSetup() {
-        SymmetrySettings symmetrySettings = mapParameters.getSymmetrySettings();
         int mapSize = map.getSize();
-        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mapParameters.getMountainDensity());
+        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(generatorParameters.getMountainDensity());
         mountains.setSize(mapSize / 2);
 
         mountains.progressiveWalk((int) (normalizedMountainDensity * 16 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8, mapSize / 4);
