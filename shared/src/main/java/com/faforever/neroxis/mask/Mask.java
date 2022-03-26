@@ -172,8 +172,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public U mock() {
         Class<?> clazz = getClass();
         Mask<?, U> mock = copy(getName() + MOCK_NAME);
-        mock.makeImmutable();
-        return (U) mock;
+        return mock.enqueue(mock::makeImmutable);
     }
 
     private void makeImmutable() {

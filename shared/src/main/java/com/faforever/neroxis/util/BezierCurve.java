@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Random;
 
 @EqualsAndHashCode
-@SuppressWarnings("unchecked")
 public strictfp class BezierCurve {
     private static final Map<Integer, Integer[]> COEFFICIENTS_MAP = new HashMap<>();
 

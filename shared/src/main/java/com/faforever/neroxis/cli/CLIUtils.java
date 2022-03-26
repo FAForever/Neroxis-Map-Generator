@@ -160,7 +160,7 @@ public class CLIUtils {
                 || filename.endsWith("_script.lua");
     }
 
-    public static enum MapSizeStrictness {
+    public enum MapSizeStrictness {
         NONE, DISCRETE_64, POWER_OF_2
     }
 

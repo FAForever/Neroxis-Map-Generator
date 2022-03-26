@@ -1,9 +1,13 @@
+buildscript {
+    ext {
+        jgraph_version = '1.5.1'
+    }
+}
+
 allprojects {
     apply plugin: 'java'
     group 'com.faforever.neroxis'
 
-    compileJava.options.compilerArgs.add '-parameters'
-    compileTestJava.options.compilerArgs.add '-parameters'
 
     sourceCompatibility = JavaVersion.VERSION_15
     targetCompatibility = JavaVersion.VERSION_15
@@ -29,6 +33,12 @@ allprojects {
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': true
         ]
+    }
+
+    tasks.withType(JavaCompile) {
+        configure(options) {
+            options.compilerArgs << '-parameters'
+        }
     }
 
     // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle

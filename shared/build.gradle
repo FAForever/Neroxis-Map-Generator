@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation("org.luaj:luaj-jse:3.0.1")
-    implementation('com.dslplatform:dsl-json-java8:1.9.9')
+    implementation("com.dslplatform:dsl-json-java8:1.9.9")
 
-    annotationProcessor('com.dslplatform:dsl-json-java8:1.9.9')
+    annotationProcessor("com.dslplatform:dsl-json-java8:1.9.9")
 }

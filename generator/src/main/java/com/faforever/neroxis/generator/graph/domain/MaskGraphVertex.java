@@ -7,6 +7,7 @@ import com.faforever.neroxis.util.MaskReflectUtil;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -18,9 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract strictfp class MaskGraphVertex<T extends Executable> {
+public abstract strictfp class MaskGraphVertex<T extends Executable> implements Serializable {
     public static final String SELF = "self";
 
     protected final Map<String, String> nonMaskParameters = new HashMap<>();
@@ -46,9 +48,8 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         results.put(SELF, null);
         resultClasses.put(SELF, executorClass);
         if (executable != null) {
-            Arrays.stream(this.executable.getAnnotationsByType(GraphParameter.class))
-                    .filter(parameterAnnotation -> !parameterAnnotation.value().equals(""))
-                    .forEach(parameterAnnotation -> setParameter(parameterAnnotation.name(), parameterAnnotation.value()));
+            Arrays.stream(this.executable.getAnnotationsByType(GraphParameter.class)).filter(parameterAnnotation -> !parameterAnnotation.value().equals("")).forEach(parameterAnnotation -> setParameter(parameterAnnotation.name(), parameterAnnotation.value()));
+            Arrays.stream(executable.getParameters()).filter(parameter -> Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))).forEach(parameter -> maskParameters.put(parameter.getName(), null));
         }
     }
 
@@ -219,6 +220,10 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
             computeResults(graphContext);
             results.forEach((key, value) -> immutableResults.put(key, value.mock()));
         }
+    }
+
+    public Set<String> getMaskParameters() {
+        return maskParameters.keySet();
     }
 
     public void resetResult() {

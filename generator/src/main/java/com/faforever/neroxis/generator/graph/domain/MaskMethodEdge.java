@@ -8,4 +8,8 @@ import lombok.RequiredArgsConstructor;
 public strictfp class MaskMethodEdge {
     private final String resultName;
     private final String parameterName;
+
+    public String toString() {
+        return resultName;
+    }
 }

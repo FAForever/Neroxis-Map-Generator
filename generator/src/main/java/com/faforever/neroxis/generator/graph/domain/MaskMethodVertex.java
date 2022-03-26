@@ -95,6 +95,6 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     public String toString() {
-        return executable.getName();
+        return identifier == null ? "" : identifier;
     }
 }

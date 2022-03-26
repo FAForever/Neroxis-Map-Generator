@@ -37,6 +37,6 @@ public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<
     }
 
     public String toString() {
-        return executorClass.getSimpleName();
+        return identifier == null ? "" : identifier;
     }
 }

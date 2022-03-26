@@ -5,12 +5,15 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.graph.domain.GraphContext;
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdgeComparator;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.generator.graph.io.GraphSerializationUtil;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.ngraph.layout.hierarchical.mxHierarchicalLayout;
+import com.faforever.neroxis.ngraph.model.mxCell;
+import com.faforever.neroxis.ngraph.model.mxICell;
+import com.faforever.neroxis.ngraph.swing.mxGraphComponent;
 import com.faforever.neroxis.ui.control.MaskGraphEditingModalGraphMouse;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -35,13 +38,17 @@ import org.jungrapht.visualization.renderers.Renderer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -51,21 +58,12 @@ import java.util.stream.IntStream;
 public strictfp class PipelinePanel extends JPanel {
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> rawGraph = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
     private final DefaultListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> graph = new DefaultListenableGraph<>(rawGraph);
-    private final VisualizationViewer<MaskGraphVertex<?>, MaskMethodEdge> graphViewer = VisualizationViewer.builder(graph)
-            .layoutAlgorithm(SugiyamaLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder()
-                    .straightenEdges(true)
-                    .favoredEdgePredicate(maskMethodEdge -> maskMethodEdge.getResultName().equals(MaskGraphVertex.SELF))
-                    .edgeComparator(new MaskMethodEdgeComparator())
-                    .layering(Layering.NETWORK_SIMPLEX)
-                    .build())
-            .layoutSize(new Dimension(1000, 1000))
-            .viewSize(new Dimension(750, 750))
-            .build();
-    private final MaskGraphEditingModalGraphMouse graphMouse = MaskGraphEditingModalGraphMouse.builder()
-            .renderContextSupplier(graphViewer::getRenderContext)
-            .multiLayerTransformerSupplier(graphViewer.getRenderContext()::getMultiLayerTransformer)
-            .build();
+    private final com.faforever.neroxis.ngraph.view.mxGraph mxGraph = new com.faforever.neroxis.ngraph.view.mxGraph();
+    private final mxGraphComponent graphComponent = new mxGraphComponent(mxGraph);
+    private final VisualizationViewer<MaskGraphVertex<?>, MaskMethodEdge> graphViewer = VisualizationViewer.builder(graph).layoutAlgorithm(SugiyamaLayoutAlgorithm.<MaskGraphVertex<?>, MaskMethodEdge>builder().layering(Layering.NETWORK_SIMPLEX).build()).layoutSize(new Dimension(100, 100)).viewSize(new Dimension(750, 750)).build();
+    private final MaskGraphEditingModalGraphMouse graphMouse = MaskGraphEditingModalGraphMouse.builder().renderContextSupplier(graphViewer::getRenderContext).multiLayerTransformerSupplier(graphViewer.getRenderContext()::getMultiLayerTransformer).build();
     private final VisualizationScrollPane pipelineGraphPane = new VisualizationScrollPane(graphViewer);
+    private final Map<mxICell, MaskGraphVertex<?>> cellToVertex = new HashMap<>();
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
     private final EntryPanel entryPanel = new EntryPanel(new Dimension(550, 550));
     private final JFileChooser fileChooser = new JFileChooser();
@@ -76,6 +74,10 @@ public strictfp class PipelinePanel extends JPanel {
     private final JComboBox<Integer> spawnCountComboBox = new JComboBox<>();
     private final JComboBox<Integer> numTeamsComboBox = new JComboBox<>();
     private final JComboBox<Symmetry> terrainSymmetryComboBox = new JComboBox<>();
+    private final Map<MaskGraphVertex<?>, mxICell> vertexToCell = new HashMap<>();
+    private final Map<mxICell, MaskMethodEdge> cellToEdge = new HashMap<>();
+    private final Map<MaskMethodEdge, mxICell> edgeToCell = new HashMap<>();
+    mxHierarchicalLayout layout = new mxHierarchicalLayout(mxGraph);
 
     public PipelinePanel() {
         graph.addGraphListener(new GraphListener<>() {
@@ -83,17 +85,16 @@ public strictfp class PipelinePanel extends JPanel {
             public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
                 MaskMethodEdge edge = e.getEdge();
                 MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
+                mxCell cell = (mxCell) mxGraph.insertEdge(mxGraph.getDefaultParent(), null, null, vertexToCell.get(e.getEdgeSource()), vertexToCell.get(e.getEdgeTarget()));
+                edgeToCell.put(edge, cell);
+                cellToEdge.put(cell, edge);
                 String parameterName = edge.getParameterName();
                 edgeTarget.setParameter(parameterName, new MaskVertexResult(edge.getResultName(), e.getEdgeSource()));
                 if (MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(parameterName)) {
                     MaskGraphVertex<?> nextVertex = edgeTarget;
                     while (nextVertex != null) {
                         nextVertex.setIdentifier(e.getEdgeSource().getIdentifier());
-                        nextVertex = graph.outgoingEdgesOf(nextVertex).stream().filter(methodEdge ->
-                                        MaskGraphVertex.SELF.equals(methodEdge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(methodEdge.getParameterName())
-                                ).map(graph::getEdgeTarget)
-                                .findFirst()
-                                .orElse(null);
+                        nextVertex = graph.outgoingEdgesOf(nextVertex).stream().filter(methodEdge -> MaskGraphVertex.SELF.equals(methodEdge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(methodEdge.getParameterName())).map(graph::getEdgeTarget).findFirst().orElse(null);
                     }
                     graphViewer.repaint();
                 }
@@ -106,18 +107,28 @@ public strictfp class PipelinePanel extends JPanel {
                 edgeTarget.clearParameter(e.getEdge().getParameterName());
                 vertexEditPanel.updatePanel();
                 graphViewer.repaint();
+                mxICell cell = edgeToCell.remove(e.getEdge());
+                cellToEdge.remove(cell);
+                mxGraph.removeCells(new Object[]{cell});
             }
 
             @Override
             public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+                mxCell cell = (mxCell) mxGraph.insertVertex(mxGraph.getDefaultParent(), null, e.getVertex().getIdentifier(), 0, 0, 100, 100);
+                MaskGraphVertex<?> vertex = e.getVertex();
+                vertexToCell.put(vertex, cell);
+                cellToVertex.put(cell, e.getVertex());
                 graphViewer.getSelectedVertexState().clear();
-                graphViewer.getSelectedVertexState().select(e.getVertex());
+                graphViewer.getSelectedVertexState().select(vertex);
             }
 
             @Override
             public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
                 MaskGraphVertex<?> vertex = e.getVertex();
                 graphViewer.getSelectedVertexState().deselect(vertex);
+                mxICell cell = vertexToCell.remove(e.getVertex());
+                cellToVertex.remove(cell);
+                mxGraph.removeCells(new Object[]{cell});
             }
         });
         setLayout(new GridBagLayout());
@@ -174,7 +185,29 @@ public strictfp class PipelinePanel extends JPanel {
         constraints.weighty = 1;
         constraints.gridheight = 5;
 
-        add(pipelineGraphPane, constraints);
+        //        add(pipelineGraphPane, constraints);
+        add(graphComponent, constraints);
+        graphComponent.addMouseWheelListener(e -> {
+            if (e.getWheelRotation() < 0) {
+                graphComponent.zoomIn();
+            } else {
+                graphComponent.zoomOut();
+            }
+        });
+
+        graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
+                if (cell != null && cell.isVertex()) {
+                    MaskGraphVertex<?> vertex = cellToVertex.get(cell);
+                    vertexEditPanel.setVertex(vertex);
+                    if (vertex.getExecutable() != null && vertex.isComputed()) {
+                        entryPanel.setMask(vertex.getImmutableResult(MaskGraphVertex.SELF));
+                    }
+                }
+            }
+        });
     }
 
     private void setupEntryPanel() {
@@ -362,6 +395,8 @@ public strictfp class PipelinePanel extends JPanel {
         layoutModel.setSize(100, 100);
         layoutAlgorithm.visit(layoutModel);
         graphViewer.repaint();
+
+        layout.execute(mxGraph.getDefaultParent());
     }
 
     private void removeUnusedVertices() {
