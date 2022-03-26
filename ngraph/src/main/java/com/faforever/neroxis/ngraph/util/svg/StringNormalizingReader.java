@@ -71,7 +71,7 @@ public class StringNormalizingReader extends NormalizingReader {
         int result = (length == next) ? -1 : string.charAt(next++);
         if (result <= 13) {
             switch (result) {
-                case 13:
+                case 13 -> {
                     column = 0;
                     line++;
                     int c = (length == next) ? -1 : string.charAt(next);
@@ -79,10 +79,11 @@ public class StringNormalizingReader extends NormalizingReader {
                         next++;
                     }
                     return 10;
-
-                case 10:
+                }
+                case 10 -> {
                     column = 0;
                     line++;
+                }
             }
         }
         return result;

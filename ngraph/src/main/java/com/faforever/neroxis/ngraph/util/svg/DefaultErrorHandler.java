@@ -26,11 +26,11 @@ package com.faforever.neroxis.ngraph.util.svg;
 
 public class DefaultErrorHandler implements ErrorHandler {
 
-	/**
-	 * Implements {@link ErrorHandler#error(ParseException)}.
-	 * Throws the given exception.
-	 */
-	public void error(ParseException e) throws ParseException {
-		throw e;
-	}
+    /**
+     * Implements {@link ErrorHandler#error(ParseException)}.
+     * Throws the given exception.
+     */
+    public void error(ParseException e) throws ParseException {
+        throw e;
+    }
 }

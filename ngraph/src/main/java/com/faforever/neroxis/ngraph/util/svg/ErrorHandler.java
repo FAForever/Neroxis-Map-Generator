@@ -25,8 +25,8 @@ package com.faforever.neroxis.ngraph.util.svg;
  * @author <a href="mailto:stephane@hillion.org">Stephane Hillion</a>
  */
 public interface ErrorHandler {
-	/**
-	 * Called when a parse error occurs.
-	 */
-	void error(ParseException e) throws ParseException;
+    /**
+     * Called when a parse error occurs.
+     */
+    void error(ParseException e) throws ParseException;
 }

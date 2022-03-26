@@ -26,21 +26,21 @@ import java.awt.*;
  * @author <a href="mailto:stephane@hillion.org">Stephane Hillion</a>
  */
 public interface ShapeProducer {
-	/**
-	 * Returns the Shape object initialized during the last parsing.
-	 *
-	 * @return the shape or null if this handler has not been used to
-	 * parse a path.
-	 */
-	Shape getShape();
+    /**
+     * Returns the Shape object initialized during the last parsing.
+     *
+     * @return the shape or null if this handler has not been used to
+     * parse a path.
+     */
+    Shape getShape();
 
-	/**
-	 * Returns the current winding rule.
-	 */
-	int getWindingRule();
+    /**
+     * Returns the current winding rule.
+     */
+    int getWindingRule();
 
-	/**
-	 * Sets the winding rule used to construct the path.
-	 */
-	void setWindingRule(int i);
+    /**
+     * Sets the winding rule used to construct the path.
+     */
+    void setWindingRule(int i);
 }
