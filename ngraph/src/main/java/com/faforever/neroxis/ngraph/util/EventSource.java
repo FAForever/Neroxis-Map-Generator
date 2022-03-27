@@ -40,30 +40,18 @@ public class EventSource {
         setEventSource(source);
     }
 
-    /**
-     *
-     */
     public Object getEventSource() {
         return eventSource;
     }
 
-    /**
-     *
-     */
     public void setEventSource(Object value) {
         this.eventSource = value;
     }
 
-    /**
-     *
-     */
     public boolean isEventsEnabled() {
         return eventsEnabled;
     }
 
-    /**
-     *
-     */
     public void setEventsEnabled(boolean eventsEnabled) {
         this.eventsEnabled = eventsEnabled;
     }

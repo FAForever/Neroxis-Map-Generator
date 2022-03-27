@@ -31,13 +31,11 @@ import com.faforever.neroxis.ngraph.util.StyleUtils;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
-import org.w3c.dom.Element;
-
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Shape;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import lombok.Getter;
+import org.w3c.dom.Element;
 
 /**
  * Implements a graph object that allows to create diagrams from a graph model
@@ -171,13 +172,14 @@ import java.util.logging.Logger;
  * passed to repaint to define the dirty region.
  */
 @SuppressWarnings("unused")
+@Getter
 public class Graph extends EventSource {
 
     private static final Logger log = Logger.getLogger(Graph.class.getName());
     /**
      * Holds the list of bundles.
      */
-    protected static List<ImageBundle> imageBundles = new LinkedList<ImageBundle>();
+    protected static List<ImageBundle> imageBundles = new LinkedList<>();
     /**
      * Property change event handling.
      */
@@ -250,12 +252,12 @@ public class Graph extends EventSource {
     protected boolean cellsLocked = false;
 
     /**
-     * Specifies the return value for isCell(s)Editable. Default is true.
+     * Specifies if editing is allowed in this graph. Default is true.
      */
     protected boolean cellsEditable = true;
 
     /**
-     * Specifies the return value for isCell(s)Sizable. Default is true.
+     * Specifies if resizing is allowed in this graph. Default is true.
      */
     protected boolean cellsResizable = true;
 
@@ -280,13 +282,13 @@ public class Graph extends EventSource {
     protected boolean cellsDeletable = true;
 
     /**
-     * Specifies the return value for isCell(s)Cloneable. Default is true.
+     * Specifies if the graph should allow cloning of cells by holding down the
+     * control key while cells are being moved. Default is true.
      */
     protected boolean cellsCloneable = true;
 
     /**
-     * Specifies the return value for isCellDisconntableFromTerminal. Default
-     * is true.
+     * Specifies if the graph should allow disconnecting of edges. Default is true.
      */
     protected boolean cellsDisconnectable = true;
 
@@ -306,7 +308,7 @@ public class Graph extends EventSource {
     protected boolean vertexLabelsMovable = false;
 
     /**
-     * Specifies the return value for isDropEnabled. Default is true.
+     * Specifies if the graph allows drop into other cells. Default is true.
      */
     protected boolean dropEnabled = true;
 
@@ -317,7 +319,7 @@ public class Graph extends EventSource {
 
     /**
      * Specifies if the graph should automatically update the cell size
-     * after an edit. This is used in isAutoSizeCell. Default is false.
+     * after an edit. Default is false.
      */
     protected boolean autoSizeCells = false;
 
@@ -570,15 +572,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the graph model that contains the graph data.
-     *
-     * @return Returns the model that contains the graph data
-     */
-    public IGraphModel getModel() {
-        return model;
-    }
-
-    /**
      * Sets the graph model that contains the data, and fires an
      * Event.CHANGE followed by an Event.REPAINT event.
      *
@@ -599,15 +592,6 @@ public class Graph extends EventSource {
         model.addListener(Event.CHANGE, graphModelChangeHandler);
         changeSupport.firePropertyChange("model", oldModel, model);
         repaint();
-    }
-
-    /**
-     * Returns the view that contains the cell states.
-     *
-     * @return Returns the view that contains the cell states
-     */
-    public GraphView getView() {
-        return view;
     }
 
     /**
@@ -641,15 +625,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the stylesheet that provides the style.
-     *
-     * @return Returns the stylesheet that provides the style.
-     */
-    public Stylesheet getStylesheet() {
-        return stylesheet;
-    }
-
-    /**
      * Sets the stylesheet that provides the style.
      *
      * @param value Stylesheet that provides the style.
@@ -680,10 +655,8 @@ public class Graph extends EventSource {
 
     /**
      * Returns the cells to be selected for the given list of changes.
-     *
-     * @return
      */
-    public ICell[] getSelectionCellsForChanges(List<UndoableChange> changes) {
+    public List<ICell> getSelectionCellsForChanges(List<UndoableChange> changes) {
         List<ICell> cells = new ArrayList<>();
 
         for (UndoableChange change : changes) {
@@ -708,7 +681,7 @@ public class Graph extends EventSource {
             }
         }
 
-        return cells.toArray(new ICell[0]);
+        return cells;
     }
 
     /**
@@ -721,10 +694,9 @@ public class Graph extends EventSource {
 
         // Ignores dirty rectangle if there was a root change
         if (!ignoreDirty) {
-            Iterator<UndoableChange> it = changes.iterator();
 
-            while (it.hasNext()) {
-                if (it.next() instanceof RootChange) {
+            for (UndoableChange change : changes) {
+                if (change instanceof RootChange) {
                     ignoreDirty = true;
                     break;
                 }
@@ -761,16 +733,9 @@ public class Graph extends EventSource {
      * Removes selection cells that are not in the model from the selection.
      */
     protected void updateSelection() {
-        ICell[] cells = getSelectionCells();
-        List<ICell> removed = new ArrayList<>();
+        List<ICell> removed = getSelectionCells().stream().filter(cell -> !model.contains(cell)).collect(Collectors.toList());
 
-        for (ICell cell : cells) {
-            if (!model.contains(cell)) {
-                removed.add(cell);
-            }
-        }
-
-        removeSelectionCells(removed.toArray(new ICell[0]));
+        removeSelectionCells(removed);
     }
 
     /**
@@ -817,10 +782,9 @@ public class Graph extends EventSource {
      */
     public Rectangle processChanges(List<UndoableChange> changes, boolean invalidate, boolean ignoreDirty) {
         Rectangle bounds = null;
-        Iterator<UndoableChange> it = changes.iterator();
 
-        while (it.hasNext()) {
-            Rectangle rect = processChange(it.next(), invalidate, ignoreDirty);
+        for (UndoableChange change : changes) {
+            Rectangle rect = processChange(change, invalidate, ignoreDirty);
 
             if (bounds == null) {
                 bounds = rect;
@@ -1046,7 +1010,7 @@ public class Graph extends EventSource {
      *
      * @param style String representing the new style of the cells.
      */
-    public Object[] setCellStyle(String style) {
+    public List<ICell> setCellStyle(String style) {
         return setCellStyle(style, null);
     }
 
@@ -1058,7 +1022,7 @@ public class Graph extends EventSource {
      * @param cells Optional array of <Cells> to set the style for. Default is the
      *              selection cells.
      */
-    public ICell[] setCellStyle(String style, ICell[] cells) {
+    public List<ICell> setCellStyle(String style, List<ICell> cells) {
         if (cells == null) {
             cells = getSelectionCells();
         }
@@ -1086,8 +1050,8 @@ public class Graph extends EventSource {
      * @param defaultValue Default boolean value if no value is defined.
      * @param cell         Cell whose style should be modified.
      */
-    public Object toggleCellStyle(String key, boolean defaultValue, ICell cell) {
-        return toggleCellStyles(key, defaultValue, new ICell[]{cell})[0];
+    public ICell toggleCellStyle(String key, boolean defaultValue, ICell cell) {
+        return toggleCellStyles(key, defaultValue, List.of(cell)).get(0);
     }
 
     /**
@@ -1097,7 +1061,7 @@ public class Graph extends EventSource {
      * @param key          Key for the boolean value to be toggled.
      * @param defaultValue Default boolean value if no value is defined.
      */
-    public Object[] toggleCellStyles(String key, boolean defaultValue) {
+    public List<ICell> toggleCellStyles(String key, boolean defaultValue) {
         return toggleCellStyles(key, defaultValue, null);
     }
 
@@ -1111,14 +1075,14 @@ public class Graph extends EventSource {
      * @param defaultValue Default boolean value if no value is defined.
      * @param cells        Cells whose styles should be modified.
      */
-    public Object[] toggleCellStyles(String key, boolean defaultValue, ICell[] cells) {
+    public List<ICell> toggleCellStyles(String key, boolean defaultValue, List<ICell> cells) {
         if (cells == null) {
             cells = getSelectionCells();
         }
 
-        if (cells != null && cells.length > 0) {
-            CellState state = view.getState(cells[0]);
-            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells[0]);
+        if (cells != null && cells.size() > 0) {
+            CellState state = view.getState(cells.get(0));
+            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells.get(0));
 
             if (style != null) {
                 String value = (Utils.isTrue(style, key, defaultValue)) ? "0" : "1";
@@ -1135,7 +1099,7 @@ public class Graph extends EventSource {
      * @param key   String representing the key to be assigned.
      * @param value String representing the new value for the key.
      */
-    public Object[] setCellStyles(String key, String value) {
+    public List<ICell> setCellStyles(String key, String value) {
         return setCellStyles(key, value, null);
     }
 
@@ -1150,7 +1114,7 @@ public class Graph extends EventSource {
      * @param value String representing the new value for the key.
      * @param cells Array of cells to change the style for.
      */
-    public ICell[] setCellStyles(String key, String value, ICell[] cells) {
+    public List<ICell> setCellStyles(String key, String value, List<ICell> cells) {
         if (cells == null) {
             cells = getSelectionCells();
         }
@@ -1167,7 +1131,7 @@ public class Graph extends EventSource {
      * @param key  String representing the key to toggle the flag in.
      * @param flag Integer that represents the bit to be toggled.
      */
-    public Object[] toggleCellStyleFlags(String key, int flag) {
+    public List<ICell> toggleCellStyleFlags(String key, int flag) {
         return toggleCellStyleFlags(key, flag, null);
     }
 
@@ -1180,7 +1144,7 @@ public class Graph extends EventSource {
      * @param cells Optional array of <Cells> to change the style for. Default is
      *              the selection cells.
      */
-    public ICell[] toggleCellStyleFlags(String key, int flag, ICell[] cells) {
+    public List<ICell> toggleCellStyleFlags(String key, int flag, List<ICell> cells) {
         return setCellStyleFlags(key, flag, null, cells);
     }
 
@@ -1193,7 +1157,7 @@ public class Graph extends EventSource {
      * @param value Boolean value to be used or null if the value should be
      *              toggled.
      */
-    public Object[] setCellStyleFlags(String key, int flag, boolean value) {
+    public List<ICell> setCellStyleFlags(String key, int flag, boolean value) {
         return setCellStyleFlags(key, flag, value, null);
     }
 
@@ -1208,15 +1172,15 @@ public class Graph extends EventSource {
      * @param cells Optional array of cells to change the style for. If no
      *              cells are specified then the selection cells are used.
      */
-    public ICell[] setCellStyleFlags(String key, int flag, Boolean value, ICell[] cells) {
+    public List<ICell> setCellStyleFlags(String key, int flag, Boolean value, List<ICell> cells) {
         if (cells == null) {
             cells = getSelectionCells();
         }
 
-        if (cells != null && cells.length > 0) {
+        if (cells != null && cells.size() > 0) {
             if (value == null) {
-                CellState state = view.getState(cells[0]);
-                Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells[0]);
+                CellState state = view.getState(cells.get(0));
+                Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells.get(0));
 
                 if (style != null) {
                     int current = Utils.getInt(style, key);
@@ -1285,7 +1249,7 @@ public class Graph extends EventSource {
      * @param align Specifies the alignment. Possible values are all constants
      *              in Constants with an ALIGN prefix.
      */
-    public Object[] alignCells(String align) {
+    public List<ICell> alignCells(String align) {
         return alignCells(align, null);
     }
 
@@ -1301,7 +1265,7 @@ public class Graph extends EventSource {
      *              in Constants with an ALIGN prefix.
      * @param cells Array of cells to be aligned.
      */
-    public ICell[] alignCells(String align, ICell[] cells) {
+    public List<ICell> alignCells(String align, List<ICell> cells) {
         return alignCells(align, cells, null);
     }
 
@@ -1314,12 +1278,12 @@ public class Graph extends EventSource {
      * @param cells Array of cells to be aligned.
      * @param param Optional coordinate for the alignment.
      */
-    public ICell[] alignCells(String align, ICell[] cells, Object param) {
+    public List<ICell> alignCells(String align, List<ICell> cells, Object param) {
         if (cells == null) {
             cells = getSelectionCells();
         }
 
-        if (cells != null && cells.length > 1) {
+        if (cells != null && cells.size() > 1) {
             // Finds the required coordinate for the alignment
             if (param == null) {
                 for (ICell cell : cells) {
@@ -1364,11 +1328,11 @@ public class Graph extends EventSource {
             try {
                 double tmp = Double.parseDouble(String.valueOf(param));
 
-                for (int i = 0; i < cells.length; i++) {
-                    Geometry geo = getCellGeometry(cells[i]);
+                for (ICell cell : cells) {
+                    Geometry geo = getCellGeometry(cell);
 
-                    if (geo != null && !model.isEdge(cells[i])) {
-                        geo = (Geometry) geo.clone();
+                    if (geo != null && !model.isEdge(cell)) {
+                        geo = geo.clone();
 
                         if (align == null || align.equals(Constants.ALIGN_LEFT)) {
                             geo.setX(tmp);
@@ -1384,10 +1348,10 @@ public class Graph extends EventSource {
                             geo.setY(tmp - geo.getHeight());
                         }
 
-                        model.setGeometry(cells[i], geo);
+                        model.setGeometry(cell, geo);
 
                         if (isResetEdgesOnMove()) {
-                            resetEdges(new ICell[]{cells[i]});
+                            resetEdges(List.of(cell));
                         }
                     }
                 }
@@ -1438,7 +1402,7 @@ public class Graph extends EventSource {
      *
      * @param back Specifies if the cells should be moved to back.
      */
-    public Object[] orderCells(boolean back) {
+    public List<ICell> orderCells(boolean back) {
         return orderCells(back, null);
     }
 
@@ -1455,7 +1419,7 @@ public class Graph extends EventSource {
      * @param cells Array of cells whose order should be changed. If null is
      *              specified then the selection cells are used.
      */
-    public ICell[] orderCells(boolean back, ICell[] cells) {
+    public List<ICell> orderCells(boolean back, List<ICell> cells) {
         if (cells == null) {
             cells = Utils.sortCells(getSelectionCells(), true);
         }
@@ -1478,17 +1442,17 @@ public class Graph extends EventSource {
      * @param cells Array of cells whose order should be changed.
      * @param back  Specifies if the cells should be moved to back.
      */
-    public void cellsOrdered(ICell[] cells, boolean back) {
+    public void cellsOrdered(List<ICell> cells, boolean back) {
         if (cells != null) {
             model.beginUpdate();
             try {
-                for (int i = 0; i < cells.length; i++) {
-                    ICell parent = model.getParent(cells[i]);
+                for (int i = 0; i < cells.size(); i++) {
+                    ICell parent = model.getParent(cells.get(i));
 
                     if (back) {
-                        model.add(parent, cells[i], i);
+                        model.add(parent, cells.get(i), i);
                     } else {
-                        model.add(parent, cells[i], model.getChildCount(parent) - 1);
+                        model.add(parent, cells.get(i), model.getChildCount(parent) - 1);
                     }
                 }
 
@@ -1546,7 +1510,7 @@ public class Graph extends EventSource {
      * @param cells  Optional array of cells to be grouped. If null is specified
      *               then the selection cells are used.
      */
-    public ICell groupCells(ICell group, double border, ICell[] cells) {
+    public ICell groupCells(ICell group, double border, List<ICell> cells) {
         if (cells == null) {
             cells = Utils.sortCells(getSelectionCells(), true);
         }
@@ -1559,12 +1523,12 @@ public class Graph extends EventSource {
 
         Rectangle bounds = getBoundsForGroup(group, cells, border);
 
-        if (cells.length > 0 && bounds != null) {
+        if (cells.size() > 0 && bounds != null) {
             // Uses parent of group or previous parent of first child
             ICell parent = model.getParent(group);
 
             if (parent == null) {
-                parent = model.getParent(cells[0]);
+                parent = model.getParent(cells.get(0));
             }
 
             model.beginUpdate();
@@ -1582,8 +1546,8 @@ public class Graph extends EventSource {
 
                 // Adds the group into the parent and resizes
                 index = model.getChildCount(parent);
-                cellsAdded(new ICell[]{group}, parent, index, null, null, false, false);
-                cellsResized(new ICell[]{group}, new Rectangle[]{bounds});
+                cellsAdded(List.of(group), parent, index, null, null, false, false);
+                cellsResized(List.of(group), new Rectangle[]{bounds});
 
                 fireEvent(new EventObject(Event.GROUP_CELLS, "group", group, "cells", cells, "border", border));
             } finally {
@@ -1598,22 +1562,13 @@ public class Graph extends EventSource {
      * Returns the cells with the same parent as the first cell
      * in the given array.
      */
-    public ICell[] getCellsForGroup(ICell[] cells) {
-        List<ICell> result = new ArrayList<>(cells.length);
-
-        if (cells.length > 0) {
-            Object parent = model.getParent(cells[0]);
-            result.add(cells[0]);
-
-            // Filters selection cells with the same parent
-            for (int i = 1; i < cells.length; i++) {
-                if (model.getParent(cells[i]) == parent) {
-                    result.add(cells[i]);
-                }
-            }
+    public List<ICell> getCellsForGroup(List<ICell> cells) {
+        if (cells.size() == 0) {
+            return List.of();
         }
 
-        return result.toArray(new ICell[0]);
+        ICell parent = model.getParent(cells.get(0));
+        return cells.stream().filter(cell -> parent.equals(model.getParent(cell))).collect(Collectors.toList());
     }
 
     /**
@@ -1622,7 +1577,7 @@ public class Graph extends EventSource {
      * vertices in the given children array. Edges are ignored. If the group
      * cell is a swimlane the title region is added to the bounds.
      */
-    public Rectangle getBoundsForGroup(ICell group, ICell[] children, double border) {
+    public Rectangle getBoundsForGroup(ICell group, List<ICell> children, double border) {
         Rectangle result = getBoundingBoxFromGeometry(children);
 
         if (result != null) {
@@ -1654,7 +1609,7 @@ public class Graph extends EventSource {
      *
      * @return Returns a new group cell.
      */
-    public ICell createGroupCell(ICell[] cells) {
+    public ICell createGroupCell(List<ICell> cells) {
         Cell group = new Cell("", new Geometry(), null);
         group.setVertex(true);
         group.setConnectable(false);
@@ -1665,7 +1620,7 @@ public class Graph extends EventSource {
     /**
      * Ungroups the selection cells. This is a shortcut method.
      */
-    public ICell[] ungroupCells() {
+    public List<ICell> ungroupCells() {
         return ungroupCells(null);
     }
 
@@ -1677,36 +1632,25 @@ public class Graph extends EventSource {
      *              the selection cells are used.
      * @return Returns the children that have been removed from the groups.
      */
-    public ICell[] ungroupCells(ICell[] cells) {
+    public List<ICell> ungroupCells(List<ICell> cells) {
         List<ICell> result = new ArrayList<>();
 
         if (cells == null) {
-            cells = getSelectionCells();
-
-            // Finds the cells with children
-            List<ICell> tmp = new ArrayList<>(cells.length);
-
-            for (ICell cell : cells) {
-                if (model.getChildCount(cell) > 0) {
-                    tmp.add(cell);
-                }
-            }
-
-            cells = tmp.toArray(new ICell[0]);
+            cells = getSelectionCells().stream().filter(cell -> model.getChildCount(cell) > 0).collect(Collectors.toList());
         }
 
-        if (cells.length > 0) {
+        if (!cells.isEmpty()) {
             model.beginUpdate();
             try {
                 for (ICell cell : cells) {
-                    ICell[] children = GraphModel.getChildren(model, cell);
+                    List<ICell> children = GraphModel.getChildren(model, cell);
 
-                    if (children.length > 0) {
+                    if (!children.isEmpty()) {
                         ICell parent = model.getParent(cell);
                         int index = model.getChildCount(parent);
 
                         cellsAdded(children, parent, index, null, null, true);
-                        result.addAll(Arrays.asList(children));
+                        result.addAll(children);
                     }
                 }
 
@@ -1717,14 +1661,14 @@ public class Graph extends EventSource {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
      * Removes the selection cells from their parents and adds them to the
      * default parent returned by getDefaultParent.
      */
-    public ICell[] removeCellsFromParent() {
+    public List<ICell> removeCellsFromParent() {
         return removeCellsFromParent(null);
     }
 
@@ -1735,7 +1679,7 @@ public class Graph extends EventSource {
      * @param cells Array of cells to be removed from their parents.
      * @return Returns the cells that were removed from their parents.
      */
-    public ICell[] removeCellsFromParent(ICell[] cells) {
+    public List<ICell> removeCellsFromParent(List<ICell> cells) {
         if (cells == null) {
             cells = getSelectionCells();
         }
@@ -1758,7 +1702,7 @@ public class Graph extends EventSource {
      * Updates the bounds of the given array of groups so that it includes
      * all child vertices.
      */
-    public Object[] updateGroupBounds() {
+    public List<ICell> updateGroupBounds() {
         return updateGroupBounds(null);
     }
 
@@ -1768,7 +1712,7 @@ public class Graph extends EventSource {
      *
      * @param cells The groups whose bounds should be updated.
      */
-    public ICell[] updateGroupBounds(ICell[] cells) {
+    public List<ICell> updateGroupBounds(List<ICell> cells) {
         return updateGroupBounds(cells, 0);
     }
 
@@ -1779,7 +1723,7 @@ public class Graph extends EventSource {
      * @param cells  The groups whose bounds should be updated.
      * @param border The border to be added in the group.
      */
-    public ICell[] updateGroupBounds(ICell[] cells, int border) {
+    public List<ICell> updateGroupBounds(List<ICell> cells, int border) {
         return updateGroupBounds(cells, border, false);
     }
 
@@ -1791,7 +1735,7 @@ public class Graph extends EventSource {
      * @param border     The border to be added in the group.
      * @param moveParent Specifies if the group should be moved.
      */
-    public ICell[] updateGroupBounds(ICell[] cells, int border, boolean moveParent) {
+    public List<ICell> updateGroupBounds(List<ICell> cells, int border, boolean moveParent) {
         if (cells == null) {
             cells = getSelectionCells();
         }
@@ -1802,15 +1746,15 @@ public class Graph extends EventSource {
                 Geometry geo = getCellGeometry(cell);
 
                 if (geo != null) {
-                    ICell[] children = getChildCells(cell);
+                    List<ICell> children = getChildCells(cell);
 
-                    if (children != null && children.length > 0) {
+                    if (children != null && !children.isEmpty()) {
                         Rectangle childBounds = getBoundingBoxFromGeometry(children);
 
                         if (childBounds.getWidth() > 0 && childBounds.getHeight() > 0) {
                             Rectangle size = (isSwimlane(cell)) ? getStartSize(cell) : new Rectangle();
 
-                            geo = (Geometry) geo.clone();
+                            geo = geo.clone();
 
                             if (moveParent) {
                                 geo.setX(geo.getX() + childBounds.getX() - size.getWidth() - border);
@@ -1849,7 +1793,7 @@ public class Graph extends EventSource {
      * g2.addCells(g1.cloneCells(g1.cloneCells(g1.getChildCells(g1.getDefaultParent()));
      * </code>
      */
-    public ICell[] cloneCells(ICell[] cells) {
+    public List<ICell> cloneCells(List<ICell> cells) {
 
         return cloneCells(cells, true);
     }
@@ -1870,35 +1814,36 @@ public class Graph extends EventSource {
      * @param cells Array of Cells to be cloned.
      * @return Returns the clones of the given cells.
      */
-    public ICell[] cloneCells(ICell[] cells, boolean allowInvalidEdges) {
-        ICell[] clones = null;
+    public List<ICell> cloneCells(List<ICell> cells, boolean allowInvalidEdges) {
+        List<ICell> clones = null;
 
         if (cells != null) {
-            Collection<ICell> tmp = new LinkedHashSet<>(cells.length);
-            tmp.addAll(Arrays.asList(cells));
+            Collection<ICell> tmp = new LinkedHashSet<>(cells.size());
+            tmp.addAll(cells);
 
             if (!tmp.isEmpty()) {
                 double scale = view.getScale();
                 Point trans = view.getTranslate();
                 clones = model.cloneCells(cells, true);
 
-                for (int i = 0; i < cells.length; i++) {
-                    if (!allowInvalidEdges && model.isEdge(clones[i]) && getEdgeValidationError(clones[i], model.getTerminal(clones[i], true), model.getTerminal(clones[i], false)) != null) {
-                        clones[i] = null;
+                for (int i = 0; i < cells.size(); i++) {
+                    ICell clone = clones.get(i);
+                    if (!allowInvalidEdges && model.isEdge(clone) && getEdgeValidationError(clone, model.getTerminal(clone, true), model.getTerminal(clone, false)) != null) {
+                        clones.set(i, null);
                     } else {
-                        Geometry g = model.getGeometry(clones[i]);
+                        Geometry g = model.getGeometry(clone);
 
                         if (g != null) {
-                            CellState state = view.getState(cells[i]);
-                            CellState pstate = view.getState(model.getParent(cells[i]));
+                            CellState state = view.getState(cells.get(i));
+                            CellState pstate = view.getState(model.getParent(cells.get(i)));
 
                             if (state != null && pstate != null) {
                                 double dx = pstate.getOrigin().getX();
                                 double dy = pstate.getOrigin().getY();
 
-                                if (model.isEdge(clones[i])) {
+                                if (model.isEdge(clone)) {
                                     // Checks if the source is cloned or sets the terminal point
-                                    ICell src = model.getTerminal(cells[i], true);
+                                    ICell src = model.getTerminal(cells.get(i), true);
 
                                     while (src != null && !tmp.contains(src)) {
                                         src = model.getParent(src);
@@ -1910,7 +1855,7 @@ public class Graph extends EventSource {
                                     }
 
                                     // Checks if the target is cloned or sets the terminal point
-                                    ICell trg = model.getTerminal(cells[i], false);
+                                    ICell trg = model.getTerminal(cells.get(i), false);
 
                                     while (trg != null && !tmp.contains(trg)) {
                                         trg = model.getParent(trg);
@@ -1940,7 +1885,7 @@ public class Graph extends EventSource {
                     }
                 }
             } else {
-                clones = new ICell[]{};
+                clones = new ArrayList<>();
             }
         }
 
@@ -2141,7 +2086,7 @@ public class Graph extends EventSource {
      * @return Returns the cell that was added.
      */
     public ICell addCell(ICell cell, ICell parent, Integer index, ICell source, ICell target) {
-        return addCells(new ICell[]{cell}, parent, index, source, target)[0];
+        return addCells(List.of(cell), parent, index, source, target).get(0);
     }
 
     /**
@@ -2150,7 +2095,7 @@ public class Graph extends EventSource {
      * @param cells Array of cells to be inserted.
      * @return Returns the cells that were added.
      */
-    public ICell[] addCells(ICell[] cells) {
+    public List<ICell> addCells(List<ICell> cells) {
         return addCells(cells, null);
     }
 
@@ -2162,7 +2107,7 @@ public class Graph extends EventSource {
      *               is specified then the default parent is used.
      * @return Returns the cells that were added.
      */
-    public ICell[] addCells(ICell[] cells, ICell parent) {
+    public List<ICell> addCells(List<ICell> cells, ICell parent) {
         return addCells(cells, parent, null);
     }
 
@@ -2175,7 +2120,7 @@ public class Graph extends EventSource {
      * @param index  Optional index to insert the cells at. Default is to append.
      * @return Returns the cells that were added.
      */
-    public ICell[] addCells(ICell[] cells, ICell parent, Integer index) {
+    public List<ICell> addCells(List<ICell> cells, ICell parent, Integer index) {
         return addCells(cells, parent, index, null, null);
     }
 
@@ -2193,7 +2138,7 @@ public class Graph extends EventSource {
      * @param target Optional target terminal for all inserted cells.
      * @return Returns the cells that were added.
      */
-    public ICell[] addCells(ICell[] cells, ICell parent, Integer index, ICell source, ICell target) {
+    public List<ICell> addCells(List<ICell> cells, ICell parent, Integer index, ICell source, ICell target) {
         if (parent == null) {
             parent = getDefaultParent();
         }
@@ -2217,7 +2162,7 @@ public class Graph extends EventSource {
      * Adds the specified cells to the given parent. This method fires
      * Event.CELLS_ADDED while the transaction is in progress.
      */
-    public void cellsAdded(ICell[] cells, ICell parent, Integer index, ICell source, ICell target, boolean absolute) {
+    public void cellsAdded(List<ICell> cells, ICell parent, Integer index, ICell source, ICell target, boolean absolute) {
         cellsAdded(cells, parent, index, source, target, absolute, true);
     }
 
@@ -2225,7 +2170,7 @@ public class Graph extends EventSource {
      * Adds the specified cells to the given parent. This method fires
      * Event.CELLS_ADDED while the transaction is in progress.
      */
-    public void cellsAdded(ICell[] cells, ICell parent, Integer index, ICell source, ICell target, boolean absolute, boolean constrain) {
+    public void cellsAdded(List<ICell> cells, ICell parent, Integer index, ICell source, ICell target, boolean absolute, boolean constrain) {
         if (cells != null && parent != null && index != null) {
             model.beginUpdate();
             try {
@@ -2233,31 +2178,32 @@ public class Graph extends EventSource {
                 Point o1 = (parentState != null) ? parentState.getOrigin() : null;
                 Point zero = new Point(0, 0);
 
-                for (int i = 0; i < cells.length; i++) {
-                    if (cells[i] == null) {
+                for (int i = 0; i < cells.size(); i++) {
+                    ICell cell = cells.get(i);
+                    if (cell == null) {
                         index--;
                     } else {
-                        ICell previous = model.getParent(cells[i]);
+                        ICell previous = model.getParent(cell);
 
                         // Keeps the cell at its absolute location
-                        if (o1 != null && cells[i] != parent && parent != previous) {
+                        if (o1 != null && cell != parent && parent != previous) {
                             CellState oldState = view.getState(previous);
                             Point o2 = (oldState != null) ? oldState.getOrigin() : zero;
-                            Geometry geo = model.getGeometry(cells[i]);
+                            Geometry geo = model.getGeometry(cell);
 
                             if (geo != null) {
                                 double dx = o2.getX() - o1.getX();
                                 double dy = o2.getY() - o1.getY();
 
-                                geo = (Geometry) geo.clone();
+                                geo = geo.clone();
                                 geo.translate(dx, dy);
 
-                                if (!geo.isRelative() && model.isVertex(cells[i]) && !isAllowNegativeCoordinates()) {
+                                if (!geo.isRelative() && model.isVertex(cell) && !isAllowNegativeCoordinates()) {
                                     geo.setX(Math.max(0, geo.getX()));
                                     geo.setY(Math.max(0, geo.getY()));
                                 }
 
-                                model.setGeometry(cells[i], geo);
+                                model.setGeometry(cell, geo);
                             }
                         }
 
@@ -2267,26 +2213,26 @@ public class Graph extends EventSource {
                             index--;
                         }
 
-                        model.add(parent, cells[i], index + i);
+                        model.add(parent, cell, index + i);
 
                         // Extends the parent
-                        if (isExtendParentsOnAdd() && isExtendParent(cells[i])) {
-                            extendParent(cells[i]);
+                        if (isExtendParentsOnAdd() && isExtendParent(cell)) {
+                            extendParent(cell);
                         }
 
                         // Constrains the child
                         if (constrain) {
-                            constrainChild(cells[i]);
+                            constrainChild(cell);
                         }
 
                         // Sets the source terminal
                         if (source != null) {
-                            cellConnected(cells[i], source, true, null);
+                            cellConnected(cell, source, true, null);
                         }
 
                         // Sets the target terminal
                         if (target != null) {
-                            cellConnected(cells[i], target, false, null);
+                            cellConnected(cell, target, false, null);
                         }
                     }
                 }
@@ -2304,7 +2250,7 @@ public class Graph extends EventSource {
      *
      * @return Returns the cells that have been removed.
      */
-    public ICell[] removeCells() {
+    public List<ICell> removeCells() {
         return removeCells(null);
     }
 
@@ -2314,7 +2260,7 @@ public class Graph extends EventSource {
      * @param cells Array of cells to remove.
      * @return Returns the cells that have been removed.
      */
-    public ICell[] removeCells(ICell[] cells) {
+    public List<ICell> removeCells(List<ICell> cells) {
         return removeCells(cells, true);
     }
 
@@ -2328,7 +2274,7 @@ public class Graph extends EventSource {
      * @param includeEdges Specifies if all connected edges should be removed as
      *                     well.
      */
-    public ICell[] removeCells(ICell[] cells, boolean includeEdges) {
+    public List<ICell> removeCells(List<ICell> cells, boolean includeEdges) {
         if (cells == null) {
             cells = getDeletableCells(getSelectionCells());
         }
@@ -2355,8 +2301,8 @@ public class Graph extends EventSource {
      *
      * @param cells Array of cells to remove.
      */
-    public void cellsRemoved(ICell[] cells) {
-        if (cells != null && cells.length > 0) {
+    public void cellsRemoved(List<ICell> cells) {
+        if (cells != null && !cells.isEmpty()) {
             double scale = view.getScale();
             Point tr = view.getTranslate();
 
@@ -2364,8 +2310,8 @@ public class Graph extends EventSource {
             try {
                 for (ICell cell : cells) {
                     // Disconnects edges which are not in cells
-                    Collection<ICell> cellSet = new HashSet<>(Arrays.asList(cells));
-                    ICell[] edges = getConnections(cell);
+                    Collection<ICell> cellSet = new HashSet<>(cells);
+                    List<ICell> edges = getConnections(cell);
 
                     for (ICell edge : edges) {
                         if (!cellSet.contains(edge)) {
@@ -2388,7 +2334,7 @@ public class Graph extends EventSource {
                                         tmp = model.getParent(tmp);
                                     }
 
-                                    geo = (Geometry) geo.clone();
+                                    geo = geo.clone();
                                     int n = (source) ? 0 : state.getAbsolutePointCount() - 1;
                                     Point pt = state.getAbsolutePoint(n);
 
@@ -2410,11 +2356,11 @@ public class Graph extends EventSource {
         }
     }
 
-    public ICell splitEdge(ICell edge, ICell[] cells) {
+    public ICell splitEdge(ICell edge, List<ICell> cells) {
         return splitEdge(edge, cells, null, 0, 0);
     }
 
-    public ICell splitEdge(ICell edge, ICell[] cells, double dx, double dy) {
+    public ICell splitEdge(ICell edge, List<ICell> cells, double dx, double dy) {
         return splitEdge(edge, cells, null, dx, dy);
     }
 
@@ -2429,9 +2375,9 @@ public class Graph extends EventSource {
      * @param newEdge Object that represents the edge to be inserted.
      * @return Returns the new edge that has been inserted.
      */
-    public ICell splitEdge(ICell edge, ICell[] cells, ICell newEdge, double dx, double dy) {
+    public ICell splitEdge(ICell edge, List<ICell> cells, ICell newEdge, double dx, double dy) {
         if (newEdge == null) {
-            newEdge = cloneCells(new ICell[]{edge})[0];
+            newEdge = cloneCells(List.of(edge)).get(0);
         }
 
         ICell parent = model.getParent(edge);
@@ -2441,8 +2387,8 @@ public class Graph extends EventSource {
         try {
             cellsMoved(cells, dx, dy, false, false);
             cellsAdded(cells, parent, model.getChildCount(parent), null, null, true);
-            cellsAdded(new ICell[]{newEdge}, parent, model.getChildCount(parent), source, cells[0], false);
-            cellConnected(edge, cells[0], true, null);
+            cellsAdded(List.of(newEdge), parent, model.getChildCount(parent), source, cells.get(0), false);
+            cellConnected(edge, cells.get(0), true, null);
             fireEvent(new EventObject(Event.SPLIT_EDGE, "edge", edge, "cells", cells, "newEdge", newEdge, "dx", dx, "dy", dy));
         } finally {
             model.endUpdate();
@@ -2458,7 +2404,7 @@ public class Graph extends EventSource {
      * @param show Boolean that specifies the visible state to be assigned.
      * @return Returns the cells whose visible state was changed.
      */
-    public Object[] toggleCells(boolean show) {
+    public List<ICell> toggleCells(boolean show) {
         return toggleCells(show, null);
     }
 
@@ -2474,7 +2420,7 @@ public class Graph extends EventSource {
      * @param cells Array of cells whose visible state should be changed.
      * @return Returns the cells whose visible state was changed.
      */
-    public ICell[] toggleCells(boolean show, ICell[] cells) {
+    public List<ICell> toggleCells(boolean show, List<ICell> cells) {
         return toggleCells(show, cells, true);
     }
 
@@ -2489,7 +2435,7 @@ public class Graph extends EventSource {
      *              null is specified then the selection cells are used.
      * @return Returns the cells whose visible state was changed.
      */
-    public ICell[] toggleCells(boolean show, ICell[] cells, boolean includeEdges) {
+    public List<ICell> toggleCells(boolean show, List<ICell> cells, boolean includeEdges) {
         if (cells == null) {
             cells = getSelectionCells();
         }
@@ -2516,13 +2462,11 @@ public class Graph extends EventSource {
      * @param cells Array of cells whose visible state should be changed.
      * @param show  Boolean that specifies the visible state to be assigned.
      */
-    public void cellsToggled(ICell[] cells, boolean show) {
-        if (cells != null && cells.length > 0) {
+    public void cellsToggled(List<ICell> cells, boolean show) {
+        if (cells != null && !cells.isEmpty()) {
             model.beginUpdate();
             try {
-                for (int i = 0; i < cells.length; i++) {
-                    model.setVisible(cells[i], show);
-                }
+                cells.forEach(cell -> model.setVisible(cell, show));
             } finally {
                 model.endUpdate();
             }
@@ -2537,7 +2481,7 @@ public class Graph extends EventSource {
      *                 assigned.
      * @return Returns the cells whose collapsed state was changed.
      */
-    public Object[] foldCells(boolean collapse) {
+    public List<ICell> foldCells(boolean collapse) {
         return foldCells(collapse, false);
     }
 
@@ -2555,14 +2499,14 @@ public class Graph extends EventSource {
      *                 be assigned to all descendants.
      * @return Returns the cells whose collapsed state was changed.
      */
-    public Object[] foldCells(boolean collapse, boolean recurse) {
+    public List<ICell> foldCells(boolean collapse, boolean recurse) {
         return foldCells(collapse, recurse, null);
     }
 
     /**
      * Invokes foldCells with checkFoldable set to false.
      */
-    public ICell[] foldCells(boolean collapse, boolean recurse, ICell[] cells) {
+    public List<ICell> foldCells(boolean collapse, boolean recurse, List<ICell> cells) {
         return foldCells(collapse, recurse, cells, false);
     }
 
@@ -2580,7 +2524,7 @@ public class Graph extends EventSource {
      * @param checkFoldable Boolean indicating of isCellFoldable should be
      *                      checked. Default is false.
      */
-    public ICell[] foldCells(boolean collapse, boolean recurse, ICell[] cells, boolean checkFoldable) {
+    public List<ICell> foldCells(boolean collapse, boolean recurse, List<ICell> cells, boolean checkFoldable) {
         if (cells == null) {
             cells = getFoldableCells(getSelectionCells(), collapse);
         }
@@ -2599,7 +2543,7 @@ public class Graph extends EventSource {
     /**
      * Invokes cellsFoldable with checkFoldable set to false.
      */
-    public void cellsFolded(ICell[] cells, boolean collapse, boolean recurse) {
+    public void cellsFolded(List<ICell> cells, boolean collapse, boolean recurse) {
         cellsFolded(cells, collapse, recurse, false);
     }
 
@@ -2615,8 +2559,8 @@ public class Graph extends EventSource {
      * @param checkFoldable Boolean indicating of isCellFoldable should be
      *                      checked. Default is false.
      */
-    public void cellsFolded(ICell[] cells, boolean collapse, boolean recurse, boolean checkFoldable) {
-        if (cells != null && cells.length > 0) {
+    public void cellsFolded(List<ICell> cells, boolean collapse, boolean recurse, boolean checkFoldable) {
+        if (cells != null && !cells.isEmpty()) {
             model.beginUpdate();
             try {
                 for (ICell cell : cells) {
@@ -2629,7 +2573,7 @@ public class Graph extends EventSource {
                         }
 
                         if (recurse) {
-                            ICell[] children = GraphModel.getChildren(model, cell);
+                            List<ICell> children = GraphModel.getChildren(model, cell);
                             cellsFolded(children, collapse, true);
                         }
                     }
@@ -2654,7 +2598,7 @@ public class Graph extends EventSource {
             Geometry geo = model.getGeometry(cell);
 
             if (geo != null) {
-                geo = (Geometry) geo.clone();
+                geo = geo.clone();
 
                 updateAlternateBounds(cell, geo, willCollapse);
                 geo.swap();
@@ -2708,18 +2652,18 @@ public class Graph extends EventSource {
      * Returns an array with the given cells and all edges that are connected
      * to a cell or one of its descendants.
      */
-    public ICell[] addAllEdges(ICell[] cells) {
-        List<ICell> allCells = new ArrayList<>(cells.length);
-        allCells.addAll(Arrays.asList(cells));
-        allCells.addAll(Arrays.asList(getAllEdges(cells)));
+    public List<ICell> addAllEdges(List<ICell> cells) {
+        List<ICell> allCells = new ArrayList<>();
+        allCells.addAll(cells);
+        allCells.addAll(getAllEdges(cells));
 
-        return allCells.toArray(new ICell[0]);
+        return allCells;
     }
 
     /**
      * Returns all edges connected to the given cells or their descendants.
      */
-    public ICell[] getAllEdges(ICell[] cells) {
+    public List<ICell> getAllEdges(List<ICell> cells) {
         List<ICell> edges = new ArrayList<>();
 
         if (cells != null) {
@@ -2731,12 +2675,12 @@ public class Graph extends EventSource {
                 }
 
                 // Recurses
-                ICell[] children = GraphModel.getChildren(model, cell);
-                edges.addAll(Arrays.asList(getAllEdges(children)));
+                List<ICell> children = GraphModel.getChildren(model, cell);
+                edges.addAll(getAllEdges(children));
             }
         }
 
-        return edges.toArray(new ICell[0]);
+        return edges;
     }
 
     /**
@@ -2788,7 +2732,7 @@ public class Graph extends EventSource {
 
                 if (size != null && geo != null) {
                     boolean collapsed = isCellCollapsed(cell);
-                    geo = (Geometry) geo.clone();
+                    geo = geo.clone();
 
                     if (isSwimlane(cell)) {
                         CellState state = view.getState(cell);
@@ -2838,7 +2782,7 @@ public class Graph extends EventSource {
                         }
                     }
 
-                    cellsResized(new ICell[]{cell}, new Rectangle[]{geo});
+                    cellsResized(List.of(cell), new Rectangle[]{geo});
                 }
             } finally {
                 model.endUpdate();
@@ -2904,8 +2848,8 @@ public class Graph extends EventSource {
                     }
 
                     if (gridEnabled) {
-                        width = snap(width + gridSize / 2);
-                        height = snap(height + gridSize / 2);
+                        width = snap(width + gridSize / 2d);
+                        height = snap(height + gridSize / 2d);
                     }
 
                     result = new Rectangle(0, 0, width, height);
@@ -2927,7 +2871,7 @@ public class Graph extends EventSource {
      * @param bounds <Rectangle> that represents the new bounds.
      */
     public ICell resizeCell(ICell cell, Rectangle bounds) {
-        return resizeCells(new ICell[]{cell}, new Rectangle[]{bounds})[0];
+        return resizeCells(List.of(cell), new Rectangle[]{bounds}).get(0);
     }
 
     /**
@@ -2938,7 +2882,7 @@ public class Graph extends EventSource {
      * @param cells  Array of cells whose bounds should be changed.
      * @param bounds Array of rectangles that represents the new bounds.
      */
-    public ICell[] resizeCells(ICell[] cells, Rectangle[] bounds) {
+    public List<ICell> resizeCells(List<ICell> cells, Rectangle[] bounds) {
         model.beginUpdate();
         try {
             cellsResized(cells, bounds);
@@ -2958,16 +2902,17 @@ public class Graph extends EventSource {
      * @param cells  Array of <Cells> whose bounds should be changed.
      * @param bounds Array of <Rectangles> that represents the new bounds.
      */
-    public void cellsResized(ICell[] cells, Rectangle[] bounds) {
-        if (cells != null && bounds != null && cells.length == bounds.length) {
+    public void cellsResized(List<ICell> cells, Rectangle[] bounds) {
+        if (cells != null && bounds != null && cells.size() == bounds.length) {
             model.beginUpdate();
             try {
-                for (int i = 0; i < cells.length; i++) {
+                for (int i = 0; i < cells.size(); i++) {
                     Rectangle tmp = bounds[i];
-                    Geometry geo = model.getGeometry(cells[i]);
+                    ICell cell = cells.get(i);
+                    Geometry geo = model.getGeometry(cell);
 
                     if (geo != null && (geo.getX() != tmp.getX() || geo.getY() != tmp.getY() || geo.getWidth() != tmp.getWidth() || geo.getHeight() != tmp.getHeight())) {
-                        geo = (Geometry) geo.clone();
+                        geo = geo.clone();
 
                         if (geo.isRelative()) {
                             Point offset = geo.getOffset();
@@ -2984,15 +2929,15 @@ public class Graph extends EventSource {
                         geo.setWidth(tmp.getWidth());
                         geo.setHeight(tmp.getHeight());
 
-                        if (!geo.isRelative() && model.isVertex(cells[i]) && !isAllowNegativeCoordinates()) {
+                        if (!geo.isRelative() && model.isVertex(cell) && !isAllowNegativeCoordinates()) {
                             geo.setX(Math.max(0, geo.getX()));
                             geo.setY(Math.max(0, geo.getY()));
                         }
 
-                        model.setGeometry(cells[i], geo);
+                        model.setGeometry(cell, geo);
 
-                        if (isExtendParent(cells[i])) {
-                            extendParent(cells[i]);
+                        if (isExtendParent(cell)) {
+                            extendParent(cell);
                         }
                     }
                 }
@@ -3001,7 +2946,6 @@ public class Graph extends EventSource {
                     resetEdges(cells);
                 }
 
-                // RENAME BOUNDSARRAY TO BOUNDS
                 fireEvent(new EventObject(Event.CELLS_RESIZED, "cells", cells, "bounds", bounds));
             } finally {
                 model.endUpdate();
@@ -3024,12 +2968,12 @@ public class Graph extends EventSource {
                 Geometry geo = model.getGeometry(cell);
 
                 if (geo != null && (p.getWidth() < geo.getX() + geo.getWidth() || p.getHeight() < geo.getY() + geo.getHeight())) {
-                    p = (Geometry) p.clone();
+                    p = p.clone();
 
                     p.setWidth(Math.max(p.getWidth(), geo.getX() + geo.getWidth()));
                     p.setHeight(Math.max(p.getHeight(), geo.getY() + geo.getHeight()));
 
-                    cellsResized(new ICell[]{parent}, new Rectangle[]{p});
+                    cellsResized(List.of(parent), new Rectangle[]{p});
                 }
             }
         }
@@ -3038,7 +2982,7 @@ public class Graph extends EventSource {
     /**
      * Moves the cells by the given amount. This is a shortcut method.
      */
-    public ICell[] moveCells(ICell[] cells, double dx, double dy) {
+    public List<ICell> moveCells(List<ICell> cells, double dx, double dy) {
         return moveCells(cells, dx, dy, false);
     }
 
@@ -3050,7 +2994,7 @@ public class Graph extends EventSource {
      * Moves or clones the cells and moves the cells or clones by the given
      * amount. This is a shortcut method.
      */
-    public ICell[] moveCells(ICell[] cells, double dx, double dy, boolean clone) {
+    public List<ICell> moveCells(List<ICell> cells, double dx, double dy, boolean clone) {
         return moveCells(cells, dx, dy, clone, null, null);
     }
 
@@ -3069,7 +3013,7 @@ public class Graph extends EventSource {
      * @param location Location where the mouse was released.
      * @return Returns the cells that were moved.
      */
-    public ICell[] moveCells(ICell[] cells, double dx, double dy, boolean clone, ICell target, java.awt.Point location) {
+    public List<ICell> moveCells(List<ICell> cells, double dx, double dy, boolean clone, ICell target, java.awt.Point location) {
         if (cells != null && (dx != 0 || dy != 0 || clone || target != null)) {
             model.beginUpdate();
             try {
@@ -3112,7 +3056,7 @@ public class Graph extends EventSource {
      * using disconnectGraph if disconnect is true. This method fires
      * Event.CELLS_MOVED while the transaction is in progress.
      */
-    public void cellsMoved(ICell[] cells, double dx, double dy, boolean disconnect, boolean constrain) {
+    public void cellsMoved(List<ICell> cells, double dx, double dy, boolean disconnect, boolean constrain) {
         if (cells != null && (dx != 0 || dy != 0)) {
             model.beginUpdate();
             try {
@@ -3147,7 +3091,7 @@ public class Graph extends EventSource {
         Geometry geo = model.getGeometry(cell);
 
         if (geo != null) {
-            geo = (Geometry) geo.clone();
+            geo = geo.clone();
             geo.translate(dx, dy);
 
             if (!geo.isRelative() && model.isVertex(cell) && !isAllowNegativeCoordinates()) {
@@ -3262,15 +3206,15 @@ public class Graph extends EventSource {
      * @param cells Array of Cells for which the connected edges should be
      *              reset.
      */
-    public void resetEdges(ICell[] cells) {
+    public void resetEdges(List<ICell> cells) {
         if (cells != null) {
             // Prepares a hashtable for faster cell lookups
-            HashSet<ICell> set = new HashSet<>(Arrays.asList(cells));
+            HashSet<ICell> set = new HashSet<>(cells);
 
             model.beginUpdate();
             try {
                 for (ICell cell : cells) {
-                    ICell[] edges = GraphModel.getEdges(model, cell);
+                    List<ICell> edges = GraphModel.getEdges(model, cell);
 
                     for (ICell edge : edges) {
                         CellState state = view.getState(edge);
@@ -3302,7 +3246,7 @@ public class Graph extends EventSource {
             List<Point> points = geo.getPoints();
 
             if (points != null && !points.isEmpty()) {
-                geo = (Geometry) geo.clone();
+                geo = geo.clone();
                 geo.setPoints(null);
                 model.setGeometry(edge, geo);
             }
@@ -3364,18 +3308,17 @@ public class Graph extends EventSource {
      * @param source     Boolean indicating if the terminal is the source or target.
      * @param constraint Optional connection constraint to be used for this connection.
      */
-    public void setConnectionConstraint(ICell edge, Object terminal, boolean source, ConnectionConstraint constraint) {
+    public void setConnectionConstraint(ICell edge, ICell terminal, boolean source, ConnectionConstraint constraint) {
         if (constraint != null) {
             model.beginUpdate();
             try {
-                ICell[] cells = new ICell[]{edge};
+                List<ICell> cells = List.of(edge);
 
-                // FIXME, constraint can't be null, we've checked that above
-                if (constraint == null || constraint.point == null) {
+                if (constraint.point == null) {
                     setCellStyles((source) ? Constants.STYLE_EXIT_X : Constants.STYLE_ENTRY_X, null, cells);
                     setCellStyles((source) ? Constants.STYLE_EXIT_Y : Constants.STYLE_ENTRY_Y, null, cells);
                     setCellStyles((source) ? Constants.STYLE_EXIT_PERIMETER : Constants.STYLE_ENTRY_PERIMETER, null, cells);
-                } else if (constraint.point != null) {
+                } else {
                     setCellStyles((source) ? Constants.STYLE_EXIT_X : Constants.STYLE_ENTRY_X, String.valueOf(constraint.point.getX()), cells);
                     setCellStyles((source) ? Constants.STYLE_EXIT_Y : Constants.STYLE_ENTRY_Y, String.valueOf(constraint.point.getY()), cells);
 
@@ -3413,16 +3356,14 @@ public class Graph extends EventSource {
 
             // Bounds need to be rotated by 90 degrees for further computation
             if (direction != null) {
-                if (direction.equals(Constants.DIRECTION_NORTH)) {
-                    r1 += 270;
-                } else if (direction.equals(Constants.DIRECTION_WEST)) {
-                    r1 += 180;
-                } else if (direction.equals(Constants.DIRECTION_SOUTH)) {
-                    r1 += 90;
+                switch (direction) {
+                    case Constants.DIRECTION_NORTH -> r1 += 270;
+                    case Constants.DIRECTION_WEST -> r1 += 180;
+                    case Constants.DIRECTION_SOUTH -> r1 += 90;
                 }
 
                 // Bounds need to be rotated by 90 degrees for further computation
-                if (direction == Constants.DIRECTION_NORTH || direction == Constants.DIRECTION_SOUTH) {
+                if (direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH)) {
                     bounds.rotate90();
                 }
             }
@@ -3454,8 +3395,8 @@ public class Graph extends EventSource {
                 r2 += r1;
 
                 if (this.getModel().isVertex(vertex.cell)) {
-                    boolean flipH = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPH).equals(1);
-                    boolean flipV = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPV).equals(1);
+                    boolean flipH = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPH).equals("1");
+                    boolean flipV = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPV).equals("1");
 
                     if (flipH) {
                         point.setX(2 * bounds.getCenterX() - point.getX());
@@ -3508,7 +3449,7 @@ public class Graph extends EventSource {
     public ICell connectCell(ICell edge, ICell terminal, boolean source, ConnectionConstraint constraint) {
         model.beginUpdate();
         try {
-            Object previous = model.getTerminal(edge, source);
+            ICell previous = model.getTerminal(edge, source);
             cellConnected(edge, terminal, source, constraint);
             fireEvent(new EventObject(Event.CONNECT_CELL, "edge", edge, "terminal", terminal, "source", source, "previous", previous));
         } finally {
@@ -3532,7 +3473,7 @@ public class Graph extends EventSource {
         if (edge != null) {
             model.beginUpdate();
             try {
-                Object previous = model.getTerminal(edge, source);
+                ICell previous = model.getTerminal(edge, source);
 
                 // Updates the constraint
                 setConnectionConstraint(edge, terminal, source, constraint);
@@ -3543,14 +3484,14 @@ public class Graph extends EventSource {
                     // Checks if the new terminal is a port
                     String id = null;
 
-                    if (isPort(terminal) && terminal instanceof ICell) {
+                    if (terminal != null && isPort(terminal)) {
                         id = terminal.getId();
                         terminal = getTerminalForPort(terminal, source);
                     }
 
                     // Sets or resets all previous information for connecting to a child port
                     String key = (source) ? Constants.STYLE_SOURCE_PORT : Constants.STYLE_TARGET_PORT;
-                    setCellStyles(key, id, new ICell[]{edge});
+                    setCellStyles(key, id, List.of(edge));
                 }
 
                 model.setTerminal(edge, terminal, source);
@@ -3572,7 +3513,7 @@ public class Graph extends EventSource {
      *
      * @param cells Array of <Cells> to be disconnected.
      */
-    public void disconnectGraph(ICell[] cells) {
+    public void disconnectGraph(List<ICell> cells) {
         if (cells != null) {
             model.beginUpdate();
             try {
@@ -3581,7 +3522,7 @@ public class Graph extends EventSource {
 
                 // Prepares a hashtable for faster cell lookups
 
-                Set<ICell> hash = new HashSet<>(Arrays.asList(cells));
+                Set<ICell> hash = new HashSet<>(cells);
 
                 for (ICell cell : cells) {
                     if (model.isEdge(cell)) {
@@ -3592,7 +3533,7 @@ public class Graph extends EventSource {
                             CellState pstate = view.getState(model.getParent(cell));
 
                             if (state != null && pstate != null) {
-                                geo = (Geometry) geo.clone();
+                                geo = geo.clone();
 
                                 double dx = -pstate.getOrigin().getX();
                                 double dy = -pstate.getOrigin().getY();
@@ -3658,7 +3599,7 @@ public class Graph extends EventSource {
      * @param cell Cell that represents the root of the view.
      * @return Returns the translation of the graph for the given root cell.
      */
-    public Point getTranslateForRoot(Object cell) {
+    public Point getTranslateForRoot(ICell cell) {
         return null;
     }
 
@@ -3673,7 +3614,7 @@ public class Graph extends EventSource {
      * A typical implementation of this method looks as follows:
      *
      * <code>
-     * public boolean isPort(Object cell)
+     * public boolean isPort(ICell cell)
      * {
      * Geometry geo = getCellGeometry(cell);
      * <p>
@@ -3684,7 +3625,7 @@ public class Graph extends EventSource {
      * @param cell Cell that represents the port.
      * @return Returns true if the cell is a port.
      */
-    public boolean isPort(Object cell) {
+    public boolean isPort(ICell cell) {
         return false;
     }
 
@@ -3708,7 +3649,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose offset should be returned.
      * @return Returns the child offset for the given cell.
      */
-    public Point getChildOffsetForCell(Object cell) {
+    public Point getChildOffsetForCell(ICell cell) {
         return null;
     }
 
@@ -3789,7 +3730,7 @@ public class Graph extends EventSource {
      * @param cell <Cell> which should be checked as a possible root.
      * @return Returns true if the given cell is a valid root.
      */
-    public boolean isValidRoot(Object cell) {
+    public boolean isValidRoot(ICell cell) {
         return (cell != null);
     }
 
@@ -3831,7 +3772,7 @@ public class Graph extends EventSource {
      * Returns the bounding box for the geometries of the vertices in the
      * given array of cells.
      */
-    public Rectangle getBoundingBoxFromGeometry(ICell[] cells) {
+    public Rectangle getBoundingBoxFromGeometry(List<ICell> cells) {
         Rectangle result = null;
 
         if (cells != null) {
@@ -3877,17 +3818,17 @@ public class Graph extends EventSource {
     /**
      * Returns the bounding box of the given cells and their descendants.
      */
-    public Rectangle getPaintBounds(ICell[] cells) {
+    public Rectangle getPaintBounds(List<ICell> cells) {
         return getBoundsForCells(cells, false, true, true);
     }
 
     /**
      * Returns the bounds for the given cells.
      */
-    public Rectangle getBoundsForCells(ICell[] cells, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
+    public Rectangle getBoundsForCells(List<ICell> cells, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
         Rectangle result = null;
 
-        if (cells != null && cells.length > 0) {
+        if (cells != null && !cells.isEmpty()) {
             for (ICell cell : cells) {
                 Rectangle tmp = getCellBounds(cell, includeEdges, includeDescendants, boundingBox);
 
@@ -3909,14 +3850,14 @@ public class Graph extends EventSource {
      * if includeEdge is true.
      */
     public Rectangle getCellBounds(ICell cell, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
-        ICell[] cells;
+        List<ICell> cells;
 
         // Recursively includes connected edges
         if (includeEdges) {
             Set<ICell> allCells = new HashSet<>();
             allCells.add(cell);
 
-            Set<ICell> edges = new HashSet<>(Arrays.asList(getEdges(cell)));
+            Set<ICell> edges = new HashSet<>(getEdges(cell));
 
             while (!edges.isEmpty() && !allCells.containsAll(edges)) {
                 allCells.addAll(edges);
@@ -3924,15 +3865,15 @@ public class Graph extends EventSource {
                 Set<ICell> tmp = new HashSet<>();
 
                 for (ICell edge : edges) {
-                    tmp.addAll(Arrays.asList(getEdges(edge)));
+                    tmp.addAll(getEdges(edge));
                 }
 
                 edges = tmp;
             }
 
-            cells = allCells.toArray(new ICell[0]);
+            cells = List.copyOf(allCells);
         } else {
-            cells = new ICell[]{cell};
+            cells = List.of(cell);
         }
 
         Rectangle result = view.getBounds(cells, boundingBox);
@@ -4073,14 +4014,10 @@ public class Graph extends EventSource {
      * @return Returns true if the given cell is a loop.
      */
     public boolean isLoop(CellState state) {
-        Object src = state.getVisibleTerminalState(true);
-        Object trg = state.getVisibleTerminalState(false);
+        CellState src = state.getVisibleTerminalState(true);
+        CellState trg = state.getVisibleTerminalState(false);
 
         return (src != null && src == trg);
-    }
-
-    public Multiplicity[] getMultiplicities() {
-        return multiplicities;
     }
 
     //
@@ -4140,16 +4077,16 @@ public class Graph extends EventSource {
         }
 
         if (source != null && target != null) {
-            StringBuffer error = new StringBuffer();
+            StringBuilder error = new StringBuilder();
 
             // Checks if the cells are already connected
             // and adds an error message if required
             if (!multigraph) {
-                Object[] tmp = GraphModel.getEdgesBetween(model, source, target, true);
+                List<ICell> tmp = GraphModel.getEdgesBetween(model, source, target, true);
 
                 // Checks if the source and target are not connected by another edge
-                if (tmp.length > 1 || (tmp.length == 1 && tmp[0] != edge)) {
-                    error.append(Resources.get("alreadyConnected", "Already Connected") + "\n");
+                if (tmp.size() > 1 || (tmp.size() == 1 && tmp.get(0) != edge)) {
+                    error.append(Resources.get("alreadyConnected", "Already Connected")).append("\n");
                 }
             }
 
@@ -4161,8 +4098,8 @@ public class Graph extends EventSource {
 
             // Checks the change against each multiplicity rule
             if (multiplicities != null) {
-                for (int i = 0; i < multiplicities.length; i++) {
-                    String err = multiplicities[i].check(this, edge, source, target, sourceOut, targetIn);
+                for (Multiplicity multiplicity : multiplicities) {
+                    String err = multiplicity.check(this, edge, source, target, sourceOut, targetIn);
 
                     if (err != null) {
                         error.append(err);
@@ -4191,7 +4128,7 @@ public class Graph extends EventSource {
      * @param source Cell that represents the source terminal.
      * @param target Cell that represents the target terminal.
      */
-    public String validateEdge(Object edge, Object source, Object target) {
+    public String validateEdge(ICell edge, ICell source, ICell target) {
         return null;
     }
 
@@ -4205,18 +4142,17 @@ public class Graph extends EventSource {
     public String getCellValidationError(ICell cell) {
         int outCount = GraphModel.getDirectedEdgeCount(model, cell, true);
         int inCount = GraphModel.getDirectedEdgeCount(model, cell, false);
-        StringBuffer error = new StringBuffer();
+        StringBuilder error = new StringBuilder();
         Object value = model.getValue(cell);
 
         if (multiplicities != null) {
-            for (int i = 0; i < multiplicities.length; i++) {
-                Multiplicity rule = multiplicities[i];
+            for (Multiplicity rule : multiplicities) {
                 int max = rule.getMaxValue();
 
                 if (rule.source && Utils.isNode(value, rule.type, rule.attr, rule.value) && ((max == 0 && outCount > 0) || (rule.min == 1 && outCount == 0) || (max == 1 && outCount > 1))) {
-                    error.append(rule.countError + '\n');
+                    error.append(rule.countError).append('\n');
                 } else if (!rule.source && Utils.isNode(value, rule.type, rule.attr, rule.value) && ((max == 0 && inCount > 0) || (rule.min == 1 && inCount == 0) || (max == 1 && inCount > 1))) {
-                    error.append(rule.countError + '\n');
+                    error.append(rule.countError).append('\n');
                 }
             }
         }
@@ -4229,9 +4165,9 @@ public class Graph extends EventSource {
      * cell and validation context. This implementation returns null.
      *
      * @param cell    Cell that represents the cell to validate.
-     * @param context Hashtable that represents the global validation state.
+     * @param context HashMap that represents the global validation state.
      */
-    public String validateCell(Object cell, HashMap<Object, Object> context) {
+    public String validateCell(ICell cell, HashMap<Object, Object> context) {
         return null;
     }
 
@@ -4383,15 +4319,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the value of <border>.
-     *
-     * @return Returns the border.
-     */
-    public int getBorder() {
-        return border;
-    }
-
-    /**
      * Sets the value of <border>.
      *
      * @param value Positive integer that represents the border to be used.
@@ -4462,13 +4389,6 @@ public class Graph extends EventSource {
     //
 
     /**
-     * Returns cellsLocked, the default return value for isCellLocked.
-     */
-    public boolean isCellsLocked() {
-        return cellsLocked;
-    }
-
-    /**
      * Sets cellsLocked, the default return value for isCellLocked and fires a
      * property change event for cellsLocked.
      */
@@ -4492,18 +4412,6 @@ public class Graph extends EventSource {
         return isCellsEditable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_EDITABLE, true);
     }
 
-    /**
-     * Returns true if editing is allowed in this graph.
-     *
-     * @return Returns true if the graph is editable.
-     */
-    public boolean isCellsEditable() {
-        return cellsEditable;
-    }
-
-    /**
-     * Sets if the graph is editable.
-     */
     public void setCellsEditable(boolean value) {
         boolean oldValue = cellsEditable;
         cellsEditable = value;
@@ -4512,8 +4420,7 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns true if the given cell is resizable. This implementation returns
-     * cellsSizable for all cells.
+     * Returns true if the given cell is resizable.
      *
      * @param cell Cell whose resizable state should be returned.
      * @return Returns true if the cell is sizable.
@@ -4525,16 +4432,6 @@ public class Graph extends EventSource {
         return isCellsResizable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_RESIZABLE, true);
     }
 
-    /**
-     * Returns true if the given cell is resizable. This implementation return sizable.
-     */
-    public boolean isCellsResizable() {
-        return cellsResizable;
-    }
-
-    /**
-     * Sets if the graph is resizable.
-     */
     public void setCellsResizable(boolean value) {
         boolean oldValue = cellsResizable;
         cellsResizable = value;
@@ -4545,7 +4442,7 @@ public class Graph extends EventSource {
     /**
      * Returns the cells which are movable in the given array of cells.
      */
-    public ICell[] getMovableCells(ICell[] cells) {
+    public List<ICell> getMovableCells(List<ICell> cells) {
         return GraphModel.filterCells(cells, this::isCellMovable);
     }
 
@@ -4563,16 +4460,6 @@ public class Graph extends EventSource {
         return isCellsMovable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_MOVABLE, true);
     }
 
-    /**
-     * Returns cellsMovable.
-     */
-    public boolean isCellsMovable() {
-        return cellsMovable;
-    }
-
-    /**
-     * Sets cellsMovable.
-     */
     public void setCellsMovable(boolean value) {
         boolean oldValue = cellsMovable;
         cellsMovable = value;
@@ -4592,7 +4479,7 @@ public class Graph extends EventSource {
      * @param cell   Cell whose terminal point should be moved.
      * @param source Boolean indicating if the source or target terminal should be moved.
      */
-    public boolean isTerminalPointMovable(Object cell, boolean source) {
+    public boolean isTerminalPointMovable(ICell cell, boolean source) {
         return true;
     }
 
@@ -4611,16 +4498,6 @@ public class Graph extends EventSource {
         return isCellsBendable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_BENDABLE, true);
     }
 
-    /**
-     * Returns cellsBendable.
-     */
-    public boolean isCellsBendable() {
-        return cellsBendable;
-    }
-
-    /**
-     * Sets cellsBendable.
-     */
     public void setCellsBendable(boolean value) {
         boolean oldValue = cellsBendable;
         cellsBendable = value;
@@ -4635,20 +4512,10 @@ public class Graph extends EventSource {
      * @param cell <Cell> whose selectable state should be returned.
      * @return Returns true if the given cell is selectable.
      */
-    public boolean isCellSelectable(Object cell) {
+    public boolean isCellSelectable(ICell cell) {
         return isCellsSelectable();
     }
 
-    /**
-     * Returns cellsSelectable.
-     */
-    public boolean isCellsSelectable() {
-        return cellsSelectable;
-    }
-
-    /**
-     * Sets cellsSelectable.
-     */
     public void setCellsSelectable(boolean value) {
         boolean oldValue = cellsSelectable;
         cellsSelectable = value;
@@ -4657,9 +4524,9 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the cells which are movable in the given array of cells.
+     * Returns the cells which are deleatable in the given array of cells.
      */
-    public ICell[] getDeletableCells(ICell[] cells) {
+    public List<ICell> getDeletableCells(List<ICell> cells) {
         return GraphModel.filterCells(cells, this::isCellDeletable);
     }
 
@@ -4677,16 +4544,6 @@ public class Graph extends EventSource {
         return isCellsDeletable() && Utils.isTrue(style, Constants.STYLE_DELETABLE, true);
     }
 
-    /**
-     * Returns cellsDeletable.
-     */
-    public boolean isCellsDeletable() {
-        return cellsDeletable;
-    }
-
-    /**
-     * Sets cellsDeletable.
-     */
     public void setCellsDeletable(boolean value) {
         boolean oldValue = cellsDeletable;
         cellsDeletable = value;
@@ -4695,9 +4552,9 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the cells which are movable in the given array of cells.
+     * Returns the cells which are cloneable in the given array of cells.
      */
-    public ICell[] getCloneableCells(ICell[] cells) {
+    public List<ICell> getCloneableCells(List<ICell> cells) {
         return GraphModel.filterCells(cells, this::isCellCloneable);
     }
 
@@ -4713,20 +4570,6 @@ public class Graph extends EventSource {
         return isCellsCloneable() && Utils.isTrue(style, Constants.STYLE_CLONEABLE, true);
     }
 
-    /**
-     * Returns cellsCloneable.
-     */
-    public boolean isCellsCloneable() {
-        return cellsCloneable;
-    }
-
-    /**
-     * Specifies if the graph should allow cloning of cells by holding down the
-     * control key while cells are being moved. This implementation updates
-     * cellsCloneable.
-     *
-     * @param value Boolean indicating if the graph should be cloneable.
-     */
     public void setCellsCloneable(boolean value) {
         boolean oldValue = cellsCloneable;
         cellsCloneable = value;
@@ -4750,19 +4593,6 @@ public class Graph extends EventSource {
         return isCellsDisconnectable() && !isCellLocked(cell);
     }
 
-    /**
-     * Returns cellsDisconnectable.
-     */
-    public boolean isCellsDisconnectable() {
-        return cellsDisconnectable;
-    }
-
-    /**
-     * Sets cellsDisconnectable.
-     *
-     * @param value Boolean indicating if the graph should allow disconnecting of
-     *              edges.
-     */
     public void setCellsDisconnectable(boolean value) {
         boolean oldValue = cellsDisconnectable;
         cellsDisconnectable = value;
@@ -4790,16 +4620,6 @@ public class Graph extends EventSource {
         return isLabelsClipped();
     }
 
-    /**
-     * Returns labelsClipped.
-     */
-    public boolean isLabelsClipped() {
-        return labelsClipped;
-    }
-
-    /**
-     * Sets labelsClipped.
-     */
     public void setLabelsClipped(boolean value) {
         boolean oldValue = labelsClipped;
         labelsClipped = value;
@@ -4819,16 +4639,6 @@ public class Graph extends EventSource {
         return !isCellLocked(cell) && ((model.isEdge(cell) && isEdgeLabelsMovable()) || (model.isVertex(cell) && isVertexLabelsMovable()));
     }
 
-    /**
-     * Returns vertexLabelsMovable.
-     */
-    public boolean isVertexLabelsMovable() {
-        return vertexLabelsMovable;
-    }
-
-    /**
-     * Sets vertexLabelsMovable.
-     */
     public void setVertexLabelsMovable(boolean value) {
         boolean oldValue = vertexLabelsMovable;
         vertexLabelsMovable = value;
@@ -4836,30 +4646,11 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("vertexLabelsMovable", oldValue, vertexLabelsMovable);
     }
 
-    /**
-     * Returns edgeLabelsMovable.
-     */
-    public boolean isEdgeLabelsMovable() {
-        return edgeLabelsMovable;
-    }
-
-    /**
-     * Returns edgeLabelsMovable.
-     */
     public void setEdgeLabelsMovable(boolean value) {
         boolean oldValue = edgeLabelsMovable;
         edgeLabelsMovable = value;
 
         changeSupport.firePropertyChange("edgeLabelsMovable", oldValue, edgeLabelsMovable);
-    }
-
-    /**
-     * Returns true if the graph is <enabled>.
-     *
-     * @return Returns true if the graph is enabled.
-     */
-    public boolean isEnabled() {
-        return enabled;
     }
 
     //
@@ -4879,16 +4670,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("enabled", oldValue, enabled);
     }
 
-    /**
-     * Returns true if the graph allows drop into other cells.
-     */
-    public boolean isDropEnabled() {
-        return dropEnabled;
-    }
-
-    /**
-     * Sets dropEnabled.
-     */
     public void setDropEnabled(boolean value) {
         boolean oldValue = dropEnabled;
         dropEnabled = value;
@@ -4896,32 +4677,10 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("dropEnabled", oldValue, dropEnabled);
     }
 
-    /**
-     * Affects the return values of isValidDropTarget to allow for edges as
-     * drop targets. The splitEdge method is called in GraphHandler if
-     * GraphComponent.isSplitEvent returns true for a given configuration.
-     */
-    public boolean isSplitEnabled() {
-        return splitEnabled;
-    }
-
-    /**
-     * Sets splitEnabled.
-     */
     public void setSplitEnabled(boolean value) {
         splitEnabled = value;
     }
 
-    /**
-     * Returns multigraph.
-     */
-    public boolean isMultigraph() {
-        return multigraph;
-    }
-
-    /**
-     * Sets multigraph.
-     */
     public void setMultigraph(boolean value) {
         boolean oldValue = multigraph;
         multigraph = value;
@@ -4929,16 +4688,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("multigraph", oldValue, multigraph);
     }
 
-    /**
-     * Returns swimlaneNesting.
-     */
-    public boolean isSwimlaneNesting() {
-        return swimlaneNesting;
-    }
-
-    /**
-     * Sets swimlaneNesting.
-     */
     public void setSwimlaneNesting(boolean value) {
         boolean oldValue = swimlaneNesting;
         swimlaneNesting = value;
@@ -4946,16 +4695,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("swimlaneNesting", oldValue, swimlaneNesting);
     }
 
-    /**
-     * Returns allowDanglingEdges
-     */
-    public boolean isAllowDanglingEdges() {
-        return allowDanglingEdges;
-    }
-
-    /**
-     * Sets allowDanglingEdges.
-     */
     public void setAllowDanglingEdges(boolean value) {
         boolean oldValue = allowDanglingEdges;
         allowDanglingEdges = value;
@@ -4963,16 +4702,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("allowDanglingEdges", oldValue, allowDanglingEdges);
     }
 
-    /**
-     * Returns cloneInvalidEdges.
-     */
-    public boolean isCloneInvalidEdges() {
-        return cloneInvalidEdges;
-    }
-
-    /**
-     * Sets cloneInvalidEdge.
-     */
     public void setCloneInvalidEdges(boolean value) {
         boolean oldValue = cloneInvalidEdges;
         cloneInvalidEdges = value;
@@ -4980,16 +4709,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("cloneInvalidEdges", oldValue, cloneInvalidEdges);
     }
 
-    /**
-     * Returns disconnectOnMove
-     */
-    public boolean isDisconnectOnMove() {
-        return disconnectOnMove;
-    }
-
-    /**
-     * Sets disconnectOnMove.
-     */
     public void setDisconnectOnMove(boolean value) {
         boolean oldValue = disconnectOnMove;
         disconnectOnMove = value;
@@ -4998,16 +4717,6 @@ public class Graph extends EventSource {
 
     }
 
-    /**
-     * Returns allowLoops.
-     */
-    public boolean isAllowLoops() {
-        return allowLoops;
-    }
-
-    /**
-     * Sets allowLoops.
-     */
     public void setAllowLoops(boolean value) {
         boolean oldValue = allowLoops;
         allowLoops = value;
@@ -5015,16 +4724,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("allowLoops", oldValue, allowLoops);
     }
 
-    /**
-     * Returns connectableEdges.
-     */
-    public boolean isConnectableEdges() {
-        return connectableEdges;
-    }
-
-    /**
-     * Sets connetableEdges.
-     */
     public void setConnectableEdges(boolean value) {
         boolean oldValue = connectableEdges;
         connectableEdges = value;
@@ -5033,16 +4732,6 @@ public class Graph extends EventSource {
 
     }
 
-    /**
-     * Returns resetEdgesOnMove.
-     */
-    public boolean isResetEdgesOnMove() {
-        return resetEdgesOnMove;
-    }
-
-    /**
-     * Sets resetEdgesOnMove.
-     */
     public void setResetEdgesOnMove(boolean value) {
         boolean oldValue = resetEdgesOnMove;
         resetEdgesOnMove = value;
@@ -5050,16 +4739,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("resetEdgesOnMove", oldValue, resetEdgesOnMove);
     }
 
-    /**
-     * Returns resetViewOnRootChange.
-     */
-    public boolean isResetViewOnRootChange() {
-        return resetViewOnRootChange;
-    }
-
-    /**
-     * Sets resetEdgesOnResize.
-     */
     public void setResetViewOnRootChange(boolean value) {
         boolean oldValue = resetViewOnRootChange;
         resetViewOnRootChange = value;
@@ -5067,28 +4746,11 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("resetViewOnRootChange", oldValue, resetViewOnRootChange);
     }
 
-    /**
-     * Returns resetEdgesOnResize.
-     */
-    public boolean isResetEdgesOnResize() {
-        return resetEdgesOnResize;
-    }
-
-    /**
-     * Sets resetEdgesOnResize.
-     */
     public void setResetEdgesOnResize(boolean value) {
         boolean oldValue = resetEdgesOnResize;
         resetEdgesOnResize = value;
 
         changeSupport.firePropertyChange("resetEdgesOnResize", oldValue, resetEdgesOnResize);
-    }
-
-    /**
-     * Returns resetEdgesOnConnect.
-     */
-    public boolean isResetEdgesOnConnect() {
-        return resetEdgesOnConnect;
     }
 
     /**
@@ -5118,15 +4780,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns true if the size of the given cell should automatically be
-     * updated after a change of the label. This implementation returns
-     * autoSize for all given cells.
-     */
-    public boolean isAutoSizeCells() {
-        return autoSizeCells;
-    }
-
-    /**
      * Specifies if cell sizes should be automatically updated after a label
      * change. This implementation sets autoSize to the given parameter.
      *
@@ -5152,13 +4805,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns extendParents.
-     */
-    public boolean isExtendParents() {
-        return extendParents;
-    }
-
-    /**
      * Sets extendParents.
      */
     public void setExtendParents(boolean value) {
@@ -5166,13 +4812,6 @@ public class Graph extends EventSource {
         extendParents = value;
 
         changeSupport.firePropertyChange("extendParents", oldValue, extendParents);
-    }
-
-    /**
-     * Returns extendParentsOnAdd.
-     */
-    public boolean isExtendParentsOnAdd() {
-        return extendParentsOnAdd;
     }
 
     /**
@@ -5196,15 +4835,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns constrainChildren.
-     *
-     * @return the keepInsideParentOnMove
-     */
-    public boolean isConstrainChildren() {
-        return constrainChildren;
-    }
-
-    /**
      * @param value the constrainChildren to set
      */
     public void setConstrainChildren(boolean value) {
@@ -5212,13 +4842,6 @@ public class Graph extends EventSource {
         constrainChildren = value;
 
         changeSupport.firePropertyChange("constrainChildren", oldValue, constrainChildren);
-    }
-
-    /**
-     * Returns autoOrigin.
-     */
-    public boolean isAutoOrigin() {
-        return autoOrigin;
     }
 
     /**
@@ -5232,13 +4855,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns origin.
-     */
-    public Point getOrigin() {
-        return origin;
-    }
-
-    /**
      * @param value the origin to set
      */
     public void setOrigin(Point value) {
@@ -5246,13 +4862,6 @@ public class Graph extends EventSource {
         origin = value;
 
         changeSupport.firePropertyChange("origin", oldValue, origin);
-    }
-
-    /**
-     * @return Returns changesRepaintThreshold.
-     */
-    public int getChangesRepaintThreshold() {
-        return changesRepaintThreshold;
     }
 
     /**
@@ -5266,15 +4875,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns isAllowNegativeCoordinates.
-     *
-     * @return the allowNegativeCoordinates
-     */
-    public boolean isAllowNegativeCoordinates() {
-        return allowNegativeCoordinates;
-    }
-
-    /**
      * @param value the allowNegativeCoordinates to set
      */
     public void setAllowNegativeCoordinates(boolean value) {
@@ -5282,15 +4882,6 @@ public class Graph extends EventSource {
         allowNegativeCoordinates = value;
 
         changeSupport.firePropertyChange("allowNegativeCoordinates", oldValue, allowNegativeCoordinates);
-    }
-
-    /**
-     * Returns collapseToPreferredSize.
-     *
-     * @return the collapseToPreferredSize
-     */
-    public boolean isCollapseToPreferredSize() {
-        return collapseToPreferredSize;
     }
 
     /**
@@ -5304,13 +4895,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * @return Returns true if edges are rendered in the foreground.
-     */
-    public boolean isKeepEdgesInForeground() {
-        return keepEdgesInForeground;
-    }
-
-    /**
      * @param value the keepEdgesInForeground to set
      */
     public void setKeepEdgesInForeground(boolean value) {
@@ -5318,13 +4902,6 @@ public class Graph extends EventSource {
         keepEdgesInForeground = value;
 
         changeSupport.firePropertyChange("keepEdgesInForeground", oldValue, keepEdgesInForeground);
-    }
-
-    /**
-     * @return Returns true if edges are rendered in the background.
-     */
-    public boolean isKeepEdgesInBackground() {
-        return keepEdgesInBackground;
     }
 
     /**
@@ -5342,7 +4919,7 @@ public class Graph extends EventSource {
      * This implementation returns true for all non-null values and is
      * called by is called by <isValidConnection>.
      *
-     * @param cell Object that represents a possible source or null.
+     * @param cell ICell that represents a possible source or null.
      * @return Returns true if the given cell is a valid source terminal.
      */
     public boolean isValidSource(ICell cell) {
@@ -5353,7 +4930,7 @@ public class Graph extends EventSource {
      * Returns isValidSource for the given cell. This is called by
      * isValidConnection.
      *
-     * @param cell Object that represents a possible target or null.
+     * @param cell ICell that represents a possible target or null.
      * @return Returns true if the given cell is a valid target.
      */
     public boolean isValidTarget(ICell cell) {
@@ -5367,22 +4944,13 @@ public class Graph extends EventSource {
      * This implementation returns true if <isValidSource> returns true for
      * the source and <isValidTarget> returns true for the target.
      *
-     * @param source Object that represents the source cell.
-     * @param target Object that represents the target cell.
+     * @param source ICell that represents the source cell.
+     * @param target ICell that represents the target cell.
      * @return Returns true if the the connection between the given terminals
      * is valid.
      */
     public boolean isValidConnection(ICell source, ICell target) {
         return isValidSource(source) && isValidTarget(target) && (isAllowLoops() || source != target);
-    }
-
-    /**
-     * Returns the minimum size of the diagram.
-     *
-     * @return Returns the minimum container size.
-     */
-    public Rectangle getMinimumGraphSize() {
-        return minimumGraphSize;
     }
 
     /**
@@ -5406,15 +4974,8 @@ public class Graph extends EventSource {
      * @return Returns the overlapping value for the given cell inside its
      * parent.
      */
-    public double getOverlap(Object cell) {
+    public double getOverlap(ICell cell) {
         return (isAllowOverlapParent(cell)) ? getDefaultOverlap() : 0;
-    }
-
-    /**
-     * Gets defaultOverlap.
-     */
-    public double getDefaultOverlap() {
-        return defaultOverlap;
     }
 
     /**
@@ -5433,14 +4994,14 @@ public class Graph extends EventSource {
      *
      * @return Returns true if the given cell may overlap its parent.
      */
-    public boolean isAllowOverlapParent(Object cell) {
+    public boolean isAllowOverlapParent(ICell cell) {
         return false;
     }
 
     /**
      * Returns the cells which are movable in the given array of cells.
      */
-    public ICell[] getFoldableCells(ICell[] cells, final boolean collapse) {
+    public List<ICell> getFoldableCells(List<ICell> cells, final boolean collapse) {
         return GraphModel.filterCells(cells, cell -> isCellFoldable(cell, collapse));
     }
 
@@ -5460,15 +5021,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns true if the grid is enabled.
-     *
-     * @return Returns the enabled state of the grid.
-     */
-    public boolean isGridEnabled() {
-        return gridEnabled;
-    }
-
-    /**
      * Sets if the grid is enabled.
      *
      * @param value Specifies if the grid should be enabled.
@@ -5478,15 +5030,6 @@ public class Graph extends EventSource {
         gridEnabled = value;
 
         changeSupport.firePropertyChange("gridEnabled", oldValue, gridEnabled);
-    }
-
-    /**
-     * Returns true if ports are enabled.
-     *
-     * @return Returns the enabled state of the ports.
-     */
-    public boolean isPortsEnabled() {
-        return portsEnabled;
     }
 
     /**
@@ -5502,15 +5045,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns the grid size.
-     *
-     * @return Returns the grid size
-     */
-    public int getGridSize() {
-        return gridSize;
-    }
-
-    /**
      * Sets the grid size and fires a property change event for gridSize.
      *
      * @param value New grid size to be used.
@@ -5520,13 +5054,6 @@ public class Graph extends EventSource {
         gridSize = value;
 
         changeSupport.firePropertyChange("gridSize", oldValue, gridSize);
-    }
-
-    /**
-     * Returns alternateEdgeStyle.
-     */
-    public String getAlternateEdgeStyle() {
-        return alternateEdgeStyle;
     }
 
     /**
@@ -5545,12 +5072,12 @@ public class Graph extends EventSource {
      * not collapsed, or if splitEnabled is true and isSplitTarget returns
      * true for the given arguments
      *
-     * @param cell  Object that represents the possible drop target.
-     * @param cells Objects that are going to be dropped.
+     * @param cell  ICell that represents the possible drop target.
+     * @param cells ICells that are going to be dropped.
      * @return Returns true if the cell is a valid drop target for the given
      * cells.
      */
-    public boolean isValidDropTarget(ICell cell, ICell[] cells) {
+    public boolean isValidDropTarget(ICell cell, List<ICell> cells) {
         return cell != null && ((isSplitEnabled() && isSplitTarget(cell, cells)) || (!model.isEdge(cell) && (isSwimlane(cell) || (model.getChildCount(cell) > 0 && !isCellCollapsed(cell)))));
     }
 
@@ -5558,17 +5085,17 @@ public class Graph extends EventSource {
      * Returns true if split is enabled and the given edge may be splitted into
      * two edges with the given cell as a new terminal between the two.
      *
-     * @param target Object that represents the edge to be splitted.
+     * @param target ICell that represents the edge to be splitted.
      * @param cells  Array of cells to add into the given edge.
      * @return Returns true if the given edge may be splitted by the given
      * cell.
      */
-    public boolean isSplitTarget(ICell target, ICell[] cells) {
-        if (target != null && cells != null && cells.length == 1) {
+    public boolean isSplitTarget(ICell target, List<ICell> cells) {
+        if (target != null && cells != null && cells.size() == 1) {
             ICell src = model.getTerminal(target, true);
             ICell trg = model.getTerminal(target, false);
 
-            return (model.isEdge(target) && isCellConnectable(cells[0]) && getEdgeValidationError(target, model.getTerminal(target, true), cells[0]) == null && !model.isAncestor(cells[0], src) && !model.isAncestor(cells[0], trg));
+            return (model.isEdge(target) && isCellConnectable(cells.get(0)) && getEdgeValidationError(target, model.getTerminal(target, true), cells.get(0)) == null && !model.isAncestor(cells.get(0), src) && !model.isAncestor(cells.get(0), trg));
         }
 
         return false;
@@ -5583,7 +5110,7 @@ public class Graph extends EventSource {
      * <p>
      * This function should only be used if isDropEnabled returns true.
      */
-    public ICell getDropTarget(ICell[] cells, java.awt.Point pt, ICell cell) {
+    public ICell getDropTarget(List<ICell> cells, java.awt.Point pt, ICell cell) {
         if (!isSwimlaneNesting()) {
             for (ICell o : cells) {
                 if (isSwimlane(o)) {
@@ -5602,7 +5129,7 @@ public class Graph extends EventSource {
 		{
 			// Checks if the cell is an ancestor of the swimlane
 			// under the mouse and uses the swimlane in that case
-			Object tmp = model.getParent(swimlane);
+			ICell tmp = model.getParent(swimlane);
 
 			while (tmp != null && isSwimlane(tmp) && tmp != cell)
 			{
@@ -5619,7 +5146,7 @@ public class Graph extends EventSource {
             cell = model.getParent(cell);
         }
 
-        return (model.getParent(cell) != model.getRoot() && !Utils.contains(cells, cell)) ? cell : null;
+        return (model.getParent(cell) != model.getRoot() && !cells.contains(cell)) ? cell : null;
     }
 
     /**
@@ -5661,7 +5188,7 @@ public class Graph extends EventSource {
      *
      * @param parent Cell whose children should be returned.
      */
-    public ICell[] getChildVertices(ICell parent) {
+    public List<ICell> getChildVertices(ICell parent) {
         return getChildCells(parent, true, false);
     }
 
@@ -5670,7 +5197,7 @@ public class Graph extends EventSource {
      *
      * @param parent Cell whose children should be returned.
      */
-    public ICell[] getChildEdges(ICell parent) {
+    public List<ICell> getChildEdges(ICell parent) {
         return getChildCells(parent, false, true);
     }
 
@@ -5679,7 +5206,7 @@ public class Graph extends EventSource {
      *
      * @param parent Cell whose children should be returned.
      */
-    public ICell[] getChildCells(ICell parent) {
+    public List<ICell> getChildCells(ICell parent) {
         return getChildCells(parent, false, false);
     }
 
@@ -5692,9 +5219,9 @@ public class Graph extends EventSource {
      * @param edges    Specifies if child edges should be returned.
      * @return Returns the child vertices and edges.
      */
-    public ICell[] getChildCells(ICell parent, boolean vertices, boolean edges) {
-        ICell[] cells = GraphModel.getChildCells(model, parent, vertices, edges);
-        List<ICell> result = new ArrayList<>(cells.length);
+    public List<ICell> getChildCells(ICell parent, boolean vertices, boolean edges) {
+        List<ICell> cells = GraphModel.getChildCells(model, parent, vertices, edges);
+        List<ICell> result = new ArrayList<>(cells.size());
 
         // Filters out the non-visible child cells
         for (ICell cell : cells) {
@@ -5703,7 +5230,7 @@ public class Graph extends EventSource {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -5712,7 +5239,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose connections should be returned.
      * @return Returns the connected edges for the given cell.
      */
-    public ICell[] getConnections(ICell cell) {
+    public List<ICell> getConnections(ICell cell) {
         return getConnections(cell, null);
     }
 
@@ -5726,7 +5253,7 @@ public class Graph extends EventSource {
      *               to be returned.
      * @return Returns the connected edges for the given cell.
      */
-    public ICell[] getConnections(ICell cell, ICell parent) {
+    public List<ICell> getConnections(ICell cell, ICell parent) {
         return getConnections(cell, parent, false);
     }
 
@@ -5740,7 +5267,7 @@ public class Graph extends EventSource {
      *               to be returned.
      * @return Returns the connected edges for the given cell.
      */
-    public ICell[] getConnections(ICell cell, ICell parent, boolean recurse) {
+    public List<ICell> getConnections(ICell cell, ICell parent, boolean recurse) {
         return getEdges(cell, parent, true, true, false, recurse);
     }
 
@@ -5751,7 +5278,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose incoming edges should be returned.
      * @return Returns the incoming edges of the given cell.
      */
-    public ICell[] getIncomingEdges(ICell cell) {
+    public List<ICell> getIncomingEdges(ICell cell) {
         return getIncomingEdges(cell, null);
     }
 
@@ -5765,7 +5292,7 @@ public class Graph extends EventSource {
      *               to be returned.
      * @return Returns the incoming edges of the given cell.
      */
-    public ICell[] getIncomingEdges(ICell cell, ICell parent) {
+    public List<ICell> getIncomingEdges(ICell cell, ICell parent) {
         return getEdges(cell, parent, true, false, false);
     }
 
@@ -5776,7 +5303,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose outgoing edges should be returned.
      * @return Returns the outgoing edges of the given cell.
      */
-    public ICell[] getOutgoingEdges(ICell cell) {
+    public List<ICell> getOutgoingEdges(ICell cell) {
         return getOutgoingEdges(cell, null);
     }
 
@@ -5790,7 +5317,7 @@ public class Graph extends EventSource {
      *               to be returned.
      * @return Returns the outgoing edges of the given cell.
      */
-    public ICell[] getOutgoingEdges(ICell cell, ICell parent) {
+    public List<ICell> getOutgoingEdges(ICell cell, ICell parent) {
         return getEdges(cell, parent, false, true, false);
     }
 
@@ -5800,7 +5327,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose edges should be returned.
      * @return Returns the edges of the given cell.
      */
-    public ICell[] getEdges(ICell cell) {
+    public List<ICell> getEdges(ICell cell) {
         return getEdges(cell, null);
     }
 
@@ -5812,7 +5339,7 @@ public class Graph extends EventSource {
      *               to be returned.
      * @return Returns the edges of the given cell.
      */
-    public ICell[] getEdges(ICell cell, ICell parent) {
+    public List<ICell> getEdges(ICell cell, ICell parent) {
         return getEdges(cell, parent, true, true, true);
     }
 
@@ -5831,7 +5358,7 @@ public class Graph extends EventSource {
      * @param includeLoops Specifies if loops should be included in the result.
      * @return Returns the edges connected to the given cell.
      */
-    public ICell[] getEdges(ICell cell, ICell parent, boolean incoming, boolean outgoing, boolean includeLoops) {
+    public List<ICell> getEdges(ICell cell, ICell parent, boolean incoming, boolean outgoing, boolean includeLoops) {
         return getEdges(cell, parent, incoming, outgoing, includeLoops, false);
     }
 
@@ -5854,7 +5381,7 @@ public class Graph extends EventSource {
      *                     parent, <code>true</code>, or the direct parent, <code>false</code>
      * @return Returns the edges connected to the given cell.
      */
-    public ICell[] getEdges(ICell cell, ICell parent, boolean incoming, boolean outgoing, boolean includeLoops, boolean recurse) {
+    public List<ICell> getEdges(ICell cell, ICell parent, boolean incoming, boolean outgoing, boolean includeLoops, boolean recurse) {
         boolean isCollapsed = isCellCollapsed(cell);
         List<ICell> edges = new ArrayList<>();
         int childCount = model.getChildCount(cell);
@@ -5863,11 +5390,11 @@ public class Graph extends EventSource {
             ICell child = model.getChildAt(cell, i);
 
             if (isCollapsed || !isCellVisible(child)) {
-                edges.addAll(Arrays.asList(GraphModel.getEdges(model, child, incoming, outgoing, includeLoops)));
+                edges.addAll(GraphModel.getEdges(model, child, incoming, outgoing, includeLoops));
             }
         }
 
-        edges.addAll(Arrays.asList(GraphModel.getEdges(model, cell, incoming, outgoing, includeLoops)));
+        edges.addAll(GraphModel.getEdges(model, cell, incoming, outgoing, includeLoops));
         List<ICell> result = new ArrayList<>(edges.size());
 
         for (ICell edge : edges) {
@@ -5880,7 +5407,7 @@ public class Graph extends EventSource {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -5905,7 +5432,7 @@ public class Graph extends EventSource {
      *
      * @return Returns the terminals at the opposite ends of the given edges.
      */
-    public ICell[] getOpposites(ICell[] edges, ICell terminal) {
+    public List<ICell> getOpposites(List<ICell> edges, ICell terminal) {
         return getOpposites(edges, terminal, true, true);
     }
 
@@ -5922,7 +5449,7 @@ public class Graph extends EventSource {
      *                 result.
      * @return Returns the cells at the opposite ends of the given edges.
      */
-    public ICell[] getOpposites(ICell[] edges, ICell terminal, boolean sources, boolean targets) {
+    public List<ICell> getOpposites(List<ICell> edges, ICell terminal, boolean sources, boolean targets) {
         Collection<ICell> terminals = new LinkedHashSet<>();
 
         if (edges != null) {
@@ -5947,7 +5474,7 @@ public class Graph extends EventSource {
             }
         }
 
-        return terminals.toArray(new ICell[0]);
+        return List.copyOf(terminals);
     }
 
     /**
@@ -5957,7 +5484,7 @@ public class Graph extends EventSource {
      *
      * @return Returns all edges between the given terminals.
      */
-    public ICell[] getEdgesBetween(ICell source, ICell target) {
+    public List<ICell> getEdgesBetween(ICell source, ICell target) {
         return getEdgesBetween(source, target, false);
     }
 
@@ -5968,23 +5495,23 @@ public class Graph extends EventSource {
      *
      * @return Returns all edges between the given terminals.
      */
-    public ICell[] getEdgesBetween(ICell source, ICell target, boolean directed) {
-        ICell[] edges = getEdges(source);
-        List<ICell> result = new ArrayList<>(edges.length);
+    public List<ICell> getEdgesBetween(ICell source, ICell target, boolean directed) {
+        List<ICell> edges = getEdges(source);
+        List<ICell> result = new ArrayList<>(edges.size());
 
         // Checks if the edge is connected to the correct
         // cell and adds any match to the result
         for (ICell edge : edges) {
             CellState state = view.getState(edge);
-            Object src = (state != null) ? state.getVisibleTerminal(true) : view.getVisibleTerminal(edge, true);
-            Object trg = (state != null) ? state.getVisibleTerminal(false) : view.getVisibleTerminal(edge, false);
+            ICell src = (state != null) ? state.getVisibleTerminal(true) : view.getVisibleTerminal(edge, true);
+            ICell trg = (state != null) ? state.getVisibleTerminal(false) : view.getVisibleTerminal(edge, false);
 
             if ((src == source && trg == target) || (!directed && src == target && trg == source)) {
                 result.add(edge);
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -6001,7 +5528,7 @@ public class Graph extends EventSource {
      *                       from the origin should be returned.
      * @return Returns the cells beyond the given halfpane.
      */
-    public ICell[] getCellsBeyond(double x0, double y0, ICell parent, boolean rightHalfpane, boolean bottomHalfpane) {
+    public List<ICell> getCellsBeyond(double x0, double y0, ICell parent, boolean rightHalfpane, boolean bottomHalfpane) {
         if (parent == null) {
             parent = getDefaultParent();
         }
@@ -6025,7 +5552,7 @@ public class Graph extends EventSource {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -6084,12 +5611,12 @@ public class Graph extends EventSource {
                 ICell cell = model.getChildAt(parent, i);
 
                 if (model.isVertex(cell) && isCellVisible(cell)) {
-                    ICell[] conns = getConnections(cell, (isolate) ? parent : null);
+                    List<ICell> conns = getConnections(cell, (isolate) ? parent : null);
                     int fanOut = 0;
                     int fanIn = 0;
 
                     for (ICell conn : conns) {
-                        Object src = view.getVisibleTerminal(conn, true);
+                        ICell src = view.getVisibleTerminal(conn, true);
 
                         if (src == cell) {
                             fanOut++;
@@ -6125,7 +5652,7 @@ public class Graph extends EventSource {
      * <code>
      * graph.traverse(root, true, new ICellVisitor()
      * {
-     * public boolean visit(Object vertex, Object edge)
+     * public boolean visit(ICell vertex, ICell edge)
      * {
      * System.out.println("edge="+graph.convertValueToString(edge)+
      * " vertex="+graph.convertValueToString(vertex));
@@ -6183,10 +5710,6 @@ public class Graph extends EventSource {
         }
     }
 
-    public GraphSelectionModel getSelectionModel() {
-        return selectionModel;
-    }
-
     //
     // Selection
     //
@@ -6198,7 +5721,7 @@ public class Graph extends EventSource {
     /**
      * @return Returns true if the given cell is selected.
      */
-    public boolean isCellSelected(Object cell) {
+    public boolean isCellSelected(ICell cell) {
         return selectionModel.isSelected(cell);
     }
 
@@ -6220,9 +5743,6 @@ public class Graph extends EventSource {
         return selectionModel.getCell();
     }
 
-    /**
-     * @param cell
-     */
     public void setSelectionCell(ICell cell) {
         selectionModel.setCell(cell);
     }
@@ -6230,25 +5750,19 @@ public class Graph extends EventSource {
     /**
      * @return Returns the selection cells.
      */
-    public ICell[] getSelectionCells() {
-        return selectionModel.getCells();
+    public List<ICell> getSelectionCells() {
+        return List.copyOf(selectionModel.getCells());
     }
 
-    public void setSelectionCells(ICell[] cells) {
+    public void setSelectionCells(List<ICell> cells) {
         selectionModel.setCells(cells);
-    }
-
-    public void setSelectionCells(Collection<ICell> cells) {
-        if (cells != null) {
-            setSelectionCells(cells.toArray(new ICell[0]));
-        }
     }
 
     public void addSelectionCell(ICell cell) {
         selectionModel.addCell(cell);
     }
 
-    public void addSelectionCells(ICell[] cells) {
+    public void addSelectionCells(List<ICell> cells) {
         selectionModel.addCells(cells);
     }
 
@@ -6256,7 +5770,7 @@ public class Graph extends EventSource {
         selectionModel.removeCell(cell);
     }
 
-    public void removeSelectionCells(ICell[] cells) {
+    public void removeSelectionCells(List<ICell> cells) {
         selectionModel.removeCells(cells);
     }
 
@@ -6385,7 +5899,7 @@ public class Graph extends EventSource {
      */
     public void selectCells(final boolean vertices, final boolean edges, ICell parent) {
 
-        Collection<ICell> cells = GraphModel.filterDescendants(getModel(), cell -> view.getState(cell) != null && model.getChildCount(cell) == 0 && ((model.isVertex(cell) && vertices) || (model.isEdge(cell) && edges)));
+        List<ICell> cells = GraphModel.filterDescendants(getModel(), cell -> view.getState(cell) != null && model.getChildCount(cell) == 0 && ((model.isVertex(cell) && vertices) || (model.isEdge(cell) && edges)));
         setSelectionCells(cells);
     }
 
@@ -6406,7 +5920,7 @@ public class Graph extends EventSource {
             parent = getDefaultParent();
         }
 
-        ICell[] children = GraphModel.getChildren(model, parent);
+        List<ICell> children = GraphModel.getChildren(model, parent);
 
         setSelectionCells(children);
     }

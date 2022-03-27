@@ -11,7 +11,7 @@ import com.faforever.neroxis.ngraph.util.Event;
 import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
-
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,27 +51,18 @@ public class SwimlaneManager extends EventSource {
      */
     protected boolean resizeEnabled;
 
-    /**
-     *
-     */
     protected IEventListener addHandler = (source, evt) -> {
         if (isEnabled() && isAddEnabled()) {
-            cellsAdded((ICell[]) evt.getProperty("cells"));
+            cellsAdded((List<ICell>) evt.getProperty("cells"));
         }
     };
 
-    /**
-     *
-     */
     protected IEventListener resizeHandler = (source, evt) -> {
         if (isEnabled() && isResizeEnabled()) {
-            cellsResized((ICell[]) evt.getProperty("cells"));
+            cellsResized((List<ICell>) evt.getProperty("cells"));
         }
     };
 
-    /**
-     *
-     */
     public SwimlaneManager(Graph graph) {
         setGraph(graph);
     }
@@ -182,7 +173,7 @@ public class SwimlaneManager extends EventSource {
      * Called if any cells have been added. Calls swimlaneAdded for all swimlanes
      * where isSwimlaneIgnored returns false.
      */
-    protected void cellsAdded(ICell[] cells) {
+    protected void cellsAdded(List<ICell> cells) {
         if (cells != null) {
             IGraphModel model = getGraph().getModel();
 
@@ -235,7 +226,7 @@ public class SwimlaneManager extends EventSource {
      * Called if any cells have been resizes. Calls swimlaneResized for all
      * swimlanes where isSwimlaneIgnored returns false.
      */
-    protected void cellsResized(ICell[] cells) {
+    protected void cellsResized(List<ICell> cells) {
         if (cells != null) {
             IGraphModel model = this.getGraph().getModel();
 
@@ -288,7 +279,7 @@ public class SwimlaneManager extends EventSource {
                 if (geo != null) {
 
                     if ((parentHorizontal && geo.getHeight() != h) || (!parentHorizontal && geo.getWidth() != w)) {
-                        geo = (Geometry) geo.clone();
+                        geo = geo.clone();
 
                         if (parentHorizontal) {
                             geo.setHeight(h);
@@ -316,9 +307,6 @@ public class SwimlaneManager extends EventSource {
         }
     }
 
-    /**
-     *
-     */
     public void destroy() {
         setGraph(null);
     }

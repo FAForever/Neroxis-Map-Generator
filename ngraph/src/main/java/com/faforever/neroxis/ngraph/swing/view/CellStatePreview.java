@@ -13,8 +13,10 @@ import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Composite;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -25,19 +27,10 @@ import java.util.Map;
  * Represents the current state of a cell in a given graph view.
  */
 public class CellStatePreview {
-    /**
-     *
-     */
     protected Map<CellState, Point> deltas = new LinkedHashMap<CellState, Point>();
 
-    /**
-     *
-     */
     protected int count = 0;
 
-    /**
-     *
-     */
     protected GraphComponent graphComponent;
 
     /**
@@ -45,14 +38,8 @@ public class CellStatePreview {
      */
     protected boolean cloned;
 
-    /**
-     *
-     */
     protected float opacity = 1;
 
-    /**
-     *
-     */
     protected List<CellState> cellStates;
 
     /**
@@ -64,65 +51,38 @@ public class CellStatePreview {
         this.cloned = cloned;
     }
 
-    /**
-     *
-     */
     public boolean isCloned() {
         return cloned;
     }
 
-    /**
-     *
-     */
     public void setCloned(boolean value) {
         cloned = value;
     }
 
-    /**
-     *
-     */
     public boolean isEmpty() {
         return count == 0;
     }
 
-    /**
-     *
-     */
     public int getCount() {
         return count;
     }
 
-    /**
-     *
-     */
     public Map<CellState, Point> getDeltas() {
         return deltas;
     }
 
-    /**
-     *
-     */
     public float getOpacity() {
         return opacity;
     }
 
-    /**
-     *
-     */
     public void setOpacity(float value) {
         opacity = value;
     }
 
-    /**
-     *
-     */
     public Point moveState(CellState state, double dx, double dy) {
         return moveState(state, dx, dy, true, true);
     }
 
-    /**
-     *
-     */
     public Point moveState(CellState state, double dx, double dy, boolean add, boolean includeEdges) {
         Point delta = deltas.get(state);
 
@@ -217,9 +177,6 @@ public class CellStatePreview {
         return dirty;
     }
 
-    /**
-     *
-     */
     public void restore(List<CellState> snapshot) {
         Graph graph = graphComponent.getGraph();
         Iterator<CellState> it = snapshot.iterator();
@@ -234,9 +191,6 @@ public class CellStatePreview {
         }
     }
 
-    /**
-     *
-     */
     public void restoreState(CellState state, CellState from) {
         state.setLabelBounds(from.getLabelBounds());
         state.setAbsolutePoints(from.getAbsolutePoints());
@@ -252,9 +206,6 @@ public class CellStatePreview {
         state.setHeight(from.getHeight());
     }
 
-    /**
-     *
-     */
     public List<CellState> snapshot(CellState state) {
         List<CellState> result = new LinkedList<>();
 
@@ -274,9 +225,6 @@ public class CellStatePreview {
         return result;
     }
 
-    /**
-     *
-     */
     protected void translateState(CellState parentState, CellState state, double dx, double dy) {
         if (state != null) {
             Graph graph = graphComponent.getGraph();
@@ -304,9 +252,6 @@ public class CellStatePreview {
         }
     }
 
-    /**
-     *
-     */
     protected Rectangle revalidateState(CellState parentState, CellState state, double dx, double dy) {
         Rectangle dirty = null;
 
@@ -353,9 +298,6 @@ public class CellStatePreview {
         return dirty;
     }
 
-    /**
-     *
-     */
     public void addEdges(CellState state) {
         Graph graph = graphComponent.getGraph();
         IGraphModel model = graph.getModel();
@@ -371,9 +313,6 @@ public class CellStatePreview {
         }
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (cellStates != null && cellStates.size() > 0) {
             Graphics2DCanvas canvas = graphComponent.getCanvas();
@@ -401,9 +340,6 @@ public class CellStatePreview {
         }
     }
 
-    /**
-     *
-     */
     protected float getOpacityForCell(Object cell) {
         return opacity;
     }

@@ -13,9 +13,9 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import java.awt.*;
+import java.awt.Graphics;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +53,7 @@ public class Morphing extends Animation {
     /**
      * Optional array of cells to limit the animation to.
      */
-    protected ICell[] cells;
+    protected List<ICell> cells;
 
     protected transient Rectangle dirty;
 
@@ -117,7 +117,7 @@ public class Morphing extends Animation {
      * then all cells are checked and animated if they have been moved
      * in the current transaction.
      */
-    public void setCells(ICell[] value) {
+    public void setCells(List<ICell> value) {
         cells = value;
     }
 

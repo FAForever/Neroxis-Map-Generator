@@ -4,24 +4,17 @@
 package com.faforever.neroxis.ngraph.util;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.canvas.HtmlCanvas;
 import com.faforever.neroxis.ngraph.canvas.ICanvas;
 import com.faforever.neroxis.ngraph.canvas.ImageCanvas;
-import com.faforever.neroxis.ngraph.canvas.SvgCanvas;
-import com.faforever.neroxis.ngraph.canvas.VmlCanvas;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
-import org.w3c.dom.Document;
-
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class CellRenderer {
-    /**
-     *
-     */
     private CellRenderer() {
         // static class
     }
@@ -33,11 +26,11 @@ public class CellRenderer {
      * @param graph Graph to be painted onto the canvas.
      * @return Returns the image that represents the canvas.
      */
-    public static ICanvas drawCells(Graph graph, ICell[] cells, double scale, Rectangle clip, CanvasFactory factory) {
+    public static ICanvas drawCells(Graph graph, List<ICell> cells, double scale, Rectangle clip, CanvasFactory factory) {
         ICanvas canvas = null;
 
         if (cells == null) {
-            cells = new ICell[]{graph.getModel().getRoot()};
+            cells = List.of(graph.getModel().getRoot());
         }
 
         // Gets the current state of the view
@@ -89,17 +82,11 @@ public class CellRenderer {
         return canvas;
     }
 
-    /**
-     *
-     */
-    public static BufferedImage createBufferedImage(Graph graph, ICell[] cells, double scale, Color background, boolean antiAlias, Rectangle clip) {
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, Color background, boolean antiAlias, Rectangle clip) {
         return createBufferedImage(graph, cells, scale, background, antiAlias, clip, new Graphics2DCanvas());
     }
 
-    /**
-     *
-     */
-    public static BufferedImage createBufferedImage(Graph graph, ICell[] cells, double scale, final Color background, final boolean antiAlias, Rectangle clip, final Graphics2DCanvas graphicsCanvas) {
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, final Color background, final boolean antiAlias, Rectangle clip, final Graphics2DCanvas graphicsCanvas) {
         ImageCanvas canvas = (ImageCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
             public ICanvas createCanvas(int width, int height) {
                 return new ImageCanvas(graphicsCanvas, width, height, background, antiAlias);
@@ -110,51 +97,6 @@ public class CellRenderer {
         return (canvas != null) ? canvas.destroy() : null;
     }
 
-    /**
-     *
-     */
-    public static Document createHtmlDocument(Graph graph, ICell[] cells, double scale, Color background, Rectangle clip) {
-        HtmlCanvas canvas = (HtmlCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
-            public ICanvas createCanvas(int width, int height) {
-                return new HtmlCanvas(DomUtils.createHtmlDocument());
-            }
-
-        });
-
-        return (canvas != null) ? canvas.getDocument() : null;
-    }
-
-    /**
-     *
-     */
-    public static Document createSvgDocument(Graph graph, ICell[] cells, double scale, Color background, Rectangle clip) {
-        SvgCanvas canvas = (SvgCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
-            public ICanvas createCanvas(int width, int height) {
-                return new SvgCanvas(DomUtils.createSvgDocument(width, height));
-            }
-
-        });
-
-        return (canvas != null) ? canvas.getDocument() : null;
-    }
-
-    /**
-     *
-     */
-    public static Document createVmlDocument(Graph graph, ICell[] cells, double scale, Color background, Rectangle clip) {
-        VmlCanvas canvas = (VmlCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
-            public ICanvas createCanvas(int width, int height) {
-                return new VmlCanvas(DomUtils.createVmlDocument());
-            }
-
-        });
-
-        return (canvas != null) ? canvas.getDocument() : null;
-    }
-
-    /**
-     *
-     */
     public static abstract class CanvasFactory {
 
         /**

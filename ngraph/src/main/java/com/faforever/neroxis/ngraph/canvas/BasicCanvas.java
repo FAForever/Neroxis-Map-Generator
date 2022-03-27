@@ -3,11 +3,14 @@ package com.faforever.neroxis.ngraph.canvas;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Utils;
-
 import java.awt.image.BufferedImage;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public abstract class BasicCanvas implements ICanvas {
 
     /**
@@ -45,62 +48,13 @@ public abstract class BasicCanvas implements ICanvas {
     /**
      * Cache for images.
      */
-    protected Hashtable<String, BufferedImage> imageCache = new Hashtable<String, BufferedImage>();
+    protected HashMap<String, BufferedImage> imageCache = new HashMap<>();
 
     /**
      * Sets the current translate.
      */
     public void setTranslate(double dx, double dy) {
         translate = new Point(dx, dy);
-    }
-
-    /**
-     * Returns the current translate.
-     */
-    public Point getTranslate() {
-        return translate;
-    }
-
-    /**
-     *
-     */
-    public double getScale() {
-        return scale;
-    }
-
-    /**
-     *
-     */
-    public void setScale(double scale) {
-        this.scale = scale;
-    }
-
-    /**
-     *
-     */
-    public String getImageBasePath() {
-        return imageBasePath;
-    }
-
-    /**
-     *
-     */
-    public void setImageBasePath(String imageBasePath) {
-        this.imageBasePath = imageBasePath;
-    }
-
-    /**
-     *
-     */
-    public boolean isDrawLabels() {
-        return drawLabels;
-    }
-
-    /**
-     *
-     */
-    public void setDrawLabels(boolean drawLabels) {
-        this.drawLabels = drawLabels;
     }
 
     /**
@@ -122,9 +76,6 @@ public abstract class BasicCanvas implements ICanvas {
         return img;
     }
 
-    /**
-     *
-     */
     public void flushImageCache() {
         imageCache.clear();
     }

@@ -7,205 +7,45 @@ package com.faforever.neroxis.ngraph.util;
  * Contains all global constants.
  */
 public class Event {
-
-    /**
-     *
-     */
     public static final String DONE = "done";
-
-    /**
-     *
-     */
     public static final String ADD_CELLS = "addCells";
-
-    /**
-     *
-     */
     public static final String CELLS_ADDED = "cellsAdded";
-
-    /**
-     *
-     */
     public static final String ALIGN_CELLS = "alignCells";
-
-    /**
-     *
-     */
     public static final String CONNECT_CELL = "connectCell";
-
-    /**
-     *
-     */
     public static final String CONNECT = "connect";
-
-    /**
-     *
-     */
     public static final String CELL_CONNECTED = "cellConnected";
-
-    /**
-     *
-     */
     public static final String FLIP_EDGE = "flipEdge";
-
-    /**
-     *
-     */
     public static final String FOLD_CELLS = "foldCells";
-
-    /**
-     *
-     */
     public static final String CELLS_FOLDED = "cellsFolded";
-
-    /**
-     *
-     */
     public static final String GROUP_CELLS = "groupCells";
-
-    /**
-     *
-     */
     public static final String UNGROUP_CELLS = "ungroupCells";
-
-    /**
-     *
-     */
     public static final String REMOVE_CELLS_FROM_PARENT = "removeCellsFromParent";
-
-    /**
-     *
-     */
     public static final String MOVE_CELLS = "moveCells";
-
-    /**
-     *
-     */
     public static final String CELLS_MOVED = "cellsMoved";
-
-    /**
-     *
-     */
     public static final String ORDER_CELLS = "orderCells";
-
-    /**
-     *
-     */
     public static final String CELLS_ORDERED = "cellsOrdered";
-
-    /**
-     *
-     */
     public static final String REMOVE_CELLS = "removeCells";
-
-    /**
-     *
-     */
     public static final String CELLS_REMOVED = "cellsRemoved";
-
-    /**
-     *
-     */
     public static final String REPAINT = "repaint";
-
-    /**
-     *
-     */
     public static final String RESIZE_CELLS = "resizeCells";
-
-    /**
-     *
-     */
     public static final String CELLS_RESIZED = "cellsResized";
-
-    /**
-     *
-     */
     public static final String SPLIT_EDGE = "splitEdge";
-
-    /**
-     *
-     */
     public static final String TOGGLE_CELLS = "toggleCells";
-
-    /**
-     *
-     */
     public static final String CELLS_TOGGLED = "cellsToggled";
-
-    /**
-     *
-     */
     public static final String UPDATE_CELL_SIZE = "updateCellSize";
-
-    /**
-     *
-     */
     public static final String LABEL_CHANGED = "labelChanged";
-
-    /**
-     *
-     */
     public static final String ADD_OVERLAY = "addOverlay";
-
-    /**
-     *
-     */
     public static final String REMOVE_OVERLAY = "removeOverlay";
-
-    /**
-     *
-     */
     public static final String BEFORE_PAINT = "beforePaint";
-
-    /**
-     *
-     */
     public static final String PAINT = "paint";
-
-    /**
-     *
-     */
     public static final String AFTER_PAINT = "afterPaint";
-
-    /**
-     *
-     */
     public static final String START_EDITING = "startEditing";
-
-    /**
-     *
-     */
     public static final String UNDO = "undo";
-
-    /**
-     *
-     */
     public static final String REDO = "redo";
-
-    /**
-     *
-     */
     public static final String UP = "up";
-
-    /**
-     *
-     */
     public static final String DOWN = "down";
-
-    /**
-     *
-     */
     public static final String SCALE = "scale";
-
-    /**
-     *
-     */
     public static final String TRANSLATE = "translate";
-
-    /**
-     *
-     */
     public static final String SCALE_AND_TRANSLATE = "scaleAndTranslate";
 
     /**
@@ -249,30 +89,10 @@ public class Event {
      * currentEdit.
      */
     public static final String END_UPDATE = "endUpdate";
-
-    /**
-     *
-     */
     public static final String INSERT = "insert";
-
-    /**
-     *
-     */
     public static final String ADD = "add";
-
-    /**
-     *
-     */
     public static final String CLEAR = "clear";
-
-    /**
-     *
-     */
     public static final String FIRED = "fired";
-
-    /**
-     *
-     */
     public static final String SELECT = "select";
 
     /**
@@ -294,30 +114,9 @@ public class Event {
      * </code>
      */
     public static String MARK = "mark";
-
-    /**
-     *
-     */
     public static String ROOT = "root";
-
-    /**
-     *
-     */
     public static String LAYOUT_CELLS = "layoutCells";
-
-    /**
-     *
-     */
     public static String START = "start";
-
-    /**
-     *
-     */
     public static String CONTINUE = "continue";
-
-    /**
-     *
-     */
     public static String STOP = "stop";
-
 }

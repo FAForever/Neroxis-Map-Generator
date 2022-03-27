@@ -9,13 +9,16 @@ import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class CompactTreeLayout extends GraphLayout {
 
     /**
@@ -115,127 +118,10 @@ public class CompactTreeLayout extends GraphLayout {
      * @return Returns true if the vertex should be ignored.
      */
     public boolean isVertexIgnored(ICell vertex) {
-        return super.isVertexIgnored(vertex) || graph.getConnections(vertex).length == 0;
+        return super.isVertexIgnored(vertex) || graph.getConnections(vertex).isEmpty();
     }
 
-    /**
-     * @return the horizontal
-     */
-    public boolean isHorizontal() {
-        return horizontal;
-    }
 
-    /**
-     * @param horizontal the horizontal to set
-     */
-    public void setHorizontal(boolean horizontal) {
-        this.horizontal = horizontal;
-    }
-
-    /**
-     * @return the invert
-     */
-    public boolean isInvert() {
-        return invert;
-    }
-
-    /**
-     * @param invert the invert to set
-     */
-    public void setInvert(boolean invert) {
-        this.invert = invert;
-    }
-
-    /**
-     * @return the resizeParent
-     */
-    public boolean isResizeParent() {
-        return resizeParent;
-    }
-
-    /**
-     * @param resizeParent the resizeParent to set
-     */
-    public void setResizeParent(boolean resizeParent) {
-        this.resizeParent = resizeParent;
-    }
-
-    /**
-     * @return the moveTree
-     */
-    public boolean isMoveTree() {
-        return moveTree;
-    }
-
-    /**
-     * @param moveTree the moveTree to set
-     */
-    public void setMoveTree(boolean moveTree) {
-        this.moveTree = moveTree;
-    }
-
-    /**
-     * @return the resetEdges
-     */
-    public boolean isResetEdges() {
-        return resetEdges;
-    }
-
-    /**
-     * @param resetEdges the resetEdges to set
-     */
-    public void setResetEdges(boolean resetEdges) {
-        this.resetEdges = resetEdges;
-    }
-
-    public boolean isEdgeRouting() {
-        return edgeRouting;
-    }
-
-    public void setEdgeRouting(boolean edgeRouting) {
-        this.edgeRouting = edgeRouting;
-    }
-
-    /**
-     * @return the levelDistance
-     */
-    public int getLevelDistance() {
-        return levelDistance;
-    }
-
-    /**
-     * @param levelDistance the levelDistance to set
-     */
-    public void setLevelDistance(int levelDistance) {
-        this.levelDistance = levelDistance;
-    }
-
-    /**
-     * @return the nodeDistance
-     */
-    public int getNodeDistance() {
-        return nodeDistance;
-    }
-
-    /**
-     * @param nodeDistance the nodeDistance to set
-     */
-    public void setNodeDistance(int nodeDistance) {
-        this.nodeDistance = nodeDistance;
-    }
-
-    public double getGroupPadding() {
-        return groupPadding;
-    }
-
-    public void setGroupPadding(int groupPadding) {
-        this.groupPadding = groupPadding;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
     public void execute(ICell parent) {
         super.execute(parent);
         execute(parent, null);
@@ -253,7 +139,7 @@ public class CompactTreeLayout extends GraphLayout {
 
         if (root == null) {
             // Takes the parent as the root if it has outgoing edges
-            if (graph.getEdges(parent, model.getParent(parent), invert, !invert, false).length > 0) {
+            if (!graph.getEdges(parent, model.getParent(parent), invert, !invert, false).isEmpty()) {
                 root = parent;
             }
 
@@ -264,7 +150,7 @@ public class CompactTreeLayout extends GraphLayout {
 
                 if (roots.size() > 0) {
                     for (ICell o : roots) {
-                        if (!isVertexIgnored(o) && graph.getEdges(o, null, invert, !invert, false).length > 0) {
+                        if (!isVertexIgnored(o) && !graph.getEdges(o, null, invert, !invert, false).isEmpty()) {
                             root = o;
                             break;
                         }
@@ -365,7 +251,7 @@ public class CompactTreeLayout extends GraphLayout {
                 ICell cell = model.getChildAt(parent, i);
 
                 if (model.isVertex(cell) && graph.isCellVisible(cell)) {
-                    ICell[] conns = graph.getConnections(cell, parent, true);
+                    List<ICell> conns = graph.getConnections(cell, parent, true);
                     int fanOut = 0;
                     int fanIn = 0;
 
@@ -434,7 +320,7 @@ public class CompactTreeLayout extends GraphLayout {
 
             IGraphModel model = graph.getModel();
             TreeNode prev = null;
-            ICell[] out = graph.getEdges(cell, parent, invert, !invert, false, true);
+            List<ICell> out = graph.getEdges(cell, parent, invert, !invert, false, true);
             GraphView view = graph.getView();
 
             for (ICell edge : out) {
@@ -722,7 +608,7 @@ public class CompactTreeLayout extends GraphLayout {
      * a padding.
      */
     protected void adjustParents() {
-        arrangeGroups(Utils.sortCells(this.parentsChanged, true).toArray(new ICell[0]), groupPadding);
+        arrangeGroups(List.copyOf(Utils.sortCells(this.parentsChanged, true)), groupPadding);
     }
 
     /**
@@ -794,7 +680,7 @@ public class CompactTreeLayout extends GraphLayout {
             ICell childCell = sortedCellsArray[j].cell.cell;
             Rectangle childBounds = getVertexBounds(childCell);
 
-            ICell[] edges = GraphModel.getEdgesBetween(model, parentCell, childCell);
+            List<ICell> edges = GraphModel.getEdgesBetween(model, parentCell, childCell);
 
             List<Point> newPoints = new ArrayList<>(3);
             double x = 0;
@@ -880,7 +766,7 @@ public class CompactTreeLayout extends GraphLayout {
      * sum of their connected edges. Does not violate (x.compareTo(y)==0) ==
      * (x.equals(y))
      */
-    protected class WeightedCellSorter implements Comparable<Object> {
+    protected static class WeightedCellSorter implements Comparable<Object> {
 
         /**
          * The weighted value of the cell stored

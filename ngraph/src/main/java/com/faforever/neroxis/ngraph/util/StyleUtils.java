@@ -5,7 +5,6 @@ package com.faforever.neroxis.ngraph.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,8 +144,8 @@ public class StyleUtils {
      * @param key   Key of the style to be changed.
      * @param value New value for the given key.
      */
-    public static void setCellStyles(IGraphModel model, ICell[] cells, String key, String value) {
-        if (cells != null && cells.length > 0) {
+    public static void setCellStyles(IGraphModel model, List<ICell> cells, String key, String value) {
+        if (cells != null && cells.size() > 0) {
             model.beginUpdate();
             try {
                 for (ICell cell : cells) {
@@ -220,8 +219,8 @@ public class StyleUtils {
      * @param flag  Integer for the bit to be changed.
      * @param value Optional boolean value for the flag.
      */
-    public static void setCellStyleFlags(IGraphModel model, ICell[] cells, String key, int flag, Boolean value) {
-        if (cells != null && cells.length > 0) {
+    public static void setCellStyleFlags(IGraphModel model, List<ICell> cells, String key, int flag, Boolean value) {
+        if (cells != null && cells.size() > 0) {
             model.beginUpdate();
             try {
                 for (ICell cell : cells) {

@@ -14,7 +14,6 @@ import com.faforever.neroxis.ngraph.util.EventObject;
 import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -138,7 +137,7 @@ public class GraphSelectionModel extends EventSource {
      */
     public void setCell(ICell cell) {
         if (cell != null) {
-            setCells(new ICell[]{cell});
+            setCells(List.of(cell));
         } else {
             clear();
         }
@@ -147,20 +146,20 @@ public class GraphSelectionModel extends EventSource {
     /**
      * Returns the selection cells.
      */
-    public ICell[] getCells() {
-        return cells.toArray(new ICell[0]);
+    public Set<ICell> getCells() {
+        return cells;
     }
 
     /**
      * Clears the selection and adds the given cells.
      */
-    public void setCells(ICell[] cells) {
+    public void setCells(List<ICell> cells) {
         if (cells != null) {
             if (singleSelection) {
-                cells = new ICell[]{getFirstSelectableCell(cells)};
+                cells = List.of(getFirstSelectableCell(cells));
             }
 
-            List<ICell> tmp = new ArrayList<>(cells.length);
+            List<ICell> tmp = new ArrayList<>(cells.size());
 
             for (ICell cell : cells) {
                 if (graph.isCellSelectable(cell)) {
@@ -180,13 +179,9 @@ public class GraphSelectionModel extends EventSource {
      * @param cells Array of cells to return the first selectable cell for.
      * @return Returns the first cell that may be selected.
      */
-    protected ICell getFirstSelectableCell(ICell[] cells) {
+    protected ICell getFirstSelectableCell(List<ICell> cells) {
         if (cells != null) {
-            for (ICell cell : cells) {
-                if (graph.isCellSelectable(cell)) {
-                    return cell;
-                }
-            }
+            return cells.stream().filter(graph::isCellSelectable).findFirst().orElse(null);
         }
 
         return null;
@@ -197,23 +192,20 @@ public class GraphSelectionModel extends EventSource {
      */
     public void addCell(ICell cell) {
         if (cell != null) {
-            addCells(new ICell[]{cell});
+            addCells(List.of(cell));
         }
     }
 
-    /**
-     *
-     */
-    public void addCells(ICell[] cells) {
+    public void addCells(List<ICell> cells) {
         if (cells != null) {
             Collection<ICell> remove = null;
 
             if (singleSelection) {
                 remove = this.cells;
-                cells = new ICell[]{getFirstSelectableCell(cells)};
+                cells = List.of(getFirstSelectableCell(cells));
             }
 
-            List<ICell> tmp = new ArrayList<>(cells.length);
+            List<ICell> tmp = new ArrayList<>(cells.size());
 
             for (ICell cell : cells) {
                 if (!isSelected(cell) && graph.isCellSelectable(cell)) {
@@ -230,16 +222,13 @@ public class GraphSelectionModel extends EventSource {
      */
     public void removeCell(ICell cell) {
         if (cell != null) {
-            removeCells(new ICell[]{cell});
+            removeCells(List.of(cell));
         }
     }
 
-    /**
-     *
-     */
-    public void removeCells(ICell[] cells) {
+    public void removeCells(List<ICell> cells) {
         if (cells != null) {
-            List<ICell> tmp = new ArrayList<>(cells.length);
+            List<ICell> tmp = new ArrayList<>(cells.size());
 
             for (ICell cell : cells) {
                 if (isSelected(cell)) {
@@ -251,9 +240,6 @@ public class GraphSelectionModel extends EventSource {
         }
     }
 
-    /**
-     *
-     */
     protected void changeSelection(Collection<ICell> added, Collection<ICell> removed) {
         if ((added != null && !added.isEmpty()) || (removed != null && !removed.isEmpty())) {
             SelectionChange change = new SelectionChange(this, added, removed);
@@ -264,27 +250,18 @@ public class GraphSelectionModel extends EventSource {
         }
     }
 
-    /**
-     *
-     */
     protected void cellAdded(ICell cell) {
         if (cell != null) {
             cells.add(cell);
         }
     }
 
-    /**
-     *
-     */
     protected void cellRemoved(ICell cell) {
         if (cell != null) {
             cells.remove(cell);
         }
     }
 
-    /**
-     *
-     */
     public static class SelectionChange implements UndoableChange {
 
         protected GraphSelectionModel model;

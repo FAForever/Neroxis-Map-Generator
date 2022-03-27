@@ -4,15 +4,14 @@
 package com.faforever.neroxis.ngraph.util;
 
 import java.awt.geom.Line2D;
+import java.io.Serial;
 
 /**
  * Implements a line with double precision coordinates.
  */
 
 public class Line extends Point {
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = -4730972599169158546L;
     /**
      * The end point of the line

@@ -15,20 +15,22 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.swing.SwingConstants;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The top level compound layout of the hierarchical layout. The individual
  * elements of the layout are called in sequence.
  */
-public class HierarchicalLayout extends GraphLayout/*,
-JGraphLayout.Stoppable*/ {
+@Getter
+@Setter
+public class HierarchicalLayout extends GraphLayout {
     /**
      * The root nodes of the layout
      */
@@ -36,12 +38,12 @@ JGraphLayout.Stoppable*/ {
 
     /**
      * Specifies if the parent should be resized after the layout so that it
-     * contains all the child cells. Default is false. @See parentBorder.
+     * contains all the child cells. Default is true. @See parentBorder.
      */
     protected boolean resizeParent = true;
 
     /**
-     * Specifies if the parnent should be moved if resizeParent is enabled.
+     * Specifies if the parent should be moved if resizeParent is enabled.
      * Default is false. @See resizeParent.
      */
     protected boolean moveParent = false;
@@ -76,7 +78,7 @@ JGraphLayout.Stoppable*/ {
      * The position of the root node(s) relative to the laid out graph in.
      * Default is <code>SwingConstants.NORTH</code>, i.e. top-down.
      */
-    protected int orientation = SwingConstants.NORTH;
+    protected int orientation;
 
     /**
      * Specifies if the STYLE_NOEDGESTYLE flag should be set on edges that are
@@ -99,12 +101,8 @@ JGraphLayout.Stoppable*/ {
     /**
      * The internal model formed of the layout
      */
+    @Setter(AccessLevel.NONE)
     protected GraphHierarchyModel model = null;
-
-    /**
-     * The layout progress bar
-     */
-    //protected JGraphLayoutProgress progress = new JGraphLayoutProgress();
 
     /**
      * Constructs a hierarchical layout
@@ -175,7 +173,7 @@ JGraphLayout.Stoppable*/ {
             run(parent);
 
             if (isResizeParent() && !graph.isCellCollapsed(parent)) {
-                graph.updateGroupBounds(new ICell[]{parent}, getParentBorder(), isMoveParent());
+                graph.updateGroupBounds(List.of(parent), getParentBorder(), isMoveParent());
             }
         } finally {
             model.endUpdate();
@@ -201,7 +199,7 @@ JGraphLayout.Stoppable*/ {
 
         for (ICell vertex : vertices) {
             if (model.isVertex(vertex) && graph.isCellVisible(vertex)) {
-                ICell[] conns = this.getEdges(vertex);
+                List<ICell> conns = this.getEdges(vertex);
                 int fanOut = 0;
                 int fanIn = 0;
 
@@ -235,7 +233,7 @@ JGraphLayout.Stoppable*/ {
         return roots;
     }
 
-    public ICell[] getEdges(ICell cell) {
+    public List<ICell> getEdges(ICell cell) {
         IGraphModel model = graph.getModel();
         boolean isCollapsed = graph.isCellCollapsed(cell);
         List<ICell> edges = new ArrayList<>();
@@ -245,11 +243,11 @@ JGraphLayout.Stoppable*/ {
             ICell child = model.getChildAt(cell, i);
 
             if (isCollapsed || !graph.isCellVisible(child)) {
-                edges.addAll(Arrays.asList(GraphModel.getEdges(model, child, true, true, false)));
+                edges.addAll(GraphModel.getEdges(model, child, true, true, false));
             }
         }
 
-        edges.addAll(Arrays.asList(GraphModel.getEdges(model, cell, true, true, false)));
+        edges.addAll(GraphModel.getEdges(model, cell, true, true, false));
         List<ICell> result = new ArrayList<>(edges.size());
 
         for (ICell edge : edges) {
@@ -262,7 +260,7 @@ JGraphLayout.Stoppable*/ {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -311,7 +309,7 @@ JGraphLayout.Stoppable*/ {
         double initialX = 0;
 
         for (Set<ICell> vertexSet : hierarchyVertices) {
-            this.model = new GraphHierarchyModel(this, vertexSet.toArray(new ICell[0]), roots, parent);
+            this.model = new GraphHierarchyModel(this, List.copyOf(vertexSet), roots, parent);
 
             cycleStage(parent);
             layeringStage();
@@ -445,140 +443,6 @@ JGraphLayout.Stoppable*/ {
         placementStage.execute(parent);
 
         return placementStage.getLimitX() + interHierarchySpacing;
-    }
-
-    /**
-     * Returns the resizeParent flag.
-     */
-    public boolean isResizeParent() {
-        return resizeParent;
-    }
-
-    /**
-     * Sets the resizeParent flag.
-     */
-    public void setResizeParent(boolean value) {
-        resizeParent = value;
-    }
-
-    /**
-     * Returns the moveParent flag.
-     */
-    public boolean isMoveParent() {
-        return moveParent;
-    }
-
-    /**
-     * Sets the moveParent flag.
-     */
-    public void setMoveParent(boolean value) {
-        moveParent = value;
-    }
-
-    /**
-     * Returns parentBorder.
-     */
-    public int getParentBorder() {
-        return parentBorder;
-    }
-
-    /**
-     * Sets parentBorder.
-     */
-    public void setParentBorder(int value) {
-        parentBorder = value;
-    }
-
-    /**
-     * @return Returns the intraCellSpacing.
-     */
-    public double getIntraCellSpacing() {
-        return intraCellSpacing;
-    }
-
-    /**
-     * @param intraCellSpacing The intraCellSpacing to set.
-     */
-    public void setIntraCellSpacing(double intraCellSpacing) {
-        this.intraCellSpacing = intraCellSpacing;
-    }
-
-    /**
-     * @return Returns the interRankCellSpacing.
-     */
-    public double getInterRankCellSpacing() {
-        return interRankCellSpacing;
-    }
-
-    /**
-     * @param interRankCellSpacing The interRankCellSpacing to set.
-     */
-    public void setInterRankCellSpacing(double interRankCellSpacing) {
-        this.interRankCellSpacing = interRankCellSpacing;
-    }
-
-    /**
-     * @return Returns the orientation.
-     */
-    public int getOrientation() {
-        return orientation;
-    }
-
-    /**
-     * @param orientation The orientation to set.
-     */
-    public void setOrientation(int orientation) {
-        this.orientation = orientation;
-    }
-
-    /**
-     * @return Returns the interHierarchySpacing.
-     */
-    public double getInterHierarchySpacing() {
-        return interHierarchySpacing;
-    }
-
-    /**
-     * @param interHierarchySpacing The interHierarchySpacing to set.
-     */
-    public void setInterHierarchySpacing(double interHierarchySpacing) {
-        this.interHierarchySpacing = interHierarchySpacing;
-    }
-
-    public double getParallelEdgeSpacing() {
-        return parallelEdgeSpacing;
-    }
-
-    public void setParallelEdgeSpacing(double parallelEdgeSpacing) {
-        this.parallelEdgeSpacing = parallelEdgeSpacing;
-    }
-
-    /**
-     * @return Returns the fineTuning.
-     */
-    public boolean isFineTuning() {
-        return fineTuning;
-    }
-
-    /**
-     * @param fineTuning The fineTuning to set.
-     */
-    public void setFineTuning(boolean fineTuning) {
-        this.fineTuning = fineTuning;
-    }
-
-    /**
-     *
-     */
-    public boolean isDisableEdgeStyle() {
-        return disableEdgeStyle;
-    }
-
-    /**
-     * @param disableEdgeStyle
-     */
-    public void setDisableEdgeStyle(boolean disableEdgeStyle) {
-        this.disableEdgeStyle = disableEdgeStyle;
     }
 
     /**

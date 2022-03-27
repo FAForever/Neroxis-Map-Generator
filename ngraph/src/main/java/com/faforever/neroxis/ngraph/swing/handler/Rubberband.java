@@ -3,6 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.GraphComponent.GraphControl;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
@@ -10,13 +11,16 @@ import com.faforever.neroxis.ngraph.util.Event;
 import com.faforever.neroxis.ngraph.util.EventObject;
 import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Utils;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.List;
 
 /**
  * Implements a rubberband selection.
@@ -165,13 +169,10 @@ public class Rubberband implements MouseListener, MouseMotionListener {
      * @param rect
      * @param e
      */
-    public Object[] select(Rectangle rect, MouseEvent e) {
+    public List<ICell> select(Rectangle rect, MouseEvent e) {
         return graphComponent.selectRegion(rect, e);
     }
 
-    /**
-     *
-     */
     public void paintRubberband(Graphics g) {
         if (first != null && bounds != null && graphComponent.isSignificant(bounds.width, bounds.height)) {
             Rectangle rect = new Rectangle(bounds);
@@ -184,9 +185,6 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
-    /**
-     *
-     */
     public void mousePressed(MouseEvent e) {
         if (!e.isConsumed() && isEnabled() && isRubberbandTrigger(e) && !e.isPopupTrigger()) {
             start(e.getPoint());
@@ -194,9 +192,6 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
-    /**
-     *
-     */
     public void mouseDragged(MouseEvent e) {
         if (!e.isConsumed() && first != null) {
             Rectangle oldBounds = new Rectangle(bounds);
@@ -243,9 +238,6 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
-    /**
-     *
-     */
     public void mouseReleased(MouseEvent e) {
         Rectangle rect = bounds;
         reset();
@@ -257,34 +249,22 @@ public class Rubberband implements MouseListener, MouseMotionListener {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-     */
+
     public void mouseClicked(MouseEvent arg0) {
         // empty
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-     */
+
     public void mouseEntered(MouseEvent arg0) {
         // empty
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-     */
+
     public void mouseExited(MouseEvent arg0) {
         // empty
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
-     */
+
     public void mouseMoved(MouseEvent arg0) {
         // empty
     }

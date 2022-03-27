@@ -3,10 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Font;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 /**
  * @author Administrator
@@ -15,14 +16,8 @@ public class LightweightLabel extends JLabel {
 
     private static final Logger log = Logger.getLogger(LightweightLabel.class.getName());
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -6771477489533614010L;
 
-    /**
-     *
-     */
     protected static LightweightLabel sharedInstance;
 
     /**
@@ -36,17 +31,11 @@ public class LightweightLabel extends JLabel {
         }
     }
 
-    /**
-     *
-     */
     public LightweightLabel() {
         setFont(new Font(Constants.DEFAULT_FONTFAMILY, 0, Constants.DEFAULT_FONTSIZE));
         setVerticalAlignment(SwingConstants.TOP);
     }
 
-    /**
-     *
-     */
     public static LightweightLabel getSharedInstance() {
         return sharedInstance;
     }

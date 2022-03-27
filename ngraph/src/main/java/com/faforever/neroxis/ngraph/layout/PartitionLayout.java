@@ -5,29 +5,32 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.Graph;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class PartitionLayout extends GraphLayout {
 
     /**
      * Boolean indicating the direction in which the space is partitioned.
      * Default is true.
      */
-    protected boolean horizontal;
+    protected final boolean horizontal;
 
     /**
      * Integer that specifies the absolute spacing in pixels between the
      * children. Default is 0.
      */
-    protected int spacing;
+    protected final int spacing;
 
     /**
      * Integer that specifies the absolute inset in pixels for the parent that
      * contains the children. Default is 0.
      */
-    protected int border;
+    protected final int border;
 
     /**
      * Boolean that specifies if vertices should be resized. Default is true.
@@ -69,10 +72,7 @@ public class PartitionLayout extends GraphLayout {
         this.border = border;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.GraphLayout#move(java.lang.Object, double, double)
-     */
+
     public void moveCell(ICell cell, double x, double y) {
         IGraphModel model = graph.getModel();
         ICell parent = model.getParent(cell);
@@ -114,10 +114,7 @@ public class PartitionLayout extends GraphLayout {
         return new Rectangle();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
+
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
         Geometry pgeo = model.getGeometry(parent);
@@ -168,7 +165,7 @@ public class PartitionLayout extends GraphLayout {
                             Geometry geo = model.getGeometry(child);
 
                             if (geo != null) {
-                                geo = (Geometry) geo.clone();
+                                geo = geo.clone();
                                 geo.setX(x0);
                                 geo.setY(y0);
 

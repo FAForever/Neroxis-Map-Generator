@@ -3,6 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -10,9 +11,7 @@ import java.io.Serializable;
  */
 public class Image implements Serializable, Cloneable {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 8541229679513497585L;
 
     /**
@@ -75,5 +74,4 @@ public class Image implements Serializable, Cloneable {
     public void setHeight(int height) {
         this.height = height;
     }
-
 }

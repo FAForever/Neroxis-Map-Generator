@@ -8,10 +8,10 @@ import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.LightweightLabel;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.Map;
+import javax.swing.CellRendererPane;
 
 /**
  * To set global CSS for all HTML labels, use the following code:
@@ -52,9 +52,6 @@ public class HtmlTextShape implements ITextShape {
         replaceHtmlLinefeeds = value;
     }
 
-    /**
-     *
-     */
     protected String createHtmlDocument(Map<String, Object> style, String text, int w, int h) {
         String overflow = Utils.getString(style, Constants.STYLE_OVERFLOW, "");
 
@@ -67,9 +64,6 @@ public class HtmlTextShape implements ITextShape {
         }
     }
 
-    /**
-     *
-     */
     public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Map<String, Object> style) {
         LightweightLabel textRenderer = LightweightLabel.getSharedInstance();
         CellRendererPane rendererPane = canvas.getRendererPane();

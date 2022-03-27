@@ -3,9 +3,19 @@ package com.faforever.neroxis.ngraph.canvas;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.LightweightLabel;
 import com.faforever.neroxis.ngraph.util.Utils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -18,6 +28,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.CellRendererPane;
+import javax.swing.JLabel;
 
 /**
  * Used for exporting images. To render to an image from a given XML string,
@@ -160,8 +172,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
     /**
      * Caches parsed colors.
      */
-    @SuppressWarnings("serial")
-    protected transient LinkedHashMap<String, Color> colorCache = new LinkedHashMap<String, Color>() {
+    protected transient LinkedHashMap<String, Color> colorCache = new LinkedHashMap<>() {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, Color> eldest) {
             return size() > COLOR_CACHE_SIZE;
@@ -241,26 +252,17 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return null;
     }
 
-    /**
-     *
-     */
     public void scale(double value) {
         // This implementation uses custom scale/translate and built-in rotation
         state.scale = state.scale * value;
     }
 
-    /**
-     *
-     */
     public void translate(double dx, double dy) {
         // This implementation uses custom scale/translate and built-in rotation
         state.dx += dx;
         state.dy += dy;
     }
 
-    /**
-     *
-     */
     public void rotate(double theta, boolean flipH, boolean flipV, double cx, double cy) {
         cx += state.dx;
         cy += state.dy;
@@ -291,9 +293,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         state.flipV = flipV;
     }
 
-    /**
-     *
-     */
     public void setStrokeWidth(double value) {
         // Lazy and cached instantiation strategy for all stroke properties
         if (value != state.strokeWidth) {
@@ -312,70 +311,46 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setDashed(boolean value) {
         this.setDashed(value, state.fixDash);
     }
 
-    /**
-     *
-     */
     public void setDashed(boolean value, boolean fixDash) {
         // Lazy and cached instantiation strategy for all stroke properties
         state.dashed = value;
         state.fixDash = fixDash;
     }
 
-    /**
-     *
-     */
     public void setDashPattern(String value) {
         if (value != null && value.length() > 0) {
             state.dashPattern = Utils.parseDashPattern(value);
         }
     }
 
-    /**
-     *
-     */
     public void setLineCap(String value) {
         if (!state.lineCap.equals(value)) {
             state.lineCap = value;
         }
     }
 
-    /**
-     *
-     */
     public void setLineJoin(String value) {
         if (!state.lineJoin.equals(value)) {
             state.lineJoin = value;
         }
     }
 
-    /**
-     *
-     */
     public void setMiterLimit(double value) {
         if (value != state.miterLimit) {
             state.miterLimit = value;
         }
     }
 
-    /**
-     *
-     */
     public void setFontSize(double value) {
         if (value != state.fontSize) {
             state.fontSize = value;
         }
     }
 
-    /**
-     *
-     */
     public void setFontColor(String value) {
         if (state.fontColorValue == null || !state.fontColorValue.equals(value)) {
             state.fontColorValue = value;
@@ -383,9 +358,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setFontBackgroundColor(String value) {
         if (state.fontBackgroundColorValue == null || !state.fontBackgroundColorValue.equals(value)) {
             state.fontBackgroundColorValue = value;
@@ -393,9 +365,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setFontBorderColor(String value) {
         if (state.fontBorderColorValue == null || !state.fontBorderColorValue.equals(value)) {
             state.fontBorderColorValue = value;
@@ -403,27 +372,18 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setFontFamily(String value) {
         if (!state.fontFamily.equals(value)) {
             state.fontFamily = value;
         }
     }
 
-    /**
-     *
-     */
     public void setFontStyle(int value) {
         if (value != state.fontStyle) {
             state.fontStyle = value;
         }
     }
 
-    /**
-     *
-     */
     public void setAlpha(double value) {
         if (state.alpha != value) {
             state.g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (value)));
@@ -431,9 +391,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setFillAlpha(double value) {
         if (state.fillAlpha != value) {
             state.fillAlpha = value;
@@ -441,9 +398,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setStrokeAlpha(double value) {
         if (state.strokeAlpha != value) {
             state.strokeAlpha = value;
@@ -451,9 +405,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setFillColor(String value) {
         if (state.fillColorValue == null || !state.fillColorValue.equals(value)) {
             state.fillColorValue = value;
@@ -464,9 +415,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setGradient(String color1, String color2, double x, double y, double w, double h, String direction, double alpha1, double alpha2) {
         // LATER: Add lazy instantiation and check if paint already created
         float x1 = (float) ((state.dx + x) * state.scale);
@@ -525,9 +473,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return result;
     }
 
-    /**
-     *
-     */
     public void rect(double x, double y, double w, double h) {
         currentPath = new GeneralPath();
         currentPath.append(new Rectangle2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale, h * state.scale), false);
@@ -550,17 +495,11 @@ public class GraphicsCanvas2D implements ICanvas2D {
         quadTo(x, y, x + dx, y);
     }
 
-    /**
-     *
-     */
     public void ellipse(double x, double y, double w, double h) {
         currentPath = new GeneralPath();
         currentPath.append(new Ellipse2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale, h * state.scale), false);
     }
 
-    /**
-     *
-     */
     public void image(double x, double y, double w, double h, String src, boolean aspect, boolean flipH, boolean flipV) {
         if (src != null && w > 0 && h > 0) {
             Image img = loadImage(src);
@@ -576,9 +515,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     protected void drawImage(Graphics2D graphics, Image image, int x, int y) {
         graphics.drawImage(image, x, y, null);
     }
@@ -590,9 +526,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return Utils.loadImage(src);
     }
 
-    /**
-     *
-     */
     protected final Rectangle getImageBounds(Image img, double x, double y, double w, double h, boolean aspect) {
         x = (state.dx + x) * state.scale;
         y = (state.dy + y) * state.scale;
@@ -774,9 +707,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return LightweightLabel.getSharedInstance();
     }
 
-    /**
-     *
-     */
     protected Point2D getMargin(String align, String valign) {
         double dx = 0;
         double dy = 0;
@@ -1029,43 +959,28 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return g2;
     }
 
-    /**
-     *
-     */
     public void begin() {
         currentPath = new GeneralPath();
     }
 
-    /**
-     *
-     */
     public void moveTo(double x, double y) {
         if (currentPath != null) {
             currentPath.moveTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
         }
     }
 
-    /**
-     *
-     */
     public void lineTo(double x, double y) {
         if (currentPath != null) {
             currentPath.lineTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
         }
     }
 
-    /**
-     *
-     */
     public void quadTo(double x1, double y1, double x2, double y2) {
         if (currentPath != null) {
             currentPath.quadTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale), (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale));
         }
     }
 
-    /**
-     *
-     */
     public void curveTo(double x1, double y1, double x2, double y2, double x3, double y3) {
         if (currentPath != null) {
             currentPath.curveTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale), (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale), (float) ((state.dx + x3) * state.scale), (float) ((state.dy + y3) * state.scale));
@@ -1081,30 +996,18 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void stroke() {
         paintCurrentPath(false, true);
     }
 
-    /**
-     *
-     */
     public void fill() {
         paintCurrentPath(true, false);
     }
 
-    /**
-     *
-     */
     public void fillAndStroke() {
         paintCurrentPath(true, true);
     }
 
-    /**
-     *
-     */
     protected void paintCurrentPath(boolean filled, boolean stroked) {
         if (currentPath != null) {
             if (stroked) {
@@ -1147,9 +1050,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     protected void paintShadow(boolean filled, boolean stroked) {
         if (state.shadowColor == null) {
             state.shadowColor = parseColor(state.shadowColorValue);
@@ -1196,38 +1096,23 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    /**
-     *
-     */
     public void setShadow(boolean value) {
         state.shadow = value;
     }
 
-    /**
-     *
-     */
     public void setShadowColor(String value) {
         state.shadowColorValue = value;
     }
 
-    /**
-     *
-     */
     public void setShadowAlpha(double value) {
         state.shadowAlpha = value;
     }
 
-    /**
-     *
-     */
     public void setShadowOffset(double dx, double dy) {
         state.shadowOffsetX = dx;
         state.shadowOffsetY = dy;
     }
 
-    /**
-     *
-     */
     protected void updateFont() {
         int size = (int) Math.round(state.fontSize * state.scale);
         int style = ((state.fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) ? Font.BOLD : Font.PLAIN;
@@ -1267,9 +1152,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return family;
     }
 
-    /**
-     *
-     */
     protected void updateStroke() {
         float sw = (float) Math.max(1, state.strokeWidth * state.scale);
         int cap = BasicStroke.CAP_BUTT;
@@ -1313,198 +1195,44 @@ public class GraphicsCanvas2D implements ICanvas2D {
         state.g.setStroke(lastStroke);
     }
 
-    /**
-     *
-     */
-    protected class CanvasState implements Cloneable {
-        /**
-         *
-         */
+    protected static class CanvasState implements Cloneable {
         protected double alpha = 1;
-
-        /**
-         *
-         */
         protected double fillAlpha = 1;
-
-        /**
-         *
-         */
         protected double strokeAlpha = 1;
-
-        /**
-         *
-         */
         protected double scale = 1;
-
-        /**
-         *
-         */
         protected double dx = 0;
-
-        /**
-         *
-         */
         protected double dy = 0;
-
-        /**
-         *
-         */
         protected double theta = 0;
-
-        /**
-         *
-         */
         protected double rotationCx = 0;
-
-        /**
-         *
-         */
         protected double rotationCy = 0;
-
-        /**
-         *
-         */
         protected boolean flipV = false;
-
-        /**
-         *
-         */
         protected boolean flipH = false;
-
-        /**
-         *
-         */
         protected double miterLimit = 10;
-
-        /**
-         *
-         */
         protected int fontStyle = 0;
-
-        /**
-         *
-         */
         protected double fontSize = Constants.DEFAULT_FONTSIZE;
-
-        /**
-         *
-         */
         protected String fontFamily = Constants.DEFAULT_FONTFAMILIES;
-
-        /**
-         *
-         */
         protected String fontColorValue = "#000000";
-
-        /**
-         *
-         */
         protected Color fontColor;
-
-        /**
-         *
-         */
         protected String fontBackgroundColorValue;
-
-        /**
-         *
-         */
         protected Color fontBackgroundColor;
-
-        /**
-         *
-         */
         protected String fontBorderColorValue;
-
-        /**
-         *
-         */
         protected Color fontBorderColor;
-
-        /**
-         *
-         */
         protected String lineCap = "flat";
-
-        /**
-         *
-         */
         protected String lineJoin = "miter";
-
-        /**
-         *
-         */
         protected double strokeWidth = 1;
-
-        /**
-         *
-         */
         protected String strokeColorValue;
-
-        /**
-         *
-         */
         protected Color strokeColor;
-
-        /**
-         *
-         */
         protected String fillColorValue;
-
-        /**
-         *
-         */
         protected Color fillColor;
-
-        /**
-         *
-         */
         protected Paint gradientPaint;
-
-        /**
-         *
-         */
         protected boolean dashed = false;
-
-        /**
-         *
-         */
         protected boolean fixDash = false;
-
-        /**
-         *
-         */
         protected float[] dashPattern = {3, 3};
-
-        /**
-         *
-         */
         protected boolean shadow = false;
-
-        /**
-         *
-         */
         protected String shadowColorValue = Constants.W3C_SHADOWCOLOR;
-
-        /**
-         *
-         */
         protected Color shadowColor;
-
-        /**
-         *
-         */
         protected double shadowAlpha = 1;
-
-        /**
-         *
-         */
         protected double shadowOffsetX = Constants.SHADOW_OFFSETX;
-
-        /**
-         *
-         */
         protected double shadowOffsetY = Constants.SHADOW_OFFSETY;
 
         /**
@@ -1512,9 +1240,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
          */
         protected transient Graphics2D g;
 
-        /**
-         *
-         */
         public Object clone() throws CloneNotSupportedException {
             return super.clone();
         }

@@ -14,10 +14,15 @@ import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
+import javax.swing.JComponent;
 
 /**
  * Implements a mouse tracker that marks cells under the mouse.
@@ -111,9 +116,6 @@ import java.awt.event.MouseEvent;
  */
 public class CellMarker extends JComponent {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 614473367053597572L;
 
     /**
@@ -377,16 +379,10 @@ public class CellMarker extends JComponent {
         return state;
     }
 
-    /**
-     *
-     */
     public void highlight(CellState state, Color color) {
         highlight(state, color, true);
     }
 
-    /**
-     *
-     */
     public void highlight(CellState state, Color color, boolean valid) {
         if (valid) {
             validState = state;

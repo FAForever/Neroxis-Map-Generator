@@ -14,9 +14,7 @@ import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
-
-import java.awt.*;
-import java.util.Arrays;
+import java.awt.Point;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -77,7 +75,7 @@ public class LayoutManager extends EventSource {
 
     protected IEventListener moveHandler = (source, evt) -> {
         if (isEnabled()) {
-            cellsMoved((ICell[]) evt.getProperty("cells"), (Point) evt.getProperty("location"));
+            cellsMoved((List<ICell>) evt.getProperty("cells"), (Point) evt.getProperty("location"));
         }
     };
 
@@ -143,7 +141,7 @@ public class LayoutManager extends EventSource {
         return null;
     }
 
-    protected void cellsMoved(ICell[] cells, Point location) {
+    protected void cellsMoved(List<ICell> cells, Point location) {
         if (cells != null && location != null) {
             IGraphModel model = getGraph().getModel();
 
@@ -159,22 +157,22 @@ public class LayoutManager extends EventSource {
     }
 
     protected void beforeUndo(UndoableEdit edit) {
-        Collection<ICell> cells = getCellsForChanges(edit.getChanges());
+        List<ICell> cells = List.copyOf(getCellsForChanges(edit.getChanges()));
         IGraphModel model = getGraph().getModel();
 
         if (isBubbling()) {
-            ICell[] tmp = GraphModel.getParents(model, cells.toArray(new ICell[0]));
+            List<ICell> tmp = GraphModel.getParents(model, cells);
 
-            while (tmp.length > 0) {
-                cells.addAll(Arrays.asList(tmp));
+            while (!tmp.isEmpty()) {
+                cells.addAll(tmp);
                 tmp = GraphModel.getParents(model, tmp);
             }
         }
 
-        layoutCells(Utils.sortCells(cells, false).toArray(new ICell[0]));
+        layoutCells(Utils.sortCells(cells, false));
     }
 
-    protected Collection<ICell> getCellsForChanges(List<UndoableChange> changes) {
+    protected Set<ICell> getCellsForChanges(List<UndoableChange> changes) {
         Set<ICell> result = new HashSet<>();
 
         for (UndoableChange change : changes) {
@@ -223,8 +221,8 @@ public class LayoutManager extends EventSource {
         return result;
     }
 
-    protected void layoutCells(ICell[] cells) {
-        if (cells.length > 0) {
+    protected void layoutCells(List<ICell> cells) {
+        if (!cells.isEmpty()) {
             // Invokes the layouts while removing duplicates
             IGraphModel model = getGraph().getModel();
 

@@ -5,9 +5,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
 
 public interface ICellOverlay {
 
-    /**
-     *
-     */
     Rectangle getBounds(CellState state);
 
 }

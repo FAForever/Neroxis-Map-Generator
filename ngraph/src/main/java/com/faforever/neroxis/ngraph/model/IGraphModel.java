@@ -5,6 +5,7 @@ package com.faforever.neroxis.ngraph.model;
 
 import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
+import java.util.List;
 
 /**
  * Defines the requirements for a graph model to be used with Graph.
@@ -36,7 +37,7 @@ public interface IGraphModel {
      *                        with all descendants.
      * @return Returns a cloned array of cells.
      */
-    ICell[] cloneCells(ICell[] cells, boolean includeChildren);
+    List<ICell> cloneCells(List<ICell> cells, boolean includeChildren);
 
     /**
      * Returns true if the given parent is an ancestor of the given child.
@@ -91,6 +92,14 @@ public interface IGraphModel {
      * @return Returns the number of children in the given cell.
      */
     int getChildCount(ICell cell);
+
+    /**
+     * Returns the children of the given parent.
+     *
+     * @param parent Cell that represents the parent.
+     * @return Returns the children in parent.
+     */
+    List<ICell> getChildren(ICell parent);
 
     /**
      * Returns the child of the given parent at the given index.

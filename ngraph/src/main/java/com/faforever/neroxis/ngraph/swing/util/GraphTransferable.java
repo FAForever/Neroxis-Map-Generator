@@ -5,10 +5,6 @@ package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.Rectangle;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.plaf.UIResource;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -20,8 +16,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.plaf.UIResource;
 
 /**
  *
@@ -102,15 +102,15 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
         }
     }
 
-    protected ICell[] cells;
+    protected List<ICell> cells;
     protected Rectangle bounds;
     protected ImageIcon image;
 
-    public GraphTransferable(ICell[] cells, Rectangle bounds) {
+    public GraphTransferable(List<ICell> cells, Rectangle bounds) {
         this(cells, bounds, null);
     }
 
-    public GraphTransferable(ICell[] cells, Rectangle bounds, ImageIcon image) {
+    public GraphTransferable(List<ICell> cells, Rectangle bounds, ImageIcon image) {
         this.cells = cells;
         this.bounds = bounds;
         this.image = image;
@@ -119,7 +119,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     /**
      * @return Returns the cells.
      */
-    public ICell[] getCells() {
+    public List<ICell> getCells() {
         return cells;
     }
 

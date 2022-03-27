@@ -4,15 +4,13 @@
 package com.faforever.neroxis.ngraph.io;
 
 import com.faforever.neroxis.ngraph.model.Cell;
+import java.util.Map;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.Iterator;
-import java.util.Map;
-
 /**
  * Codec for Cells. This class is created and registered
- * dynamically at load time and used implicitely via Codec
+ * dynamically at load time and used implicitly via Codec
  * and the CodecRegistry.
  */
 public class CellCodec extends ObjectCodec {
@@ -46,7 +44,7 @@ public class CellCodec extends ObjectCodec {
     }
 
     /**
-     * Encodes an Cell and wraps the XML up inside the
+     * Encodes a Cell and wraps the XML up inside the
      * XML of the user object (inversion).
      */
     public Node afterEncode(Codec enc, Object obj, Node node) {
@@ -76,7 +74,7 @@ public class CellCodec extends ObjectCodec {
     }
 
     /**
-     * Decodes an Cell and uses the enclosing XML node as
+     * Decodes a Cell and uses the enclosing XML node as
      * the user object for the cell (inversion).
      */
     public Node beforeDecode(Codec dec, Node node, Object obj) {
@@ -140,10 +138,8 @@ public class CellCodec extends ObjectCodec {
                 cell.setValue(value);
                 String id = value.getAttribute("id");
 
-                if (id != null) {
-                    cell.setId(id);
-                    value.removeAttribute("id");
-                }
+                cell.setId(id);
+                value.removeAttribute("id");
             } else {
                 cell.setId(((Element) node).getAttribute("id"));
             }
@@ -152,13 +148,11 @@ public class CellCodec extends ObjectCodec {
             // in order to use the correct encoder (this)
             // for the known references to cells (all).
             if (inner != null && idrefs != null) {
-                Iterator<String> it = idrefs.iterator();
 
-                while (it.hasNext()) {
-                    String attr = it.next();
+                for (String attr : idrefs) {
                     String ref = inner.getAttribute(attr);
 
-                    if (ref != null && ref.length() > 0) {
+                    if (!ref.isEmpty()) {
                         inner.removeAttribute(attr);
                         Object object = dec.objects.get(ref);
 

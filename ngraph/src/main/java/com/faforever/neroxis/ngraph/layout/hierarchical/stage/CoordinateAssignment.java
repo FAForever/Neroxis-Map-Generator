@@ -15,8 +15,6 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import javax.swing.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.swing.SwingConstants;
 
 /**
  * Sets the horizontal locations of node and edge dummy nodes on each layer.
@@ -1021,7 +1020,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * a padding.
      */
     protected void adjustParents(Set<ICell> parentsChanged) {
-        layout.arrangeGroups(Utils.sortCells(parentsChanged, true).toArray(new ICell[0]), groupPadding);
+        layout.arrangeGroups(List.copyOf(Utils.sortCells(parentsChanged, true)), groupPadding);
     }
 
     /**

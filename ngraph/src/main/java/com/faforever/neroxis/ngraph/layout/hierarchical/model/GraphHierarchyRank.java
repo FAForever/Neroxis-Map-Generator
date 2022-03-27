@@ -10,6 +10,7 @@
  */
 package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 
+import java.io.Serial;
 import java.util.LinkedHashSet;
 
 /**
@@ -18,8 +19,6 @@ import java.util.LinkedHashSet;
  */
 public class GraphHierarchyRank extends LinkedHashSet<GraphAbstractHierarchyCell> {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = -2781491210687143878L;
 }

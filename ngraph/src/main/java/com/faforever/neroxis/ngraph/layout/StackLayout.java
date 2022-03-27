@@ -6,33 +6,37 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class StackLayout extends GraphLayout {
 
     /**
      * Specifies the orientation of the layout. Default is true.
      */
-    protected boolean horizontal;
+    protected final boolean horizontal;
 
     /**
      * Specifies the spacing between the cells. Default is 0.
      */
-    protected int spacing;
+    protected final int spacing;
 
     /**
      * Specifies the horizontal origin of the layout. Default is 0.
      */
-    protected int x0;
+    protected final int x0;
 
     /**
      * Specifies the vertical origin of the layout. Default is 0.
      */
-    protected int y0;
+    protected final int y0;
 
     /**
      * Border to be added if fill is true. Default is 0.
      */
-    protected int border;
+    protected final int border;
 
     /**
      * Boolean indicating if dimension should be changed to fill out the parent
@@ -88,17 +92,11 @@ public class StackLayout extends GraphLayout {
         this.border = border;
     }
 
-    /**
-     *
-     */
     public boolean isHorizontal() {
         return horizontal;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.GraphLayout#move(java.lang.Object, double, double)
-     */
+
     public void moveCell(ICell cell, double x, double y) {
         IGraphModel model = graph.getModel();
         ICell parent = model.getParent(cell);
@@ -148,10 +146,7 @@ public class StackLayout extends GraphLayout {
         return new Rectangle();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
+
     public void execute(ICell parent) {
         if (parent != null) {
             boolean horizontal = isHorizontal();
@@ -193,7 +188,7 @@ public class StackLayout extends GraphLayout {
                         Geometry geo = model.getGeometry(child);
 
                         if (geo != null) {
-                            geo = (Geometry) geo.clone();
+                            geo = geo.clone();
 
                             if (wrap != 0 && last != null) {
 
@@ -247,7 +242,7 @@ public class StackLayout extends GraphLayout {
                 }
 
                 if (resizeParent && pgeo != null && last != null && !graph.isCellCollapsed(parent)) {
-                    pgeo = (Geometry) pgeo.clone();
+                    pgeo = pgeo.clone();
 
                     if (horizontal) {
                         pgeo.setWidth(last.getX() + last.getWidth() + spacing);

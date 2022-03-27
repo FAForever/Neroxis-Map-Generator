@@ -109,14 +109,12 @@ public interface ICanvas2D {
     /**
      * Sets the miterlimit. This should default to 10 if unset.
      *
-     * @param value
      */
     void setMiterLimit(double value);
 
     /**
      * Default value {@link Constants#DEFAULT_FONTSIZE}.
      *
-     * @param value
      */
     void setFontSize(double value);
 
@@ -130,14 +128,12 @@ public interface ICanvas2D {
     /**
      * Default value {@link Constants#DEFAULT_FONTFAMILY}.
      *
-     * @param value
      */
     void setFontFamily(String value);
 
     /**
      * Default value 0. See {@link Constants#STYLE_FONTSTYLE}.
      *
-     * @param value
      */
     void setFontStyle(int value);
 
@@ -159,7 +155,6 @@ public interface ICanvas2D {
      * Default value 1. This method may add rendering overhead and should be
      * used with care.
      *
-     * @param value
      */
     void setAlpha(double value);
 
@@ -167,7 +162,6 @@ public interface ICanvas2D {
      * Default value 1. This method may add rendering overhead and should be
      * used with care.
      *
-     * @param value
      */
     void setFillAlpha(double value);
 
@@ -175,7 +169,6 @@ public interface ICanvas2D {
      * Default value 1. This method may add rendering overhead and should be
      * used with care.
      *
-     * @param value
      */
     void setStrokeAlpha(double value);
 
@@ -189,12 +182,6 @@ public interface ICanvas2D {
     /**
      * Prepares the canvas to draw a gradient.
      *
-     * @param color1
-     * @param color2
-     * @param x
-     * @param y
-     * @param w
-     * @param h
      * @param direction Direction may be null. Use default value
      *                  {@link Constants#DIRECTION_SOUTH}.
      */
@@ -226,46 +213,24 @@ public interface ICanvas2D {
     /**
      * Next fill or stroke should draw a rectangle.
      *
-     * @param x
-     * @param y
-     * @param w
-     * @param h
      */
     void rect(double x, double y, double w, double h);
 
     /**
      * Next fill or stroke should draw a round rectangle.
      *
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param dx
-     * @param dy
      */
     void roundrect(double x, double y, double w, double h, double dx, double dy);
 
     /**
      * Next fill or stroke should draw an ellipse.
      *
-     * @param x
-     * @param y
-     * @param w
-     * @param h
      */
     void ellipse(double x, double y, double w, double h);
 
     /**
      * Draws the given image.
      *
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param src
-     * @param aspect
-     * @param flipH
-     * @param flipV
      */
     void image(double x, double y, double w, double h, String src, boolean aspect, boolean flipH, boolean flipV);
 
@@ -273,19 +238,6 @@ public interface ICanvas2D {
      * Draws the given string. Possible values for format are empty string for
      * plain text and html for HTML markup.
      *
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param str
-     * @param align
-     * @param valign
-     * @param wrap
-     * @param format
-     * @param overflow
-     * @param clip
-     * @param rotation
-     * @param dir
      */
     void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap, String format, String overflow, boolean clip, double rotation, String dir);
 
@@ -297,38 +249,24 @@ public interface ICanvas2D {
     /**
      * Moves to the given path.
      *
-     * @param x
-     * @param y
      */
     void moveTo(double x, double y);
 
     /**
      * Draws a line to the given path.
      *
-     * @param x
-     * @param y
      */
     void lineTo(double x, double y);
 
     /**
      * Draws a quadratic curve to the given point.
      *
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
      */
     void quadTo(double x1, double y1, double x2, double y2);
 
     /**
      * Draws a bezier curve to the given point.
      *
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @param x3
-     * @param y3
      */
     void curveTo(double x1, double y1, double x2, double y2, double x3, double y3);
 

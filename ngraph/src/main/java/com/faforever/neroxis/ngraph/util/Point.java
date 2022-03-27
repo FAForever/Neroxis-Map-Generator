@@ -4,6 +4,7 @@
 package com.faforever.neroxis.ngraph.util;
 
 import java.awt.geom.Point2D;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -11,9 +12,7 @@ import java.io.Serializable;
  */
 public class Point implements Serializable, Cloneable {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 6554231393215892186L;
 
     /**

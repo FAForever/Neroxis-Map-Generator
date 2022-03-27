@@ -37,9 +37,15 @@ import com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
@@ -53,14 +59,25 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
+import javax.swing.BoundedRangeModel;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.RepaintManager;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.TransferHandler;
 
 /**
  * For setting the preferred size of the viewport for scrolling, use
@@ -109,12 +126,13 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     public static final double DEFAULT_PAGESCALE = 1.4;
     private static final Logger log = Logger.getLogger(GraphComponent.class.getName());
+    @Serial
     private static final long serialVersionUID = -30203858391633447L;
     public static ImageIcon DEFAULT_EXPANDED_ICON = null;
     public static ImageIcon DEFAULT_COLLAPSED_ICON = null;
     public static ImageIcon DEFAULT_WARNING_ICON = null;
 
-    /**
+    /*
      * Loads the collapse and expand icons.
      */
     static {
@@ -326,9 +344,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     };
 
     protected PropertyChangeListener viewChangeHandler = new PropertyChangeListener() {
-        /**
-         *
-         */
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getPropertyName().equals("view")) {
                 GraphView oldView = (GraphView) evt.getOldValue();
@@ -411,9 +426,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Resets the zoom policy if the scale is changed manually.
      */
     protected IEventListener scaleHandler = new IEventListener() {
-        /**
-         *
-         */
         public void invoke(Object sender, EventObject evt) {
             if (!zooming) {
                 zoomPolicy = ZOOM_POLICY_NONE;
@@ -426,7 +438,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     private transient boolean centerOnResize = true;
 
     /**
-     * @param graph
      */
     public GraphComponent(Graph graph) {
         setCellEditor(createCellEditor());
@@ -964,7 +975,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Callback to process an escape keystroke.
      *
-     * @param e
      */
     public void escape(KeyEvent e) {
         if (selectionCellsHandler != null) {
@@ -989,7 +999,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * and returns the inserted cells. This shortcut is used if cells are
      * inserted via datatransfer.
      */
-    public ICell[] importCells(ICell[] cells, double dx, double dy, ICell target, java.awt.Point location) {
+    public List<ICell> importCells(List<ICell> cells, double dx, double dy, ICell target, java.awt.Point location) {
         return graph.moveCells(cells, dx, dy, true, target, location);
     }
 
@@ -1329,7 +1339,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Scrolls the graph so that it shows the given cell.
      *
-     * @param cell
      */
     public void scrollCellToVisible(ICell cell) {
         scrollCellToVisible(cell, false);
@@ -1358,8 +1367,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param x
-     * @param y
      * @return Returns the cell at the given location.
      */
     public ICell getCellAt(int x, int y) {
@@ -1439,10 +1446,10 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
 
-    public ICell[] selectRegion(java.awt.Rectangle rect, MouseEvent e) {
-        ICell[] cells = getCells(rect);
+    public List<ICell> selectRegion(java.awt.Rectangle rect, MouseEvent e) {
+        List<ICell> cells = getCells(rect);
 
-        if (cells.length > 0) {
+        if (!cells.isEmpty()) {
             selectCellsForEvent(cells, e);
         } else if (!graph.isSelectionEmpty() && !e.isConsumed()) {
             graph.clearSelection();
@@ -1456,7 +1463,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      *
      * @return Returns the cells inside the given rectangle.
      */
-    public ICell[] getCells(java.awt.Rectangle rect) {
+    public List<ICell> getCells(java.awt.Rectangle rect) {
         return getCells(rect, null);
     }
 
@@ -1468,8 +1475,8 @@ public class GraphComponent extends JScrollPane implements Printable {
      *
      * @return Returns the children inside the given rectangle.
      */
-    public ICell[] getCells(java.awt.Rectangle rect, ICell parent) {
-        Collection<ICell> result = new ArrayList<>();
+    public List<ICell> getCells(java.awt.Rectangle rect, ICell parent) {
+        List<ICell> result = new ArrayList<>();
 
         if (rect.width > 0 || rect.height > 0) {
             if (parent == null) {
@@ -1497,7 +1504,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                             if (canvas.contains(this, rect, state)) {
                                 result.add(cell);
                             } else {
-                                result.addAll(Arrays.asList(getCells(rect, cell)));
+                                result.addAll(getCells(rect, cell));
                             }
                         }
                     }
@@ -1508,13 +1515,13 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
      * Selects the cells for the given event.
      */
-    public void selectCellsForEvent(ICell[] cells, MouseEvent event) {
+    public void selectCellsForEvent(List<ICell> cells, MouseEvent event) {
         if (isToggleEvent(event)) {
             graph.addSelectionCells(cells);
         } else {
@@ -1610,7 +1617,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param enabled
      */
     public void setToolTips(boolean enabled) {
         if (enabled) {
@@ -1626,7 +1632,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param connectable
      */
     public void setConnectable(boolean connectable) {
         connectionHandler.setEnabled(connectable);
@@ -1638,7 +1643,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param enabled
      */
     public void setPanning(boolean enabled) {
         panningHandler.setEnabled(enabled);
@@ -1894,7 +1898,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Returns all cells which may be imported via datatransfer.
      */
-    public ICell[] getImportableCells(ICell[] cells) {
+    public List<ICell> getImportableCells(List<ICell> cells) {
         return GraphModel.filterCells(cells, this::canImportCell);
     }
 
@@ -1926,7 +1930,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Returns all cells which may be exported via datatransfer.
      */
-    public ICell[] getExportableCells(ICell[] cells) {
+    public List<ICell> getExportableCells(List<ICell> cells) {
         return GraphModel.filterCells(cells, this::canExportCell);
     }
 
@@ -1960,7 +1964,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param event
      * @return Returns true if the given event should toggle selected cells.
      */
     public boolean isCloneEvent(MouseEvent event) {
@@ -1968,7 +1971,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param event
      * @return Returns true if the given event should toggle selected cells.
      */
     public boolean isToggleEvent(MouseEvent event) {
@@ -1979,7 +1981,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param event
      * @return Returns true if the given event allows the grid to be applied.
      */
     public boolean isGridEnabledEvent(MouseEvent event) {
@@ -1991,7 +1992,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * of the underlying API. To enable this for move operations set dragEnabled
      * to false.
      *
-     * @param event
      * @return Returns true if the given event is a panning event.
      */
     public boolean isPanningEvent(MouseEvent event) {
@@ -2003,7 +2003,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * of the underlying API. To enable this for move operations set dragEnabled
      * to false.
      *
-     * @param event
      * @return Returns true if the given event is constrained.
      */
     public boolean isConstrainedEvent(MouseEvent event) {
@@ -2015,7 +2014,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * of the underlying API. To enable this for move operations set dragEnabled
      * to false.
      *
-     * @param event
      * @return Returns true if the given event is constrained.
      */
     public boolean isForceMarqueeEvent(MouseEvent event) {
@@ -2969,8 +2967,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Creates the tripleBufferGraphics and tripleBuffer for the given dimension
      * and draws the complete graph onto the triplebuffer.
      *
-     * @param width
-     * @param height
      */
     protected void createTripleBuffer(int width, int height) {
         try {
@@ -3000,7 +2996,6 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Clears and repaints the triple buffer at the given rectangle or repaints
      * the complete buffer if no rectangle is specified.
      *
-     * @param dirty
      */
     public void repaintTripleBuffer(java.awt.Rectangle dirty) {
         if (tripleBuffered && tripleBufferGraphics != null) {
@@ -3030,7 +3025,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param eventsEnabled
      * @see EventSource#setEventsEnabled(boolean)
      */
     public void setEventsEnabled(boolean eventsEnabled) {
@@ -3038,8 +3032,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @param eventName
-     * @param listener
      * @see EventSource#addListener(java.lang.String,
      * IEventListener)
      */
@@ -3065,87 +3057,43 @@ public class GraphComponent extends JScrollPane implements Printable {
 
     public static class MouseRedirector implements MouseListener, MouseMotionListener {
 
-        /**
-         *
-         */
         protected GraphComponent graphComponent;
 
-        /**
-         *
-         */
         public MouseRedirector(GraphComponent graphComponent) {
             this.graphComponent = graphComponent;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-         */
         public void mouseClicked(MouseEvent e) {
             graphComponent.getGraphControl().dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, graphComponent.getGraphControl()));
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-         */
+
         public void mouseEntered(MouseEvent e) {
             // Redirecting this would cause problems on the Mac
             // and is technically incorrect anyway
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-         */
+
         public void mouseExited(MouseEvent e) {
             mouseClicked(e);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-         */
+
         public void mousePressed(MouseEvent e) {
             mouseClicked(e);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-         */
+
         public void mouseReleased(MouseEvent e) {
             mouseClicked(e);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent
-         * )
-         */
+
         public void mouseDragged(MouseEvent e) {
             mouseClicked(e);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent
-         * )
-         */
+
         public void mouseMoved(MouseEvent e) {
             mouseClicked(e);
         }
@@ -3157,9 +3105,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     public class GraphControl extends JComponent {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = -8916603170766739124L;
 
         /**
@@ -3169,9 +3115,6 @@ public class GraphComponent extends JScrollPane implements Printable {
          */
         protected java.awt.Point translate = new java.awt.Point(0, 0);
 
-        /**
-         *
-         */
         public GraphControl() {
             addMouseListener(new MouseAdapter() {
                 public void mouseReleased(MouseEvent e) {
@@ -3197,9 +3140,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             translate = value;
         }
 
-        /**
-         *
-         */
         public GraphComponent getGraphContainer() {
             return GraphComponent.this;
         }
@@ -3268,9 +3208,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
 
-        /**
-         *
-         */
         public String getToolTipText(MouseEvent e) {
             String tip = getSelectionCellsHandler().getToolTipText(e);
 
@@ -3328,9 +3265,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
 
-        /**
-         *
-         */
         public void paint(Graphics g) {
             g.translate(translate.x, translate.y);
             eventSource.fireEvent(new EventObject(Event.BEFORE_PAINT, "g", g));
@@ -3339,9 +3273,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             g.translate(-translate.x, -translate.y);
         }
 
-        /**
-         *
-         */
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
@@ -3378,9 +3309,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             eventSource.fireEvent(new EventObject(Event.PAINT, "g", g));
         }
 
-        /**
-         *
-         */
         public void drawGraph(Graphics2D g, boolean drawLabels) {
             Graphics2D previousGraphics = canvas.getGraphics();
             boolean previousDrawLabels = canvas.isDrawLabels();
@@ -3410,9 +3338,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             drawCell(canvas, graph.getModel().getRoot());
         }
 
-        /**
-         *
-         */
         protected boolean hitClip(Graphics2DCanvas canvas, CellState state) {
             java.awt.Rectangle rect = getExtendedCellBounds(state);
 
@@ -3502,9 +3427,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
 
-        /**
-         *
-         */
         protected void cellDrawn(ICanvas canvas, CellState state) {
             if (isFoldingEnabled() && canvas instanceof Graphics2DCanvas) {
                 IGraphModel model = graph.getModel();

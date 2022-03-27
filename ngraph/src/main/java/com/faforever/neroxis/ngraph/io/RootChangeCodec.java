@@ -4,9 +4,8 @@
 package com.faforever.neroxis.ngraph.io;
 
 import com.faforever.neroxis.ngraph.model.GraphModel.RootChange;
-import org.w3c.dom.Node;
-
 import java.util.Map;
+import org.w3c.dom.Node;
 
 /**
  * Codec for ChildChanges. This class is created and registered
@@ -29,9 +28,7 @@ public class RootChangeCodec extends ObjectCodec {
         super(template, exclude, idrefs, mapping);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#afterEncode(com.faforever.neroxis.ngraph.io.Codec, java.lang.Object, org.w3c.dom.Node)
-     */
+
     @Override
     public Node afterEncode(Codec enc, Object obj, Node node) {
         if (obj instanceof RootChange) {
@@ -76,9 +73,7 @@ public class RootChangeCodec extends ObjectCodec {
         return node;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#afterDecode(com.faforever.neroxis.ngraph.io.Codec, org.w3c.dom.Node, java.lang.Object)
-     */
+
     @Override
     public Object afterDecode(Codec dec, Node node, Object obj) {
         if (obj instanceof RootChange) {

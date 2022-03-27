@@ -18,7 +18,6 @@ import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction;
-
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,9 +59,6 @@ import java.util.Map;
  * respectively.
  */
 public class GraphView extends EventSource {
-    /**
-     *
-     */
     private static final Point EMPTY_POINT = new Point();
 
     /**
@@ -257,10 +253,9 @@ public class GraphView extends EventSource {
      * Returns the bounding box for an array of cells or null, if no cells are
      * specified.
      *
-     * @param cells
      * @return Returns the bounding box for the given cells.
      */
-    public Rectangle getBounds(ICell[] cells) {
+    public Rectangle getBounds(List<ICell> cells) {
         return getBounds(cells, false);
     }
 
@@ -270,7 +265,7 @@ public class GraphView extends EventSource {
      *
      * @return Returns the bounding box for the given cells.
      */
-    public Rectangle getBoundingBox(ICell[] cells) {
+    public Rectangle getBoundingBox(List<ICell> cells) {
         return getBounds(cells, true);
     }
 
@@ -278,13 +273,12 @@ public class GraphView extends EventSource {
      * Returns the bounding box for an array of cells or null, if no cells are
      * specified.
      *
-     * @param cells
      * @return Returns the bounding box for the given cells.
      */
-    public Rectangle getBounds(ICell[] cells, boolean boundingBox) {
+    public Rectangle getBounds(List<ICell> cells, boolean boundingBox) {
         Rectangle result = null;
 
-        if (cells != null && cells.length > 0) {
+        if (cells != null && !cells.isEmpty()) {
             IGraphModel model = graph.getModel();
 
             for (ICell cell : cells) {
@@ -317,9 +311,6 @@ public class GraphView extends EventSource {
         validate();
     }
 
-    /**
-     *
-     */
     public void revalidate() {
         invalidate();
         validate();
@@ -336,9 +327,6 @@ public class GraphView extends EventSource {
      * Removes the state of the given cell and all descendants if the given cell
      * is not the current root.
      *
-     * @param cell
-     * @param force
-     * @param recurse
      */
     public void clear(ICell cell, boolean force, boolean recurse) {
         removeState(cell);
@@ -786,7 +774,7 @@ public class GraphView extends EventSource {
 
             // Adds worst case border for an arrow shape
             if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_ARROW)) {
-                rect.grow(Constants.ARROW_WIDTH / 2);
+                rect.grow(Constants.ARROW_WIDTH / 2d);
             }
         } else {
             rect.grow(strokeWidth);
@@ -1406,8 +1394,8 @@ public class GraphView extends EventSource {
      * states that are not null, that is, the returned array may have less
      * elements than the given array.
      */
-    public CellState[] getCellStates(ICell[] cells) {
-        List<CellState> result = new ArrayList<>(cells.length);
+    public CellState[] getCellStates(List<ICell> cells) {
+        List<CellState> result = new ArrayList<>(cells.size());
 
         for (ICell cell : cells) {
             CellState state = getState(cell);
@@ -1499,19 +1487,10 @@ public class GraphView extends EventSource {
      */
     public static class CurrentRootChange implements UndoableChange {
 
-        /**
-         *
-         */
         protected GraphView view;
 
-        /**
-         *
-         */
         protected ICell root, previous;
 
-        /**
-         *
-         */
         protected boolean up;
 
         /**

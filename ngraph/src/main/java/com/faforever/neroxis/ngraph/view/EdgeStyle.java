@@ -8,7 +8,6 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Utils;
-
 import java.util.List;
 
 /**
@@ -25,9 +24,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction EntityRelation = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             GraphView view = state.getView();
             IGraphModel model = view.getGraph().getModel();
@@ -116,9 +113,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction Loop = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             if (source != null) {
                 GraphView view = state.getView();
@@ -182,9 +177,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction SideToSide = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             GraphView view = state.getView();
             Point pt = ((points != null && points.size() > 0) ? points.get(0) : null);
@@ -254,9 +247,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction TopToBottom = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             GraphView view = state.getView();
             Point pt = ((points != null && points.size() > 0) ? points.get(0) : null);
@@ -327,9 +318,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction ElbowConnector = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             Point pt = (points != null && points.size() > 0) ? points.get(0) : null;
 
@@ -376,9 +365,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction SegmentConnector = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> hints, List<Point> result) {
             // Creates array of all way- and terminalpoints
             List<Point> pts = state.absolutePoints;
@@ -530,9 +517,7 @@ public class EdgeStyle {
      */
     public static EdgeStyleFunction OrthConnector = new EdgeStyleFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction#apply(com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, java.util.List, java.util.List)
-         */
+
         public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
             Graph graph = state.view.graph;
             boolean sourceEdge = source != null && graph.getModel().isEdge(source.cell);

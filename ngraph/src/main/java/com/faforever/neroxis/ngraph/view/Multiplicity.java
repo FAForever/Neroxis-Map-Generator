@@ -3,11 +3,10 @@ package com.faforever.neroxis.ngraph.view;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Utils;
-import org.w3c.dom.Element;
-
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Element;
 
 public class Multiplicity {
 
@@ -76,9 +75,6 @@ public class Multiplicity {
      */
     protected String typeError;
 
-    /**
-     *
-     */
     public Multiplicity(boolean source, String type, String attr, String value, int min, String max, Collection<String> validNeighbors, String countError, String typeError, boolean validNeighborsAllowed) {
         this.source = source;
         this.type = type;

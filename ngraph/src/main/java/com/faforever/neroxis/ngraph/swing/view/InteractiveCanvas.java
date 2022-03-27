@@ -11,40 +11,27 @@ import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.image.ImageObserver;
 
 public class InteractiveCanvas extends Graphics2DCanvas {
-    /**
-     *
-     */
     protected ImageObserver imageObserver = null;
 
-    /**
-     *
-     */
     public InteractiveCanvas() {
         this(null);
     }
 
-    /**
-     *
-     */
     public InteractiveCanvas(ImageObserver imageObserver) {
         setImageObserver(imageObserver);
     }
 
-    /**
-     *
-     */
     public ImageObserver getImageObserver() {
         return imageObserver;
     }
 
-    /**
-     *
-     */
     public void setImageObserver(ImageObserver value) {
         imageObserver = value;
     }
@@ -53,7 +40,7 @@ public class InteractiveCanvas extends Graphics2DCanvas {
      * Overrides graphics call to use image observer.
      */
     protected void drawImageImpl(Image image, int x, int y) {
-        g.drawImage(image, x, y, imageObserver);
+        graphics2D.drawImage(image, x, y, imageObserver);
     }
 
     /**
@@ -63,16 +50,10 @@ public class InteractiveCanvas extends Graphics2DCanvas {
         return new Dimension(image.getWidth(imageObserver), image.getHeight(imageObserver));
     }
 
-    /**
-     *
-     */
     public boolean contains(GraphComponent graphComponent, Rectangle rect, CellState state) {
         return state != null && state.getX() >= rect.x && state.getY() >= rect.y && state.getX() + state.getWidth() <= rect.x + rect.width && state.getY() + state.getHeight() <= rect.y + rect.height;
     }
 
-    /**
-     *
-     */
     public boolean intersects(GraphComponent graphComponent, Rectangle rect, CellState state) {
         if (state != null) {
             // Checks if the label intersects

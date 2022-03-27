@@ -8,7 +8,6 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,10 +37,6 @@ public class ParallelEdgeLayout extends GraphLayout {
         this.spacing = spacing;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
     public void execute(ICell parent) {
         Map<String, List<ICell>> lookup = findParallels(parent);
 
@@ -58,9 +53,6 @@ public class ParallelEdgeLayout extends GraphLayout {
         }
     }
 
-    /**
-     *
-     */
     protected Map<String, List<ICell>> findParallels(ICell parent) {
         Map<String, List<ICell>> lookup = new HashMap<>();
         IGraphModel model = graph.getModel();
@@ -85,9 +77,6 @@ public class ParallelEdgeLayout extends GraphLayout {
         return lookup;
     }
 
-    /**
-     *
-     */
     protected String getEdgeId(ICell edge) {
         GraphView view = graph.getView();
         CellState state = view.getState(edge);
@@ -104,9 +93,6 @@ public class ParallelEdgeLayout extends GraphLayout {
         return null;
     }
 
-    /**
-     *
-     */
     protected void layout(List<ICell> parallels) {
         ICell edge = parallels.get(0);
         IGraphModel model = graph.getModel();
@@ -152,9 +138,6 @@ public class ParallelEdgeLayout extends GraphLayout {
         }
     }
 
-    /**
-     *
-     */
     protected void route(ICell edge, double x, double y) {
         if (graph.isCellMovable(edge)) {
             setEdgePoints(edge, List.of(new Point(x, y)));

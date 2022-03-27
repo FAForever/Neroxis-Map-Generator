@@ -11,8 +11,12 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
@@ -96,9 +100,6 @@ public class CurveLabelShape implements ITextShape {
      * ADT to encapsulate label positioning information
      */
     protected LabelPosition labelPosition = new LabelPosition();
-    /**
-     *
-     */
     protected boolean rotationEnabled = true;
 
     public CurveLabelShape(CellState state, Curve value) {
@@ -106,23 +107,14 @@ public class CurveLabelShape implements ITextShape {
         this.curve = value;
     }
 
-    /**
-     *
-     */
     public boolean getRotationEnabled() {
         return rotationEnabled;
     }
 
-    /**
-     *
-     */
     public void setRotationEnabled(boolean value) {
         rotationEnabled = value;
     }
 
-    /**
-     *
-     */
     public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Map<String, Object> style) {
         java.awt.Rectangle rect = state.getLabelBounds().getRectangle();
         Graphics2D g = canvas.getGraphics();

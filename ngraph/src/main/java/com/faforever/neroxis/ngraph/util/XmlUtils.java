@@ -3,10 +3,10 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,10 +15,9 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 /**
  * Contains various XML helper methods for use with Graph.
@@ -27,14 +26,8 @@ public class XmlUtils {
 
     private static final Logger log = Logger.getLogger(XmlUtils.class.getName());
 
-    /**
-     *
-     */
     private static DocumentBuilderFactory documentBuilderFactory = null;
 
-    /**
-     *
-     */
     public static DocumentBuilder getDocumentBuilder() {
         if (documentBuilderFactory == null) {
             documentBuilderFactory = DocumentBuilderFactory.newInstance();

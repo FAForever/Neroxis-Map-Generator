@@ -21,9 +21,7 @@ public class Perimeter {
      */
     public static PerimeterFunction RectanglePerimeter = new PerimeterFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction#apply
-         */
+
         public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
             double cx = bounds.getCenterX();
             double cy = bounds.getCenterY();
@@ -84,9 +82,7 @@ public class Perimeter {
      */
     public static PerimeterFunction EllipsePerimeter = new PerimeterFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction#apply
-         */
+
         public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
             double x = bounds.getX();
             double y = bounds.getY();
@@ -177,9 +173,7 @@ public class Perimeter {
      */
     public static PerimeterFunction RhombusPerimeter = new PerimeterFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction#apply
-         */
+
         public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
             double x = bounds.getX();
             double y = bounds.getY();
@@ -240,9 +234,7 @@ public class Perimeter {
      */
     public static PerimeterFunction TrianglePerimeter = new PerimeterFunction() {
 
-        /* (non-Javadoc)
-         * @see com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction#apply(com.faforever.neroxis.ngraph.utils.Rectangle, com.faforever.neroxis.ngraph.view.CellState, com.faforever.neroxis.ngraph.view.CellState, boolean, com.faforever.neroxis.ngraph.utils.Point)
-         */
+
         public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
             Object direction = (vertex != null) ? Utils.getString(vertex.style, Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST) : Constants.DIRECTION_EAST;
             boolean vertical = direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH);

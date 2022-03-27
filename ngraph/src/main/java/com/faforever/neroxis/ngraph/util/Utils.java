@@ -7,12 +7,14 @@ import com.faforever.neroxis.ngraph.io.CodecRegistry;
 import com.faforever.neroxis.ngraph.model.CellPath;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.CellState;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.imageio.ImageIO;
-import javax.swing.text.html.HTMLDocument;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Line2D;
@@ -22,7 +24,6 @@ import java.awt.image.ImageObserver;
 import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,10 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.text.html.HTMLDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Contains various helper methods for use with Graph.
@@ -774,9 +779,6 @@ public class Utils {
         }
     }
 
-    /**
-     *
-     */
     public static void fillClippedRect(Graphics g, int x, int y, int width, int height) {
         java.awt.Rectangle bg = new java.awt.Rectangle(x, y, width, height);
 
@@ -852,8 +854,8 @@ public class Utils {
     /**
      * Sorts the given cells according to the order in the cell hierarchy.
      */
-    public static ICell[] sortCells(ICell[] cells, final boolean ascending) {
-        return sortCells(Arrays.asList(cells), ascending).toArray(new ICell[0]);
+    public static List<ICell> sortCells(List<ICell> cells, final boolean ascending) {
+        return sortCells(cells, ascending);
     }
 
     /**
@@ -1163,16 +1165,10 @@ public class Utils {
         }
     }
 
-    /**
-     *
-     */
     public static Font getFont(Map<String, Object> style) {
         return getFont(style, 1);
     }
 
-    /**
-     *
-     */
     public static Font getFont(Map<String, Object> style, double scale) {
         String fontFamily = getString(style, Constants.STYLE_FONTFAMILY, Constants.DEFAULT_FONTFAMILY);
         int fontSize = getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE);
@@ -1195,9 +1191,6 @@ public class Utils {
         return new Font(fontFamily, swingFontStyle, (int) (fontSize * scale)).deriveFont(fontAttributes);
     }
 
-    /**
-     *
-     */
     public static String hexString(Color color) {
         return HtmlColor.hexString(color);
     }

@@ -12,19 +12,22 @@ import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Abstract bass class for layouts
  */
+@Getter
+@Setter
 public abstract class GraphLayout implements IGraphLayout {
 
     /**
      * Holds the enclosing graph.
      */
-    protected Graph graph;
+    protected final Graph graph;
 
     /**
      * The parent cell of the layout, if any
@@ -48,19 +51,10 @@ public abstract class GraphLayout implements IGraphLayout {
         this.parent = parent;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#move(java.lang.Object, double, double)
-     */
+
     public void moveCell(ICell cell, double x, double y) {
         // TODO: Map the position to a child index for
         // the cell to be placed closest to the position
-    }
-
-    /**
-     * Returns the associated graph.
-     */
-    public Graph getGraph() {
-        return graph;
     }
 
     /**
@@ -145,14 +139,14 @@ public abstract class GraphLayout implements IGraphLayout {
      * Disables or enables the edge style of the given edge.
      */
     public void setEdgeStyleEnabled(ICell edge, boolean value) {
-        graph.setCellStyles(Constants.STYLE_NOEDGESTYLE, (value) ? "0" : "1", new ICell[]{edge});
+        graph.setCellStyles(Constants.STYLE_NOEDGESTYLE, (value) ? "0" : "1", List.of(edge));
     }
 
     /**
      * Disables or enables orthogonal end segments of the given edge
      */
     public void setOrthogonalEdge(ICell edge, boolean value) {
-        graph.setCellStyles(Constants.STYLE_ORTHOGONAL, (value) ? "1" : "0", new ICell[]{edge});
+        graph.setCellStyles(Constants.STYLE_ORTHOGONAL, (value) ? "1" : "0", List.of(edge));
     }
 
     public Point getParentOffset(ICell parent) {
@@ -190,7 +184,7 @@ public abstract class GraphLayout implements IGraphLayout {
             geometry = new Geometry();
             geometry.setRelative(true);
         } else {
-            geometry = (Geometry) geometry.clone();
+            geometry = geometry.clone();
         }
 
         if (this.parent != null && points != null) {
@@ -302,7 +296,7 @@ public abstract class GraphLayout implements IGraphLayout {
             }
 
             if (geometry.getX() != x || geometry.getY() != y) {
-                geometry = (Geometry) geometry.clone();
+                geometry = geometry.clone();
                 geometry.setX(x);
                 geometry.setY(y);
 
@@ -323,12 +317,12 @@ public abstract class GraphLayout implements IGraphLayout {
      * @param groups the groups to adjust
      * @param border the border applied to the adjusted groups
      */
-    public void arrangeGroups(ICell[] groups, int border) {
+    public void arrangeGroups(List<ICell> groups, int border) {
         graph.getModel().beginUpdate();
         try {
-            for (int i = groups.length - 1; i >= 0; i--) {
-                ICell group = groups[i];
-                ICell[] children = graph.getChildVertices(group);
+            for (int i = groups.size() - 1; i >= 0; i--) {
+                ICell group = groups.get(i);
+                List<ICell> children = graph.getChildVertices(group);
                 Rectangle bounds = graph.getBoundingBoxFromGeometry(children);
 
                 Geometry geometry = graph.getCellGeometry(group);
@@ -343,7 +337,7 @@ public abstract class GraphLayout implements IGraphLayout {
                 }
 
                 if (bounds != null && geometry != null) {
-                    geometry = (Geometry) geometry.clone();
+                    geometry = geometry.clone();
                     geometry.setX(geometry.getX() + bounds.getX() - border - left);
                     geometry.setY(geometry.getY() + bounds.getY() - border - top);
                     geometry.setWidth(bounds.getWidth() + 2 * border + left);

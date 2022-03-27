@@ -3,7 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -174,9 +174,6 @@ public class HtmlColor {
         htmlColors.put("yellowgreen", parseColor("#9ACD32"));
     }
 
-    /**
-     *
-     */
     public static String hexString(Color color) {
         int r = color.getRed();
         int g = color.getGreen();

@@ -19,12 +19,15 @@ import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  * Connection handler creates new connections between cells. This control is used to display the connector
@@ -36,19 +39,10 @@ import java.beans.PropertyChangeListener;
  */
 public class ConnectionHandler extends MouseAdapter {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -2543899557644889853L;
 
-    /**
-     *
-     */
     public static Cursor CONNECT_CURSOR = new Cursor(Cursor.HAND_CURSOR);
 
-    /**
-     *
-     */
     protected GraphComponent graphComponent;
 
     /**
@@ -56,9 +50,6 @@ public class ConnectionHandler extends MouseAdapter {
      */
     protected EventSource eventSource = new EventSource(this);
 
-    /**
-     *
-     */
     protected ConnectPreview connectPreview;
 
     /**
@@ -81,9 +72,6 @@ public class ConnectionHandler extends MouseAdapter {
      */
     protected boolean handleEnabled = Constants.CONNECT_HANDLE_ENABLED;
 
-    /**
-     *
-     */
     protected boolean select = true;
 
     /**
@@ -97,44 +85,20 @@ public class ConnectionHandler extends MouseAdapter {
      */
     protected boolean keepOnTop = true;
 
-    /**
-     *
-     */
     protected boolean enabled = true;
 
-    /**
-     *
-     */
     protected transient java.awt.Point first;
 
-    /**
-     *
-     */
     protected transient boolean active = false;
 
-    /**
-     *
-     */
     protected transient java.awt.Rectangle bounds;
 
-    /**
-     *
-     */
     protected transient CellState source;
 
-    /**
-     *
-     */
     protected transient CellMarker marker;
 
-    /**
-     *
-     */
     protected transient String error;
 
-    /**
-     *
-     */
     protected transient IEventListener resetHandler = new IEventListener() {
         public void invoke(Object source, EventObject evt) {
             reset();
@@ -263,23 +227,14 @@ public class ConnectionHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     protected ConnectPreview createConnectPreview() {
         return new ConnectPreview(graphComponent);
     }
 
-    /**
-     *
-     */
     public ConnectPreview getConnectPreview() {
         return connectPreview;
     }
 
-    /**
-     *
-     */
     public void setConnectPreview(ConnectPreview value) {
         connectPreview = value;
     }
@@ -292,9 +247,6 @@ public class ConnectionHandler extends MouseAdapter {
         return connectPreview.isActive();
     }
 
-    /**
-     *
-     */
     public boolean isActive() {
         return active;
     }
@@ -306,121 +258,70 @@ public class ConnectionHandler extends MouseAdapter {
         return connectIcon == null && !handleEnabled;
     }
 
-    /**
-     *
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     *
-     */
     public void setEnabled(boolean value) {
         enabled = value;
     }
 
-    /**
-     *
-     */
     public boolean isKeepOnTop() {
         return keepOnTop;
     }
 
-    /**
-     *
-     */
     public void setKeepOnTop(boolean value) {
         keepOnTop = value;
     }
 
-    /**
-     *
-     */
     public void setConnectIcon(ImageIcon value) {
         connectIcon = value;
     }
 
-    /**
-     *
-     */
     public ImageIcon getConnecIcon() {
         return connectIcon;
     }
 
-    /**
-     *
-     */
     public boolean isHandleEnabled() {
         return handleEnabled;
     }
 
-    /**
-     *
-     */
     public void setHandleEnabled(boolean value) {
         handleEnabled = value;
     }
 
-    /**
-     *
-     */
     public int getHandleSize() {
         return handleSize;
     }
 
-    /**
-     *
-     */
     public void setHandleSize(int value) {
         handleSize = value;
     }
 
-    /**
-     *
-     */
     public CellMarker getMarker() {
         return marker;
     }
 
-    /**
-     *
-     */
     public void setMarker(CellMarker value) {
         marker = value;
     }
 
-    /**
-     *
-     */
     public boolean isCreateTarget() {
         return createTarget;
     }
 
-    /**
-     *
-     */
     public void setCreateTarget(boolean value) {
         createTarget = value;
     }
 
-    /**
-     *
-     */
     public boolean isSelect() {
         return select;
     }
 
-    /**
-     *
-     */
     public void setSelect(boolean value) {
         select = value;
     }
 
-    /**
-     *
-     */
     public void reset() {
         connectPreview.stop(false);
         setBounds(null);
@@ -431,12 +332,9 @@ public class ConnectionHandler extends MouseAdapter {
         error = null;
     }
 
-    /**
-     *
-     */
     public ICell createTargetVertex(MouseEvent e, ICell source) {
         Graph graph = graphComponent.getGraph();
-        ICell clone = graph.cloneCells(new ICell[]{source})[0];
+        ICell clone = graph.cloneCells(List.of(source)).get(0);
         IGraphModel model = graph.getModel();
         Geometry geo = model.getGeometry(clone);
 
@@ -449,9 +347,6 @@ public class ConnectionHandler extends MouseAdapter {
         return clone;
     }
 
-    /**
-     *
-     */
     public boolean isValidSource(ICell cell) {
         return graphComponent.getGraph().isValidSource(cell);
     }
@@ -481,9 +376,6 @@ public class ConnectionHandler extends MouseAdapter {
         return graphComponent.getGraph().getEdgeValidationError(connectPreview.getPreviewState().getCell(), source, target);
     }
 
-    /**
-     *
-     */
     public void mousePressed(MouseEvent e) {
         if (!graphComponent.isForceMarqueeEvent(e) && !graphComponent.isPanningEvent(e) && !e.isPopupTrigger() && graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && ((isHighlighting() && marker.hasValidState()) || (!isHighlighting() && bounds != null && bounds.contains(e.getPoint())))) {
             start(e, marker.getValidState());
@@ -491,17 +383,11 @@ public class ConnectionHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void start(MouseEvent e, CellState state) {
         first = e.getPoint();
         connectPreview.start(e, state, "");
     }
 
-    /**
-     *
-     */
     public void mouseMoved(MouseEvent e) {
         mouseDragged(e);
 
@@ -542,9 +428,6 @@ public class ConnectionHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseDragged(MouseEvent e) {
         if (!e.isConsumed() && graphComponent.isEnabled() && isEnabled()) {
             // Activates the handler
@@ -572,9 +455,6 @@ public class ConnectionHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseReleased(MouseEvent e) {
         if (isActive()) {
             if (error != null) {
@@ -594,7 +474,7 @@ public class ConnectionHandler extends MouseAdapter {
 
                         if (!marker.hasValidState() && isCreateTarget()) {
                             ICell vertex = createTargetVertex(e, source.getCell());
-                            dropTarget = graph.getDropTarget(new ICell[]{vertex}, e.getPoint(), graphComponent.getCellAt(e.getX(), e.getY()));
+                            dropTarget = graph.getDropTarget(List.of(vertex), e.getPoint(), graphComponent.getCellAt(e.getX(), e.getY()));
 
                             if (vertex != null) {
                                 // Disables edges as drop targets if the target cell was created
@@ -612,7 +492,7 @@ public class ConnectionHandler extends MouseAdapter {
                                     dropTarget = graph.getDefaultParent();
                                 }
 
-                                graph.addCells(new ICell[]{vertex}, dropTarget);
+                                graph.addCells(List.of(vertex), dropTarget);
                             }
 
                             // FIXME: Here we pre-create the state for the vertex to be
@@ -641,9 +521,6 @@ public class ConnectionHandler extends MouseAdapter {
         reset();
     }
 
-    /**
-     *
-     */
     public void setBounds(java.awt.Rectangle value) {
         if ((bounds == null && value != null) || (bounds != null && value == null) || (bounds != null && value != null && !bounds.equals(value))) {
             java.awt.Rectangle tmp = bounds;
@@ -685,9 +562,6 @@ public class ConnectionHandler extends MouseAdapter {
         eventSource.removeListener(listener, eventName);
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (bounds != null) {
             if (connectIcon != null) {

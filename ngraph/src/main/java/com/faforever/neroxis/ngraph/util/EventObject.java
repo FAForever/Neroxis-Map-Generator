@@ -3,7 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,7 +40,7 @@ public class EventObject {
      */
     public EventObject(String name, Object... args) {
         this.name = name;
-        properties = new Hashtable<String, Object>();
+        properties = new HashMap<>();
 
         if (args != null) {
             for (int i = 0; i < args.length; i += 2) {
@@ -58,16 +58,10 @@ public class EventObject {
         return name;
     }
 
-    /**
-     *
-     */
     public Map<String, Object> getProperties() {
         return properties;
     }
 
-    /**
-     *
-     */
     public Object getProperty(String key) {
         return properties.get(key);
     }

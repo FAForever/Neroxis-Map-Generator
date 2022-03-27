@@ -10,8 +10,22 @@ import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.EventObject;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.InputMap;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -20,11 +34,6 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLWriter;
 import javax.swing.text.html.MinimalHTMLWriter;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.EventObject;
 
 /**
  * To control this editor, use Graph.invokesStopCellEditing, Graph.
@@ -280,10 +289,7 @@ public class CellEditor implements ICellEditor {
         return bounds;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.swing.view.ICellEditor#startEditing(java.lang.Object, java.util.EventObject)
-     */
+
     public void startEditing(ICell cell, EventObject evt) {
         if (editingCell != null) {
             stopEditing(true);
@@ -347,10 +353,7 @@ public class CellEditor implements ICellEditor {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.swing.view.ICellEditor#stopEditing(boolean)
-     */
+
     public void stopEditing(boolean cancel) {
         if (editingCell != null) {
             scrollPane.transferFocusUpCycle();
@@ -401,10 +404,7 @@ public class CellEditor implements ICellEditor {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.swing.view.ICellEditor#getEditingCell()
-     */
+
     public Object getEditingCell() {
         return editingCell;
     }

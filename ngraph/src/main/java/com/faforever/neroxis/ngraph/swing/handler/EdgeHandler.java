@@ -14,14 +14,20 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.ConnectionConstraint;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -45,9 +51,6 @@ public class EdgeHandler extends CellHandler {
 
     protected CellMarker marker = new CellMarker(graphComponent) {
 
-        /**
-         *
-         */
         private static final long serialVersionUID = 8826073441093831764L;
 
         // Only returns edges if they are connectable and never returns
@@ -507,7 +510,7 @@ public class EdgeHandler extends CellHandler {
         if (geometry != null) {
             model.beginUpdate();
             try {
-                geometry = (Geometry) geometry.clone();
+                geometry = geometry.clone();
 
                 if (isSource(index) || isTarget(index)) {
                     connect(edge, null, isSource(index), false);
@@ -550,10 +553,10 @@ public class EdgeHandler extends CellHandler {
         model.beginUpdate();
         try {
             if (isClone) {
-                ICell clone = graph.cloneCells(new ICell[]{edge})[0];
+                ICell clone = graph.cloneCells(List.of(edge)).get(0);
 
                 ICell parent = model.getParent(edge);
-                graph.addCells(new ICell[]{clone}, parent);
+                graph.addCells(List.of(clone), parent);
 
                 ICell other = model.getTerminal(edge, !isSource);
                 graph.connectCell(clone, other, !isSource);
@@ -578,7 +581,7 @@ public class EdgeHandler extends CellHandler {
         Geometry geometry = model.getGeometry(state.getCell());
 
         if (geometry != null) {
-            geometry = (Geometry) geometry.clone();
+            geometry = geometry.clone();
 
             // Resets the relative location stored inside the geometry
             Point pt = graph.getView().getRelativePoint(edgeState, x, y);

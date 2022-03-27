@@ -5,7 +5,7 @@ package com.faforever.neroxis.ngraph.model;
 
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
-
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +24,7 @@ import java.util.List;
  */
 public class Geometry extends Rectangle {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 2649828026610336589L;
 
     /**
@@ -276,9 +274,7 @@ public class Geometry extends Rectangle {
         if (TRANSLATE_CONTROL_POINTS && points != null) {
             int count = points.size();
 
-            for (int i = 0; i < count; i++) {
-                Point pt = points.get(i);
-
+            for (Point pt : points) {
                 pt.setX(pt.getX() + dx);
                 pt.setY(pt.getY() + dy);
             }
@@ -288,7 +284,7 @@ public class Geometry extends Rectangle {
     /**
      * Returns a clone of the cell.
      */
-    public Object clone() {
+    public Geometry clone() {
         Geometry clone = (Geometry) super.clone();
 
         clone.setX(getX());
@@ -300,10 +296,10 @@ public class Geometry extends Rectangle {
         List<Point> pts = getPoints();
 
         if (pts != null) {
-            clone.points = new ArrayList<Point>(pts.size());
+            clone.points = new ArrayList<>(pts.size());
 
-            for (int i = 0; i < pts.size(); i++) {
-                clone.points.add((Point) pts.get(i).clone());
+            for (Point pt : pts) {
+                clone.points.add((Point) pt.clone());
             }
         }
 

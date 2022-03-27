@@ -7,11 +7,14 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class EdgeLabelLayout extends GraphLayout {
 
     /**
@@ -22,10 +25,7 @@ public class EdgeLabelLayout extends GraphLayout {
         super(graph);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
+
     public void execute(ICell parent) {
         GraphView view = graph.getView();
         IGraphModel model = graph.getModel();
@@ -51,9 +51,6 @@ public class EdgeLabelLayout extends GraphLayout {
         placeLabels(vertices.toArray(), edges.toArray());
     }
 
-    /**
-     *
-     */
     protected void placeLabels(Object[] v, Object[] e) {
         IGraphModel model = graph.getModel();
 
@@ -80,9 +77,6 @@ public class EdgeLabelLayout extends GraphLayout {
         }
     }
 
-    /**
-     *
-     */
     protected void avoid(CellState edge, CellState vertex) {
         IGraphModel model = graph.getModel();
         Rectangle labRect = edge.getLabelBounds().getRectangle();
@@ -108,7 +102,7 @@ public class EdgeLabelLayout extends GraphLayout {
             Geometry g = model.getGeometry(edge.getCell());
 
             if (g != null) {
-                g = (Geometry) g.clone();
+                g = g.clone();
 
                 if (g.getOffset() != null) {
                     g.getOffset().setX(g.getOffset().getX() + dx);

@@ -6,7 +6,6 @@ package com.faforever.neroxis.ngraph.view;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +14,6 @@ import java.util.Map;
  * Represents the current state of a cell in a given graph view.
  */
 public class CellState extends Rectangle {
-    /**
-     *
-     */
     private static final long serialVersionUID = 7588335615324083354L;
 
     /**

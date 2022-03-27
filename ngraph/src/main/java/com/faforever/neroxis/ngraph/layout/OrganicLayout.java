@@ -10,16 +10,18 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * An implementation of a simulated annealing layout, based on "Drawing Graphs
@@ -86,6 +88,8 @@ import java.util.Map;
  * no nodes are moved during an iteration the move radius is halved, presuming
  * that a finer granularity is required.
  */
+@Getter
+@Setter
 public class OrganicLayout extends GraphLayout {
 
     /**
@@ -298,12 +302,12 @@ public class OrganicLayout extends GraphLayout {
     /**
      * Internal models collection of nodes ( vertices ) to be laid out
      */
-    protected CellWrapper[] v;
+    protected List<CellWrapper> vertices;
 
     /**
      * Internal models collection of edges to be laid out
      */
-    protected CellWrapper[] e;
+    protected List<CellWrapper> edges;
 
     /**
      * Array of the x portion of the normalised test vectors that
@@ -370,7 +374,7 @@ public class OrganicLayout extends GraphLayout {
      * @param vertex Object that represents the vertex to be tested.
      * @return Returns true if the vertex should be ignored.
      */
-    public boolean isVertexIgnored(Object vertex) {
+    public boolean isVertexIgnored(ICell vertex) {
         return false;
     }
 
@@ -380,14 +384,14 @@ public class OrganicLayout extends GraphLayout {
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
         GraphView view = graph.getView();
-        ICell[] vertices = graph.getChildVertices(parent);
-        HashSet<Object> vertexSet = new HashSet<Object>(Arrays.asList(vertices));
+        List<ICell> vertices = graph.getChildVertices(parent);
+        HashSet<ICell> vertexSet = new HashSet<>(vertices);
 
-        HashSet<Object> validEdges = new HashSet<Object>();
+        Set<ICell> validEdges = new HashSet<>();
 
         // Remove edges that do not have both source and target terminals visible
         for (ICell vertex : vertices) {
-            ICell[] edges = GraphModel.getEdges(model, vertex, false, true, false);
+            List<ICell> edges = GraphModel.getEdges(model, vertex, false, true, false);
 
             for (ICell edge : edges) {
                 // Only deal with sources. To be valid in the layout, each edge must be attached
@@ -400,7 +404,7 @@ public class OrganicLayout extends GraphLayout {
 
         }
 
-        ICell[] edges = validEdges.toArray(new ICell[0]);
+        List<ICell> edges = List.copyOf(validEdges);
 
         // If the bounds dimensions have not been set see if the average area
         // per node has been
@@ -408,12 +412,12 @@ public class OrganicLayout extends GraphLayout {
         Rectangle bounds = null;
 
         // Form internal model of nodes
-        Map<Object, Integer> vertexMap = new Hashtable<Object, Integer>();
-        v = new CellWrapper[vertices.length];
-        for (int i = 0; i < vertices.length; i++) {
-            v[i] = new CellWrapper(vertices[i]);
-            vertexMap.put(vertices[i], i);
-            bounds = getVertexBounds(vertices[i]);
+        Map<Object, Integer> vertexMap = new HashMap<>();
+        this.vertices = new ArrayList<>();
+        for (int i = 0; i < vertices.size(); i++) {
+            this.vertices.add(new CellWrapper(vertices.get(i)));
+            vertexMap.put(vertices.get(i), i);
+            bounds = getVertexBounds(vertices.get(i));
 
             if (totalBounds == null) {
                 totalBounds = (Rectangle) bounds.clone();
@@ -425,14 +429,14 @@ public class OrganicLayout extends GraphLayout {
             // the center point of the vertex for better positioning
             double width = bounds.getWidth();
             double height = bounds.getHeight();
-            v[i].x = bounds.getX() + width / 2.0;
-            v[i].y = bounds.getY() + height / 2.0;
+            this.vertices.get(i).x = bounds.getX() + width / 2.0;
+            this.vertices.get(i).y = bounds.getY() + height / 2.0;
             if (approxNodeDimensions) {
-                v[i].radiusSquared = Math.min(width, height);
-                v[i].radiusSquared *= v[i].radiusSquared;
+                this.vertices.get(i).radiusSquared = Math.min(width, height);
+                this.vertices.get(i).radiusSquared *= this.vertices.get(i).radiusSquared;
             } else {
-                v[i].radiusSquared = width * width;
-                v[i].heightSquared = height * height;
+                this.vertices.get(i).radiusSquared = width * width;
+                this.vertices.get(i).heightSquared = height * height;
             }
         }
 
@@ -447,7 +451,7 @@ public class OrganicLayout extends GraphLayout {
         } else {
             // find the center point of the current graph
             // based the new graph bounds on the average node area set
-            double newArea = averageNodeArea * vertices.length;
+            double newArea = averageNodeArea * vertices.size();
             double squareLength = Math.sqrt(newArea);
             if (bounds != null) {
                 double centreX = totalBounds.getX() + totalBounds.getWidth() / 2.0;
@@ -484,13 +488,13 @@ public class OrganicLayout extends GraphLayout {
 
 
         // Form internal model of edges
-        e = new CellWrapper[edges.length];
+        this.edges = new ArrayList<>();
 
-        for (int i = 0; i < e.length; i++) {
-            e[i] = new CellWrapper(edges[i]);
+        for (int i = 0; i < edges.size(); i++) {
+            this.edges.add(new CellWrapper(edges.get(i)));
 
-            Object sourceCell = model.getTerminal(edges[i], true);
-            Object targetCell = model.getTerminal(edges[i], false);
+            ICell sourceCell = model.getTerminal(edges.get(i), true);
+            ICell targetCell = model.getTerminal(edges.get(i), false);
             Integer source = null;
             Integer target = null;
             // Check if either end of the edge is not connected
@@ -500,25 +504,16 @@ public class OrganicLayout extends GraphLayout {
             if (targetCell != null) {
                 target = vertexMap.get(targetCell);
             }
-            if (source != null) {
-                e[i].source = source.intValue();
-            } else {
-                // source end is not connected
-                e[i].source = -1;
-            }
-            if (target != null) {
-                e[i].target = target.intValue();
-            } else {
-                // target end is not connected
-                e[i].target = -1;
-            }
+
+            this.edges.get(i).source = source != null ? source : -1;
+            this.edges.get(i).target = target != null ? target : -1;
         }
 
         // Set up internal nodes with information about whether edges
         // are connected to them or not
-        for (int i = 0; i < v.length; i++) {
-            v[i].relevantEdges = getRelevantEdges(i);
-            v[i].connectedEdges = getConnectedEdges(i);
+        for (int i = 0; i < this.vertices.size(); i++) {
+            this.vertices.get(i).relevantEdges = getRelevantEdges(i);
+            this.vertices.get(i).connectedEdges = getConnectedEdges(i);
         }
 
         // Setup the normal vectors for the test points to move each vertex to
@@ -554,19 +549,20 @@ public class OrganicLayout extends GraphLayout {
         }
 
         // Obtain the final positions
-        double[][] result = new double[v.length][2];
-        for (int i = 0; i < v.length; i++) {
-            vertices[i] = v[i].cell;
-            bounds = getVertexBounds(vertices[i]);
+        double[][] result = new double[this.vertices.size()][2];
+        vertices.clear();
+        for (int i = 0; i < this.vertices.size(); i++) {
+            vertices.add(this.vertices.get(i).cell);
+            bounds = getVertexBounds(vertices.get(i));
 
-            result[i][0] = v[i].x - bounds.getWidth() / 2;
-            result[i][1] = v[i].y - bounds.getHeight() / 2;
+            result[i][0] = this.vertices.get(i).x - bounds.getWidth() / 2;
+            result[i][1] = this.vertices.get(i).y - bounds.getHeight() / 2;
         }
 
         model.beginUpdate();
         try {
-            for (int i = 0; i < vertices.length; i++) {
-                setVertexLocation(vertices[i], result[i][0], result[i][1]);
+            for (int i = 0; i < vertices.size(); i++) {
+                setVertexLocation(vertices.get(i), result[i][0], result[i][1]);
             }
         } finally {
             model.endUpdate();
@@ -595,32 +591,31 @@ public class OrganicLayout extends GraphLayout {
 
         // boolean to keep track of whether any moves were made in this round
         boolean energyHasChanged = false;
-        for (int i = 0; i < v.length; i++) {
-            int index = i;
+        for (int i = 0; i < vertices.size(); i++) {
 
             // Obtain the energies for the node is its current position
             // TODO The energy could be stored from the last iteration
             // and used again, rather than re-calculate
-            double oldNodeDistribution = getNodeDistribution(index);
-            double oldEdgeDistance = getEdgeDistanceFromNode(index);
-            oldEdgeDistance += getEdgeDistanceAffectedNodes(index);
-            double oldEdgeCrossing = getEdgeCrossingAffectedEdges(index);
-            double oldBorderLine = getBorderline(index);
-            double oldEdgeLength = getEdgeLengthAffectedEdges(index);
-            double oldAdditionFactors = getAdditionFactorsEnergy(index);
+            double oldNodeDistribution = getNodeDistribution(i);
+            double oldEdgeDistance = getEdgeDistanceFromNode(i);
+            oldEdgeDistance += getEdgeDistanceAffectedNodes(i);
+            double oldEdgeCrossing = getEdgeCrossingAffectedEdges(i);
+            double oldBorderLine = getBorderline(i);
+            double oldEdgeLength = getEdgeLengthAffectedEdges(i);
+            double oldAdditionFactors = getAdditionFactorsEnergy(i);
 
             for (int j = 0; j < triesPerCell; j++) {
                 double movex = moveRadius * xNormTry[j];
                 double movey = moveRadius * yNormTry[j];
 
                 // applying new move
-                double oldx = v[index].x;
-                double oldy = v[index].y;
-                v[index].x = v[index].x + movex;
-                v[index].y = v[index].y + movey;
+                double oldx = vertices.get(i).x;
+                double oldy = vertices.get(i).y;
+                vertices.get(i).x = vertices.get(i).x + movex;
+                vertices.get(i).y = vertices.get(i).y + movey;
 
                 // calculate the energy delta from this move
-                double energyDelta = calcEnergyDelta(index, oldNodeDistribution, oldEdgeDistance, oldEdgeCrossing, oldBorderLine, oldEdgeLength, oldAdditionFactors);
+                double energyDelta = calcEnergyDelta(i, oldNodeDistribution, oldEdgeDistance, oldEdgeCrossing, oldBorderLine, oldEdgeLength, oldAdditionFactors);
 
                 if (energyDelta < 0) {
                     // energy of moved node is lower, finish tries for this
@@ -629,8 +624,8 @@ public class OrganicLayout extends GraphLayout {
                     break; // exits loop
                 } else {
                     // Revert node coordinates
-                    v[index].x = oldx;
-                    v[index].y = oldy;
+                    vertices.get(i).x = oldx;
+                    vertices.get(i).y = oldy;
                 }
             }
         }
@@ -721,15 +716,15 @@ public class OrganicLayout extends GraphLayout {
 
         // This check is placed outside of the inner loop for speed, even
         // though the code then has to be duplicated
-        if (isOptimizeNodeDistribution == true) {
+        if (isOptimizeNodeDistribution) {
             if (approxNodeDimensions) {
-                for (int j = 0; j < v.length; j++) {
+                for (int j = 0; j < vertices.size(); j++) {
                     if (i != j) {
-                        double vx = v[i].x - v[j].x;
-                        double vy = v[i].y - v[j].y;
+                        double vx = vertices.get(i).x - vertices.get(j).x;
+                        double vy = vertices.get(i).y - vertices.get(j).y;
                         double distanceSquared = vx * vx + vy * vy;
-                        distanceSquared -= v[i].radiusSquared;
-                        distanceSquared -= v[j].radiusSquared;
+                        distanceSquared -= vertices.get(i).radiusSquared;
+                        distanceSquared -= vertices.get(j).radiusSquared;
 
                         // prevents from dividing with Zero.
                         if (distanceSquared < minDistanceLimitSquared) {
@@ -740,13 +735,13 @@ public class OrganicLayout extends GraphLayout {
                     }
                 }
             } else {
-                for (int j = 0; j < v.length; j++) {
+                for (int j = 0; j < vertices.size(); j++) {
                     if (i != j) {
-                        double vx = v[i].x - v[j].x;
-                        double vy = v[i].y - v[j].y;
+                        double vx = vertices.get(i).x - vertices.get(j).x;
+                        double vy = vertices.get(i).y - vertices.get(j).y;
                         double distanceSquared = vx * vx + vy * vy;
-                        distanceSquared -= v[i].radiusSquared;
-                        distanceSquared -= v[j].radiusSquared;
+                        distanceSquared -= vertices.get(i).radiusSquared;
+                        distanceSquared -= vertices.get(j).radiusSquared;
                         // If the height separation indicates overlap, subtract
                         // the widths from the distance. Same for width overlap
                         // TODO						if ()
@@ -778,16 +773,16 @@ public class OrganicLayout extends GraphLayout {
         if (isOptimizeBorderLine) {
             // Avoid very small distances and convert negative distance (i.e
             // outside the border to small positive ones )
-            double l = v[i].x - boundsX;
+            double l = vertices.get(i).x - boundsX;
             if (l < minDistanceLimit)
                 l = minDistanceLimit;
-            double t = v[i].y - boundsY;
+            double t = vertices.get(i).y - boundsY;
             if (t < minDistanceLimit)
                 t = minDistanceLimit;
-            double r = boundsX + boundsWidth - v[i].x;
+            double r = boundsX + boundsWidth - vertices.get(i).x;
             if (r < minDistanceLimit)
                 r = minDistanceLimit;
-            double b = boundsY + boundsHeight - v[i].y;
+            double b = boundsY + boundsHeight - vertices.get(i).y;
             if (b < minDistanceLimit)
                 b = minDistanceLimit;
             energy += borderLineCostFactor * ((1000000.0 / (t * t)) + (1000000.0 / (l * l)) + (1000000.0 / (b * b)) + (1000000.0 / (r * r)));
@@ -806,8 +801,8 @@ public class OrganicLayout extends GraphLayout {
      */
     protected double getEdgeLengthAffectedEdges(int node) {
         double energy = 0.0;
-        for (int i = 0; i < v[node].connectedEdges.length; i++) {
-            energy += getEdgeLength(v[node].connectedEdges[i]);
+        for (int i = 0; i < vertices.get(node).connectedEdges.length; i++) {
+            energy += getEdgeLength(vertices.get(node).connectedEdges[i]);
         }
         return energy;
     }
@@ -822,7 +817,7 @@ public class OrganicLayout extends GraphLayout {
      */
     protected double getEdgeLength(int i) {
         if (isOptimizeEdgeLength) {
-            double edgeLength = Point2D.distance(v[e[i].source].x, v[e[i].source].y, v[e[i].target].x, v[e[i].target].y);
+            double edgeLength = Point2D.distance(vertices.get(edges.get(i).source).x, vertices.get(edges.get(i).source).y, vertices.get(edges.get(i).target).x, vertices.get(edges.get(i).target).y);
             return (edgeLengthCostFactor * edgeLength * edgeLength);
         } else {
             return 0.0;
@@ -840,8 +835,8 @@ public class OrganicLayout extends GraphLayout {
      */
     protected double getEdgeCrossingAffectedEdges(int node) {
         double energy = 0.0;
-        for (int i = 0; i < v[node].connectedEdges.length; i++) {
-            energy += getEdgeCrossing(v[node].connectedEdges[i]);
+        for (int i = 0; i < vertices.get(node).connectedEdges.length; i++) {
+            energy += getEdgeCrossing(vertices.get(node).connectedEdges[i]);
         }
 
         return energy;
@@ -864,16 +859,16 @@ public class OrganicLayout extends GraphLayout {
         double minjX, minjY, miniX, miniY, maxjX, maxjY, maxiX, maxiY;
 
         if (isOptimizeEdgeCrossing) {
-            double iP1X = v[e[i].source].x;
-            double iP1Y = v[e[i].source].y;
-            double iP2X = v[e[i].target].x;
-            double iP2Y = v[e[i].target].y;
+            double iP1X = vertices.get(edges.get(i).source).x;
+            double iP1Y = vertices.get(edges.get(i).source).y;
+            double iP2X = vertices.get(edges.get(i).target).x;
+            double iP2Y = vertices.get(edges.get(i).target).y;
 
-            for (int j = 0; j < e.length; j++) {
-                double jP1X = v[e[j].source].x;
-                double jP1Y = v[e[j].source].y;
-                double jP2X = v[e[j].target].x;
-                double jP2Y = v[e[j].target].y;
+            for (int j = 0; j < edges.size(); j++) {
+                double jP1X = vertices.get(edges.get(j).source).x;
+                double jP1Y = vertices.get(edges.get(j).source).y;
+                double jP2X = vertices.get(edges.get(j).target).x;
+                double jP2Y = vertices.get(edges.get(j).target).y;
                 if (j != i) {
                     // First check is to see if the minimum bounding rectangles
                     // of the edges overlap at all. Since the layout tries
@@ -881,41 +876,11 @@ public class OrganicLayout extends GraphLayout {
                     // overlap and this is a cheap way to avoid most of the
                     // processing
                     // Some long code to avoid a Math.max call...
-                    if (iP1X < iP2X) {
-                        miniX = iP1X;
-                        maxiX = iP2X;
-                    } else {
-                        miniX = iP2X;
-                        maxiX = iP1X;
-                    }
-                    if (jP1X < jP2X) {
-                        minjX = jP1X;
-                        maxjX = jP2X;
-                    } else {
-                        minjX = jP2X;
-                        maxjX = jP1X;
-                    }
-                    if (maxiX < minjX || miniX > maxjX) {
+                    if (checkBoundingPoints(iP1X, iP2X, jP1X, jP2X))
                         continue;
-                    }
 
-                    if (iP1Y < iP2Y) {
-                        miniY = iP1Y;
-                        maxiY = iP2Y;
-                    } else {
-                        miniY = iP2Y;
-                        maxiY = iP1Y;
-                    }
-                    if (jP1Y < jP2Y) {
-                        minjY = jP1Y;
-                        maxjY = jP2Y;
-                    } else {
-                        minjY = jP2Y;
-                        maxjY = jP1Y;
-                    }
-                    if (maxiY < minjY || miniY > maxjY) {
+                    if (checkBoundingPoints(iP1Y, iP2Y, jP1Y, jP2Y))
                         continue;
-                    }
 
                     // Ignore if any end points are coincident
                     if (((iP1X != jP1X) && (iP1Y != jP1Y)) && ((iP1X != jP2X) && (iP1Y != jP2Y)) && ((iP2X != jP1X) && (iP2Y != jP1Y)) && ((iP2X != jP2X) && (iP2Y != jP2Y))) {
@@ -943,6 +908,14 @@ public class OrganicLayout extends GraphLayout {
         return edgeCrossingCostFactor * n;
     }
 
+    private boolean checkBoundingPoints(double i1, double i2, double j1, double j2) {
+        double mini = Math.min(i1, i2);
+        double maxi = Math.max(i1, i2);
+        double minj = Math.min(j1, j2);
+        double maxj = Math.max(j1, j2);
+        return maxi < minj || mini > maxj;
+    }
+
     /**
      * This method calculates the energy of the distance between Cells and
      * Edges. This version of the edge distance cost calculates the energy
@@ -956,12 +929,12 @@ public class OrganicLayout extends GraphLayout {
         double energy = 0.0;
         // This function is only performed during fine tuning for performance
         if (isOptimizeEdgeDistance && isFineTuning) {
-            int[] edges = v[i].relevantEdges;
+            int[] edges = vertices.get(i).relevantEdges;
             for (int edge : edges) {
                 // Note that the distance value is squared
-                double distSquare = Line2D.ptSegDistSq(v[e[edge].source].x, v[e[edge].source].y, v[e[edge].target].x, v[e[edge].target].y, v[i].x, v[i].y);
+                double distSquare = Line2D.ptSegDistSq(vertices.get(this.edges.get(edge).source).x, vertices.get(this.edges.get(edge).source).y, vertices.get(this.edges.get(edge).target).x, vertices.get(this.edges.get(edge).target).y, vertices.get(i).x, vertices.get(i).y);
 
-                distSquare -= v[i].radiusSquared;
+                distSquare -= vertices.get(i).radiusSquared;
 
                 // prevents from dividing with Zero. No Math.abs() call
                 // for performance
@@ -990,8 +963,8 @@ public class OrganicLayout extends GraphLayout {
      */
     protected double getEdgeDistanceAffectedNodes(int node) {
         double energy = 0.0;
-        for (int i = 0; i < (v[node].connectedEdges.length); i++) {
-            energy += getEdgeDistanceFromEdge(v[node].connectedEdges[i]);
+        for (int i = 0; i < (vertices.get(node).connectedEdges.length); i++) {
+            energy += getEdgeDistanceFromEdge(vertices.get(node).connectedEdges[i]);
         }
 
         return energy;
@@ -1010,12 +983,12 @@ public class OrganicLayout extends GraphLayout {
         double energy = 0.0;
         // This function is only performed during fine tuning for performance
         if (isOptimizeEdgeDistance && isFineTuning) {
-            for (int j = 0; j < v.length; j++) {
+            for (int j = 0; j < vertices.size(); j++) {
                 // Don't calculate for connected nodes
-                if (e[i].source != j && e[i].target != j) {
-                    double distSquare = Line2D.ptSegDistSq(v[e[i].source].x, v[e[i].source].y, v[e[i].target].x, v[e[i].target].y, v[j].x, v[j].y);
+                if (edges.get(i).source != j && edges.get(i).target != j) {
+                    double distSquare = Line2D.ptSegDistSq(vertices.get(edges.get(i).source).x, vertices.get(edges.get(i).source).y, vertices.get(edges.get(i).target).x, vertices.get(edges.get(i).target).y, vertices.get(j).x, vertices.get(j).y);
 
-                    distSquare -= v[j].radiusSquared;
+                    distSquare -= vertices.get(j).radiusSquared;
 
                     // prevents from dividing with Zero. No Math.abs() call
                     // for performance
@@ -1051,12 +1024,12 @@ public class OrganicLayout extends GraphLayout {
      * @return Array of all interesting Edges
      */
     protected int[] getRelevantEdges(int cellIndex) {
-        ArrayList<Integer> relevantEdgeList = new ArrayList<Integer>(e.length);
+        ArrayList<Integer> relevantEdgeList = new ArrayList<>(edges.size());
 
-        for (int i = 0; i < e.length; i++) {
-            if (e[i].source != cellIndex && e[i].target != cellIndex) {
+        for (int i = 0; i < edges.size(); i++) {
+            if (edges.get(i).source != cellIndex && edges.get(i).target != cellIndex) {
                 // Add non-connected edges
-                relevantEdgeList.add(new Integer(i));
+                relevantEdgeList.add(i);
             }
         }
 
@@ -1066,7 +1039,7 @@ public class OrganicLayout extends GraphLayout {
         //Reform the list into an array but replace Integer values with ints
         for (int i = 0; i < relevantEdgeArray.length; i++) {
             if (iter.hasNext()) {
-                relevantEdgeArray[i] = iter.next().intValue();
+                relevantEdgeArray[i] = iter.next();
             }
         }
 
@@ -1080,12 +1053,12 @@ public class OrganicLayout extends GraphLayout {
      * @return Array of all connected Edges
      */
     protected int[] getConnectedEdges(int cellIndex) {
-        ArrayList<Integer> connectedEdgeList = new ArrayList<Integer>(e.length);
+        ArrayList<Integer> connectedEdgeList = new ArrayList<Integer>(edges.size());
 
-        for (int i = 0; i < e.length; i++) {
-            if (e[i].source == cellIndex || e[i].target == cellIndex) {
+        for (int i = 0; i < edges.size(); i++) {
+            if (edges.get(i).source == cellIndex || edges.get(i).target == cellIndex) {
                 // Add connected edges to list by their index number
-                connectedEdgeList.add(new Integer(i));
+                connectedEdgeList.add(i);
             }
         }
 
@@ -1095,7 +1068,7 @@ public class OrganicLayout extends GraphLayout {
         // Reform the list into an array but replace Integer values with ints
         for (int i = 0; i < connectedEdgeArray.length; i++) {
             if (iter.hasNext()) {
-                connectedEdgeArray[i] = iter.next().intValue();
+                connectedEdgeArray[i] = iter.next();
             }
         }
 
@@ -1110,345 +1083,11 @@ public class OrganicLayout extends GraphLayout {
     }
 
     /**
-     * @return Returns the averageNodeArea.
-     */
-    public double getAverageNodeArea() {
-        return averageNodeArea;
-    }
-
-    /**
-     * @param averageNodeArea The averageNodeArea to set.
-     */
-    public void setAverageNodeArea(double averageNodeArea) {
-        this.averageNodeArea = averageNodeArea;
-    }
-
-    /**
-     * @return Returns the borderLineCostFactor.
-     */
-    public double getBorderLineCostFactor() {
-        return borderLineCostFactor;
-    }
-
-    /**
-     * @param borderLineCostFactor The borderLineCostFactor to set.
-     */
-    public void setBorderLineCostFactor(double borderLineCostFactor) {
-        this.borderLineCostFactor = borderLineCostFactor;
-    }
-
-    /**
-     * @return Returns the edgeCrossingCostFactor.
-     */
-    public double getEdgeCrossingCostFactor() {
-        return edgeCrossingCostFactor;
-    }
-
-    /**
-     * @param edgeCrossingCostFactor The edgeCrossingCostFactor to set.
-     */
-    public void setEdgeCrossingCostFactor(double edgeCrossingCostFactor) {
-        this.edgeCrossingCostFactor = edgeCrossingCostFactor;
-    }
-
-    /**
-     * @return Returns the edgeDistanceCostFactor.
-     */
-    public double getEdgeDistanceCostFactor() {
-        return edgeDistanceCostFactor;
-    }
-
-    /**
-     * @param edgeDistanceCostFactor The edgeDistanceCostFactor to set.
-     */
-    public void setEdgeDistanceCostFactor(double edgeDistanceCostFactor) {
-        this.edgeDistanceCostFactor = edgeDistanceCostFactor;
-    }
-
-    /**
-     * @return Returns the edgeLengthCostFactor.
-     */
-    public double getEdgeLengthCostFactor() {
-        return edgeLengthCostFactor;
-    }
-
-    /**
-     * @param edgeLengthCostFactor The edgeLengthCostFactor to set.
-     */
-    public void setEdgeLengthCostFactor(double edgeLengthCostFactor) {
-        this.edgeLengthCostFactor = edgeLengthCostFactor;
-    }
-
-    /**
-     * @return Returns the fineTuningRadius.
-     */
-    public double getFineTuningRadius() {
-        return fineTuningRadius;
-    }
-
-    /**
-     * @param fineTuningRadius The fineTuningRadius to set.
-     */
-    public void setFineTuningRadius(double fineTuningRadius) {
-        this.fineTuningRadius = fineTuningRadius;
-    }
-
-    /**
-     * @return Returns the initialMoveRadius.
-     */
-    public double getInitialMoveRadius() {
-        return initialMoveRadius;
-    }
-
-    /**
-     * @param initialMoveRadius The initialMoveRadius to set.
-     */
-    public void setInitialMoveRadius(double initialMoveRadius) {
-        this.initialMoveRadius = initialMoveRadius;
-    }
-
-    /**
-     * @return Returns the isFineTuning.
-     */
-    public boolean isFineTuning() {
-        return isFineTuning;
-    }
-
-    /**
-     * @param isFineTuning The isFineTuning to set.
-     */
-    public void setFineTuning(boolean isFineTuning) {
-        this.isFineTuning = isFineTuning;
-    }
-
-    /**
-     * @return Returns the isOptimizeBorderLine.
-     */
-    public boolean isOptimizeBorderLine() {
-        return isOptimizeBorderLine;
-    }
-
-    /**
-     * @param isOptimizeBorderLine The isOptimizeBorderLine to set.
-     */
-    public void setOptimizeBorderLine(boolean isOptimizeBorderLine) {
-        this.isOptimizeBorderLine = isOptimizeBorderLine;
-    }
-
-    /**
-     * @return Returns the isOptimizeEdgeCrossing.
-     */
-    public boolean isOptimizeEdgeCrossing() {
-        return isOptimizeEdgeCrossing;
-    }
-
-    /**
-     * @param isOptimizeEdgeCrossing The isOptimizeEdgeCrossing to set.
-     */
-    public void setOptimizeEdgeCrossing(boolean isOptimizeEdgeCrossing) {
-        this.isOptimizeEdgeCrossing = isOptimizeEdgeCrossing;
-    }
-
-    /**
-     * @return Returns the isOptimizeEdgeDistance.
-     */
-    public boolean isOptimizeEdgeDistance() {
-        return isOptimizeEdgeDistance;
-    }
-
-    /**
-     * @param isOptimizeEdgeDistance The isOptimizeEdgeDistance to set.
-     */
-    public void setOptimizeEdgeDistance(boolean isOptimizeEdgeDistance) {
-        this.isOptimizeEdgeDistance = isOptimizeEdgeDistance;
-    }
-
-    /**
-     * @return Returns the isOptimizeEdgeLength.
-     */
-    public boolean isOptimizeEdgeLength() {
-        return isOptimizeEdgeLength;
-    }
-
-    /**
-     * @param isOptimizeEdgeLength The isOptimizeEdgeLength to set.
-     */
-    public void setOptimizeEdgeLength(boolean isOptimizeEdgeLength) {
-        this.isOptimizeEdgeLength = isOptimizeEdgeLength;
-    }
-
-    /**
-     * @return Returns the isOptimizeNodeDistribution.
-     */
-    public boolean isOptimizeNodeDistribution() {
-        return isOptimizeNodeDistribution;
-    }
-
-    /**
-     * @param isOptimizeNodeDistribution The isOptimizeNodeDistribution to set.
-     */
-    public void setOptimizeNodeDistribution(boolean isOptimizeNodeDistribution) {
-        this.isOptimizeNodeDistribution = isOptimizeNodeDistribution;
-    }
-
-    /**
-     * @return Returns the maxIterations.
-     */
-    public int getMaxIterations() {
-        return maxIterations;
-    }
-
-    /**
-     * @param maxIterations The maxIterations to set.
-     */
-    public void setMaxIterations(int maxIterations) {
-        this.maxIterations = maxIterations;
-    }
-
-    /**
-     * @return Returns the minDistanceLimit.
-     */
-    public double getMinDistanceLimit() {
-        return minDistanceLimit;
-    }
-
-    /**
-     * @param minDistanceLimit The minDistanceLimit to set.
-     */
-    public void setMinDistanceLimit(double minDistanceLimit) {
-        this.minDistanceLimit = minDistanceLimit;
-    }
-
-    /**
-     * @return Returns the minMoveRadius.
-     */
-    public double getMinMoveRadius() {
-        return minMoveRadius;
-    }
-
-    /**
-     * @param minMoveRadius The minMoveRadius to set.
-     */
-    public void setMinMoveRadius(double minMoveRadius) {
-        this.minMoveRadius = minMoveRadius;
-    }
-
-    /**
-     * @return Returns the nodeDistributionCostFactor.
-     */
-    public double getNodeDistributionCostFactor() {
-        return nodeDistributionCostFactor;
-    }
-
-    /**
-     * @param nodeDistributionCostFactor The nodeDistributionCostFactor to set.
-     */
-    public void setNodeDistributionCostFactor(double nodeDistributionCostFactor) {
-        this.nodeDistributionCostFactor = nodeDistributionCostFactor;
-    }
-
-    /**
-     * @return Returns the radiusScaleFactor.
-     */
-    public double getRadiusScaleFactor() {
-        return radiusScaleFactor;
-    }
-
-    /**
-     * @param radiusScaleFactor The radiusScaleFactor to set.
-     */
-    public void setRadiusScaleFactor(double radiusScaleFactor) {
-        this.radiusScaleFactor = radiusScaleFactor;
-    }
-
-    /**
-     * @return Returns the triesPerCell.
-     */
-    public int getTriesPerCell() {
-        return triesPerCell;
-    }
-
-    /**
-     * @param triesPerCell The triesPerCell to set.
-     */
-    public void setTriesPerCell(int triesPerCell) {
-        this.triesPerCell = triesPerCell;
-    }
-
-    /**
-     * @return Returns the unchangedEnergyRoundTermination.
-     */
-    public int getUnchangedEnergyRoundTermination() {
-        return unchangedEnergyRoundTermination;
-    }
-
-    /**
-     * @param unchangedEnergyRoundTermination The unchangedEnergyRoundTermination to set.
-     */
-    public void setUnchangedEnergyRoundTermination(int unchangedEnergyRoundTermination) {
-        this.unchangedEnergyRoundTermination = unchangedEnergyRoundTermination;
-    }
-
-    /**
-     * @return Returns the maxDistanceLimit.
-     */
-    public double getMaxDistanceLimit() {
-        return maxDistanceLimit;
-    }
-
-    /**
-     * @param maxDistanceLimit The maxDistanceLimit to set.
-     */
-    public void setMaxDistanceLimit(double maxDistanceLimit) {
-        this.maxDistanceLimit = maxDistanceLimit;
-    }
-
-    /**
-     * @return the approxNodeDimensions
-     */
-    public boolean isApproxNodeDimensions() {
-        return approxNodeDimensions;
-    }
-
-    /**
-     * @param approxNodeDimensions the approxNodeDimensions to set
-     */
-    public void setApproxNodeDimensions(boolean approxNodeDimensions) {
-        this.approxNodeDimensions = approxNodeDimensions;
-    }
-
-    /**
-     * @return the disableEdgeStyle
-     */
-    public boolean isDisableEdgeStyle() {
-        return disableEdgeStyle;
-    }
-
-    /**
-     * @param disableEdgeStyle the disableEdgeStyle to set
-     */
-    public void setDisableEdgeStyle(boolean disableEdgeStyle) {
-        this.disableEdgeStyle = disableEdgeStyle;
-    }
-
-    /**
-     * @return the resetEdges
-     */
-    public boolean isResetEdges() {
-        return resetEdges;
-    }
-
-    /**
-     * @param resetEdges the resetEdges to set
-     */
-    public void setResetEdges(boolean resetEdges) {
-        this.resetEdges = resetEdges;
-    }
-
-    /**
      * Internal representation of a node or edge that holds cached information
      * to enable the layout to perform more quickly and to simplify the code
      */
+    @Getter
+    @Setter
     public static class CellWrapper {
 
         /**
@@ -1508,125 +1147,6 @@ public class OrganicLayout extends GraphLayout {
          */
         public CellWrapper(ICell cell) {
             this.cell = cell;
-        }
-
-        /**
-         * @return the relevantEdges
-         */
-        public int[] getRelevantEdges() {
-            return relevantEdges;
-        }
-
-        /**
-         * @param relevantEdges the relevantEdges to set
-         */
-        public void setRelevantEdges(int[] relevantEdges) {
-            this.relevantEdges = relevantEdges;
-        }
-
-        /**
-         * @return the connectedEdges
-         */
-        public int[] getConnectedEdges() {
-            return connectedEdges;
-        }
-
-        /**
-         * @param connectedEdges the connectedEdges to set
-         */
-        public void setConnectedEdges(int[] connectedEdges) {
-            this.connectedEdges = connectedEdges;
-        }
-
-        /**
-         * @return the x
-         */
-        public double getX() {
-            return x;
-        }
-
-        /**
-         * @param x the x to set
-         */
-        public void setX(double x) {
-            this.x = x;
-        }
-
-        /**
-         * @return the y
-         */
-        public double getY() {
-            return y;
-        }
-
-        /**
-         * @param y the y to set
-         */
-        public void setY(double y) {
-            this.y = y;
-        }
-
-        /**
-         * @return the radiusSquared
-         */
-        public double getRadiusSquared() {
-            return radiusSquared;
-        }
-
-        /**
-         * @param radiusSquared the radiusSquared to set
-         */
-        public void setRadiusSquared(double radiusSquared) {
-            this.radiusSquared = radiusSquared;
-        }
-
-        /**
-         * @return the heightSquared
-         */
-        public double getHeightSquared() {
-            return heightSquared;
-        }
-
-        /**
-         * @param heightSquared the heightSquared to set
-         */
-        public void setHeightSquared(double heightSquared) {
-            this.heightSquared = heightSquared;
-        }
-
-        /**
-         * @return the source
-         */
-        public int getSource() {
-            return source;
-        }
-
-        /**
-         * @param source the source to set
-         */
-        public void setSource(int source) {
-            this.source = source;
-        }
-
-        /**
-         * @return the target
-         */
-        public int getTarget() {
-            return target;
-        }
-
-        /**
-         * @param target the target to set
-         */
-        public void setTarget(int target) {
-            this.target = target;
-        }
-
-        /**
-         * @return the cell
-         */
-        public Object getCell() {
-            return cell;
         }
     }
 }

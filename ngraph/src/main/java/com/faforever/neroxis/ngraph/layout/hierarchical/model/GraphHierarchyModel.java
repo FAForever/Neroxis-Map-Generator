@@ -6,9 +6,7 @@ package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +67,7 @@ public class GraphHierarchyModel {
      * @param layout   the enclosing layout object
      * @param vertices the vertices for this hierarchy
      */
-    public GraphHierarchyModel(HierarchicalLayout layout, ICell[] vertices, List<ICell> roots, ICell parent) {
+    public GraphHierarchyModel(HierarchicalLayout layout, List<ICell> vertices, List<ICell> roots, ICell parent) {
         Graph graph = layout.getGraph();
         this.roots = roots;
         this.parent = parent;
@@ -81,17 +79,17 @@ public class GraphHierarchyModel {
         // map of cells to internal cell needed for second run through
         // to setup the sink of edges correctly. Guess size by number
         // of edges is roughly same as number of vertices.
-        vertexMapper = new HashMap<>(vertices.length);
-        edgeMapper = new HashMap<>(vertices.length);
+        vertexMapper = new HashMap<>(vertices.size());
+        edgeMapper = new HashMap<>(vertices.size());
 
         maxRank = SOURCESCANSTARTRANK;
 
-        GraphHierarchyNode[] internalVertices = new GraphHierarchyNode[vertices.length];
+        GraphHierarchyNode[] internalVertices = new GraphHierarchyNode[vertices.size()];
         createInternalCells(layout, vertices, internalVertices);
 
         // Go through edges set their sink values. Also check the
         // ordering if and invert edges if necessary
-        for (int i = 0; i < vertices.length; i++) {
+        for (int i = 0; i < vertices.size(); i++) {
             Collection<GraphHierarchyEdge> edges = internalVertices[i].connectsAsSource;
 
             for (GraphHierarchyEdge internalEdge : edges) {
@@ -115,7 +113,7 @@ public class GraphHierarchyModel {
                         internalEdge.target = internalTargetCell;
 
                         if (internalTargetCell.connectsAsTarget.size() == 0) {
-                            internalTargetCell.connectsAsTarget = new LinkedHashSet<GraphHierarchyEdge>(4);
+                            internalTargetCell.connectsAsTarget = new LinkedHashSet<>(4);
                         }
 
                         internalTargetCell.connectsAsTarget.add(internalEdge);
@@ -138,17 +136,18 @@ public class GraphHierarchyModel {
      * @param internalVertices the blank internal vertices to have their information filled
      *                         in using the real vertices
      */
-    protected void createInternalCells(HierarchicalLayout layout, ICell[] vertices, GraphHierarchyNode[] internalVertices) {
+    protected void createInternalCells(HierarchicalLayout layout, List<ICell> vertices, GraphHierarchyNode[] internalVertices) {
         Graph graph = layout.getGraph();
 
         // Create internal edges
-        for (int i = 0; i < vertices.length; i++) {
-            internalVertices[i] = new GraphHierarchyNode(vertices[i]);
-            vertexMapper.put(vertices[i], internalVertices[i]);
+        for (int i = 0; i < vertices.size(); i++) {
+            ICell vertex = vertices.get(i);
+            internalVertices[i] = new GraphHierarchyNode(vertex);
+            vertexMapper.put(vertex, internalVertices[i]);
 
             // If the layout is deterministic, order the cells
-            ICell[] conns = layout.getEdges(vertices[i]);
-            List<ICell> outgoingCells = Arrays.asList(graph.getOpposites(conns, vertices[i]));
+            List<ICell> conns = layout.getEdges(vertex);
+            List<ICell> outgoingCells = graph.getOpposites(conns, vertex);
             internalVertices[i].connectsAsSource = new LinkedHashSet<>(outgoingCells.size());
 
             // Create internal edges, but don't do any rank assignment yet
@@ -157,7 +156,7 @@ public class GraphHierarchyModel {
 
             for (ICell cell : outgoingCells) {
                 // Don't add self-loops
-                if (cell != vertices[i] && graph.getModel().isVertex(cell) && !layout.isVertexIgnored(cell)) {
+                if (cell != vertex && graph.getModel().isVertex(cell) && !layout.isVertexIgnored(cell)) {
                     // We process all edge between this source and its targets
                     // If there are edges going both ways, we need to collect
                     // them all into one internal edges to avoid looping problems
@@ -171,16 +170,14 @@ public class GraphHierarchyModel {
                     // are the same. All the graph edges will have been assigned to
                     // an internal edge going the other way, so we don't want to
                     // process them again
-                    ICell[] undirectEdges = graph.getEdgesBetween(vertices[i], cell, false);
-                    ICell[] directedEdges = graph.getEdgesBetween(vertices[i], cell, true);
+                    List<ICell> undirectedEdges = graph.getEdgesBetween(vertex, cell, false);
+                    List<ICell> directedEdges = graph.getEdgesBetween(vertex, cell, true);
 
-                    if (undirectEdges != null && undirectEdges.length > 0 && (edgeMapper.get(undirectEdges[0]) == null) && (directedEdges.length * 2 >= undirectEdges.length)) {
+                    if (undirectedEdges != null && !undirectedEdges.isEmpty() && (edgeMapper.get(undirectedEdges.get(0)) == null) && (directedEdges.size() * 2 >= undirectedEdges.size())) {
 
-                        ArrayList<ICell> listEdges = new ArrayList<>(Arrays.asList(undirectEdges));
+                        GraphHierarchyEdge internalEdge = new GraphHierarchyEdge(undirectedEdges);
 
-                        GraphHierarchyEdge internalEdge = new GraphHierarchyEdge(listEdges);
-
-                        for (ICell edge : listEdges) {
+                        for (ICell edge : undirectedEdges) {
                             edgeMapper.put(edge, internalEdge);
 
                             // Resets all point on the edge and disables the edge style
@@ -211,7 +208,7 @@ public class GraphHierarchyModel {
      */
     public void initialRank() {
         Collection<GraphHierarchyNode> internalNodes = vertexMapper.values();
-        LinkedList<GraphHierarchyNode> startNodes = new LinkedList<GraphHierarchyNode>();
+        LinkedList<GraphHierarchyNode> startNodes = new LinkedList<>();
 
         if (roots != null) {
 
@@ -232,7 +229,7 @@ public class GraphHierarchyModel {
             internalNode.temp[0] = -1;
         }
 
-        List<GraphHierarchyNode> startNodesCopy = new ArrayList<GraphHierarchyNode>(startNodes);
+        List<GraphHierarchyNode> startNodesCopy = new ArrayList<>(startNodes);
 
         while (!startNodes.isEmpty()) {
             GraphHierarchyNode internalNode = startNodes.getFirst();
@@ -276,10 +273,8 @@ public class GraphHierarchyModel {
                 maxRank = Math.min(maxRank, minimumLayer);
 
                 if (edgesToBeMarked != null) {
-                    Iterator<GraphHierarchyEdge> iter3 = edgesToBeMarked.iterator();
 
-                    while (iter3.hasNext()) {
-                        GraphHierarchyEdge internalEdge = iter3.next();
+                    for (GraphHierarchyEdge internalEdge : edgesToBeMarked) {
                         // Assign unique stamp ( y/m/d/h )
                         internalEdge.temp[0] = 5270620;
 
@@ -327,13 +322,10 @@ public class GraphHierarchyModel {
         }
 
         // Tighten the roots as far as possible
-        for (int i = 0; i < startNodesCopy.size(); i++) {
-            GraphHierarchyNode internalNode = startNodesCopy.get(i);
+        for (GraphHierarchyNode internalNode : startNodesCopy) {
             int currentMaxLayer = 0;
-            Iterator<GraphHierarchyEdge> iter2 = internalNode.connectsAsSource.iterator();
 
-            while (iter2.hasNext()) {
-                GraphHierarchyEdge internalEdge = iter2.next();
+            for (GraphHierarchyEdge internalEdge : internalNode.connectsAsSource) {
                 GraphHierarchyNode otherNode = internalEdge.target;
                 internalNode.temp[0] = Math.max(currentMaxLayer, otherNode.temp[0] + 1);
                 currentMaxLayer = internalNode.temp[0];
@@ -350,61 +342,56 @@ public class GraphHierarchyModel {
      * to create dummy nodes for edges that cross layers.
      */
     public void fixRanks() {
-        final GraphHierarchyRank[] rankList = new GraphHierarchyRank[maxRank + 1];
-        ranks = new LinkedHashMap<Integer, GraphHierarchyRank>(maxRank + 1);
+        List<GraphHierarchyRank> rankList = new ArrayList<>();
+        ranks = new LinkedHashMap<>(maxRank + 1);
 
         for (int i = 0; i < maxRank + 1; i++) {
-            rankList[i] = new GraphHierarchyRank();
-            ranks.put(new Integer(i), rankList[i]);
+            rankList.add(new GraphHierarchyRank());
+            ranks.put(i, rankList.get(i));
         }
 
         // Perform a DFS to obtain an initial ordering for each rank.
         // Without doing this you would end up having to process
         // crossings for a standard tree.
-        GraphHierarchyNode[] rootsArray = null;
+        List<GraphHierarchyNode> rootsArray = null;
 
         if (roots != null) {
-            Object[] oldRootsArray = roots.toArray();
-            rootsArray = new GraphHierarchyNode[oldRootsArray.length];
+            List<ICell> oldRootsArray = roots;
+            rootsArray = new ArrayList<>();
 
-            for (int i = 0; i < oldRootsArray.length; i++) {
-                Object node = oldRootsArray[i];
+            for (ICell node : oldRootsArray) {
                 GraphHierarchyNode internalNode = vertexMapper.get(node);
-                rootsArray[i] = internalNode;
+                rootsArray.add(internalNode);
             }
         }
 
-        visit(new GraphHierarchyModel.CellVisitor() {
-            public void visit(GraphHierarchyNode parent, GraphHierarchyNode cell, GraphHierarchyEdge connectingEdge, int layer, int seen) {
-                GraphHierarchyNode node = cell;
+        visit((parent, cell, connectingEdge, layer, seen) -> {
 
-                if (seen == 0 && node.maxRank < 0 && node.minRank < 0) {
-                    rankList[node.temp[0]].add(cell);
-                    node.maxRank = node.temp[0];
-                    node.minRank = node.temp[0];
+            if (seen == 0 && cell.maxRank < 0 && cell.minRank < 0) {
+                rankList.get(cell.temp[0]).add(cell);
+                cell.maxRank = cell.temp[0];
+                cell.minRank = cell.temp[0];
 
-                    // Set temp[0] to the nodes position in the rank
-                    node.temp[0] = rankList[node.maxRank].size() - 1;
-                }
+                // Set temp[0] to the nodes position in the rank
+                cell.temp[0] = rankList.get(cell.maxRank).size() - 1;
+            }
 
-                if (parent != null && connectingEdge != null) {
-                    int parentToCellRankDifference = (parent).maxRank - node.maxRank;
+            if (parent != null && connectingEdge != null) {
+                int parentToCellRankDifference = (parent).maxRank - cell.maxRank;
 
-                    if (parentToCellRankDifference > 1) {
-                        // There are ranks in between the parent and current cell
-                        GraphHierarchyEdge edge = connectingEdge;
-                        edge.maxRank = (parent).maxRank;
-                        edge.minRank = (cell).maxRank;
-                        edge.temp = new int[parentToCellRankDifference - 1];
-                        edge.x = new double[parentToCellRankDifference - 1];
-                        edge.y = new double[parentToCellRankDifference - 1];
+                if (parentToCellRankDifference > 1) {
+                    // There are ranks in between the parent and current cell
+                    connectingEdge.maxRank = (parent).maxRank;
+                    connectingEdge.minRank = (cell).maxRank;
+                    connectingEdge.temp = new int[parentToCellRankDifference - 1];
+                    connectingEdge.x = new double[parentToCellRankDifference - 1];
+                    connectingEdge.y = new double[parentToCellRankDifference - 1];
 
-                        for (int i = edge.minRank + 1; i < edge.maxRank; i++) {
-                            // The connecting edge must be added to the
-                            // appropriate ranks
-                            rankList[i].add(edge);
-                            edge.setGeneralPurposeVariable(i, rankList[i].size() - 1);
-                        }
+                    for (int i = connectingEdge.minRank + 1; i < connectingEdge.maxRank; i++) {
+                        // The connecting edge must be added to the
+                        // appropriate ranks
+                        rankList.get(i).add(connectingEdge);
+                        connectingEdge.setGeneralPurposeVariable(i, rankList.get(i).size() - 1);
                     }
                 }
             }
@@ -418,15 +405,15 @@ public class GraphHierarchyModel {
      * @param trackAncestors whether or not the search is to keep track all nodes directly
      *                       above this one in the search path
      */
-    public void visit(CellVisitor visitor, GraphHierarchyNode[] dfsRoots, boolean trackAncestors, Set<GraphHierarchyNode> seenNodes) {
+    public void visit(CellVisitor visitor, List<GraphHierarchyNode> dfsRoots, boolean trackAncestors, Set<GraphHierarchyNode> seenNodes) {
         // Run dfs through on all roots
         if (dfsRoots != null) {
-            for (int i = 0; i < dfsRoots.length; i++) {
-                GraphHierarchyNode internalNode = dfsRoots[i];
+            for (int i = 0; i < dfsRoots.size(); i++) {
+                GraphHierarchyNode internalNode = dfsRoots.get(i);
 
                 if (internalNode != null) {
                     if (seenNodes == null) {
-                        seenNodes = new HashSet<GraphHierarchyNode>();
+                        seenNodes = new HashSet<>();
                     }
 
                     if (trackAncestors) {
@@ -465,14 +452,13 @@ public class GraphHierarchyModel {
 
                 // Copy the connects as source list so that visitors
                 // can change the original for edge direction inversions
-                final Object[] outgoingEdges = root.connectsAsSource.toArray();
+                final List<GraphHierarchyEdge> outgoingEdges = List.copyOf(root.connectsAsSource);
 
-                for (int i = 0; i < outgoingEdges.length; i++) {
-                    GraphHierarchyEdge internalEdge = (GraphHierarchyEdge) outgoingEdges[i];
-                    GraphHierarchyNode targetNode = internalEdge.target;
+                for (GraphHierarchyEdge outgoingEdge : outgoingEdges) {
+                    GraphHierarchyNode targetNode = outgoingEdge.target;
 
                     // Root check is O(|roots|)
-                    dfs(root, targetNode, internalEdge, visitor, seen, layer + 1);
+                    dfs(root, targetNode, outgoingEdge, visitor, seen, layer + 1);
                 }
             } else {
                 // Use the int field to indicate this node has been seen

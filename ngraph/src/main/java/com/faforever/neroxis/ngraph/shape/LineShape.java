@@ -16,9 +16,6 @@ public class LineShape extends BasicShape {
         }
     }
 
-    /**
-     *
-     */
     public Point[] createPoints(Graphics2DCanvas canvas, CellState state) {
         String direction = Utils.getString(state.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST);
 

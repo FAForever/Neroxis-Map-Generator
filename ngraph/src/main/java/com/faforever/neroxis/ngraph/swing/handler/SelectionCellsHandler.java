@@ -11,26 +11,23 @@ package com.faforever.neroxis.ngraph.swing.handler;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
 import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import javax.swing.SwingUtilities;
 
 public class SelectionCellsHandler implements MouseListener, MouseMotionListener {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -882368002120921842L;
 
     /**
@@ -67,39 +64,20 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
     /**
      * Maps from cells to handlers in the order of the selection cells.
      */
-    protected transient LinkedHashMap<Object, CellHandler> handlers = new LinkedHashMap<Object, CellHandler>();
+    protected transient LinkedHashMap<Object, CellHandler> handlers = new LinkedHashMap<>();
 
-    /**
-     *
-     */
-    protected transient IEventListener refreshHandler = new IEventListener() {
-        public void invoke(Object source, EventObject evt) {
-            if (isEnabled()) {
-                refresh();
-            }
+    protected transient IEventListener refreshHandler = (source, evt) -> {
+        if (isEnabled()) {
+            refresh();
         }
     };
 
-    /**
-     *
-     */
-    protected transient PropertyChangeListener labelMoveHandler = new PropertyChangeListener() {
-
-        /*
-         * (non-Javadoc)
-         * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-         */
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getPropertyName().equals("vertexLabelsMovable") || evt.getPropertyName().equals("edgeLabelsMovable")) {
-                refresh();
-            }
+    protected transient PropertyChangeListener labelMoveHandler = evt -> {
+        if (evt.getPropertyName().equals("vertexLabelsMovable") || evt.getPropertyName().equals("edgeLabelsMovable")) {
+            refresh();
         }
-
     };
 
-    /**
-     * @param graphComponent
-     */
     public SelectionCellsHandler(final GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
 
@@ -110,21 +88,17 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         // Installs the graph listeners and keeps them in sync
         addGraphListeners(graphComponent.getGraph());
 
-        graphComponent.addPropertyChangeListener(new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals("graph")) {
-                    removeGraphListeners((Graph) evt.getOldValue());
-                    addGraphListeners((Graph) evt.getNewValue());
-                }
+        graphComponent.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals("graph")) {
+                removeGraphListeners((Graph) evt.getOldValue());
+                addGraphListeners((Graph) evt.getNewValue());
             }
         });
 
         // Installs the paint handler
-        graphComponent.addListener(Event.PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paintHandles(g);
-            }
+        graphComponent.addListener(Event.PAINT, (sender, evt) -> {
+            Graphics g = (Graphics) evt.getProperty("g");
+            paintHandles(g);
         });
     }
 
@@ -165,58 +139,34 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
-    /**
-     *
-     */
     public GraphComponent getGraphComponent() {
         return graphComponent;
     }
 
-    /**
-     *
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     *
-     */
     public void setEnabled(boolean value) {
         enabled = value;
     }
 
-    /**
-     *
-     */
     public boolean isVisible() {
         return visible;
     }
 
-    /**
-     *
-     */
     public void setVisible(boolean value) {
         visible = value;
     }
 
-    /**
-     *
-     */
     public int getMaxHandlers() {
         return maxHandlers;
     }
 
-    /**
-     *
-     */
     public void setMaxHandlers(int value) {
         maxHandlers = value;
     }
 
-    /**
-     *
-     */
     public CellHandler getHandler(Object cell) {
         return handlers.get(cell);
     }
@@ -236,9 +186,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
-    /**
-     *
-     */
     public void mouseMoved(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             Iterator<CellHandler> it = handlers.values().iterator();
@@ -249,9 +196,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
-    /**
-     *
-     */
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             Iterator<CellHandler> it = handlers.values().iterator();
@@ -262,9 +206,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
-    /**
-     *
-     */
     public void mouseReleased(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             Iterator<CellHandler> it = handlers.values().iterator();
@@ -294,31 +235,23 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         return tip;
     }
 
-    /**
-     *
-     */
     public void reset() {
-        Iterator<CellHandler> it = handlers.values().iterator();
-
-        while (it.hasNext()) {
-            it.next().reset();
+        for (CellHandler cellHandler : handlers.values()) {
+            cellHandler.reset();
         }
     }
 
-    /**
-     *
-     */
     public void refresh() {
         Graph graph = graphComponent.getGraph();
 
         // Creates a new map for the handlers and tries to
         // to reuse existing handlers from the old map
         LinkedHashMap<Object, CellHandler> oldHandlers = handlers;
-        handlers = new LinkedHashMap<Object, CellHandler>();
+        handlers = new LinkedHashMap<>();
 
         // Creates handles for all selection cells
-        ICell[] tmp = graph.getSelectionCells();
-        boolean handlesVisible = tmp.length <= getMaxHandlers();
+        List<ICell> tmp = graph.getSelectionCells();
+        boolean handlesVisible = tmp.size() <= getMaxHandlers();
         Rectangle handleBounds = null;
 
         for (ICell o : tmp) {
@@ -374,37 +307,24 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         bounds = handleBounds;
     }
 
-    /**
-     *
-     */
     public void paintHandles(Graphics g) {
-        Iterator<CellHandler> it = handlers.values().iterator();
 
-        while (it.hasNext()) {
-            it.next().paint(g);
+        for (CellHandler cellHandler : handlers.values()) {
+            cellHandler.paint(g);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-     */
+
     public void mouseClicked(MouseEvent arg0) {
         // empty
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-     */
+
     public void mouseEntered(MouseEvent arg0) {
         // empty
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-     */
+
     public void mouseExited(MouseEvent arg0) {
         // empty
     }

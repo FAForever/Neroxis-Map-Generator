@@ -3,12 +3,14 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Cells are the elements of the graph model. They represent the state
@@ -31,14 +33,14 @@ import java.util.List;
  * <p>
  * To add more than one edge label, add a child vertex with
  * a relative geometry. The x- and y-coordinates of that
- * geometry will have the same semantiv as the above for
+ * geometry will have the same semantics as above for
  * edge labels.
  */
+@Getter
+@Setter
 public class Cell implements ICell, Cloneable, Serializable {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 910211337632342672L;
 
     /**
@@ -77,7 +79,7 @@ public class Cell implements ICell, Cloneable, Serializable {
     /**
      * Holds the child cells and connected edges.
      */
-    protected List<Object> children, edges;
+    protected List<ICell> children, edges;
 
     /**
      * Constructs a new cell with an empty user object.
@@ -108,188 +110,12 @@ public class Cell implements ICell, Cloneable, Serializable {
         setStyle(style);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getId()
-     */
-    public String getId() {
-        return id;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setId(String)
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getValue()
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setValue(Object)
-     */
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getGeometry()
-     */
-    public Geometry getGeometry() {
-        return geometry;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setGeometry(com.faforever.neroxis.ngraph.model.Geometry)
-     */
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getStyle()
-     */
-    public String getStyle() {
-        return style;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setStyle(String)
-     */
-    public void setStyle(String style) {
-        this.style = style;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#isVertex()
-     */
-    public boolean isVertex() {
-        return vertex;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setVertex(boolean)
-     */
-    public void setVertex(boolean vertex) {
-        this.vertex = vertex;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#isEdge()
-     */
-    public boolean isEdge() {
-        return edge;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setEdge(boolean)
-     */
-    public void setEdge(boolean edge) {
-        this.edge = edge;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#isConnectable()
-     */
-    public boolean isConnectable() {
-        return connectable;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setConnectable(boolean)
-     */
-    public void setConnectable(boolean connectable) {
-        this.connectable = connectable;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#isVisible()
-     */
-    public boolean isVisible() {
-        return visible;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setVisible(boolean)
-     */
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#isCollapsed()
-     */
-    public boolean isCollapsed() {
-        return collapsed;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setCollapsed(boolean)
-     */
-    public void setCollapsed(boolean collapsed) {
-        this.collapsed = collapsed;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getParent()
-     */
-    public ICell getParent() {
-        return parent;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setParent(com.faforever.neroxis.ngraph.model.ICell)
-     */
-    public void setParent(ICell parent) {
-        this.parent = parent;
-    }
-
-    /**
-     * Returns the source terminal.
-     */
-    public ICell getSource() {
-        return source;
-    }
-
-    /**
-     * Sets the source terminal.
-     *
-     * @param source Cell that represents the new source terminal.
-     */
-    public void setSource(ICell source) {
-        this.source = source;
-    }
-
-    /**
-     * Returns the target terminal.
-     */
-    public ICell getTarget() {
-        return target;
-    }
-
-    /**
-     * Sets the target terminal.
-     *
-     * @param target Cell that represents the new target terminal.
-     */
-    public void setTarget(ICell target) {
-        this.target = target;
-    }
-
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getTerminal(boolean)
-     */
+    @Deprecated
     public ICell getTerminal(boolean source) {
         return (source) ? getSource() : getTarget();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#setTerminal(com.faforever.neroxis.ngraph.model.ICell, boolean)
-     */
+    @Deprecated
     public ICell setTerminal(ICell terminal, boolean isSource) {
         if (isSource) {
             setSource(terminal);
@@ -300,30 +126,22 @@ public class Cell implements ICell, Cloneable, Serializable {
         return terminal;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getChildCount()
-     */
+    public List<ICell> getChildren() {
+        return List.copyOf(children);
+    }
+
     public int getChildCount() {
         return (children != null) ? children.size() : 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getIndex(com.faforever.neroxis.ngraph.model.ICell)
-     */
     public int getIndex(ICell child) {
         return (children != null) ? children.indexOf(child) : -1;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getChildAt(int)
-     */
     public ICell getChildAt(int index) {
-        return (children != null) ? (ICell) children.get(index) : null;
+        return (children != null) ? children.get(index) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#insert(com.faforever.neroxis.ngraph.model.ICell)
-     */
     public ICell insert(ICell child) {
         int index = getChildCount();
 
@@ -334,16 +152,13 @@ public class Cell implements ICell, Cloneable, Serializable {
         return insert(child, index);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#insert(com.faforever.neroxis.ngraph.model.ICell, int)
-     */
     public ICell insert(ICell child, int index) {
         if (child != null) {
             child.removeFromParent();
             child.setParent(this);
 
             if (children == null) {
-                children = new ArrayList<Object>();
+                children = new ArrayList<>();
                 children.add(child);
             } else {
                 children.add(index, child);
@@ -353,9 +168,6 @@ public class Cell implements ICell, Cloneable, Serializable {
         return child;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#remove(int)
-     */
     public ICell remove(int index) {
         ICell child = null;
 
@@ -367,9 +179,6 @@ public class Cell implements ICell, Cloneable, Serializable {
         return child;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#remove(com.faforever.neroxis.ngraph.model.ICell)
-     */
     public ICell remove(ICell child) {
         if (child != null && children != null) {
             children.remove(child);
@@ -379,39 +188,24 @@ public class Cell implements ICell, Cloneable, Serializable {
         return child;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#removeFromParent()
-     */
     public void removeFromParent() {
         if (parent != null) {
             parent.remove(this);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getEdgeCount()
-     */
     public int getEdgeCount() {
         return (edges != null) ? edges.size() : 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getEdgeIndex(com.faforever.neroxis.ngraph.model.ICell)
-     */
     public int getEdgeIndex(ICell edge) {
         return (edges != null) ? edges.indexOf(edge) : -1;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#getEdgeAt(int)
-     */
     public ICell getEdgeAt(int index) {
-        return (edges != null) ? (ICell) edges.get(index) : null;
+        return (edges != null) ? edges.get(index) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#insertEdge(com.faforever.neroxis.ngraph.model.ICell, boolean)
-     */
     public ICell insertEdge(ICell edge, boolean isOutgoing) {
         if (edge != null) {
             edge.removeFromTerminal(isOutgoing);
@@ -419,7 +213,7 @@ public class Cell implements ICell, Cloneable, Serializable {
 
             if (edges == null || edge.getTerminal(!isOutgoing) != this || !edges.contains(edge)) {
                 if (edges == null) {
-                    edges = new ArrayList<Object>();
+                    edges = new ArrayList<>();
                 }
 
                 edges.add(edge);
@@ -429,9 +223,6 @@ public class Cell implements ICell, Cloneable, Serializable {
         return edge;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#removeEdge(com.faforever.neroxis.ngraph.model.ICell, boolean)
-     */
     public ICell removeEdge(ICell edge, boolean isOutgoing) {
         if (edge != null) {
             if (edge.getTerminal(!isOutgoing) != this && edges != null) {
@@ -444,9 +235,6 @@ public class Cell implements ICell, Cloneable, Serializable {
         return edge;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.ICell#removeFromTerminal(boolean)
-     */
     public void removeFromTerminal(boolean isSource) {
         ICell terminal = getTerminal(isSource);
 
@@ -527,7 +315,7 @@ public class Cell implements ICell, Cloneable, Serializable {
         Geometry geometry = getGeometry();
 
         if (geometry != null) {
-            clone.setGeometry((Geometry) geometry.clone());
+            clone.setGeometry(geometry.clone());
         }
 
         return clone;
@@ -562,5 +350,4 @@ public class Cell implements ICell, Cloneable, Serializable {
 
         return builder.toString();
     }
-
 }

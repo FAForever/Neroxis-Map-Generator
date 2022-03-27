@@ -10,8 +10,7 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
@@ -42,9 +41,6 @@ public class ElbowEdgeHandler extends EdgeHandler {
         return null;
     }
 
-    /**
-     *
-     */
     protected boolean isFlipEvent(MouseEvent e) {
         return e.getClickCount() == 2 && index == 1;
     }
@@ -56,9 +52,6 @@ public class ElbowEdgeHandler extends EdgeHandler {
         return index == 3;
     }
 
-    /**
-     *
-     */
     protected Rectangle[] createHandles() {
         p = createPoints(state);
         Rectangle[] h = new Rectangle[4];

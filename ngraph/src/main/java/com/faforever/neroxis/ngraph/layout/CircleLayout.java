@@ -4,10 +4,13 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.Graph;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class CircleLayout extends GraphLayout {
 
     /**
@@ -62,94 +65,7 @@ public class CircleLayout extends GraphLayout {
         this.radius = radius;
     }
 
-    /**
-     * @return the radius
-     */
-    public double getRadius() {
-        return radius;
-    }
 
-    /**
-     * @param radius the radius to set
-     */
-    public void setRadius(double radius) {
-        this.radius = radius;
-    }
-
-    /**
-     * @return the moveCircle
-     */
-    public boolean isMoveCircle() {
-        return moveCircle;
-    }
-
-    /**
-     * @param moveCircle the moveCircle to set
-     */
-    public void setMoveCircle(boolean moveCircle) {
-        this.moveCircle = moveCircle;
-    }
-
-    /**
-     * @return the x0
-     */
-    public double getX0() {
-        return x0;
-    }
-
-    /**
-     * @param x0 the x0 to set
-     */
-    public void setX0(double x0) {
-        this.x0 = x0;
-    }
-
-    /**
-     * @return the y0
-     */
-    public double getY0() {
-        return y0;
-    }
-
-    /**
-     * @param y0 the y0 to set
-     */
-    public void setY0(double y0) {
-        this.y0 = y0;
-    }
-
-    /**
-     * @return the resetEdges
-     */
-    public boolean isResetEdges() {
-        return resetEdges;
-    }
-
-    /**
-     * @param resetEdges the resetEdges to set
-     */
-    public void setResetEdges(boolean resetEdges) {
-        this.resetEdges = resetEdges;
-    }
-
-    /**
-     * @return the disableEdgeStyle
-     */
-    public boolean isDisableEdgeStyle() {
-        return disableEdgeStyle;
-    }
-
-    /**
-     * @param disableEdgeStyle the disableEdgeStyle to set
-     */
-    public void setDisableEdgeStyle(boolean disableEdgeStyle) {
-        this.disableEdgeStyle = disableEdgeStyle;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.layout.IGraphLayout#execute(java.lang.Object)
-     */
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
 
@@ -163,7 +79,7 @@ public class CircleLayout extends GraphLayout {
             double max = 0;
             Double top = null;
             Double left = null;
-            List<Object> vertices = new ArrayList<Object>();
+            List<ICell> vertices = new ArrayList<>();
             int childCount = model.getChildCount(parent);
 
             for (int i = 0; i < childCount; i++) {
@@ -198,7 +114,7 @@ public class CircleLayout extends GraphLayout {
             }
 
             int vertexCount = vertices.size();
-            double r = Math.max(vertexCount * max / Math.PI, radius);
+            double trueRadius = Math.max(vertexCount * max / Math.PI, radius);
 
             // Moves the circle to the specified origin
             if (moveCircle) {
@@ -206,7 +122,7 @@ public class CircleLayout extends GraphLayout {
                 top = y0;
             }
 
-            circle(vertices.toArray(new ICell[0]), r, left, top);
+            circle(vertices, trueRadius, left, top);
         } finally {
             model.endUpdate();
         }
@@ -216,13 +132,14 @@ public class CircleLayout extends GraphLayout {
      * Executes the circular layout for the specified array
      * of vertices and the given radius.
      */
-    public void circle(ICell[] vertices, double r, double left, double top) {
-        int vertexCount = vertices.length;
+    public void circle(List<ICell> vertices, double r, double left, double top) {
+        int vertexCount = vertices.size();
         double phi = 2 * Math.PI / vertexCount;
 
         for (int i = 0; i < vertexCount; i++) {
-            if (isVertexMovable(vertices[i])) {
-                setVertexLocation(vertices[i], left + r + r * Math.sin(i * phi), top + r + r * Math.cos(i * phi));
+            ICell vertex = vertices.get(i);
+            if (isVertexMovable(vertex)) {
+                setVertexLocation(vertex, left + r + r * Math.sin(i * phi), top + r + r * Math.cos(i * phi));
             }
         }
     }

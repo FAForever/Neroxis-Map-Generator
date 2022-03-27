@@ -58,16 +58,10 @@ public class Resources {
         bundles.addFirst(PropertyResourceBundle.getBundle(basename, locale));
     }
 
-    /**
-     *
-     */
     public static String get(String key) {
         return get(key, null, null);
     }
 
-    /**
-     *
-     */
     public static String get(String key, String defaultValue) {
         return get(key, null, defaultValue);
     }

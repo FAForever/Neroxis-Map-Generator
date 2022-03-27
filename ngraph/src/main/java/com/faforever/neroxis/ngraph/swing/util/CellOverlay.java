@@ -4,20 +4,15 @@ import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 public class CellOverlay extends JComponent implements ICellOverlay {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 921991820491141221L;
 
-    /**
-     *
-     */
     protected ImageIcon imageIcon;
 
     /**
@@ -41,9 +36,6 @@ public class CellOverlay extends JComponent implements ICellOverlay {
      */
     protected double defaultOverlap = 0.5;
 
-    /**
-     *
-     */
     public CellOverlay(ImageIcon icon, String warning) {
         this.imageIcon = icon;
         setToolTipText(warning);
@@ -78,17 +70,11 @@ public class CellOverlay extends JComponent implements ICellOverlay {
         verticalAlign = value;
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         g.drawImage(imageIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.swing.util.IOverlay#getBounds(com.faforever.neroxis.ngraph.view.CellState)
-     */
+
     public Rectangle getBounds(CellState state) {
         boolean isEdge = state.getView().getGraph().getModel().isEdge(state.getCell());
         double s = state.getView().getScale();

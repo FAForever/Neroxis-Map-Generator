@@ -3,6 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
+import java.util.List;
+
 /**
  * Defines the requirements for a cell that can be used in an GraphModel.
  */
@@ -124,12 +126,37 @@ public interface ICell {
     void setParent(ICell parent);
 
     /**
+     * @return Returns the source
+     */
+    ICell getSource();
+
+    /**
+     * Sets the source.
+     *
+     * @param source Cell that represents the new source
+     */
+    void setSource(ICell source);
+
+    /**
+     * @return Returns the target
+     */
+    ICell getTarget();
+
+    /**
+     * Sets the target.
+     *
+     * @param target Cell that represents the new target
+     */
+    void setTarget(ICell target);
+
+    /**
      * Returns the source or target terminal.
      *
      * @param source Boolean that specifies if the source terminal should be
      *               returned.
      * @return Returns the source or target terminal.
      */
+    @Deprecated
     ICell getTerminal(boolean source);
 
     /**
@@ -140,6 +167,7 @@ public interface ICell {
      *                 should be set.
      * @return Returns the new terminal.
      */
+    @Deprecated
     ICell setTerminal(ICell terminal, boolean isSource);
 
     /**
@@ -148,6 +176,11 @@ public interface ICell {
      * @return Returns the number of children.
      */
     int getChildCount();
+
+    /**
+     * @return Returns the children of the cell as a list.
+     */
+    List<ICell> getChildren();
 
     /**
      * Returns the index of the specified child in the child array.

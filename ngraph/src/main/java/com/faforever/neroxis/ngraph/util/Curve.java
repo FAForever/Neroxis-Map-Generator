@@ -61,15 +61,9 @@ public class Curve {
      */
     protected boolean valid = false;
 
-    /**
-     *
-     */
     public Curve() {
     }
 
-    /**
-     *
-     */
     public Curve(List<Point> points) {
         boolean nullPoints = false;
 
@@ -85,16 +79,10 @@ public class Curve {
         }
     }
 
-    /**
-     *
-     */
     public void setLabelBuffer(double buffer) {
         labelBuffer = buffer;
     }
 
-    /**
-     *
-     */
     public Rectangle getBounds() {
         if (!valid) {
             createCoreCurve();

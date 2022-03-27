@@ -10,9 +10,13 @@ import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.GraphView;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
@@ -23,8 +27,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 
 /**
  * An outline view for a specific graph component.
@@ -33,19 +40,11 @@ public class GraphOutline extends JComponent {
 
     private static final Logger log = Logger.getLogger(GraphOutline.class.getName());
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = -2521103946905154267L;
 
-    /**
-     *
-     */
     public static Color DEFAULT_ZOOMHANDLE_FILL = new Color(0, 255, 255);
 
-    /**
-     *
-     */
     protected GraphComponent graphComponent;
 
     /**
@@ -68,44 +67,20 @@ public class GraphOutline extends JComponent {
      */
     protected Rectangle repaintClip = null;
 
-    /**
-     *
-     */
     protected boolean tripleBuffered = true;
 
-    /**
-     *
-     */
     protected java.awt.Rectangle finderBounds = new java.awt.Rectangle();
 
-    /**
-     *
-     */
     protected java.awt.Point zoomHandleLocation = null;
 
-    /**
-     *
-     */
     protected boolean finderVisible = true;
 
-    /**
-     *
-     */
     protected boolean zoomHandleVisible = true;
 
-    /**
-     *
-     */
     protected boolean useScaledInstance = false;
 
-    /**
-     *
-     */
     protected boolean antiAlias = false;
 
-    /**
-     *
-     */
     protected boolean drawLabels = false;
 
     /**
@@ -122,29 +97,14 @@ public class GraphOutline extends JComponent {
      */
     protected int outlineBorder = 10;
 
-    /**
-     *
-     */
     protected MouseTracker tracker = new MouseTracker();
 
-    /**
-     *
-     */
     protected double scale = 1;
 
-    /**
-     *
-     */
     protected java.awt.Point translate = new java.awt.Point();
 
-    /**
-     *
-     */
     protected transient boolean zoomGesture = false;
 
-    /**
-     *
-     */
     protected IEventListener repaintHandler = new IEventListener() {
         public void invoke(Object source, EventObject evt) {
             updateScaleAndTranslate();
@@ -174,9 +134,6 @@ public class GraphOutline extends JComponent {
         }
     };
 
-    /**
-     *
-     */
     protected ComponentListener componentHandler = new ComponentAdapter() {
         public void componentResized(ComponentEvent e) {
             if (updateScaleAndTranslate()) {
@@ -189,14 +146,8 @@ public class GraphOutline extends JComponent {
         }
     };
 
-    /**
-     *
-     */
     protected AdjustmentListener adjustmentHandler = new AdjustmentListener() {
 
-        /**
-         *
-         */
         public void adjustmentValueChanged(AdjustmentEvent e) {
             if (updateScaleAndTranslate()) {
                 repaintBuffer = true;
@@ -209,9 +160,6 @@ public class GraphOutline extends JComponent {
 
     };
 
-    /**
-     *
-     */
     public GraphOutline(GraphComponent graphComponent) {
         addComponentListener(componentHandler);
         addMouseMotionListener(tracker);
@@ -221,9 +169,6 @@ public class GraphOutline extends JComponent {
         setOpaque(true);
     }
 
-    /**
-     *
-     */
     public boolean isTripleBuffered() {
         return tripleBuffered;
     }
@@ -244,9 +189,6 @@ public class GraphOutline extends JComponent {
         firePropertyChange("tripleBuffered", oldValue, tripleBuffered);
     }
 
-    /**
-     *
-     */
     public boolean isDrawLabels() {
         return drawLabels;
     }
@@ -284,9 +226,6 @@ public class GraphOutline extends JComponent {
         firePropertyChange("antiAlias", oldValue, antiAlias);
     }
 
-    /**
-     *
-     */
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
@@ -296,23 +235,14 @@ public class GraphOutline extends JComponent {
         }
     }
 
-    /**
-     *
-     */
     public void setFinderVisible(boolean visible) {
         finderVisible = visible;
     }
 
-    /**
-     *
-     */
     public void setZoomHandleVisible(boolean visible) {
         zoomHandleVisible = visible;
     }
 
-    /**
-     *
-     */
     public boolean isFitPage() {
         return fitPage;
     }
@@ -334,9 +264,6 @@ public class GraphOutline extends JComponent {
         firePropertyChange("fitPage", oldValue, fitPage);
     }
 
-    /**
-     *
-     */
     public GraphComponent getGraphComponent() {
         return graphComponent;
     }
@@ -446,9 +373,6 @@ public class GraphOutline extends JComponent {
         }
     }
 
-    /**
-     *
-     */
     public void updateFinder(boolean repaint) {
         java.awt.Rectangle rect = graphComponent.getViewport().getViewRect();
 
@@ -460,9 +384,6 @@ public class GraphOutline extends JComponent {
         updateFinderBounds(new java.awt.Rectangle(x + translate.x, y + translate.y, w + 1, h + 1), repaint);
     }
 
-    /**
-     *
-     */
     public void updateFinderBounds(java.awt.Rectangle bounds, boolean repaint) {
         if (bounds != null && !bounds.equals(finderBounds)) {
             java.awt.Rectangle old = new java.awt.Rectangle(finderBounds);
@@ -477,9 +398,6 @@ public class GraphOutline extends JComponent {
         }
     }
 
-    /**
-     *
-     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         paintBackground(g);
@@ -658,19 +576,10 @@ public class GraphOutline extends JComponent {
         }
     }
 
-    /**
-     *
-     */
     public class MouseTracker implements MouseListener, MouseMotionListener {
-        /**
-         *
-         */
         protected java.awt.Point start = null;
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-         */
+
         public void mousePressed(MouseEvent e) {
             zoomGesture = hitZoomHandle(e.getX(), e.getY());
 
@@ -679,10 +588,7 @@ public class GraphOutline extends JComponent {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
-         */
+
         public void mouseDragged(MouseEvent e) {
             if (isEnabled() && start != null) {
                 if (zoomGesture) {
@@ -713,10 +619,7 @@ public class GraphOutline extends JComponent {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-         */
+
         public void mouseReleased(MouseEvent e) {
             if (start != null) {
                 if (zoomGesture) {
@@ -761,17 +664,11 @@ public class GraphOutline extends JComponent {
             }
         }
 
-        /**
-         *
-         */
         public boolean hitZoomHandle(int x, int y) {
             return new java.awt.Rectangle(finderBounds.x + finderBounds.width - 6, finderBounds.y + finderBounds.height - 6, 8, 8).contains(x, y);
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
-         */
+
         public void mouseMoved(MouseEvent e) {
             if (hitZoomHandle(e.getX(), e.getY())) {
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -782,26 +679,17 @@ public class GraphOutline extends JComponent {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-         */
+
         public void mouseClicked(MouseEvent e) {
             // ignore
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-         */
+
         public void mouseEntered(MouseEvent e) {
             // ignore
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-         */
+
         public void mouseExited(MouseEvent e) {
             // ignore
         }

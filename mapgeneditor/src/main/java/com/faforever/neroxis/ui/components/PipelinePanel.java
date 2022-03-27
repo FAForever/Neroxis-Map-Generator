@@ -18,25 +18,12 @@ import com.faforever.neroxis.ui.control.MaskGraphEditingModalGraphMouse;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
-import lombok.Getter;
-import lombok.Setter;
-import org.jgrapht.event.GraphEdgeChangeEvent;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.event.GraphVertexChangeEvent;
-import org.jgrapht.graph.DefaultListenableGraph;
-import org.jgrapht.graph.DirectedAcyclicGraph;
-import org.jungrapht.visualization.RenderContext;
-import org.jungrapht.visualization.VisualizationScrollPane;
-import org.jungrapht.visualization.VisualizationViewer;
-import org.jungrapht.visualization.control.EditingModalGraphMouse;
-import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
-import org.jungrapht.visualization.layout.algorithms.SugiyamaLayoutAlgorithm;
-import org.jungrapht.visualization.layout.algorithms.sugiyama.Layering;
-import org.jungrapht.visualization.layout.model.LayoutModel;
-import org.jungrapht.visualization.renderers.Renderer;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Paint;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -54,6 +41,27 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import lombok.Getter;
+import lombok.Setter;
+import org.jgrapht.event.GraphEdgeChangeEvent;
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.event.GraphVertexChangeEvent;
+import org.jgrapht.graph.DefaultListenableGraph;
+import org.jgrapht.graph.DirectedAcyclicGraph;
+import org.jungrapht.visualization.RenderContext;
+import org.jungrapht.visualization.VisualizationScrollPane;
+import org.jungrapht.visualization.VisualizationViewer;
+import org.jungrapht.visualization.control.EditingModalGraphMouse;
+import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
+import org.jungrapht.visualization.layout.algorithms.SugiyamaLayoutAlgorithm;
+import org.jungrapht.visualization.layout.algorithms.sugiyama.Layering;
+import org.jungrapht.visualization.layout.model.LayoutModel;
+import org.jungrapht.visualization.renderers.Renderer;
 
 public strictfp class PipelinePanel extends JPanel {
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> rawGraph = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
@@ -109,7 +117,7 @@ public strictfp class PipelinePanel extends JPanel {
                 graphViewer.repaint();
                 ICell cell = edgeToCell.remove(e.getEdge());
                 cellToEdge.remove(cell);
-                mxGraph.removeCells(new ICell[]{cell});
+                mxGraph.removeCells(List.of(cell));
             }
 
             @Override
@@ -128,7 +136,7 @@ public strictfp class PipelinePanel extends JPanel {
                 graphViewer.getSelectedVertexState().deselect(vertex);
                 ICell cell = vertexToCell.remove(e.getVertex());
                 cellToVertex.remove(cell);
-                mxGraph.removeCells(new ICell[]{cell});
+                mxGraph.removeCells(List.of(cell));
             }
         });
         setLayout(new GridBagLayout());

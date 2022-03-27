@@ -12,12 +12,8 @@ import com.faforever.neroxis.ngraph.util.svg.AWTPolylineProducer;
 import com.faforever.neroxis.ngraph.util.svg.CSSConstants;
 import com.faforever.neroxis.ngraph.util.svg.ExtendedGeneralPath;
 import com.faforever.neroxis.ngraph.view.CellState;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -30,6 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Stencil shape drawing that takes an XML definition of the shape and renders
@@ -128,9 +128,6 @@ public class StencilShape extends BasicShape {
         return null;
     }
 
-    /**
-     *
-     */
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         double x = state.getX();
@@ -152,9 +149,6 @@ public class StencilShape extends BasicShape {
         canvas.getGraphics().translate(-x, -y);
     }
 
-    /**
-     *
-     */
     public void paintNode(Graphics2DCanvas canvas, CellState state, svgShape shape, double widthRatio, double heightRatio) {
         Shape associatedShape = shape.shape;
 
@@ -279,9 +273,6 @@ public class StencilShape extends BasicShape {
         }
     }
 
-    /**
-     *
-     */
     public void createShape(Node root, svgShape shape) {
         Node child = root.getFirstChild();
         /*

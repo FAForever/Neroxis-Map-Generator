@@ -11,10 +11,8 @@
 package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,7 +23,7 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
     /**
      * Shared empty connection map to return instead of null in applyMap.
      */
-    public static Collection<GraphHierarchyEdge> emptyConnectionMap = new ArrayList<GraphHierarchyEdge>(0);
+    public static Collection<GraphHierarchyEdge> emptyConnectionMap = List.of();
 
     /**
      * The graph cell this object represents.
@@ -76,12 +74,9 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
     public List<GraphAbstractHierarchyCell> getNextLayerConnectedCells(int layer) {
         if (nextLayerConnectedCells == null) {
             nextLayerConnectedCells = new ArrayList[1];
-            nextLayerConnectedCells[0] = new ArrayList<GraphAbstractHierarchyCell>(connectsAsTarget.size());
-            Iterator<GraphHierarchyEdge> iter = connectsAsTarget.iterator();
+            nextLayerConnectedCells[0] = new ArrayList<>(connectsAsTarget.size());
 
-            while (iter.hasNext()) {
-                GraphHierarchyEdge edge = iter.next();
-
+            for (GraphHierarchyEdge edge : connectsAsTarget) {
                 if (edge.maxRank == -1 || edge.maxRank == layer + 1) {
                     // Either edge is not in any rank or
                     // no dummy nodes in edge, add node of other side of edge
@@ -106,12 +101,9 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
     public List<GraphAbstractHierarchyCell> getPreviousLayerConnectedCells(int layer) {
         if (previousLayerConnectedCells == null) {
             previousLayerConnectedCells = new ArrayList[1];
-            previousLayerConnectedCells[0] = new ArrayList<GraphAbstractHierarchyCell>(connectsAsSource.size());
-            Iterator<GraphHierarchyEdge> iter = connectsAsSource.iterator();
+            previousLayerConnectedCells[0] = new ArrayList<>(connectsAsSource.size());
 
-            while (iter.hasNext()) {
-                GraphHierarchyEdge edge = iter.next();
-
+            for (GraphHierarchyEdge edge : connectsAsSource) {
                 if (edge.minRank == -1 || edge.minRank == layer - 1) {
                     // No dummy nodes in edge, add node of other side of edge
                     previousLayerConnectedCells[0].add(edge.target);
@@ -163,13 +155,6 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
         // Firstly, the hash code of this node needs to be shorter than the
         // other node
         if (otherNode != null && hashCode != null && otherNode.hashCode != null && hashCode.length < otherNode.hashCode.length) {
-            if (hashCode == otherNode.hashCode) {
-                return true;
-            }
-
-            if (hashCode == null) {
-                return false;
-            }
 
             // Secondly, this hash code must match the start of the other
             // node's hash code. Arrays.equals cannot be used here since

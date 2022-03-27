@@ -5,10 +5,9 @@ package com.faforever.neroxis.ngraph.io;
 
 import com.faforever.neroxis.ngraph.model.GraphModel.ChildChange;
 import com.faforever.neroxis.ngraph.model.ICell;
+import java.util.Map;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.util.Map;
 
 /**
  * Codec for ChildChanges. This class is created and registered
@@ -31,9 +30,7 @@ public class ChildChangeCodec extends ObjectCodec {
         super(template, exclude, idrefs, mapping);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#isReference(java.lang.Object, java.lang.String, java.lang.Object, boolean)
-     */
+
     @Override
     public boolean isReference(Object obj, String attr, Object value, boolean isWrite) {
         if (attr.equals("child") && obj instanceof ChildChange && (((ChildChange) obj).getPrevious() != null || !isWrite)) {
@@ -43,14 +40,12 @@ public class ChildChangeCodec extends ObjectCodec {
         return idrefs.contains(attr);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#afterEncode(com.faforever.neroxis.ngraph.io.Codec, java.lang.Object, org.w3c.dom.Node)
-     */
+
     @Override
     public Node afterEncode(Codec enc, Object obj, Node node) {
         if (obj instanceof ChildChange) {
             ChildChange change = (ChildChange) obj;
-            Object child = change.getChild();
+            ICell child = change.getChild();
 
             if (isReference(obj, "child", child, true)) {
                 // Encodes as reference (id)
@@ -61,7 +56,7 @@ public class ChildChangeCodec extends ObjectCodec {
                 // ignore the ones that are already there at decoding time. Note:
                 // This can only be resolved by moving the notify event into the
                 // execute of the edit.
-                enc.encodeCell((ICell) child, node, true);
+                enc.encodeCell(child, node, true);
             }
         }
 
@@ -116,9 +111,7 @@ public class ChildChangeCodec extends ObjectCodec {
         return node;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#afterDecode(com.faforever.neroxis.ngraph.io.Codec, org.w3c.dom.Node, java.lang.Object)
-     */
+
     @Override
     public Object afterDecode(Codec dec, Node node, Object obj) {
         if (obj instanceof ChildChange) {

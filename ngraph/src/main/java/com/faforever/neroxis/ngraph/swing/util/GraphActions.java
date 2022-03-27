@@ -5,133 +5,38 @@ package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.io.Serial;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 /**
  *
  */
 public class GraphActions {
-
-    /**
-     *
-     */
     static final Action deleteAction = new DeleteAction("delete");
-
-    /**
-     *
-     */
     static final Action editAction = new EditAction("edit");
-
-    /**
-     *
-     */
     static final Action groupAction = new GroupAction("group");
-
-    /**
-     *
-     */
     static final Action ungroupAction = new UngroupAction("ungroup");
-
-    /**
-     *
-     */
     static final Action removeFromParentAction = new RemoveFromParentAction("removeFromParent");
-
-    /**
-     *
-     */
     static final Action updateGroupBoundsAction = new UpdateGroupBoundsAction("updateGroupBounds");
-
-    /**
-     *
-     */
     static final Action selectAllAction = new SelectAction("selectAll");
-
-    /**
-     *
-     */
     static final Action selectVerticesAction = new SelectAction("vertices");
-
-    /**
-     *
-     */
     static final Action selectEdgesAction = new SelectAction("edges");
-
-    /**
-     *
-     */
     static final Action selectNoneAction = new SelectAction("selectNone");
-
-    /**
-     *
-     */
     static final Action selectNextAction = new SelectAction("selectNext");
-
-    /**
-     *
-     */
     static final Action selectPreviousAction = new SelectAction("selectPrevious");
-
-    /**
-     *
-     */
     static final Action selectParentAction = new SelectAction("selectParent");
-
-    /**
-     *
-     */
     static final Action selectChildAction = new SelectAction("selectChild");
-
-    /**
-     *
-     */
     static final Action collapseAction = new FoldAction("collapse");
-
-    /**
-     *
-     */
     static final Action expandAction = new FoldAction("expand");
-
-    /**
-     *
-     */
     static final Action enterGroupAction = new DrillAction("enterGroup");
-
-    /**
-     *
-     */
     static final Action exitGroupAction = new DrillAction("exitGroup");
-
-    /**
-     *
-     */
     static final Action homeAction = new DrillAction("home");
-
-    /**
-     *
-     */
     static final Action zoomActualAction = new ZoomAction("actual");
-
-    /**
-     *
-     */
     static final Action zoomInAction = new ZoomAction("zoomIn");
-
-    /**
-     *
-     */
     static final Action zoomOutAction = new ZoomAction("zoomOut");
-
-    /**
-     *
-     */
     static final Action toBackAction = new LayerAction("toBack");
-
-    /**
-     *
-     */
     static final Action toFrontAction = new LayerAction("toFront");
 
     /**
@@ -303,7 +208,6 @@ public class GraphActions {
     }
 
     /**
-     * @param e
      * @return Returns the graph for the given action event.
      */
     public static Graph getGraph(ActionEvent e) {
@@ -316,26 +220,16 @@ public class GraphActions {
         return null;
     }
 
-    /**
-     *
-     */
     public static class EditAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 4610112721356742702L;
 
-        /**
-         * @param name
-         */
+
         public EditAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() instanceof GraphComponent) {
                 ((GraphComponent) e.getSource()).startEditing();
@@ -344,26 +238,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class DeleteAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = -8212339796803275529L;
 
-        /**
-         * @param name
-         */
+
         public DeleteAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -374,34 +258,21 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class GroupAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
-        /**
-         * @param name
-         */
+
         public GroupAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         protected int getGroupBorder(Graph graph) {
             return 2 * graph.getGridSize();
 
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -412,26 +283,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class UngroupAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 2247770767961318251L;
 
-        /**
-         * @param name
-         */
+
         public UngroupAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -442,26 +303,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class RemoveFromParentAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 7169443038859140811L;
 
-        /**
-         * @param name
-         */
+
         public RemoveFromParentAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -472,33 +323,20 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class UpdateGroupBoundsAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
-        /**
-         * @param name
-         */
+
         public UpdateGroupBoundsAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         protected int getGroupBorder(Graph graph) {
             return 2 * graph.getGridSize();
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -509,26 +347,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class LayerAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 562519299806253741L;
 
-        /**
-         * @param name
-         */
+
         public LayerAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -540,26 +368,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class FoldAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 4078517503905239901L;
 
-        /**
-         * @param name
-         */
+
         public FoldAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -571,26 +389,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class DrillAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 5464382323663870291L;
 
-        /**
-         * @param name
-         */
+
         public DrillAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -609,26 +417,16 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class ZoomAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = -7500195051313272384L;
 
-        /**
-         * @param name
-         */
+
         public ZoomAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
 
@@ -648,26 +446,15 @@ public class GraphActions {
 
     }
 
-    /**
-     *
-     */
     public static class SelectAction extends AbstractAction {
 
-        /**
-         *
-         */
+        @Serial
         private static final long serialVersionUID = 6501585024845668187L;
 
-        /**
-         * @param name
-         */
         public SelectAction(String name) {
             super(name);
         }
 
-        /**
-         *
-         */
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 

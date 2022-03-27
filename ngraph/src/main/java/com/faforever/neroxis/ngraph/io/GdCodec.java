@@ -6,10 +6,10 @@ package com.faforever.neroxis.ngraph.io;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,10 +126,10 @@ public class GdCodec {
         StringBuilder builder = new StringBuilder();
 
         ICell parent = graph.getDefaultParent();
-        ICell[] vertices = GraphModel.getChildCells(graph.getModel(), parent, true, false);
+        List<ICell> vertices = GraphModel.getChildCells(graph.getModel(), parent, true, false);
 
-        builder.append("# Number of Nodes (0-").append(vertices.length - 1).append(")");
-        builder.append(vertices.length);
+        builder.append("# Number of Nodes (0-").append(vertices.size() - 1).append(")");
+        builder.append(vertices.size());
 
         // TODO
 

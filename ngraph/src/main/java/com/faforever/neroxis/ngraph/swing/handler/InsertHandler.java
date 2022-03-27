@@ -9,8 +9,10 @@ import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
 public class InsertHandler extends MouseAdapter {
@@ -25,44 +27,20 @@ public class InsertHandler extends MouseAdapter {
      */
     protected boolean enabled = true;
 
-    /**
-     *
-     */
     protected String style;
 
-    /**
-     *
-     */
     protected java.awt.Point first;
 
-    /**
-     *
-     */
     protected float lineWidth = 1;
 
-    /**
-     *
-     */
     protected Color lineColor = Color.black;
 
-    /**
-     *
-     */
     protected boolean rounded = false;
 
-    /**
-     *
-     */
     protected Rectangle current;
 
-    /**
-     *
-     */
     protected EventSource eventSource = new EventSource(this);
 
-    /**
-     *
-     */
     public InsertHandler(GraphComponent graphComponent, String style) {
         this.graphComponent = graphComponent;
         this.style = style;
@@ -80,44 +58,26 @@ public class InsertHandler extends MouseAdapter {
         graphComponent.getGraphControl().addMouseMotionListener(this);
     }
 
-    /**
-     *
-     */
     public GraphComponent getGraphComponent() {
         return graphComponent;
     }
 
-    /**
-     *
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     *
-     */
     public void setEnabled(boolean value) {
         enabled = value;
     }
 
-    /**
-     *
-     */
     public boolean isStartEvent(MouseEvent e) {
         return true;
     }
 
-    /**
-     *
-     */
     public void start(MouseEvent e) {
         first = e.getPoint();
     }
 
-    /**
-     *
-     */
     public void mousePressed(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && isStartEvent(e)) {
             start(e);
@@ -125,9 +85,6 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
             Rectangle dirty = current;
@@ -149,9 +106,6 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseReleased(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && current != null) {
             Graph graph = graphComponent.getGraph();
@@ -170,17 +124,11 @@ public class InsertHandler extends MouseAdapter {
         reset();
     }
 
-    /**
-     *
-     */
     public Object insertCell(Rectangle bounds) {
         // FIXME: Clone prototype cell for insert
         return graphComponent.getGraph().insertVertex(null, null, "", bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), style);
     }
 
-    /**
-     *
-     */
     public void reset() {
         java.awt.Rectangle dirty = null;
 
@@ -197,9 +145,6 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (first != null && current != null) {
             ((Graphics2D) g).setStroke(new BasicStroke(lineWidth));
@@ -214,23 +159,14 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void addListener(String eventName, IEventListener listener) {
         eventSource.addListener(eventName, listener);
     }
 
-    /**
-     *
-     */
     public void removeListener(IEventListener listener) {
         removeListener(listener, null);
     }
 
-    /**
-     *
-     */
     public void removeListener(IEventListener listener, String eventName) {
         eventSource.removeListener(listener, eventName);
     }

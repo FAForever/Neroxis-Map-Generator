@@ -15,38 +15,25 @@ import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
  * Connection handler creates new connections between cells. This control is used to display the connector
  * icon, while the preview is used to draw the line.
  */
 public class ConnectPreview extends EventSource {
-    /**
-     *
-     */
     protected GraphComponent graphComponent;
 
-    /**
-     *
-     */
     protected CellState previewState;
 
-    /**
-     *
-     */
     protected CellState sourceState;
 
-    /**
-     *
-     */
     protected Point startPoint;
 
-    /**
-     * @param graphComponent
-     */
     public ConnectPreview(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
 
@@ -70,30 +57,18 @@ public class ConnectPreview extends EventSource {
         return cell;
     }
 
-    /**
-     *
-     */
     public boolean isActive() {
         return sourceState != null;
     }
 
-    /**
-     *
-     */
     public CellState getSourceState() {
         return sourceState;
     }
 
-    /**
-     *
-     */
     public CellState getPreviewState() {
         return previewState;
     }
 
-    /**
-     *
-     */
     public Point getStartPoint() {
         return startPoint;
     }
@@ -112,17 +87,14 @@ public class ConnectPreview extends EventSource {
         fireEvent(new EventObject(Event.START, "event", e, "state", previewState));
     }
 
-    /**
-     *
-     */
     public void update(MouseEvent e, CellState targetState, double x, double y) {
         Graph graph = graphComponent.getGraph();
         ICell cell = previewState.getCell();
 
-        Rectangle dirty = graphComponent.getGraph().getPaintBounds(new ICell[]{previewState.getCell()});
+        Rectangle dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
 
-        if (cell.getTerminal(false) != null) {
-            cell.getTerminal(false).removeEdge(cell, false);
+        if (cell.getTarget() != null) {
+            cell.getTarget().removeEdge(cell, false);
         }
 
         if (targetState != null) {
@@ -148,19 +120,13 @@ public class ConnectPreview extends EventSource {
         }
     }
 
-    /**
-     *
-     */
     protected java.awt.Rectangle getDirtyRect() {
         return getDirtyRect(null);
     }
 
-    /**
-     *
-     */
     protected java.awt.Rectangle getDirtyRect(Rectangle dirty) {
         if (previewState != null) {
-            Rectangle tmp = graphComponent.getGraph().getPaintBounds(new ICell[]{previewState.getCell()});
+            Rectangle tmp = graphComponent.getGraph().getPaintBounds(List.of(previewState.getCell()));
 
             if (dirty != null) {
                 dirty.add(tmp);
@@ -179,9 +145,6 @@ public class ConnectPreview extends EventSource {
         return null;
     }
 
-    /**
-     *
-     */
     protected Point transformScreenPoint(double x, double y) {
         Graph graph = graphComponent.getGraph();
         Point tr = graph.getView().getTranslate();
@@ -190,17 +153,11 @@ public class ConnectPreview extends EventSource {
         return new Point(graph.snap(x / scale - tr.getX()), graph.snap(y / scale - tr.getY()));
     }
 
-    /**
-     *
-     */
     public void revalidate(CellState state) {
         state.getView().invalidate(state.getCell());
         state.getView().validateCellState(state.getCell());
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (previewState != null) {
             Graphics2DCanvas canvas = graphComponent.getCanvas();
@@ -253,8 +210,8 @@ public class ConnectPreview extends EventSource {
             graph.getModel().beginUpdate();
             try {
                 ICell cell = previewState.getCell();
-                ICell source = cell.getTerminal(true);
-                ICell terminal = cell.getTerminal(false);
+                ICell source = cell.getSource();
+                ICell terminal = cell.getTarget();
 
                 if (source != null) {
                     source.removeEdge(cell, true);

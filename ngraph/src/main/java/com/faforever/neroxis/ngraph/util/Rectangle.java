@@ -4,15 +4,14 @@
 package com.faforever.neroxis.ngraph.util;
 
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 
 /**
  * Implements a 2-dimensional rectangle with double precision coordinates.
  */
 public class Rectangle extends Point {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = -3793966043543578946L;
 
     /**

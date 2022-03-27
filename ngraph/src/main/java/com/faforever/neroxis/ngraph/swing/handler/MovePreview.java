@@ -13,20 +13,16 @@ import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import java.awt.*;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Connection handler creates new connections between cells. This control is used to display the connector
  * icon, while the preview is used to draw the line.
  */
 public class MovePreview extends EventSource {
-    /**
-     *
-     */
     protected GraphComponent graphComponent;
 
     /**
@@ -60,39 +56,18 @@ public class MovePreview extends EventSource {
      */
     protected boolean hideSelectionHandler = false;
 
-    /**
-     *
-     */
     protected transient CellState startState;
 
-    /**
-     *
-     */
-    protected transient CellState[] previewStates;
+    protected transient List<CellState> previewStates;
 
-    /**
-     *
-     */
-    protected transient ICell[] movingCells;
+    protected transient List<ICell> movingCells;
 
-    /**
-     *
-     */
     protected transient java.awt.Rectangle initialPlaceholder;
 
-    /**
-     *
-     */
     protected transient java.awt.Rectangle placeholder;
 
-    /**
-     *
-     */
     protected transient Rectangle lastDirty;
 
-    /**
-     *
-     */
     protected transient CellStatePreview preview;
 
     /**
@@ -112,79 +87,46 @@ public class MovePreview extends EventSource {
         });
     }
 
-    /**
-     *
-     */
     public int getThreshold() {
         return threshold;
     }
 
-    /**
-     *
-     */
     public void setThreshold(int value) {
         threshold = value;
     }
 
-    /**
-     *
-     */
     public boolean isPlaceholderPreview() {
         return placeholderPreview;
     }
 
-    /**
-     *
-     */
     public void setPlaceholderPreview(boolean value) {
         placeholderPreview = value;
     }
 
-    /**
-     *
-     */
     public boolean isClonePreview() {
         return clonePreview;
     }
 
-    /**
-     *
-     */
     public void setClonePreview(boolean value) {
         clonePreview = value;
     }
 
-    /**
-     *
-     */
     public boolean isContextPreview() {
         return contextPreview;
     }
 
-    /**
-     *
-     */
     public void setContextPreview(boolean value) {
         contextPreview = value;
     }
 
-    /**
-     *
-     */
     public boolean isHideSelectionHandler() {
         return hideSelectionHandler;
     }
 
-    /**
-     *
-     */
     public void setHideSelectionHandler(boolean value) {
         hideSelectionHandler = value;
     }
 
-    /**
-     *
-     */
     public boolean isActive() {
         return startState != null;
     }
@@ -192,14 +134,11 @@ public class MovePreview extends EventSource {
     /**
      * FIXME: Cells should be assigned outside of getPreviewStates
      */
-    public Object[] getMovingCells() {
-        return movingCells;
+    public List<ICell> getMovingCells() {
+        return List.copyOf(movingCells);
     }
 
-    /**
-     *
-     */
-    public ICell[] getCells(CellState initialState) {
+    public List<ICell> getCells(CellState initialState) {
         Graph graph = graphComponent.getGraph();
 
         return graph.getMovableCells(graph.getSelectionCells());
@@ -208,9 +147,9 @@ public class MovePreview extends EventSource {
     /**
      * Returns the states that are affected by the move operation.
      */
-    protected CellState[] getPreviewStates() {
+    protected List<CellState> getPreviewStates() {
         Graph graph = graphComponent.getGraph();
-        Collection<CellState> result = new LinkedList<>();
+        List<CellState> result = new LinkedList<>();
 
         for (ICell cell : movingCells) {
             CellState cellState = graph.getView().getState(cell);
@@ -224,7 +163,7 @@ public class MovePreview extends EventSource {
                 }
 
                 if (isContextPreview()) {
-                    ICell[] edges = graph.getAllEdges(new ICell[]{cell});
+                    List<ICell> edges = graph.getAllEdges(List.of(cell));
 
                     for (ICell edge : edges) {
                         if (!graph.isCellSelected(edge)) {
@@ -244,12 +183,9 @@ public class MovePreview extends EventSource {
             }
         }
 
-        return result.toArray(new CellState[result.size()]);
+        return result;
     }
 
-    /**
-     *
-     */
     protected boolean isCellOpaque(Object cell) {
         return startState != null && startState.getCell() == cell;
     }
@@ -262,7 +198,7 @@ public class MovePreview extends EventSource {
         movingCells = getCells(state);
         previewStates = (!placeholderPreview) ? getPreviewStates() : null;
 
-        if (previewStates == null || previewStates.length >= threshold) {
+        if (previewStates == null || previewStates.size() >= threshold) {
             placeholder = getPlaceholderBounds(startState).getRectangle();
             initialPlaceholder = new java.awt.Rectangle(placeholder);
             graphComponent.getGraphControl().repaint(placeholder);
@@ -271,18 +207,12 @@ public class MovePreview extends EventSource {
         fireEvent(new EventObject(Event.START, "event", e, "state", startState));
     }
 
-    /**
-     *
-     */
     protected Rectangle getPlaceholderBounds(CellState startState) {
         Graph graph = graphComponent.getGraph();
 
         return graph.getView().getBounds(graph.getSelectionCells());
     }
 
-    /**
-     *
-     */
     public CellStatePreview createCellStatePreview() {
         return new CellStatePreview(graphComponent, isClonePreview()) {
             protected float getOpacityForCell(Object cell) {
@@ -351,9 +281,6 @@ public class MovePreview extends EventSource {
         fireEvent(new EventObject(Event.CONTINUE, "event", e, "dx", dx, "dy", dy));
     }
 
-    /**
-     *
-     */
     protected void repaint(Rectangle dirty) {
         if (dirty != null) {
             graphComponent.getGraphControl().repaint(dirty.getRectangle());
@@ -362,9 +289,6 @@ public class MovePreview extends EventSource {
         }
     }
 
-    /**
-     *
-     */
     protected void reset() {
         Graph graph = graphComponent.getGraph();
 
@@ -395,11 +319,8 @@ public class MovePreview extends EventSource {
         }
     }
 
-    /**
-     *
-     */
-    public ICell[] stop(boolean commit, MouseEvent e, double dx, double dy, boolean clone, ICell target) {
-        ICell[] cells = movingCells;
+    public List<ICell> stop(boolean commit, MouseEvent e, double dx, double dy, boolean clone, ICell target) {
+        List<ICell> cells = movingCells;
         reset();
 
         Graph graph = graphComponent.getGraph();
@@ -418,9 +339,6 @@ public class MovePreview extends EventSource {
         return cells;
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (placeholder != null) {
             SwingConstants.PREVIEW_BORDER.paintBorder(graphComponent, g, placeholder.x, placeholder.y, placeholder.width, placeholder.height);

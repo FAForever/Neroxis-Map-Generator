@@ -16,9 +16,6 @@ import com.faforever.neroxis.ngraph.view.Graph;
  */
 public class OrthogonalLayout extends GraphLayout {
 
-    /**
-     *
-     */
     protected OrthogonalModel orthModel;
 
     /**
@@ -27,17 +24,11 @@ public class OrthogonalLayout extends GraphLayout {
      */
     protected boolean routeToGrid = false;
 
-    /**
-     *
-     */
     public OrthogonalLayout(Graph graph) {
         super(graph);
         orthModel = new OrthogonalModel(graph);
     }
 
-    /**
-     *
-     */
     public void execute(Object parent) {
         // Create the rectangulation
 

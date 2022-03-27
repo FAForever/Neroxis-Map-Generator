@@ -87,62 +87,62 @@ public class SwimlaneShape extends BasicShape {
     }
 
     protected void paintSwimlane(Graphics2DCanvas canvas, CellState state, double start, String fill, boolean swimlaneLine) {
-        GraphicsCanvas2D c = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
-        double w = state.getWidth();
-        double h = state.getHeight();
+        GraphicsCanvas2D canvas2D = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
+        double width = state.getWidth();
+        double height = state.getHeight();
 
         if (!Constants.NONE.equals(fill)) {
-            c.save();
-            c.setFillColor(fill);
-            c.rect(0, 0, w, h);
-            c.fillAndStroke();
-            c.restore();
-            c.setShadow(false);
+            canvas2D.save();
+            canvas2D.setFillColor(fill);
+            canvas2D.rect(0, 0, width, height);
+            canvas2D.fillAndStroke();
+            canvas2D.restore();
+            canvas2D.setShadow(false);
         }
 
-        c.begin();
+        canvas2D.begin();
 
         if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
-            c.moveTo(0, start);
-            c.lineTo(0, 0);
-            c.lineTo(w, 0);
-            c.lineTo(w, start);
+            canvas2D.moveTo(0, start);
+            canvas2D.lineTo(0, 0);
+            canvas2D.lineTo(width, 0);
+            canvas2D.lineTo(width, start);
 
-            if (swimlaneLine || start >= h) {
-                c.close();
+            if (swimlaneLine || start >= height) {
+                canvas2D.close();
             }
 
-            c.fillAndStroke();
+            canvas2D.fillAndStroke();
 
             // Transparent content area
-            if (start < h && Constants.NONE.equals(fill)) {
-                c.begin();
-                c.moveTo(0, start);
-                c.lineTo(0, h);
-                c.lineTo(w, h);
-                c.lineTo(w, start);
-                c.stroke();
+            if (start < height && Constants.NONE.equals(fill)) {
+                canvas2D.begin();
+                canvas2D.moveTo(0, start);
+                canvas2D.lineTo(0, height);
+                canvas2D.lineTo(width, height);
+                canvas2D.lineTo(width, start);
+                canvas2D.stroke();
             }
         } else {
-            c.moveTo(start, 0);
-            c.lineTo(0, 0);
-            c.lineTo(0, h);
-            c.lineTo(start, h);
+            canvas2D.moveTo(start, 0);
+            canvas2D.lineTo(0, 0);
+            canvas2D.lineTo(0, height);
+            canvas2D.lineTo(start, height);
 
-            if (swimlaneLine || start >= w) {
-                c.close();
+            if (swimlaneLine || start >= width) {
+                canvas2D.close();
             }
 
-            c.fillAndStroke();
+            canvas2D.fillAndStroke();
 
             // Transparent content area
-            if (start < w && Constants.NONE.equals(fill)) {
-                c.begin();
-                c.moveTo(start, 0);
-                c.lineTo(w, 0);
-                c.lineTo(w, h);
-                c.lineTo(start, h);
-                c.stroke();
+            if (start < width && Constants.NONE.equals(fill)) {
+                canvas2D.begin();
+                canvas2D.moveTo(start, 0);
+                canvas2D.lineTo(width, 0);
+                canvas2D.lineTo(width, height);
+                canvas2D.lineTo(start, height);
+                canvas2D.stroke();
             }
         }
     }

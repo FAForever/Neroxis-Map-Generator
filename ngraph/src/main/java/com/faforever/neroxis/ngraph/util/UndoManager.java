@@ -54,9 +54,6 @@ public class UndoManager extends EventSource {
         clear();
     }
 
-    /**
-     *
-     */
     public boolean isEmpty() {
         return history.isEmpty();
     }

@@ -7,14 +7,13 @@ import com.faforever.neroxis.ngraph.model.Cell;
 import com.faforever.neroxis.ngraph.model.CellPath;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.DomUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * XML codec for Java object graphs. In order to resolve forward references
@@ -33,7 +32,7 @@ public class Codec {
     /**
      * Maps from IDs to objects.
      */
-    protected Map<String, Object> objects = new Hashtable<String, Object>();
+    protected Map<String, Object> objects = new Hashtable<>();
 
     /**
      * Maps from IDs to elements.
@@ -179,7 +178,7 @@ public class Codec {
      */
     public Node getElementById(String id) {
         if (elements == null) {
-            elements = new Hashtable<String, Node>();
+            elements = new Hashtable<>();
             addElement(document.getDocumentElement());
         }
 
@@ -193,7 +192,7 @@ public class Codec {
         if (node instanceof Element) {
             String id = ((Element) node).getAttribute("id");
 
-            if (id != null && !elements.containsKey(id)) {
+            if (!elements.containsKey(id)) {
                 elements.put(id, node);
             }
         }
@@ -403,12 +402,12 @@ public class Codec {
      */
     public void insertIntoGraph(ICell cell) {
         ICell parent = cell.getParent();
-        ICell source = cell.getTerminal(true);
-        ICell target = cell.getTerminal(false);
+        ICell source = cell.getSource();
+        ICell target = cell.getTarget();
 
         // Fixes possible inconsistencies during insert into graph
-        cell.setTerminal(null, false);
-        cell.setTerminal(null, true);
+        cell.setSource(null);
+        cell.setTarget(null);
         cell.setParent(null);
 
         if (parent != null) {

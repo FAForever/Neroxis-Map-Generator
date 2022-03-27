@@ -2,8 +2,8 @@ package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.Rectangle;
-
 import java.util.HashMap;
+import java.util.List;
 
 public class TemporaryCellStates {
     protected GraphView view;
@@ -31,7 +31,7 @@ public class TemporaryCellStates {
     /**
      * Constructs a new temporary cell states instance.
      */
-    public TemporaryCellStates(GraphView view, double scale, ICell[] cells) {
+    public TemporaryCellStates(GraphView view, double scale, List<ICell> cells) {
         this.view = view;
 
         // Stores the previous state

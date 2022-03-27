@@ -10,10 +10,16 @@ import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 /**
  * Basic example of implementing a handler for rotation. This can be used as follows:
@@ -24,14 +30,8 @@ import java.awt.event.MouseEvent;
  * perimeter points etc. Feel free to contribute a fix!
  */
 public class RotationHandler extends MouseAdapter {
-    /**
-     *
-     */
     private static final double PI4 = Math.PI / 4;
-    /**
-     *
-     */
-    public static ImageIcon ROTATE_ICON = null;
+    public static ImageIcon ROTATE_ICON;
 
     /**
      * Loads the collapse and expand icons.
@@ -50,29 +50,14 @@ public class RotationHandler extends MouseAdapter {
      */
     protected boolean enabled = true;
 
-    /**
-     *
-     */
     protected JComponent handle;
 
-    /**
-     *
-     */
     protected CellState currentState;
 
-    /**
-     *
-     */
     protected double initialAngle;
 
-    /**
-     *
-     */
     protected double currentAngle;
 
-    /**
-     *
-     */
     protected Point first;
 
     /**
@@ -100,30 +85,18 @@ public class RotationHandler extends MouseAdapter {
         handle.addMouseMotionListener(this);
     }
 
-    /**
-     *
-     */
     public GraphComponent getGraphComponent() {
         return graphComponent;
     }
 
-    /**
-     *
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     *
-     */
     public void setEnabled(boolean value) {
         enabled = value;
     }
 
-    /**
-     *
-     */
     protected JComponent createHandle() {
         JLabel label = new JLabel(ROTATE_ICON);
         label.setSize(ROTATE_ICON.getIconWidth(), ROTATE_ICON.getIconHeight());
@@ -132,16 +105,10 @@ public class RotationHandler extends MouseAdapter {
         return label;
     }
 
-    /**
-     *
-     */
     public boolean isStateHandled(CellState state) {
         return graphComponent.getGraph().getModel().isVertex(state.getCell());
     }
 
-    /**
-     *
-     */
     public void mousePressed(MouseEvent e) {
         if (currentState != null && handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
             start(e);
@@ -149,9 +116,6 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void start(MouseEvent e) {
         initialAngle = Utils.getDouble(currentState.getStyle(), Constants.STYLE_ROTATION) * Constants.RAD_PER_DEG;
         currentAngle = initialAngle;
@@ -162,9 +126,6 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseMoved(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             if (handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
@@ -199,9 +160,6 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
             Rectangle dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);
@@ -226,9 +184,6 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void mouseReleased(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
             double deg = 0;
@@ -248,7 +203,7 @@ public class RotationHandler extends MouseAdapter {
             reset();
 
             if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && willExecute) {
-                graphComponent.getGraph().setCellStyles(Constants.STYLE_ROTATION, String.valueOf(deg), new ICell[]{cell});
+                graphComponent.getGraph().setCellStyles(Constants.STYLE_ROTATION, String.valueOf(deg), List.of(cell));
 
                 graphComponent.getGraphControl().repaint();
 
@@ -259,9 +214,6 @@ public class RotationHandler extends MouseAdapter {
         currentState = null;
     }
 
-    /**
-     *
-     */
     public void reset() {
         if (handle.getParent() != null) {
             handle.getParent().remove(handle);
@@ -283,9 +235,6 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    /**
-     *
-     */
     public void paint(Graphics g) {
         if (currentState != null && first != null) {
             java.awt.Rectangle rect = currentState.getRectangle();

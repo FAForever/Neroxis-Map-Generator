@@ -109,9 +109,6 @@ public class UndoableEdit {
         changes.add(change);
     }
 
-    /**
-     *
-     */
     public void undo() {
         if (!undone) {
             int count = changes.size();
@@ -128,9 +125,6 @@ public class UndoableEdit {
         dispatch();
     }
 
-    /**
-     *
-     */
     public void redo() {
         if (!redone) {
             int count = changes.size();

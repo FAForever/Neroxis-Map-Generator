@@ -3,9 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.io;
 
-import org.w3c.dom.Node;
-
 import java.util.Map;
+import org.w3c.dom.Node;
 
 /**
  * Codec for ChildChanges. This class is created and registered
@@ -32,9 +31,7 @@ public class GenericChangeCodec extends ObjectCodec {
         this.fieldname = fieldname;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.io.ObjectCodec#afterDecode(com.faforever.neroxis.ngraph.io.Codec, org.w3c.dom.Node, java.lang.Object)
-     */
+
     @Override
     public Object afterDecode(Codec dec, Node node, Object obj) {
         Object cell = getFieldValue(obj, "cell");

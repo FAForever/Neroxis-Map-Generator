@@ -8,16 +8,10 @@ import com.faforever.neroxis.ngraph.util.EventObject;
 import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -26,6 +20,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Extends EventSource to implement a graph model. The graph model acts as
@@ -191,7 +189,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param cell  Cell whose connections should be returned.
      * @return Returns the array of connected edges for the given cell.
      */
-    public static ICell[] getEdges(IGraphModel model, ICell cell) {
+    public static List<ICell> getEdges(IGraphModel model, ICell cell) {
         return getEdges(model, cell, true, true, true);
     }
 
@@ -202,7 +200,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param cell  Cell whose connections should be returned.
      * @return Returns the connected edges for the given cell.
      */
-    public static ICell[] getConnections(IGraphModel model, ICell cell) {
+    public static List<ICell> getConnections(IGraphModel model, ICell cell) {
         return getEdges(model, cell, true, true, false);
     }
 
@@ -213,7 +211,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param cell  Cell whose incoming edges should be returned.
      * @return Returns the incoming edges for the given cell.
      */
-    public static ICell[] getIncomingEdges(IGraphModel model, ICell cell) {
+    public static List<ICell> getIncomingEdges(IGraphModel model, ICell cell) {
         return getEdges(model, cell, true, false, false);
     }
 
@@ -224,7 +222,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param cell  Cell whose outgoing edges should be returned.
      * @return Returns the outgoing edges for the given cell.
      */
-    public static ICell[] getOutgoingEdges(IGraphModel model, ICell cell) {
+    public static List<ICell> getOutgoingEdges(IGraphModel model, ICell cell) {
         return getEdges(model, cell, false, true, false);
     }
 
@@ -238,7 +236,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param includeLoops Specifies if loops should be returned.
      * @return Returns the array of connected edges for the given cell.
      */
-    public static ICell[] getEdges(IGraphModel model, ICell cell, boolean incoming, boolean outgoing, boolean includeLoops) {
+    public static List<ICell> getEdges(IGraphModel model, ICell cell, boolean incoming, boolean outgoing, boolean includeLoops) {
         int edgeCount = model.getEdgeCount(cell);
         List<ICell> result = new ArrayList<>(edgeCount);
 
@@ -252,7 +250,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -263,7 +261,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param target Object that defines the target cell.
      * @return Returns all edges from source to target.
      */
-    public static ICell[] getEdgesBetween(IGraphModel model, ICell source, ICell target) {
+    public static List<ICell> getEdgesBetween(IGraphModel model, ICell source, ICell target) {
         return getEdgesBetween(model, source, target, false);
     }
 
@@ -279,7 +277,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      *                 should be taken into account.
      * @return Returns all edges between the given source and target.
      */
-    public static ICell[] getEdgesBetween(IGraphModel model, ICell source, ICell target, boolean directed) {
+    public static List<ICell> getEdgesBetween(IGraphModel model, ICell source, ICell target, boolean directed) {
         int tmp1 = model.getEdgeCount(source);
         int tmp2 = model.getEdgeCount(target);
 
@@ -310,7 +308,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -321,7 +319,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param terminal Cell that specifies the known end of the edges.
      * @return Returns the opposite cells of the given terminal.
      */
-    public static ICell[] getOpposites(IGraphModel model, ICell[] edges, ICell terminal) {
+    public static List<ICell> getOpposites(IGraphModel model, List<ICell> edges, ICell terminal) {
         return getOpposites(model, edges, terminal, true, true);
     }
 
@@ -339,7 +337,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      *                 be contained in the result. Default is true.
      * @return Returns the array of opposite terminals for the given edges.
      */
-    public static ICell[] getOpposites(IGraphModel model, ICell[] edges, ICell terminal, boolean sources, boolean targets) {
+    public static List<ICell> getOpposites(IGraphModel model, List<ICell> edges, ICell terminal, boolean sources, boolean targets) {
         List<ICell> terminals = new ArrayList<>();
 
         if (edges != null) {
@@ -363,7 +361,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return terminals.toArray(new ICell[0]);
+        return terminals;
     }
 
     /**
@@ -390,7 +388,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param parent Cell whose child vertices or edges should be returned.
      * @return Returns the child vertices and/or edges of the given parent.
      */
-    public static ICell[] getChildren(IGraphModel model, ICell parent) {
+    public static List<ICell> getChildren(IGraphModel model, ICell parent) {
         return getChildCells(model, parent, false, false);
     }
 
@@ -401,7 +399,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param parent Cell whose child vertices should be returned.
      * @return Returns the child vertices of the given parent.
      */
-    public static ICell[] getChildVertices(IGraphModel model, ICell parent) {
+    public static List<ICell> getChildVertices(IGraphModel model, ICell parent) {
         return getChildCells(model, parent, true, false);
     }
 
@@ -412,7 +410,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param parent Cell whose child edges should be returned.
      * @return Returns the child edges of the given parent.
      */
-    public static ICell[] getChildEdges(IGraphModel model, ICell parent) {
+    public static List<ICell> getChildEdges(IGraphModel model, ICell parent) {
         return getChildCells(model, parent, false, true);
     }
 
@@ -427,22 +425,11 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param edges    Boolean indicating if child edges should be returned.
      * @return Returns the child vertices and/or edges of the given parent.
      */
-    public static ICell[] getChildCells(IGraphModel model, ICell parent, boolean vertices, boolean edges) {
-        int childCount = model.getChildCount(parent);
-        List<ICell> result = new ArrayList<>(childCount);
-
-        for (int i = 0; i < childCount; i++) {
-            ICell child = model.getChildAt(parent, i);
-
-            if ((!edges && !vertices) || (edges && model.isEdge(child)) || (vertices && model.isVertex(child))) {
-                result.add(child);
-            }
-        }
-
-        return result.toArray(new ICell[0]);
+    public static List<ICell> getChildCells(IGraphModel model, ICell parent, boolean vertices, boolean edges) {
+        return model.getChildren(parent).stream().filter(child -> (!edges && !vertices) || (edges && model.isEdge(child)) || (vertices && model.isVertex(child))).collect(Collectors.toList());
     }
 
-    public static ICell[] getParents(IGraphModel model, ICell[] cells) {
+    public static List<ICell> getParents(IGraphModel model, List<ICell> cells) {
         HashSet<ICell> parents = new HashSet<>();
 
         if (cells != null) {
@@ -455,14 +442,14 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return parents.toArray(new ICell[0]);
+        return List.copyOf(parents);
     }
 
-    public static ICell[] filterCells(ICell[] cells, Filter filter) {
+    public static List<ICell> filterCells(List<ICell> cells, Filter filter) {
         ArrayList<ICell> result = null;
 
         if (cells != null) {
-            result = new ArrayList<>(cells.length);
+            result = new ArrayList<>(cells.size());
 
             for (ICell cell : cells) {
                 if (filter.filter(cell)) {
@@ -471,28 +458,28 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return (result != null) ? result.toArray(new ICell[0]) : null;
+        return result;
     }
 
     /**
      * Returns a all descendants of the given cell and the cell itself
      * as a collection.
      */
-    public static Collection<ICell> getDescendants(IGraphModel model, ICell parent) {
+    public static List<ICell> getDescendants(IGraphModel model, ICell parent) {
         return filterDescendants(model, null, parent);
     }
 
     /**
      * Creates a collection of cells using the visitor pattern.
      */
-    public static Collection<ICell> filterDescendants(IGraphModel model, Filter filter) {
+    public static List<ICell> filterDescendants(IGraphModel model, Filter filter) {
         return filterDescendants(model, filter, model.getRoot());
     }
 
     /**
      * Creates a collection of cells using the visitor pattern.
      */
-    public static Collection<ICell> filterDescendants(IGraphModel model, Filter filter, ICell parent) {
+    public static List<ICell> filterDescendants(IGraphModel model, Filter filter, ICell parent) {
         List<ICell> result = new ArrayList<>();
 
         if (filter == null || filter.filter(parent)) {
@@ -520,9 +507,9 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * <p>
      * cells - Array of <Cells> whose topmost ancestors should be returned.
      */
-    public static ICell[] getTopmostCells(IGraphModel model, ICell[] cells) {
-        Set<ICell> hash = new HashSet<>(Arrays.asList(cells));
-        List<ICell> result = new ArrayList<>(cells.length);
+    public static List<ICell> getTopmostCells(IGraphModel model, List<ICell> cells) {
+        Set<ICell> hash = new HashSet<>(cells);
+        List<ICell> result = new ArrayList<>(cells.size());
 
         for (ICell cell : cells) {
             boolean topmost = true;
@@ -542,7 +529,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             }
         }
 
-        return result.toArray(new ICell[0]);
+        return result;
     }
 
     /**
@@ -630,16 +617,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         createIds = value;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getRoot()
-     */
+
     public ICell getRoot() {
         return root;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setRoot(Object)
-     */
+
     public ICell setRoot(ICell root) {
         execute(new RootChange(this, root));
 
@@ -674,23 +657,21 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         };
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#cloneCells(Object[], boolean)
-     */
-    public ICell[] cloneCells(ICell[] cells, boolean includeChildren) {
-        Map<ICell, ICell> mapping = new HashMap<>();
-        ICell[] clones = new ICell[cells.length];
 
-        for (int i = 0; i < cells.length; i++) {
+    public List<ICell> cloneCells(List<ICell> cells, boolean includeChildren) {
+        Map<ICell, ICell> mapping = new HashMap<>();
+        List<ICell> clones = new ArrayList<>();
+
+        for (ICell cell : cells) {
             try {
-                clones[i] = cloneCell(cells[i], mapping, includeChildren);
+                clones.add(cloneCell(cell, mapping, includeChildren));
             } catch (CloneNotSupportedException e) {
                 log.log(Level.SEVERE, "Failed to clone cells", e);
             }
         }
 
-        for (int i = 0; i < cells.length; i++) {
-            restoreClone(clones[i], cells[i], mapping);
+        for (int i = 0; i < cells.size(); i++) {
+            restoreClone(clones.get(i), cells.get(i), mapping);
         }
 
         return clones;
@@ -757,9 +738,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isAncestor(Object, Object)
-     */
+
     public boolean isAncestor(ICell parent, ICell child) {
         while (child != null && child != parent) {
             child = getParent(child);
@@ -768,23 +747,17 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return child == parent;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#contains(Object)
-     */
+
     public boolean contains(ICell cell) {
         return isAncestor(getRoot(), cell);
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getParent(Object)
-     */
+
     public ICell getParent(ICell child) {
         return (child != null) ? child.getParent() : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#add(Object, Object, int)
-     */
+
     public ICell add(ICell parent, ICell child, int index) {
         if (child != parent && parent != null && child != null) {
             boolean parentChanged = parent != getParent(child);
@@ -863,9 +836,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#remove(Object)
-     */
+
     public ICell remove(ICell cell) {
         if (cell == root) {
             setRoot(null);
@@ -925,30 +896,25 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return previous;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getChildCount(Object)
-     */
+    public List<ICell> getChildren(ICell cell) {
+        return (cell != null) ? cell.getChildren() : List.of();
+    }
+
     public int getChildCount(ICell cell) {
         return (cell != null) ? cell.getChildCount() : 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getChildAt(Object, int)
-     */
+
     public ICell getChildAt(ICell parent, int index) {
         return (parent != null) ? parent.getChildAt(index) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getTerminal(Object, boolean)
-     */
+
     public ICell getTerminal(ICell edge, boolean isSource) {
         return (edge != null) ? edge.getTerminal(isSource) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setTerminal(Object, Object, boolean)
-     */
+
     public ICell setTerminal(ICell edge, ICell terminal, boolean isSource) {
         boolean terminalChanged = terminal != getTerminal(edge, isSource);
         execute(new TerminalChange(this, edge, terminal, isSource));
@@ -1063,7 +1029,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
                     double dx = origin2.getX() - origin1.getX();
                     double dy = origin2.getY() - origin1.getY();
 
-                    geo = (Geometry) geo.clone();
+                    geo = geo.clone();
                     geo.translate(-dx, -dy);
                     setGeometry(edge, geo);
                 }
@@ -1134,51 +1100,37 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getEdgeCount(Object)
-     */
+
     public int getEdgeCount(ICell cell) {
         return (cell != null) ? cell.getEdgeCount() : 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getEdgeAt(Object, int)
-     */
+
     public ICell getEdgeAt(ICell parent, int index) {
         return (parent != null) ? parent.getEdgeAt(index) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isVertex(Object)
-     */
+
     public boolean isVertex(ICell cell) {
         return cell != null && cell.isVertex();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isEdge(Object)
-     */
+
     public boolean isEdge(ICell cell) {
         return cell != null && cell.isEdge();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isConnectable(Object)
-     */
+
     public boolean isConnectable(ICell cell) {
         return cell == null || cell.isConnectable();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getValue(Object)
-     */
+
     public Object getValue(ICell cell) {
         return (cell != null) ? cell.getValue() : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setValue(Object, Object)
-     */
+
     public Object setValue(ICell cell, Object value) {
         execute(new ValueChange(this, cell, value));
 
@@ -1197,16 +1149,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return oldValue;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getGeometry(Object)
-     */
+
     public Geometry getGeometry(ICell cell) {
         return (cell != null) ? cell.getGeometry() : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setGeometry(Object, Geometry)
-     */
+
     public Geometry setGeometry(ICell cell, Geometry geometry) {
         if (geometry != getGeometry(cell)) {
             execute(new GeometryChange(this, cell, geometry));
@@ -1226,16 +1174,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return previous;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#getStyle(Object)
-     */
+
     public String getStyle(ICell cell) {
         return (cell != null) ? cell.getStyle() : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setStyle(Object, String)
-     */
+
     public String setStyle(ICell cell, String style) {
         if (style == null || !style.equals(getStyle(cell))) {
             execute(new StyleChange(this, cell, style));
@@ -1255,16 +1199,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return previous;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isCollapsed(Object)
-     */
+
     public boolean isCollapsed(ICell cell) {
         return cell != null && cell.isCollapsed();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setCollapsed(Object, boolean)
-     */
+
     public boolean setCollapsed(ICell cell, boolean collapsed) {
         if (collapsed != isCollapsed(cell)) {
             execute(new CollapseChange(this, cell, collapsed));
@@ -1285,16 +1225,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return previous;
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#isVisible(Object)
-     */
+
     public boolean isVisible(ICell cell) {
         return cell != null && cell.isVisible();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#setVisible(Object, boolean)
-     */
+
     public boolean setVisible(ICell cell, boolean visible) {
         if (visible != isVisible(cell)) {
             execute(new VisibleChange(this, cell, visible));
@@ -1327,17 +1263,13 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         endUpdate();
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#beginUpdate()
-     */
+
     public void beginUpdate() {
         updateLevel++;
         fireEvent(new EventObject(Event.BEGIN_UPDATE));
     }
 
-    /* (non-Javadoc)
-     * @see com.faforever.neroxis.ngraph.model.IGraphModel#endUpdate()
-     */
+
     public void endUpdate() {
         updateLevel--;
 
