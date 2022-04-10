@@ -4,8 +4,8 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 
 /**
@@ -20,16 +20,13 @@ public class Perimeter {
      * Describes a rectangular perimeter for the given bounds.
      */
     public static PerimeterFunction RectanglePerimeter = new PerimeterFunction() {
-
-
-        public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
+        public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
             double cx = bounds.getCenterX();
             double cy = bounds.getCenterY();
             double dx = next.getX() - cx;
             double dy = next.getY() - cy;
             double alpha = Math.atan2(dy, dx);
-
-            Point p = new Point();
+            PointDouble p = new PointDouble();
             double pi = Math.PI;
             double pi2 = Math.PI / 2;
             double beta = pi2 - alpha;
@@ -81,9 +78,7 @@ public class Perimeter {
      * Describes an elliptic perimeter.
      */
     public static PerimeterFunction EllipsePerimeter = new PerimeterFunction() {
-
-
-        public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
+        public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
             double x = bounds.getX();
             double y = bounds.getY();
             double a = bounds.getWidth() / 2;
@@ -92,16 +87,15 @@ public class Perimeter {
             double cy = y + b;
             double px = next.getX();
             double py = next.getY();
-
             // Calculates straight line equation through
             // point and ellipse center y = d * x + h
             double dx = px - cx;
             double dy = py - cy;
 
             if (dx == 0 && dy != 0) {
-                return new Point(cx, cy + b * dy / Math.abs(dy));
+                return new PointDouble(cx, cy + b * dy / Math.abs(dy));
             } else if (dx == 0 && dy == 0) {
-                return new Point(px, py);
+                return new PointDouble(px, py);
             }
 
             if (orthogonal) {
@@ -116,8 +110,7 @@ public class Perimeter {
                     if (px <= x) {
                         tx = -tx;
                     }
-
-                    return new Point(cx + tx, py);
+                    return new PointDouble(cx + tx, py);
                 }
 
                 if (px >= x && px <= x + bounds.getWidth()) {
@@ -131,8 +124,7 @@ public class Perimeter {
                     if (py <= y) {
                         ty = -ty;
                     }
-
-                    return new Point(px, cy + ty);
+                    return new PointDouble(px, cy + ty);
                 }
             }
 
@@ -163,8 +155,7 @@ public class Perimeter {
                 xout = xout2;
                 yout = yout2;
             }
-
-            return new Point(xout, yout);
+            return new PointDouble(xout, yout);
         }
 
     };
@@ -172,32 +163,28 @@ public class Perimeter {
      * Describes a rhombus (aka diamond) perimeter.
      */
     public static PerimeterFunction RhombusPerimeter = new PerimeterFunction() {
-
-
-        public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
+        public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
             double x = bounds.getX();
             double y = bounds.getY();
             double w = bounds.getWidth();
             double h = bounds.getHeight();
-
             double cx = x + w / 2;
             double cy = y + h / 2;
-
             double px = next.getX();
             double py = next.getY();
 
             // Special case for intersecting the diamond's corners
             if (cx == px) {
                 if (cy > py) {
-                    return new Point(cx, y); // top
+                    return new PointDouble(cx, y); // top
                 } else {
-                    return new Point(cx, y + h); // bottom
+                    return new PointDouble(cx, y + h); // bottom
                 }
             } else if (cy == py) {
                 if (cx > px) {
-                    return new Point(x, cy); // left
+                    return new PointDouble(x, cy); // left
                 } else {
-                    return new Point(x + w, cy); // right
+                    return new PointDouble(x + w, cy); // right
                 }
             }
 
@@ -233,35 +220,29 @@ public class Perimeter {
      * for a description of the parameters.
      */
     public static PerimeterFunction TrianglePerimeter = new PerimeterFunction() {
-
-
-        public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
+        public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
             Object direction = (vertex != null) ? Utils.getString(vertex.style, Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST) : Constants.DIRECTION_EAST;
             boolean vertical = direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH);
-
             double x = bounds.getX();
             double y = bounds.getY();
             double w = bounds.getWidth();
             double h = bounds.getHeight();
-
             double cx = x + w / 2;
             double cy = y + h / 2;
-
-            Point start = new Point(x, y);
-            Point corner = new Point(x + w, cy);
-            Point end = new Point(x, y + h);
-
+            PointDouble start = new PointDouble(x, y);
+            PointDouble corner = new PointDouble(x + w, cy);
+            PointDouble end = new PointDouble(x, y + h);
             if (direction.equals(Constants.DIRECTION_NORTH)) {
                 start = end;
-                corner = new Point(cx, y);
-                end = new Point(x + w, y + h);
+                corner = new PointDouble(cx, y);
+                end = new PointDouble(x + w, y + h);
             } else if (direction.equals(Constants.DIRECTION_SOUTH)) {
-                corner = new Point(cx, y + h);
-                end = new Point(x + w, y);
+                corner = new PointDouble(cx, y + h);
+                end = new PointDouble(x + w, y);
             } else if (direction.equals(Constants.DIRECTION_WEST)) {
-                start = new Point(x + w, y);
-                corner = new Point(x, cy);
-                end = new Point(x + w, y + h);
+                start = new PointDouble(x + w, y);
+                corner = new PointDouble(x, cy);
+                end = new PointDouble(x + w, y + h);
             }
 
             // Compute angle
@@ -278,30 +259,29 @@ public class Perimeter {
             } else {
                 base = alpha < -Math.PI + t || alpha > Math.PI - t;
             }
-
-            Point result = null;
+            PointDouble result = null;
 
             if (base) {
                 if (orthogonal && ((vertical && next.getX() >= start.getX() && next.getX() <= end.getX()) || (!vertical && next.getY() >= start.getY() && next.getY() <= end.getY()))) {
                     if (vertical) {
-                        result = new Point(next.getX(), start.getY());
+                        result = new PointDouble(next.getX(), start.getY());
                     } else {
-                        result = new Point(start.getX(), next.getY());
+                        result = new PointDouble(start.getX(), next.getY());
                     }
                 } else {
                     if (direction.equals(Constants.DIRECTION_EAST)) {
-                        result = new Point(x, y + h / 2 - w * Math.tan(alpha) / 2);
+                        result = new PointDouble(x, y + h / 2 - w * Math.tan(alpha) / 2);
                     } else if (direction.equals(Constants.DIRECTION_NORTH)) {
-                        result = new Point(x + w / 2 + h * Math.tan(alpha) / 2, y + h);
+                        result = new PointDouble(x + w / 2 + h * Math.tan(alpha) / 2, y + h);
                     } else if (direction.equals(Constants.DIRECTION_SOUTH)) {
-                        result = new Point(x + w / 2 - h * Math.tan(alpha) / 2, y);
+                        result = new PointDouble(x + w / 2 - h * Math.tan(alpha) / 2, y);
                     } else if (direction.equals(Constants.DIRECTION_WEST)) {
-                        result = new Point(x + w, y + h / 2 + w * Math.tan(alpha) / 2);
+                        result = new PointDouble(x + w, y + h / 2 + w * Math.tan(alpha) / 2);
                     }
                 }
             } else {
                 if (orthogonal) {
-                    Point pt = new Point(cx, cy);
+                    PointDouble pt = new PointDouble(cx, cy);
 
                     if (next.getY() >= y && next.getY() <= y + h) {
                         pt.setX((vertical) ? cx : ((direction.equals(Constants.DIRECTION_WEST)) ? x + w : x));
@@ -327,7 +307,7 @@ public class Perimeter {
             }
 
             if (result == null) {
-                result = new Point(cx, cy);
+                result = new PointDouble(cx, cy);
             }
 
             return result;
@@ -339,12 +319,11 @@ public class Perimeter {
      * for a description of the parameters.
      */
     public static PerimeterFunction HexagonPerimeter = new PerimeterFunction() {
-        public Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal) {
+        public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
             double x = bounds.getX();
             double y = bounds.getY();
             double w = bounds.getWidth();
             double h = bounds.getHeight();
-
             double cx = bounds.getCenterX();
             double cy = bounds.getCenterY();
             double px = next.getX();
@@ -354,80 +333,76 @@ public class Perimeter {
             double alpha = -Math.atan2(dy, dx);
             double pi = Math.PI;
             double pi2 = Math.PI / 2;
-
-            Point result = new Point(cx, cy);
-
+            PointDouble result = new PointDouble(cx, cy);
             Object direction = (vertex != null) ? Utils.getString(vertex.style, Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST) : Constants.DIRECTION_EAST;
             boolean vertical = direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH);
-            Point a = new Point();
-            Point b = new Point();
-
+            PointDouble a = new PointDouble();
+            PointDouble b = new PointDouble();
             //Only consider corrects quadrants for the orthogonal case.
             if ((px < x) && (py < y) || (px < x) && (py > y + h) || (px > x + w) && (py < y) || (px > x + w) && (py > y + h)) {
                 orthogonal = false;
             }
-
             if (orthogonal) {
                 if (vertical) {
                     //Special cases where intersects with hexagon corners
                     if (px == cx) {
                         if (py <= y) {
-                            return new Point(cx, y);
+                            return new PointDouble(cx, y);
                         } else if (py >= y + h) {
-                            return new Point(cx, y + h);
+                            return new PointDouble(cx, y + h);
                         }
                     } else if (px < x) {
                         if (py == y + h / 4) {
-                            return new Point(x, y + h / 4);
+                            return new PointDouble(x, y + h / 4);
                         } else if (py == y + 3 * h / 4) {
-                            return new Point(x, y + 3 * h / 4);
+                            return new PointDouble(x, y + 3 * h / 4);
                         }
                     } else if (px > x + w) {
                         if (py == y + h / 4) {
-                            return new Point(x + w, y + h / 4);
+                            return new PointDouble(x + w, y + h / 4);
                         } else if (py == y + 3 * h / 4) {
-                            return new Point(x + w, y + 3 * h / 4);
+                            return new PointDouble(x + w, y + 3 * h / 4);
                         }
                     } else if (px == x) {
                         if (py < cy) {
-                            return new Point(x, y + h / 4);
+                            return new PointDouble(x, y + h / 4);
                         } else if (py > cy) {
-                            return new Point(x, y + 3 * h / 4);
+                            return new PointDouble(x, y + 3 * h / 4);
                         }
                     } else if (px == x + w) {
                         if (py < cy) {
-                            return new Point(x + w, y + h / 4);
+                            return new PointDouble(x + w, y + h / 4);
                         } else if (py > cy) {
-                            return new Point(x + w, y + 3 * h / 4);
+                            return new PointDouble(x + w, y + 3 * h / 4);
                         }
                     }
                     if (py == y) {
-                        return new Point(cx, y);
+                        return new PointDouble(cx, y);
                     } else if (py == y + h) {
-                        return new Point(cx, y + h);
+                        return new PointDouble(cx, y + h);
                     }
 
                     if (px < cx) {
                         if ((py > y + h / 4) && (py < y + 3 * h / 4)) {
-                            a = new Point(x, y);
-                            b = new Point(x, y + h);
+                            a = new PointDouble(x, y);
+                            b = new PointDouble(x, y + h);
                         } else if (py < y + h / 4) {
-                            a = new Point(x - (int) (0.5 * w), y + (int) (0.5 * h));
-                            b = new Point(x + w, y - (int) (0.25 * h));
+                            a = new PointDouble(x - (int) (0.5 * w), y + (int) (0.5 * h));
+                            b = new PointDouble(x + w, y - (int) (0.25 * h));
                         } else if (py > y + 3 * h / 4) {
-                            a = new Point(x - (int) (0.5 * w), y + (int) (0.5 * h));
-                            b = new Point(x + w, y + (int) (1.25 * h));
+                            a = new PointDouble(x - (int) (0.5 * w), y + (int) (0.5 * h));
+                            b = new PointDouble(x + w, y + (int) (1.25 * h));
                         }
                     } else if (px > cx) {
                         if ((py > y + h / 4) && (py < y + 3 * h / 4)) {
-                            a = new Point(x + w, y);
-                            b = new Point(x + w, y + h);
+                            a = new PointDouble(x + w, y);
+                            b = new PointDouble(x + w, y + h);
                         } else if (py < y + h / 4) {
-                            a = new Point(x, y - (int) (0.25 * h));
-                            b = new Point(x + (int) (1.5 * w), y + (int) (0.5 * h));
+                            a = new PointDouble(x, y - (int) (0.25 * h));
+                            b = new PointDouble(x + (int) (1.5 * w), y + (int) (0.5 * h));
                         } else if (py > y + 3 * h / 4) {
-                            a = new Point(x + (int) (1.5 * w), y + (int) (0.5 * h));
-                            b = new Point(x, y + (int) (1.25 * h));
+                            a = new PointDouble(x + (int) (1.5 * w), y + (int) (0.5 * h));
+                            b = new PointDouble(x, y + (int) (1.25 * h));
                         }
                     }
 
@@ -435,62 +410,62 @@ public class Perimeter {
                     //Special cases where intersects with hexagon corners
                     if (py == cy) {
                         if (px <= x) {
-                            return new Point(x, y + h / 2);
+                            return new PointDouble(x, y + h / 2);
                         } else if (px >= x + w) {
-                            return new Point(x + w, y + h / 2);
+                            return new PointDouble(x + w, y + h / 2);
                         }
                     } else if (py < y) {
                         if (px == x + w / 4) {
-                            return new Point(x + w / 4, y);
+                            return new PointDouble(x + w / 4, y);
                         } else if (px == x + 3 * w / 4) {
-                            return new Point(x + 3 * w / 4, y);
+                            return new PointDouble(x + 3 * w / 4, y);
                         }
                     } else if (py > y + h) {
                         if (px == x + w / 4) {
-                            return new Point(x + w / 4, y + h);
+                            return new PointDouble(x + w / 4, y + h);
                         } else if (px == x + 3 * w / 4) {
-                            return new Point(x + 3 * w / 4, y + h);
+                            return new PointDouble(x + 3 * w / 4, y + h);
                         }
                     } else if (py == y) {
                         if (px < cx) {
-                            return new Point(x + w / 4, y);
+                            return new PointDouble(x + w / 4, y);
                         } else if (px > cx) {
-                            return new Point(x + 3 * w / 4, y);
+                            return new PointDouble(x + 3 * w / 4, y);
                         }
                     } else if (py == y + h) {
                         if (px < cx) {
-                            return new Point(x + w / 4, y + h);
+                            return new PointDouble(x + w / 4, y + h);
                         } else if (py > cy) {
-                            return new Point(x + 3 * w / 4, y + h);
+                            return new PointDouble(x + 3 * w / 4, y + h);
                         }
                     }
                     if (px == x) {
-                        return new Point(x, cy);
+                        return new PointDouble(x, cy);
                     } else if (px == x + w) {
-                        return new Point(x + w, cy);
+                        return new PointDouble(x + w, cy);
                     }
 
                     if (py < cy) {
                         if ((px > x + w / 4) && (px < x + 3 * w / 4)) {
-                            a = new Point(x, y);
-                            b = new Point(x + w, y);
+                            a = new PointDouble(x, y);
+                            b = new PointDouble(x + w, y);
                         } else if (px < x + w / 4) {
-                            a = new Point(x - (int) (0.25 * w), y + h);
-                            b = new Point(x + (int) (0.5 * w), y - (int) (0.5 * h));
+                            a = new PointDouble(x - (int) (0.25 * w), y + h);
+                            b = new PointDouble(x + (int) (0.5 * w), y - (int) (0.5 * h));
                         } else if (px > x + 3 * w / 4) {
-                            a = new Point(x + (int) (0.5 * w), y - (int) (0.5 * h));
-                            b = new Point(x + (int) (1.25 * w), y + h);
+                            a = new PointDouble(x + (int) (0.5 * w), y - (int) (0.5 * h));
+                            b = new PointDouble(x + (int) (1.25 * w), y + h);
                         }
                     } else if (py > cy) {
                         if ((px > x + w / 4) && (px < x + 3 * w / 4)) {
-                            a = new Point(x, y + h);
-                            b = new Point(x + w, y + h);
+                            a = new PointDouble(x, y + h);
+                            b = new PointDouble(x + w, y + h);
                         } else if (px < x + w / 4) {
-                            a = new Point(x - (int) (0.25 * w), y);
-                            b = new Point(x + (int) (0.5 * w), y + (int) (1.5 * h));
+                            a = new PointDouble(x - (int) (0.25 * w), y);
+                            b = new PointDouble(x + (int) (0.5 * w), y + (int) (1.5 * h));
                         } else if (px > x + 3 * w / 4) {
-                            a = new Point(x + (int) (0.5 * w), y + (int) (1.5 * h));
-                            b = new Point(x + (int) (1.25 * w), y);
+                            a = new PointDouble(x + (int) (0.5 * w), y + (int) (1.5 * h));
+                            b = new PointDouble(x + (int) (1.25 * w), y);
                         }
                     }
                 }
@@ -521,81 +496,81 @@ public class Perimeter {
 
                     //Special cases where intersects with hexagon corners
                     if (alpha == beta) {
-                        return new Point(x + w, y + (int) (0.25 * h));
+                        return new PointDouble(x + w, y + (int) (0.25 * h));
                     } else if (alpha == pi2) {
-                        return new Point(x + (int) (0.5 * w), y);
+                        return new PointDouble(x + (int) (0.5 * w), y);
                     } else if (alpha == (pi - beta)) {
-                        return new Point(x, y + (int) (0.25 * h));
+                        return new PointDouble(x, y + (int) (0.25 * h));
                     } else if (alpha == -beta) {
-                        return new Point(x + w, y + (int) (0.75 * h));
+                        return new PointDouble(x + w, y + (int) (0.75 * h));
                     } else if (alpha == (-pi2)) {
-                        return new Point(x + (int) (0.5 * w), y + h);
+                        return new PointDouble(x + (int) (0.5 * w), y + h);
                     } else if (alpha == (-pi + beta)) {
-                        return new Point(x, y + (int) (0.75 * h));
+                        return new PointDouble(x, y + (int) (0.75 * h));
                     }
 
                     if ((alpha < beta) && (alpha > -beta)) {
-                        a = new Point(x + w, y);
-                        b = new Point(x + w, y + h);
+                        a = new PointDouble(x + w, y);
+                        b = new PointDouble(x + w, y + h);
                     } else if ((alpha > beta) && (alpha < pi2)) {
-                        a = new Point(x, y - (int) (0.25 * h));
-                        b = new Point(x + (int) (1.5 * w), y + (int) (0.5 * h));
+                        a = new PointDouble(x, y - (int) (0.25 * h));
+                        b = new PointDouble(x + (int) (1.5 * w), y + (int) (0.5 * h));
                     } else if ((alpha > pi2) && (alpha < (pi - beta))) {
-                        a = new Point(x - (int) (0.5 * w), y + (int) (0.5 * h));
-                        b = new Point(x + w, y - (int) (0.25 * h));
+                        a = new PointDouble(x - (int) (0.5 * w), y + (int) (0.5 * h));
+                        b = new PointDouble(x + w, y - (int) (0.25 * h));
                     } else if (((alpha > (pi - beta)) && (alpha <= pi)) || ((alpha < (-pi + beta)) && (alpha >= -pi))) {
-                        a = new Point(x, y);
-                        b = new Point(x, y + h);
+                        a = new PointDouble(x, y);
+                        b = new PointDouble(x, y + h);
                     } else if ((alpha < -beta) && (alpha > -pi2)) {
-                        a = new Point(x + (int) (1.5 * w), y + (int) (0.5 * h));
-                        b = new Point(x, y + (int) (1.25 * h));
+                        a = new PointDouble(x + (int) (1.5 * w), y + (int) (0.5 * h));
+                        b = new PointDouble(x, y + (int) (1.25 * h));
                     } else if ((alpha < -pi2) && (alpha > (-pi + beta))) {
-                        a = new Point(x - (int) (0.5 * w), y + (int) (0.5 * h));
-                        b = new Point(x + w, y + (int) (1.25 * h));
+                        a = new PointDouble(x - (int) (0.5 * w), y + (int) (0.5 * h));
+                        b = new PointDouble(x + w, y + (int) (1.25 * h));
                     }
                 } else {
                     double beta = Math.atan2(h / 2, w / 4);
 
                     //Special cases where intersects with hexagon corners
                     if (alpha == beta) {
-                        return new Point(x + (int) (0.75 * w), y);
+                        return new PointDouble(x + (int) (0.75 * w), y);
                     } else if (alpha == (pi - beta)) {
-                        return new Point(x + (int) (0.25 * w), y);
+                        return new PointDouble(x + (int) (0.25 * w), y);
                     } else if ((alpha == pi) || (alpha == -pi)) {
-                        return new Point(x, y + (int) (0.5 * h));
+                        return new PointDouble(x, y + (int) (0.5 * h));
                     } else if (alpha == 0) {
-                        return new Point(x + w, y + (int) (0.5 * h));
+                        return new PointDouble(x + w, y + (int) (0.5 * h));
                     } else if (alpha == -beta) {
-                        return new Point(x + (int) (0.75 * w), y + h);
+                        return new PointDouble(x + (int) (0.75 * w), y + h);
                     } else if (alpha == (-pi + beta)) {
-                        return new Point(x + (int) (0.25 * w), y + h);
+                        return new PointDouble(x + (int) (0.25 * w), y + h);
                     }
 
                     if ((alpha > 0) && (alpha < beta)) {
-                        a = new Point(x + (int) (0.5 * w), y - (int) (0.5 * h));
-                        b = new Point(x + (int) (1.25 * w), y + h);
+                        a = new PointDouble(x + (int) (0.5 * w), y - (int) (0.5 * h));
+                        b = new PointDouble(x + (int) (1.25 * w), y + h);
                     } else if ((alpha > beta) && (alpha < (pi - beta))) {
-                        a = new Point(x, y);
-                        b = new Point(x + w, y);
+                        a = new PointDouble(x, y);
+                        b = new PointDouble(x + w, y);
                     } else if ((alpha > (pi - beta)) && (alpha < pi)) {
-                        a = new Point(x - (int) (0.25 * w), y + h);
-                        b = new Point(x + (int) (0.5 * w), y - (int) (0.5 * h));
+                        a = new PointDouble(x - (int) (0.25 * w), y + h);
+                        b = new PointDouble(x + (int) (0.5 * w), y - (int) (0.5 * h));
                     } else if ((alpha < 0) && (alpha > -beta)) {
-                        a = new Point(x + (int) (0.5 * w), y + (int) (1.5 * h));
-                        b = new Point(x + (int) (1.25 * w), y);
+                        a = new PointDouble(x + (int) (0.5 * w), y + (int) (1.5 * h));
+                        b = new PointDouble(x + (int) (1.25 * w), y);
                     } else if ((alpha < -beta) && (alpha > (-pi + beta))) {
-                        a = new Point(x, y + h);
-                        b = new Point(x + w, y + h);
+                        a = new PointDouble(x, y + h);
+                        b = new PointDouble(x + w, y + h);
                     } else if ((alpha < (-pi + beta)) && (alpha > -pi)) {
-                        a = new Point(x - (int) (0.25 * w), y);
-                        b = new Point(x + (int) (0.5 * w), y + (int) (1.5 * h));
+                        a = new PointDouble(x - (int) (0.25 * w), y);
+                        b = new PointDouble(x + (int) (0.5 * w), y + (int) (1.5 * h));
                     }
                 }
 
                 result = Utils.intersection(cx, cy, next.getX(), next.getY(), a.getX(), a.getY(), b.getX(), b.getY());
             }
             if (result == null) {
-                return new Point(cx, cy);
+                return new PointDouble(cx, cy);
             }
             return result;
         }
@@ -620,7 +595,7 @@ public class Perimeter {
          *                   returned.
          * @return Returns the perimeter point.
          */
-        Point apply(Rectangle bounds, CellState vertex, Point next, boolean orthogonal);
+        PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal);
 
     }
 }

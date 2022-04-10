@@ -12,8 +12,8 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.ngraph.layout.hierarchical.SingleLayerHierarchicalLayout;
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
@@ -93,7 +93,7 @@ public strictfp class PipelinePanel extends JPanel {
             } else {
                 graphComponent.zoomOut();
             }
-            Point rawPoint = graphComponent.getPointForEvent(e);
+            PointDouble rawPoint = graphComponent.getPointForEvent(e);
             graphComponent.scrollRectToVisible(new java.awt.Rectangle((int) rawPoint.getX(), (int) rawPoint.getY(), 0, 0));
         });
 
@@ -311,8 +311,8 @@ public strictfp class PipelinePanel extends JPanel {
             ICell target = edge.getTarget();
             ICell source = edge.getSource();
             ICell parentEdge = graph.getEdgesBetween(cell, target.getParent()).stream().findFirst().orElseThrow(() -> new IllegalStateException("No parent"));
-            Rectangle sourceBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
-            Rectangle targetBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
+            RectangleDouble sourceBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
+            RectangleDouble targetBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
             edge.getGeometry().setPoints(parentEdge.getGeometry().getPoints().stream().filter(point -> !sourceBoundingBox.contains(point.getX(), point.getY()) && !targetBoundingBox.contains(point.getX(), point.getY())).collect(Collectors.toList()));
             edge.setTarget(target);
             edge.setSource(source);

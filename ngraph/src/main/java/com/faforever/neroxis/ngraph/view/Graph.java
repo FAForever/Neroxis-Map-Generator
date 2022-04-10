@@ -51,8 +51,8 @@ import com.faforever.neroxis.ngraph.model.GraphModel.VisibleChange;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.StyleUtils;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
@@ -341,19 +341,17 @@ public class Graph extends EventSource {
      * after an edit. Default is false.
      */
     protected boolean autoSizeCells = false;
-
     /**
      * <Rectangle> that specifies the area in which all cells in the
      * diagram should be placed. Uses in getMaximumGraphBounds. Use a width
      * or height of 0 if you only want to give a upper, left corner.
      */
-    protected Rectangle maximumGraphBounds = null;
-
+    protected RectangleDouble maximumGraphBounds = null;
     /**
      * Rectangle that specifies the minimum size of the graph canvas inside
      * the scrollpane.
      */
-    protected Rectangle minimumGraphSize = null;
+    protected RectangleDouble minimumGraphSize = null;
 
     /**
      * Border to be added to the bottom and right side when the container is
@@ -493,7 +491,6 @@ public class Graph extends EventSource {
      * for any number of changes. Default is 1000.
      */
     protected int changesRepaintThreshold = 1000;
-
     /**
      * Specifies if the origin should be automatically updated.
      */
@@ -501,7 +498,7 @@ public class Graph extends EventSource {
     /**
      * Holds the current automatic origin.
      */
-    protected Point origin = new Point();
+    protected PointDouble origin = new PointDouble();
     /**
      * Fires repaint events for full repaints.
      */
@@ -518,7 +515,7 @@ public class Graph extends EventSource {
      * Fires repaint events for model changes.
      */
     protected IEventListener<ChangeEvent> graphModelChangeHandler = (sender, evt) -> {
-        Rectangle dirty = graphModelChanged((IGraphModel) sender, evt.getEdit().getChanges());
+        RectangleDouble dirty = graphModelChanged((IGraphModel) sender, evt.getEdit().getChanges());
         repaint(dirty);
     };
 
@@ -702,13 +699,11 @@ public class Graph extends EventSource {
      * Called when the graph model changes. Invokes processChange on each
      * item of the given array to update the view accordingly.
      */
-    public Rectangle graphModelChanged(IGraphModel sender, List<UndoableChange> changes) {
+    public RectangleDouble graphModelChanged(IGraphModel sender, List<UndoableChange> changes) {
         int thresh = getChangesRepaintThreshold();
         boolean ignoreDirty = thresh > 0 && changes.size() > thresh;
-
         // Ignores dirty rectangle if there was a root change
         if (!ignoreDirty) {
-
             for (UndoableChange change : changes) {
                 if (change instanceof RootChange) {
                     ignoreDirty = true;
@@ -716,8 +711,7 @@ public class Graph extends EventSource {
                 }
             }
         }
-
-        Rectangle dirty = processChanges(changes, true, ignoreDirty);
+        RectangleDouble dirty = processChanges(changes, true, ignoreDirty);
         view.validate();
 
         if (isAutoOrigin()) {
@@ -725,7 +719,7 @@ public class Graph extends EventSource {
         }
 
         if (!ignoreDirty) {
-            Rectangle tmp = processChanges(changes, false, ignoreDirty);
+            RectangleDouble tmp = processChanges(changes, false, ignoreDirty);
 
             if (tmp != null) {
                 if (dirty == null) {
@@ -760,7 +754,7 @@ public class Graph extends EventSource {
      * while the second validation is required to apply the new translate.
      */
     protected void updateOrigin() {
-        Rectangle bounds = getGraphBounds();
+        RectangleDouble bounds = getGraphBounds();
 
         if (bounds != null) {
             double scale = getView().getScale();
@@ -770,21 +764,17 @@ public class Graph extends EventSource {
             if (x < 0 || y < 0) {
                 double x0 = Math.min(0, x);
                 double y0 = Math.min(0, y);
-
                 origin.setX(origin.getX() + x0);
                 origin.setY(origin.getY() + y0);
-
-                Point t = getView().getTranslate();
-                getView().setTranslate(new Point(t.getX() - x0, t.getY() - y0));
+                PointDouble t = getView().getTranslate();
+                getView().setTranslate(new PointDouble(t.getX() - x0, t.getY() - y0));
             } else if ((x > 0 || y > 0) && (origin.getX() < 0 || origin.getY() < 0)) {
                 double dx = Math.min(-origin.getX(), x);
                 double dy = Math.min(-origin.getY(), y);
-
                 origin.setX(origin.getX() + dx);
                 origin.setY(origin.getY() + dy);
-
-                Point t = getView().getTranslate();
-                getView().setTranslate(new Point(t.getX() - dx, t.getY() - dy));
+                PointDouble t = getView().getTranslate();
+                getView().setTranslate(new PointDouble(t.getX() - dx, t.getY() - dy));
             }
         }
     }
@@ -794,12 +784,10 @@ public class Graph extends EventSource {
      * repainted in the buffer. A return value of null means no repaint
      * is required.
      */
-    public Rectangle processChanges(List<UndoableChange> changes, boolean invalidate, boolean ignoreDirty) {
-        Rectangle bounds = null;
-
+    public RectangleDouble processChanges(List<UndoableChange> changes, boolean invalidate, boolean ignoreDirty) {
+        RectangleDouble bounds = null;
         for (UndoableChange change : changes) {
-            Rectangle rect = processChange(change, invalidate, ignoreDirty);
-
+            RectangleDouble rect = processChange(change, invalidate, ignoreDirty);
             if (bounds == null) {
                 bounds = rect;
             } else {
@@ -815,16 +803,13 @@ public class Graph extends EventSource {
      * in <view>. This fires a <root> event if the root has changed in the
      * model.
      */
-    public Rectangle processChange(UndoableChange change, boolean invalidate, boolean ignoreDirty) {
-        Rectangle result = null;
-
+    public RectangleDouble processChange(UndoableChange change, boolean invalidate, boolean ignoreDirty) {
+        RectangleDouble result = null;
         if (change instanceof RootChange) {
             result = (ignoreDirty) ? null : getGraphBounds();
-
             if (invalidate) {
                 clearSelection();
                 removeStateForCell(((RootChange) change).getPrevious());
-
                 if (isResetViewOnRootChange()) {
                     view.setEventsEnabled(false);
 
@@ -1452,8 +1437,7 @@ public class Graph extends EventSource {
         if (group == null) {
             group = createGroupCell(cells);
         }
-
-        Rectangle bounds = getBoundsForGroup(group, cells, border);
+        RectangleDouble bounds = getBoundsForGroup(group, cells, border);
 
         if (cells.size() > 0 && bounds != null) {
             // Uses parent of group or previous parent of first child
@@ -1479,7 +1463,7 @@ public class Graph extends EventSource {
                 // Adds the group into the parent and resizes
                 index = model.getChildCount(parent);
                 cellsAdded(List.of(group), parent, index, null, null, false, false);
-                cellsResized(List.of(group), new Rectangle[]{bounds});
+                cellsResized(List.of(group), new RectangleDouble[]{bounds});
                 fireEvent(new GroupCellsEvent(cells, group, border));
             } finally {
                 model.endUpdate();
@@ -1508,17 +1492,16 @@ public class Graph extends EventSource {
      * vertices in the given children array. Edges are ignored. If the group
      * cell is a swimlane the title region is added to the bounds.
      */
-    private Rectangle getBoundsForGroup(ICell group, List<ICell> children, double border) {
-        Rectangle result = getBoundingBoxFromGeometry(children);
+    private RectangleDouble getBoundsForGroup(ICell group, List<ICell> children, double border) {
+        RectangleDouble result = getBoundingBoxFromGeometry(children);
         if (result != null) {
             if (isSwimlane(group)) {
-                Rectangle size = getStartSize(group);
+                RectangleDouble size = getStartSize(group);
                 result.setX(result.getX() - size.getWidth());
                 result.setY(result.getY() - size.getHeight());
                 result.setWidth(result.getWidth() + size.getWidth());
                 result.setHeight(result.getHeight() + size.getHeight());
             }
-
             // Adds the border
             result.setX(result.getX() - border);
             result.setY(result.getY() - border);
@@ -1675,10 +1658,10 @@ public class Graph extends EventSource {
                     List<ICell> children = getChildCells(cell);
 
                     if (children != null && !children.isEmpty()) {
-                        Rectangle childBounds = getBoundingBoxFromGeometry(children);
+                        RectangleDouble childBounds = getBoundingBoxFromGeometry(children);
 
                         if (childBounds.getWidth() > 0 && childBounds.getHeight() > 0) {
-                            Rectangle size = (isSwimlane(cell)) ? getStartSize(cell) : new Rectangle();
+                            RectangleDouble size = (isSwimlane(cell)) ? getStartSize(cell) : new RectangleDouble();
 
                             geo = geo.clone();
 
@@ -1749,7 +1732,7 @@ public class Graph extends EventSource {
 
             if (!tmp.isEmpty()) {
                 double scale = view.getScale();
-                Point trans = view.getTranslate();
+                PointDouble trans = view.getTranslate();
                 clones = model.cloneCells(cells, true);
 
                 for (int i = 0; i < cells.size(); i++) {
@@ -1776,8 +1759,8 @@ public class Graph extends EventSource {
                                     }
 
                                     if (src == null) {
-                                        Point pt = state.getAbsolutePoint(0);
-                                        g.setTerminalPoint(new Point(pt.getX() / scale - trans.getX(), pt.getY() / scale - trans.getY()), true);
+                                        PointDouble pt = state.getAbsolutePoint(0);
+                                        g.setTerminalPoint(new PointDouble(pt.getX() / scale - trans.getX(), pt.getY() / scale - trans.getY()), true);
                                     }
 
                                     // Checks if the target is cloned or sets the terminal point
@@ -1788,16 +1771,15 @@ public class Graph extends EventSource {
                                     }
 
                                     if (trg == null) {
-                                        Point pt = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-                                        g.setTerminalPoint(new Point(pt.getX() / scale - trans.getX(), pt.getY() / scale - trans.getY()), false);
+                                        PointDouble pt = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+                                        g.setTerminalPoint(new PointDouble(pt.getX() / scale - trans.getX(), pt.getY() / scale - trans.getY()), false);
                                     }
 
                                     // Translates the control points
-                                    List<Point> points = g.getPoints();
+                                    List<PointDouble> points = g.getPoints();
 
                                     if (points != null) {
-
-                                        for (Point pt : points) {
+                                        for (PointDouble pt : points) {
                                             pt.setX(pt.getX() + dx);
                                             pt.setY(pt.getY() + dy);
                                         }
@@ -2101,20 +2083,18 @@ public class Graph extends EventSource {
             model.beginUpdate();
             try {
                 CellState parentState = (absolute) ? view.getState(parent) : null;
-                Point o1 = (parentState != null) ? parentState.getOrigin() : null;
-                Point zero = new Point(0, 0);
-
+                PointDouble o1 = (parentState != null) ? parentState.getOrigin() : null;
+                PointDouble zero = new PointDouble(0, 0);
                 for (int i = 0; i < cells.size(); i++) {
                     ICell cell = cells.get(i);
                     if (cell == null) {
                         index--;
                     } else {
                         ICell previous = model.getParent(cell);
-
                         // Keeps the cell at its absolute location
                         if (o1 != null && cell != parent && parent != previous) {
                             CellState oldState = view.getState(previous);
-                            Point o2 = (oldState != null) ? oldState.getOrigin() : zero;
+                            PointDouble o2 = (oldState != null) ? oldState.getOrigin() : zero;
                             Geometry geo = model.getGeometry(cell);
 
                             if (geo != null) {
@@ -2229,7 +2209,7 @@ public class Graph extends EventSource {
     public void cellsRemoved(List<ICell> cells) {
         if (cells != null && !cells.isEmpty()) {
             double scale = view.getScale();
-            Point tr = view.getTranslate();
+            PointDouble tr = view.getTranslate();
 
             model.beginUpdate();
             try {
@@ -2261,9 +2241,8 @@ public class Graph extends EventSource {
 
                                     geo = geo.clone();
                                     int n = (source) ? 0 : state.getAbsolutePointCount() - 1;
-                                    Point pt = state.getAbsolutePoint(n);
-
-                                    geo.setTerminalPoint(new Point(pt.getX() / scale - tr.getX(), pt.getY() / scale - tr.getY()), source);
+                                    PointDouble pt = state.getAbsolutePoint(n);
+                                    geo.setTerminalPoint(new PointDouble(pt.getX() / scale - tr.getX(), pt.getY() / scale - tr.getY()), source);
                                     model.setTerminal(edge, null, source);
                                     model.setGeometry(edge, geo);
                                 }
@@ -2546,13 +2525,13 @@ public class Graph extends EventSource {
     public void updateAlternateBounds(ICell cell, Geometry geo, boolean willCollapse) {
         if (cell != null && geo != null) {
             if (geo.getAlternateBounds() == null) {
-                Rectangle bounds = null;
+                RectangleDouble bounds = null;
 
                 if (isCollapseToPreferredSize()) {
                     bounds = getPreferredSizeForCell(cell);
 
                     if (isSwimlane(cell)) {
-                        Rectangle size = getStartSize(cell);
+                        RectangleDouble size = getStartSize(cell);
 
                         bounds.setHeight(Math.max(bounds.getHeight(), size.getHeight()));
                         bounds.setWidth(Math.max(bounds.getWidth(), size.getWidth()));
@@ -2562,8 +2541,7 @@ public class Graph extends EventSource {
                 if (bounds == null) {
                     bounds = geo;
                 }
-
-                geo.setAlternateBounds(new Rectangle(geo.getX(), geo.getY(), bounds.getWidth(), bounds.getHeight()));
+                geo.setAlternateBounds(new RectangleDouble(geo.getX(), geo.getY(), bounds.getWidth(), bounds.getHeight()));
             } else {
                 geo.getAlternateBounds().setX(geo.getX());
                 geo.getAlternateBounds().setY(geo.getY());
@@ -2650,7 +2628,7 @@ public class Graph extends EventSource {
         if (cell != null) {
             model.beginUpdate();
             try {
-                Rectangle size = getPreferredSizeForCell(cell);
+                RectangleDouble size = getPreferredSizeForCell(cell);
                 Geometry geo = model.getGeometry(cell);
 
                 if (size != null && geo != null) {
@@ -2691,10 +2669,10 @@ public class Graph extends EventSource {
                     }
 
                     if (!ignoreChildren && !collapsed) {
-                        Rectangle bounds = view.getBounds(GraphModel.getChildren(model, cell));
+                        RectangleDouble bounds = view.getBounds(GraphModel.getChildren(model, cell));
 
                         if (bounds != null) {
-                            Point tr = view.getTranslate();
+                            PointDouble tr = view.getTranslate();
                             double scale = view.getScale();
 
                             double width = (bounds.getX() + bounds.getWidth()) / scale - geo.getX() - tr.getX();
@@ -2704,8 +2682,7 @@ public class Graph extends EventSource {
                             geo.setHeight(Math.max(geo.getHeight(), height));
                         }
                     }
-
-                    cellsResized(List.of(cell), new Rectangle[]{geo});
+                    cellsResized(List.of(cell), new RectangleDouble[]{geo});
                 }
             } finally {
                 model.endUpdate();
@@ -2719,17 +2696,14 @@ public class Graph extends EventSource {
      *
      * @param cell <Cell> for which the preferred size should be returned.
      */
-    public Rectangle getPreferredSizeForCell(ICell cell) {
-        Rectangle result = null;
-
+    public RectangleDouble getPreferredSizeForCell(ICell cell) {
+        RectangleDouble result = null;
         if (cell != null) {
             CellState state = view.getState(cell);
             Map<String, Object> style = (state != null) ? state.style : getCellStyle(cell);
-
             if (style != null && !model.isEdge(cell)) {
                 double dx = 0;
                 double dy = 0;
-
                 // Adds dimension of image if shape is a label
                 if (getImage(state) != null || Utils.getString(style, Constants.STYLE_IMAGE) != null) {
                     if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_LABEL)) {
@@ -2759,7 +2733,7 @@ public class Graph extends EventSource {
                 String value = getLabel(cell);
 
                 if (value != null && value.length() > 0) {
-                    Rectangle size = Utils.getLabelSize(value, style, isHtmlLabel(cell), 1);
+                    RectangleDouble size = Utils.getLabelSize(value, style, isHtmlLabel(cell), 1);
                     double width = size.getWidth() + dx;
                     double height = size.getHeight() + dy;
 
@@ -2774,11 +2748,10 @@ public class Graph extends EventSource {
                         width = snap(width + gridSize / 2d);
                         height = snap(height + gridSize / 2d);
                     }
-
-                    result = new Rectangle(0, 0, width, height);
+                    result = new RectangleDouble(0, 0, width, height);
                 } else {
                     double gs2 = 4 * gridSize;
-                    result = new Rectangle(0, 0, gs2, gs2);
+                    result = new RectangleDouble(0, 0, gs2, gs2);
                 }
             }
         }
@@ -2793,8 +2766,8 @@ public class Graph extends EventSource {
      * @param cell   <Cell> whose bounds should be changed.
      * @param bounds <Rectangle> that represents the new bounds.
      */
-    public ICell resizeCell(ICell cell, Rectangle bounds) {
-        return resizeCells(List.of(cell), new Rectangle[]{bounds}).get(0);
+    public ICell resizeCell(ICell cell, RectangleDouble bounds) {
+        return resizeCells(List.of(cell), new RectangleDouble[]{bounds}).get(0);
     }
 
     /**
@@ -2805,7 +2778,7 @@ public class Graph extends EventSource {
      * @param cells  Array of cells whose bounds should be changed.
      * @param bounds Array of rectangles that represents the new bounds.
      */
-    public List<ICell> resizeCells(List<ICell> cells, Rectangle[] bounds) {
+    public List<ICell> resizeCells(List<ICell> cells, RectangleDouble[] bounds) {
         model.beginUpdate();
         try {
             cellsResized(cells, bounds);
@@ -2813,7 +2786,6 @@ public class Graph extends EventSource {
         } finally {
             model.endUpdate();
         }
-
         return cells;
     }
 
@@ -2825,20 +2797,19 @@ public class Graph extends EventSource {
      * @param cells  Array of <Cells> whose bounds should be changed.
      * @param bounds Array of <Rectangles> that represents the new bounds.
      */
-    public void cellsResized(List<ICell> cells, Rectangle[] bounds) {
+    public void cellsResized(List<ICell> cells, RectangleDouble[] bounds) {
         if (cells != null && bounds != null && cells.size() == bounds.length) {
             model.beginUpdate();
             try {
                 for (int i = 0; i < cells.size(); i++) {
-                    Rectangle tmp = bounds[i];
+                    RectangleDouble tmp = bounds[i];
                     ICell cell = cells.get(i);
                     Geometry geo = model.getGeometry(cell);
-
                     if (geo != null && (geo.getX() != tmp.getX() || geo.getY() != tmp.getY() || geo.getWidth() != tmp.getWidth() || geo.getHeight() != tmp.getHeight())) {
                         geo = geo.clone();
 
                         if (geo.isRelative()) {
-                            Point offset = geo.getOffset();
+                            PointDouble offset = geo.getOffset();
 
                             if (offset != null) {
                                 offset.setX(offset.getX() + tmp.getX());
@@ -2894,8 +2865,7 @@ public class Graph extends EventSource {
 
                     p.setWidth(Math.max(p.getWidth(), geo.getX() + geo.getWidth()));
                     p.setHeight(Math.max(p.getHeight(), geo.getY() + geo.getHeight()));
-
-                    cellsResized(List.of(parent), new Rectangle[]{p});
+                    cellsResized(List.of(parent), new RectangleDouble[]{p});
                 }
             }
         }
@@ -3021,9 +2991,9 @@ public class Graph extends EventSource {
 
             if (geo.isRelative() && !model.isEdge(cell)) {
                 if (geo.getOffset() == null) {
-                    geo.setOffset(new Point(dx, dy));
+                    geo.setOffset(new PointDouble(dx, dy));
                 } else {
-                    Point offset = geo.getOffset();
+                    PointDouble offset = geo.getOffset();
 
                     offset.setX(offset.getX() + dx);
                     offset.setY(offset.getY() + dy);
@@ -3037,15 +3007,13 @@ public class Graph extends EventSource {
     /**
      * Returns the Rectangle inside which a cell is to be kept.
      */
-    public Rectangle getCellContainmentArea(ICell cell) {
+    public RectangleDouble getCellContainmentArea(ICell cell) {
         if (cell != null && !model.isEdge(cell)) {
             ICell parent = model.getParent(cell);
-
             if (parent == getDefaultParent() || parent == getCurrentRoot()) {
                 return getMaximumGraphBounds();
             } else if (parent != null && parent != getDefaultParent()) {
                 Geometry g = model.getGeometry(parent);
-
                 if (g != null) {
                     double x = 0;
                     double y = 0;
@@ -3053,15 +3021,14 @@ public class Graph extends EventSource {
                     double h = g.getHeight();
 
                     if (isSwimlane(parent)) {
-                        Rectangle size = getStartSize(parent);
+                        RectangleDouble size = getStartSize(parent);
 
                         x = size.getWidth();
                         w -= size.getWidth();
                         y = size.getHeight();
                         h -= size.getHeight();
                     }
-
-                    return new Rectangle(x, y, w, h);
+                    return new RectangleDouble(x, y, w, h);
                 }
             }
         }
@@ -3072,17 +3039,16 @@ public class Graph extends EventSource {
     /**
      * @return the maximumGraphBounds
      */
-    public Rectangle getMaximumGraphBounds() {
+    public RectangleDouble getMaximumGraphBounds() {
         return maximumGraphBounds;
     }
 
     /**
      * @param value the maximumGraphBounds to set
      */
-    public void setMaximumGraphBounds(Rectangle value) {
-        Rectangle oldValue = maximumGraphBounds;
+    public void setMaximumGraphBounds(RectangleDouble value) {
+        RectangleDouble oldValue = maximumGraphBounds;
         maximumGraphBounds = value;
-
         changeSupport.firePropertyChange("maximumGraphBounds", oldValue, maximumGraphBounds);
     }
 
@@ -3097,7 +3063,7 @@ public class Graph extends EventSource {
     public void constrainChild(ICell cell) {
         if (cell != null) {
             Geometry geo = model.getGeometry(cell);
-            Rectangle area = (isConstrainChild(cell)) ? getCellContainmentArea(cell) : getMaximumGraphBounds();
+            RectangleDouble area = (isConstrainChild(cell)) ? getCellContainmentArea(cell) : getMaximumGraphBounds();
 
             if (geo != null && area != null) {
                 // Keeps child within the content area of the parent
@@ -3163,7 +3129,7 @@ public class Graph extends EventSource {
 
         if (geo != null) {
             // Resets the control points
-            List<Point> points = geo.getPoints();
+            List<PointDouble> points = geo.getPoints();
 
             if (points != null && !points.isEmpty()) {
                 geo = geo.clone();
@@ -3198,14 +3164,14 @@ public class Graph extends EventSource {
      * @param source   Boolean indicating if the terminal is the source or target.
      */
     public ConnectionConstraint getConnectionConstraint(CellState edge, CellState terminal, boolean source) {
-        Point point = null;
+        PointDouble point = null;
         Object x = edge.getStyle().get((source) ? Constants.STYLE_EXIT_X : Constants.STYLE_ENTRY_X);
 
         if (x != null) {
             Object y = edge.getStyle().get((source) ? Constants.STYLE_EXIT_Y : Constants.STYLE_ENTRY_Y);
 
             if (y != null) {
-                point = new Point(Double.parseDouble(x.toString()), Double.parseDouble(y.toString()));
+                point = new PointDouble(Double.parseDouble(x.toString()), Double.parseDouble(y.toString()));
             }
         }
 
@@ -3264,16 +3230,13 @@ public class Graph extends EventSource {
      * @param constraint Connection constraint that represents the connection point
      *                   constraint as returned by getConnectionConstraint.
      */
-    public Point getConnectionPoint(CellState vertex, ConnectionConstraint constraint) {
-        Point point = null;
-
+    public PointDouble getConnectionPoint(CellState vertex, ConnectionConstraint constraint) {
+        PointDouble point = null;
         if (vertex != null && constraint.point != null) {
-            Rectangle bounds = this.view.getPerimeterBounds(vertex, 0);
-            Point cx = new Point(bounds.getCenterX(), bounds.getCenterY());
+            RectangleDouble bounds = this.view.getPerimeterBounds(vertex, 0);
+            PointDouble cx = new PointDouble(bounds.getCenterX(), bounds.getCenterY());
             String direction = Utils.getString(vertex.getStyle(), Constants.STYLE_DIRECTION);
-
             double r1 = 0;
-
             // Bounds need to be rotated by 90 degrees for further computation
             if (direction != null) {
                 switch (direction) {
@@ -3287,8 +3250,7 @@ public class Graph extends EventSource {
                     bounds.rotate90();
                 }
             }
-
-            point = new Point(bounds.getX() + constraint.point.getX() * bounds.getWidth(), bounds.getY() + constraint.point.getY() * bounds.getHeight());
+            point = new PointDouble(bounds.getX() + constraint.point.getX() * bounds.getWidth(), bounds.getY() + constraint.point.getY() * bounds.getHeight());
 
             // Rotation for direction before projection on perimeter
             double r2 = Utils.getDouble(vertex.getStyle(), Constants.STYLE_ROTATION);
@@ -3437,7 +3399,7 @@ public class Graph extends EventSource {
             model.beginUpdate();
             try {
                 double scale = view.getScale();
-                Point tr = view.getTranslate();
+                PointDouble tr = view.getTranslate();
 
                 // Prepares a hashtable for faster cell lookups
 
@@ -3465,8 +3427,8 @@ public class Graph extends EventSource {
                                     }
 
                                     if (src == null) {
-                                        Point pt = state.getAbsolutePoint(0);
-                                        geo.setTerminalPoint(new Point(pt.getX() / scale - tr.getX() + dx, pt.getY() / scale - tr.getY() + dy), true);
+                                        PointDouble pt = state.getAbsolutePoint(0);
+                                        geo.setTerminalPoint(new PointDouble(pt.getX() / scale - tr.getX() + dx, pt.getY() / scale - tr.getY() + dy), true);
                                         model.setTerminal(cell, null, true);
                                     }
                                 }
@@ -3480,8 +3442,8 @@ public class Graph extends EventSource {
 
                                     if (trg == null) {
                                         int n = state.getAbsolutePointCount() - 1;
-                                        Point pt = state.getAbsolutePoint(n);
-                                        geo.setTerminalPoint(new Point(pt.getX() / scale - tr.getX() + dx, pt.getY() / scale - tr.getY() + dy), false);
+                                        PointDouble pt = state.getAbsolutePoint(n);
+                                        geo.setTerminalPoint(new PointDouble(pt.getX() / scale - tr.getX() + dx, pt.getY() / scale - tr.getY() + dy), false);
                                         model.setTerminal(cell, null, false);
                                     }
                                 }
@@ -3518,7 +3480,7 @@ public class Graph extends EventSource {
      * @param cell Cell that represents the root of the view.
      * @return Returns the translation of the graph for the given root cell.
      */
-    public Point getTranslateForRoot(ICell cell) {
+    public PointDouble getTranslateForRoot(ICell cell) {
         return null;
     }
 
@@ -3568,7 +3530,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose offset should be returned.
      * @return Returns the child offset for the given cell.
      */
-    public Point getChildOffsetForCell(ICell cell) {
+    public PointDouble getChildOffsetForCell(ICell cell) {
         return null;
     }
 
@@ -3656,7 +3618,7 @@ public class Graph extends EventSource {
     /**
      * Returns the bounds of the visible graph.
      */
-    public Rectangle getGraphBounds() {
+    public RectangleDouble getGraphBounds() {
         return view.getGraphBounds();
     }
 
@@ -3667,7 +3629,7 @@ public class Graph extends EventSource {
     /**
      * Returns the bounds of the given cell.
      */
-    public Rectangle getCellBounds(ICell cell) {
+    public RectangleDouble getCellBounds(ICell cell) {
         return getCellBounds(cell, false);
     }
 
@@ -3675,7 +3637,7 @@ public class Graph extends EventSource {
      * Returns the bounds of the given cell including all connected edges
      * if includeEdge is true.
      */
-    public Rectangle getCellBounds(ICell cell, boolean includeEdges) {
+    public RectangleDouble getCellBounds(ICell cell, boolean includeEdges) {
         return getCellBounds(cell, includeEdges, false);
     }
 
@@ -3683,7 +3645,7 @@ public class Graph extends EventSource {
      * Returns the bounds of the given cell including all connected edges
      * if includeEdge is true.
      */
-    public Rectangle getCellBounds(ICell cell, boolean includeEdges, boolean includeDescendants) {
+    public RectangleDouble getCellBounds(ICell cell, boolean includeEdges, boolean includeDescendants) {
         return getCellBounds(cell, includeEdges, includeDescendants, false);
     }
 
@@ -3691,16 +3653,14 @@ public class Graph extends EventSource {
      * Returns the bounding box for the geometries of the vertices in the
      * given array of cells.
      */
-    public Rectangle getBoundingBoxFromGeometry(List<ICell> cells) {
-        Rectangle result = null;
-
+    public RectangleDouble getBoundingBoxFromGeometry(List<ICell> cells) {
+        RectangleDouble result = null;
         if (cells != null) {
             for (ICell cell : cells) {
                 if (getModel().isVertex(cell)) {
                     Geometry geo = getCellGeometry(cell);
-
                     if (result == null) {
-                        result = new Rectangle(geo);
+                        result = new RectangleDouble(geo);
                     } else {
                         result.add(geo);
                     }
@@ -3714,7 +3674,7 @@ public class Graph extends EventSource {
     /**
      * Returns the bounds of the given cell.
      */
-    public Rectangle getBoundingBox(ICell cell) {
+    public RectangleDouble getBoundingBox(ICell cell) {
         return getBoundingBox(cell, false);
     }
 
@@ -3722,7 +3682,7 @@ public class Graph extends EventSource {
      * Returns the bounding box of the given cell including all connected edges
      * if includeEdge is true.
      */
-    public Rectangle getBoundingBox(ICell cell, boolean includeEdges) {
+    public RectangleDouble getBoundingBox(ICell cell, boolean includeEdges) {
         return getBoundingBox(cell, includeEdges, false);
     }
 
@@ -3730,30 +3690,28 @@ public class Graph extends EventSource {
      * Returns the bounding box of the given cell including all connected edges
      * if includeEdge is true.
      */
-    public Rectangle getBoundingBox(ICell cell, boolean includeEdges, boolean includeDescendants) {
+    public RectangleDouble getBoundingBox(ICell cell, boolean includeEdges, boolean includeDescendants) {
         return getCellBounds(cell, includeEdges, includeDescendants, true);
     }
 
     /**
      * Returns the bounding box of the given cells and their descendants.
      */
-    public Rectangle getPaintBounds(List<ICell> cells) {
+    public RectangleDouble getPaintBounds(List<ICell> cells) {
         return getBoundsForCells(cells, false, true, true);
     }
 
     /**
      * Returns the bounds for the given cells.
      */
-    public Rectangle getBoundsForCells(List<ICell> cells, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
-        Rectangle result = null;
-
+    public RectangleDouble getBoundsForCells(List<ICell> cells, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
+        RectangleDouble result = null;
         if (cells != null && !cells.isEmpty()) {
             for (ICell cell : cells) {
-                Rectangle tmp = getCellBounds(cell, includeEdges, includeDescendants, boundingBox);
-
+                RectangleDouble tmp = getCellBounds(cell, includeEdges, includeDescendants, boundingBox);
                 if (tmp != null) {
                     if (result == null) {
-                        result = new Rectangle(tmp);
+                        result = new RectangleDouble(tmp);
                     } else {
                         result.add(tmp);
                     }
@@ -3768,16 +3726,13 @@ public class Graph extends EventSource {
      * Returns the bounds of the given cell including all connected edges
      * if includeEdge is true.
      */
-    public Rectangle getCellBounds(ICell cell, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
+    public RectangleDouble getCellBounds(ICell cell, boolean includeEdges, boolean includeDescendants, boolean boundingBox) {
         List<ICell> cells;
-
         // Recursively includes connected edges
         if (includeEdges) {
             Set<ICell> allCells = new HashSet<>();
             allCells.add(cell);
-
             Set<ICell> edges = new HashSet<>(getEdges(cell));
-
             while (!edges.isEmpty() && !allCells.containsAll(edges)) {
                 allCells.addAll(edges);
 
@@ -3794,8 +3749,7 @@ public class Graph extends EventSource {
         } else {
             cells = List.of(cell);
         }
-
-        Rectangle result = view.getBounds(cells, boundingBox);
+        RectangleDouble result = view.getBounds(cells, boundingBox);
 
         // Recursively includes the bounds of the children
         if (includeDescendants) {
@@ -3803,7 +3757,7 @@ public class Graph extends EventSource {
                 int childCount = model.getChildCount(o);
 
                 for (int j = 0; j < childCount; j++) {
-                    Rectangle tmp = getCellBounds(model.getChildAt(o, j), includeEdges, true, boundingBox);
+                    RectangleDouble tmp = getCellBounds(model.getChildAt(o, j), includeEdges, true, boundingBox);
 
                     if (result != null) {
                         result.add(tmp);
@@ -3837,7 +3791,7 @@ public class Graph extends EventSource {
      * Fires a repaint event. The optional region is the rectangle that needs
      * to be repainted.
      */
-    public void repaint(Rectangle region) {
+    public void repaint(RectangleDouble region) {
         fireEvent(new RepaintEvent(region));
     }
 
@@ -4208,14 +4162,12 @@ public class Graph extends EventSource {
      * @param swimlane <Cell> whose start size should be returned.
      * @return Returns the startsize for the given swimlane.
      */
-    public Rectangle getStartSize(ICell swimlane) {
-        Rectangle result = new Rectangle();
+    public RectangleDouble getStartSize(ICell swimlane) {
+        RectangleDouble result = new RectangleDouble();
         CellState state = view.getState(swimlane);
         Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(swimlane);
-
         if (style != null) {
             double size = Utils.getDouble(style, Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE);
-
             if (Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true)) {
                 result.setHeight(size);
             } else {
@@ -4776,10 +4728,9 @@ public class Graph extends EventSource {
     /**
      * @param value the origin to set
      */
-    public void setOrigin(Point value) {
-        Point oldValue = origin;
+    public void setOrigin(PointDouble value) {
+        PointDouble oldValue = origin;
         origin = value;
-
         changeSupport.firePropertyChange("origin", oldValue, origin);
     }
 
@@ -4875,10 +4826,9 @@ public class Graph extends EventSource {
     /**
      * @param value the minimumGraphSize to set
      */
-    public void setMinimumGraphSize(Rectangle value) {
-        Rectangle oldValue = minimumGraphSize;
+    public void setMinimumGraphSize(RectangleDouble value) {
+        RectangleDouble oldValue = minimumGraphSize;
         minimumGraphSize = value;
-
         changeSupport.firePropertyChange("minimumGraphSize", oldValue, value);
     }
 

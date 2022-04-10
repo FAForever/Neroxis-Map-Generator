@@ -6,7 +6,7 @@ package com.faforever.neroxis.ngraph.view;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.util.List;
 
@@ -23,18 +23,13 @@ public class EdgeStyle {
      * schema diagrams).
      */
     public static EdgeStyleFunction EntityRelation = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
             GraphView view = state.getView();
             IGraphModel model = view.getGraph().getModel();
             double segment = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, Constants.ENTITY_SEGMENT) * state.view.getScale();
-
-            Point p0 = state.getAbsolutePoint(0);
-            Point pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-
+            PointDouble p0 = state.getAbsolutePoint(0);
+            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
             boolean isSourceLeft = false;
-
             if (p0 != null) {
                 source = new CellState();
                 source.setX(p0.getX());
@@ -85,23 +80,22 @@ public class EdgeStyle {
                 double ye = view.getRoutingCenterY(target);
 
                 double seg = segment;
-
                 double dx = (isSourceLeft) ? -seg : seg;
-                Point dep = new Point(x0 + dx, y0);
+                PointDouble dep = new PointDouble(x0 + dx, y0);
                 result.add(dep);
 
                 dx = (isTargetLeft) ? -seg : seg;
-                Point arr = new Point(xe + dx, ye);
+                PointDouble arr = new PointDouble(xe + dx, ye);
 
                 // Adds intermediate points if both go out on same side
                 if (isSourceLeft == isTargetLeft) {
                     double x = (isSourceLeft) ? Math.min(x0, xe) - segment : Math.max(x0, xe) + segment;
-                    result.add(new Point(x, y0));
-                    result.add(new Point(x, ye));
+                    result.add(new PointDouble(x, y0));
+                    result.add(new PointDouble(x, ye));
                 } else if ((dep.getX() < arr.getX()) == isSourceLeft) {
                     double midY = y0 + (ye - y0) / 2;
-                    result.add(new Point(dep.getX(), midY));
-                    result.add(new Point(arr.getX(), midY));
+                    result.add(new PointDouble(dep.getX(), midY));
+                    result.add(new PointDouble(arr.getX(), midY));
                 }
 
                 result.add(arr);
@@ -112,17 +106,13 @@ public class EdgeStyle {
      * Provides a self-reference, aka. loop.
      */
     public static EdgeStyleFunction Loop = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
             if (source != null) {
                 GraphView view = state.getView();
                 Graph graph = view.getGraph();
-                Point pt = (points != null && points.size() > 0) ? points.get(0) : null;
-
+                PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
                 if (pt != null) {
                     pt = view.transformControlPoint(state, pt);
-
                     if (source.contains(pt.getX(), pt.getY())) {
                         pt = null;
                     }
@@ -166,9 +156,8 @@ public class EdgeStyle {
                     y = pt.getY();
                     dy = 0;
                 }
-
-                result.add(new Point(x - dx, y - dy));
-                result.add(new Point(x + dx, y + dy));
+                result.add(new PointDouble(x - dx, y - dy));
+                result.add(new PointDouble(x + dx, y + dy));
             }
         }
     };
@@ -176,18 +165,14 @@ public class EdgeStyle {
      * Provides a vertical elbow edge.
      */
     public static EdgeStyleFunction SideToSide = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
             GraphView view = state.getView();
-            Point pt = ((points != null && points.size() > 0) ? points.get(0) : null);
-            Point p0 = state.getAbsolutePoint(0);
-            Point pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-
+            PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
+            PointDouble p0 = state.getAbsolutePoint(0);
+            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
             if (pt != null) {
                 pt = view.transformControlPoint(state, pt);
             }
-
             if (p0 != null) {
                 source = new CellState();
                 source.setX(p0.getX());
@@ -220,23 +205,22 @@ public class EdgeStyle {
                 }
 
                 if (!target.contains(x, y1) && !source.contains(x, y1)) {
-                    result.add(new Point(x, y1));
+                    result.add(new PointDouble(x, y1));
                 }
 
                 if (!target.contains(x, y2) && !source.contains(x, y2)) {
-                    result.add(new Point(x, y2));
+                    result.add(new PointDouble(x, y2));
                 }
 
                 if (result.size() == 1) {
                     if (pt != null) {
                         if (!target.contains(x, pt.getY()) && !source.contains(x, pt.getY())) {
-                            result.add(new Point(x, pt.getY()));
+                            result.add(new PointDouble(x, pt.getY()));
                         }
                     } else {
                         double t = Math.max(source.getY(), target.getY());
                         double b = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
-
-                        result.add(new Point(x, t + (b - t) / 2));
+                        result.add(new PointDouble(x, t + (b - t) / 2));
                     }
                 }
             }
@@ -246,18 +230,14 @@ public class EdgeStyle {
      * Provides a horizontal elbow edge.
      */
     public static EdgeStyleFunction TopToBottom = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
             GraphView view = state.getView();
-            Point pt = ((points != null && points.size() > 0) ? points.get(0) : null);
-            Point p0 = state.getAbsolutePoint(0);
-            Point pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-
+            PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
+            PointDouble p0 = state.getAbsolutePoint(0);
+            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
             if (pt != null) {
                 pt = view.transformControlPoint(state, pt);
             }
-
             if (p0 != null) {
                 source = new CellState();
                 source.setX(p0.getX());
@@ -283,7 +263,7 @@ public class EdgeStyle {
                 double y = (pt != null) ? pt.getY() : b + (t - b) / 2;
 
                 if (!target.contains(x, y) && !source.contains(x, y)) {
-                    result.add(new Point(x, y));
+                    result.add(new PointDouble(x, y));
                 }
 
                 if (pt != null && pt.getX() >= target.getX() && pt.getX() <= target.getX() + target.getWidth()) {
@@ -293,19 +273,18 @@ public class EdgeStyle {
                 }
 
                 if (!target.contains(x, y) && !source.contains(x, y)) {
-                    result.add(new Point(x, y));
+                    result.add(new PointDouble(x, y));
                 }
 
                 if (result.size() == 1) {
                     if (pt != null) {
                         if (!target.contains(pt.getX(), y) && !source.contains(pt.getX(), y)) {
-                            result.add(new Point(pt.getX(), y));
+                            result.add(new PointDouble(pt.getX(), y));
                         }
                     } else {
                         double l = Math.max(source.getX(), target.getX());
                         double r = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-
-                        result.add(new Point(l + (r - l) / 2, y));
+                        result.add(new PointDouble(l + (r - l) / 2, y));
                     }
                 }
             }
@@ -317,19 +296,14 @@ public class EdgeStyle {
      * unspecified.
      */
     public static EdgeStyleFunction ElbowConnector = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
-            Point pt = (points != null && points.size() > 0) ? points.get(0) : null;
-
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+            PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
             boolean vertical = false;
             boolean horizontal = false;
-
             if (source != null && target != null) {
                 if (pt != null) {
                     double left = Math.min(source.getX(), target.getX());
                     double right = Math.max(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-
                     double top = Math.min(source.getY(), target.getY());
                     double bottom = Math.max(source.getY() + source.getHeight(), target.getY() + target.getHeight());
 
@@ -364,21 +338,17 @@ public class EdgeStyle {
      * as an interactive handler for this style.
      */
     public static EdgeStyleFunction SegmentConnector = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> hints, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> hints, List<PointDouble> result) {
             // Creates array of all way- and terminalpoints
-            List<Point> pts = state.absolutePoints;
+            List<PointDouble> pts = state.absolutePoints;
             boolean horizontal = true;
-            Point hint = null;
-
+            PointDouble hint = null;
             // Adds the first point
-            Point pt = pts.get(0);
-
+            PointDouble pt = pts.get(0);
             if (pt == null && source != null) {
-                pt = new Point(state.view.getRoutingCenterX(source), state.view.getRoutingCenterY(source));
+                pt = new PointDouble(state.view.getRoutingCenterX(source), state.view.getRoutingCenterY(source));
             } else if (pt != null) {
-                pt = (Point) pt.clone();
+                pt = (PointDouble) pt.clone();
             }
 
             int lastInx = pts.size() - 1;
@@ -386,12 +356,11 @@ public class EdgeStyle {
             // Adds the waypoints
             if (hints != null && hints.size() > 0) {
                 hint = state.view.transformControlPoint(state, hints.get(0));
-
                 CellState currentTerm = source;
-                Point currentPt = pts.get(0);
+                PointDouble currentPt = pts.get(0);
                 boolean hozChan = false;
                 boolean vertChan = false;
-                Point currentHint = hint;
+                PointDouble currentHint = hint;
                 int hintsLen = hints.size();
 
                 for (int i = 0; i < 2; i++) {
@@ -425,9 +394,9 @@ public class EdgeStyle {
                 }
 
                 if (horizontal && ((pts.get(0) != null && pts.get(0).getY() != hint.getY()) || (pts.get(0) == null && source != null && (hint.getY() < source.getY() || hint.getY() > source.getY() + source.getHeight())))) {
-                    result.add(new Point(pt.getX(), hint.getY()));
+                    result.add(new PointDouble(pt.getX(), hint.getY()));
                 } else if (!horizontal && ((pts.get(0) != null && pts.get(0).getX() != hint.getX()) || (pts.get(0) == null && source != null && (hint.getX() < source.getX() || hint.getX() > source.getX() + source.getWidth())))) {
-                    result.add(new Point(hint.getX(), pt.getY()));
+                    result.add(new PointDouble(hint.getX(), pt.getY()));
                 }
 
                 if (horizontal) {
@@ -448,8 +417,7 @@ public class EdgeStyle {
                     } else {
                         pt.setX(hint.getX());
                     }
-
-                    result.add((Point) pt.clone());
+                    result.add((PointDouble) pt.clone());
                 }
             } else {
                 hint = pt;
@@ -461,13 +429,13 @@ public class EdgeStyle {
             pt = pts.get(lastInx);
 
             if (pt == null && target != null) {
-                pt = new Point(state.view.getRoutingCenterX(target), state.view.getRoutingCenterY(target));
+                pt = new PointDouble(state.view.getRoutingCenterX(target), state.view.getRoutingCenterY(target));
             }
 
             if (horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getY() != hint.getY()) || (pts.get(lastInx) == null && target != null && (hint.getY() < target.getY() || hint.getY() > target.getY() + target.getHeight())))) {
-                result.add(new Point(pt.getX(), hint.getY()));
+                result.add(new PointDouble(pt.getX(), hint.getY()));
             } else if (!horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getX() != hint.getX()) || (pts.get(lastInx) == null && target != null && (hint.getX() < target.getX() || hint.getX() > target.getX() + target.getWidth())))) {
-                result.add(new Point(hint.getX(), pt.getY()));
+                result.add(new PointDouble(hint.getX(), pt.getY()));
             }
 
             // Removes bends inside the source terminal for floating ports
@@ -516,18 +484,14 @@ public class EdgeStyle {
      * respects port constraints
      */
     public static EdgeStyleFunction OrthConnector = new EdgeStyleFunction() {
-
-
-        public void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result) {
+        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
             Graph graph = state.view.graph;
             boolean sourceEdge = source != null && graph.getModel().isEdge(source.cell);
             boolean targetEdge = target != null && graph.getModel().isEdge(target.cell);
-
             if ((points != null && points.size() > 0) || (sourceEdge) || (targetEdge)) {
                 EdgeStyle.SegmentConnector.apply(state, source, target, points, result);
                 return;
             }
-
             if (source != null && target != null) {
                 double scaledOrthBuffer = orthBuffer * state.getView().getScale();
                 // Determine the side(s) of the source and target vertices
@@ -582,27 +546,21 @@ public class EdgeStyle {
                 } else {
                     if (dy <= 0) {
                         quad = 3;
-
                         // Special case on x = 0 and negative y
                         if (dx == 0) {
                             quad = 2;
                         }
                     }
-
                 }
-
                 // Check for connection constraints
-                Point p0 = state.getAbsolutePoint(0);
-                Point pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-                Point currentTerm = p0;
-
+                PointDouble p0 = state.getAbsolutePoint(0);
+                PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+                PointDouble currentTerm = p0;
                 // constraint[source, target] [x, y]
                 double[][] constraint = new double[][]{{0.5, 0.5}, {0.5, 0.5}};
-
                 for (int i = 0; i < 2; i++) {
                     if (currentTerm != null) {
                         constraint[i][0] = (currentTerm.getX() - geo[i][0]) / geo[i][2];
-
                         if (constraint[i][0] < 0.01) {
                             dir[i] = Constants.DIRECTION_MASK_WEST;
                         } else if (constraint[i][0] > 0.99) {
@@ -855,7 +813,7 @@ public class EdgeStyle {
                 }
 
                 for (int i = 0; i <= currentIndex; i++) {
-                    result.add(new Point(wayPoints1[i][0], wayPoints1[i][1]));
+                    result.add(new PointDouble(wayPoints1[i][0], wayPoints1[i][1]));
                 }
 
             }
@@ -922,7 +880,7 @@ public class EdgeStyle {
          * @param result Array of points that represent the actual points of the
          *               edge.
          */
-        void apply(CellState state, CellState source, CellState target, List<Point> points, List<Point> result);
+        void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result);
 
     }
 }

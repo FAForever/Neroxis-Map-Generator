@@ -15,8 +15,8 @@ import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.GraphTransferable;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.CellRenderer;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.AlphaComposite;
@@ -155,21 +155,18 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
     protected transient CellMarker marker;
 
     protected transient boolean canImport;
-
     /**
      * Scaled, translated bounds of the selection cells.
      */
-    protected transient Rectangle cellBounds;
-
+    protected transient RectangleDouble cellBounds;
     /**
      * Scaled, translated bounding box of the selection cells.
      */
-    protected transient Rectangle bbox;
-
+    protected transient RectangleDouble bbox;
     /**
      * Unscaled, untranslated bounding box of the selection cells.
      */
-    protected transient Rectangle transferBounds;
+    protected transient RectangleDouble transferBounds;
 
     protected transient boolean visible = false;
 
@@ -641,8 +638,7 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
                 Graph graph = graphComponent.getGraph();
                 double scale = graph.getView().getScale();
                 java.awt.Point pt = SwingUtilities.convertPoint(graphComponent, e.getLocation(), graphComponent.getGraphControl());
-
-                pt = graphComponent.snapScaledPoint(new Point(pt)).getPoint();
+                pt = graphComponent.snapScaledPoint(new PointDouble(pt)).toPoint();
                 handler.setLocation(new java.awt.Point(pt));
 
                 int dx = 0;
@@ -757,7 +753,7 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         if (first != null && cellBounds != null) {
             Graph graph = graphComponent.getGraph();
             double scale = graph.getView().getScale();
-            Point trans = graph.getView().getTranslate();
+            PointDouble trans = graph.getView().getTranslate();
 
             // LATER: Drag image _size_ depends on the initial position and may sometimes
             // not align with the grid when dragging. This is because the rounding of the width
@@ -820,7 +816,7 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
 
             if (first != null && (cellBounds != null || movePreview.isActive())) {
                 double scale = graph.getView().getScale();
-                Point trans = graph.getView().getTranslate();
+                PointDouble trans = graph.getView().getTranslate();
 
                 // TODO: Simplify math below, this was copy pasted from
                 // getPreviewLocation with the rounding removed

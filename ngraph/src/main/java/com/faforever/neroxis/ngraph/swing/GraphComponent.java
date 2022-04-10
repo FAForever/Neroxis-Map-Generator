@@ -40,8 +40,8 @@ import com.faforever.neroxis.ngraph.swing.view.CellEditor;
 import com.faforever.neroxis.ngraph.swing.view.ICellEditor;
 import com.faforever.neroxis.ngraph.swing.view.InteractiveCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -353,7 +353,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         }
     };
     protected IEventListener<RepaintEvent> repaintHandler = (sender, evt) -> {
-        Rectangle dirty = evt.getRegion();
+        RectangleDouble dirty = evt.getRegion();
         java.awt.Rectangle rect = (dirty != null) ? dirty.getRectangle() : null;
         if (rect != null) {
             rect.grow(1, 1);
@@ -638,12 +638,12 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Returns the size of the area that layouts can operate in.
      */
-    public Rectangle getLayoutAreaSize() {
+    public RectangleDouble getLayoutAreaSize() {
         if (pageVisible) {
             Dimension d = getPreferredSizeForPage();
-            return new Rectangle(new java.awt.Rectangle(d));
+            return new RectangleDouble(new java.awt.Rectangle(d));
         } else {
-            return new Rectangle(new java.awt.Rectangle(graphControl.getSize()));
+            return new RectangleDouble(new java.awt.Rectangle(graphControl.getSize()));
         }
     }
 
@@ -918,7 +918,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Returns an Point representing the given event in the unscaled,
      * non-translated coordinate space and applies the grid.
      */
-    public Point getPointForEvent(MouseEvent e) {
+    public PointDouble getPointForEvent(MouseEvent e) {
         return getPointForEvent(e, true);
     }
 
@@ -926,13 +926,13 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Returns an Point representing the given event in the unscaled,
      * non-translated coordinate space and applies the grid.
      */
-    public Point getPointForEvent(MouseEvent e, boolean addOffset) {
+    public PointDouble getPointForEvent(MouseEvent e, boolean addOffset) {
         double s = graph.getView().getScale();
-        Point tr = graph.getView().getTranslate();
+        PointDouble tr = graph.getView().getTranslate();
         double off = (addOffset) ? graph.getGridSize() / 2 : 0;
         double x = graph.snap(e.getX() / s - tr.getX() - off);
         double y = graph.snap(e.getY() / s - tr.getY() - off);
-        return new Point(x, y);
+        return new PointDouble(x, y);
     }
 
     public void startEditing() {
@@ -1011,7 +1011,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Returns the scaled preferred size for the current graph.
      */
     protected Dimension getScaledPreferredSizeForGraph() {
-        Rectangle bounds = graph.getGraphBounds();
+        RectangleDouble bounds = graph.getGraphBounds();
         int border = graph.getBorder();
         return new Dimension((int) Math.round(bounds.getX() + bounds.getWidth()) + border + 1, (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
     }
@@ -1019,7 +1019,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * Should be called by a hook inside GraphView/Graph
      */
-    protected Point getPageTranslate(double scale) {
+    protected PointDouble getPageTranslate(double scale) {
         Dimension d = getPreferredSizeForPage();
         Dimension bd = new Dimension(d);
         if (!preferPageSize) {
@@ -1030,7 +1030,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         double height = Math.max(bd.height, (getViewport().getHeight() - 8) / scale);
         double dx = Math.max(0, (width - d.width) / 2);
         double dy = Math.max(0, (height - d.height) / 2);
-        return new Point(dx, dy);
+        return new PointDouble(dx, dy);
     }
 
     /**
@@ -1044,7 +1044,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             zoom(zoomPolicy == ZOOM_POLICY_PAGE, centerOnResize || zoomPolicy == ZOOM_POLICY_PAGE);
             centerOnResize = false;
         } else if (pageVisible && centerPage) {
-            Point translate = getPageTranslate(graph.getView().getScale());
+            PointDouble translate = getPageTranslate(graph.getView().getScale());
             graph.getView().setTranslate(translate);
         } else {
             getGraphControl().updatePreferredSize();
@@ -1071,7 +1071,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         GraphView view = graph.getView();
         double newScale = (double) ((int) (view.getScale() * 100 * factor)) / 100;
         if (newScale != view.getScale() && newScale > 0.04) {
-            Point translate = (pageVisible && centerPage) ? getPageTranslate(newScale) : new Point();
+            PointDouble translate = (pageVisible && centerPage) ? getPageTranslate(newScale) : new PointDouble();
             graph.getView().scaleAndTranslate(newScale, translate.getX(), translate.getY());
             if (keepSelectionVisibleOnZoom && !graph.isSelectionEmpty()) {
                 getGraphControl().scrollRectToVisible(view.getBoundingBox(graph.getSelectionCells()).getRectangle());
@@ -1085,7 +1085,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     public void zoomTo(final double newScale, final boolean center) {
         GraphView view = graph.getView();
         final double scale = view.getScale();
-        Point translate = (pageVisible && centerPage) ? getPageTranslate(newScale) : new Point();
+        PointDouble translate = (pageVisible && centerPage) ? getPageTranslate(newScale) : new PointDouble();
         graph.getView().scaleAndTranslate(newScale, translate.getX(), translate.getY());
         // Causes two repaints on the scrollpane, namely one for the scale
         // change with the new preferred size and one for the change of
@@ -1106,7 +1106,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Resets the zoom and panning in the view.
      */
     public void zoomActual() {
-        Point translate = (pageVisible && centerPage) ? getPageTranslate(1) : new Point();
+        PointDouble translate = (pageVisible && centerPage) ? getPageTranslate(1) : new PointDouble();
         graph.getView().scaleAndTranslate(1, translate.getX(), translate.getY());
         if (isPageVisible()) {
             // Causes two repaints, see zoomTo for more details
@@ -1152,7 +1152,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 if (newScale > 0) {
                     GraphView graphView = graph.getView();
                     final double scale = graphView.getScale();
-                    Point translate = (centerPage) ? getPageTranslate(newScale) : new Point();
+                    PointDouble translate = (centerPage) ? getPageTranslate(newScale) : new PointDouble();
                     graphView.scaleAndTranslate(newScale, translate.getX(), translate.getY());
                     // Causes two repaints, see zoomTo for more details
                     final double factor = newScale / scale;
@@ -1208,7 +1208,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     public void scrollCellToVisible(ICell cell, boolean center) {
         CellState state = graph.getView().getState(cell);
         if (state != null) {
-            Rectangle bounds = state;
+            RectangleDouble bounds = state;
             if (center) {
                 bounds = bounds.clone();
                 bounds.setX(bounds.getCenterX() - getWidth() / 2);
@@ -1249,7 +1249,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             parent = graph.getDefaultParent();
         }
         if (parent != null) {
-            Point previousTranslate = canvas.getTranslate();
+            PointDouble previousTranslate = canvas.getTranslate();
             double previousScale = canvas.getScale();
             try {
                 canvas.setScale(graph.getView().getScale());
@@ -1322,7 +1322,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 parent = graph.getDefaultParent();
             }
             if (parent != null) {
-                Point previousTranslate = canvas.getTranslate();
+                PointDouble previousTranslate = canvas.getTranslate();
                 double previousScale = canvas.getScale();
                 try {
                     canvas.setScale(graph.getView().getScale());
@@ -1409,7 +1409,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         int w = (int) Math.max(8, icon.getIconWidth() * scale);
         int h = (int) Math.max(8, icon.getIconHeight() * scale);
         if (isEdge) {
-            Point pt = graph.getView().getPoint(state);
+            PointDouble pt = graph.getView().getPoint(state);
             x = (int) pt.getX() - w / 2;
             y = (int) pt.getY() - h / 2;
         }
@@ -1816,14 +1816,14 @@ public class GraphComponent extends JScrollPane implements Printable {
         return event != null && event.isAltDown();
     }
 
-    public Point snapScaledPoint(Point pt) {
+    public PointDouble snapScaledPoint(PointDouble pt) {
         return snapScaledPoint(pt, 0, 0);
     }
 
-    public Point snapScaledPoint(Point pt, double dx, double dy) {
+    public PointDouble snapScaledPoint(PointDouble pt, double dx, double dy) {
         if (pt != null) {
             double scale = graph.getView().getScale();
-            Point trans = graph.getView().getTranslate();
+            PointDouble trans = graph.getView().getTranslate();
             pt.setX((graph.snap(pt.getX() / scale - trans.getX() + dx / scale) + trans.getX()) * scale - dx);
             pt.setY((graph.snap(pt.getY() / scale - trans.getY() + dy / scale) + trans.getY()) * scale - dy);
         }
@@ -1849,7 +1849,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         GraphView view = graph.getView();
         // Stores the old state of the view
         boolean eventsEnabled = view.isEventsEnabled();
-        Point translate = view.getTranslate();
+        PointDouble translate = view.getTranslate();
         // Disables firing of scale events so that there is no
         // repaint or update of the original graph while pages
         // are being printed
@@ -1857,12 +1857,12 @@ public class GraphComponent extends JScrollPane implements Printable {
         // Uses the view to create temporary cell states for each cell
         TemporaryCellStates tempStates = new TemporaryCellStates(view, 1 / pageScale);
         try {
-            view.setTranslate(new Point(0, 0));
+            view.setTranslate(new PointDouble(0, 0));
             Graphics2DCanvas canvas = createCanvas();
             canvas.setGraphics((Graphics2D) g);
             canvas.setScale(1 / pageScale);
             view.revalidate();
-            Rectangle graphBounds = graph.getGraphBounds();
+            RectangleDouble graphBounds = graph.getGraphBounds();
             Dimension pSize = new Dimension((int) Math.ceil(graphBounds.getX() + graphBounds.getWidth()) + 1, (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
             int w = (int) (printFormat.getImageableWidth());
             int h = (int) (printFormat.getImageableHeight());
@@ -2209,7 +2209,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             if (comp.getParent() == null) {
                 getGraphControl().add(comp, 0);
             }
-            Rectangle rect = overlay.getBounds(state);
+            RectangleDouble rect = overlay.getBounds(state);
             if (rect != null) {
                 comp.setBounds(rect.getRectangle());
                 comp.setVisible(true);
@@ -2359,7 +2359,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     protected java.awt.Rectangle paintBackgroundPage(Graphics g) {
-        Point translate = graph.getView().getTranslate();
+        PointDouble translate = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
         int x0 = (int) Math.round(translate.getX() * scale) - 1;
         int y0 = (int) Math.round(translate.getY() * scale) - 1;
@@ -2417,7 +2417,7 @@ public class GraphComponent extends JScrollPane implements Printable {
 
     protected void paintBackgroundImage(Graphics g) {
         if (backgroundImage != null) {
-            Point translate = graph.getView().getTranslate();
+            PointDouble translate = graph.getView().getTranslate();
             double scale = graph.getView().getScale();
             g.drawImage(backgroundImage.getImage(), (int) (translate.getX() * scale), (int) (translate.getY() * scale), (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale), this);
         }
@@ -2446,7 +2446,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 minStepping /= 2;
             }
             // Fetches some global display state information
-            Point trans = graph.getView().getTranslate();
+            PointDouble trans = graph.getView().getTranslate();
             double scale = graph.getView().getScale();
             double tx = trans.getX() * scale;
             double ty = trans.getY() * scale;
@@ -2590,7 +2590,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * the buffer if it has a different size.
      */
     public void checkTripleBuffer() {
-        Rectangle bounds = graph.getGraphBounds();
+        RectangleDouble bounds = graph.getGraphBounds();
         int width = (int) Math.ceil(bounds.getX() + bounds.getWidth() + 2);
         int height = (int) Math.ceil(bounds.getY() + bounds.getHeight() + 2);
         if (tripleBuffer != null) {
@@ -2782,7 +2782,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             int bottom = rect.y + rect.height;
             Dimension d = new Dimension(getPreferredSize());
             Dimension sp = getScaledPreferredSizeForGraph();
-            Rectangle min = graph.getMinimumGraphSize();
+            RectangleDouble min = graph.getMinimumGraphSize();
             double scale = graph.getView().getScale();
             boolean update = false;
             if (rect.x < 0) {
@@ -2851,7 +2851,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             } else {
                 d = getScaledPreferredSizeForGraph();
             }
-            Rectangle min = graph.getMinimumGraphSize();
+            RectangleDouble min = graph.getMinimumGraphSize();
             if (min != null) {
                 d.width = (int) Math.max(d.width, Math.round(min.getWidth() * scale));
                 d.height = (int) Math.max(d.height, Math.round(min.getHeight() * scale));
@@ -2904,7 +2904,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         public void drawGraph(Graphics2D g, boolean drawLabels) {
             Graphics2D previousGraphics = canvas.getGraphics();
             boolean previousDrawLabels = canvas.isDrawLabels();
-            Point previousTranslate = canvas.getTranslate();
+            PointDouble previousTranslate = canvas.getTranslate();
             double previousScale = canvas.getScale();
             try {
                 canvas.setScale(graph.getView().getScale());
@@ -2941,7 +2941,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             java.awt.Rectangle rect = null;
             // Takes rotation into account
             double rotation = Utils.getDouble(state.getStyle(), Constants.STYLE_ROTATION);
-            Rectangle tmp = Utils.getBoundingBox(new Rectangle(state), rotation);
+            RectangleDouble tmp = Utils.getBoundingBox(new RectangleDouble(state), rotation);
             // Adds scaled stroke width
             int border = (int) Math.ceil(Utils.getDouble(state.getStyle(), Constants.STYLE_STROKEWIDTH) * graph.getView().getScale()) + 1;
             tmp.grow(border);

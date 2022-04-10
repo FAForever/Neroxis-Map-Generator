@@ -3,8 +3,8 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
@@ -178,15 +178,14 @@ public class CompactTreeLayout extends GraphLayout {
                     double y0 = x0;
 
                     if (!moveTree) {
-                        Rectangle g = getVertexBounds(root);
+                        RectangleDouble g = getVertexBounds(root);
 
                         if (g != null) {
                             x0 = g.getX();
                             y0 = g.getY();
                         }
                     }
-
-                    Rectangle bounds = null;
+                    RectangleDouble bounds = null;
 
                     if (horizontal) {
                         bounds = horizontalLayout(node, x0, y0, null);
@@ -377,12 +376,11 @@ public class CompactTreeLayout extends GraphLayout {
         }
     }
 
-    protected Rectangle horizontalLayout(TreeNode node, double x0, double y0, Rectangle bounds) {
+    protected RectangleDouble horizontalLayout(TreeNode node, double x0, double y0, RectangleDouble bounds) {
         node.x += x0 + node.offsetX;
         node.y += y0 + node.offsetY;
         bounds = apply(node, bounds);
         TreeNode child = node.child;
-
         if (child != null) {
             bounds = horizontalLayout(child, node.x, node.y, bounds);
             double siblingOffset = node.y + child.offsetY;
@@ -398,12 +396,11 @@ public class CompactTreeLayout extends GraphLayout {
         return bounds;
     }
 
-    protected Rectangle verticalLayout(TreeNode node, Object parent, double x0, double y0, Rectangle bounds) {
+    protected RectangleDouble verticalLayout(TreeNode node, Object parent, double x0, double y0, RectangleDouble bounds) {
         node.x += x0 + node.offsetY;
         node.y += y0 + node.offsetX;
         bounds = apply(node, bounds);
         TreeNode child = node.child;
-
         if (child != null) {
             bounds = verticalLayout(child, node, node.x, node.y, bounds);
             double siblingOffset = node.x + child.offsetY;
@@ -558,8 +555,7 @@ public class CompactTreeLayout extends GraphLayout {
 
     protected TreeNode createNode(ICell cell) {
         TreeNode node = new TreeNode(cell);
-
-        Rectangle geo = getVertexBounds(cell);
+        RectangleDouble geo = getVertexBounds(cell);
 
         if (geo != null) {
             if (horizontal) {
@@ -574,24 +570,22 @@ public class CompactTreeLayout extends GraphLayout {
         return node;
     }
 
-    protected Rectangle apply(TreeNode node, Rectangle bounds) {
+    protected RectangleDouble apply(TreeNode node, RectangleDouble bounds) {
         IGraphModel model = graph.getModel();
         ICell cell = node.cell;
-        Rectangle g = model.getGeometry(cell);
-
+        RectangleDouble g = model.getGeometry(cell);
         if (cell != null && g != null) {
             if (isVertexMovable(cell)) {
                 g = setVertexLocation(cell, node.x, node.y);
-
                 if (resizeParent) {
                     parentsChanged.add(model.getParent(cell));
                 }
             }
 
             if (bounds == null) {
-                bounds = new Rectangle(g.getX(), g.getY(), g.getWidth(), g.getHeight());
+                bounds = new RectangleDouble(g.getX(), g.getY(), g.getWidth(), g.getHeight());
             } else {
-                bounds = new Rectangle(Math.min(bounds.getX(), g.getX()), Math.min(bounds.getY(), g.getY()), Math.max(bounds.getX() + bounds.getWidth(), g.getX() + g.getWidth()), Math.max(bounds.getY() + bounds.getHeight(), g.getY() + g.getHeight()));
+                bounds = new RectangleDouble(Math.min(bounds.getX(), g.getX()), Math.min(bounds.getY(), g.getY()), Math.max(bounds.getX() + bounds.getWidth(), g.getX() + g.getWidth()), Math.max(bounds.getY() + bounds.getHeight(), g.getY() + g.getHeight()));
             }
         }
 
@@ -673,16 +667,14 @@ public class CompactTreeLayout extends GraphLayout {
 
         double currentYOffset = minEdgeJetty - prefVertEdgeOff;
         double maxYOffset = 0;
-
-        Rectangle parentBounds = getVertexBounds(parentCell);
+        RectangleDouble parentBounds = getVertexBounds(parentCell);
 
         for (int j = 0; j < sortedCellsArray.length; j++) {
             ICell childCell = sortedCellsArray[j].cell.cell;
-            Rectangle childBounds = getVertexBounds(childCell);
+            RectangleDouble childBounds = getVertexBounds(childCell);
 
             List<ICell> edges = GraphModel.getEdgesBetween(model, parentCell, childCell);
-
-            List<Point> newPoints = new ArrayList<>(3);
+            List<PointDouble> newPoints = new ArrayList<>(3);
             double x = 0;
             double y = 0;
 
@@ -692,20 +684,20 @@ public class CompactTreeLayout extends GraphLayout {
                     //
                     x = parentBounds.getX() + parentBounds.getWidth();
                     y = parentBounds.getY() + currentXOffset;
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     x = parentBounds.getX() + parentBounds.getWidth() + currentYOffset;
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     y = childBounds.getY() + childBounds.getHeight() / 2.0;
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     setEdgePoints(edge, newPoints);
                 } else {
                     x = parentBounds.getX() + currentXOffset;
                     y = parentBounds.getY() + parentBounds.getHeight();
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     y = parentBounds.getY() + parentBounds.getHeight() + currentYOffset;
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     x = childBounds.getX() + childBounds.getWidth() / 2.0;
-                    newPoints.add(new Point(x, y));
+                    newPoints.add(new PointDouble(x, y));
                     setEdgePoints(edge, newPoints);
                 }
             }

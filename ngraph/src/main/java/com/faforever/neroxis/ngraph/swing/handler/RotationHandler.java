@@ -4,7 +4,7 @@ import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Cursor;
@@ -154,7 +154,7 @@ public class RotationHandler extends MouseAdapter {
 
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
-            Rectangle dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);
+            RectangleDouble dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);
             Point pt = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
 
             double cx = currentState.getCenterX();
@@ -210,8 +210,7 @@ public class RotationHandler extends MouseAdapter {
         if (handle.getParent() != null) {
             handle.getParent().remove(handle);
         }
-
-        Rectangle dirty = null;
+        RectangleDouble dirty = null;
 
         if (currentState != null && first != null) {
             dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);

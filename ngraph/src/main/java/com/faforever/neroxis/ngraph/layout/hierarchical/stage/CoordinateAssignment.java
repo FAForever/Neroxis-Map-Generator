@@ -11,8 +11,8 @@ import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyMode
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyNode;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyRank;
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.geom.Rectangle2D;
@@ -651,7 +651,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
         for (GraphAbstractHierarchyCell cell : rank) {
             if (cell.isVertex()) {
                 GraphHierarchyNode node = (GraphHierarchyNode) cell;
-                Rectangle bounds = layout.getVertexBounds(node.cell);
+                RectangleDouble bounds = layout.getVertexBounds(node.cell);
 
                 if (bounds != null) {
                     if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
@@ -727,7 +727,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
 
                 if (cell.isVertex()) {
                     GraphHierarchyNode node = (GraphHierarchyNode) cell;
-                    Rectangle bounds = layout.getVertexBounds(node.cell);
+                    RectangleDouble bounds = layout.getVertexBounds(node.cell);
 
                     if (bounds != null) {
                         if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
@@ -1186,8 +1186,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             while (parallelEdges.hasNext()) {
                 ICell realEdge = parallelEdges.next();
                 ICell realSource = layout.getGraph().getView().getVisibleTerminal(realEdge, true);
-
-                List<Point> newPoints = new ArrayList<Point>(edge.x.length);
+                List<PointDouble> newPoints = new ArrayList<PointDouble>(edge.x.length);
 
                 // Single length reversed edges end up with the jettys in the wrong
                 // places. Since single length edges only have jettys, not segment
@@ -1218,9 +1217,9 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                     double x = jettys[parallelEdgeCount * 4 + arrayOffset];
 
                     if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
-                        newPoints.add(new Point(x, y));
+                        newPoints.add(new PointDouble(x, y));
                     } else {
-                        newPoints.add(new Point(y, x));
+                        newPoints.add(new PointDouble(y, x));
                     }
                 }
 
@@ -1257,11 +1256,11 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                     }
 
                     if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
-                        newPoints.add(new Point(positionX, topChannelY));
-                        newPoints.add(new Point(positionX, bottomChannelY));
+                        newPoints.add(new PointDouble(positionX, topChannelY));
+                        newPoints.add(new PointDouble(positionX, bottomChannelY));
                     } else {
-                        newPoints.add(new Point(topChannelY, positionX));
-                        newPoints.add(new Point(bottomChannelY, positionX));
+                        newPoints.add(new PointDouble(topChannelY, positionX));
+                        newPoints.add(new PointDouble(bottomChannelY, positionX));
                     }
 
                     limitX = Math.max(limitX, positionX);
@@ -1285,9 +1284,9 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                     double x = jettys[parallelEdgeCount * 4 + 2 - arrayOffset];
 
                     if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
-                        newPoints.add(new Point(x, y));
+                        newPoints.add(new PointDouble(x, y));
                     } else {
-                        newPoints.add(new Point(y, x));
+                        newPoints.add(new PointDouble(y, x));
                     }
                 }
 

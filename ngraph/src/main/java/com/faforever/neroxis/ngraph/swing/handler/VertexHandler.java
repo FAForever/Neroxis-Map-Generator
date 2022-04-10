@@ -8,14 +8,18 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 public class VertexHandler extends CellHandler {
 
@@ -65,9 +69,8 @@ public class VertexHandler extends CellHandler {
         } else {
             h = new java.awt.Rectangle[1];
         }
-
         int s = Constants.LABEL_HANDLE_SIZE;
-        Rectangle bounds = state.getLabelBounds();
+        RectangleDouble bounds = state.getLabelBounds();
         h[h.length - 1] = new java.awt.Rectangle((int) (bounds.getX() + bounds.getWidth() / 2 - s), (int) (bounds.getY() + bounds.getHeight() / 2 - s), 2 * s, 2 * s);
 
         return h;
@@ -91,7 +94,7 @@ public class VertexHandler extends CellHandler {
             double dy = e.getY() - first.y;
 
             if (isLabel(index)) {
-                Point pt = new Point(e.getPoint());
+                PointDouble pt = new PointDouble(e.getPoint());
 
                 if (gridEnabledEvent) {
                     pt = graphComponent.snapScaledPoint(pt);
@@ -119,8 +122,7 @@ public class VertexHandler extends CellHandler {
                     dx = graph.snap(dx / scale) * scale;
                     dy = graph.snap(dy / scale) * scale;
                 }
-
-                Rectangle bounds = union(getState(), dx, dy, index);
+                RectangleDouble bounds = union(getState(), dx, dy, index);
                 bounds.setWidth(bounds.getWidth() + 1);
                 bounds.setHeight(bounds.getHeight() + 1);
                 preview.setBounds(bounds.getRectangle());
@@ -156,7 +158,7 @@ public class VertexHandler extends CellHandler {
 
         if (geometry != null) {
             double scale = graph.getView().getScale();
-            Point pt = new Point(e.getPoint());
+            PointDouble pt = new PointDouble(e.getPoint());
 
             if (gridEnabledEvent) {
                 pt = graphComponent.snapScaledPoint(pt);
@@ -172,18 +174,14 @@ public class VertexHandler extends CellHandler {
                     dx = 0;
                 }
             }
-
-            Point offset = geometry.getOffset();
-
+            PointDouble offset = geometry.getOffset();
             if (offset == null) {
-                offset = new Point();
+                offset = new PointDouble();
             }
-
             dx += offset.getX();
             dy += offset.getY();
-
-            geometry = (Geometry) geometry.clone();
-            geometry.setOffset(new Point(Math.round(dx), Math.round(dy)));
+            geometry = geometry.clone();
+            geometry.setOffset(new PointDouble(Math.round(dx), Math.round(dy)));
             graph.getModel().setGeometry(state.getCell(), geometry);
         }
     }
@@ -200,7 +198,7 @@ public class VertexHandler extends CellHandler {
             double dy = (e.getY() - first.y) / scale;
 
             if (isLabel(index)) {
-                geometry = (Geometry) geometry.clone();
+                geometry = geometry.clone();
 
                 if (geometry.getOffset() != null) {
                     dx += geometry.getOffset().getX();
@@ -211,11 +209,10 @@ public class VertexHandler extends CellHandler {
                     dx = graph.snap(dx);
                     dy = graph.snap(dy);
                 }
-
-                geometry.setOffset(new Point(dx, dy));
+                geometry.setOffset(new PointDouble(dx, dy));
                 graph.getModel().setGeometry(cell, geometry);
             } else {
-                Rectangle bounds = union(geometry, dx, dy, index);
+                RectangleDouble bounds = union(geometry, dx, dy, index);
                 java.awt.Rectangle rect = bounds.getRectangle();
 
                 // Snaps new bounds to grid (unscaled)
@@ -227,8 +224,7 @@ public class VertexHandler extends CellHandler {
                     rect.x = x;
                     rect.y = y;
                 }
-
-                graph.resizeCell(cell, new Rectangle(rect));
+                graph.resizeCell(cell, new RectangleDouble(rect));
             }
         }
     }
@@ -241,12 +237,11 @@ public class VertexHandler extends CellHandler {
         return null;
     }
 
-    protected Rectangle union(Rectangle bounds, double dx, double dy, int index) {
+    protected RectangleDouble union(RectangleDouble bounds, double dx, double dy, int index) {
         double left = bounds.getX();
         double right = left + bounds.getWidth();
         double top = bounds.getY();
         double bottom = top + bounds.getHeight();
-
         if (index > 4 /* Bottom Row */) {
             bottom = bottom + dy;
         } else if (index < 3 /* Top Row */) {
@@ -273,8 +268,7 @@ public class VertexHandler extends CellHandler {
             top += height;
             height = Math.abs(height);
         }
-
-        return new Rectangle(left, top, width, height);
+        return new RectangleDouble(left, top, width, height);
     }
 
     public Color getSelectionColor() {

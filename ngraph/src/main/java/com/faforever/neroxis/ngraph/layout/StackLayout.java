@@ -3,7 +3,7 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import lombok.Getter;
@@ -142,8 +142,8 @@ public class StackLayout extends GraphLayout {
     /**
      * Hook for subclassers to return the container size.
      */
-    public Rectangle getContainerSize() {
-        return new Rectangle();
+    public RectangleDouble getContainerSize() {
+        return new RectangleDouble();
     }
 
 
@@ -157,7 +157,7 @@ public class StackLayout extends GraphLayout {
             // geometry or the current root of the view in which case the size
             // of the graph's container will be used.
             if (pgeo == null && model.getParent(parent) == model.getRoot() || parent == graph.getView().getCurrentRoot()) {
-                Rectangle tmp = getContainerSize();
+                RectangleDouble tmp = getContainerSize();
                 pgeo = new Geometry(0, 0, tmp.getWidth(), tmp.getHeight());
             }
 
@@ -170,7 +170,7 @@ public class StackLayout extends GraphLayout {
             fillValue -= 2 * spacing + 2 * border;
 
             // Handles swimlane start size
-            Rectangle size = graph.getStartSize(parent);
+            RectangleDouble size = graph.getStartSize(parent);
             fillValue -= (horizontal) ? size.getHeight() : size.getWidth();
             double x0 = this.x0 + size.getWidth() + border;
             double y0 = this.y0 + size.getHeight() + border;

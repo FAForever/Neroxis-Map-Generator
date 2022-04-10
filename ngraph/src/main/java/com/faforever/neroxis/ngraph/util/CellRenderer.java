@@ -26,16 +26,13 @@ public class CellRenderer {
      * @param graph Graph to be painted onto the canvas.
      * @return Returns the image that represents the canvas.
      */
-    public static ICanvas drawCells(Graph graph, List<ICell> cells, double scale, Rectangle clip, CanvasFactory factory) {
+    public static ICanvas drawCells(Graph graph, List<ICell> cells, double scale, RectangleDouble clip, CanvasFactory factory) {
         ICanvas canvas = null;
-
         if (cells == null) {
             cells = List.of(graph.getModel().getRoot());
         }
-
         // Gets the current state of the view
         GraphView view = graph.getView();
-
         // Keeps the existing translation as the cells might
         // be aligned to the grid in a different way in a graph
         // that has a translation other than zero
@@ -59,7 +56,7 @@ public class CellRenderer {
 
                 if (canvas != null) {
                     double previousScale = canvas.getScale();
-                    Point previousTranslate = canvas.getTranslate();
+                    PointDouble previousTranslate = canvas.getTranslate();
 
                     try {
                         canvas.setTranslate(-rect.x, -rect.y);
@@ -82,18 +79,16 @@ public class CellRenderer {
         return canvas;
     }
 
-    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, Color background, boolean antiAlias, Rectangle clip) {
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, Color background, boolean antiAlias, RectangleDouble clip) {
         return createBufferedImage(graph, cells, scale, background, antiAlias, clip, new Graphics2DCanvas());
     }
 
-    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, final Color background, final boolean antiAlias, Rectangle clip, final Graphics2DCanvas graphicsCanvas) {
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, final Color background, final boolean antiAlias, RectangleDouble clip, final Graphics2DCanvas graphicsCanvas) {
         ImageCanvas canvas = (ImageCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
             public ICanvas createCanvas(int width, int height) {
                 return new ImageCanvas(graphicsCanvas, width, height, background, antiAlias);
             }
-
         });
-
         return (canvas != null) ? canvas.destroy() : null;
     }
 

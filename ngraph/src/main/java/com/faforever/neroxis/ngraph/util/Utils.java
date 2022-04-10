@@ -74,7 +74,7 @@ public class Utils {
      * markup in the label is computed as HTML and all newlines inside the HTML
      * body are converted into linebreaks.
      */
-    public static Rectangle getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale) {
+    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale) {
         return getLabelSize(label, style, isHtml, scale, 0);
     }
 
@@ -83,15 +83,13 @@ public class Utils {
      * markup in the label is computed as HTML and all newlines inside the HTML
      * body are converted into linebreaks.
      */
-    public static Rectangle getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale, double htmlWrapWidth) {
-        Rectangle size;
-
+    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale, double htmlWrapWidth) {
+        RectangleDouble size;
         if (isHtml) {
             size = getSizeForHtml(getBodyMarkup(label, true), style, scale, htmlWrapWidth);
         } else {
             size = getSizeForString(label, getFont(style), scale);
         }
-
         return size;
     }
 
@@ -121,22 +119,19 @@ public class Utils {
     /**
      * Returns the paint bounds for the given label.
      */
-    public static Rectangle getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, Point offset, Rectangle vertexBounds, double scale) {
+    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, PointDouble offset, RectangleDouble vertexBounds, double scale) {
         return getLabelPaintBounds(label, style, isHtml, offset, vertexBounds, scale, false);
     }
 
     /**
      * Returns the paint bounds for the given label.
      */
-    public static Rectangle getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, Point offset, Rectangle vertexBounds, double scale, boolean isEdge) {
+    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
         double wrapWidth = 0;
-
         if (isHtml && vertexBounds != null && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
             wrapWidth = vertexBounds.getWidth();
         }
-
-        Rectangle size = Utils.getLabelSize(label, style, isHtml, scale, wrapWidth);
-
+        RectangleDouble size = Utils.getLabelSize(label, style, isHtml, scale, wrapWidth);
         // Measures font with full scale and scales back
         size.setWidth(size.getWidth() / scale);
         size.setHeight(size.getHeight() / scale);
@@ -178,14 +173,12 @@ public class Utils {
      * labels this width and height is 0.) The scale is used to scale the given
      * size and the spacings in the specified style.
      */
-    public static Rectangle getScaledLabelBounds(double x, double y, Rectangle size, double outerWidth, double outerHeight, Map<String, Object> style, double scale) {
+    public static RectangleDouble getScaledLabelBounds(double x, double y, RectangleDouble size, double outerWidth, double outerHeight, Map<String, Object> style, double scale) {
         double inset = Constants.LABEL_INSET * scale;
-
         // Scales the size of the label
         // FIXME: Correct rounded font size and not-rounded scale
         double width = size.getWidth() * scale + 2 * inset;
         double height = size.getHeight() * scale + 2 * inset;
-
         // Gets the global spacing and orientation
         boolean horizontal = isTrue(style, Constants.STYLE_HORIZONTAL, true);
         int spacing = (int) (getInt(style, Constants.STYLE_SPACING) * scale);
@@ -232,8 +225,7 @@ public class Utils {
         } else {
             y += spacing + top;
         }
-
-        return new Rectangle(x, y, width, height);
+        return new RectangleDouble(x, y, width, height);
     }
 
     /**
@@ -257,15 +249,13 @@ public class Utils {
      * @param text String whose size should be returned.
      * @param font Font to be used for the computation.
      */
-    public static Rectangle getSizeForString(String text, Font font, double scale) {
+    public static RectangleDouble getSizeForString(String text, Font font, double scale) {
         FontRenderContext frc = new FontRenderContext(null, false, false);
         font = font.deriveFont((float) (font.getSize2D() * scale));
         FontMetrics metrics = null;
-
         if (fontGraphics != null) {
             metrics = fontGraphics.getFontMetrics(font);
         }
-
         double lineHeight = Constants.LINESPACING;
 
         if (metrics != null) {
@@ -291,8 +281,7 @@ public class Utils {
                 }
             }
         }
-
-        return new Rectangle(boundingBox);
+        return new RectangleDouble(boundingBox);
     }
 
     /**
@@ -441,14 +430,12 @@ public class Utils {
      *
      * @param markup HTML markup whose size should be returned.
      */
-    public static Rectangle getSizeForHtml(String markup, Map<String, Object> style, double scale, double wrapWidth) {
+    public static RectangleDouble getSizeForHtml(String markup, Map<String, Object> style, double scale, double wrapWidth) {
         LightweightLabel textRenderer = LightweightLabel.getSharedInstance();
-
         if (textRenderer != null) {
             // First run measures size with no wrapping
             textRenderer.setText(createHtmlDocument(style, markup));
             Dimension size = textRenderer.getPreferredSize();
-
             // Second run measures size with wrapping if required.
             // Note that this is only required because max-width
             // is not supported and we can't get the width of an
@@ -462,8 +449,7 @@ public class Utils {
                     size = size2;
                 }
             }
-
-            return new Rectangle(0, 0, size.width * scale, size.height * scale);
+            return new RectangleDouble(0, 0, size.width * scale, size.height * scale);
         } else {
             return getSizeForString(markup, getFont(style), scale);
         }
@@ -572,32 +558,26 @@ public class Utils {
     /**
      * Returns the bounding box for the rotated rectangle.
      */
-    public static Rectangle getBoundingBox(Rectangle rect, double rotation) {
-        Rectangle result = null;
-
+    public static RectangleDouble getBoundingBox(RectangleDouble rect, double rotation) {
+        RectangleDouble result = null;
         if (rect != null && rotation != 0) {
             double rad = Math.toRadians(rotation);
             double cos = Math.cos(rad);
             double sin = Math.sin(rad);
-
-            Point cx = new Point(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
-
-            Point p1 = new Point(rect.getX(), rect.getY());
-            Point p2 = new Point(rect.getX() + rect.getWidth(), rect.getY());
-            Point p3 = new Point(p2.getX(), rect.getY() + rect.getHeight());
-            Point p4 = new Point(rect.getX(), p3.getY());
-
+            PointDouble cx = new PointDouble(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+            PointDouble p1 = new PointDouble(rect.getX(), rect.getY());
+            PointDouble p2 = new PointDouble(rect.getX() + rect.getWidth(), rect.getY());
+            PointDouble p3 = new PointDouble(p2.getX(), rect.getY() + rect.getHeight());
+            PointDouble p4 = new PointDouble(rect.getX(), p3.getY());
             p1 = getRotatedPoint(p1, cos, sin, cx);
             p2 = getRotatedPoint(p2, cos, sin, cx);
             p3 = getRotatedPoint(p3, cos, sin, cx);
             p4 = getRotatedPoint(p4, cos, sin, cx);
-
             java.awt.Rectangle tmp = new java.awt.Rectangle((int) p1.getX(), (int) p1.getY(), 0, 0);
-            tmp.add(p2.getPoint());
-            tmp.add(p3.getPoint());
-            tmp.add(p4.getPoint());
-
-            result = new Rectangle(tmp);
+            tmp.add(p2.toPoint());
+            tmp.add(p3.toPoint());
+            tmp.add(p4.toPoint());
+            result = new RectangleDouble(tmp);
         } else if (rect != null) {
             result = rect.clone();
         }
@@ -647,8 +627,8 @@ public class Utils {
     /**
      * Rotates the given point by the given cos and sin.
      */
-    public static Point getRotatedPoint(Point pt, double cos, double sin) {
-        return getRotatedPoint(pt, cos, sin, new Point());
+    public static PointDouble getRotatedPoint(PointDouble pt, double cos, double sin) {
+        return getRotatedPoint(pt, cos, sin, new PointDouble());
     }
 
     /**
@@ -659,11 +639,11 @@ public class Utils {
         int index = -1;
 
         if (state.getAbsolutePointCount() > 0) {
-            Point last = state.getAbsolutePoint(0);
+            PointDouble last = state.getAbsolutePoint(0);
             double min = Double.MAX_VALUE;
 
             for (int i = 1; i < state.getAbsolutePointCount(); i++) {
-                Point current = state.getAbsolutePoint(i);
+                PointDouble current = state.getAbsolutePoint(i);
                 double dist = new Line2D.Double(last.x, last.y, current.x, current.y).ptSegDistSq(x, y);
 
                 if (dist < min) {
@@ -681,14 +661,12 @@ public class Utils {
     /**
      * Rotates the given point by the given cos and sin.
      */
-    public static Point getRotatedPoint(Point pt, double cos, double sin, Point c) {
+    public static PointDouble getRotatedPoint(PointDouble pt, double cos, double sin, PointDouble c) {
         double x = pt.getX() - c.getX();
         double y = pt.getY() - c.getY();
-
         double x1 = x * cos - y * sin;
         double y1 = y * cos + x * sin;
-
-        return new Point(x1 + c.getX(), y1 + c.getY());
+        return new PointDouble(x1 + c.getX(), y1 + c.getY());
     }
 
     /**
@@ -798,18 +776,14 @@ public class Utils {
      * the given list by the given vector. Elements that are not Points are
      * added to the result as-is.
      */
-    public static List<Point> translatePoints(List<Point> pts, double dx, double dy) {
-        List<Point> result = null;
-
+    public static List<PointDouble> translatePoints(List<PointDouble> pts, double dx, double dy) {
+        List<PointDouble> result = null;
         if (pts != null) {
             result = new ArrayList<>(pts.size());
-
-            for (Point pt : pts) {
-                Point point = (Point) pt.clone();
-
+            for (PointDouble pt : pts) {
+                PointDouble point = (PointDouble) pt.clone();
                 point.setX(point.getX() + dx);
                 point.setY(point.getY() + dy);
-
                 result.add(point);
             }
         }
@@ -830,20 +804,17 @@ public class Utils {
      * @param y3 Y-coordinate of the second line's endpoint.
      * @return Returns the intersection between the two lines.
      */
-    public static Point intersection(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
+    public static PointDouble intersection(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
         double denom = ((y3 - y2) * (x1 - x0)) - ((x3 - x2) * (y1 - y0));
         double nume_a = ((x3 - x2) * (y0 - y2)) - ((y3 - y2) * (x0 - x2));
         double nume_b = ((x1 - x0) * (y0 - y2)) - ((y1 - y0) * (x0 - x2));
-
         double ua = nume_a / denom;
         double ub = nume_b / denom;
-
         if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0) {
             // Get the intersection point
             double intersectionX = x0 + ua * (x1 - x0);
             double intersectionY = y0 + ua * (y1 - y0);
-
-            return new Point(intersectionX, intersectionY);
+            return new PointDouble(intersectionX, intersectionY);
         }
 
         // No intersection

@@ -62,7 +62,7 @@ public class LightweightLabel extends JLabel {
     /**
      * Overridden for performance reasons.
      */
-    public void repaint(Rectangle r) {
+    public void repaint(RectangleDouble r) {
     }
 
     /**

@@ -6,7 +6,7 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.util.HashMap;
 import java.util.List;
@@ -175,8 +175,7 @@ public class FastOrganicLayout extends GraphLayout {
         IGraphModel model = graph.getModel();
 
         vertexArray = graph.getChildVertices(parent).stream().filter(vertex -> !isVertexIgnored(vertex)).collect(Collectors.toList());
-
-        Rectangle initialBounds = (useInputOrigin) ? graph.getBoundsForCells(vertexArray, false, false, true) : null;
+        RectangleDouble initialBounds = (useInputOrigin) ? graph.getBoundsForCells(vertexArray, false, false, true) : null;
         int n = vertexArray.size();
 
         dispX = new double[n];
@@ -205,7 +204,7 @@ public class FastOrganicLayout extends GraphLayout {
 
             // Set up the mapping from array indices to cells
             indices.put(vertex, i);
-            Rectangle bounds = getVertexBounds(vertex);
+            RectangleDouble bounds = getVertexBounds(vertex);
 
             // Set the X,Y value of the internal version of the cell to
             // the center point of the vertex for better positioning

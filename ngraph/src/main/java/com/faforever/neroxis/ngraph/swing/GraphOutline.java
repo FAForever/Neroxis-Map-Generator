@@ -5,8 +5,8 @@ package com.faforever.neroxis.ngraph.swing;
 
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.event.RepaintEvent;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import java.awt.BasicStroke;
@@ -60,11 +60,10 @@ public class GraphOutline extends JComponent {
      * True if the triple buffer needs a full repaint.
      */
     protected boolean repaintBuffer = false;
-
     /**
      * Clip of the triple buffer to be repainted.
      */
-    protected Rectangle repaintClip = null;
+    protected RectangleDouble repaintClip = null;
 
     protected boolean tripleBuffered = true;
 
@@ -101,9 +100,9 @@ public class GraphOutline extends JComponent {
     protected transient boolean zoomGesture = false;
     protected IEventListener<RepaintEvent> repaintHandler = (source, evt) -> {
         updateScaleAndTranslate();
-        Rectangle dirty = evt.getRegion();
+        RectangleDouble dirty = evt.getRegion();
         if (dirty != null) {
-            repaintClip = new Rectangle(dirty);
+            repaintClip = new RectangleDouble(dirty);
         } else {
             repaintBuffer = true;
         }
@@ -530,7 +529,7 @@ public class GraphOutline extends JComponent {
             if (gw > 0 && gh > 0) {
                 boolean magnifyPage = graphComponent.isPageVisible() && isFitPage() && graphComponent.getHorizontalScrollBar().isVisible() && graphComponent.getVerticalScrollBar().isVisible();
                 double graphScale = graphComponent.getGraph().getView().getScale();
-                Point trans = graphComponent.getGraph().getView().getTranslate();
+                PointDouble trans = graphComponent.getGraph().getView().getTranslate();
 
                 int w = (int) outlineSize.getWidth() - 2 * outlineBorder;
                 int h = (int) outlineSize.getHeight() - 2 * outlineBorder;

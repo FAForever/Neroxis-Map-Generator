@@ -3,7 +3,7 @@ package com.faforever.neroxis.ngraph.shape;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.canvas.GraphicsCanvas2D;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 
@@ -16,17 +16,14 @@ public class SwimlaneShape extends BasicShape {
         return Math.max(0, Utils.getFloat(state.getStyle(), Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE) * canvas.getScale());
     }
 
-    protected Rectangle getGradientBounds(Graphics2DCanvas canvas, CellState state) {
+    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
         double start = getTitleSize(canvas, state);
-
         if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
             start = Math.min(start, state.getHeight());
-
-            return new Rectangle(state.getX(), state.getY(), state.getWidth(), start);
+            return new RectangleDouble(state.getX(), state.getY(), state.getWidth(), start);
         } else {
             start = Math.min(start, state.getWidth());
-
-            return new Rectangle(state.getX(), state.getY(), start, state.getHeight());
+            return new RectangleDouble(state.getX(), state.getY(), start, state.getHeight());
         }
     }
 
@@ -77,7 +74,7 @@ public class SwimlaneShape extends BasicShape {
         String gradient = Utils.getString(state.getStyle(), Constants.STYLE_GRADIENTCOLOR, Constants.NONE);
 
         if (!Constants.NONE.equals(fill) && !Constants.NONE.equals(gradient)) {
-            Rectangle b = getGradientBounds(canvas, state);
+            RectangleDouble b = getGradientBounds(canvas, state);
             c.setGradient(fill, gradient, b.getX(), b.getY(), b.getWidth(), b.getHeight(), Utils.getString(state.getStyle(), Constants.STYLE_GRADIENT_DIRECTION, Constants.DIRECTION_NORTH), 1, 1);
         } else {
             c.setFillColor(fill);

@@ -27,8 +27,8 @@ import com.faforever.neroxis.ngraph.shape.SwimlaneShape;
 import com.faforever.neroxis.ngraph.shape.TriangleShape;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.AlphaComposite;
@@ -298,19 +298,16 @@ public class Graphics2DCanvas extends BasicCanvas {
         return new Dimension(image.getWidth(null), image.getHeight(null));
     }
 
-    public void paintPolyline(Point[] points, boolean rounded) {
+    public void paintPolyline(PointDouble[] points, boolean rounded) {
         if (points != null && points.length > 1) {
-            Point pt = points[0];
-            Point pe = points[points.length - 1];
-
+            PointDouble pt = points[0];
+            PointDouble pe = points[points.length - 1];
             double arcSize = Constants.LINE_ARCSIZE * scale;
-
             GeneralPath path = new GeneralPath();
             path.moveTo((float) pt.getX(), (float) pt.getY());
-
             // Draws the line segments
             for (int i = 1; i < points.length - 1; i++) {
-                Point tmp = points[i];
+                PointDouble tmp = points[i];
                 double dx = pt.getX() - tmp.getX();
                 double dy = pt.getY() - tmp.getY();
 
@@ -329,7 +326,7 @@ public class Graphics2DCanvas extends BasicCanvas {
                     // Draws a curve from the last point to the current
                     // point with a spacing of size off the current point
                     // into direction of the next point
-                    Point next = points[i + 1];
+                    PointDouble next = points[i + 1];
 
                     // Uses next non-overlapping point
                     while (i < points.length - 2 && Math.round(next.getX() - tmp.getX()) == 0 && Math.round(next.getY() - tmp.getY()) == 0) {
@@ -346,9 +343,8 @@ public class Graphics2DCanvas extends BasicCanvas {
 
                     double x2 = tmp.getX() + nx2;
                     double y2 = tmp.getY() + ny2;
-
                     path.quadTo((float) tmp.getX(), (float) tmp.getY(), (float) x2, (float) y2);
-                    tmp = new Point(x2, y2);
+                    tmp = new PointDouble(x2, y2);
                 } else {
                     path.lineTo((float) tmp.getX(), (float) tmp.getY());
                 }
@@ -417,16 +413,13 @@ public class Graphics2DCanvas extends BasicCanvas {
         }
     }
 
-    public Paint createFillPaint(Rectangle bounds, Map<String, Object> style) {
+    public Paint createFillPaint(RectangleDouble bounds, Map<String, Object> style) {
         Color fillColor = Utils.getColor(style, Constants.STYLE_FILLCOLOR);
         Paint fillPaint = null;
-
         if (fillColor != null) {
             Color gradientColor = Utils.getColor(style, Constants.STYLE_GRADIENTCOLOR);
-
             if (gradientColor != null) {
                 String gradientDirection = Utils.getString(style, Constants.STYLE_GRADIENT_DIRECTION);
-
                 float x1 = (float) bounds.getX();
                 float y1 = (float) bounds.getY();
                 float x2 = (float) bounds.getX();
@@ -449,16 +442,13 @@ public class Graphics2DCanvas extends BasicCanvas {
         return fillPaint;
     }
 
-    public Graphics2D createTemporaryGraphics(Map<String, Object> style, float opacity, Rectangle bounds) {
+    public Graphics2D createTemporaryGraphics(Map<String, Object> style, float opacity, RectangleDouble bounds) {
         Graphics2D temporaryGraphics = (Graphics2D) graphics2D.create();
-
         // Applies the default translate
         temporaryGraphics.translate(translate.getX(), translate.getY());
-
         // Applies the rotation on the graphics object
         if (bounds != null) {
             double rotation = Utils.getDouble(style, Constants.STYLE_ROTATION, 0);
-
             if (rotation != 0) {
                 temporaryGraphics.rotate(Math.toRadians(rotation), bounds.getCenterX(), bounds.getCenterY());
             }

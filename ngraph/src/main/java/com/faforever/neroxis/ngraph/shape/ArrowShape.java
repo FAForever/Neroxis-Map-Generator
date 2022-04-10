@@ -2,23 +2,21 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Polygon;
+import java.awt.Shape;
 
 public class ArrowShape extends BasicShape {
 
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         double scale = canvas.getScale();
-        Point p0 = state.getAbsolutePoint(0);
-        Point pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-
+        PointDouble p0 = state.getAbsolutePoint(0);
+        PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
         // Geometry of arrow
         double spacing = Constants.ARROW_SPACING * scale;
         double width = Constants.ARROW_WIDTH * scale;
         double arrow = Constants.ARROW_SIZE * scale;
-
         double dx = pe.getX() - p0.getX();
         double dy = pe.getY() - p0.getY();
         double dist = Math.sqrt(dx * dx + dy * dy);

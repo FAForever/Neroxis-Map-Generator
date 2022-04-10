@@ -6,16 +6,15 @@ package com.faforever.neroxis.ngraph.shape;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.canvas.GraphicsCanvas2D;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Implements a stencil for the given XML definition. This class implements the Graph
@@ -141,7 +140,7 @@ public class Stencil implements IShape {
         }
 
         // Note: Overwritten in Stencil.paintShape (can depend on aspect)
-        Rectangle aspect = computeAspect(state, state, direction);
+        RectangleDouble aspect = computeAspect(state, state, direction);
         double minScale = Math.min(aspect.getWidth(), aspect.getHeight());
         double sw = strokewidth.equals("inherit") ? Utils.getDouble(state.getStyle(), Constants.STYLE_STROKEWIDTH, 1) * state.getView().getScale() : Double.parseDouble(strokewidth) * minScale;
         canvas.setStrokeWidth(sw);
@@ -201,15 +200,14 @@ public class Stencil implements IShape {
     /**
      * Draws the shadow.
      */
-    protected void drawShadow(GraphicsCanvas2D canvas, CellState state, double rotation, boolean flipH, boolean flipV, Rectangle bounds, double alpha, boolean filled, Rectangle aspect) {
+    protected void drawShadow(GraphicsCanvas2D canvas, CellState state, double rotation, boolean flipH, boolean flipV, RectangleDouble bounds, double alpha, boolean filled, RectangleDouble aspect) {
         // Requires background in generic shape for shadow, looks like only one
         // fillAndStroke is allowed per current path, try working around that
         // Computes rotated shadow offset
         double rad = rotation * Math.PI / 180;
         double cos = Math.cos(-rad);
         double sin = Math.sin(-rad);
-        Point offset = Utils.getRotatedPoint(new Point(Constants.SHADOW_OFFSETX, Constants.SHADOW_OFFSETY), cos, sin);
-
+        PointDouble offset = Utils.getRotatedPoint(new PointDouble(Constants.SHADOW_OFFSETX, Constants.SHADOW_OFFSETY), cos, sin);
         if (flipH) {
             offset.setX(offset.getX() * -1);
         }
@@ -234,15 +232,12 @@ public class Stencil implements IShape {
     /**
      * Draws this stencil inside the given bounds.
      */
-    public boolean drawShape(GraphicsCanvas2D canvas, CellState state, Rectangle bounds, Rectangle aspect, boolean background) {
+    public boolean drawShape(GraphicsCanvas2D canvas, CellState state, RectangleDouble bounds, RectangleDouble aspect, boolean background) {
         Element elt = (background) ? bgNode : fgNode;
-
         if (elt != null) {
             lastMoveX = 0;
             lastMoveY = 0;
-
             Node tmp = elt.getFirstChild();
-
             while (tmp != null) {
                 if (tmp.getNodeType() == Node.ELEMENT_NODE) {
                     drawElement(canvas, state, (Element) tmp, aspect);
@@ -262,14 +257,12 @@ public class Stencil implements IShape {
      * and vertical scale in width and height used to draw this shape inside the
      * given rectangle.
      */
-    protected Rectangle computeAspect(CellState state, Rectangle bounds, String direction) {
+    protected RectangleDouble computeAspect(CellState state, RectangleDouble bounds, String direction) {
         double x0 = bounds.getX();
         double y0 = bounds.getY();
         double sx = bounds.getWidth() / w0;
         double sy = bounds.getHeight() / h0;
-
         boolean inverse = (direction != null && (direction.equals("north") || direction.equals("south")));
-
         if (inverse) {
             sy = bounds.getWidth() / h0;
             sx = bounds.getHeight() / w0;
@@ -293,21 +286,19 @@ public class Stencil implements IShape {
                 y0 += (bounds.getHeight() - this.h0 * sy) / 2;
             }
         }
-
-        return new Rectangle(x0, y0, sx, sy);
+        return new RectangleDouble(x0, y0, sx, sy);
     }
 
     /**
      * Drawsthe given element.
      */
-    protected void drawElement(GraphicsCanvas2D canvas, CellState state, Element node, Rectangle aspect) {
+    protected void drawElement(GraphicsCanvas2D canvas, CellState state, Element node, RectangleDouble aspect) {
         String name = node.getNodeName();
         double x0 = aspect.getX();
         double y0 = aspect.getY();
         double sx = aspect.getWidth();
         double sy = aspect.getHeight();
         double minScale = Math.min(sx, sy);
-
         // LATER: Move to lookup table
         if (name.equals("save")) {
             canvas.save();
@@ -396,8 +387,7 @@ public class Stencil implements IShape {
                 double y = y0 + getDouble(node, "y") * sy;
                 double w = getDouble(node, "w") * sx;
                 double h = getDouble(node, "h") * sy;
-
-                Rectangle tmp = new Rectangle(x, y, w, h);
+                RectangleDouble tmp = new RectangleDouble(x, y, w, h);
                 stencil.drawShape(canvas, state, tmp, aspect, true);
                 stencil.drawShape(canvas, state, tmp, aspect, false);
             }

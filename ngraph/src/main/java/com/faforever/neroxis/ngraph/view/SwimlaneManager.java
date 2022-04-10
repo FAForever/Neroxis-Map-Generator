@@ -10,7 +10,7 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.util.List;
 import java.util.Map;
@@ -236,14 +236,14 @@ public class SwimlaneManager extends EventSource {
                         Geometry geo = model.getGeometry(cell);
 
                         if (geo != null) {
-                            Rectangle size = new Rectangle(0, 0, geo.getWidth(), geo.getHeight());
+                            RectangleDouble size = new RectangleDouble(0, 0, geo.getWidth(), geo.getHeight());
                             ICell top = cell;
                             ICell current = top;
 
                             while (current != null) {
                                 top = current;
                                 current = model.getParent(current);
-                                Rectangle tmp = (graph.isSwimlane(current)) ? graph.getStartSize(current) : new Rectangle();
+                                RectangleDouble tmp = (graph.isSwimlane(current)) ? graph.getStartSize(current) : new RectangleDouble();
                                 size.setWidth(size.getWidth() + tmp.getWidth());
                                 size.setHeight(size.getHeight() + tmp.getHeight());
                             }
@@ -289,8 +289,7 @@ public class SwimlaneManager extends EventSource {
                     }
                 }
             }
-
-            Rectangle tmp = (graph.isSwimlane(swimlane)) ? graph.getStartSize(swimlane) : new Rectangle();
+            RectangleDouble tmp = (graph.isSwimlane(swimlane)) ? graph.getStartSize(swimlane) : new RectangleDouble();
             w -= tmp.getWidth();
             h -= tmp.getHeight();
 

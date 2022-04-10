@@ -7,8 +7,8 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.GraphTransferable;
 import com.faforever.neroxis.ngraph.util.CellRenderer;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Color;
 import java.awt.Image;
@@ -153,10 +153,9 @@ public class GraphTransferHandler extends TransferHandler {
 
     public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, ImageIcon icon) {
         Graph graph = graphComponent.getGraph();
-        Point tr = graph.getView().getTranslate();
+        PointDouble tr = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
-
-        Rectangle bounds = graph.getPaintBounds(cells);
+        RectangleDouble bounds = graph.getPaintBounds(cells);
 
         // Removes the scale and translation from the bounds
         bounds.setX(bounds.getX() / scale - tr.getX());
@@ -167,7 +166,7 @@ public class GraphTransferHandler extends TransferHandler {
         return createGraphTransferable(graphComponent, cells, bounds, icon);
     }
 
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, Rectangle bounds, ImageIcon icon) {
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, RectangleDouble bounds, ImageIcon icon) {
         return new GraphTransferable(graphComponent.getGraph().cloneCells(cells), bounds, icon);
     }
 
@@ -266,12 +265,12 @@ public class GraphTransferHandler extends TransferHandler {
         try {
             Graph graph = graphComponent.getGraph();
             double scale = graph.getView().getScale();
-            Rectangle bounds = gt.getBounds();
+            RectangleDouble bounds = gt.getBounds();
             double dx = 0, dy = 0;
 
             // Computes the offset for the placement of the imported cells
             if (location != null && bounds != null) {
-                Point translate = graph.getView().getTranslate();
+                PointDouble translate = graph.getView().getTranslate();
 
                 dx = location.getX() - (bounds.getX() + translate.getX()) * scale;
                 dy = location.getY() - (bounds.getY() + translate.getY()) * scale;

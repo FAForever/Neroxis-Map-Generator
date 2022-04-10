@@ -3,7 +3,7 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +86,7 @@ public class PartitionLayout extends GraphLayout {
             // TODO: Take into account the orientation
             for (i = 0; i < childCount; i++) {
                 ICell child = model.getChildAt(parent, i);
-                Rectangle bounds = getVertexBounds(child);
+                RectangleDouble bounds = getVertexBounds(child);
 
                 if (bounds != null) {
                     double tmp = bounds.getX() + bounds.getWidth() / 2;
@@ -110,8 +110,8 @@ public class PartitionLayout extends GraphLayout {
     /**
      * Hook for subclassers to return the container size.
      */
-    public Rectangle getContainerSize() {
-        return new Rectangle();
+    public RectangleDouble getContainerSize() {
+        return new RectangleDouble();
     }
 
 
@@ -123,7 +123,7 @@ public class PartitionLayout extends GraphLayout {
         // geometry or the current root of the view in which case the size
         // of the graph's container will be used.
         if (pgeo == null && model.getParent(parent) == model.getRoot() || parent == graph.getView().getCurrentRoot()) {
-            Rectangle tmp = getContainerSize();
+            RectangleDouble tmp = getContainerSize();
             pgeo = new Geometry(0, 0, tmp.getWidth(), tmp.getHeight());
         }
 
@@ -146,8 +146,7 @@ public class PartitionLayout extends GraphLayout {
                 double y0 = border;
                 double other = (horizontal) ? pgeo.getHeight() : pgeo.getWidth();
                 other -= 2 * border;
-
-                Rectangle size = graph.getStartSize(parent);
+                RectangleDouble size = graph.getStartSize(parent);
 
                 other -= (horizontal) ? size.getHeight() : size.getWidth();
                 x0 = x0 + size.getWidth();

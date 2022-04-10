@@ -3,8 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,43 +22,37 @@ import java.util.List;
  * pixels from that point. In addition, the offset is used as an absolute
  * offset vector from the resulting point.
  */
-public class Geometry extends Rectangle {
-
+public class Geometry extends RectangleDouble {
     @Serial
     private static final long serialVersionUID = 2649828026610336589L;
-
     /**
      * Global switch to translate the points in translate. Default is true.
      */
     public static transient boolean TRANSLATE_CONTROL_POINTS = true;
-
     /**
      * Stores alternate values for x, y, width and height in a rectangle.
      * Default is null.
      */
-    protected Rectangle alternateBounds;
-
+    protected RectangleDouble alternateBounds;
     /**
      * Defines the source- and target-point of the edge. This is used if the
      * corresponding edge does not have a source vertex. Otherwise it is
      * ignored. Default is null.
      */
-    protected Point sourcePoint, targetPoint;
-
+    protected PointDouble sourcePoint, targetPoint;
     /**
      * List of Points which specifies the control points along the edge.
      * These points are the intermediate points on the edge, for the endpoints
      * use targetPoint and sourcePoint or set the terminals of the edge to
      * a non-null value. Default is null.
      */
-    protected List<Point> points;
-
+    protected List<PointDouble> points;
     /**
      * Holds the offset of the label for edges. This is the absolute vector
      * between the center of the edge and the top, left point of the label.
      * Default is null.
      */
-    protected Point offset;
+    protected PointDouble offset;
 
     /**
      * Specifies if the coordinates in the geometry are to be interpreted as
@@ -91,7 +85,7 @@ public class Geometry extends Rectangle {
     /**
      * Returns the alternate bounds.
      */
-    public Rectangle getAlternateBounds() {
+    public RectangleDouble getAlternateBounds() {
         return alternateBounds;
     }
 
@@ -100,7 +94,7 @@ public class Geometry extends Rectangle {
      *
      * @param rect Rectangle to be used for the alternate bounds.
      */
-    public void setAlternateBounds(Rectangle rect) {
+    public void setAlternateBounds(RectangleDouble rect) {
         alternateBounds = rect;
     }
 
@@ -109,7 +103,7 @@ public class Geometry extends Rectangle {
      *
      * @return Returns the source point.
      */
-    public Point getSourcePoint() {
+    public PointDouble getSourcePoint() {
         return sourcePoint;
     }
 
@@ -118,7 +112,7 @@ public class Geometry extends Rectangle {
      *
      * @param sourcePoint Source point to be used.
      */
-    public void setSourcePoint(Point sourcePoint) {
+    public void setSourcePoint(PointDouble sourcePoint) {
         this.sourcePoint = sourcePoint;
     }
 
@@ -127,7 +121,7 @@ public class Geometry extends Rectangle {
      *
      * @return Returns the target point.
      */
-    public Point getTargetPoint() {
+    public PointDouble getTargetPoint() {
         return targetPoint;
     }
 
@@ -136,14 +130,14 @@ public class Geometry extends Rectangle {
      *
      * @param targetPoint Target point to be used.
      */
-    public void setTargetPoint(Point targetPoint) {
+    public void setTargetPoint(PointDouble targetPoint) {
         this.targetPoint = targetPoint;
     }
 
     /**
      * Returns the list of control points.
      */
-    public List<Point> getPoints() {
+    public List<PointDouble> getPoints() {
         return points;
     }
 
@@ -152,14 +146,14 @@ public class Geometry extends Rectangle {
      *
      * @param value List that contains the new control points.
      */
-    public void setPoints(List<Point> value) {
+    public void setPoints(List<PointDouble> value) {
         points = value;
     }
 
     /**
      * Returns the offset.
      */
-    public Point getOffset() {
+    public PointDouble getOffset() {
         return offset;
     }
 
@@ -168,7 +162,7 @@ public class Geometry extends Rectangle {
      *
      * @param offset Point to be used for the offset.
      */
-    public void setOffset(Point offset) {
+    public void setOffset(PointDouble offset) {
         this.offset = offset;
     }
 
@@ -199,7 +193,7 @@ public class Geometry extends Rectangle {
      */
     public void swap() {
         if (alternateBounds != null) {
-            Rectangle old = new Rectangle(getX(), getY(), getWidth(), getHeight());
+            RectangleDouble old = new RectangleDouble(getX(), getY(), getWidth(), getHeight());
 
             x = alternateBounds.getX();
             y = alternateBounds.getY();
@@ -218,7 +212,7 @@ public class Geometry extends Rectangle {
      *                 should be returned.
      * @return Returns the source or target point.
      */
-    public Point getTerminalPoint(boolean isSource) {
+    public PointDouble getTerminalPoint(boolean isSource) {
         return (isSource) ? sourcePoint : targetPoint;
     }
 
@@ -231,13 +225,12 @@ public class Geometry extends Rectangle {
      *                 should be set.
      * @return Returns the new point.
      */
-    public Point setTerminalPoint(Point point, boolean isSource) {
+    public PointDouble setTerminalPoint(PointDouble point, boolean isSource) {
         if (isSource) {
             sourcePoint = point;
         } else {
             targetPoint = point;
         }
-
         return point;
     }
 
@@ -272,7 +265,7 @@ public class Geometry extends Rectangle {
 
         // Translate the control points
         if (TRANSLATE_CONTROL_POINTS && points != null) {
-            for (Point pt : points) {
+            for (PointDouble pt : points) {
                 pt.setX(pt.getX() + dx);
                 pt.setY(pt.getY() + dy);
             }
@@ -290,36 +283,30 @@ public class Geometry extends Rectangle {
         clone.setWidth(getWidth());
         clone.setHeight(getHeight());
         clone.setRelative(isRelative());
-
-        List<Point> pts = getPoints();
+        List<PointDouble> pts = getPoints();
 
         if (pts != null) {
             clone.points = new ArrayList<>(pts.size());
-
-            for (Point pt : pts) {
-                clone.points.add((Point) pt.clone());
+            for (PointDouble pt : pts) {
+                clone.points.add((PointDouble) pt.clone());
             }
         }
-
-        Point tp = getTargetPoint();
+        PointDouble tp = getTargetPoint();
 
         if (tp != null) {
-            clone.setTargetPoint((Point) tp.clone());
+            clone.setTargetPoint((PointDouble) tp.clone());
         }
-
-        Point sp = getSourcePoint();
+        PointDouble sp = getSourcePoint();
 
         if (sp != null) {
-            setSourcePoint((Point) sp.clone());
+            setSourcePoint((PointDouble) sp.clone());
         }
-
-        Point off = getOffset();
+        PointDouble off = getOffset();
 
         if (off != null) {
-            clone.setOffset((Point) off.clone());
+            clone.setOffset((PointDouble) off.clone());
         }
-
-        Rectangle alt = getAlternateBounds();
+        RectangleDouble alt = getAlternateBounds();
 
         if (alt != null) {
             setAlternateBounds(alt.clone());

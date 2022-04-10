@@ -3,11 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.canvas;
 
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -65,7 +65,7 @@ public class ImageCanvas implements ICanvas {
         canvas.setScale(scale);
     }
 
-    public Point getTranslate() {
+    public PointDouble getTranslate() {
         return canvas.getTranslate();
     }
 

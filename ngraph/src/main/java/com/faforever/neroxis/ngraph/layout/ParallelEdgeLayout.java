@@ -4,7 +4,7 @@ import com.faforever.neroxis.ngraph.model.CellPath;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -140,7 +140,7 @@ public class ParallelEdgeLayout extends GraphLayout {
 
     protected void route(ICell edge, double x, double y) {
         if (graph.isCellMovable(edge)) {
-            setEdgePoints(edge, List.of(new Point(x, y)));
+            setEdgePoints(edge, List.of(new PointDouble(x, y)));
         }
     }
 

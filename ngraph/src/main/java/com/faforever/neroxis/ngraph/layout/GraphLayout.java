@@ -7,8 +7,8 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -149,15 +149,12 @@ public abstract class GraphLayout implements IGraphLayout {
         graph.setCellStyles(Constants.STYLE_ORTHOGONAL, (value) ? "1" : "0", List.of(edge));
     }
 
-    public Point getParentOffset(ICell parent) {
-        Point result = new Point();
-
+    public PointDouble getParentOffset(ICell parent) {
+        PointDouble result = new PointDouble();
         if (parent != null && parent != this.parent) {
             IGraphModel model = graph.getModel();
-
             if (model.isAncestor(this.parent, parent)) {
                 Geometry parentGeo = model.getGeometry(parent);
-
                 while (parent != this.parent) {
                     result.setX(result.getX() + parentGeo.getX());
                     result.setY(result.getY() + parentGeo.getY());
@@ -176,10 +173,9 @@ public abstract class GraphLayout implements IGraphLayout {
      * list of Points. Set the points to null to remove all
      * existing points for an edge.
      */
-    public void setEdgePoints(ICell edge, List<Point> points) {
+    public void setEdgePoints(ICell edge, List<PointDouble> points) {
         IGraphModel model = graph.getModel();
         Geometry geometry = model.getGeometry(edge);
-
         if (geometry == null) {
             geometry = new Geometry();
             geometry.setRelative(true);
@@ -189,10 +185,8 @@ public abstract class GraphLayout implements IGraphLayout {
 
         if (this.parent != null && points != null) {
             ICell parent = graph.getModel().getParent(edge);
-
-            Point parentOffset = getParentOffset(parent);
-
-            for (Point point : points) {
+            PointDouble parentOffset = getParentOffset(parent);
+            for (PointDouble point : points) {
                 point.setX(point.getX() - parentOffset.getX());
                 point.setY(point.getY() - parentOffset.getY());
             }
@@ -207,39 +201,35 @@ public abstract class GraphLayout implements IGraphLayout {
      * Returns an <Rectangle> that defines the bounds of the given cell
      * or the bounding box if <useBoundingBox> is true.
      */
-    public Rectangle getVertexBounds(ICell vertex) {
-        Rectangle geo = graph.getModel().getGeometry(vertex);
-
+    public RectangleDouble getVertexBounds(ICell vertex) {
+        RectangleDouble geo = graph.getModel().getGeometry(vertex);
         // Checks for oversize label bounding box and corrects
         // the return value accordingly
         if (useBoundingBox) {
             CellState state = graph.getView().getState(vertex);
-
             if (state != null) {
                 double scale = graph.getView().getScale();
-                Rectangle tmp = state.getBoundingBox();
+                RectangleDouble tmp = state.getBoundingBox();
 
                 double dx0 = (tmp.getX() - state.getX()) / scale;
                 double dy0 = (tmp.getY() - state.getY()) / scale;
                 double dx1 = (tmp.getX() + tmp.getWidth() - state.getX() - state.getWidth()) / scale;
                 double dy1 = (tmp.getY() + tmp.getHeight() - state.getY() - state.getHeight()) / scale;
-
-                geo = new Rectangle(geo.getX() + dx0, geo.getY() + dy0, geo.getWidth() - dx0 + dx1, geo.getHeight() + -dy0 + dy1);
+                geo = new RectangleDouble(geo.getX() + dx0, geo.getY() + dy0, geo.getWidth() - dx0 + dx1, geo.getHeight() + -dy0 + dy1);
             }
         }
 
         if (this.parent != null) {
             ICell parent = graph.getModel().getParent(vertex);
-            geo = (Rectangle) geo.clone();
+            geo = geo.clone();
 
             if (parent != null && parent != this.parent) {
-                Point parentOffset = getParentOffset(parent);
+                PointDouble parentOffset = getParentOffset(parent);
                 geo.setX(geo.getX() + parentOffset.getX());
                 geo.setY(geo.getY() + parentOffset.getY());
             }
         }
-
-        return new Rectangle(geo);
+        return new RectangleDouble(geo);
     }
 
     /**
@@ -255,23 +245,20 @@ public abstract class GraphLayout implements IGraphLayout {
      * x - Integer that defines the x-coordinate of the new location.
      * y - Integer that defines the y-coordinate of the new location.
      */
-    public Rectangle setVertexLocation(ICell vertex, double x, double y) {
+    public RectangleDouble setVertexLocation(ICell vertex, double x, double y) {
         IGraphModel model = graph.getModel();
         Geometry geometry = model.getGeometry(vertex);
-        Rectangle result = null;
-
+        RectangleDouble result = null;
         if (geometry != null) {
-            result = new Rectangle(x, y, geometry.getWidth(), geometry.getHeight());
-
+            result = new RectangleDouble(x, y, geometry.getWidth(), geometry.getHeight());
             GraphView graphView = graph.getView();
-
             // Checks for oversize labels and offset the result
             if (useBoundingBox) {
                 CellState state = graphView.getState(vertex);
 
                 if (state != null) {
                     double scale = graph.getView().getScale();
-                    Rectangle box = state.getBoundingBox();
+                    RectangleDouble box = state.getBoundingBox();
 
                     if (state.getBoundingBox().getX() < state.getX()) {
                         x += (state.getX() - box.getX()) / scale;
@@ -288,7 +275,7 @@ public abstract class GraphLayout implements IGraphLayout {
                 ICell parent = model.getParent(vertex);
 
                 if (parent != null && parent != this.parent) {
-                    Point parentOffset = getParentOffset(parent);
+                    PointDouble parentOffset = getParentOffset(parent);
 
                     x = x - parentOffset.getX();
                     y = y - parentOffset.getY();
@@ -323,7 +310,7 @@ public abstract class GraphLayout implements IGraphLayout {
             for (int i = groups.size() - 1; i >= 0; i--) {
                 ICell group = groups.get(i);
                 List<ICell> children = graph.getChildVertices(group);
-                Rectangle bounds = graph.getBoundingBoxFromGeometry(children);
+                RectangleDouble bounds = graph.getBoundingBoxFromGeometry(children);
 
                 Geometry geometry = graph.getCellGeometry(group);
                 double left = 0;
@@ -331,7 +318,7 @@ public abstract class GraphLayout implements IGraphLayout {
 
                 // Adds the size of the title area for swimlanes
                 if (this.graph.isSwimlane(group)) {
-                    Rectangle size = graph.getStartSize(group);
+                    RectangleDouble size = graph.getStartSize(group);
                     left = size.getWidth();
                     top = size.getHeight();
                 }

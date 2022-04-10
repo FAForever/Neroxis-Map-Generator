@@ -519,10 +519,10 @@ public class CellMarker extends JComponent {
             g.setColor(currentColor);
 
             if (markedState.getAbsolutePointCount() > 0) {
-                Point last = markedState.getAbsolutePoint(0).getPoint();
+                Point last = markedState.getAbsolutePoint(0).toPoint();
 
                 for (int i = 1; i < markedState.getAbsolutePointCount(); i++) {
-                    Point current = markedState.getAbsolutePoint(i).getPoint();
+                    Point current = markedState.getAbsolutePoint(i).toPoint();
                     g.drawLine(last.x - getX(), last.y - getY(), current.x - getX(), current.y - getY());
                     last = current;
                 }

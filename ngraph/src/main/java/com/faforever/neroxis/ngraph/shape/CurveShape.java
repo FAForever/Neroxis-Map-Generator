@@ -6,8 +6,8 @@ package com.faforever.neroxis.ngraph.shape;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Curve;
-import com.faforever.neroxis.ngraph.util.Line;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.LineDouble;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.RenderingHints;
 import java.util.List;
@@ -41,25 +41,21 @@ public class CurveShape extends ConnectorShape {
         canvas.getGraphics().setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, keyStrokeHint);
     }
 
-    protected void paintPolyline(Graphics2DCanvas canvas, List<Point> points, Map<String, Object> style) {
+    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Map<String, Object> style) {
         double scale = canvas.getScale();
         validateCurve(points, scale, style);
-
         canvas.paintPolyline(curve.getCurvePoints(Curve.CORE_CURVE), false);
     }
 
     /**
      * Forces underlying curve to a valid state
-     *
-     * @param points
      */
-    public void validateCurve(List<Point> points, double scale, Map<String, Object> style) {
+    public void validateCurve(List<PointDouble> points, double scale, Map<String, Object> style) {
         if (curve == null) {
             curve = new Curve(points);
         } else {
             curve.updateCurve(points);
         }
-
         curve.setLabelBuffer(scale * Constants.DEFAULT_LABEL_BUFFER);
     }
 
@@ -73,20 +69,19 @@ public class CurveShape extends ConnectorShape {
      * @param markerSize the scaled maximum length of the marker
      * @return a line describing the vector the marker should be drawn along
      */
-    protected Line getMarkerVector(List<Point> points, boolean source, double markerSize) {
+    protected LineDouble getMarkerVector(List<PointDouble> points, boolean source, double markerSize) {
         double curveLength = curve.getCurveLength(Curve.CORE_CURVE);
         double markerRatio = markerSize / curveLength;
         if (markerRatio >= 1.0) {
             markerRatio = 1.0;
         }
-
         if (source) {
-            Line sourceVector = curve.getCurveParallel(Curve.CORE_CURVE, markerRatio);
-            return new Line(sourceVector.getP1(), points.get(0));
+            LineDouble sourceVector = curve.getCurveParallel(Curve.CORE_CURVE, markerRatio);
+            return new LineDouble(sourceVector.getP1(), points.get(0));
         } else {
-            Line targetVector = curve.getCurveParallel(Curve.CORE_CURVE, 1.0 - markerRatio);
+            LineDouble targetVector = curve.getCurveParallel(Curve.CORE_CURVE, 1.0 - markerRatio);
             int pointCount = points.size();
-            return new Line(targetVector.getP1(), points.get(pointCount - 1));
+            return new LineDouble(targetVector.getP1(), points.get(pointCount - 1));
         }
     }
 }

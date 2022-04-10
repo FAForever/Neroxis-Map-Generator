@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ngraph.canvas;
 
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -29,11 +29,10 @@ public abstract class BasicCanvas implements ICanvas {
      * is required. Default value is DEFAULT_IMAGEBASEPATH.
      */
     protected String imageBasePath = DEFAULT_IMAGEBASEPATH;
-
     /**
      * Specifies the current translation. Default is (0,0).
      */
-    protected Point translate = new Point();
+    protected PointDouble translate = new PointDouble();
 
     /**
      * Specifies the current scale. Default is 1.
@@ -54,7 +53,7 @@ public abstract class BasicCanvas implements ICanvas {
      * Sets the current translate.
      */
     public void setTranslate(double dx, double dy) {
-        translate = new Point(dx, dy);
+        translate = new PointDouble(dx, dy);
     }
 
     /**

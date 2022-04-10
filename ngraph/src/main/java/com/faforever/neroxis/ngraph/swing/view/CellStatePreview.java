@@ -8,8 +8,8 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
@@ -27,7 +27,7 @@ import java.util.Map;
  * Represents the current state of a cell in a given graph view.
  */
 public class CellStatePreview {
-    protected Map<CellState, Point> deltas = new LinkedHashMap<CellState, Point>();
+    protected Map<CellState, PointDouble> deltas = new LinkedHashMap<CellState, PointDouble>();
 
     protected int count = 0;
 
@@ -67,7 +67,7 @@ public class CellStatePreview {
         return count;
     }
 
-    public Map<CellState, Point> getDeltas() {
+    public Map<CellState, PointDouble> getDeltas() {
         return deltas;
     }
 
@@ -79,15 +79,14 @@ public class CellStatePreview {
         opacity = value;
     }
 
-    public Point moveState(CellState state, double dx, double dy) {
+    public PointDouble moveState(CellState state, double dx, double dy) {
         return moveState(state, dx, dy, true, true);
     }
 
-    public Point moveState(CellState state, double dx, double dy, boolean add, boolean includeEdges) {
-        Point delta = deltas.get(state);
-
+    public PointDouble moveState(CellState state, double dx, double dy, boolean add, boolean includeEdges) {
+        PointDouble delta = deltas.get(state);
         if (delta == null) {
-            delta = new Point(dx, dy);
+            delta = new PointDouble(dx, dy);
             deltas.put(state, delta);
             count++;
         } else {
@@ -110,13 +109,11 @@ public class CellStatePreview {
     /**
      * Returns a dirty rectangle to be repainted in GraphControl.
      */
-    public Rectangle show() {
+    public RectangleDouble show() {
         Graph graph = graphComponent.getGraph();
         IGraphModel model = graph.getModel();
-
         // Stores a copy of the cell states
         List<CellState> previousStates = null;
-
         if (isCloned()) {
             previousStates = new ArrayList<>();
             for (CellState state : deltas.keySet()) {
@@ -129,20 +126,20 @@ public class CellStatePreview {
 
         while (it.hasNext()) {
             CellState state = it.next();
-            Point delta = deltas.get(state);
+            PointDouble delta = deltas.get(state);
             CellState parentState = graph.getView().getState(model.getParent(state.getCell()));
             translateState(parentState, state, delta.getX(), delta.getY());
         }
 
         // Revalidates the states in step
-        Rectangle dirty = null;
+        RectangleDouble dirty = null;
         it = deltas.keySet().iterator();
 
         while (it.hasNext()) {
             CellState state = it.next();
-            Point delta = deltas.get(state);
+            PointDouble delta = deltas.get(state);
             CellState parentState = graph.getView().getState(model.getParent(state.getCell()));
-            Rectangle tmp = revalidateState(parentState, state, delta.getX(), delta.getY());
+            RectangleDouble tmp = revalidateState(parentState, state, delta.getX(), delta.getY());
 
             if (dirty != null) {
                 dirty.add(tmp);
@@ -236,23 +233,19 @@ public class CellStatePreview {
                     state.setY(state.getY() + dy);
                 }
             }
-
             int childCount = model.getChildCount(cell);
-
             for (int i = 0; i < childCount; i++) {
                 translateState(state, graph.getView().getState(model.getChildAt(cell, i)), dx, dy);
             }
         }
     }
 
-    protected Rectangle revalidateState(CellState parentState, CellState state, double dx, double dy) {
-        Rectangle dirty = null;
-
+    protected RectangleDouble revalidateState(CellState parentState, CellState state, double dx, double dy) {
+        RectangleDouble dirty = null;
         if (state != null) {
             Graph graph = graphComponent.getGraph();
             IGraphModel model = graph.getModel();
             ICell cell = state.getCell();
-
             // Updates the edge terminal points and restores the
             // (relative) positions of any (relative) children
             if (model.isEdge(cell)) {
@@ -278,7 +271,7 @@ public class CellStatePreview {
             int childCount = model.getChildCount(cell);
 
             for (int i = 0; i < childCount; i++) {
-                Rectangle tmp = revalidateState(state, graph.getView().getState(model.getChildAt(cell, i)), dx, dy);
+                RectangleDouble tmp = revalidateState(state, graph.getView().getState(model.getChildAt(cell, i)), dx, dy);
 
                 if (dirty != null) {
                     dirty.add(tmp);
@@ -314,9 +307,8 @@ public class CellStatePreview {
             if (graphComponent.isAntiAlias()) {
                 Utils.setAntiAlias((Graphics2D) g, true, true);
             }
-
             Graphics2D previousGraphics = canvas.getGraphics();
-            Point previousTranslate = canvas.getTranslate();
+            PointDouble previousTranslate = canvas.getTranslate();
             double previousScale = canvas.getScale();
 
             try {

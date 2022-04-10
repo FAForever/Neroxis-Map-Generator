@@ -7,7 +7,7 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import java.awt.geom.Line2D;
@@ -401,16 +401,12 @@ public class OrganicLayout extends GraphLayout {
                     validEdges.add(edge);
                 }
             }
-
         }
-
         List<ICell> edges = List.copyOf(validEdges);
-
         // If the bounds dimensions have not been set see if the average area
         // per node has been
-        Rectangle totalBounds = null;
-        Rectangle bounds = null;
-
+        RectangleDouble totalBounds = null;
+        RectangleDouble bounds = null;
         // Form internal model of nodes
         Map<Object, Integer> vertexMap = new HashMap<>();
         this.vertices = new ArrayList<>();
@@ -418,9 +414,8 @@ public class OrganicLayout extends GraphLayout {
             this.vertices.add(new CellWrapper(vertices.get(i)));
             vertexMap.put(vertices.get(i), i);
             bounds = getVertexBounds(vertices.get(i));
-
             if (totalBounds == null) {
-                totalBounds = (Rectangle) bounds.clone();
+                totalBounds = bounds.clone();
             } else {
                 totalBounds.add(bounds);
             }

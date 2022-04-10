@@ -4,8 +4,8 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +18,13 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class CellState extends Rectangle {
+public class CellState extends RectangleDouble {
     @Serial
     private static final long serialVersionUID = 7588335615324083354L;
-
     /**
      * Reference to the enclosing graph view.
      */
     protected GraphView view;
-
     /**
      * Reference to the cell that is represented by this state.
      */
@@ -43,23 +41,20 @@ public class CellState extends Rectangle {
      * cell.
      */
     protected Map<String, Object> style;
-
     /**
      * Holds the origin for all child cells.
      */
-    protected Point origin = new Point();
-
+    protected PointDouble origin = new PointDouble();
     /**
      * List of Points that represent the absolute points of an edge.
      */
-    protected List<Point> absolutePoints;
-
+    protected List<PointDouble> absolutePoints;
     /**
      * Holds the absolute offset. For edges, this is the absolute coordinates
      * of the label position. For vertices, this is the offset of the label
      * relative to the top, left corner of the vertex.
      */
-    protected Point absoluteOffset = new Point();
+    protected PointDouble absoluteOffset = new PointDouble();
 
     /**
      * Caches the distance between the end points and the length of an edge.
@@ -71,16 +66,14 @@ public class CellState extends Rectangle {
      * edge.
      */
     protected double[] segments;
-
     /**
      * Holds the rectangle which contains the label.
      */
-    protected Rectangle labelBounds;
-
+    protected RectangleDouble labelBounds;
     /**
      * Holds the largest rectangle which contains all rendering for this cell.
      */
-    protected Rectangle boundingBox;
+    protected RectangleDouble boundingBox;
 
     /**
      * Specifies if the state is invalid. Default is true.
@@ -118,7 +111,7 @@ public class CellState extends Rectangle {
      *
      * @return the Point at the given index
      */
-    public Point getAbsolutePoint(int index) {
+    public PointDouble getAbsolutePoint(int index) {
         return absolutePoints.get(index);
     }
 
@@ -127,7 +120,7 @@ public class CellState extends Rectangle {
      *
      * @return the Point at the given index
      */
-    public Point setAbsolutePoint(int index, Point point) {
+    public PointDouble setAbsolutePoint(int index, PointDouble point) {
         return absolutePoints.set(index, point);
     }
 
@@ -140,7 +133,6 @@ public class CellState extends Rectangle {
         return (absolutePoints != null) ? absolutePoints.size() : 0;
     }
 
-
     /**
      * Returns the rectangle that should be used as the perimeter of the cell.
      * This implementation adds the perimeter spacing to the rectangle
@@ -148,7 +140,7 @@ public class CellState extends Rectangle {
      *
      * @return Returns the rectangle that defines the perimeter.
      */
-    public Rectangle getPerimeterBounds() {
+    public RectangleDouble getPerimeterBounds() {
         return getPerimeterBounds(0);
     }
 
@@ -157,13 +149,11 @@ public class CellState extends Rectangle {
      *
      * @return Returns the rectangle that defines the perimeter.
      */
-    public Rectangle getPerimeterBounds(double border) {
-        Rectangle bounds = new Rectangle(getRectangle());
-
+    public RectangleDouble getPerimeterBounds(double border) {
+        RectangleDouble bounds = new RectangleDouble(getRectangle());
         if (border != 0) {
             bounds.grow(border);
         }
-
         return bounds;
     }
 
@@ -174,12 +164,11 @@ public class CellState extends Rectangle {
      * @param isSource Boolean that specifies if the first or last point should
      *                 be assigned.
      */
-    public void setAbsoluteTerminalPoint(Point point, boolean isSource) {
+    public void setAbsoluteTerminalPoint(PointDouble point, boolean isSource) {
         if (isSource) {
             if (absolutePoints == null) {
                 absolutePoints = new ArrayList<>();
             }
-
             if (absolutePoints.size() == 0) {
                 absolutePoints.add(point);
             } else {
@@ -250,16 +239,16 @@ public class CellState extends Rectangle {
         if (absolutePoints != null) {
             clone.absolutePoints = new ArrayList<>();
             for (int i = 0; i < absolutePoints.size(); i++) {
-                clone.absolutePoints.add((Point) absolutePoints.get(i).clone());
+                clone.absolutePoints.add((PointDouble) absolutePoints.get(i).clone());
             }
         }
 
         if (origin != null) {
-            clone.origin = (Point) origin.clone();
+            clone.origin = (PointDouble) origin.clone();
         }
 
         if (absoluteOffset != null) {
-            clone.absoluteOffset = (Point) absoluteOffset.clone();
+            clone.absoluteOffset = (PointDouble) absoluteOffset.clone();
         }
 
         if (labelBounds != null) {

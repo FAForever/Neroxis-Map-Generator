@@ -10,7 +10,7 @@ import com.faforever.neroxis.ngraph.event.EndUpdateEvent;
 import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.event.ExecuteEvent;
 import com.faforever.neroxis.ngraph.event.UndoEvent;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -1032,12 +1032,10 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
                 Geometry geo = getGeometry(edge);
 
                 if (geo != null) {
-                    Point origin1 = getOrigin(getParent(edge));
-                    Point origin2 = getOrigin(cell);
-
+                    PointDouble origin1 = getOrigin(getParent(edge));
+                    PointDouble origin2 = getOrigin(cell);
                     double dx = origin2.getX() - origin1.getX();
                     double dy = origin2.getY() - origin1.getY();
-
                     geo = geo.clone();
                     geo.translate(-dx, -dy);
                     setGeometry(edge, geo);
@@ -1052,22 +1050,19 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * Returns the absolute, accumulated origin for the children inside the
      * given parent.
      */
-    public Point getOrigin(ICell cell) {
-        Point result = null;
-
+    public PointDouble getOrigin(ICell cell) {
+        PointDouble result = null;
         if (cell != null) {
             result = getOrigin(getParent(cell));
-
             if (!isEdge(cell)) {
                 Geometry geo = getGeometry(cell);
-
                 if (geo != null) {
                     result.setX(result.getX() + geo.getX());
                     result.setY(result.getY() + geo.getY());
                 }
             }
         } else {
-            result = new Point();
+            result = new PointDouble();
         }
 
         return result;

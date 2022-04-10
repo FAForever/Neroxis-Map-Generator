@@ -8,7 +8,7 @@ import com.faforever.neroxis.ngraph.shape.BasicShape;
 import com.faforever.neroxis.ngraph.shape.IShape;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Dimension;
@@ -83,10 +83,10 @@ public class InteractiveCanvas extends Graphics2DCanvas {
                 if (realShape != null && realShape.intersects(rect)) {
                     return true;
                 } else {
-                    Point p0 = state.getAbsolutePoint(0);
+                    PointDouble p0 = state.getAbsolutePoint(0);
 
                     for (int i = 0; i < pointCount; i++) {
-                        Point p1 = state.getAbsolutePoint(i);
+                        PointDouble p1 = state.getAbsolutePoint(i);
 
                         if (rect.intersectsLine(p0.getX(), p0.getY(), p1.getX(), p1.getY())) {
                             return true;

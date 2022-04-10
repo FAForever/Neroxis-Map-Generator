@@ -9,14 +9,14 @@ import java.io.Serial;
 /**
  * Extends awt point with double precision coordinates.
  */
-public class Point extends Point2D.Double {
+public class PointDouble extends Point2D.Double {
     @Serial
     private static final long serialVersionUID = 6554231393215892186L;
 
     /**
      * Constructs a new point at (0, 0).
      */
-    public Point() {
+    public PointDouble() {
         this(0, 0);
     }
 
@@ -25,7 +25,7 @@ public class Point extends Point2D.Double {
      *
      * @param point Point that specifies the location.
      */
-    public Point(Point2D point) {
+    public PointDouble(Point2D point) {
         this(point.getX(), point.getY());
     }
 
@@ -34,7 +34,7 @@ public class Point extends Point2D.Double {
      *
      * @param point Point that specifies the location.
      */
-    public Point(Point point) {
+    public PointDouble(PointDouble point) {
         this(point.getX(), point.getY());
     }
 
@@ -44,7 +44,7 @@ public class Point extends Point2D.Double {
      * @param x X-coordinate of the point to be created.
      * @param y Y-coordinate of the point to be created.
      */
-    public Point(double x, double y) {
+    public PointDouble(double x, double y) {
         setX(x);
         setY(y);
     }
@@ -85,7 +85,7 @@ public class Point extends Point2D.Double {
         y = value;
     }
 
-    public void move(Point point) {
+    public void move(PointDouble point) {
         move(point.x, point.y);
     }
 
@@ -94,7 +94,7 @@ public class Point extends Point2D.Double {
         this.y = y;
     }
 
-    public void translate(Point point) {
+    public void translate(PointDouble point) {
         translate(point.x, point.y);
     }
 
@@ -108,7 +108,7 @@ public class Point extends Point2D.Double {
      *
      * @return Returns a new point for the location.
      */
-    public java.awt.Point getPoint() {
+    public java.awt.Point toPoint() {
         return new java.awt.Point((int) Math.round(x), (int) Math.round(y));
     }
 

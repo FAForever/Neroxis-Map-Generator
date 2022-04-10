@@ -13,14 +13,14 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Rectangle extends Rectangle2D.Double {
+public class RectangleDouble extends Rectangle2D.Double {
     @Serial
     private static final long serialVersionUID = -3793966043543578946L;
 
     /**
      * Constructs a new rectangle at (0, 0) with the width and height set to 0.
      */
-    public Rectangle() {
+    public RectangleDouble() {
         this(0, 0, 0, 0);
     }
 
@@ -29,7 +29,7 @@ public class Rectangle extends Rectangle2D.Double {
      *
      * @param rect Rectangle to construct a copy of.
      */
-    public Rectangle(Rectangle2D rect) {
+    public RectangleDouble(Rectangle2D rect) {
         this(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
@@ -38,7 +38,7 @@ public class Rectangle extends Rectangle2D.Double {
      *
      * @param rect Rectangle to construct a copy of.
      */
-    public Rectangle(Rectangle rect) {
+    public RectangleDouble(RectangleDouble rect) {
         this(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
@@ -50,7 +50,7 @@ public class Rectangle extends Rectangle2D.Double {
      * @param width  Width of the new rectangle.
      * @param height Height of the new rectangle.
      */
-    public Rectangle(double x, double y, double width, double height) {
+    public RectangleDouble(double x, double y, double width, double height) {
         super(x, y, width, height);
     }
 
@@ -123,11 +123,9 @@ public class Rectangle extends Rectangle2D.Double {
      * @return the point at which the line intersects this rectangle, or null
      * if there is no intersection
      */
-    public Point intersectLine(double x0, double y0, double x1, double y1) {
-        Point result = null;
-
+    public PointDouble intersectLine(double x0, double y0, double x1, double y1) {
+        PointDouble result = null;
         result = Utils.intersection(x, y, x + width, y, x0, y0, x1, y1);
-
         if (result == null) {
             result = Utils.intersection(x + width, y, x + width, y + height, x0, y0, x1, y1);
         }
@@ -140,7 +138,7 @@ public class Rectangle extends Rectangle2D.Double {
         return result;
     }
 
-    public void add(Rectangle rect) {
+    public void add(RectangleDouble rect) {
         if (rect != null) {
             double minX = Math.min(x, rect.x);
             double minY = Math.min(y, rect.y);
@@ -183,20 +181,18 @@ public class Rectangle extends Rectangle2D.Double {
      * Returns true if the given object equals this rectangle.
      */
     public boolean equals(Object obj) {
-        if (obj instanceof Rectangle) {
-            Rectangle rect = (Rectangle) obj;
-
+        if (obj instanceof RectangleDouble) {
+            RectangleDouble rect = (RectangleDouble) obj;
             return rect.getX() == getX() && rect.getY() == getY() && rect.getWidth() == getWidth() && rect.getHeight() == getHeight();
         }
-
         return false;
     }
 
     /**
      * Returns a new instance of the same rectangle.
      */
-    public Rectangle clone() {
-        Rectangle clone = (Rectangle) super.clone();
+    public RectangleDouble clone() {
+        RectangleDouble clone = (RectangleDouble) super.clone();
         clone.setWidth(getWidth());
         clone.setHeight(getHeight());
         return clone;

@@ -16,13 +16,12 @@ public class Spline {
      */
     private double length;
 
-    public Spline(List<Point> points) {
+    public Spline(List<PointDouble> points) {
         if (points != null) {
             double[] x = new double[points.size()];
             double[] y = new double[points.size()];
             int i = 0;
-
-            for (Point point : points) {
+            for (PointDouble point : points) {
                 x[i] = point.getX();
                 y[i++] = point.getY();
             }
@@ -92,9 +91,8 @@ public class Spline {
     /**
      * @param t 0 <= t <= 1
      */
-    public Point getPoint(double t) {
-        Point result = new Point(splineX.getValue(t), splineY.getValue(t));
-
+    public PointDouble getPoint(double t) {
+        PointDouble result = new PointDouble(splineX.getValue(t), splineY.getValue(t));
         return result;
     }
 

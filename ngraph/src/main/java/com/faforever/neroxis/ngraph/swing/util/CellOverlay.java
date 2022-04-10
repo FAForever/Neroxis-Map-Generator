@@ -1,8 +1,8 @@
 package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -74,15 +74,12 @@ public class CellOverlay extends JComponent implements ICellOverlay {
         g.drawImage(imageIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
     }
 
-
-    public Rectangle getBounds(CellState state) {
+    public RectangleDouble getBounds(CellState state) {
         boolean isEdge = state.getView().getGraph().getModel().isEdge(state.getCell());
         double s = state.getView().getScale();
-        Point pt = null;
-
+        PointDouble pt = null;
         int w = imageIcon.getIconWidth();
         int h = imageIcon.getIconHeight();
-
         if (isEdge) {
             int n = state.getAbsolutePointCount();
 
@@ -90,12 +87,12 @@ public class CellOverlay extends JComponent implements ICellOverlay {
                 pt = state.getAbsolutePoint(n / 2 + 1);
             } else {
                 int idx = n / 2;
-                Point p0 = state.getAbsolutePoint(idx - 1);
-                Point p1 = state.getAbsolutePoint(idx);
-                pt = new Point(p0.getX() + (p1.getX() - p0.getX()) / 2, p0.getY() + (p1.getY() - p0.getY()) / 2);
+                PointDouble p0 = state.getAbsolutePoint(idx - 1);
+                PointDouble p1 = state.getAbsolutePoint(idx);
+                pt = new PointDouble(p0.getX() + (p1.getX() - p0.getX()) / 2, p0.getY() + (p1.getY() - p0.getY()) / 2);
             }
         } else {
-            pt = new Point();
+            pt = new PointDouble();
 
             if (align.equals(Constants.ALIGN_LEFT)) {
                 pt.setX(state.getX());
@@ -113,8 +110,7 @@ public class CellOverlay extends JComponent implements ICellOverlay {
                 pt.setY(state.getY() + state.getHeight());
             }
         }
-
-        return new Rectangle(pt.getX() - w * defaultOverlap * s, pt.getY() - h * defaultOverlap * s, w * s, h * s);
+        return new RectangleDouble(pt.getX() - w * defaultOverlap * s, pt.getY() - h * defaultOverlap * s, w * s, h * s);
     }
 
 }

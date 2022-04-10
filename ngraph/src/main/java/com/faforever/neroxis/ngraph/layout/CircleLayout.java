@@ -2,7 +2,7 @@ package com.faforever.neroxis.ngraph.layout;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +87,7 @@ public class CircleLayout extends GraphLayout {
 
                 if (!isVertexIgnored(cell)) {
                     vertices.add(cell);
-                    Rectangle bounds = getVertexBounds(cell);
+                    RectangleDouble bounds = getVertexBounds(cell);
 
                     if (top == null) {
                         top = bounds.getY();

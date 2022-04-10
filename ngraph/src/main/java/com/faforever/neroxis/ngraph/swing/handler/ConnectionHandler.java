@@ -18,8 +18,8 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.GraphComponent.GraphControl;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -315,7 +315,7 @@ public class ConnectionHandler extends MouseAdapter {
         Geometry geo = model.getGeometry(clone);
 
         if (geo != null) {
-            Point point = graphComponent.getPointForEvent(e);
+            PointDouble point = graphComponent.getPointForEvent(e);
             geo.setX(graph.snap(point.getX() - geo.getWidth() / 2));
             geo.setY(graph.snap(point.getY() - geo.getHeight() / 2));
         }
@@ -384,7 +384,7 @@ public class ConnectionHandler extends MouseAdapter {
             int y = (int) source.getCenterY() - imgHeight / 2;
 
             if (graphComponent.getGraph().isSwimlane(source.getCell())) {
-                Rectangle size = graphComponent.getGraph().getStartSize(source.getCell());
+                RectangleDouble size = graphComponent.getGraph().getStartSize(source.getCell());
 
                 if (size.getWidth() > 0) {
                     x = (int) (source.getX() + size.getWidth() / 2 - imgWidth / 2);
@@ -456,7 +456,7 @@ public class ConnectionHandler extends MouseAdapter {
                                 CellState pstate = graph.getView().getState(dropTarget);
                                 if (pstate != null) {
                                     Geometry geo = graph.getModel().getGeometry(vertex);
-                                    Point origin = pstate.getOrigin();
+                                    PointDouble origin = pstate.getOrigin();
                                     geo.setX(geo.getX() - origin.getX());
                                     geo.setY(geo.getY() - origin.getY());
                                 }

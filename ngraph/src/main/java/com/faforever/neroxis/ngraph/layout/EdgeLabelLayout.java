@@ -3,7 +3,7 @@ package com.faforever.neroxis.ngraph.layout;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -108,7 +108,7 @@ public class EdgeLabelLayout extends GraphLayout {
                     g.getOffset().setX(g.getOffset().getX() + dx);
                     g.getOffset().setY(g.getOffset().getY() + dy);
                 } else {
-                    g.setOffset(new Point(dx, dy));
+                    g.setOffset(new PointDouble(dx, dy));
                 }
 
                 model.setGeometry(edge.getCell(), g);

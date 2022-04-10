@@ -9,7 +9,7 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.ConnectionConstraint;
 import com.faforever.neroxis.ngraph.view.Graph;
@@ -149,8 +149,7 @@ public class EdgeHandler extends CellHandler {
         for (int i = 0; i < h.length - 1; i++) {
             h[i] = createHandle(p[i]);
         }
-
-        h[p.length] = createHandle(state.getAbsoluteOffset().getPoint(), Constants.LABEL_HANDLE_SIZE);
+        h[p.length] = createHandle(state.getAbsoluteOffset().toPoint(), Constants.LABEL_HANDLE_SIZE);
 
         return h;
     }
@@ -200,7 +199,7 @@ public class EdgeHandler extends CellHandler {
         java.awt.Point[] pts = new java.awt.Point[s.getAbsolutePointCount()];
 
         for (int i = 0; i < pts.length; i++) {
-            pts[i] = s.getAbsolutePoint(i).getPoint();
+            pts[i] = s.getAbsolutePoint(i).toPoint();
         }
 
         return pts;
@@ -251,17 +250,14 @@ public class EdgeHandler extends CellHandler {
     }
 
     /**
-     * @param point
-     * @param gridEnabled
      * @return Returns the scaled, translated and grid-aligned point.
      */
-    protected Point convertPoint(Point point, boolean gridEnabled) {
+    protected PointDouble convertPoint(PointDouble point, boolean gridEnabled) {
         Graph graph = graphComponent.getGraph();
         double scale = graph.getView().getScale();
-        Point trans = graph.getView().getTranslate();
+        PointDouble trans = graph.getView().getTranslate();
         double x = point.getX() / scale - trans.getX();
         double y = point.getY() / scale - trans.getY();
-
         if (gridEnabled) {
             x = graph.snap(x);
             y = graph.snap(y);
@@ -323,12 +319,11 @@ public class EdgeHandler extends CellHandler {
             ICell target = null;
 
             if (isLabel(index)) {
-                Point abs = state.getAbsoluteOffset();
+                PointDouble abs = state.getAbsoluteOffset();
                 double dx = abs.getX() - first.x;
                 double dy = abs.getY() - first.y;
 
-                Point pt = new Point(e.getPoint());
-
+                PointDouble pt = new PointDouble(e.getPoint());
                 if (gridEnabledEvent) {
                     pt = graphComponent.snapScaledPoint(pt, dx, dy);
                 }
@@ -349,20 +344,17 @@ public class EdgeHandler extends CellHandler {
                 // the current state of this handle. This is required for
                 // computing the correct perimeter points and edge style.
                 Geometry geometry = graphComponent.getGraph().getCellGeometry(state.getCell());
-                CellState clone = (CellState) state.clone();
-                List<Point> points = geometry.getPoints();
+                CellState clone = state.clone();
+                List<PointDouble> points = geometry.getPoints();
                 GraphView view = clone.getView();
-
                 if (isSource || isTarget) {
                     marker.process(e);
                     CellState currentState = marker.getValidState();
                     target = state.getVisibleTerminal(!isSource);
-
                     if (currentState != null) {
                         source = currentState.getCell();
                     } else {
-                        Point pt = new Point(e.getPoint());
-
+                        PointDouble pt = new PointDouble(e.getPoint());
                         if (gridEnabledEvent) {
                             pt = graphComponent.snapScaledPoint(pt);
                         }
@@ -376,15 +368,13 @@ public class EdgeHandler extends CellHandler {
                         target = tmp;
                     }
                 } else {
-                    Point point = convertPoint(new Point(e.getPoint()), gridEnabledEvent);
-
+                    PointDouble point = convertPoint(new PointDouble(e.getPoint()), gridEnabledEvent);
                     if (points == null) {
                         points = Arrays.asList(point);
                     } else if (index - 1 < points.size()) {
-                        points = new ArrayList<Point>(points);
+                        points = new ArrayList<PointDouble>(points);
                         points.set(index - 1, point);
                     }
-
                     source = view.getVisibleTerminal(state.getCell(), true);
                     target = view.getVisibleTerminal(state.getCell(), false);
                 }
@@ -453,12 +443,11 @@ public class EdgeHandler extends CellHandler {
                         JOptionPane.showMessageDialog(graphComponent, error);
                     }
                 } else if (isLabel(index)) {
-                    Point abs = state.getAbsoluteOffset();
+                    PointDouble abs = state.getAbsoluteOffset();
                     dx = abs.getX() - first.x;
                     dy = abs.getY() - first.y;
 
-                    Point pt = new Point(e.getPoint());
-
+                    PointDouble pt = new PointDouble(e.getPoint());
                     if (gridEnabledEvent) {
                         pt = graphComponent.snapScaledPoint(pt, dx, dy);
                     }
@@ -475,9 +464,8 @@ public class EdgeHandler extends CellHandler {
                 } else if (marker.hasValidState() && (isSource(index) || isTarget(index))) {
                     connect(state.getCell(), marker.getValidState().getCell(), isSource(index), graphComponent.isCloneEvent(e) && isCloneEnabled());
                 } else if ((!isSource(index) && !isTarget(index)) || graphComponent.getGraph().isAllowDanglingEdges()) {
-                    movePoint(state.getCell(), index, convertPoint(new Point(e.getPoint()), gridEnabledEvent));
+                    movePoint(state.getCell(), index, convertPoint(new PointDouble(e.getPoint()), gridEnabledEvent));
                 }
-
                 e.consume();
             }
         }
@@ -503,26 +491,22 @@ public class EdgeHandler extends CellHandler {
     /**
      * Moves the edges control point with the given index to the given point.
      */
-    protected void movePoint(ICell edge, int pointIndex, Point point) {
+    protected void movePoint(ICell edge, int pointIndex, PointDouble point) {
         IGraphModel model = graphComponent.getGraph().getModel();
         Geometry geometry = model.getGeometry(edge);
-
         if (geometry != null) {
             model.beginUpdate();
             try {
                 geometry = geometry.clone();
-
                 if (isSource(index) || isTarget(index)) {
                     connect(edge, null, isSource(index), false);
                     geometry.setTerminalPoint(point, isSource(index));
                 } else {
-                    List<Point> pts = geometry.getPoints();
-
+                    List<PointDouble> pts = geometry.getPoints();
                     if (pts == null) {
-                        pts = new ArrayList<Point>();
+                        pts = new ArrayList<PointDouble>();
                         geometry.setPoints(pts);
                     }
-
                     if (pts != null) {
                         if (pointIndex <= pts.size()) {
                             pts.set(pointIndex - 1, point);
@@ -584,17 +568,16 @@ public class EdgeHandler extends CellHandler {
             geometry = geometry.clone();
 
             // Resets the relative location stored inside the geometry
-            Point pt = graph.getView().getRelativePoint(edgeState, x, y);
+            PointDouble pt = graph.getView().getRelativePoint(edgeState, x, y);
             geometry.setX(pt.getX());
             geometry.setY(pt.getY());
 
             // Resets the offset inside the geometry to find the offset
             // from the resulting point
             double scale = graph.getView().getScale();
-            geometry.setOffset(new Point(0, 0));
+            geometry.setOffset(new PointDouble(0, 0));
             pt = graph.getView().getPoint(edgeState, geometry);
-            geometry.setOffset(new Point(Math.round((x - pt.getX()) / scale), Math.round((y - pt.getY()) / scale)));
-
+            geometry.setOffset(new PointDouble(Math.round((x - pt.getX()) / scale), Math.round((y - pt.getY()) / scale)));
             model.setGeometry(edgeState.getCell(), geometry);
         }
     }
@@ -626,12 +609,10 @@ public class EdgeHandler extends CellHandler {
         g2.setStroke(getSelectionStroke());
         g.setColor(getSelectionColor());
 
-        java.awt.Point last = state.getAbsolutePoint(0).getPoint();
-
+        java.awt.Point last = state.getAbsolutePoint(0).toPoint();
         for (int i = 1; i < state.getAbsolutePointCount(); i++) {
-            java.awt.Point current = state.getAbsolutePoint(i).getPoint();
+            java.awt.Point current = state.getAbsolutePoint(i).toPoint();
             Line2D line = new Line2D.Float(last.x, last.y, current.x, current.y);
-
             Rectangle bounds = g2.getStroke().createStrokedShape(line).getBounds();
 
             if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {

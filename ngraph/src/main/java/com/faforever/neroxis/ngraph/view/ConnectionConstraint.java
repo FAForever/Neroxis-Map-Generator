@@ -3,7 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 
 /**
  * Defines an object that contains the constraints about how to connect one
@@ -13,7 +13,7 @@ public class ConnectionConstraint {
     /**
      * Point that specifies the fixed location of the connection point.
      */
-    protected Point point;
+    protected PointDouble point;
 
     /**
      * Boolean that specifies if the point should be projected onto the perimeter
@@ -31,7 +31,7 @@ public class ConnectionConstraint {
     /**
      * Constructs a connection constraint for the given point.
      */
-    public ConnectionConstraint(Point point) {
+    public ConnectionConstraint(PointDouble point) {
         this(point, true);
     }
 
@@ -44,7 +44,7 @@ public class ConnectionConstraint {
      * @param perimeter Optional boolean that specifies if the fixed point should be
      *                  projected onto the perimeter of the terminal. Default is true.
      */
-    public ConnectionConstraint(Point point, boolean perimeter) {
+    public ConnectionConstraint(PointDouble point, boolean perimeter) {
         setPoint(point);
         setPerimeter(perimeter);
     }
@@ -52,14 +52,14 @@ public class ConnectionConstraint {
     /**
      * Returns the point.
      */
-    public Point getPoint() {
+    public PointDouble getPoint() {
         return point;
     }
 
     /**
      * Sets the point.
      */
-    public void setPoint(Point value) {
+    public void setPoint(PointDouble value) {
         point = value;
     }
 

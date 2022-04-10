@@ -5,11 +5,12 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Paint;
+import java.awt.Shape;
 import java.util.Map;
 
 public class BasicShape implements IShape {
@@ -70,7 +71,7 @@ public class BasicShape implements IShape {
         }
     }
 
-    protected Rectangle getGradientBounds(Graphics2DCanvas canvas, CellState state) {
+    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
         return state;
     }
 

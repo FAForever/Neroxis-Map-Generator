@@ -3,7 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.canvas;
 
-import com.faforever.neroxis.ngraph.util.Point;
+import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 
 /**
@@ -21,7 +21,7 @@ public interface ICanvas {
      *
      * @return Returns the current translation.
      */
-    Point getTranslate();
+    PointDouble getTranslate();
 
     /**
      * Returns the scale.

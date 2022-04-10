@@ -5,7 +5,7 @@ package com.faforever.neroxis.ngraph.swing.handler;
 
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Color;
@@ -82,7 +82,7 @@ public class CellHandler {
         this.state = state;
         handles = createHandles();
         Graph graph = graphComponent.getGraph();
-        Rectangle tmp = graph.getBoundingBox(state.getCell());
+        RectangleDouble tmp = graph.getBoundingBox(state.getCell());
 
         if (tmp != null) {
             bounds = tmp.getRectangle();

@@ -5,7 +5,7 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.handler.GraphTransferHandler;
 import com.faforever.neroxis.ngraph.swing.util.GraphTransferable;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.awt.datatransfer.Transferable;
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
         this.pipelineGraphComponent = pipelineGraphComponent;
     }
 
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, Rectangle bounds, ImageIcon icon) {
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, RectangleDouble bounds, ImageIcon icon) {
         return new GraphTransferable(cells, bounds, icon);
     }
 

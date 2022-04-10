@@ -8,8 +8,8 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.view.CellStatePreview;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Graphics;
@@ -43,18 +43,16 @@ public class Morphing extends Animation {
      * slower and smoother. Default is 1.5.
      */
     protected double ease;
-
     /**
      * Maps from cells to origins.
      */
-    protected Map<Object, Point> origins = new HashMap<Object, Point>();
+    protected Map<Object, PointDouble> origins = new HashMap<Object, PointDouble>();
 
     /**
      * Optional array of cells to limit the animation to.
      */
     protected List<ICell> cells;
-
-    protected transient Rectangle dirty;
+    protected transient RectangleDouble dirty;
 
     protected transient CellStatePreview preview;
 
@@ -176,7 +174,7 @@ public class Morphing extends Animation {
     protected void animateCell(ICell cell, CellStatePreview move, boolean recurse) {
         Graph graph = graphComponent.getGraph();
         CellState state = graph.getView().getState(cell);
-        Point delta = null;
+        PointDouble delta = null;
 
         if (state != null) {
             // Moves the animated state from where it will be after the model
@@ -184,7 +182,7 @@ public class Morphing extends Animation {
             delta = getDelta(state);
 
             if (graph.getModel().isVertex(cell) && (delta.getX() != 0 || delta.getY() != 0)) {
-                Point translate = graph.getView().getTranslate();
+                PointDouble translate = graph.getView().getTranslate();
                 double scale = graph.getView().getScale();
 
                 // FIXME: Something wrong with the scale
@@ -208,7 +206,7 @@ public class Morphing extends Animation {
      * Returns true if the animation should not recursively find more
      * deltas for children if the given parent state has been animated.
      */
-    protected boolean stopRecursion(CellState state, Point delta) {
+    protected boolean stopRecursion(CellState state, PointDouble delta) {
         return delta != null && (delta.getX() != 0 || delta.getY() != 0);
     }
 
@@ -216,29 +214,25 @@ public class Morphing extends Animation {
      * Returns the vector between the current rendered state and the future
      * location of the state after the display will be updated.
      */
-    protected Point getDelta(CellState state) {
+    protected PointDouble getDelta(CellState state) {
         Graph graph = graphComponent.getGraph();
-        Point origin = getOriginForCell(state.getCell());
-        Point translate = graph.getView().getTranslate();
+        PointDouble origin = getOriginForCell(state.getCell());
+        PointDouble translate = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
-        Point current = new Point(state.getX() / scale - translate.getX(), state.getY() / scale - translate.getY());
-
-        return new Point((origin.getX() - current.getX()) * scale, (origin.getY() - current.getY()) * scale);
+        PointDouble current = new PointDouble(state.getX() / scale - translate.getX(), state.getY() / scale - translate.getY());
+        return new PointDouble((origin.getX() - current.getX()) * scale, (origin.getY() - current.getY()) * scale);
     }
 
     /**
      * Returns the top, left corner of the given cell.
      */
-    protected Point getOriginForCell(ICell cell) {
-        Point result = origins.get(cell);
-
+    protected PointDouble getOriginForCell(ICell cell) {
+        PointDouble result = origins.get(cell);
         if (result == null) {
             Graph graph = graphComponent.getGraph();
-
             if (cell != null) {
-                result = new Point(getOriginForCell(graph.getModel().getParent(cell)));
+                result = new PointDouble(getOriginForCell(graph.getModel().getParent(cell)));
                 Geometry geo = graph.getCellGeometry(cell);
-
                 // TODO: Handle offset, relative geometries etc
                 if (geo != null) {
                     result.setX(result.getX() + geo.getX());
@@ -247,8 +241,8 @@ public class Morphing extends Animation {
             }
 
             if (result == null) {
-                Point t = graph.getView().getTranslate();
-                result = new Point(-t.getX(), -t.getY());
+                PointDouble t = graph.getView().getTranslate();
+                result = new PointDouble(-t.getX(), -t.getY());
             }
 
             origins.put(cell, result);

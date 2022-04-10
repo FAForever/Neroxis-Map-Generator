@@ -7,8 +7,8 @@ import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.event.InsertEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -38,8 +38,7 @@ public class InsertHandler extends MouseAdapter {
     protected Color lineColor = Color.black;
 
     protected boolean rounded = false;
-
-    protected Rectangle current;
+    protected RectangleDouble current;
 
     protected EventSource eventSource = new EventSource(this);
 
@@ -84,17 +83,14 @@ public class InsertHandler extends MouseAdapter {
 
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
-            Rectangle dirty = current;
-
-            current = new Rectangle(first.x, first.y, 0, 0);
-            current.add(new Rectangle(e.getX(), e.getY(), 0, 0));
-
+            RectangleDouble dirty = current;
+            current = new RectangleDouble(first.x, first.y, 0, 0);
+            current.add(new RectangleDouble(e.getX(), e.getY(), 0, 0));
             if (dirty != null) {
                 dirty.add(current);
             } else {
                 dirty = current;
             }
-
             java.awt.Rectangle tmp = dirty.getRectangle();
             int b = (int) Math.ceil(lineWidth);
             graphComponent.getGraphControl().repaint(tmp.x - b, tmp.y - b, tmp.width + 2 * b, tmp.height + 2 * b);
@@ -107,7 +103,7 @@ public class InsertHandler extends MouseAdapter {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && current != null) {
             Graph graph = graphComponent.getGraph();
             double scale = graph.getView().getScale();
-            Point tr = graph.getView().getTranslate();
+            PointDouble tr = graph.getView().getTranslate();
             current.setX(current.getX() / scale - tr.getX());
             current.setY(current.getY() / scale - tr.getY());
             current.setWidth(current.getWidth() / scale);
@@ -120,7 +116,7 @@ public class InsertHandler extends MouseAdapter {
         reset();
     }
 
-    public ICell insertCell(Rectangle bounds) {
+    public ICell insertCell(RectangleDouble bounds) {
         // FIXME: Clone prototype cell for insert
         return graphComponent.getGraph().insertVertex(null, null, "", bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), style);
     }

@@ -12,8 +12,8 @@ import com.faforever.neroxis.ngraph.event.StopEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
@@ -33,8 +33,7 @@ public class ConnectPreview extends EventSource {
     protected CellState previewState;
 
     protected CellState sourceState;
-
-    protected Point startPoint;
+    protected PointDouble startPoint;
 
     public ConnectPreview(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
@@ -68,7 +67,7 @@ public class ConnectPreview extends EventSource {
         return previewState;
     }
 
-    public Point getStartPoint() {
+    public PointDouble getStartPoint() {
         return startPoint;
     }
 
@@ -88,7 +87,7 @@ public class ConnectPreview extends EventSource {
     public void update(MouseEvent event, CellState targetState, double x, double y) {
         Graph graph = graphComponent.getGraph();
         ICell cell = previewState.getCell();
-        Rectangle dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
+        RectangleDouble dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
         if (cell.getTarget() != null) {
             cell.getTarget().removeEdge(cell, false);
         }
@@ -118,16 +117,14 @@ public class ConnectPreview extends EventSource {
         return getDirtyRect(null);
     }
 
-    protected java.awt.Rectangle getDirtyRect(Rectangle dirty) {
+    protected java.awt.Rectangle getDirtyRect(RectangleDouble dirty) {
         if (previewState != null) {
-            Rectangle tmp = graphComponent.getGraph().getPaintBounds(List.of(previewState.getCell()));
-
+            RectangleDouble tmp = graphComponent.getGraph().getPaintBounds(List.of(previewState.getCell()));
             if (dirty != null) {
                 dirty.add(tmp);
             } else {
                 dirty = tmp;
             }
-
             if (dirty != null) {
                 // TODO: Take arrow size into account
                 dirty.grow(2);
@@ -139,12 +136,11 @@ public class ConnectPreview extends EventSource {
         return null;
     }
 
-    protected Point transformScreenPoint(double x, double y) {
+    protected PointDouble transformScreenPoint(double x, double y) {
         Graph graph = graphComponent.getGraph();
-        Point tr = graph.getView().getTranslate();
+        PointDouble tr = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
-
-        return new Point(graph.snap(x / scale - tr.getX()), graph.snap(y / scale - tr.getY()));
+        return new PointDouble(graph.snap(x / scale - tr.getX()), graph.snap(y / scale - tr.getY()));
     }
 
     public void revalidate(CellState state) {
@@ -165,9 +161,8 @@ public class ConnectPreview extends EventSource {
             if (alpha < 1) {
                 ((Graphics2D) g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             }
-
             Graphics2D previousGraphics = canvas.getGraphics();
-            Point previousTranslate = canvas.getTranslate();
+            PointDouble previousTranslate = canvas.getTranslate();
             double previousScale = canvas.getScale();
 
             try {

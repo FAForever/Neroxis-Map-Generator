@@ -12,7 +12,7 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.swing.view.CellStatePreview;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Graphics;
@@ -67,8 +67,7 @@ public class MovePreview extends EventSource {
     protected transient java.awt.Rectangle initialPlaceholder;
 
     protected transient java.awt.Rectangle placeholder;
-
-    protected transient Rectangle lastDirty;
+    protected transient RectangleDouble lastDirty;
 
     protected transient CellStatePreview preview;
 
@@ -204,9 +203,8 @@ public class MovePreview extends EventSource {
         fireEvent(new StartEvent(startState, e));
     }
 
-    protected Rectangle getPlaceholderBounds(CellState startState) {
+    protected RectangleDouble getPlaceholderBounds(CellState startState) {
         Graph graph = graphComponent.getGraph();
-
         return graph.getView().getBounds(graph.getSelectionCells());
     }
 
@@ -255,8 +253,7 @@ public class MovePreview extends EventSource {
                     }
                 }
             }
-
-            Rectangle dirty = lastDirty;
+            RectangleDouble dirty = lastDirty;
 
             lastDirty = preview.show();
 
@@ -277,7 +274,7 @@ public class MovePreview extends EventSource {
         fireEvent(new ContinueEvent(null, null, dx, dy, e));
     }
 
-    protected void repaint(Rectangle dirty) {
+    protected void repaint(RectangleDouble dirty) {
         if (dirty != null) {
             graphComponent.getGraphControl().repaint(dirty.getRectangle());
         } else {

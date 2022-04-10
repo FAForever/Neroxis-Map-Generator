@@ -6,9 +6,9 @@ package com.faforever.neroxis.ngraph.shape;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Curve;
-import com.faforever.neroxis.ngraph.util.Line;
-import com.faforever.neroxis.ngraph.util.Point;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.LineDouble;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Color;
@@ -45,7 +45,7 @@ public class CurveLabelShape implements ITextShape {
      * Indicates that a glyph does not have valid drawing bounds, usually
      * because it is not visible
      */
-    public static Rectangle INVALID_GLYPH_BOUNDS = new Rectangle(0, 0, 0, 0);
+    public static RectangleDouble INVALID_GLYPH_BOUNDS = new RectangleDouble(0, 0, 0, 0);
     /**
      * Specifies if image aspect should be preserved in drawImage. Default is true.
      */
@@ -73,7 +73,7 @@ public class CurveLabelShape implements ITextShape {
     /**
      * Cache of the last set of guide points that this label was calculated for
      */
-    protected List<Point> lastPoints;
+    protected List<PointDouble> lastPoints;
     /**
      * Cache of the points between which drawing straight lines views as a
      * curve
@@ -95,7 +95,7 @@ public class CurveLabelShape implements ITextShape {
     /**
      * Cache of the bounds of the label
      */
-    protected Rectangle labelBounds;
+    protected RectangleDouble labelBounds;
     /**
      * ADT to encapsulate label positioning information
      */
@@ -135,9 +135,9 @@ public class CurveLabelShape implements ITextShape {
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, FONT_FRACTIONALMETRICS);
             for (LabelGlyphCache labelGlyph : labelGlyphs) {
-                Line parallel = labelGlyph.glyphGeometry;
+                LineDouble parallel = labelGlyph.glyphGeometry;
                 if (labelGlyph.visible && parallel != null && parallel != Curve.INVALID_POSITION) {
-                    Point parallelEnd = parallel.getP2();
+                    PointDouble parallelEnd = parallel.getP2();
                     double x = parallelEnd.getX();
                     double rotation = (Math.atan(parallelEnd.getY() / x));
                     if (x < 0) {
@@ -165,13 +165,12 @@ public class CurveLabelShape implements ITextShape {
      * @param label the entire string of the label.
      * @param style the edge style
      */
-    public Rectangle updateLabelBounds(String label, Map<String, Object> style) {
+    public RectangleDouble updateLabelBounds(String label, Map<String, Object> style) {
         double scale = state.getView().getScale();
         Font font = Utils.getFont(style, scale);
         FontMetrics fm = Utils.getFontMetrics(font);
         int descent = 0;
         int ascent = 0;
-
         if (fm != null) {
             descent = fm.getDescent();
             ascent = fm.getAscent();
@@ -215,7 +214,7 @@ public class CurveLabelShape implements ITextShape {
                         LabelGlyphCache qlyph = new LabelGlyphCache();
                         glyphList.add(qlyph);
                         qlyph.glyphShape = shape;
-                        Rectangle size = new Rectangle(gv.getGlyphLogicalBounds(j).getBounds2D());
+                        RectangleDouble size = new RectangleDouble(gv.getGlyphLogicalBounds(j).getBounds2D());
                         qlyph.labelGlyphBounds = size;
                         labelSize += size.getWidth();
                         vectorOffset += size.getWidth();
@@ -248,12 +247,12 @@ public class CurveLabelShape implements ITextShape {
                     labelGlyph.glyphShape = vector.getOutline();
 
                     if (fm == null) {
-                        Rectangle size = new Rectangle(font.getStringBounds(glyph, CurveLabelShape.frc));
+                        RectangleDouble size = new RectangleDouble(font.getStringBounds(glyph, CurveLabelShape.frc));
                         labelGlyph.labelGlyphBounds = size;
                         labelSize += size.getWidth();
                     } else {
                         double width = fm.stringWidth(glyph);
-                        labelGlyph.labelGlyphBounds = new Rectangle(0, 0, width, ascent);
+                        labelGlyph.labelGlyphBounds = new RectangleDouble(0, 0, width, ascent);
                         labelSize += width;
                     }
 
@@ -290,14 +289,13 @@ public class CurveLabelShape implements ITextShape {
         double curveLength = curve.getCurveLength(Curve.LABEL_CURVE);
         double currentPos = labelPosition.startBuffer / curveLength;
         double endPos = 1.0 - (labelPosition.endBuffer / curveLength);
-
-        Rectangle overallLabelBounds = null;
+        RectangleDouble overallLabelBounds = null;
         centerVisibleIndex = 0;
 
         double currentCurveDelta = 0.0;
         double curveDeltaSignificant = 0.3;
         double curveDeltaMax = 0.5;
-        Line nextParallel = null;
+        LineDouble nextParallel = null;
 
         // TODO on translation just move the points, don't recalculate
         // Might be better than the curve is the only thing updated and
@@ -308,8 +306,7 @@ public class CurveLabelShape implements ITextShape {
                 labelGlyphs[j].visible = false;
                 continue;
             }
-
-            Line parallel = nextParallel;
+            LineDouble parallel = nextParallel;
 
             if (currentCurveDelta > curveDeltaSignificant || nextParallel == null) {
                 parallel = curve.getCurveParallel(Curve.LABEL_CURVE, currentPos);
@@ -373,7 +370,7 @@ public class CurveLabelShape implements ITextShape {
             nextParallel = curve.getCurveParallel(Curve.LABEL_CURVE, currentPosCandidate);
 
             currentPos = currentPosCandidate;
-            Point nextVector = nextParallel.getP2();
+            PointDouble nextVector = nextParallel.getP2();
             double end2X = nextVector.getX();
             double end2Y = nextVector.getY();
 
@@ -410,7 +407,7 @@ public class CurveLabelShape implements ITextShape {
             if (labelGlyphs[j].drawingBounds != null) {
                 labelGlyphs[j].drawingBounds.setRect(minX, minY, maxX - minX, maxY - minY);
             } else {
-                labelGlyphs[j].drawingBounds = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+                labelGlyphs[j].drawingBounds = new RectangleDouble(minX, minY, maxX - minX, maxY - minY);
             }
 
             if (overallLabelBounds == null) {
@@ -428,8 +425,8 @@ public class CurveLabelShape implements ITextShape {
         if (overallLabelBounds == null) {
             // Return a small rectangle in the center of the label curve
             // Null label bounds causes NPE when editing
-            Line labelCenter = curve.getCurveParallel(Curve.LABEL_CURVE, 0.5);
-            overallLabelBounds = new Rectangle(labelCenter.getX1(), labelCenter.getY1(), 1, 1);
+            LineDouble labelCenter = curve.getCurveParallel(Curve.LABEL_CURVE, 0.5);
+            overallLabelBounds = new RectangleDouble(labelCenter.getX1(), labelCenter.getY1(), 1, 1);
         }
 
         this.labelBounds = overallLabelBounds;
@@ -498,7 +495,7 @@ public class CurveLabelShape implements ITextShape {
         this.curve = curve;
     }
 
-    public Rectangle getLabelBounds() {
+    public RectangleDouble getLabelBounds() {
         return labelBounds;
     }
 
@@ -507,7 +504,7 @@ public class CurveLabelShape implements ITextShape {
      *
      * @return the centerVisibleIndex
      */
-    public Rectangle getCenterVisiblePosition() {
+    public RectangleDouble getCenterVisiblePosition() {
         return labelGlyphs[centerVisibleIndex].drawingBounds;
     }
 
@@ -521,23 +518,21 @@ public class CurveLabelShape implements ITextShape {
          * edge. Note that these are the unrotated values used to determine the
          * width of each glyph.
          */
-        public Rectangle labelGlyphBounds;
-
+        public RectangleDouble labelGlyphBounds;
         /**
          * The un-rotated rectangle that just bounds this character
          */
-        public Rectangle drawingBounds;
+        public RectangleDouble drawingBounds;
 
         /**
          * The glyph being drawn
          */
         public String glyph;
-
         /**
          * A line parallel to the curve segment at which the element is to be
          * drawn
          */
-        public Line glyphGeometry;
+        public LineDouble glyphGeometry;
 
         /**
          * The cached shape of the glyph

@@ -9,21 +9,21 @@ import java.io.Serial;
 /**
  * Implements a line with double precision coordinates.
  */
-public class Line extends Line2D.Double {
+public class LineDouble extends Line2D.Double {
     @Serial
     private static final long serialVersionUID = -4730972599169158546L;
 
     /**
      * Creates a new line
      */
-    public Line(Point startPt, Point endPt) {
+    public LineDouble(PointDouble startPt, PointDouble endPt) {
         super(startPt, endPt);
     }
 
     /**
      * Creates a new line
      */
-    public Line(double startPtX, double startPtY, double endPtX, double endPtY) {
+    public LineDouble(double startPtX, double startPtY, double endPtX, double endPtY) {
         super(startPtX, startPtY, endPtX, endPtY);
     }
 
@@ -32,8 +32,8 @@ public class Line extends Line2D.Double {
      *
      * @return Returns the end point of the line.
      */
-    public Point getP1() {
-        return new Point(x1, y1);
+    public PointDouble getP1() {
+        return new PointDouble(x1, y1);
     }
 
     /**
@@ -41,14 +41,14 @@ public class Line extends Line2D.Double {
      *
      * @return Returns the end point of the line.
      */
-    public Point getP2() {
-        return new Point(x2, y2);
+    public PointDouble getP2() {
+        return new PointDouble(x2, y2);
     }
 
     /**
      * Sets the start and end points.
      */
-    public void setPoints(Point startPt, Point endPt) {
+    public void setPoints(PointDouble startPt, PointDouble endPt) {
         setLine(startPt, endPt);
     }
 }

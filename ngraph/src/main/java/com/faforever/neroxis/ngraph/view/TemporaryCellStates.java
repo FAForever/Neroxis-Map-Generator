@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,8 +9,7 @@ public class TemporaryCellStates {
     protected GraphView view;
 
     protected HashMap<ICell, CellState> oldStates;
-
-    protected Rectangle oldBounds;
+    protected RectangleDouble oldBounds;
 
     protected double oldScale;
 
@@ -44,12 +43,12 @@ public class TemporaryCellStates {
         view.setScale(scale);
 
         if (cells != null) {
-            Rectangle bbox = null;
+            RectangleDouble bbox = null;
 
             // Validates the vertices and edges without adding them to
             // the model so that the original cells are not modified
             for (ICell cell : cells) {
-                Rectangle bounds = view.getBoundingBox(view.validateCellState(view.validateCell(cell)));
+                RectangleDouble bounds = view.getBoundingBox(view.validateCellState(view.validateCell(cell)));
 
                 if (bbox == null) {
                     bbox = bounds;
@@ -59,7 +58,7 @@ public class TemporaryCellStates {
             }
 
             if (bbox == null) {
-                bbox = new Rectangle();
+                bbox = new RectangleDouble();
             }
 
             view.setGraphBounds(bbox);

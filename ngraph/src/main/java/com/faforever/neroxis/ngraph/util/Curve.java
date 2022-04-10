@@ -21,7 +21,7 @@ public class Curve {
     /**
      * Indicates that an invalid position on a curve was requested
      */
-    public static Line INVALID_POSITION = new Line(new Point(0, 0), new Point(1, 0));
+    public static LineDouble INVALID_POSITION = new LineDouble(new PointDouble(0, 0), new PointDouble(1, 0));
     /**
      * The points this curve is drawn through. These are typically control
      * points and are at distances from each other that straight lines
@@ -29,11 +29,11 @@ public class Curve {
      * these guiding points and creates a finer set of internal points
      * that visually appears to be a curve when linked by straight lines
      */
-    public List<Point> guidePoints = new ArrayList<Point>();
+    public List<PointDouble> guidePoints = new ArrayList<PointDouble>();
     /**
      * A collection of arrays of curve points
      */
-    protected Map<String, Point[]> points;
+    protected Map<String, PointDouble[]> points;
     // Rectangle just completely enclosing branch and label/
     protected double minXBounds = 10000000;
     protected double maxXBounds = 0;
@@ -64,18 +64,16 @@ public class Curve {
     public Curve() {
     }
 
-    public Curve(List<Point> points) {
+    public Curve(List<PointDouble> points) {
         boolean nullPoints = false;
-
-        for (Point point : points) {
+        for (PointDouble point : points) {
             if (point == null) {
                 nullPoints = true;
                 break;
             }
         }
-
         if (!nullPoints) {
-            guidePoints = new ArrayList<Point>(points);
+            guidePoints = new ArrayList<PointDouble>(points);
         }
     }
 
@@ -83,11 +81,11 @@ public class Curve {
         labelBuffer = buffer;
     }
 
-    public Rectangle getBounds() {
+    public RectangleDouble getBounds() {
         if (!valid) {
             createCoreCurve();
         }
-        return new Rectangle(minXBounds, minYBounds, maxXBounds - minXBounds, maxYBounds - minYBounds);
+        return new RectangleDouble(minXBounds, minYBounds, maxXBounds - minXBounds, maxYBounds - minYBounds);
     }
 
     /**
@@ -180,27 +178,25 @@ public class Curve {
      * as a line, parallel with the curve. If the distance or curve is
      * invalid, <code>Curve.INVALID_POSITION</code> is returned
      */
-    public Line getCurveParallel(String index, double distance) {
-        Point[] pointsCurve = getCurvePoints(index);
+    public LineDouble getCurveParallel(String index, double distance) {
+        PointDouble[] pointsCurve = getCurvePoints(index);
         double[] curveIntervals = getIntervals(index);
-
         if (pointsCurve != null && pointsCurve.length > 0 && curveIntervals != null && distance >= 0.0 && distance <= 1.0) {
             // If the curve is zero length, it will only have one point
             // We can't calculate in this case
             if (pointsCurve.length == 1) {
-                Point point = pointsCurve[0];
-                return new Line(point, new Point(1, 0));
+                PointDouble point = pointsCurve[0];
+                return new LineDouble(point, new PointDouble(1, 0));
             }
-
             int lowerLimit = getLowerIndexOfSegment(index, distance);
-            Point firstPointOfSeg = pointsCurve[lowerLimit];
+            PointDouble firstPointOfSeg = pointsCurve[lowerLimit];
             double segVectorX = pointsCurve[lowerLimit + 1].getX() - firstPointOfSeg.getX();
             double segVectorY = pointsCurve[lowerLimit + 1].getY() - firstPointOfSeg.getY();
             double distanceAlongSeg = (distance - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1] - curveIntervals[lowerLimit]);
             double segLength = Math.sqrt(segVectorX * segVectorX + segVectorY * segVectorY);
             double startPointX = firstPointOfSeg.getX() + segVectorX * distanceAlongSeg;
             double startPointY = firstPointOfSeg.getY() + segVectorY * distanceAlongSeg;
-            return new Line(startPointX, startPointY, segVectorX / segLength, segVectorY / segLength);
+            return new LineDouble(startPointX, startPointY, segVectorX / segLength, segVectorY / segLength);
         } else {
             return INVALID_POSITION;
         }
@@ -215,33 +211,30 @@ public class Curve {
      * @return a sequence of point representing the curve section or null
      * if it cannot be calculated
      */
-    public Point[] getCurveSection(String index, double start, double end) {
-        Point[] pointsCurve = getCurvePoints(index);
+    public PointDouble[] getCurveSection(String index, double start, double end) {
+        PointDouble[] pointsCurve = getCurvePoints(index);
         double[] curveIntervals = getIntervals(index);
-
         if (pointsCurve != null && pointsCurve.length > 0 && curveIntervals != null && start >= 0.0 && start <= 1.0 && end >= 0.0 && end <= 1.0) {
             // If the curve is zero length, it will only have one point
             // We can't calculate in this case
             if (pointsCurve.length == 1) {
-                Point point = pointsCurve[0];
-                return new Point[]{new Point(point.getX(), point.getY())};
+                PointDouble point = pointsCurve[0];
+                return new PointDouble[]{new PointDouble(point.getX(), point.getY())};
             }
-
             int lowerLimit = getLowerIndexOfSegment(index, start);
-            Point firstPointOfSeg = pointsCurve[lowerLimit];
+            PointDouble firstPointOfSeg = pointsCurve[lowerLimit];
             double segVectorX = pointsCurve[lowerLimit + 1].getX() - firstPointOfSeg.getX();
             double segVectorY = pointsCurve[lowerLimit + 1].getY() - firstPointOfSeg.getY();
             double distanceAlongSeg = (start - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1] - curveIntervals[lowerLimit]);
-            Point startPoint = new Point(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
-
-            List<Point> result = new ArrayList<Point>();
+            PointDouble startPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
+            List<PointDouble> result = new ArrayList<PointDouble>();
             result.add(startPoint);
 
             double current = start;
             current = curveIntervals[++lowerLimit];
 
             while (current <= end) {
-                Point nextPointOfSeg = pointsCurve[lowerLimit];
+                PointDouble nextPointOfSeg = pointsCurve[lowerLimit];
                 result.add(nextPointOfSeg);
                 current = curveIntervals[++lowerLimit];
             }
@@ -253,11 +246,10 @@ public class Curve {
                 segVectorX = pointsCurve[lowerLimit].getX() - firstPointOfSeg.getX();
                 segVectorY = pointsCurve[lowerLimit].getY() - firstPointOfSeg.getY();
                 distanceAlongSeg = (end - curveIntervals[lowerLimit - 1]) / (curveIntervals[lowerLimit] - curveIntervals[lowerLimit - 1]);
-                Point endPoint = new Point(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
+                PointDouble endPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
                 result.add(endPoint);
             }
-
-            Point[] resultArray = new Point[result.size()];
+            PointDouble[] resultArray = new PointDouble[result.size()];
             return result.toArray(resultArray);
         } else {
             return null;
@@ -277,11 +269,10 @@ public class Curve {
         if (!getBounds().getRectangle().intersects(rect)) {
             return false;
         }
-
-        Point[] pointsCurve = getCurvePoints(Curve.CORE_CURVE);
+        PointDouble[] pointsCurve = getCurvePoints(Curve.CORE_CURVE);
 
         if (pointsCurve != null && pointsCurve.length > 1) {
-            Rectangle Rect = new Rectangle(rect);
+            RectangleDouble Rect = new RectangleDouble(rect);
             // First check for any of the curve points lying within the
             // rectangle, then for any of the curve segments intersecting
             // with the rectangle sides
@@ -314,18 +305,15 @@ public class Curve {
      * the given rectangle, if it does so. If it does not intersect,
      * null is returned.
      */
-    public Point intersectsRectPerimeter(String index, Rectangle rect) {
-        Point result = null;
-        Point[] pointsCurve = getCurvePoints(index);
-
+    public PointDouble intersectsRectPerimeter(String index, RectangleDouble rect) {
+        PointDouble result = null;
+        PointDouble[] pointsCurve = getCurvePoints(index);
         if (pointsCurve != null && pointsCurve.length > 1) {
             int crossingSeg = intersectRectPerimeterSeg(index, rect);
-
             if (crossingSeg != -1) {
                 result = intersectRectPerimeterPoint(index, rect, crossingSeg);
             }
         }
-
         return result;
     }
 
@@ -342,15 +330,13 @@ public class Curve {
      * @return the distance along the curve from the start at which
      * the intersection occurs
      */
-    public double intersectsRectPerimeterDist(String index, Rectangle rect) {
+    public double intersectsRectPerimeterDist(String index, RectangleDouble rect) {
         double result = -1;
-        Point[] pointsCurve = getCurvePoints(index);
+        PointDouble[] pointsCurve = getCurvePoints(index);
         double[] curveIntervals = getIntervals(index);
-
         if (pointsCurve != null && pointsCurve.length > 1) {
             int segIndex = intersectRectPerimeterSeg(index, rect);
-            Point intersectPoint = null;
-
+            PointDouble intersectPoint = null;
             if (segIndex != -1) {
                 intersectPoint = intersectRectPerimeterPoint(index, rect, segIndex);
             }
@@ -381,16 +367,14 @@ public class Curve {
      * @return the point to move the top left of the input rect to
      * , otherwise null if no point can be determined
      */
-    public Point collisionMove(String index, Rectangle rect, double buffer) {
+    public PointDouble collisionMove(String index, RectangleDouble rect, double buffer) {
         int hitSeg = intersectRectPerimeterSeg(index, rect);
-
         // Could test for a second hit (the rect exit, unless the same
         // segment is entry and exit) and allow for that in movement.
-
         if (hitSeg == -1) {
             return null;
         } else {
-            Point[] pointsCurve = getCurvePoints(index);
+            PointDouble[] pointsCurve = getCurvePoints(index);
 
             double x0 = pointsCurve[hitSeg - 1].getX();
             double y0 = pointsCurve[hitSeg - 1].getY();
@@ -404,7 +388,7 @@ public class Curve {
 
             // Whether the intersection is one of the horizontal sides of the rect
             @SuppressWarnings("unused") boolean horizIncident = false;
-            Point hitPoint = Utils.intersection(x, y, x + width, y, x0, y0, x1, y1);
+            PointDouble hitPoint = Utils.intersection(x, y, x + width, y, x0, y0, x1, y1);
 
             if (hitPoint != null) {
                 horizIncident = true;
@@ -442,7 +426,7 @@ public class Curve {
      * the given rectangle, if it does so. If it does not intersect,
      * -1 is returned
      */
-    protected int intersectRectPerimeterSeg(String index, Rectangle rect) {
+    protected int intersectRectPerimeterSeg(String index, RectangleDouble rect) {
         return intersectRectPerimeterSeg(index, rect, 1);
     }
 
@@ -460,9 +444,8 @@ public class Curve {
      * the given rectangle, if it does so. If it does not intersect,
      * -1 is returned
      */
-    protected int intersectRectPerimeterSeg(String index, Rectangle rect, int startSegment) {
-        Point[] pointsCurve = getCurvePoints(index);
-
+    protected int intersectRectPerimeterSeg(String index, RectangleDouble rect, int startSegment) {
+        PointDouble[] pointsCurve = getCurvePoints(index);
         if (pointsCurve != null && pointsCurve.length > 1) {
             for (int i = startSegment; i < pointsCurve.length; i++) {
                 if (rect.intersectLine(pointsCurve[i].getX(), pointsCurve[i].getY(), pointsCurve[i - 1].getX(), pointsCurve[i - 1].getY()) != null) {
@@ -470,7 +453,6 @@ public class Curve {
                 }
             }
         }
-
         return -1;
     }
 
@@ -487,16 +469,14 @@ public class Curve {
      * of the given rectangle, if it does so. If it does not intersect,
      * null is returned.
      */
-    protected Point intersectRectPerimeterPoint(String curveIndex, Rectangle rect, int indexSeg) {
-        Point result = null;
-        Point[] pointsCurve = getCurvePoints(curveIndex);
-
+    protected PointDouble intersectRectPerimeterPoint(String curveIndex, RectangleDouble rect, int indexSeg) {
+        PointDouble result = null;
+        PointDouble[] pointsCurve = getCurvePoints(curveIndex);
         if (pointsCurve != null && pointsCurve.length > 1 && indexSeg >= 0 && indexSeg < pointsCurve.length) {
             double p1X = pointsCurve[indexSeg - 1].getX();
             double p1Y = pointsCurve[indexSeg - 1].getY();
             double p2X = pointsCurve[indexSeg].getX();
             double p2Y = pointsCurve[indexSeg].getY();
-
             result = rect.intersectLine(p1X, p1Y, p2X, p2Y);
         }
 
@@ -515,14 +495,13 @@ public class Curve {
      * curve and (width, height) is an additional Cartesian offset applied
      * after the other calculations
      */
-    public Rectangle getRelativeFromAbsPoint(Point absPoint, String index) {
+    public RectangleDouble getRelativeFromAbsPoint(PointDouble absPoint, String index) {
         // Work out which segment the absolute point is closest to
-        Point[] currentCurve = getCurvePoints(index);
+        PointDouble[] currentCurve = getCurvePoints(index);
         double[] currentIntervals = getIntervals(index);
         int closestSegment = 0;
         double closestSegDistSq = 10000000;
-        Line segment = new Line(currentCurve[0], currentCurve[1]);
-
+        LineDouble segment = new LineDouble(currentCurve[0], currentCurve[1]);
         for (int i = 1; i < currentCurve.length; i++) {
             segment.setPoints(currentCurve[i - 1], currentCurve[i]);
             double segDistSq = segment.ptSegDistSq(absPoint);
@@ -532,7 +511,6 @@ public class Curve {
                 closestSegment = i - 1;
             }
         }
-
         // Get the distance (squared) from the point to the
         // infinitely extrapolated line created by the closest
         // segment. If that value is the same as the distance
@@ -540,12 +518,10 @@ public class Curve {
         // point on the line will intersect the point. If they
         // are not equal, an additional cartesian offset is
         // required
-        Point startSegPt = currentCurve[closestSegment];
-        Point endSegPt = currentCurve[closestSegment + 1];
-
-        Line closestSeg = new Line(startSegPt, endSegPt);
+        PointDouble startSegPt = currentCurve[closestSegment];
+        PointDouble endSegPt = currentCurve[closestSegment + 1];
+        LineDouble closestSeg = new LineDouble(startSegPt, endSegPt);
         double lineDistSq = closestSeg.ptLineDistSq(absPoint);
-
         double orthogonalOffset = Math.sqrt(Math.min(lineDistSq, closestSegDistSq));
         double segX = endSegPt.getX() - startSegPt.getX();
         double segY = endSegPt.getY() - startSegPt.getY();
@@ -610,8 +586,7 @@ public class Curve {
         if (distAlongEdge > 1.0) {
             distAlongEdge = 1.0;
         }
-
-        return new Rectangle(distAlongEdge, orthogonalOffset, cartOffsetX, cartOffsetY);
+        return new RectangleDouble(distAlongEdge, orthogonalOffset, cartOffsetX, cartOffsetY);
     }
 
     /**
@@ -679,8 +654,7 @@ public class Curve {
         // If it changes the extrapolation calculation must
         // take this into account.
         double intervalChange = 1;
-
-        List<Point> coreCurve = new ArrayList<Point>();
+        List<PointDouble> coreCurve = new ArrayList<PointDouble>();
         List<Double> coreIntervals = new ArrayList<Double>();
         boolean twoLoopsComplete = false;
 
@@ -688,8 +662,8 @@ public class Curve {
             if (t > 1.0) {
                 // Use the point regardless of the accuracy,
                 t = 1.0001;
-                Point endControlPoint = guidePoints.get(guidePoints.size() - 1);
-                Point finalPoint = new Point(endControlPoint.getX(), endControlPoint.getY());
+                PointDouble endControlPoint = guidePoints.get(guidePoints.size() - 1);
+                PointDouble finalPoint = new PointDouble(endControlPoint.getX(), endControlPoint.getY());
                 coreCurve.add(finalPoint);
                 coreIntervals.add(t);
                 updateBounds(endControlPoint.getX(), endControlPoint.getY());
@@ -764,7 +738,7 @@ public class Curve {
                 twoLoopsComplete = true;
             }
             if (currentPointAccepted) {
-                Point newPoint = new Point(newX, newY);
+                PointDouble newPoint = new PointDouble(newX, newY);
                 coreCurve.add(newPoint);
                 coreIntervals.add(t);
                 updateBounds(newX, newY);
@@ -775,15 +749,12 @@ public class Curve {
             // A single point makes no sense, leave the curve as invalid
             return;
         }
-
-        Point[] corePoints = new Point[coreCurve.size()];
+        PointDouble[] corePoints = new PointDouble[coreCurve.size()];
         int count = 0;
-
-        for (Point point : coreCurve) {
+        for (PointDouble point : coreCurve) {
             corePoints[count++] = point;
         }
-
-        points = new Hashtable<String, Point[]>();
+        points = new Hashtable<String, PointDouble[]>();
         curveLengths = new Hashtable<String, Double>();
         points.put(CORE_CURVE, corePoints);
         curveLengths.put(CORE_CURVE, lengthSpline);
@@ -809,7 +780,7 @@ public class Curve {
      */
     public boolean isLabelReversed() {
         if (valid) {
-            Point[] centralCurve = getCurvePoints(CORE_CURVE);
+            PointDouble[] centralCurve = getCurvePoints(CORE_CURVE);
 
             if (centralCurve != null) {
                 double changeX = centralCurve[centralCurve.length - 1].getX() - centralCurve[0].getX();
@@ -824,11 +795,10 @@ public class Curve {
     protected void createLabelCurve() {
         // Place the label on the "high" side of the vector
         // joining the start and end points of the curve
-        Point[] currentCurve = getBaseLabelCurve();
+        PointDouble[] currentCurve = getBaseLabelCurve();
 
         boolean labelReversed = isLabelReversed();
-
-        List<Point> labelCurvePoints = new ArrayList<Point>();
+        List<PointDouble> labelCurvePoints = new ArrayList<PointDouble>();
 
         // Lower and upper curve start from the very ends
         // of their curves, so given that their middle points
@@ -839,14 +809,12 @@ public class Curve {
         for (int i = 1; i < currentCurve.length; i++) {
             int currentIndex = i;
             int lastIndex = i - 1;
-
             if (labelReversed) {
                 currentIndex = currentCurve.length - i - 1;
                 lastIndex = currentCurve.length - i;
             }
-
-            Point segStartPoint = currentCurve[currentIndex];
-            Point segEndPoint = currentCurve[lastIndex];
+            PointDouble segStartPoint = currentCurve[currentIndex];
+            PointDouble segEndPoint = currentCurve[lastIndex];
             double segVectorX = segEndPoint.getX() - segStartPoint.getX();
             double segVectorY = segEndPoint.getY() - segStartPoint.getY();
             double segVectorLength = Math.sqrt(segVectorX * segVectorX + segVectorY * segVectorY);
@@ -854,31 +822,29 @@ public class Curve {
             double normSegVectorY = segVectorY / segVectorLength;
             double centerSegX = (segEndPoint.getX() + segStartPoint.getX()) / 2.0;
             double centerSegY = (segEndPoint.getY() + segStartPoint.getY()) / 2.0;
-
             if (i == 1) {
                 // Special case to work out the very end points at
                 // the start of the curve
-                Point startPoint = new Point(segEndPoint.getX() - (normSegVectorY * labelBuffer), segEndPoint.getY() + (normSegVectorX * labelBuffer));
+                PointDouble startPoint = new PointDouble(segEndPoint.getX() - (normSegVectorY * labelBuffer), segEndPoint.getY() + (normSegVectorX * labelBuffer));
                 labelCurvePoints.add(startPoint);
                 updateBounds(startPoint.getX(), startPoint.getY());
             }
 
             double pointX = centerSegX - (normSegVectorY * labelBuffer);
             double pointY = centerSegY + (normSegVectorX * labelBuffer);
-            Point labelCurvePoint = new Point(pointX, pointY);
+            PointDouble labelCurvePoint = new PointDouble(pointX, pointY);
             updateBounds(pointX, pointY);
             labelCurvePoints.add(labelCurvePoint);
 
             if (i == currentCurve.length - 1) {
                 // Special case to work out the very end points at
                 // the start of the curve
-                Point endPoint = new Point(segStartPoint.getX() - (normSegVectorY * labelBuffer), segStartPoint.getY() + (normSegVectorX * labelBuffer));
+                PointDouble endPoint = new PointDouble(segStartPoint.getX() - (normSegVectorY * labelBuffer), segStartPoint.getY() + (normSegVectorX * labelBuffer));
                 labelCurvePoints.add(endPoint);
                 updateBounds(endPoint.getX(), endPoint.getY());
             }
         }
-
-        Point[] tmpPoints = new Point[labelCurvePoints.size()];
+        PointDouble[] tmpPoints = new PointDouble[labelCurvePoints.size()];
         points.put(LABEL_CURVE, labelCurvePoints.toArray(tmpPoints));
         populateIntervals(LABEL_CURVE);
     }
@@ -886,12 +852,12 @@ public class Curve {
     /**
      * Returns the curve the label curve is too be based on
      */
-    protected Point[] getBaseLabelCurve() {
+    protected PointDouble[] getBaseLabelCurve() {
         return getCurvePoints(CORE_CURVE);
     }
 
     protected void populateIntervals(String index) {
-        Point[] currentCurve = points.get(index);
+        PointDouble[] currentCurve = points.get(index);
 
         double[] newIntervals = new double[currentCurve.length];
 
@@ -929,16 +895,14 @@ public class Curve {
      *
      * @param newPoints the new guide points
      */
-    public void updateCurve(List<Point> newPoints) {
+    public void updateCurve(List<PointDouble> newPoints) {
         boolean pointsChanged = false;
-
         // If any of the new points are null, ignore the list
-        for (Point point : newPoints) {
+        for (PointDouble point : newPoints) {
             if (point == null) {
                 return;
             }
         }
-
         if (newPoints.size() != guidePoints.size()) {
             pointsChanged = true;
         } else {
@@ -948,15 +912,13 @@ public class Curve {
             if (newPoints.size() == guidePoints.size() && newPoints.size() > 1 && guidePoints.size() > 1) {
                 boolean constantTranslation = true;
                 boolean trivialTranslation = true;
-                Point newPoint0 = newPoints.get(0);
-                Point oldPoint0 = guidePoints.get(0);
+                PointDouble newPoint0 = newPoints.get(0);
+                PointDouble oldPoint0 = guidePoints.get(0);
                 double transX = newPoint0.getX() - oldPoint0.getX();
                 double transY = newPoint0.getY() - oldPoint0.getY();
-
                 if (Math.abs(transX) > 0.01 || Math.abs(transY) > 0.01) {
                     trivialTranslation = false;
                 }
-
                 for (int i = 1; i < newPoints.size(); i++) {
                     double nextTransX = newPoints.get(i).getX() - guidePoints.get(i).getX();
                     double nextTransY = newPoints.get(i).getY() - guidePoints.get(i).getY();
@@ -975,19 +937,18 @@ public class Curve {
                 } else if (constantTranslation) {
                     pointsChanged = false;
                     // Translate all stored points by the translation amounts
-                    Collection<Point[]> curves = points.values();
+                    Collection<PointDouble[]> curves = points.values();
 
                     // Update all geometry information held by the curve
                     // That is, all the curve points, the guide points
                     // and the cached bounds
-                    for (Point[] curve : curves) {
+                    for (PointDouble[] curve : curves) {
                         for (int i = 0; i < curve.length; i++) {
                             curve[i].setX(curve[i].getX() + transX);
                             curve[i].setY(curve[i].getY() + transY);
                         }
                     }
-
-                    guidePoints = new ArrayList<Point>(newPoints);
+                    guidePoints = new ArrayList<PointDouble>(newPoints);
                     minXBounds += transX;
                     minYBounds += transY;
                     maxXBounds += transX;
@@ -999,8 +960,8 @@ public class Curve {
         }
 
         if (pointsChanged) {
-            guidePoints = new ArrayList<Point>(newPoints);
-            points = new Hashtable<String, Point[]>();
+            guidePoints = new ArrayList<PointDouble>(newPoints);
+            points = new Hashtable<String, PointDouble[]>();
             valid = false;
         }
     }
@@ -1014,15 +975,13 @@ public class Curve {
      * @param index the key specifying the curve
      * @return the points making up that curve, or null
      */
-    public Point[] getCurvePoints(String index) {
+    public PointDouble[] getCurvePoints(String index) {
         if (validateCurve()) {
             if (points.get(LABEL_CURVE) == null && index == LABEL_CURVE) {
                 createLabelCurve();
             }
-
             return points.get(index);
         }
-
         return null;
     }
 
@@ -1077,7 +1036,7 @@ public class Curve {
     /**
      * @return the guidePoints
      */
-    public List<Point> getGuidePoints() {
+    public List<PointDouble> getGuidePoints() {
         return guidePoints;
     }
 }

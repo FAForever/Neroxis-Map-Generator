@@ -4,7 +4,7 @@
 package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -101,14 +101,14 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     }
 
     protected List<ICell> cells;
-    protected Rectangle bounds;
+    protected RectangleDouble bounds;
     protected ImageIcon image;
 
-    public GraphTransferable(List<ICell> cells, Rectangle bounds) {
+    public GraphTransferable(List<ICell> cells, RectangleDouble bounds) {
         this(cells, bounds, null);
     }
 
-    public GraphTransferable(List<ICell> cells, Rectangle bounds, ImageIcon image) {
+    public GraphTransferable(List<ICell> cells, RectangleDouble bounds, ImageIcon image) {
         this.cells = cells;
         this.bounds = bounds;
         this.image = image;
@@ -124,7 +124,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     /**
      * Returns the unscaled, untranslated bounding box of the cells.
      */
-    public Rectangle getBounds() {
+    public RectangleDouble getBounds() {
         return bounds;
     }
 

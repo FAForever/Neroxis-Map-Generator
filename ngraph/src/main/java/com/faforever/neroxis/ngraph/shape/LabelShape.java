@@ -2,11 +2,11 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Rectangle;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.geom.GeneralPath;
 import java.util.Map;
 
@@ -47,8 +47,7 @@ public class LabelShape extends ImageShape {
         int imgWidth = (int) (Utils.getInt(style, Constants.STYLE_IMAGE_WIDTH, Constants.DEFAULT_IMAGESIZE) * scale);
         int imgHeight = (int) (Utils.getInt(style, Constants.STYLE_IMAGE_HEIGHT, Constants.DEFAULT_IMAGESIZE) * scale);
         int spacing = (int) (Utils.getInt(style, Constants.STYLE_SPACING, 2) * scale);
-
-        Rectangle imageBounds = new Rectangle(state);
+        RectangleDouble imageBounds = new RectangleDouble(state);
 
         if (imgAlign.equals(Constants.ALIGN_CENTER)) {
             imageBounds.setX(imageBounds.getX() + (imageBounds.getWidth() - imgWidth) / 2);
