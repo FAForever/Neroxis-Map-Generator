@@ -9,8 +9,7 @@ import com.faforever.neroxis.ngraph.util.Line;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ public class ConnectorShape extends BasicShape {
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (state.getAbsolutePointCount() > 1 && configureGraphics(canvas, state, false)) {
-            List<Point> pts = new ArrayList<Point>(state.getAbsolutePoints());
+            List<Point> pts = new ArrayList<>(state.getAbsolutePoints());
             Map<String, Object> style = state.getStyle();
 
             // Paints the markers and updates the points
@@ -47,8 +46,7 @@ public class ConnectorShape extends BasicShape {
 
     protected void paintPolyline(Graphics2DCanvas canvas, List<Point> points, Map<String, Object> style) {
         boolean rounded = isRounded(style) && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
-
-        canvas.paintPolyline(points.toArray(new Point[points.size()]), rounded);
+        canvas.paintPolyline(points.toArray(new Point[0]), rounded);
     }
 
     public boolean isRounded(Map<String, Object> style) {
@@ -76,20 +74,15 @@ public class ConnectorShape extends BasicShape {
         float size = (Utils.getFloat(style, (source) ? Constants.STYLE_STARTSIZE : Constants.STYLE_ENDSIZE, Constants.DEFAULT_MARKERSIZE));
         Color color = Utils.getColor(style, Constants.STYLE_STROKECOLOR);
         canvas.getGraphics().setColor(color);
-
         double absSize = size * canvas.getScale();
-
         List<Point> points = state.getAbsolutePoints();
         Line markerVector = getMarkerVector(points, source, absSize);
-        Point p0 = new Point(markerVector.getX(), markerVector.getY());
-        Point pe = markerVector.getEndPoint();
-
-        Point offset = null;
-
+        Point p0 = markerVector.getP1();
+        Point pe = markerVector.getP2();
+        Point offset;
         // Computes the norm and the inverse norm
         double dx = pe.getX() - p0.getX();
         double dy = pe.getY() - p0.getY();
-
         double dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
         double unitX = dx / dist;
         double unitY = dy / dist;

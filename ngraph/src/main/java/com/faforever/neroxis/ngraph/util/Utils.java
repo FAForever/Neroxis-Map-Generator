@@ -21,7 +21,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.io.ByteArrayInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -600,7 +599,7 @@ public class Utils {
 
             result = new Rectangle(tmp);
         } else if (rect != null) {
-            result = (Rectangle) rect.clone();
+            result = rect.clone();
         }
 
         return result;
@@ -1355,34 +1354,20 @@ public class Utils {
         BufferedImage img = null;
 
         if (url != null) {
-            // Parses data URIs of the form data:image/format;base64,xxx
-            if (url.startsWith("data:image/")) {
+            URL realUrl;
+            try {
+                realUrl = new URL(url);
+            } catch (Exception e) {
+                realUrl = Utils.class.getResource(url);
+            }
+            if (realUrl != null) {
                 try {
-                    int comma = url.indexOf(',');
-                    byte[] data = Base64.decode(url.substring(comma + 1));
-                    ByteArrayInputStream is = new ByteArrayInputStream(data);
-                    img = ImageIO.read(is);
-                } catch (Exception e) {
-                    log.log(Level.SEVERE, "Failed to load a data URI image", e);
+                    img = ImageIO.read(realUrl);
+                } catch (Exception e1) {
+                    log.log(Level.SEVERE, "Failed to read the image from " + realUrl, e1);
                 }
             } else {
-                URL realUrl;
-
-                try {
-                    realUrl = new URL(url);
-                } catch (Exception e) {
-                    realUrl = Utils.class.getResource(url);
-                }
-
-                if (realUrl != null) {
-                    try {
-                        img = ImageIO.read(realUrl);
-                    } catch (Exception e1) {
-                        log.log(Level.SEVERE, "Failed to read the image from " + realUrl, e1);
-                    }
-                } else {
-                    log.log(Level.SEVERE, "Failed to load image from " + url);
-                }
+                log.log(Level.SEVERE, "Failed to load image from " + url);
             }
         }
 

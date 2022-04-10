@@ -189,7 +189,7 @@ public class Curve {
             // We can't calculate in this case
             if (pointsCurve.length == 1) {
                 Point point = pointsCurve[0];
-                return new Line(point.getX(), point.getY(), new Point(1, 0));
+                return new Line(point, new Point(1, 0));
             }
 
             int lowerLimit = getLowerIndexOfSegment(index, distance);
@@ -200,8 +200,7 @@ public class Curve {
             double segLength = Math.sqrt(segVectorX * segVectorX + segVectorY * segVectorY);
             double startPointX = firstPointOfSeg.getX() + segVectorX * distanceAlongSeg;
             double startPointY = firstPointOfSeg.getY() + segVectorY * distanceAlongSeg;
-            Point endPoint = new Point(segVectorX / segLength, segVectorY / segLength);
-            return new Line(startPointX, startPointY, endPoint);
+            return new Line(startPointX, startPointY, segVectorX / segLength, segVectorY / segLength);
         } else {
             return INVALID_POSITION;
         }

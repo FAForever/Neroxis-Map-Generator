@@ -51,7 +51,6 @@ import com.faforever.neroxis.ngraph.model.GraphModel.VisibleChange;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.ImageBundle;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Resources;
@@ -66,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -201,10 +199,6 @@ import org.w3c.dom.Element;
 @Getter
 public class Graph extends EventSource {
     private static final Logger log = Logger.getLogger(Graph.class.getName());
-    /**
-     * Holds the list of bundles.
-     */
-    protected static List<ImageBundle> imageBundles = new ArrayList<>();
     /**
      * Property change event handling.
      */
@@ -979,7 +973,7 @@ public class Graph extends EventSource {
         String name = model.getStyle(cell);
 
         if (name != null) {
-            style = postProcessCellStyle(stylesheet.getCellStyle(name, style));
+            style = stylesheet.getCellStyle(name, style);
         }
 
         if (style == null) {
@@ -992,37 +986,6 @@ public class Graph extends EventSource {
     //
     // Cell styles
     //
-
-    /**
-     * Tries to resolve the value for the image style in the image bundles and
-     * turns short data URIs as defined in ImageBundle to data URIs as
-     * defined in RFC 2397 of the IETF.
-     */
-    protected Map<String, Object> postProcessCellStyle(Map<String, Object> style) {
-        if (style != null) {
-            String key = Utils.getString(style, Constants.STYLE_IMAGE);
-            String image = getImageFromBundles(key);
-
-            if (image != null) {
-                style.put(Constants.STYLE_IMAGE, image);
-            } else {
-                image = key;
-            }
-
-            // Converts short data uris to normal data uris
-            if (image != null && image.startsWith("data:image/")) {
-                int comma = image.indexOf(',');
-
-                if (comma > 0) {
-                    image = image.substring(0, comma) + ";base64," + image.substring(comma + 1);
-                }
-
-                style.put(Constants.STYLE_IMAGE, image);
-            }
-        }
-
-        return style;
-    }
 
     /**
      * Sets the style of the selection cells to the given value.
@@ -1211,54 +1174,6 @@ public class Graph extends EventSource {
         }
 
         return cells;
-    }
-
-    /**
-     * Adds the specified bundle.
-     */
-    public void addImageBundle(ImageBundle bundle) {
-        imageBundles.add(bundle);
-    }
-
-    /**
-     * Removes the specified bundle.
-     */
-    public void removeImageBundle(ImageBundle bundle) {
-        imageBundles.remove(bundle);
-    }
-
-    /**
-     * Searches all bundles for the specified key and returns the value for the
-     * first match or null if the key is not found.
-     */
-    public String getImageFromBundles(String key) {
-        if (key != null) {
-            Iterator<ImageBundle> it = imageBundles.iterator();
-
-            while (it.hasNext()) {
-                String value = it.next().getImage(key);
-
-                if (value != null) {
-                    return value;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the image bundles
-     */
-    public List<ImageBundle> getImageBundles() {
-        return imageBundles;
-    }
-
-    /**
-     * Returns the image bundles
-     */
-    public void getImageBundles(List<ImageBundle> value) {
-        imageBundles = value;
     }
 
     /**

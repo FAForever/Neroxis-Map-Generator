@@ -5,20 +5,13 @@ package com.faforever.neroxis.ngraph.util;
 
 import java.awt.geom.Point2D;
 import java.io.Serial;
-import java.io.Serializable;
 
 /**
- * Implements a 2-dimensional point with double precision coordinates.
+ * Extends awt point with double precision coordinates.
  */
-public class Point implements Serializable, Cloneable {
-
+public class Point extends Point2D.Double {
     @Serial
     private static final long serialVersionUID = 6554231393215892186L;
-
-    /**
-     * Holds the x- and y-coordinates of the point. Default is 0.
-     */
-    protected double x, y;
 
     /**
      * Constructs a new point at (0, 0).
@@ -92,6 +85,24 @@ public class Point implements Serializable, Cloneable {
         y = value;
     }
 
+    public void move(Point point) {
+        move(point.x, point.y);
+    }
+
+    public void move(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void translate(Point point) {
+        translate(point.x, point.y);
+    }
+
+    public void translate(double dx, double dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+
     /**
      * Returns the coordinates as a new point.
      *
@@ -102,34 +113,6 @@ public class Point implements Serializable, Cloneable {
     }
 
     /**
-     * Returns true if the given object equals this rectangle.
-     */
-    public boolean equals(Object obj) {
-        if (obj instanceof Point) {
-            Point pt = (Point) obj;
-
-            return pt.getX() == getX() && pt.getY() == getY();
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns a new instance of the same point.
-     */
-    public Point clone() {
-        Point clone;
-        try {
-            clone = (Point) super.clone();
-        } catch (CloneNotSupportedException e) {
-            clone = new Point();
-        }
-        clone.setX(getX());
-        clone.setY(getY());
-        return clone;
-    }
-
-    /**
      * Returns a <code>String</code> that represents the value
      * of this <code>Point</code>.
      *
@@ -137,16 +120,7 @@ public class Point implements Serializable, Cloneable {
      */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(16);
-        builder.append(getClass().getSimpleName());
-        builder.append(" [");
-        builder.append("x=");
-        builder.append(x);
-        builder.append(", y=");
-        builder.append(y);
-        builder.append("]");
-
-        return builder.toString();
+        return String.format("Point[%f, %f]", x, y);
     }
 
 }

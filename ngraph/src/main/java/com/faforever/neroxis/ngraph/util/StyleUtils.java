@@ -24,7 +24,7 @@ public class StyleUtils {
             String[] pairs = style.split(";");
             String stylename = pairs[0];
 
-            if (stylename.indexOf("=") < 0) {
+            if (!stylename.contains("=")) {
                 return stylename;
             }
         }
@@ -46,13 +46,12 @@ public class StyleUtils {
             String[] pairs = style.split(";");
 
             for (String pair : pairs) {
-                if (pair.indexOf("=") < 0) {
+                if (!pair.contains("=")) {
                     result.add(pair);
                 }
             }
         }
-
-        return result.toArray(new String[result.size()]);
+        return result.toArray(new String[0]);
     }
 
     /**
@@ -100,14 +99,14 @@ public class StyleUtils {
      * returns the updated style. Trailing semicolons are preserved.
      */
     public static String removeStylename(String style, String stylename) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         if (style != null) {
             String[] tokens = style.split(";");
 
             for (String token : tokens) {
                 if (!token.equals(stylename)) {
-                    buffer.append(token + ";");
+                    buffer.append(token).append(";");
                 }
             }
         }
@@ -120,14 +119,14 @@ public class StyleUtils {
      * style.
      */
     public static String removeAllStylenames(String style) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         if (style != null) {
             String[] tokens = style.split(";");
 
             for (String token : tokens) {
                 if (token.indexOf('=') >= 0) {
-                    buffer.append(token + ";");
+                    buffer.append(token).append(";");
                 }
             }
         }
@@ -246,7 +245,7 @@ public class StyleUtils {
      */
     public static String setStyleFlag(String style, String key, int flag, Boolean value) {
         if (style == null || style.length() == 0) {
-            if (value == null || value.booleanValue()) {
+            if (value == null || value) {
                 style = key + "=" + flag;
             } else {
                 style = key + "=0";
@@ -256,26 +255,23 @@ public class StyleUtils {
 
             if (index < 0) {
                 String sep = (style.endsWith(";")) ? "" : ";";
-
-                if (value == null || value.booleanValue()) {
+                if (value == null || value) {
                     style = style + sep + key + "=" + flag;
                 } else {
                     style = style + sep + key + "=0";
                 }
             } else {
                 int cont = style.indexOf(";", index);
-                String tmp = "";
-                int result = 0;
-
+                String tmp;
+                int result;
                 if (cont < 0) {
                     tmp = style.substring(index + key.length() + 1);
                 } else {
                     tmp = style.substring(index + key.length() + 1, cont);
                 }
-
                 if (value == null) {
                     result = Integer.parseInt(tmp) ^ flag;
-                } else if (value.booleanValue()) {
+                } else if (value) {
                     result = Integer.parseInt(tmp) | flag;
                 } else {
                     result = Integer.parseInt(tmp) & ~flag;

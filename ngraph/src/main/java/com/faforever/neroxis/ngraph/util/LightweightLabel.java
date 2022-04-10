@@ -4,6 +4,7 @@
 package com.faforever.neroxis.ngraph.util;
 
 import java.awt.Font;
+import java.io.Serial;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
@@ -15,7 +16,7 @@ import javax.swing.SwingConstants;
 public class LightweightLabel extends JLabel {
 
     private static final Logger log = Logger.getLogger(LightweightLabel.class.getName());
-
+    @Serial
     private static final long serialVersionUID = -6771477489533614010L;
 
     protected static LightweightLabel sharedInstance;

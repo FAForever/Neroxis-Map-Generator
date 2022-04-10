@@ -9,8 +9,7 @@ import com.faforever.neroxis.ngraph.util.Curve;
 import com.faforever.neroxis.ngraph.util.Line;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.RenderingHints;
 import java.util.List;
 import java.util.Map;
 
@@ -83,11 +82,11 @@ public class CurveShape extends ConnectorShape {
 
         if (source) {
             Line sourceVector = curve.getCurveParallel(Curve.CORE_CURVE, markerRatio);
-            return new Line(sourceVector.getX(), sourceVector.getY(), points.get(0));
+            return new Line(sourceVector.getP1(), points.get(0));
         } else {
             Line targetVector = curve.getCurveParallel(Curve.CORE_CURVE, 1.0 - markerRatio);
             int pointCount = points.size();
-            return new Line(targetVector.getX(), targetVector.getY(), points.get(pointCount - 1));
+            return new Line(targetVector.getP1(), points.get(pointCount - 1));
         }
     }
 }

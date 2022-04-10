@@ -128,35 +128,27 @@ public class CurveLabelShape implements ITextShape {
             float opacity = Utils.getFloat(style, Constants.STYLE_OPACITY, 100);
             Graphics2D previousGraphics = g;
             g = canvas.createTemporaryGraphics(style, opacity, state);
-
             Font font = Utils.getFont(style, canvas.getScale());
             g.setFont(font);
-
             Color fontColor = Utils.getColor(style, Constants.STYLE_FONTCOLOR, Color.black);
             g.setColor(fontColor);
-
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
             g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, FONT_FRACTIONALMETRICS);
-
-            for (int j = 0; j < labelGlyphs.length; j++) {
-                Line parallel = labelGlyphs[j].glyphGeometry;
-
-                if (labelGlyphs[j].visible && parallel != null && parallel != Curve.INVALID_POSITION) {
-                    Point parallelEnd = parallel.getEndPoint();
+            for (LabelGlyphCache labelGlyph : labelGlyphs) {
+                Line parallel = labelGlyph.glyphGeometry;
+                if (labelGlyph.visible && parallel != null && parallel != Curve.INVALID_POSITION) {
+                    Point parallelEnd = parallel.getP2();
                     double x = parallelEnd.getX();
                     double rotation = (Math.atan(parallelEnd.getY() / x));
-
                     if (x < 0) {
                         // atan only ranges from -PI/2 to PI/2, have to offset
                         // for negative x values
                         rotation += Math.PI;
                     }
-
                     final AffineTransform old = g.getTransform();
-                    g.translate(parallel.getX(), parallel.getY());
+                    g.translate(parallel.getX1(), parallel.getY1());
                     g.rotate(rotation);
-                    Shape letter = labelGlyphs[j].glyphShape;
+                    Shape letter = labelGlyph.glyphShape;
                     g.fill(letter);
                     g.setTransform(old);
                 }
@@ -327,22 +319,20 @@ public class CurveLabelShape implements ITextShape {
             }
 
             labelGlyphs[j].glyphGeometry = parallel;
-
             if (parallel == Curve.INVALID_POSITION) {
                 continue;
             }
-
             // Get the four corners of the rotated rectangle bounding the glyph
             // The drawing bounds of the glyph is the unrotated rect that
             // just bounds those four corners
             final double w = labelGlyphs[j].labelGlyphBounds.getWidth();
             final double h = labelGlyphs[j].labelGlyphBounds.getHeight();
-            final double x = parallel.getEndPoint().getX();
-            final double y = parallel.getEndPoint().getY();
+            final double x = parallel.getP2().getX();
+            final double y = parallel.getP2().getY();
             // Bottom left
-            double p1X = parallel.getX() - (descent * y);
+            double p1X = parallel.getX1() - (descent * y);
             double minX = p1X, maxX = p1X;
-            double p1Y = parallel.getY() + (descent * x);
+            double p1Y = parallel.getY1() + (descent * x);
             double minY = p1Y, maxY = p1Y;
             // Top left
             double p2X = p1X + ((h + descent) * y);
@@ -383,8 +373,7 @@ public class CurveLabelShape implements ITextShape {
             nextParallel = curve.getCurveParallel(Curve.LABEL_CURVE, currentPosCandidate);
 
             currentPos = currentPosCandidate;
-
-            Point nextVector = nextParallel.getEndPoint();
+            Point nextVector = nextParallel.getP2();
             double end2X = nextVector.getX();
             double end2Y = nextVector.getY();
 
@@ -425,7 +414,7 @@ public class CurveLabelShape implements ITextShape {
             }
 
             if (overallLabelBounds == null) {
-                overallLabelBounds = (Rectangle) labelGlyphs[j].drawingBounds.clone();
+                overallLabelBounds = labelGlyphs[j].drawingBounds.clone();
             } else {
                 overallLabelBounds.add(labelGlyphs[j].drawingBounds);
             }
@@ -440,7 +429,7 @@ public class CurveLabelShape implements ITextShape {
             // Return a small rectangle in the center of the label curve
             // Null label bounds causes NPE when editing
             Line labelCenter = curve.getCurveParallel(Curve.LABEL_CURVE, 0.5);
-            overallLabelBounds = new Rectangle(labelCenter.getX(), labelCenter.getY(), 1, 1);
+            overallLabelBounds = new Rectangle(labelCenter.getX1(), labelCenter.getY1(), 1, 1);
         }
 
         this.labelBounds = overallLabelBounds;

@@ -183,7 +183,7 @@ public class GraphView extends EventSource {
      */
     public void scaleAndTranslate(double scale, double dx, double dy) {
         double previousScale = this.scale;
-        Point previousTranslate = translate.clone();
+        Point previousTranslate = (Point) translate.clone();
 
         if (scale != this.scale || dx != translate.getX() || dy != translate.getY()) {
             this.scale = scale;
@@ -241,7 +241,7 @@ public class GraphView extends EventSource {
      * @param value New translation to be used.
      */
     public void setTranslate(Point value) {
-        Point previousTranslate = translate.clone();
+        Point previousTranslate = (Point) translate.clone();
 
         if (value != null && (value.getX() != translate.getX() || value.getY() != translate.getY())) {
             translate = value;

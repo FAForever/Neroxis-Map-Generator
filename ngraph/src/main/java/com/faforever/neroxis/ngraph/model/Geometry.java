@@ -297,26 +297,26 @@ public class Geometry extends Rectangle {
             clone.points = new ArrayList<>(pts.size());
 
             for (Point pt : pts) {
-                clone.points.add(pt.clone());
+                clone.points.add((Point) pt.clone());
             }
         }
 
         Point tp = getTargetPoint();
 
         if (tp != null) {
-            clone.setTargetPoint(tp.clone());
+            clone.setTargetPoint((Point) tp.clone());
         }
 
         Point sp = getSourcePoint();
 
         if (sp != null) {
-            setSourcePoint(sp.clone());
+            setSourcePoint((Point) sp.clone());
         }
 
         Point off = getOffset();
 
         if (off != null) {
-            clone.setOffset(off.clone());
+            clone.setOffset((Point) off.clone());
         }
 
         Rectangle alt = getAlternateBounds();

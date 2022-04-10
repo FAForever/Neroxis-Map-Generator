@@ -176,12 +176,8 @@ public class CellStatePreview {
 
     public void restore(List<CellState> snapshot) {
         Graph graph = graphComponent.getGraph();
-        Iterator<CellState> it = snapshot.iterator();
-
-        while (it.hasNext()) {
-            CellState state = it.next();
+        for (CellState state : snapshot) {
             CellState orig = graph.getView().getState(state.getCell());
-
             if (orig != null && orig != state) {
                 restoreState(orig, state);
             }

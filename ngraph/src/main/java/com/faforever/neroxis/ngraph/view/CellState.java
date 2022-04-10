@@ -177,7 +177,7 @@ public class CellState extends Rectangle {
     public void setAbsoluteTerminalPoint(Point point, boolean isSource) {
         if (isSource) {
             if (absolutePoints == null) {
-                absolutePoints = new ArrayList<Point>();
+                absolutePoints = new ArrayList<>();
             }
 
             if (absolutePoints.size() == 0) {
@@ -187,7 +187,7 @@ public class CellState extends Rectangle {
             }
         } else {
             if (absolutePoints == null) {
-                absolutePoints = new ArrayList<Point>();
+                absolutePoints = new ArrayList<>();
                 absolutePoints.add(null);
                 absolutePoints.add(point);
             } else if (absolutePoints.size() == 1) {
@@ -240,23 +240,26 @@ public class CellState extends Rectangle {
      * cloning to the new instance.
      */
     public CellState clone() {
-        CellState clone = new CellState(view, cell, style);
+        CellState clone = (CellState) super.clone();
+        clone.setView(view);
+        clone.setCell(cell);
+        clone.setStyle(style);
         if (label != null) {
             clone.label = label;
         }
         if (absolutePoints != null) {
-            clone.absolutePoints = new ArrayList<Point>();
+            clone.absolutePoints = new ArrayList<>();
             for (int i = 0; i < absolutePoints.size(); i++) {
-                clone.absolutePoints.add(absolutePoints.get(i).clone());
+                clone.absolutePoints.add((Point) absolutePoints.get(i).clone());
             }
         }
 
         if (origin != null) {
-            clone.origin = origin.clone();
+            clone.origin = (Point) origin.clone();
         }
 
         if (absoluteOffset != null) {
-            clone.absoluteOffset = absoluteOffset.clone();
+            clone.absoluteOffset = (Point) absoluteOffset.clone();
         }
 
         if (labelBounds != null) {

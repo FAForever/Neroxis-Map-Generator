@@ -1,16 +1,15 @@
 package com.faforever.neroxis.ui;
 
 import com.faforever.neroxis.ui.components.PipelinePanel;
-import com.faforever.neroxis.util.DebugUtil;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 public strictfp class PipelineEditor {
     private JFrame frame = new JFrame();
 
     public static void main(String[] args) {
-        DebugUtil.DEBUG = true;
         new PipelineEditor().createGui();
     }
 

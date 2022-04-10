@@ -5,19 +5,17 @@ package com.faforever.neroxis.ngraph.util;
 
 import java.awt.geom.Rectangle2D;
 import java.io.Serial;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Implements a 2-dimensional rectangle with double precision coordinates.
  */
-public class Rectangle extends Point {
-
+@Getter
+@Setter
+public class Rectangle extends Rectangle2D.Double {
     @Serial
     private static final long serialVersionUID = -3793966043543578946L;
-
-    /**
-     * Holds the width and the height. Default is 0.
-     */
-    protected double width, height;
 
     /**
      * Constructs a new rectangle at (0, 0) with the width and height set to 0.
@@ -53,19 +51,15 @@ public class Rectangle extends Point {
      * @param height Height of the new rectangle.
      */
     public Rectangle(double x, double y, double width, double height) {
-        super(x, y);
-
-        setWidth(width);
-        setHeight(height);
+        super(x, y, width, height);
     }
 
-    /**
-     * Returns the width of the rectangle.
-     *
-     * @return Returns the width.
-     */
-    public double getWidth() {
-        return width;
+    public void setX(double value) {
+        x = value;
+    }
+
+    public void setY(double value) {
+        y = value;
     }
 
     /**
@@ -78,53 +72,12 @@ public class Rectangle extends Point {
     }
 
     /**
-     * Returns the height of the rectangle.
-     *
-     * @return Returns the height.
-     */
-    public double getHeight() {
-        return height;
-    }
-
-    /**
      * Sets the height of the rectangle.
      *
      * @param value Double that specifies the new height.
      */
     public void setHeight(double value) {
         height = value;
-    }
-
-    /**
-     * Sets this rectangle to the specified values
-     *
-     * @param x the new x-axis position
-     * @param y the new y-axis position
-     * @param w the new width of the rectangle
-     * @param h the new height of the rectangle
-     */
-    public void setRect(double x, double y, double w, double h) {
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
-    }
-
-    /**
-     * Adds the given rectangle to this rectangle.
-     */
-    public void add(Rectangle rect) {
-        if (rect != null) {
-            double minX = Math.min(x, rect.x);
-            double minY = Math.min(y, rect.y);
-            double maxX = Math.max(x + width, rect.x + rect.width);
-            double maxY = Math.max(y + height, rect.y + rect.height);
-
-            x = minX;
-            y = minY;
-            width = maxX - minX;
-            height = maxY - minY;
-        }
     }
 
     /**
@@ -160,17 +113,6 @@ public class Rectangle extends Point {
     }
 
     /**
-     * Returns true if the given point is contained in the rectangle.
-     *
-     * @param x X-coordinate of the point.
-     * @param y Y-coordinate of the point.
-     * @return Returns true if the point is contained in the rectangle.
-     */
-    public boolean contains(double x, double y) {
-        return (this.x <= x && this.x + width >= x && this.y <= y && this.y + height >= y);
-    }
-
-    /**
      * Returns the point at which the specified point intersects the perimeter
      * of this rectangle or null if there is no intersection.
      *
@@ -189,16 +131,26 @@ public class Rectangle extends Point {
         if (result == null) {
             result = Utils.intersection(x + width, y, x + width, y + height, x0, y0, x1, y1);
         }
-
         if (result == null) {
             result = Utils.intersection(x + width, y + height, x, y + height, x0, y0, x1, y1);
         }
-
         if (result == null) {
             result = Utils.intersection(x, y, x, y + height, x0, y0, x1, y1);
         }
-
         return result;
+    }
+
+    public void add(Rectangle rect) {
+        if (rect != null) {
+            double minX = Math.min(x, rect.x);
+            double minY = Math.min(y, rect.y);
+            double maxX = Math.max(x + width, rect.x + rect.width);
+            double maxY = Math.max(y + height, rect.y + rect.height);
+            x = minX;
+            y = minY;
+            width = maxX - minX;
+            height = maxY - minY;
+        }
     }
 
     /**
@@ -259,20 +211,7 @@ public class Rectangle extends Point {
      */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(32);
-        builder.append(getClass().getSimpleName());
-        builder.append(" [");
-        builder.append("x=");
-        builder.append(x);
-        builder.append(", y=");
-        builder.append(y);
-        builder.append(", width=");
-        builder.append(width);
-        builder.append(", height=");
-        builder.append(height);
-        builder.append("]");
-
-        return builder.toString();
+        return getClass().getSimpleName() + " [" + "x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
     }
 
 }
