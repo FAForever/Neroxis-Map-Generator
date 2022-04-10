@@ -22,206 +22,175 @@ public class EdgeStyle {
      * Provides an entity relation style for edges (as used in database
      * schema diagrams).
      */
-    public static EdgeStyleFunction EntityRelation = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
-            GraphView view = state.getView();
-            IGraphModel model = view.getGraph().getModel();
-            double segment = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, Constants.ENTITY_SEGMENT) * state.view.getScale();
-            PointDouble p0 = state.getAbsolutePoint(0);
-            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-            boolean isSourceLeft = false;
-            if (p0 != null) {
-                source = new CellState();
-                source.setX(p0.getX());
-                source.setY(p0.getY());
-            } else if (source != null) {
-                int constraint = Utils.getPortConstraints(source, state, true, Constants.DIRECTION_MASK_NONE);
-
-                if (constraint != Constants.DIRECTION_MASK_NONE) {
-                    isSourceLeft = constraint == Constants.DIRECTION_MASK_WEST;
-                } else {
-                    Geometry sourceGeometry = model.getGeometry(source.cell);
-
-                    if (sourceGeometry.isRelative()) {
-                        isSourceLeft = sourceGeometry.getX() <= 0.5;
-                    } else if (target != null) {
-                        isSourceLeft = target.getX() + target.getWidth() < source.getX();
-                    }
+    public static EdgeStyleFunction EntityRelation = (state, source, target, points, result) -> {
+        GraphView view = state.getView();
+        IGraphModel model = view.getGraph().getModel();
+        double segment = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, Constants.ENTITY_SEGMENT) * state.view.getScale();
+        PointDouble p0 = state.getAbsolutePoint(0);
+        PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+        boolean isSourceLeft = false;
+        if (p0 != null) {
+            source = new CellState();
+            source.setX(p0.getX());
+            source.setY(p0.getY());
+        } else if (source != null) {
+            int constraint = Utils.getPortConstraints(source, state, true, Constants.DIRECTION_MASK_NONE);
+            if (constraint != Constants.DIRECTION_MASK_NONE) {
+                isSourceLeft = constraint == Constants.DIRECTION_MASK_WEST;
+            } else {
+                Geometry sourceGeometry = model.getGeometry(source.cell);
+                if (sourceGeometry.isRelative()) {
+                    isSourceLeft = sourceGeometry.getX() <= 0.5;
+                } else if (target != null) {
+                    isSourceLeft = target.getX() + target.getWidth() < source.getX();
                 }
             }
-
-            boolean isTargetLeft = true;
-
-            if (pe != null) {
-                target = new CellState();
-                target.setX(pe.getX());
-                target.setY(pe.getY());
-            } else if (target != null) {
-                int constraint = Utils.getPortConstraints(target, state, false, Constants.DIRECTION_MASK_NONE);
-
-                if (constraint != Constants.DIRECTION_MASK_NONE) {
-                    isTargetLeft = constraint == Constants.DIRECTION_MASK_WEST;
-                } else {
-                    Geometry targetGeometry = model.getGeometry(target.cell);
-
-                    if (targetGeometry.isRelative()) {
-                        isTargetLeft = targetGeometry.getX() <= 0.5;
-                    } else if (source != null) {
-                        isTargetLeft = source.getX() + source.getWidth() < target.getX();
-                    }
+        }
+        boolean isTargetLeft = true;
+        if (pe != null) {
+            target = new CellState();
+            target.setX(pe.getX());
+            target.setY(pe.getY());
+        } else if (target != null) {
+            int constraint = Utils.getPortConstraints(target, state, false, Constants.DIRECTION_MASK_NONE);
+            if (constraint != Constants.DIRECTION_MASK_NONE) {
+                isTargetLeft = constraint == Constants.DIRECTION_MASK_WEST;
+            } else {
+                Geometry targetGeometry = model.getGeometry(target.cell);
+                if (targetGeometry.isRelative()) {
+                    isTargetLeft = targetGeometry.getX() <= 0.5;
+                } else if (source != null) {
+                    isTargetLeft = source.getX() + source.getWidth() < target.getX();
                 }
             }
-
-            if (source != null && target != null) {
-                double x0 = (isSourceLeft) ? source.getX() : source.getX() + source.getWidth();
-                double y0 = view.getRoutingCenterY(source);
-
-                double xe = (isTargetLeft) ? target.getX() : target.getX() + target.getWidth();
-                double ye = view.getRoutingCenterY(target);
-
-                double seg = segment;
-                double dx = (isSourceLeft) ? -seg : seg;
-                PointDouble dep = new PointDouble(x0 + dx, y0);
-                result.add(dep);
-
-                dx = (isTargetLeft) ? -seg : seg;
-                PointDouble arr = new PointDouble(xe + dx, ye);
-
-                // Adds intermediate points if both go out on same side
-                if (isSourceLeft == isTargetLeft) {
-                    double x = (isSourceLeft) ? Math.min(x0, xe) - segment : Math.max(x0, xe) + segment;
-                    result.add(new PointDouble(x, y0));
-                    result.add(new PointDouble(x, ye));
-                } else if ((dep.getX() < arr.getX()) == isSourceLeft) {
-                    double midY = y0 + (ye - y0) / 2;
-                    result.add(new PointDouble(dep.getX(), midY));
-                    result.add(new PointDouble(arr.getX(), midY));
-                }
-
-                result.add(arr);
+        }
+        if (source != null && target != null) {
+            double x0 = (isSourceLeft) ? source.getX() : source.getX() + source.getWidth();
+            double y0 = view.getRoutingCenterY(source);
+            double xe = (isTargetLeft) ? target.getX() : target.getX() + target.getWidth();
+            double ye = view.getRoutingCenterY(target);
+            double seg = segment;
+            double dx = (isSourceLeft) ? -seg : seg;
+            PointDouble dep = new PointDouble(x0 + dx, y0);
+            result.add(dep);
+            dx = (isTargetLeft) ? -seg : seg;
+            PointDouble arr = new PointDouble(xe + dx, ye);
+            // Adds intermediate points if both go out on same side
+            if (isSourceLeft == isTargetLeft) {
+                double x = (isSourceLeft) ? Math.min(x0, xe) - segment : Math.max(x0, xe) + segment;
+                result.add(new PointDouble(x, y0));
+                result.add(new PointDouble(x, ye));
+            } else if ((dep.getX() < arr.getX()) == isSourceLeft) {
+                double midY = y0 + (ye - y0) / 2;
+                result.add(new PointDouble(dep.getX(), midY));
+                result.add(new PointDouble(arr.getX(), midY));
             }
+            result.add(arr);
         }
     };
     /**
      * Provides a self-reference, aka. loop.
      */
-    public static EdgeStyleFunction Loop = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
-            if (source != null) {
-                GraphView view = state.getView();
-                Graph graph = view.getGraph();
-                PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
-                if (pt != null) {
-                    pt = view.transformControlPoint(state, pt);
-                    if (source.contains(pt.getX(), pt.getY())) {
-                        pt = null;
-                    }
+    public static EdgeStyleFunction Loop = (state, source, target, points, result) -> {
+        if (source != null) {
+            GraphView view = state.getView();
+            Graph graph = view.getGraph();
+            PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
+            if (pt != null) {
+                pt = view.transformControlPoint(state, pt);
+                if (source.contains(pt.getX(), pt.getY())) {
+                    pt = null;
                 }
-
-                double x = 0;
-                double dx = 0;
-                double y = 0;
-                double dy = 0;
-
-                double seg = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, graph.getGridSize()) * view.getScale();
-                String dir = Utils.getString(state.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_WEST);
-
-                if (dir.equals(Constants.DIRECTION_NORTH) || dir.equals(Constants.DIRECTION_SOUTH)) {
-                    x = view.getRoutingCenterX(source);
-                    dx = seg;
-                } else {
-                    y = view.getRoutingCenterY(source);
-                    dy = seg;
-                }
-
-                if (pt == null || pt.getX() < source.getX() || pt.getX() > source.getX() + source.getWidth()) {
-                    if (pt != null) {
-                        x = pt.getX();
-                        dy = Math.max(Math.abs(y - pt.getY()), dy);
-                    } else {
-                        if (dir.equals(Constants.DIRECTION_NORTH)) {
-                            y = source.getY() - 2 * dx;
-                        } else if (dir.equals(Constants.DIRECTION_SOUTH)) {
-                            y = source.getY() + source.getHeight() + 2 * dx;
-                        } else if (dir.equals(Constants.DIRECTION_EAST)) {
-                            x = source.getX() - 2 * dy;
-                        } else {
-                            x = source.getX() + source.getWidth() + 2 * dy;
-                        }
-                    }
-                } else {
-                    // pt != null
-                    x = view.getRoutingCenterX(source);
-                    dx = Math.max(Math.abs(x - pt.getX()), dy);
-                    y = pt.getY();
-                    dy = 0;
-                }
-                result.add(new PointDouble(x - dx, y - dy));
-                result.add(new PointDouble(x + dx, y + dy));
             }
+            double x = 0;
+            double dx = 0;
+            double y = 0;
+            double dy = 0;
+            double seg = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, graph.getGridSize()) * view.getScale();
+            String dir = Utils.getString(state.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_WEST);
+            if (dir.equals(Constants.DIRECTION_NORTH) || dir.equals(Constants.DIRECTION_SOUTH)) {
+                x = view.getRoutingCenterX(source);
+                dx = seg;
+            } else {
+                y = view.getRoutingCenterY(source);
+                dy = seg;
+            }
+            if (pt == null || pt.getX() < source.getX() || pt.getX() > source.getX() + source.getWidth()) {
+                if (pt != null) {
+                    x = pt.getX();
+                    dy = Math.max(Math.abs(y - pt.getY()), dy);
+                } else {
+                    if (dir.equals(Constants.DIRECTION_NORTH)) {
+                        y = source.getY() - 2 * dx;
+                    } else if (dir.equals(Constants.DIRECTION_SOUTH)) {
+                        y = source.getY() + source.getHeight() + 2 * dx;
+                    } else if (dir.equals(Constants.DIRECTION_EAST)) {
+                        x = source.getX() - 2 * dy;
+                    } else {
+                        x = source.getX() + source.getWidth() + 2 * dy;
+                    }
+                }
+            } else {
+                // pt != null
+                x = view.getRoutingCenterX(source);
+                dx = Math.max(Math.abs(x - pt.getX()), dy);
+                y = pt.getY();
+                dy = 0;
+            }
+            result.add(new PointDouble(x - dx, y - dy));
+            result.add(new PointDouble(x + dx, y + dy));
         }
     };
     /**
      * Provides a vertical elbow edge.
      */
-    public static EdgeStyleFunction SideToSide = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
-            GraphView view = state.getView();
-            PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
-            PointDouble p0 = state.getAbsolutePoint(0);
-            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+    public static EdgeStyleFunction SideToSide = (state, source, target, points, result) -> {
+        GraphView view = state.getView();
+        PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
+        PointDouble p0 = state.getAbsolutePoint(0);
+        PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+        if (pt != null) {
+            pt = view.transformControlPoint(state, pt);
+        }
+        if (p0 != null) {
+            source = new CellState();
+            source.setX(p0.getX());
+            source.setY(p0.getY());
+        }
+        if (pe != null) {
+            target = new CellState();
+            target.setX(pe.getX());
+            target.setY(pe.getY());
+        }
+        if (source != null && target != null) {
+            double l = Math.max(source.getX(), target.getX());
+            double r = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
+            double x = (pt != null) ? pt.getX() : r + (l - r) / 2;
+            double y1 = view.getRoutingCenterY(source);
+            double y2 = view.getRoutingCenterY(target);
             if (pt != null) {
-                pt = view.transformControlPoint(state, pt);
+                if (pt.getY() >= source.getY() && pt.getY() <= source.getY() + source.getHeight()) {
+                    y1 = pt.getY();
+                }
+                if (pt.getY() >= target.getY() && pt.getY() <= target.getY() + target.getHeight()) {
+                    y2 = pt.getY();
+                }
             }
-            if (p0 != null) {
-                source = new CellState();
-                source.setX(p0.getX());
-                source.setY(p0.getY());
+            if (!target.contains(x, y1) && !source.contains(x, y1)) {
+                result.add(new PointDouble(x, y1));
             }
-
-            if (pe != null) {
-                target = new CellState();
-                target.setX(pe.getX());
-                target.setY(pe.getY());
+            if (!target.contains(x, y2) && !source.contains(x, y2)) {
+                result.add(new PointDouble(x, y2));
             }
-
-            if (source != null && target != null) {
-                double l = Math.max(source.getX(), target.getX());
-                double r = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-
-                double x = (pt != null) ? pt.getX() : r + (l - r) / 2;
-
-                double y1 = view.getRoutingCenterY(source);
-                double y2 = view.getRoutingCenterY(target);
-
+            if (result.size() == 1) {
                 if (pt != null) {
-                    if (pt.getY() >= source.getY() && pt.getY() <= source.getY() + source.getHeight()) {
-                        y1 = pt.getY();
+                    if (!target.contains(x, pt.getY()) && !source.contains(x, pt.getY())) {
+                        result.add(new PointDouble(x, pt.getY()));
                     }
-
-                    if (pt.getY() >= target.getY() && pt.getY() <= target.getY() + target.getHeight()) {
-                        y2 = pt.getY();
-                    }
-                }
-
-                if (!target.contains(x, y1) && !source.contains(x, y1)) {
-                    result.add(new PointDouble(x, y1));
-                }
-
-                if (!target.contains(x, y2) && !source.contains(x, y2)) {
-                    result.add(new PointDouble(x, y2));
-                }
-
-                if (result.size() == 1) {
-                    if (pt != null) {
-                        if (!target.contains(x, pt.getY()) && !source.contains(x, pt.getY())) {
-                            result.add(new PointDouble(x, pt.getY()));
-                        }
-                    } else {
-                        double t = Math.max(source.getY(), target.getY());
-                        double b = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
-                        result.add(new PointDouble(x, t + (b - t) / 2));
-                    }
+                } else {
+                    double t = Math.max(source.getY(), target.getY());
+                    double b = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
+                    result.add(new PointDouble(x, t + (b - t) / 2));
                 }
             }
         }
@@ -229,63 +198,52 @@ public class EdgeStyle {
     /**
      * Provides a horizontal elbow edge.
      */
-    public static EdgeStyleFunction TopToBottom = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
-            GraphView view = state.getView();
-            PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
-            PointDouble p0 = state.getAbsolutePoint(0);
-            PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
-            if (pt != null) {
-                pt = view.transformControlPoint(state, pt);
+    public static EdgeStyleFunction TopToBottom = (state, source, target, points, result) -> {
+        GraphView view = state.getView();
+        PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
+        PointDouble p0 = state.getAbsolutePoint(0);
+        PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
+        if (pt != null) {
+            pt = view.transformControlPoint(state, pt);
+        }
+        if (p0 != null) {
+            source = new CellState();
+            source.setX(p0.getX());
+            source.setY(p0.getY());
+        }
+        if (pe != null) {
+            target = new CellState();
+            target.setX(pe.getX());
+            target.setY(pe.getY());
+        }
+        if (source != null && target != null) {
+            double t = Math.max(source.getY(), target.getY());
+            double b = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
+            double x = view.getRoutingCenterX(source);
+            if (pt != null && pt.getX() >= source.getX() && pt.getX() <= source.getX() + source.getWidth()) {
+                x = pt.getX();
             }
-            if (p0 != null) {
-                source = new CellState();
-                source.setX(p0.getX());
-                source.setY(p0.getY());
+            double y = (pt != null) ? pt.getY() : b + (t - b) / 2;
+            if (!target.contains(x, y) && !source.contains(x, y)) {
+                result.add(new PointDouble(x, y));
             }
-
-            if (pe != null) {
-                target = new CellState();
-                target.setX(pe.getX());
-                target.setY(pe.getY());
+            if (pt != null && pt.getX() >= target.getX() && pt.getX() <= target.getX() + target.getWidth()) {
+                x = pt.getX();
+            } else {
+                x = view.getRoutingCenterX(target);
             }
-
-            if (source != null && target != null) {
-                double t = Math.max(source.getY(), target.getY());
-                double b = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
-
-                double x = view.getRoutingCenterX(source);
-
-                if (pt != null && pt.getX() >= source.getX() && pt.getX() <= source.getX() + source.getWidth()) {
-                    x = pt.getX();
-                }
-
-                double y = (pt != null) ? pt.getY() : b + (t - b) / 2;
-
-                if (!target.contains(x, y) && !source.contains(x, y)) {
-                    result.add(new PointDouble(x, y));
-                }
-
-                if (pt != null && pt.getX() >= target.getX() && pt.getX() <= target.getX() + target.getWidth()) {
-                    x = pt.getX();
-                } else {
-                    x = view.getRoutingCenterX(target);
-                }
-
-                if (!target.contains(x, y) && !source.contains(x, y)) {
-                    result.add(new PointDouble(x, y));
-                }
-
-                if (result.size() == 1) {
-                    if (pt != null) {
-                        if (!target.contains(pt.getX(), y) && !source.contains(pt.getX(), y)) {
-                            result.add(new PointDouble(pt.getX(), y));
-                        }
-                    } else {
-                        double l = Math.max(source.getX(), target.getX());
-                        double r = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-                        result.add(new PointDouble(l + (r - l) / 2, y));
+            if (!target.contains(x, y) && !source.contains(x, y)) {
+                result.add(new PointDouble(x, y));
+            }
+            if (result.size() == 1) {
+                if (pt != null) {
+                    if (!target.contains(pt.getX(), y) && !source.contains(pt.getX(), y)) {
+                        result.add(new PointDouble(pt.getX(), y));
                     }
+                } else {
+                    double l = Math.max(source.getX(), target.getX());
+                    double r = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
+                    result.add(new PointDouble(l + (r - l) / 2, y));
                 }
             }
         }
@@ -295,161 +253,132 @@ public class EdgeStyle {
      * flag in the cell style. SideToSide is used if horizontal is true or
      * unspecified.
      */
-    public static EdgeStyleFunction ElbowConnector = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
-            PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
-            boolean vertical = false;
-            boolean horizontal = false;
-            if (source != null && target != null) {
-                if (pt != null) {
-                    double left = Math.min(source.getX(), target.getX());
-                    double right = Math.max(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-                    double top = Math.min(source.getY(), target.getY());
-                    double bottom = Math.max(source.getY() + source.getHeight(), target.getY() + target.getHeight());
-
-                    pt = state.getView().transformControlPoint(state, pt);
-
-                    vertical = pt.getY() < top || pt.getY() > bottom;
-                    horizontal = pt.getX() < left || pt.getX() > right;
-                } else {
-                    double left = Math.max(source.getX(), target.getX());
-                    double right = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
-
-                    vertical = left == right;
-
-                    if (!vertical) {
-                        double top = Math.max(source.getY(), target.getY());
-                        double bottom = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
-
-                        horizontal = top == bottom;
-                    }
+    public static EdgeStyleFunction ElbowConnector = (state, source, target, points, result) -> {
+        PointDouble pt = (points != null && points.size() > 0) ? points.get(0) : null;
+        boolean vertical = false;
+        boolean horizontal = false;
+        if (source != null && target != null) {
+            if (pt != null) {
+                double left = Math.min(source.getX(), target.getX());
+                double right = Math.max(source.getX() + source.getWidth(), target.getX() + target.getWidth());
+                double top = Math.min(source.getY(), target.getY());
+                double bottom = Math.max(source.getY() + source.getHeight(), target.getY() + target.getHeight());
+                pt = state.getView().transformControlPoint(state, pt);
+                vertical = pt.getY() < top || pt.getY() > bottom;
+                horizontal = pt.getX() < left || pt.getX() > right;
+            } else {
+                double left = Math.max(source.getX(), target.getX());
+                double right = Math.min(source.getX() + source.getWidth(), target.getX() + target.getWidth());
+                vertical = left == right;
+                if (!vertical) {
+                    double top = Math.max(source.getY(), target.getY());
+                    double bottom = Math.min(source.getY() + source.getHeight(), target.getY() + target.getHeight());
+                    horizontal = top == bottom;
                 }
             }
-
-            if (!horizontal && (vertical || Utils.getString(state.getStyle(), Constants.STYLE_ELBOW, "").equals(Constants.ELBOW_VERTICAL))) {
-                EdgeStyle.TopToBottom.apply(state, source, target, points, result);
-            } else {
-                EdgeStyle.SideToSide.apply(state, source, target, points, result);
-            }
+        }
+        if (!horizontal && (vertical || Utils.getString(state.getStyle(), Constants.STYLE_ELBOW, "").equals(Constants.ELBOW_VERTICAL))) {
+            EdgeStyle.TopToBottom.apply(state, source, target, points, result);
+        } else {
+            EdgeStyle.SideToSide.apply(state, source, target, points, result);
         }
     };
     /**
      * Implements an orthogonal edge style. Use <EdgeSegmentHandler>
      * as an interactive handler for this style.
      */
-    public static EdgeStyleFunction SegmentConnector = new EdgeStyleFunction() {
-        public void apply(CellState state, CellState source, CellState target, List<PointDouble> hints, List<PointDouble> result) {
-            // Creates array of all way- and terminalpoints
-            List<PointDouble> pts = state.absolutePoints;
-            boolean horizontal = true;
-            PointDouble hint = null;
-            // Adds the first point
-            PointDouble pt = pts.get(0);
-            if (pt == null && source != null) {
-                pt = new PointDouble(state.view.getRoutingCenterX(source), state.view.getRoutingCenterY(source));
-            } else if (pt != null) {
-                pt = (PointDouble) pt.clone();
+    public static EdgeStyleFunction SegmentConnector = (state, source, target, hints, result) -> {
+        // Creates array of all way- and terminalpoints
+        List<PointDouble> pts = state.absolutePoints;
+        boolean horizontal = true;
+        PointDouble hint;
+        // Adds the first point
+        PointDouble pt = pts.get(0);
+        if (pt == null && source != null) {
+            pt = new PointDouble(state.view.getRoutingCenterX(source), state.view.getRoutingCenterY(source));
+        } else if (pt != null) {
+            pt = (PointDouble) pt.clone();
+        }
+        int lastInx = pts.size() - 1;
+        // Adds the waypoints
+        if (hints != null && hints.size() > 0) {
+            hint = state.view.transformControlPoint(state, hints.get(0));
+            CellState currentTerm = source;
+            PointDouble currentPt = pts.get(0);
+            boolean hozChan = false;
+            boolean vertChan = false;
+            PointDouble currentHint = hint;
+            int hintsLen = hints.size();
+            for (int i = 0; i < 2; i++) {
+                boolean fixedVertAlign = currentPt != null && currentPt.getX() == currentHint.getX();
+                boolean fixedHozAlign = currentPt != null && currentPt.getY() == currentHint.getY();
+                boolean inHozChan = currentTerm != null && (currentHint.getY() >= currentTerm.getY() && currentHint.getY() <= currentTerm.getY() + currentTerm.getHeight());
+                boolean inVertChan = currentTerm != null && (currentHint.getX() >= currentTerm.getX() && currentHint.getX() <= currentTerm.getX() + currentTerm.getWidth());
+                hozChan = fixedHozAlign || (currentPt == null && inHozChan);
+                vertChan = fixedVertAlign || (currentPt == null && inVertChan);
+                if (currentPt != null && (!fixedHozAlign && !fixedVertAlign) && (inHozChan || inVertChan)) {
+                    horizontal = !inHozChan;
+                    break;
+                }
+                if (vertChan || hozChan) {
+                    horizontal = hozChan;
+                    if (i == 1) {
+                        // Work back from target end
+                        horizontal = hints.size() % 2 == 0 ? hozChan : vertChan;
+                    }
+                    break;
+                }
+                currentTerm = target;
+                currentPt = pts.get(lastInx);
+                currentHint = state.view.transformControlPoint(state, hints.get(hintsLen - 1));
             }
-
-            int lastInx = pts.size() - 1;
-
-            // Adds the waypoints
-            if (hints != null && hints.size() > 0) {
-                hint = state.view.transformControlPoint(state, hints.get(0));
-                CellState currentTerm = source;
-                PointDouble currentPt = pts.get(0);
-                boolean hozChan = false;
-                boolean vertChan = false;
-                PointDouble currentHint = hint;
-                int hintsLen = hints.size();
-
-                for (int i = 0; i < 2; i++) {
-                    boolean fixedVertAlign = currentPt != null && currentPt.getX() == currentHint.getX();
-                    boolean fixedHozAlign = currentPt != null && currentPt.getY() == currentHint.getY();
-                    boolean inHozChan = currentTerm != null && (currentHint.getY() >= currentTerm.getY() && currentHint.getY() <= currentTerm.getY() + currentTerm.getHeight());
-                    boolean inVertChan = currentTerm != null && (currentHint.getX() >= currentTerm.getX() && currentHint.getX() <= currentTerm.getX() + currentTerm.getWidth());
-
-                    hozChan = fixedHozAlign || (currentPt == null && inHozChan);
-                    vertChan = fixedVertAlign || (currentPt == null && inVertChan);
-
-                    if (currentPt != null && (!fixedHozAlign && !fixedVertAlign) && (inHozChan || inVertChan)) {
-                        horizontal = !inHozChan;
-                        break;
-                    }
-
-                    if (vertChan || hozChan) {
-                        horizontal = hozChan;
-
-                        if (i == 1) {
-                            // Work back from target end
-                            horizontal = hints.size() % 2 == 0 ? hozChan : vertChan;
-                        }
-
-                        break;
-                    }
-
-                    currentTerm = target;
-                    currentPt = pts.get(lastInx);
-                    currentHint = state.view.transformControlPoint(state, hints.get(hintsLen - 1));
-                }
-
-                if (horizontal && ((pts.get(0) != null && pts.get(0).getY() != hint.getY()) || (pts.get(0) == null && source != null && (hint.getY() < source.getY() || hint.getY() > source.getY() + source.getHeight())))) {
-                    result.add(new PointDouble(pt.getX(), hint.getY()));
-                } else if (!horizontal && ((pts.get(0) != null && pts.get(0).getX() != hint.getX()) || (pts.get(0) == null && source != null && (hint.getX() < source.getX() || hint.getX() > source.getX() + source.getWidth())))) {
-                    result.add(new PointDouble(hint.getX(), pt.getY()));
-                }
-
+            if (horizontal && ((pts.get(0) != null && pts.get(0).getY() != hint.getY()) || (pts.get(0) == null && source != null && (hint.getY() < source.getY() || hint.getY() > source.getY() + source.getHeight())))) {
+                result.add(new PointDouble(pt.getX(), hint.getY()));
+            } else if (!horizontal && ((pts.get(0) != null && pts.get(0).getX() != hint.getX()) || (pts.get(0) == null && source != null && (hint.getX() < source.getX() || hint.getX() > source.getX() + source.getWidth())))) {
+                result.add(new PointDouble(hint.getX(), pt.getY()));
+            }
+            if (horizontal) {
+                pt.setY(hint.getY());
+            } else {
+                pt.setX(hint.getX());
+            }
+            for (int i = 0; i < hints.size(); i++) {
+                horizontal = !horizontal;
+                hint = state.view.transformControlPoint(state, hints.get(i));
+                //				Log.show();
+                //				Log.debug('hint', i, hint.x, hint.y);
                 if (horizontal) {
                     pt.setY(hint.getY());
                 } else {
                     pt.setX(hint.getX());
                 }
-
-                for (int i = 0; i < hints.size(); i++) {
-                    horizontal = !horizontal;
-                    hint = state.view.transformControlPoint(state, hints.get(i));
-
-                    //				Log.show();
-                    //				Log.debug('hint', i, hint.x, hint.y);
-
-                    if (horizontal) {
-                        pt.setY(hint.getY());
-                    } else {
-                        pt.setX(hint.getX());
-                    }
-                    result.add((PointDouble) pt.clone());
-                }
-            } else {
-                hint = pt;
-                // FIXME: First click in connect preview toggles orientation
-                horizontal = true;
+                result.add((PointDouble) pt.clone());
             }
-
-            // Adds the last point
-            pt = pts.get(lastInx);
-
-            if (pt == null && target != null) {
-                pt = new PointDouble(state.view.getRoutingCenterX(target), state.view.getRoutingCenterY(target));
+        } else {
+            hint = pt;
+            // FIXME: First click in connect preview toggles orientation
+            horizontal = true;
+        }
+        // Adds the last point
+        pt = pts.get(lastInx);
+        if (pt == null && target != null) {
+            pt = new PointDouble(state.view.getRoutingCenterX(target), state.view.getRoutingCenterY(target));
+        }
+        if (horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getY() != hint.getY()) || (pts.get(lastInx) == null && target != null && (hint.getY() < target.getY() || hint.getY() > target.getY() + target.getHeight())))) {
+            result.add(new PointDouble(pt.getX(), hint.getY()));
+        } else if (!horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getX() != hint.getX()) || (pts.get(lastInx) == null && target != null && (hint.getX() < target.getX() || hint.getX() > target.getX() + target.getWidth())))) {
+            result.add(new PointDouble(hint.getX(), pt.getY()));
+        }
+        // Removes bends inside the source terminal for floating ports
+        if (pts.get(0) == null && source != null) {
+            while (result.size() > 1 && source.contains(result.get(1).getX(), result.get(1).getY())) {
+                result.remove(1);
             }
-
-            if (horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getY() != hint.getY()) || (pts.get(lastInx) == null && target != null && (hint.getY() < target.getY() || hint.getY() > target.getY() + target.getHeight())))) {
-                result.add(new PointDouble(pt.getX(), hint.getY()));
-            } else if (!horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getX() != hint.getX()) || (pts.get(lastInx) == null && target != null && (hint.getX() < target.getX() || hint.getX() > target.getX() + target.getWidth())))) {
-                result.add(new PointDouble(hint.getX(), pt.getY()));
-            }
-
-            // Removes bends inside the source terminal for floating ports
-            if (pts.get(0) == null && source != null) {
-                while (result.size() > 1 && source.contains(result.get(1).getX(), result.get(1).getY())) {
-                    result.remove(1);
-                }
-            }
-
-            // Removes bends inside the target terminal
-            if (pts.get(lastInx) == null && target != null) {
-                while (result.size() > 1 && target.contains(result.get(result.size() - 1).getX(), result.get(result.size() - 1).getY())) {
-                    result.remove(result.size() - 1);
-                }
+        }
+        // Removes bends inside the target terminal
+        if (pts.get(lastInx) == null && target != null) {
+            while (result.size() > 1 && target.contains(result.get(result.size() - 1).getX(), result.get(result.size() - 1).getY())) {
+                result.remove(result.size() - 1);
             }
         }
     };
@@ -597,19 +526,14 @@ public class EdgeStyle {
                 int[] dirPref = new int[2];
                 int[] horPref = new int[2];
                 int[] vertPref = new int[2];
-
                 horPref[0] = sourceLeftDist >= sourceRightDist ? Constants.DIRECTION_MASK_WEST : Constants.DIRECTION_MASK_EAST;
                 vertPref[0] = sourceTopDist >= sourceBottomDist ? Constants.DIRECTION_MASK_NORTH : Constants.DIRECTION_MASK_SOUTH;
-
                 horPref[1] = Utils.reversePortConstraints(horPref[0]);
                 vertPref[1] = Utils.reversePortConstraints(vertPref[0]);
-
-                double preferredHorizDist = sourceLeftDist >= sourceRightDist ? sourceLeftDist : sourceRightDist;
-                double preferredVertDist = sourceTopDist >= sourceBottomDist ? sourceTopDist : sourceBottomDist;
-
+                double preferredHorizDist = Math.max(sourceLeftDist, sourceRightDist);
+                double preferredVertDist = Math.max(sourceTopDist, sourceBottomDist);
                 int[][] prefOrdering = new int[2][2];
                 boolean preferredOrderSet = false;
-
                 // If the preferred port isn't available, switch it
                 for (int i = 0; i < 2; i++) {
                     if (dir[i] != 0x0) {
@@ -699,31 +623,25 @@ public class EdgeStyle {
                 // End of source and target direction determination
 
                 int[] routePattern = getRoutePattern(dir, quad, dx, dy);
-
-                if (dx == 0 || dy == 0) {
-
-                }
-
                 wayPoints1[0][0] = geo[0][0];
                 wayPoints1[0][1] = geo[0][1];
-
                 switch (dir[0]) {
-                    case Constants.DIRECTION_MASK_WEST:
+                    case Constants.DIRECTION_MASK_WEST -> {
                         wayPoints1[0][0] -= scaledOrthBuffer;
                         wayPoints1[0][1] += constraint[0][1] * geo[0][3];
-                        break;
-                    case Constants.DIRECTION_MASK_SOUTH:
+                    }
+                    case Constants.DIRECTION_MASK_SOUTH -> {
                         wayPoints1[0][0] += constraint[0][0] * geo[0][2];
                         wayPoints1[0][1] += geo[0][3] + scaledOrthBuffer;
-                        break;
-                    case Constants.DIRECTION_MASK_EAST:
+                    }
+                    case Constants.DIRECTION_MASK_EAST -> {
                         wayPoints1[0][0] += geo[0][2] + scaledOrthBuffer;
                         wayPoints1[0][1] += constraint[0][1] * geo[0][3];
-                        break;
-                    case Constants.DIRECTION_MASK_NORTH:
+                    }
+                    case Constants.DIRECTION_MASK_NORTH -> {
                         wayPoints1[0][0] += constraint[0][0] * geo[0][2];
                         wayPoints1[0][1] -= scaledOrthBuffer;
-                        break;
+                    }
                 }
 
                 int currentIndex = 0;
@@ -821,19 +739,12 @@ public class EdgeStyle {
 
         /**
          * Hook method to return the routing pattern for the given state
-         * @param dir
-         * @param quad
-         * @param dx
-         * @param dy
-         * @return
          */
-        protected int[] getRoutePattern(int[] dir, double quad, double dx, double dy) {
+        private int[] getRoutePattern(int[] dir, double quad, double dx, double dy) {
             int sourceIndex = dir[0] == Constants.DIRECTION_MASK_EAST ? 3 : dir[0];
             int targetIndex = dir[1] == Constants.DIRECTION_MASK_EAST ? 3 : dir[1];
-
             sourceIndex -= quad;
             targetIndex -= quad;
-
             if (sourceIndex < 1) {
                 sourceIndex += 4;
             }

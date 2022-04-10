@@ -3,7 +3,6 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import com.faforever.neroxis.ngraph.io.CodecRegistry;
 import com.faforever.neroxis.ngraph.model.CellPath;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -34,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.text.html.HTMLDocument;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -1346,85 +1344,12 @@ public class Utils {
     }
 
     /**
-     * Creates a table for the given text using the given document to create the
-     * DOM nodes. Returns the outermost table node.
-     */
-    public static Element createTable(Document document, String text, int x, int y, int w, int h, double scale, Map<String, Object> style) {
-        // Does not use a textbox as this must go inside another VML shape
-        Element table = document.createElement("table");
-
-        if (text != null && text.length() > 0) {
-            Element tr = document.createElement("tr");
-            Element td = document.createElement("td");
-
-            table.setAttribute("cellspacing", "0");
-            table.setAttribute("border", "0");
-            td.setAttribute("align", Utils.getString(style, Constants.STYLE_ALIGN, Constants.ALIGN_CENTER));
-
-            String fontColor = getString(style, Constants.STYLE_FONTCOLOR, "black");
-            String fontFamily = getString(style, Constants.STYLE_FONTFAMILY, Constants.DEFAULT_FONTFAMILIES);
-            int fontSize = (int) (getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE) * scale);
-
-            String s = "position:absolute;" + "left:" + x + "px;" + "top:" + y + "px;" + "width:" + w + "px;" + "height:" + h + "px;" + "font-size:" + fontSize + "px;" + "font-family:" + fontFamily + ";" + "color:" + fontColor + ";";
-
-            if (Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
-                s += "white-space:normal;";
-            }
-
-            // Applies the background color
-            String background = getString(style, Constants.STYLE_LABEL_BACKGROUNDCOLOR);
-
-            if (background != null) {
-                s += "background:" + background + ";";
-            }
-
-            // Applies the border color
-            String border = getString(style, Constants.STYLE_LABEL_BORDERCOLOR);
-
-            if (border != null) {
-                s += "border:" + border + " solid 1pt;";
-            }
-
-            // Applies the opacity
-            float opacity = getFloat(style, Constants.STYLE_TEXT_OPACITY, 100);
-
-            if (opacity < 100) {
-                // Adds all rules (first for IE)
-                s += "filter:alpha(opacity=" + opacity + ");";
-                s += "opacity:" + (opacity / 100) + ";";
-            }
-
-            td.setAttribute("style", s);
-            String[] lines = text.split("\n");
-
-            for (String line : lines) {
-                td.appendChild(document.createTextNode(line));
-                td.appendChild(document.createElement("br"));
-            }
-
-            tr.appendChild(td);
-            table.appendChild(tr);
-        }
-
-        return table;
-    }
-
-    /**
      * Returns a new, empty DOM document.
      *
      * @return Returns a new DOM document.
      */
     public static String createHtmlDocument(Map<String, Object> style, String text) {
         return createHtmlDocument(style, text, 1, 0);
-    }
-
-    /**
-     * Returns a new, empty DOM document.
-     *
-     * @return Returns a new DOM document.
-     */
-    public static String createHtmlDocument(Map<String, Object> style, String text, double scale) {
-        return createHtmlDocument(style, text, scale, 0);
     }
 
     /**
@@ -1572,44 +1497,5 @@ public class Utils {
         document.getStyleSheet().addRule(rule.toString());
 
         return document;
-    }
-
-    /**
-     * Returns a new DOM document for the given URI. External entities and DTDs are ignored.
-     *
-     * @param uri URI to parse into the document.
-     * @return Returns a new DOM document for the given URI.
-     */
-    public static Document loadDocument(String uri) {
-        try {
-            return XmlUtils.getDocumentBuilder().parse(uri);
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "Failed to load the document from " + uri, e);
-        }
-
-        return null;
-    }
-
-    /**
-     * Evaluates a Java expression as a class member using CodecRegistry. The
-     * range of supported expressions is limited to static class members such as
-     * EdgeStyle.ElbowConnector.
-     */
-    public static Object eval(String expression) {
-        int dot = expression.lastIndexOf(".");
-
-        if (dot > 0) {
-            Class<?> clazz = CodecRegistry.getClassForName(expression.substring(0, dot));
-
-            if (clazz != null) {
-                try {
-                    return clazz.getField(expression.substring(dot + 1)).get(null);
-                } catch (Exception e) {
-                    log.log(Level.SEVERE, "Failed to eval expression: " + expression, e);
-                }
-            }
-        }
-
-        return expression;
     }
 }

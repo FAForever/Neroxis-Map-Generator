@@ -917,23 +917,7 @@ public class GraphView extends EventSource {
             edgeStyle = edge.getStyle().get(Constants.STYLE_EDGE);
         }
 
-        // Converts string values to objects
-        if (edgeStyle instanceof String) {
-            String str = String.valueOf(edgeStyle);
-            Object tmp = StyleRegistry.getValue(str);
-
-            if (tmp == null) {
-                tmp = Utils.eval(str);
-            }
-
-            edgeStyle = tmp;
-        }
-
-        if (edgeStyle instanceof EdgeStyleFunction) {
-            return (EdgeStyleFunction) edgeStyle;
-        }
-
-        return null;
+        return (EdgeStyleFunction) edgeStyle;
     }
 
     /**
@@ -1071,24 +1055,7 @@ public class GraphView extends EventSource {
      */
     public PerimeterFunction getPerimeterFunction(CellState state) {
         Object perimeter = state.getStyle().get(Constants.STYLE_PERIMETER);
-
-        // Converts string values to objects
-        if (perimeter instanceof String) {
-            String str = String.valueOf(perimeter);
-            Object tmp = StyleRegistry.getValue(str);
-
-            if (tmp == null) {
-                tmp = Utils.eval(str);
-            }
-
-            perimeter = tmp;
-        }
-
-        if (perimeter instanceof PerimeterFunction) {
-            return (PerimeterFunction) perimeter;
-        }
-
-        return null;
+        return (PerimeterFunction) perimeter;
     }
 
     /**
