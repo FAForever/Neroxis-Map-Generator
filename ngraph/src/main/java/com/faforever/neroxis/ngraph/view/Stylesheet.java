@@ -4,8 +4,7 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.util.Constants;
-
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,16 +19,14 @@ import java.util.Map;
  * Constants.DEFAULT_FONTSIZE.
  */
 public class Stylesheet {
-
     /**
      * Shared immutable empty hashtable (for undefined cell styles).
      */
-    public static final Map<String, Object> EMPTY_STYLE = new Hashtable<String, Object>();
-
+    public static final Map<String, Object> EMPTY_STYLE = new HashMap<>();
     /**
      * Maps from names to styles.
      */
-    protected Map<String, Map<String, Object>> styles = new Hashtable<String, Map<String, Object>>();
+    protected Map<String, Map<String, Object>> styles = new HashMap<>();
 
     /**
      * Constructs a new stylesheet and assigns default styles.
@@ -61,7 +58,7 @@ public class Stylesheet {
      * @return Returns the default vertex style.
      */
     protected Map<String, Object> createDefaultVertexStyle() {
-        Map<String, Object> style = new Hashtable<String, Object>();
+        Map<String, Object> style = new HashMap<>();
 
         style.put(Constants.STYLE_SHAPE, Constants.SHAPE_RECTANGLE);
         style.put(Constants.STYLE_PERIMETER, Perimeter.RectanglePerimeter);
@@ -80,7 +77,7 @@ public class Stylesheet {
      * @return Returns the default edge style.
      */
     protected Map<String, Object> createDefaultEdgeStyle() {
-        Map<String, Object> style = new Hashtable<String, Object>();
+        Map<String, Object> style = new HashMap<>();
 
         style.put(Constants.STYLE_SHAPE, Constants.SHAPE_CONNECTOR);
         style.put(Constants.STYLE_ENDARROW, Constants.ARROW_CLASSIC);
@@ -154,19 +151,15 @@ public class Stylesheet {
             String[] pairs = name.split(";");
 
             if (style != null && !name.startsWith(";")) {
-                style = new Hashtable<String, Object>(style);
+                style = new HashMap<>(style);
             } else {
-                style = new Hashtable<String, Object>();
+                style = new HashMap<>();
             }
-
-            for (int i = 0; i < pairs.length; i++) {
-                String tmp = pairs[i];
+            for (String tmp : pairs) {
                 int c = tmp.indexOf('=');
-
                 if (c >= 0) {
                     String key = tmp.substring(0, c);
                     String value = tmp.substring(c + 1);
-
                     if (value.equals(Constants.NONE)) {
                         style.remove(key);
                     } else {
@@ -174,7 +167,6 @@ public class Stylesheet {
                     }
                 } else {
                     Map<String, Object> tmpStyle = styles.get(tmp);
-
                     if (tmpStyle != null) {
                         style.putAll(tmpStyle);
                     }

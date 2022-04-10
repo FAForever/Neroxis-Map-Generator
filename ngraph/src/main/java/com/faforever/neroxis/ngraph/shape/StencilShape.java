@@ -21,7 +21,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -109,14 +109,12 @@ public class StencilShape extends BasicShape {
      */
     protected static Map<String, Object> getStylenames(String style) {
         if (style != null && style.length() > 0) {
-            Map<String, Object> result = new Hashtable<String, Object>();
+            Map<String, Object> result = new HashMap<>();
 
             if (style != null) {
                 String[] pairs = style.split(";");
-
-                for (int i = 0; i < pairs.length; i++) {
-                    String[] keyValue = pairs[i].split(":");
-
+                for (String pair : pairs) {
+                    String[] keyValue = pair.split(":");
                     if (keyValue.length == 2) {
                         result.put(keyValue[0].trim(), keyValue[1].trim());
                     }

@@ -4,8 +4,7 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.util.Constants;
-
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -14,11 +13,10 @@ import java.util.Map;
  * in a style. This is currently only used to perimeters and edge styles.
  */
 public class StyleRegistry {
-
     /**
      * Maps from strings to objects.
      */
-    protected static Map<String, Object> values = new Hashtable<String, Object>();
+    protected static Map<String, Object> values = new HashMap<>();
 
     // Registers the known object styles
     static {

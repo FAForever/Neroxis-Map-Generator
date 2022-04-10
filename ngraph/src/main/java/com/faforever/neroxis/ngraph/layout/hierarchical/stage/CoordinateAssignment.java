@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -271,7 +270,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
         LinkedList<WeightedCellSorter> nodeList = new LinkedList<>();
 
         // Need to be able to map from cell to cellWrapper
-        Map<GraphAbstractHierarchyCell, WeightedCellSorter> map = new Hashtable<GraphAbstractHierarchyCell, WeightedCellSorter>();
+        Map<GraphAbstractHierarchyCell, WeightedCellSorter> map = new HashMap<>();
         GraphAbstractHierarchyCell[][] rank = new GraphAbstractHierarchyCell[model.maxRank + 1][];
 
         for (int i = 0; i <= model.maxRank; i++) {
@@ -432,7 +431,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
         // , the order is given by the weighted sum of the in or out edges,
         // depending on whether we're travelling up or down the hierarchy.
         WeightedCellSorter[] weightedValues = new WeightedCellSorter[rank.length];
-        Map<GraphAbstractHierarchyCell, WeightedCellSorter> cellMap = new Hashtable<GraphAbstractHierarchyCell, WeightedCellSorter>(rank.length);
+        Map<GraphAbstractHierarchyCell, WeightedCellSorter> cellMap = new HashMap<>(rank.length);
 
         for (int i = 0; i < rank.length; i++) {
             GraphAbstractHierarchyCell currentCell = (GraphAbstractHierarchyCell) rank[i];

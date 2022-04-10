@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -790,7 +789,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
                     }
 
                     if (cells == null) {
-                        cells = new Hashtable<>();
+                        cells = new HashMap<>();
                     }
 
                     cells.put(cell.getId(), cell);

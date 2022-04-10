@@ -9,12 +9,11 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MarkerRegistry {
-
-    protected static Map<String, IMarker> markers = new Hashtable<String, IMarker>();
+    protected static Map<String, IMarker> markers = new HashMap<>();
 
     static {
         IMarker tmp = new IMarker() {

@@ -5,7 +5,7 @@ package com.faforever.neroxis.ngraph.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -744,7 +744,6 @@ public class Curve {
                 updateBounds(newX, newY);
             }
         }
-
         if (coreCurve.size() < 2) {
             // A single point makes no sense, leave the curve as invalid
             return;
@@ -754,19 +753,16 @@ public class Curve {
         for (PointDouble point : coreCurve) {
             corePoints[count++] = point;
         }
-        points = new Hashtable<String, PointDouble[]>();
-        curveLengths = new Hashtable<String, Double>();
+        points = new HashMap<>();
+        curveLengths = new HashMap<>();
         points.put(CORE_CURVE, corePoints);
         curveLengths.put(CORE_CURVE, lengthSpline);
-
         double[] coreIntervalsArray = new double[coreIntervals.size()];
         count = 0;
-
         for (Double tempInterval : coreIntervals) {
             coreIntervalsArray[count++] = tempInterval.doubleValue();
         }
-
-        intervals = new Hashtable<String, double[]>();
+        intervals = new HashMap<>();
         intervals.put(CORE_CURVE, coreIntervalsArray);
 
         valid = true;
@@ -961,7 +957,7 @@ public class Curve {
 
         if (pointsChanged) {
             guidePoints = new ArrayList<PointDouble>(newPoints);
-            points = new Hashtable<String, PointDouble[]>();
+            points = new HashMap<>();
             valid = false;
         }
     }
