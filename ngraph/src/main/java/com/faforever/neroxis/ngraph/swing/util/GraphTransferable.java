@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.List;
@@ -23,11 +24,8 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.plaf.UIResource;
 
-/**
- *
- */
 public class GraphTransferable implements Transferable, UIResource, Serializable {
-
+    @Serial
     private static final long serialVersionUID = 5123819419918087664L;
     private static final Logger log = Logger.getLogger(GraphTransferable.class.getName());
 

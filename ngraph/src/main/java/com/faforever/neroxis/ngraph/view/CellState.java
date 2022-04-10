@@ -6,14 +6,20 @@ package com.faforever.neroxis.ngraph.view;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents the current state of a cell in a given graph view.
  */
+@Getter
+@Setter
 public class CellState extends Rectangle {
+    @Serial
     private static final long serialVersionUID = 7588335615324083354L;
 
     /**
@@ -108,106 +114,6 @@ public class CellState extends Rectangle {
     }
 
     /**
-     * Returns true if the state is invalid.
-     */
-    public boolean isInvalid() {
-        return invalid;
-    }
-
-    /**
-     * Sets the invalid state.
-     */
-    public void setInvalid(boolean invalid) {
-        this.invalid = invalid;
-    }
-
-    /**
-     * Returns the enclosing graph view.
-     *
-     * @return the view
-     */
-    public GraphView getView() {
-        return view;
-    }
-
-    /**
-     * Sets the enclosing graph view.
-     *
-     * @param view the view to set
-     */
-    public void setView(GraphView view) {
-        this.view = view;
-    }
-
-    /**
-     * Returns the current label.
-     */
-    public String getLabel() {
-        return label;
-    }
-
-    /**
-     * Returns the current label.
-     */
-    public void setLabel(String value) {
-        label = value;
-    }
-
-    /**
-     * Returns the cell that is represented by this state.
-     *
-     * @return the cell
-     */
-    public ICell getCell() {
-        return cell;
-    }
-
-    /**
-     * Sets the cell that this state represents.
-     *
-     * @param cell the cell to set
-     */
-    public void setCell(ICell cell) {
-        this.cell = cell;
-    }
-
-    /**
-     * Returns the cell style as a map of key, value pairs.
-     *
-     * @return the style
-     */
-    public Map<String, Object> getStyle() {
-        return style;
-    }
-
-    /**
-     * Sets the cell style as a map of key, value pairs.
-     *
-     * @param style the style to set
-     */
-    public void setStyle(Map<String, Object> style) {
-        this.style = style;
-    }
-
-    /**
-     * Returns the origin for the children.
-     *
-     * @return the origin
-     */
-    public Point getOrigin() {
-        return origin;
-    }
-
-    /**
-     * Sets the origin for the children.
-     *
-     * @param origin the origin to set
-     */
-    public void setOrigin(Point origin) {
-        this.origin = origin;
-    }
-
-    /**
      * Returns the absolute point at the given index.
      *
      * @return the Point at the given index
@@ -234,131 +140,6 @@ public class CellState extends Rectangle {
         return (absolutePoints != null) ? absolutePoints.size() : 0;
     }
 
-    /**
-     * Returns the absolute points.
-     *
-     * @return the absolutePoints
-     */
-    public List<Point> getAbsolutePoints() {
-        return absolutePoints;
-    }
-
-    /**
-     * Returns the absolute points.
-     *
-     * @param absolutePoints the absolutePoints to set
-     */
-    public void setAbsolutePoints(List<Point> absolutePoints) {
-        this.absolutePoints = absolutePoints;
-    }
-
-    /**
-     * Returns the absolute offset.
-     *
-     * @return the absoluteOffset
-     */
-    public Point getAbsoluteOffset() {
-        return absoluteOffset;
-    }
-
-    /**
-     * Returns the absolute offset.
-     *
-     * @param absoluteOffset the absoluteOffset to set
-     */
-    public void setAbsoluteOffset(Point absoluteOffset) {
-        this.absoluteOffset = absoluteOffset;
-    }
-
-    /**
-     * Returns the terminal distance.
-     *
-     * @return the terminalDistance
-     */
-    public double getTerminalDistance() {
-        return terminalDistance;
-    }
-
-    /**
-     * Sets the terminal distance.
-     *
-     * @param terminalDistance the terminalDistance to set
-     */
-    public void setTerminalDistance(double terminalDistance) {
-        this.terminalDistance = terminalDistance;
-    }
-
-    /**
-     * Returns the length.
-     *
-     * @return the length
-     */
-    public double getLength() {
-        return length;
-    }
-
-    /**
-     * Sets the length.
-     *
-     * @param length the length to set
-     */
-    public void setLength(double length) {
-        this.length = length;
-    }
-
-    /**
-     * Returns the length of the segments.
-     *
-     * @return the segments
-     */
-    public double[] getSegments() {
-        return segments;
-    }
-
-    /**
-     * Sets the length of the segments.
-     *
-     * @param segments the segments to set
-     */
-    public void setSegments(double[] segments) {
-        this.segments = segments;
-    }
-
-    /**
-     * Returns the label bounds.
-     *
-     * @return Returns the label bounds for this state.
-     */
-    public Rectangle getLabelBounds() {
-        return labelBounds;
-    }
-
-    /**
-     * Sets the label bounds.
-     *
-     * @param labelBounds
-     */
-    public void setLabelBounds(Rectangle labelBounds) {
-        this.labelBounds = labelBounds;
-    }
-
-    /**
-     * Returns the bounding box.
-     *
-     * @return Returns the bounding box for this state.
-     */
-    public Rectangle getBoundingBox() {
-        return boundingBox;
-    }
-
-    /**
-     * Sets the bounding box.
-     *
-     * @param boundingBox
-     */
-    public void setBoundingBox(Rectangle boundingBox) {
-        this.boundingBox = boundingBox;
-    }
 
     /**
      * Returns the rectangle that should be used as the perimeter of the cell.
@@ -458,35 +239,32 @@ public class CellState extends Rectangle {
      * except the view and cell references, which are copied with no
      * cloning to the new instance.
      */
-    public Object clone() {
+    public CellState clone() {
         CellState clone = new CellState(view, cell, style);
-
         if (label != null) {
             clone.label = label;
         }
-
         if (absolutePoints != null) {
             clone.absolutePoints = new ArrayList<Point>();
-
             for (int i = 0; i < absolutePoints.size(); i++) {
-                clone.absolutePoints.add((Point) absolutePoints.get(i).clone());
+                clone.absolutePoints.add(absolutePoints.get(i).clone());
             }
         }
 
         if (origin != null) {
-            clone.origin = (Point) origin.clone();
+            clone.origin = origin.clone();
         }
 
         if (absoluteOffset != null) {
-            clone.absoluteOffset = (Point) absoluteOffset.clone();
+            clone.absoluteOffset = absoluteOffset.clone();
         }
 
         if (labelBounds != null) {
-            clone.labelBounds = (Rectangle) labelBounds.clone();
+            clone.labelBounds = labelBounds.clone();
         }
 
         if (boundingBox != null) {
-            clone.boundingBox = (Rectangle) boundingBox.clone();
+            clone.boundingBox = boundingBox.clone();
         }
 
         clone.terminalDistance = terminalDistance;
@@ -502,24 +280,7 @@ public class CellState extends Rectangle {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(64);
-        builder.append(getClass().getSimpleName());
-        builder.append(" [");
-        builder.append("cell=");
-        builder.append(cell);
-        builder.append(", label=");
-        builder.append(label);
-        builder.append(", x=");
-        builder.append(x);
-        builder.append(", y=");
-        builder.append(y);
-        builder.append(", width=");
-        builder.append(width);
-        builder.append(", height=");
-        builder.append(height);
-        builder.append("]");
-
-        return builder.toString();
+        return getClass().getSimpleName() + " [cell=" + cell + ", label=" + label + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
     }
 
 }

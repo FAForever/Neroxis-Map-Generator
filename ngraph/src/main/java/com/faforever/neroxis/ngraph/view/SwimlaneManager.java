@@ -3,12 +3,13 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.event.AddCellsEvent;
+import com.faforever.neroxis.ngraph.event.CellsResizedEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.util.List;
@@ -45,21 +46,18 @@ public class SwimlaneManager extends EventSource {
      * existing siblings. Default is true.
      */
     protected boolean addEnabled;
-
     /**
      * Specifies if resizing of swimlanes should be handled. Default is true.
      */
     protected boolean resizeEnabled;
-
-    protected IEventListener addHandler = (source, evt) -> {
+    protected IEventListener<AddCellsEvent> addHandler = (source, evt) -> {
         if (isEnabled() && isAddEnabled()) {
-            cellsAdded((List<ICell>) evt.getProperty("cells"));
+            cellsAdded(evt.getCells());
         }
     };
-
-    protected IEventListener resizeHandler = (source, evt) -> {
+    protected IEventListener<CellsResizedEvent> resizeHandler = (source, evt) -> {
         if (isEnabled() && isResizeEnabled()) {
-            cellsResized((List<ICell>) evt.getProperty("cells"));
+            cellsResized(evt.getCells());
         }
     };
 
@@ -142,8 +140,8 @@ public class SwimlaneManager extends EventSource {
         this.graph = graph;
 
         if (this.graph != null) {
-            this.graph.addListener(Event.ADD_CELLS, addHandler);
-            this.graph.addListener(Event.CELLS_RESIZED, resizeHandler);
+            this.graph.addListener(AddCellsEvent.class, addHandler);
+            this.graph.addListener(CellsResizedEvent.class, resizeHandler);
         }
     }
 

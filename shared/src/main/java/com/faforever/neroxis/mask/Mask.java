@@ -9,11 +9,7 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -26,6 +22,9 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
@@ -165,7 +164,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     @SneakyThrows
     public U copy(String maskName) {
         Class<?> clazz = getClass();
-        return (U) clazz.getConstructor(clazz, String.class).newInstance(this, maskName);
+        return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
     }
 
     @SneakyThrows
@@ -739,7 +738,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             visible = visibleState;
             if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock())) && visible) {
                 String callingMethod = DebugUtil.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
-                String callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.map");
+                String callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.mask", "enqueue", "apply", "applyWithSymmetry");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
             }
         }

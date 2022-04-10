@@ -117,18 +117,15 @@ public class Point implements Serializable, Cloneable {
     /**
      * Returns a new instance of the same point.
      */
-    public Object clone() {
+    public Point clone() {
         Point clone;
-
         try {
             clone = (Point) super.clone();
         } catch (CloneNotSupportedException e) {
             clone = new Point();
         }
-
         clone.setX(getX());
         clone.setY(getY());
-
         return clone;
     }
 

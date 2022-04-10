@@ -17,9 +17,9 @@ import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -118,11 +118,8 @@ public class CellStatePreview {
         List<CellState> previousStates = null;
 
         if (isCloned()) {
-            previousStates = new LinkedList<CellState>();
-            Iterator<CellState> it = deltas.keySet().iterator();
-
-            while (it.hasNext()) {
-                CellState state = it.next();
+            previousStates = new ArrayList<>();
+            for (CellState state : deltas.keySet()) {
                 previousStates.addAll(snapshot(state));
             }
         }
@@ -158,7 +155,7 @@ public class CellStatePreview {
         // are not cloned then this does nothing and just expects a repaint
         // of the dirty rectangle.
         if (previousStates != null) {
-            cellStates = new LinkedList<CellState>();
+            cellStates = new ArrayList<>();
             it = deltas.keySet().iterator();
 
             while (it.hasNext()) {
@@ -207,10 +204,10 @@ public class CellStatePreview {
     }
 
     public List<CellState> snapshot(CellState state) {
-        List<CellState> result = new LinkedList<>();
+        List<CellState> result = new ArrayList<>();
 
         if (state != null) {
-            result.add((CellState) state.clone());
+            result.add(state.clone());
 
             Graph graph = graphComponent.getGraph();
             IGraphModel model = graph.getModel();

@@ -3,17 +3,21 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.ConnectEvent;
+import com.faforever.neroxis.ngraph.event.EventObject;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.GraphComponent.GraphControl;
-import com.faforever.neroxis.ngraph.swing.util.MouseAdapter;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -22,9 +26,9 @@ import com.faforever.neroxis.ngraph.view.GraphView;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.io.Serial;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -37,6 +41,7 @@ import javax.swing.JOptionPane;
  * property contains the inserted edge, the <code>event</code> and <code>target</code>
  * properties contain the respective arguments that were passed to mouseReleased.
  */
+@SuppressWarnings("unused")
 public class ConnectionHandler extends MouseAdapter {
 
     private static final long serialVersionUID = -2543899557644889853L;
@@ -96,51 +101,27 @@ public class ConnectionHandler extends MouseAdapter {
     protected transient CellState source;
 
     protected transient CellMarker marker;
-
     protected transient String error;
+    protected transient IEventListener<? extends EventObject> resetHandler = (source, evt) -> reset();
 
-    protected transient IEventListener resetHandler = new IEventListener() {
-        public void invoke(Object source, EventObject evt) {
-            reset();
-        }
-    };
-
-    /**
-     * @param graphComponent
-     */
     public ConnectionHandler(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
-        });
-
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> paint(evt.getGraphics()));
         connectPreview = createConnectPreview();
-
         GraphControl graphControl = graphComponent.getGraphControl();
         graphControl.addMouseListener(this);
         graphControl.addMouseMotionListener(this);
-
         // Installs the graph listeners and keeps them in sync
         addGraphListeners(graphComponent.getGraph());
-
-        graphComponent.addPropertyChangeListener(new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals("graph")) {
-                    removeGraphListeners((Graph) evt.getOldValue());
-                    addGraphListeners((Graph) evt.getNewValue());
-                }
+        graphComponent.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals("graph")) {
+                removeGraphListeners((Graph) evt.getOldValue());
+                addGraphListeners((Graph) evt.getNewValue());
             }
         });
-
         marker = new CellMarker(graphComponent) {
-            /**
-             *
-             */
+            @Serial
             private static final long serialVersionUID = 103433247310526381L;
 
             // Overrides to return cell at location only if valid (so that
@@ -148,7 +129,6 @@ public class ConnectionHandler extends MouseAdapter {
             // message when the mouse is released)
             protected ICell getCell(MouseEvent e) {
                 ICell cell = super.getCell(e);
-
                 if (isConnecting()) {
                     if (source != null) {
                         error = validateConnection(source.getCell(), cell);
@@ -205,11 +185,10 @@ public class ConnectionHandler extends MouseAdapter {
         // LATER: Install change listener for graph model, view
         if (graph != null) {
             GraphView view = graph.getView();
-            view.addListener(Event.SCALE, resetHandler);
-            view.addListener(Event.TRANSLATE, resetHandler);
-            view.addListener(Event.SCALE_AND_TRANSLATE, resetHandler);
-
-            graph.getModel().addListener(Event.CHANGE, resetHandler);
+            view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) resetHandler);
+            view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) resetHandler);
+            view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) resetHandler);
+            graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) resetHandler);
         }
     }
 
@@ -219,11 +198,8 @@ public class ConnectionHandler extends MouseAdapter {
     protected void removeGraphListeners(Graph graph) {
         if (graph != null) {
             GraphView view = graph.getView();
-            view.removeListener(resetHandler, Event.SCALE);
-            view.removeListener(resetHandler, Event.TRANSLATE);
-            view.removeListener(resetHandler, Event.SCALE_AND_TRANSLATE);
-
-            graph.getModel().removeListener(resetHandler, Event.CHANGE);
+            view.removeListener(resetHandler);
+            graph.getModel().removeListener(resetHandler);
         }
     }
 
@@ -356,7 +332,7 @@ public class ConnectionHandler extends MouseAdapter {
      * Graph.getEdgeValidationError in validateConnection. This is an
      * additional hook for disabling certain targets in this specific handler.
      */
-    public boolean isValidTarget(Object cell) {
+    public boolean isValidTarget(ICell cell) {
         return true;
     }
 
@@ -475,26 +451,19 @@ public class ConnectionHandler extends MouseAdapter {
                         if (!marker.hasValidState() && isCreateTarget()) {
                             ICell vertex = createTargetVertex(e, source.getCell());
                             dropTarget = graph.getDropTarget(List.of(vertex), e.getPoint(), graphComponent.getCellAt(e.getX(), e.getY()));
-
-                            if (vertex != null) {
-                                // Disables edges as drop targets if the target cell was created
-                                if (dropTarget == null || !graph.getModel().isEdge(dropTarget)) {
-                                    CellState pstate = graph.getView().getState(dropTarget);
-
-                                    if (pstate != null) {
-                                        Geometry geo = graph.getModel().getGeometry(vertex);
-
-                                        Point origin = pstate.getOrigin();
-                                        geo.setX(geo.getX() - origin.getX());
-                                        geo.setY(geo.getY() - origin.getY());
-                                    }
-                                } else {
-                                    dropTarget = graph.getDefaultParent();
+                            // Disables edges as drop targets if the target cell was created
+                            if (dropTarget == null || !graph.getModel().isEdge(dropTarget)) {
+                                CellState pstate = graph.getView().getState(dropTarget);
+                                if (pstate != null) {
+                                    Geometry geo = graph.getModel().getGeometry(vertex);
+                                    Point origin = pstate.getOrigin();
+                                    geo.setX(geo.getX() - origin.getX());
+                                    geo.setY(geo.getY() - origin.getY());
                                 }
-
-                                graph.addCells(List.of(vertex), dropTarget);
+                            } else {
+                                dropTarget = graph.getDefaultParent();
                             }
-
+                            graph.addCells(List.of(vertex), dropTarget);
                             // FIXME: Here we pre-create the state for the vertex to be
                             // inserted in order to invoke update in the connectPreview.
                             // This means we have a cell state which should be created
@@ -507,7 +476,7 @@ public class ConnectionHandler extends MouseAdapter {
 
                         if (cell != null) {
                             graphComponent.getGraph().setSelectionCell(cell);
-                            eventSource.fireEvent(new EventObject(Event.CONNECT, "cell", cell, "event", e, "target", dropTarget));
+                            eventSource.fireEvent(new ConnectEvent(cell, e, dropTarget));
                         }
 
                         e.consume();
@@ -522,9 +491,8 @@ public class ConnectionHandler extends MouseAdapter {
     }
 
     public void setBounds(java.awt.Rectangle value) {
-        if ((bounds == null && value != null) || (bounds != null && value == null) || (bounds != null && value != null && !bounds.equals(value))) {
+        if (bounds == null && value != null || bounds != null && value == null || bounds != null && !bounds.equals(value)) {
             java.awt.Rectangle tmp = bounds;
-
             if (tmp != null) {
                 if (value != null) {
                     tmp.add(value);
@@ -532,34 +500,23 @@ public class ConnectionHandler extends MouseAdapter {
             } else {
                 tmp = value;
             }
-
             bounds = value;
-
-            if (tmp != null) {
-                graphComponent.getGraphControl().repaint(tmp);
-            }
+            graphComponent.getGraphControl().repaint(tmp);
         }
     }
 
     /**
      * Adds the given event listener.
      */
-    public void addListener(String eventName, IEventListener listener) {
-        eventSource.addListener(eventName, listener);
+    public <T extends EventObject> void addListener(Class<T> eventClass, IEventListener<T> listener) {
+        eventSource.addListener(eventClass, listener);
     }
 
     /**
      * Removes the given event listener.
      */
-    public void removeListener(IEventListener listener) {
+    public void removeListener(IEventListener<?> listener) {
         eventSource.removeListener(listener);
-    }
-
-    /**
-     * Removes the given event listener for the specified event name.
-     */
-    public void removeListener(IEventListener listener, String eventName) {
-        eventSource.removeListener(listener, eventName);
     }
 
     public void paint(Graphics g) {

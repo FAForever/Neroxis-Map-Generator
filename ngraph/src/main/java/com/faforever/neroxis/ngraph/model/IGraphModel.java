@@ -3,7 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.EventObject;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import java.util.List;
 
@@ -110,6 +111,40 @@ public interface IGraphModel {
      * @return Returns the child at index in parent.
      */
     ICell getChildAt(ICell parent, int index);
+
+    /**
+     * Returns the source of the given edge depending on the
+     * value of the boolean parameter.
+     *
+     * @param edge Cell that specifies the edge.
+     * @return Returns the source of the given edge.
+     */
+    ICell getSource(ICell edge);
+
+    /**
+     * Sets the source or target terminal of the given edge using.
+     *
+     * @param edge   Cell that specifies the edge.
+     * @param source Cell that specifies the new terminal.
+     */
+    void setSource(ICell edge, ICell source);
+
+    /**
+     * Returns the target of the given edge depending on the
+     * value of the boolean parameter.
+     *
+     * @param edge Cell that specifies the edge.
+     * @return Returns the target of the given edge.
+     */
+    ICell getTarget(ICell edge);
+
+    /**
+     * Sets the source or target terminal of the given edge using.
+     *
+     * @param edge   Cell that specifies the edge.
+     * @param target Cell that specifies the new target.
+     */
+    void setTarget(ICell edge, ICell target);
 
     /**
      * Returns the source or target terminal of the given edge depending on the
@@ -276,21 +311,14 @@ public interface IGraphModel {
      * Binds the specified function to the given event name. If no event name
      * is given, then the listener is registered for all events.
      */
-    void addListener(String eventName, IEventListener listener);
+    <T extends EventObject> void addListener(Class<T> eventName, IEventListener<T> listener);
 
     /**
      * Function: removeListener
      * <p>
      * Removes the given listener from the list of listeners.
      */
-    void removeListener(IEventListener listener);
-
-    /**
-     * Function: removeListener
-     * <p>
-     * Removes the given listener from the list of listeners.
-     */
-    void removeListener(IEventListener listener, String eventName);
+    <T extends EventObject> void removeListener(IEventListener<T> listener);
 
     /**
      * Defines the interface for an atomic change of the graph model.

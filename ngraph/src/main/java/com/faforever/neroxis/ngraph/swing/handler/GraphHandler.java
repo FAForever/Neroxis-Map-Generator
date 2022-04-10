@@ -8,16 +8,13 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.GraphTransferable;
-import com.faforever.neroxis.ngraph.swing.util.MouseAdapter;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.CellRenderer;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -30,7 +27,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceAdapter;
@@ -41,6 +37,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -199,25 +196,17 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         this.graphComponent = graphComponent;
         marker = createMarker();
         movePreview = createMovePreview();
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> {
+            paint(evt.getGraphics());
         });
-
         // Listens to all mouse events on the rendering control
         graphComponent.getGraphControl().addMouseListener(this);
         graphComponent.getGraphControl().addMouseMotionListener(this);
-
         // Drag target creates preview image
         installDragGestureHandler();
-
         // Listens to dropped graph cells
         installDropTargetHandler();
-
         // Listens to changes of the transferhandler
         graphComponent.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent evt) {
@@ -256,31 +245,22 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
     }
 
     protected void installDragGestureHandler() {
-        DragGestureListener dragGestureListener = new DragGestureListener() {
-            public void dragGestureRecognized(DragGestureEvent e) {
-                if (graphComponent.isDragEnabled() && first != null) {
-                    final TransferHandler th = graphComponent.getTransferHandler();
-
-                    if (th instanceof GraphTransferHandler) {
-                        final GraphTransferable t = (GraphTransferable) ((GraphTransferHandler) th).createTransferable(graphComponent);
-
-                        if (t != null) {
-                            e.startDrag(null, SwingConstants.EMPTY_IMAGE, new java.awt.Point(), t, new DragSourceAdapter() {
-
-                                /**
-                                 *
-                                 */
-                                public void dragDropEnd(DragSourceDropEvent dsde) {
-                                    ((GraphTransferHandler) th).exportDone(graphComponent, t, TransferHandler.NONE);
-                                    first = null;
-                                }
-                            });
-                        }
+        DragGestureListener dragGestureListener = e -> {
+            if (graphComponent.isDragEnabled() && first != null) {
+                final TransferHandler th = graphComponent.getTransferHandler();
+                if (th instanceof GraphTransferHandler) {
+                    final GraphTransferable t = (GraphTransferable) ((GraphTransferHandler) th).createTransferable(graphComponent);
+                    if (t != null) {
+                        e.startDrag(null, SwingConstants.EMPTY_IMAGE, new java.awt.Point(), t, new DragSourceAdapter() {
+                            public void dragDropEnd(DragSourceDropEvent dsde) {
+                                ((GraphTransferHandler) th).exportDone(graphComponent, t, TransferHandler.NONE);
+                                first = null;
+                            }
+                        });
                     }
                 }
             }
         };
-
         DragSource dragSource = new DragSource();
         dragSource.createDefaultDragGestureRecognizer(graphComponent.getGraphControl(), (isCloneEnabled()) ? DnDConstants.ACTION_COPY_OR_MOVE : DnDConstants.ACTION_MOVE, dragGestureListener);
     }

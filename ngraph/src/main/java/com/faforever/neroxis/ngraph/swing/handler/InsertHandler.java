@@ -1,11 +1,12 @@
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
+import com.faforever.neroxis.ngraph.event.EventObject;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.InsertEvent;
+import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.swing.util.MouseAdapter;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.Graph;
@@ -13,6 +14,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class InsertHandler extends MouseAdapter {
@@ -46,12 +48,7 @@ public class InsertHandler extends MouseAdapter {
         this.style = style;
 
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
-        });
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> paint(evt.getGraphics()));
 
         // Listens to all mouse events on the rendering control
         graphComponent.getGraphControl().addMouseListener(this);
@@ -115,16 +112,15 @@ public class InsertHandler extends MouseAdapter {
             current.setY(current.getY() / scale - tr.getY());
             current.setWidth(current.getWidth() / scale);
             current.setHeight(current.getHeight() / scale);
-
-            Object cell = insertCell(current);
-            eventSource.fireEvent(new EventObject(Event.INSERT, "cell", cell));
+            ICell cell = insertCell(current);
+            eventSource.fireEvent(new InsertEvent(cell));
             e.consume();
         }
 
         reset();
     }
 
-    public Object insertCell(Rectangle bounds) {
+    public ICell insertCell(Rectangle bounds) {
         // FIXME: Clone prototype cell for insert
         return graphComponent.getGraph().insertVertex(null, null, "", bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), style);
     }
@@ -150,7 +146,6 @@ public class InsertHandler extends MouseAdapter {
             ((Graphics2D) g).setStroke(new BasicStroke(lineWidth));
             g.setColor(lineColor);
             java.awt.Rectangle rect = current.getRectangle();
-
             if (rounded) {
                 g.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 8, 8);
             } else {
@@ -159,16 +154,11 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    public void addListener(String eventName, IEventListener listener) {
-        eventSource.addListener(eventName, listener);
+    public <T extends EventObject> void addListener(Class<T> eventClass, IEventListener<T> listener) {
+        eventSource.addListener(eventClass, listener);
     }
 
-    public void removeListener(IEventListener listener) {
-        removeListener(listener, null);
+    public void removeListener(IEventListener<?> listener) {
+        eventSource.removeListener(listener);
     }
-
-    public void removeListener(IEventListener listener, String eventName) {
-        eventSource.removeListener(listener, eventName);
-    }
-
 }

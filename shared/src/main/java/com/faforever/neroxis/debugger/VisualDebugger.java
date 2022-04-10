@@ -1,10 +1,16 @@
 package com.faforever.neroxis.debugger;
 
 import com.faforever.neroxis.mask.Mask;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
 import lombok.Value;
-
-import javax.swing.*;
-import java.awt.*;
 
 public strictfp class VisualDebugger {
     private static DefaultListModel<MaskListItem> listModel;
@@ -43,15 +49,14 @@ public strictfp class VisualDebugger {
     }
 
     private static void setupCanvas() {
-        canvas = new EntryPanel(new Dimension(650, 650));
-
+        canvas = new EntryPanel();
+        canvas.setPreferredSize(new Dimension(650, 650));
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 1;
         constraints.weightx = 1;
         constraints.gridy = 0;
         constraints.weighty = 1;
-
         frame.add(canvas, constraints);
     }
 

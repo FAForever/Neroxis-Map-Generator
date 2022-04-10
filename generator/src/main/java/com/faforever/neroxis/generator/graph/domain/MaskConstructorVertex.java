@@ -1,11 +1,10 @@
 package com.faforever.neroxis.generator.graph.domain;
 
 import com.faforever.neroxis.mask.Mask;
-import lombok.Getter;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import lombok.Getter;
 
 @Getter
 public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
@@ -16,7 +15,7 @@ public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<
 
     @Override
     public String getExecutableName() {
-        return executorClass.getSimpleName();
+        return "new";
     }
 
     @Override

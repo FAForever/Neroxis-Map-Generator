@@ -8,22 +8,12 @@ public strictfp class DebugUtil {
     public static boolean DEBUG = false;
     public static boolean VISUALIZE = false;
 
-    public static String getStackTraceLineInPackage(String packageName) {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream
-                .filter(stackTraceElement -> {
-                    String className = stackTraceElement.getClassName();
-                    String packName = className.substring(0, className.lastIndexOf("."));
-                    return packName.startsWith(packageName);
-                })
-                .findFirst()
-                .map(stackFrame -> stackFrame.getFileName() + ":" + stackFrame.getLineNumber())
-                .orElse("not found"));
+    public static String getStackTraceLineInPackage(String packageName, String... excludedMethodNames) {
+        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream.filter(stackTraceElement -> stackTraceElement.getClassName().startsWith(packageName)).filter(stackTraceElement -> Arrays.stream(excludedMethodNames).noneMatch(excludedMethod -> stackTraceElement.getMethodName().contains(excludedMethod))).findFirst().map(stackFrame -> stackFrame.getFileName() + ":" + stackFrame.getLineNumber()).orElse("not found"));
     }
 
     public static String getStackTraceMethodInPackage(String packageName, String... excludedMethodNames) {
-        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream
-                .filter(stackTraceElement -> stackTraceElement.getClassName().contains(packageName)
-                        && Arrays.stream(excludedMethodNames).noneMatch(excludedMethod -> stackTraceElement.getMethodName().contains(excludedMethod)))
+        return StackWalker.getInstance().walk(stackFrameStream -> stackFrameStream.filter(stackTraceElement -> stackTraceElement.getClassName().startsWith(packageName)).filter(stackTraceElement -> Arrays.stream(excludedMethodNames).noneMatch(excludedMethod -> stackTraceElement.getMethodName().contains(excludedMethod)))
                 .findFirst()
                 .map(StackWalker.StackFrame::getMethodName)
                 .orElse("not found"));

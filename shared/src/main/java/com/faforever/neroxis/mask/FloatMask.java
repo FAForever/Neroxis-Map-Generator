@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
+import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -9,8 +10,7 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
-
-import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
@@ -65,11 +63,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         apply(point -> setPrimitive(point, imageBuffer.getElemFloat(point.x + point.y * size) * scaleFactor));
     }
 
-    public FloatMask(FloatMask other) {
+    protected FloatMask(FloatMask other) {
         this(other, null);
     }
 
-    public FloatMask(FloatMask other, String name) {
+    protected FloatMask(FloatMask other, String name) {
         super(other, name);
     }
 
@@ -90,11 +88,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2) {
         this(other1, other2, null);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, String name) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, String name) {
         this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name, other1.isParallel());
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
@@ -118,11 +116,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index) {
         this(other, index, null);
     }
 
-    public <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {

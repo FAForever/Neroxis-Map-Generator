@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2007, Gaudenz Alder
  */
-package com.faforever.neroxis.ngraph.util;
+package com.faforever.neroxis.ngraph.event;
 
 /**
  * Contains all global constants.

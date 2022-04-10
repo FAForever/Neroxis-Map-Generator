@@ -4,26 +4,23 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskReflectUtil;
-import lombok.Getter;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import lombok.Getter;
 
 @Getter
 public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
-    public static final String NEW_MASK = "newMask";
-    public static final String EXECUTOR = "executor";
-
+    public static final String NEW_MASK = "new";
+    public static final String EXECUTOR = "exec";
     private MaskVertexResult executor;
 
     public MaskMethodVertex(Method executable, Class<? extends Mask<?, ?>> executorClass) {
         super(executable, executorClass);
-
         if (!Mask.class.isAssignableFrom(executable.getReturnType())) {
             throw new IllegalArgumentException("Method does not return a subclass of Mask");
         }
-
+        maskParameters.put(EXECUTOR, null);
         if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
             results.put(NEW_MASK, null);
             resultClasses.put(NEW_MASK, (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType()));
@@ -94,7 +91,10 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         }
     }
 
-    public String toString() {
-        return identifier == null ? "" : identifier;
+    public Class<? extends Mask<?, ?>> getMaskParameterClass(String parameterName) {
+        if (EXECUTOR.equals(parameterName)) {
+            return executorClass;
+        }
+        return super.getMaskParameterClass(parameterName);
     }
 }

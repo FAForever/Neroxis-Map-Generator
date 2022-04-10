@@ -1,14 +1,12 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.Range;
-import lombok.Value;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import lombok.Value;
 
 @SuppressWarnings({"unused"})
 @Value
@@ -77,23 +75,6 @@ public strictfp class ParameterConstraints {
                 .numTeams(generatorParameters.getNumTeams())
                 .visibility(generatorParameters.getVisibility())
                 .terrainSymmetry(generatorParameters.getTerrainSymmetry())
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
-    }
-
-    public GeneratorParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Visibility visibility, Symmetry terrainSymmetry) {
-        return GeneratorParameters.builder()
-                .spawnCount(spawnCount)
-                .landDensity(landDensityRange.getRandomFloat(random))
-                .plateauDensity(plateauDensityRange.getRandomFloat(random))
-                .mountainDensity(mountainDensityRange.getRandomFloat(random))
-                .rampDensity(rampDensityRange.getRandomFloat(random))
-                .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
-                .mexDensity(mexDensityRange.getRandomFloat(random))
-                .mapSize(mapSize)
-                .numTeams(numTeams)
-                .visibility(visibility)
-                .terrainSymmetry(terrainSymmetry)
                 .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                 .build();
     }

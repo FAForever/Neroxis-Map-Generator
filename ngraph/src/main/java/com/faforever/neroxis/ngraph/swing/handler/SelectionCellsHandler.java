@@ -8,10 +8,16 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.DownEvent;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.PaintEvent;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
+import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Graphics;
@@ -60,13 +66,11 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
      * Default is DEFAULT_MAX_HANDLES.
      */
     protected int maxHandlers = DEFAULT_MAX_HANDLERS;
-
     /**
      * Maps from cells to handlers in the order of the selection cells.
      */
     protected transient LinkedHashMap<Object, CellHandler> handlers = new LinkedHashMap<>();
-
-    protected transient IEventListener refreshHandler = (source, evt) -> {
+    protected transient IEventListener<?> refreshHandler = (source, evt) -> {
         if (isEnabled()) {
             refresh();
         }
@@ -84,21 +88,17 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         // Listens to all mouse events on the rendering control
         graphComponent.getGraphControl().addMouseListener(this);
         graphComponent.getGraphControl().addMouseMotionListener(this);
-
         // Installs the graph listeners and keeps them in sync
         addGraphListeners(graphComponent.getGraph());
-
         graphComponent.addPropertyChangeListener(evt -> {
             if (evt.getPropertyName().equals("graph")) {
                 removeGraphListeners((Graph) evt.getOldValue());
                 addGraphListeners((Graph) evt.getNewValue());
             }
         });
-
         // Installs the paint handler
-        graphComponent.addListener(Event.PAINT, (sender, evt) -> {
-            Graphics g = (Graphics) evt.getProperty("g");
-            paintHandles(g);
+        graphComponent.addListener(PaintEvent.class, (sender, evt) -> {
+            paintHandles(evt.getGraphics());
         });
     }
 
@@ -108,14 +108,13 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
     protected void addGraphListeners(Graph graph) {
         // LATER: Install change listener for graph model, selection model, view
         if (graph != null) {
-            graph.getSelectionModel().addListener(Event.CHANGE, refreshHandler);
-            graph.getModel().addListener(Event.CHANGE, refreshHandler);
-            graph.getView().addListener(Event.SCALE, refreshHandler);
-            graph.getView().addListener(Event.TRANSLATE, refreshHandler);
-            graph.getView().addListener(Event.SCALE_AND_TRANSLATE, refreshHandler);
-            graph.getView().addListener(Event.DOWN, refreshHandler);
-            graph.getView().addListener(Event.UP, refreshHandler);
-
+            graph.getSelectionModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) refreshHandler);
+            graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) refreshHandler);
+            graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) refreshHandler);
+            graph.getView().addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) refreshHandler);
+            graph.getView().addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) refreshHandler);
+            graph.getView().addListener(DownEvent.class, (IEventListener<DownEvent>) refreshHandler);
+            graph.getView().addListener(UpEvent.class, (IEventListener<UpEvent>) refreshHandler);
             // Refreshes the handles if moveVertexLabels or moveEdgeLabels changes
             graph.addPropertyChangeListener(labelMoveHandler);
         }
@@ -126,14 +125,8 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
      */
     protected void removeGraphListeners(Graph graph) {
         if (graph != null) {
-            graph.getSelectionModel().removeListener(refreshHandler, Event.CHANGE);
-            graph.getModel().removeListener(refreshHandler, Event.CHANGE);
-            graph.getView().removeListener(refreshHandler, Event.SCALE);
-            graph.getView().removeListener(refreshHandler, Event.TRANSLATE);
-            graph.getView().removeListener(refreshHandler, Event.SCALE_AND_TRANSLATE);
-            graph.getView().removeListener(refreshHandler, Event.DOWN);
-            graph.getView().removeListener(refreshHandler, Event.UP);
-
+            graph.getSelectionModel().removeListener(refreshHandler);
+            graph.getModel().removeListener(refreshHandler);
             // Refreshes the handles if moveVertexLabels or moveEdgeLabels changes
             graph.removePropertyChangeListener(labelMoveHandler);
         }

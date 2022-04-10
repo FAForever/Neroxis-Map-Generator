@@ -3,14 +3,14 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.EventObject;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.MarkEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -423,9 +423,8 @@ public class CellMarker extends JComponent {
                     graphComponent.getGraphControl().add(this);
                 }
             }
-
             repaint();
-            eventSource.fireEvent(new EventObject(Event.MARK, "state", markedState));
+            eventSource.fireEvent(new MarkEvent(markedState));
         }
     }
 
@@ -436,7 +435,7 @@ public class CellMarker extends JComponent {
         if (getParent() != null) {
             setVisible(false);
             getParent().remove(this);
-            eventSource.fireEvent(new EventObject(Event.MARK));
+            eventSource.fireEvent(new MarkEvent(null));
         }
     }
 
@@ -500,22 +499,15 @@ public class CellMarker extends JComponent {
     /**
      * Adds the given event listener.
      */
-    public void addListener(String eventName, IEventListener listener) {
-        eventSource.addListener(eventName, listener);
+    public <T extends EventObject> void addListener(Class<T> eventClass, IEventListener<T> listener) {
+        eventSource.addListener(eventClass, listener);
     }
 
     /**
      * Removes the given event listener.
      */
-    public void removeListener(IEventListener listener) {
+    public void removeListener(IEventListener<?> listener) {
         eventSource.removeListener(listener);
-    }
-
-    /**
-     * Removes the given event listener for the specified event name.
-     */
-    public void removeListener(IEventListener listener, String eventName) {
-        eventSource.removeListener(listener, eventName);
     }
 
     /**

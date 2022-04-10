@@ -3,19 +3,21 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
+import com.faforever.neroxis.ngraph.event.ContinueEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.StartEvent;
+import com.faforever.neroxis.ngraph.event.StopEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.swing.view.CellStatePreview;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,13 +79,9 @@ public class MovePreview extends EventSource {
      */
     public MovePreview(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> {
+            paint(evt.getGraphics());
         });
     }
 
@@ -149,7 +147,7 @@ public class MovePreview extends EventSource {
      */
     protected List<CellState> getPreviewStates() {
         Graph graph = graphComponent.getGraph();
-        List<CellState> result = new LinkedList<>();
+        List<CellState> result = new ArrayList<>();
 
         for (ICell cell : movingCells) {
             CellState cellState = graph.getView().getState(cell);
@@ -203,8 +201,7 @@ public class MovePreview extends EventSource {
             initialPlaceholder = new java.awt.Rectangle(placeholder);
             graphComponent.getGraphControl().repaint(placeholder);
         }
-
-        fireEvent(new EventObject(Event.START, "event", e, "state", startState));
+        fireEvent(new StartEvent(startState, e));
     }
 
     protected Rectangle getPlaceholderBounds(CellState startState) {
@@ -277,8 +274,7 @@ public class MovePreview extends EventSource {
         if (isHideSelectionHandler()) {
             graphComponent.getSelectionCellsHandler().setVisible(false);
         }
-
-        fireEvent(new EventObject(Event.CONTINUE, "event", e, "dx", dx, "dy", dy));
+        fireEvent(new ContinueEvent(null, null, dx, dy, e));
     }
 
     protected void repaint(Rectangle dirty) {
@@ -330,8 +326,7 @@ public class MovePreview extends EventSource {
                 double s = graph.getView().getScale();
                 cells = graph.moveCells(cells, dx / s, dy / s, clone, target, e.getPoint());
             }
-
-            fireEvent(new EventObject(Event.STOP, "event", e, "commit", commit));
+            fireEvent(new StopEvent(null, commit, e));
         } finally {
             graph.getModel().endUpdate();
         }

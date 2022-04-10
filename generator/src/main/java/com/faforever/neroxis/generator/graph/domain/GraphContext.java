@@ -1,16 +1,16 @@
 package com.faforever.neroxis.generator.graph.domain;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
+import java.util.Random;
 import lombok.Getter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import java.util.Random;
 
 @Getter
 public strictfp class GraphContext {
@@ -20,16 +20,46 @@ public strictfp class GraphContext {
     private final EvaluationContext evalContext;
     private final SCMap map;
     private final GeneratorParameters generatorParameters;
+    private final float landDensity;
+    private final float plateauDensity;
+    private final float mountainDensity;
+    private final float rampDensity;
+    private final float reclaimDensity;
+    private final float mexDensity;
+    private final float normalizedLandDensity;
+    private final float normalizedPlateauDensity;
+    private final float normalizedMountainDensity;
+    private final float normalizedRampDensity;
+    private final float normalizedReclaimDensity;
+    private final float normalizedMexDensity;
     private final int mapSize;
+    private final int numSymPoints;
 
-    public GraphContext(long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
-        this.generatorParameters = generatorParameters;
+    public GraphContext(long seed, GeneratorParameters generatorParameters, ParameterConstraints parameterConstraints, SymmetrySettings symmetrySettings) {
         this.symmetrySettings = symmetrySettings;
+        this.generatorParameters = generatorParameters;
+        numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        landDensity = generatorParameters.getLandDensity();
+        plateauDensity = generatorParameters.getPlateauDensity();
+        mountainDensity = generatorParameters.getMountainDensity();
+        rampDensity = generatorParameters.getRampDensity();
+        reclaimDensity = generatorParameters.getMexDensity();
+        mexDensity = generatorParameters.getMexDensity();
+        normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(landDensity);
+        normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange().normalize(plateauDensity);
+        normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mountainDensity);
+        normalizedRampDensity = parameterConstraints.getRampDensityRange().normalize(rampDensity);
+        normalizedMexDensity = parameterConstraints.getMexDensityRange().normalize(mexDensity);
+        normalizedReclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(reclaimDensity);
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         mapSize = generatorParameters.getMapSize();
         random = new Random(seed);
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
+        placeSpawns(generatorParameters, symmetrySettings);
+    }
+
+    private void placeSpawns(GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
         float spawnSeparation;
         int teamSeparation;
         if (generatorParameters.getNumTeams() < 2) {

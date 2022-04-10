@@ -3,9 +3,13 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
+import com.faforever.neroxis.ngraph.event.BeforeUndoEvent;
+import com.faforever.neroxis.ngraph.event.BeginUpdateEvent;
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.EndUpdateEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.ExecuteEvent;
+import com.faforever.neroxis.ngraph.event.UndoEvent;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import java.io.IOException;
@@ -652,7 +656,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return new UndoableEdit(this) {
             public void dispatch() {
                 // LATER: Remove changes property (deprecated)
-                ((GraphModel) source).fireEvent(new EventObject(Event.CHANGE, "edit", this, "changes", changes));
+                ((GraphModel) source).fireEvent(new ChangeEvent(this, changes, null, null));
             }
         };
     }
@@ -664,7 +668,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
 
         for (ICell cell : cells) {
             try {
-                clones.add(cloneCell(cell, mapping, includeChildren));
+                clones.add(cloneCell(cell, mapping));
             } catch (CloneNotSupportedException e) {
                 log.log(Level.SEVERE, "Failed to clone cells", e);
             }
@@ -680,24 +684,13 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
     /**
      * Inner helper method for cloning cells recursively.
      */
-    protected ICell cloneCell(ICell cell, Map<ICell, ICell> mapping, boolean includeChildren) throws CloneNotSupportedException {
+    protected ICell cloneCell(ICell cell, Map<ICell, ICell> mapping) throws CloneNotSupportedException {
         if (cell != null) {
             ICell c = mapping.get(cell);
-
             if (c == null) {
                 c = (ICell) cell.clone();
                 mapping.put(cell, c);
-
-                if (includeChildren) {
-                    int childCount = getChildCount(cell);
-
-                    for (int i = 0; i < childCount; i++) {
-                        Object clone = cloneCell(getChildAt(cell, i), mapping, true);
-                        c.insert((ICell) clone);
-                    }
-                }
             }
-
             return c;
         }
 
@@ -904,21 +897,37 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return (cell != null) ? cell.getChildCount() : 0;
     }
 
-
     public ICell getChildAt(ICell parent, int index) {
         return (parent != null) ? parent.getChildAt(index) : null;
     }
 
+    @Override
+    public ICell getSource(ICell edge) {
+        return edge.getSource();
+    }
+
+    @Override
+    public void setSource(ICell edge, ICell source) {
+        edge.setSource(source);
+    }
+
+    @Override
+    public ICell getTarget(ICell edge) {
+        return edge.getTarget();
+    }
+
+    @Override
+    public void setTarget(ICell edge, ICell target) {
+        edge.setTarget(target);
+    }
 
     public ICell getTerminal(ICell edge, boolean isSource) {
         return (edge != null) ? edge.getTerminal(isSource) : null;
     }
 
-
     public ICell setTerminal(ICell edge, ICell terminal, boolean isSource) {
         boolean terminalChanged = terminal != getTerminal(edge, isSource);
         execute(new TerminalChange(this, edge, terminal, isSource));
-
         if (maintainEdgeParent && terminalChanged) {
             updateEdgeParent(edge, getRoot());
         }
@@ -1259,14 +1268,14 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         change.execute();
         beginUpdate();
         currentEdit.add(change);
-        fireEvent(new EventObject(Event.EXECUTE, "change", change));
+        fireEvent(new ExecuteEvent(change));
         endUpdate();
     }
 
 
     public void beginUpdate() {
         updateLevel++;
-        fireEvent(new EventObject(Event.BEGIN_UPDATE));
+        fireEvent(new BeginUpdateEvent());
     }
 
 
@@ -1275,15 +1284,15 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
 
         if (!endingUpdate) {
             endingUpdate = updateLevel == 0;
-            fireEvent(new EventObject(Event.END_UPDATE, "edit", currentEdit));
+            fireEvent(new EndUpdateEvent(currentEdit));
 
             try {
                 if (endingUpdate && !currentEdit.isEmpty()) {
-                    fireEvent(new EventObject(Event.BEFORE_UNDO, "edit", currentEdit));
+                    fireEvent(new BeforeUndoEvent(currentEdit));
                     UndoableEdit tmp = currentEdit;
                     currentEdit = createUndoableEdit();
                     tmp.dispatch();
-                    fireEvent(new EventObject(Event.UNDO, "edit", tmp));
+                    fireEvent(new UndoEvent(tmp));
                 }
             } finally {
                 endingUpdate = false;

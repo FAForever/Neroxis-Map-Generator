@@ -4,12 +4,14 @@
 package com.faforever.neroxis.ngraph.swing.handler;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
+import com.faforever.neroxis.ngraph.event.ContinueEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.StartEvent;
+import com.faforever.neroxis.ngraph.event.StopEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
@@ -36,13 +38,10 @@ public class ConnectPreview extends EventSource {
 
     public ConnectPreview(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> {
+            Graphics g = evt.getGraphics();
+            paint(g);
         });
     }
 
@@ -76,27 +75,23 @@ public class ConnectPreview extends EventSource {
     /**
      * Updates the style of the edge preview from the incoming edge
      */
-    public void start(MouseEvent e, CellState startState, String style) {
+    public void start(MouseEvent event, CellState startState, String style) {
         Graph graph = graphComponent.getGraph();
         sourceState = startState;
         startPoint = transformScreenPoint(startState.getCenterX(), startState.getCenterY());
         ICell cell = createCell(startState, style);
         graph.getView().validateCell(cell);
         previewState = graph.getView().getState(cell);
-
-        fireEvent(new EventObject(Event.START, "event", e, "state", previewState));
+        fireEvent(new StartEvent(previewState, event));
     }
 
-    public void update(MouseEvent e, CellState targetState, double x, double y) {
+    public void update(MouseEvent event, CellState targetState, double x, double y) {
         Graph graph = graphComponent.getGraph();
         ICell cell = previewState.getCell();
-
         Rectangle dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
-
         if (cell.getTarget() != null) {
             cell.getTarget().removeEdge(cell, false);
         }
-
         if (targetState != null) {
             targetState.getCell().insertEdge(cell, false);
         }
@@ -105,9 +100,8 @@ public class ConnectPreview extends EventSource {
 
         geo.setTerminalPoint(startPoint, true);
         geo.setTerminalPoint(transformScreenPoint(x, y), false);
-
         revalidate(previewState);
-        fireEvent(new EventObject(Event.CONTINUE, "event", e, "x", x, "y", y));
+        fireEvent(new ContinueEvent(x, y, null, null, event));
 
         // Repaints the dirty region
         // TODO: Cache the new dirty region for next repaint
@@ -211,22 +205,17 @@ public class ConnectPreview extends EventSource {
             try {
                 ICell cell = previewState.getCell();
                 ICell source = cell.getSource();
-                ICell terminal = cell.getTarget();
-
+                ICell target = cell.getTarget();
                 if (source != null) {
                     source.removeEdge(cell, true);
                 }
-
-                if (terminal != null) {
-                    terminal.removeEdge(cell, false);
+                if (target != null) {
+                    target.removeEdge(cell, false);
                 }
-
                 if (commit) {
-                    result = graph.addCell(cell, null, null, source, terminal);
+                    result = graph.addCell(cell, null, null, source, target);
                 }
-
-                fireEvent(new EventObject(Event.STOP, "event", e, "commit", commit, "cell", (commit) ? result : null));
-
+                fireEvent(new StopEvent((commit) ? result : null, commit, e));
                 // Clears the state before the model commits
                 if (previewState != null) {
                     java.awt.Rectangle dirty = getDirtyRect();

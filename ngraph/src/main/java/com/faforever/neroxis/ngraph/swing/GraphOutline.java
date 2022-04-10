@@ -3,9 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.swing;
 
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.RepaintEvent;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
@@ -96,44 +95,31 @@ public class GraphOutline extends JComponent {
      * Default is 4.
      */
     protected int outlineBorder = 10;
-
     protected MouseTracker tracker = new MouseTracker();
-
     protected double scale = 1;
-
     protected java.awt.Point translate = new java.awt.Point();
-
     protected transient boolean zoomGesture = false;
-
-    protected IEventListener repaintHandler = new IEventListener() {
-        public void invoke(Object source, EventObject evt) {
-            updateScaleAndTranslate();
-            Rectangle dirty = (Rectangle) evt.getProperty("region");
-
-            if (dirty != null) {
-                repaintClip = new Rectangle(dirty);
-            } else {
-                repaintBuffer = true;
-            }
-
-            if (dirty != null) {
-                updateFinder(true);
-
-                dirty.grow(1 / scale);
-
-                dirty.setX(dirty.getX() * scale + translate.x);
-                dirty.setY(dirty.getY() * scale + translate.y);
-                dirty.setWidth(dirty.getWidth() * scale);
-                dirty.setHeight(dirty.getHeight() * scale);
-
-                repaint(dirty.getRectangle());
-            } else {
-                updateFinder(false);
-                repaint();
-            }
+    protected IEventListener<RepaintEvent> repaintHandler = (source, evt) -> {
+        updateScaleAndTranslate();
+        Rectangle dirty = evt.getRegion();
+        if (dirty != null) {
+            repaintClip = new Rectangle(dirty);
+        } else {
+            repaintBuffer = true;
+        }
+        if (dirty != null) {
+            updateFinder(true);
+            dirty.grow(1 / scale);
+            dirty.setX(dirty.getX() * scale + translate.x);
+            dirty.setY(dirty.getY() * scale + translate.y);
+            dirty.setWidth(dirty.getWidth() * scale);
+            dirty.setHeight(dirty.getHeight() * scale);
+            repaint(dirty.getRectangle());
+        } else {
+            updateFinder(false);
+            repaint();
         }
     };
-
     protected ComponentListener componentHandler = new ComponentAdapter() {
         public void componentResized(ComponentEvent e) {
             if (updateScaleAndTranslate()) {
@@ -286,7 +272,7 @@ public class GraphOutline extends JComponent {
         this.graphComponent = graphComponent;
 
         if (this.graphComponent != null) {
-            this.graphComponent.getGraph().addListener(Event.REPAINT, repaintHandler);
+            this.graphComponent.getGraph().addListener(RepaintEvent.class, repaintHandler);
             this.graphComponent.getGraphControl().addComponentListener(componentHandler);
             this.graphComponent.getHorizontalScrollBar().addAdjustmentListener(adjustmentHandler);
             this.graphComponent.getVerticalScrollBar().addAdjustmentListener(adjustmentHandler);

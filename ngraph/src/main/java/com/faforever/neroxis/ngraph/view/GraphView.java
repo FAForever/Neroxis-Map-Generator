@@ -3,14 +3,19 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.event.DownEvent;
+import com.faforever.neroxis.ngraph.event.Event;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
+import com.faforever.neroxis.ngraph.event.UndoEvent;
+import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
@@ -23,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Implements a view for the graph. This class is in charge of computing the
@@ -160,7 +167,7 @@ public class GraphView extends EventSource {
             change.execute();
             UndoableEdit edit = new UndoableEdit(this, false);
             edit.add(change);
-            fireEvent(new EventObject(Event.UNDO, "edit", edit));
+            fireEvent(new UndoEvent(edit));
         }
 
         return root;
@@ -176,7 +183,7 @@ public class GraphView extends EventSource {
      */
     public void scaleAndTranslate(double scale, double dx, double dy) {
         double previousScale = this.scale;
-        Object previousTranslate = translate.clone();
+        Point previousTranslate = translate.clone();
 
         if (scale != this.scale || dx != translate.getX() || dy != translate.getY()) {
             this.scale = scale;
@@ -186,8 +193,7 @@ public class GraphView extends EventSource {
                 revalidate();
             }
         }
-
-        fireEvent(new EventObject(Event.SCALE_AND_TRANSLATE, "scale", scale, "previousScale", previousScale, "translate", translate, "previousTranslate", previousTranslate));
+        fireEvent(new ScaleAndTranslateEvent(translate, previousTranslate, scale, previousScale));
     }
 
     /**
@@ -215,8 +221,7 @@ public class GraphView extends EventSource {
                 revalidate();
             }
         }
-
-        fireEvent(new EventObject(Event.SCALE, "scale", scale, "previousScale", previousScale));
+        fireEvent(new ScaleEvent(scale, previousScale));
     }
 
     /**
@@ -236,7 +241,7 @@ public class GraphView extends EventSource {
      * @param value New translation to be used.
      */
     public void setTranslate(Point value) {
-        Object previousTranslate = translate.clone();
+        Point previousTranslate = translate.clone();
 
         if (value != null && (value.getX() != translate.getX() || value.getY() != translate.getY())) {
             translate = value;
@@ -245,8 +250,7 @@ public class GraphView extends EventSource {
                 revalidate();
             }
         }
-
-        fireEvent(new EventObject(Event.TRANSLATE, "translate", translate, "previousTranslate", previousTranslate));
+        fireEvent(new TranslateEvent(translate, previousTranslate));
     }
 
     /**
@@ -402,7 +406,7 @@ public class GraphView extends EventSource {
 
         if (state != null) {
             if (state.getBoundingBox() != null) {
-                bbox = (Rectangle) state.getBoundingBox().clone();
+                bbox = state.getBoundingBox().clone();
             }
 
             if (recurse) {
@@ -1394,19 +1398,8 @@ public class GraphView extends EventSource {
      * states that are not null, that is, the returned array may have less
      * elements than the given array.
      */
-    public CellState[] getCellStates(List<ICell> cells) {
-        List<CellState> result = new ArrayList<>(cells.size());
-
-        for (ICell cell : cells) {
-            CellState state = getState(cell);
-
-            if (state != null) {
-                result.add(state);
-            }
-        }
-
-        CellState[] resultArray = new CellState[result.size()];
-        return result.toArray(resultArray);
+    public List<CellState> getCellStates(List<ICell> cells) {
+        return cells.stream().map(this::getState).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**
@@ -1466,20 +1459,7 @@ public class GraphView extends EventSource {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(128);
-        builder.append(getClass().getSimpleName());
-        builder.append(" [");
-        builder.append("currentRoot=");
-        builder.append(currentRoot);
-        builder.append(", graphBounds=");
-        builder.append(graphBounds);
-        builder.append(", scale=");
-        builder.append(scale);
-        builder.append(", translate=");
-        builder.append(translate);
-        builder.append("]");
-
-        return builder.toString();
+        return getClass().getSimpleName() + " [currentRoot=" + currentRoot + ", graphBounds=" + graphBounds + ", scale=" + scale + ", translate=" + translate + "]";
     }
 
     /**
@@ -1552,19 +1532,19 @@ public class GraphView extends EventSource {
             ICell tmp = view.getCurrentRoot();
             view.currentRoot = previous;
             previous = tmp;
-
             Point translate = view.graph.getTranslateForRoot(view.getCurrentRoot());
-
             if (translate != null) {
                 view.translate = new Point(-translate.getX(), translate.getY());
             }
-
             // Removes all existing cell states and revalidates
             view.reload();
             up = !up;
-
             String eventName = (up) ? Event.UP : Event.DOWN;
-            view.fireEvent(new EventObject(eventName, "root", view.currentRoot, "previous", previous));
+            if (up) {
+                view.fireEvent(new UpEvent(view.currentRoot, previous));
+            } else {
+                view.fireEvent(new DownEvent(view.currentRoot, previous));
+            }
         }
 
     }

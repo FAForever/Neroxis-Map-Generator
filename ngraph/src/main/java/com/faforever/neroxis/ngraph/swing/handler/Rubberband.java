@@ -3,13 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.GraphComponent.GraphControl;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -70,22 +68,10 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         // Adds the required listeners
         graphComponent.getGraphControl().addMouseListener(this);
         graphComponent.getGraphControl().addMouseMotionListener(this);
-
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-
-            public void invoke(Object source, EventObject evt) {
-                paintRubberband((Graphics) evt.getProperty("g"));
-            }
-
-        });
+        graphComponent.addListener(AfterPaintEvent.class, (source, evt) -> paintRubberband(evt.getGraphics()));
 
         // Handles escape keystrokes
         graphComponent.addKeyListener(new KeyAdapter() {
-            /**
-             *
-             * @param e
-             * @return
-             */
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE && graphComponent.isEscapeEnabled()) {
                     reset();

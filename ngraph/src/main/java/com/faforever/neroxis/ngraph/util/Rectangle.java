@@ -243,12 +243,10 @@ public class Rectangle extends Point {
     /**
      * Returns a new instance of the same rectangle.
      */
-    public Object clone() {
+    public Rectangle clone() {
         Rectangle clone = (Rectangle) super.clone();
-
         clone.setWidth(getWidth());
         clone.setHeight(getHeight());
-
         return clone;
     }
 

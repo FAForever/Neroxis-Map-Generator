@@ -6,6 +6,37 @@ package com.faforever.neroxis.ngraph.view;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.canvas.ICanvas;
 import com.faforever.neroxis.ngraph.canvas.ImageCanvas;
+import com.faforever.neroxis.ngraph.event.AddCellsEvent;
+import com.faforever.neroxis.ngraph.event.AlignCellsEvent;
+import com.faforever.neroxis.ngraph.event.CellConnectedEvent;
+import com.faforever.neroxis.ngraph.event.CellsAddedEvent;
+import com.faforever.neroxis.ngraph.event.CellsFoldedEvent;
+import com.faforever.neroxis.ngraph.event.CellsMovedEvent;
+import com.faforever.neroxis.ngraph.event.CellsOrderedEvent;
+import com.faforever.neroxis.ngraph.event.CellsRemovedEvent;
+import com.faforever.neroxis.ngraph.event.CellsResizedEvent;
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.ConnectCellEvent;
+import com.faforever.neroxis.ngraph.event.DownEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.FlipEdgeEvent;
+import com.faforever.neroxis.ngraph.event.FoldCellsEvent;
+import com.faforever.neroxis.ngraph.event.GroupCellsEvent;
+import com.faforever.neroxis.ngraph.event.MoveCellsEvent;
+import com.faforever.neroxis.ngraph.event.OrderCellsEvent;
+import com.faforever.neroxis.ngraph.event.RemoveCellsEvent;
+import com.faforever.neroxis.ngraph.event.RemoveCellsFromParentEvent;
+import com.faforever.neroxis.ngraph.event.RepaintEvent;
+import com.faforever.neroxis.ngraph.event.ResizeCellsEvent;
+import com.faforever.neroxis.ngraph.event.RootEvent;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.SplitEdgeEvent;
+import com.faforever.neroxis.ngraph.event.ToggleCellsEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
+import com.faforever.neroxis.ngraph.event.UngroupCellsEvent;
+import com.faforever.neroxis.ngraph.event.UpEvent;
+import com.faforever.neroxis.ngraph.event.UpdateCellSizeEvent;
 import com.faforever.neroxis.ngraph.model.Cell;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.GraphModel;
@@ -20,15 +51,11 @@ import com.faforever.neroxis.ngraph.model.GraphModel.VisibleChange;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.ImageBundle;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.StyleUtils;
-import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.awt.Graphics;
@@ -41,7 +68,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,12 +200,11 @@ import org.w3c.dom.Element;
 @SuppressWarnings("unused")
 @Getter
 public class Graph extends EventSource {
-
     private static final Logger log = Logger.getLogger(Graph.class.getName());
     /**
      * Holds the list of bundles.
      */
-    protected static List<ImageBundle> imageBundles = new LinkedList<>();
+    protected static List<ImageBundle> imageBundles = new ArrayList<>();
     /**
      * Property change event handling.
      */
@@ -428,18 +453,16 @@ public class Graph extends EventSource {
      * the same pair of vertices are allowed. Default is true.
      */
     protected boolean multigraph = true;
-
     /**
      * Specifies if edges are connectable. Default is false.
      * This overrides the connectable field in edges.
      */
     protected boolean connectableEdges = false;
-
     /**
      * Specifies if edges with disconnected terminals are
      * allowed in the graph. Default is false.
      */
-    protected boolean allowDanglingEdges = true;
+    protected boolean allowDanglingEdges = false;
 
     /**
      * Specifies if edges that are cloned should be validated and only inserted
@@ -481,7 +504,6 @@ public class Graph extends EventSource {
      * Specifies if the origin should be automatically updated.
      */
     protected boolean autoOrigin = false;
-
     /**
      * Holds the current automatic origin.
      */
@@ -489,11 +511,11 @@ public class Graph extends EventSource {
     /**
      * Fires repaint events for full repaints.
      */
-    protected IEventListener fullRepaintHandler = (sender, evt) -> repaint();
+    protected IEventListener<?> fullRepaintHandler = (sender, evt) -> repaint();
     /**
      * Fires repaint events for full repaints.
      */
-    protected IEventListener updateOriginHandler = (sender, evt) -> {
+    protected IEventListener<?> updateOriginHandler = (sender, evt) -> {
         if (isAutoOrigin()) {
             updateOrigin();
         }
@@ -501,8 +523,8 @@ public class Graph extends EventSource {
     /**
      * Fires repaint events for model changes.
      */
-    protected IEventListener graphModelChangeHandler = (sender, evt) -> {
-        Rectangle dirty = graphModelChanged((IGraphModel) sender, ((UndoableEdit) evt.getProperty("edit")).getChanges());
+    protected IEventListener<ChangeEvent> graphModelChangeHandler = (sender, evt) -> {
+        Rectangle dirty = graphModelChanged((IGraphModel) sender, evt.getEdit().getChanges());
         repaint(dirty);
     };
 
@@ -588,8 +610,7 @@ public class Graph extends EventSource {
         if (view != null) {
             view.revalidate();
         }
-
-        model.addListener(Event.CHANGE, graphModelChangeHandler);
+        model.addListener(ChangeEvent.class, graphModelChangeHandler);
         changeSupport.firePropertyChange("model", oldModel, model);
         repaint();
     }
@@ -610,16 +631,15 @@ public class Graph extends EventSource {
 
         if (view != null) {
             view.revalidate();
+            // Listens to changes in the view
+            view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) fullRepaintHandler);
+            view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateOriginHandler);
+            view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) fullRepaintHandler);
+            view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) fullRepaintHandler);
+            view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateOriginHandler);
+            view.addListener(UpEvent.class, (IEventListener<UpEvent>) fullRepaintHandler);
+            view.addListener(DownEvent.class, (IEventListener<DownEvent>) fullRepaintHandler);
         }
-
-        // Listens to changes in the view
-        view.addListener(Event.SCALE, fullRepaintHandler);
-        view.addListener(Event.SCALE, updateOriginHandler);
-        view.addListener(Event.TRANSLATE, fullRepaintHandler);
-        view.addListener(Event.SCALE_AND_TRANSLATE, fullRepaintHandler);
-        view.addListener(Event.SCALE_AND_TRANSLATE, updateOriginHandler);
-        view.addListener(Event.UP, fullRepaintHandler);
-        view.addListener(Event.DOWN, fullRepaintHandler);
 
         changeSupport.firePropertyChange("view", oldView, view);
     }
@@ -822,8 +842,7 @@ public class Graph extends EventSource {
                 }
 
             }
-
-            fireEvent(new EventObject(Event.ROOT));
+            fireEvent(new RootEvent());
         } else if (change instanceof ChildChange) {
             ChildChange cc = (ChildChange) change;
 
@@ -1355,8 +1374,7 @@ public class Graph extends EventSource {
                         }
                     }
                 }
-
-                fireEvent(new EventObject(Event.ALIGN_CELLS, "cells", cells, "align", align));
+                fireEvent(new AlignCellsEvent(cells, align));
             } finally {
                 model.endUpdate();
             }
@@ -1388,7 +1406,7 @@ public class Graph extends EventSource {
 
                 // Removes all existing control points
                 resetEdge(edge);
-                fireEvent(new EventObject(Event.FLIP_EDGE, "edge", edge));
+                fireEvent(new FlipEdgeEvent(edge));
             } finally {
                 model.endUpdate();
             }
@@ -1427,7 +1445,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsOrdered(cells, back);
-            fireEvent(new EventObject(Event.ORDER_CELLS, "cells", cells, "back", back));
+            fireEvent(new OrderCellsEvent(cells, back));
         } finally {
             model.endUpdate();
         }
@@ -1455,8 +1473,7 @@ public class Graph extends EventSource {
                         model.add(parent, cells.get(i), model.getChildCount(parent) - 1);
                     }
                 }
-
-                fireEvent(new EventObject(Event.CELLS_ORDERED, "cells", cells, "back", back));
+                fireEvent(new CellsOrderedEvent(cells, back));
             } finally {
                 model.endUpdate();
             }
@@ -1548,8 +1565,7 @@ public class Graph extends EventSource {
                 index = model.getChildCount(parent);
                 cellsAdded(List.of(group), parent, index, null, null, false, false);
                 cellsResized(List.of(group), new Rectangle[]{bounds});
-
-                fireEvent(new EventObject(Event.GROUP_CELLS, "group", group, "cells", cells, "border", border));
+                fireEvent(new GroupCellsEvent(cells, group, border));
             } finally {
                 model.endUpdate();
             }
@@ -1577,13 +1593,11 @@ public class Graph extends EventSource {
      * vertices in the given children array. Edges are ignored. If the group
      * cell is a swimlane the title region is added to the bounds.
      */
-    public Rectangle getBoundsForGroup(ICell group, List<ICell> children, double border) {
+    private Rectangle getBoundsForGroup(ICell group, List<ICell> children, double border) {
         Rectangle result = getBoundingBoxFromGeometry(children);
-
         if (result != null) {
             if (isSwimlane(group)) {
                 Rectangle size = getStartSize(group);
-
                 result.setX(result.getX() - size.getWidth());
                 result.setY(result.getY() - size.getHeight());
                 result.setWidth(result.getWidth() + size.getWidth());
@@ -1609,11 +1623,10 @@ public class Graph extends EventSource {
      *
      * @return Returns a new group cell.
      */
-    public ICell createGroupCell(List<ICell> cells) {
+    private ICell createGroupCell(List<ICell> cells) {
         Cell group = new Cell("", new Geometry(), null);
         group.setVertex(true);
         group.setConnectable(false);
-
         return group;
     }
 
@@ -1653,9 +1666,8 @@ public class Graph extends EventSource {
                         result.addAll(children);
                     }
                 }
-
                 cellsRemoved(addAllEdges(cells));
-                fireEvent(new EventObject(Event.UNGROUP_CELLS, "cells", cells));
+                fireEvent(new UngroupCellsEvent(cells));
             } finally {
                 model.endUpdate();
             }
@@ -1688,9 +1700,8 @@ public class Graph extends EventSource {
         try {
             ICell parent = getDefaultParent();
             int index = model.getChildCount(parent);
-
             cellsAdded(cells, parent, index, null, null, true);
-            fireEvent(new EventObject(Event.REMOVE_CELLS_FROM_PARENT, "cells", cells));
+            fireEvent(new RemoveCellsFromParentEvent(cells));
         } finally {
             model.endUpdate();
         }
@@ -2150,7 +2161,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsAdded(cells, parent, index, source, target, false, true);
-            fireEvent(new EventObject(Event.ADD_CELLS, "cells", cells, "parent", parent, "index", index, "source", source, "target", target));
+            fireEvent(new AddCellsEvent(cells, parent, index, source, target));
         } finally {
             model.endUpdate();
         }
@@ -2236,8 +2247,7 @@ public class Graph extends EventSource {
                         }
                     }
                 }
-
-                fireEvent(new EventObject(Event.CELLS_ADDED, "cells", cells, "parent", parent, "index", index, "source", source, "target", target, "absolute", absolute));
+                fireEvent(new CellsAddedEvent(cells, parent, index, source, target, absolute));
 
             } finally {
                 model.endUpdate();
@@ -2287,7 +2297,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsRemoved(cells);
-            fireEvent(new EventObject(Event.REMOVE_CELLS, "cells", cells, "includeEdges", includeEdges));
+            fireEvent(new RemoveCellsEvent(cells, includeEdges));
         } finally {
             model.endUpdate();
         }
@@ -2348,8 +2358,7 @@ public class Graph extends EventSource {
 
                     model.remove(cell);
                 }
-
-                fireEvent(new EventObject(Event.CELLS_REMOVED, "cells", cells));
+                fireEvent(new CellsRemovedEvent(cells));
             } finally {
                 model.endUpdate();
             }
@@ -2389,7 +2398,7 @@ public class Graph extends EventSource {
             cellsAdded(cells, parent, model.getChildCount(parent), null, null, true);
             cellsAdded(List.of(newEdge), parent, model.getChildCount(parent), source, cells.get(0), false);
             cellConnected(edge, cells.get(0), true, null);
-            fireEvent(new EventObject(Event.SPLIT_EDGE, "edge", edge, "cells", cells, "newEdge", newEdge, "dx", dx, "dy", dy));
+            fireEvent(new SplitEdgeEvent(cells, dx, dy, edge, newEdge));
         } finally {
             model.endUpdate();
         }
@@ -2448,7 +2457,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsToggled(cells, show);
-            fireEvent(new EventObject(Event.TOGGLE_CELLS, "show", show, "cells", cells, "includeEdges", includeEdges));
+            fireEvent(new ToggleCellsEvent(cells, show, includeEdges));
         } finally {
             model.endUpdate();
         }
@@ -2532,7 +2541,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsFolded(cells, collapse, recurse, checkFoldable);
-            fireEvent(new EventObject(Event.FOLD_CELLS, "cells", cells, "collapse", collapse, "recurse", recurse));
+            fireEvent(new FoldCellsEvent(cells, collapse, recurse));
         } finally {
             model.endUpdate();
         }
@@ -2578,8 +2587,7 @@ public class Graph extends EventSource {
                         }
                     }
                 }
-
-                fireEvent(new EventObject(Event.CELLS_FOLDED, "cells", cells, "collapse", collapse, "recurse", recurse));
+                fireEvent(new CellsFoldedEvent(cells, collapse, recurse));
             } finally {
                 model.endUpdate();
             }
@@ -2709,7 +2717,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellSizeUpdated(cell, ignoreChildren);
-            fireEvent(new EventObject(Event.UPDATE_CELL_SIZE, "cell", cell, "ignoreChildren", ignoreChildren));
+            fireEvent(new UpdateCellSizeEvent(cell, ignoreChildren));
         } finally {
             model.endUpdate();
         }
@@ -2886,7 +2894,7 @@ public class Graph extends EventSource {
         model.beginUpdate();
         try {
             cellsResized(cells, bounds);
-            fireEvent(new EventObject(Event.RESIZE_CELLS, "cells", cells, "bounds", bounds));
+            fireEvent(new ResizeCellsEvent(cells, bounds));
         } finally {
             model.endUpdate();
         }
@@ -2945,8 +2953,7 @@ public class Graph extends EventSource {
                 if (isResetEdgesOnResize()) {
                     resetEdges(cells);
                 }
-
-                fireEvent(new EventObject(Event.CELLS_RESIZED, "cells", cells, "bounds", bounds));
+                fireEvent(new CellsResizedEvent(cells, bounds));
             } finally {
                 model.endUpdate();
             }
@@ -3041,8 +3048,7 @@ public class Graph extends EventSource {
                     Integer index = model.getChildCount(target);
                     cellsAdded(cells, target, index, null, null, true);
                 }
-
-                fireEvent(new EventObject(Event.MOVE_CELLS, "cells", cells, "dx", dx, "dy", dy, "clone", clone, "target", target, "location", location));
+                fireEvent(new MoveCellsEvent(cells, dx, dy, clone, target, location));
             } finally {
                 model.endUpdate();
             }
@@ -3075,8 +3081,7 @@ public class Graph extends EventSource {
                 if (isResetEdgesOnMove()) {
                     resetEdges(cells);
                 }
-
-                fireEvent(new EventObject(Event.CELLS_MOVED, "cells", cells, "dx", dx, "dy", dy, "disconnect", disconnect));
+                fireEvent(new CellsMovedEvent(cells, dx, dy, disconnect));
             } finally {
                 model.endUpdate();
             }
@@ -3451,7 +3456,7 @@ public class Graph extends EventSource {
         try {
             ICell previous = model.getTerminal(edge, source);
             cellConnected(edge, terminal, source, constraint);
-            fireEvent(new EventObject(Event.CONNECT_CELL, "edge", edge, "terminal", terminal, "source", source, "previous", previous));
+            fireEvent(new ConnectCellEvent(edge, terminal, previous, source));
         } finally {
             model.endUpdate();
         }
@@ -3499,8 +3504,7 @@ public class Graph extends EventSource {
                 if (isResetEdgesOnConnect()) {
                     resetEdge(edge);
                 }
-
-                fireEvent(new EventObject(Event.CELL_CONNECTED, "edge", edge, "terminal", terminal, "source", source, "previous", previous));
+                fireEvent(new CellConnectedEvent(edge, terminal, previous, source));
             } finally {
                 model.endUpdate();
             }
@@ -3919,7 +3923,7 @@ public class Graph extends EventSource {
      * to be repainted.
      */
     public void repaint(Rectangle region) {
-        fireEvent(new EventObject(Event.REPAINT, "region", region));
+        fireEvent(new RepaintEvent(region));
     }
 
     /**
@@ -5092,9 +5096,8 @@ public class Graph extends EventSource {
      */
     public boolean isSplitTarget(ICell target, List<ICell> cells) {
         if (target != null && cells != null && cells.size() == 1) {
-            ICell src = model.getTerminal(target, true);
-            ICell trg = model.getTerminal(target, false);
-
+            ICell src = model.getSource(target);
+            ICell trg = model.getTarget(target);
             return (model.isEdge(target) && isCellConnectable(cells.get(0)) && getEdgeValidationError(target, model.getTerminal(target, true), cells.get(0)) == null && !model.isAncestor(cells.get(0), src) && !model.isAncestor(cells.get(0), trg));
         }
 
@@ -5145,8 +5148,7 @@ public class Graph extends EventSource {
         while (cell != null && !isValidDropTarget(cell, cells) && model.getParent(cell) != model.getRoot()) {
             cell = model.getParent(cell);
         }
-
-        return (model.getParent(cell) != model.getRoot() && !cells.contains(cell)) ? cell : null;
+        return (model.getParent(cell) != model.getRoot() && cell != null && cells != null && !cells.contains(cell)) ? cell : null;
     }
 
     /**
@@ -5437,7 +5439,7 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Returns all distincts visible opposite cells for the specified terminal
+     * Returns all distinct visible opposite cells for the specified terminal
      * on the given edges.
      *
      * @param edges    Edges whose opposite terminals should be returned.
@@ -6125,7 +6127,6 @@ public class Graph extends EventSource {
 
     @Override
     public String toString() {
-
         return getClass().getSimpleName() + " [model=" + model + ", view=" + view + "]";
     }
 

@@ -3,12 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.swing.util;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.view.CellStatePreview;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
 import com.faforever.neroxis.ngraph.util.Point;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -64,13 +63,9 @@ public class Morphing extends Animation {
      */
     public Morphing(GraphComponent graphComponent) {
         this(graphComponent, 6, 1.5, DEFAULT_DELAY);
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> {
+            paint(evt.getGraphics());
         });
     }
 

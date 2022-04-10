@@ -1,15 +1,13 @@
 package com.faforever.neroxis.generator.graph.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@ToString
 public strictfp class MaskMethodEdge {
-    private final String resultName;
-    private final String parameterName;
-
-    public String toString() {
-        return resultName;
-    }
+    String resultName;
+    String parameterName;
 }

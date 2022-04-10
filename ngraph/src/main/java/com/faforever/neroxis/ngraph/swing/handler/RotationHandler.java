@@ -1,12 +1,9 @@
 package com.faforever.neroxis.ngraph.swing.handler;
 
+import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.swing.util.MouseAdapter;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource.IEventListener;
 import com.faforever.neroxis.ngraph.util.Rectangle;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -14,6 +11,7 @@ import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -67,19 +65,13 @@ public class RotationHandler extends MouseAdapter {
         this.graphComponent = graphComponent;
         graphComponent.addMouseListener(this);
         handle = createHandle();
-
         // Installs the paint handler
-        graphComponent.addListener(Event.AFTER_PAINT, new IEventListener() {
-            public void invoke(Object sender, EventObject evt) {
-                Graphics g = (Graphics) evt.getProperty("g");
-                paint(g);
-            }
+        graphComponent.addListener(AfterPaintEvent.class, (sender, evt) -> {
+            paint(evt.getGraphics());
         });
-
         // Listens to all mouse events on the rendering control
         graphComponent.getGraphControl().addMouseListener(this);
         graphComponent.getGraphControl().addMouseMotionListener(this);
-
         // Needs to catch events because these are consumed
         handle.addMouseListener(this);
         handle.addMouseMotionListener(this);

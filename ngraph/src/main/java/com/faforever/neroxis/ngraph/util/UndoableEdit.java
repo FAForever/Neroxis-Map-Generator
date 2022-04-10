@@ -6,9 +6,6 @@ package com.faforever.neroxis.ngraph.util;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implements a 2-dimensional rectangle with double precision coordinates.
- */
 public class UndoableEdit {
 
     /**
@@ -18,11 +15,11 @@ public class UndoableEdit {
     /**
      * Holds the list of changes that make up this undoable edit.
      */
-    protected List<UndoableChange> changes = new ArrayList<UndoableChange>();
+    protected List<UndoableChange> changes = new ArrayList<>();
     /**
      * Specifies this undoable edit is significant. Default is true.
      */
-    protected boolean significant = true;
+    protected boolean significant;
     /**
      * Specifies the state of the undoable edit.
      */
@@ -127,10 +124,7 @@ public class UndoableEdit {
 
     public void redo() {
         if (!redone) {
-            int count = changes.size();
-
-            for (int i = 0; i < count; i++) {
-                UndoableChange change = changes.get(i);
+            for (UndoableChange change : changes) {
                 change.execute();
             }
 

@@ -5,8 +5,7 @@ import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
@@ -36,11 +35,11 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public IntegerMask(IntegerMask other) {
+    protected IntegerMask(IntegerMask other) {
         this(other, null);
     }
 
-    public IntegerMask(IntegerMask other, String name) {
+    protected IntegerMask(IntegerMask other, String name) {
         super(other, name);
     }
 

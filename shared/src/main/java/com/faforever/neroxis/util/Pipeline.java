@@ -2,8 +2,6 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.debugger.VisualDebugger;
 import com.faforever.neroxis.mask.Mask;
-import lombok.Getter;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
 public strictfp class Pipeline {
 
@@ -46,7 +45,7 @@ public strictfp class Pipeline {
 
         if (DebugUtil.DEBUG) {
             callingMethod = DebugUtil.getStackTraceTopMethodInPackage("com.faforever.neroxis.mask", "TestingGround");
-            callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.map.generator");
+            callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.generator");
         }
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);

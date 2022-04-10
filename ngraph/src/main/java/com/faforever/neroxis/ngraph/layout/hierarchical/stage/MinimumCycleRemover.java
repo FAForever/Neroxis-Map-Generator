@@ -44,7 +44,7 @@ public class MinimumCycleRemover implements HierarchicalLayoutStage {
      */
     public void execute(Object parent) {
         GraphHierarchyModel model = layout.getModel();
-        final Set<GraphHierarchyNode> seenNodes = new HashSet<GraphHierarchyNode>();
+        final Set<GraphHierarchyNode> seenNodes = new HashSet<>();
         final Set<GraphHierarchyNode> unseenNodes = new HashSet<>(model.getVertexMapper().values());
 
         // Perform a dfs through the internal model. If a cycle is found,

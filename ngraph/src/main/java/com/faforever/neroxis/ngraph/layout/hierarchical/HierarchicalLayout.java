@@ -163,6 +163,7 @@ public class HierarchicalLayout extends GraphLayout {
         }
 
         if (roots != null && parent != null) {
+            roots = new ArrayList<>(roots);
             roots.removeIf(root -> !model.isAncestor(parent, root));
         }
 
@@ -204,7 +205,7 @@ public class HierarchicalLayout extends GraphLayout {
                 int fanIn = 0;
 
                 for (ICell conn : conns) {
-                    Object src = graph.getView().getVisibleTerminal(conn, true);
+                    ICell src = graph.getView().getVisibleTerminal(conn, true);
 
                     if (src == vertex) {
                         fanOut++;

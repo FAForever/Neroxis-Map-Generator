@@ -3,24 +3,31 @@ package com.faforever.neroxis.debugger;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.event.MouseInputAdapter;
 
 public class EntryPanel extends JPanel {
     private final JLabel titleLabel = new JLabel();
     private final JLabel valueLabel = new JLabel();
     private final ImagePanel imagePanel = new ImagePanel();
 
-    public EntryPanel(Dimension minSize) {
-        setPreferredSize(minSize);
+    public EntryPanel() {
         setLayout(new BorderLayout());
+        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         setupImagePanel();
         setupLabels();
     }

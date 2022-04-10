@@ -70,16 +70,15 @@ public class Cell implements ICell, Cloneable, Serializable {
      * true, true and false respectively.
      */
     protected boolean vertex = false, edge = false, connectable = true, visible = true, collapsed = false;
-
     /**
      * Reference to the parent cell and source and target terminals for edges.
      */
     protected ICell parent, source, target;
-
     /**
      * Holds the child cells and connected edges.
      */
-    protected List<ICell> children, edges;
+    protected final List<ICell> children = new ArrayList<>();
+    protected final List<ICell> edges = new ArrayList<>();
 
     /**
      * Constructs a new cell with an empty user object.
@@ -156,13 +155,7 @@ public class Cell implements ICell, Cloneable, Serializable {
         if (child != null) {
             child.removeFromParent();
             child.setParent(this);
-
-            if (children == null) {
-                children = new ArrayList<>();
-                children.add(child);
-            } else {
-                children.add(index, child);
-            }
+            children.add(index, child);
         }
 
         return child;
@@ -210,12 +203,7 @@ public class Cell implements ICell, Cloneable, Serializable {
         if (edge != null) {
             edge.removeFromTerminal(isOutgoing);
             edge.setTerminal(this, isOutgoing);
-
-            if (edges == null || edge.getTerminal(!isOutgoing) != this || !edges.contains(edge)) {
-                if (edges == null) {
-                    edges = new ArrayList<>();
-                }
-
+            if (edge.getTerminal(!isOutgoing) != this || !edges.contains(edge)) {
                 edges.add(edge);
             }
         }
@@ -296,9 +284,8 @@ public class Cell implements ICell, Cloneable, Serializable {
     /**
      * Returns a clone of the cell.
      */
-    public Object clone() throws CloneNotSupportedException {
+    public Cell clone() throws CloneNotSupportedException {
         Cell clone = (Cell) super.clone();
-
         clone.setValue(cloneValue());
         clone.setStyle(getStyle());
         clone.setCollapsed(isCollapsed());
@@ -306,14 +293,14 @@ public class Cell implements ICell, Cloneable, Serializable {
         clone.setEdge(isEdge());
         clone.setVertex(isVertex());
         clone.setVisible(isVisible());
+        for (ICell child : getChildren()) {
+            clone.remove(child);
+            clone.insert((ICell) child.clone());
+        }
         clone.setParent(null);
         clone.setSource(null);
         clone.setTarget(null);
-        clone.children = null;
-        clone.edges = null;
-
         Geometry geometry = getGeometry();
-
         if (geometry != null) {
             clone.setGeometry(geometry.clone());
         }

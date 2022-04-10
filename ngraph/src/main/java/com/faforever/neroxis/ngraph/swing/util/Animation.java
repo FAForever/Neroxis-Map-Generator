@@ -3,13 +3,12 @@
  */
 package com.faforever.neroxis.ngraph.swing.util;
 
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
-
-import javax.swing.*;
+import com.faforever.neroxis.ngraph.event.DoneEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.ExecuteEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Timer;
 
 /**
  * Baseclass for all timer-based animations. Fires Event.DONE when the
@@ -90,7 +89,7 @@ public class Animation extends EventSource {
      * timer fires and fires an Event.EXECUTE event with no properties.
      */
     public void updateAnimation() {
-        fireEvent(new EventObject(Event.EXECUTE));
+        fireEvent(new ExecuteEvent(null));
     }
 
     /**
@@ -100,7 +99,7 @@ public class Animation extends EventSource {
         if (timer != null) {
             timer.stop();
             timer = null;
-            fireEvent(new EventObject(Event.DONE));
+            fireEvent(new DoneEvent());
         }
     }
 

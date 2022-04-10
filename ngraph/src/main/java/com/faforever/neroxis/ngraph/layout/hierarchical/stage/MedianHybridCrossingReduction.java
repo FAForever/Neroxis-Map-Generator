@@ -15,7 +15,6 @@ import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphAbstractHierarchyCell;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyModel;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyRank;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +36,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
      * The maximum number of iterations to perform whilst reducing edge
      * crossings
      */
-    protected int maxIterations = 24;
+    protected int maxIterations = 50;
 
     /**
      * Stores each rank as a collection of cells in the best order found for
@@ -72,7 +71,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
         nestedBestRanks = new GraphAbstractHierarchyCell[model.ranks.size()][];
 
         for (int i = 0; i < nestedBestRanks.length; i++) {
-            GraphHierarchyRank rank = model.ranks.get(new Integer(i));
+            GraphHierarchyRank rank = model.ranks.get(i);
             nestedBestRanks[i] = new GraphAbstractHierarchyCell[rank.size()];
             rank.toArray(nestedBestRanks[i]);
         }
@@ -91,7 +90,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
 
                 // Store the current rankings as the best ones
                 for (int j = 0; j < nestedBestRanks.length; j++) {
-                    GraphHierarchyRank rank = model.ranks.get(new Integer(j));
+                    GraphHierarchyRank rank = model.ranks.get(j);
                     Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
 
                     for (int k = 0; k < rank.size(); k++) {
@@ -106,7 +105,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
 
                 // Restore the best values to the cells
                 for (int j = 0; j < nestedBestRanks.length; j++) {
-                    GraphHierarchyRank rank = model.ranks.get(new Integer(j));
+                    GraphHierarchyRank rank = model.ranks.get(j);
                     Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
 
                     for (int k = 0; k < rank.size(); k++) {
@@ -123,12 +122,12 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
         }
 
         // Store the best rankings but in the model
-        Map<Integer, GraphHierarchyRank> ranks = new LinkedHashMap<Integer, GraphHierarchyRank>(model.maxRank + 1);
+        Map<Integer, GraphHierarchyRank> ranks = new LinkedHashMap<>(model.maxRank + 1);
         GraphHierarchyRank[] rankList = new GraphHierarchyRank[model.maxRank + 1];
 
         for (int i = 0; i < model.maxRank + 1; i++) {
             rankList[i] = new GraphHierarchyRank();
-            ranks.put(new Integer(i), rankList[i]);
+            ranks.put(i, rankList[i]);
         }
 
         for (int i = 0; i < nestedBestRanks.length; i++) {
@@ -170,25 +169,17 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
      */
     protected int calculateRankCrossing(int i, GraphHierarchyModel model) {
         int totalCrossings = 0;
-        GraphHierarchyRank rank = model.ranks.get(new Integer(i));
-        GraphHierarchyRank previousRank = model.ranks.get(new Integer(i - 1));
-
+        GraphHierarchyRank rank = model.ranks.get(i);
+        GraphHierarchyRank previousRank = model.ranks.get(i - 1);
         // Create an array of connections between these two levels
         int currentRankSize = rank.size();
         int previousRankSize = previousRank.size();
         int[][] connections = new int[currentRankSize][previousRankSize];
-
         // Iterate over the top rank and fill in the connection information
-        Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
-        while (iter.hasNext()) {
-            GraphAbstractHierarchyCell cell = iter.next();
+        for (GraphAbstractHierarchyCell cell : rank) {
             int rankPosition = cell.getGeneralPurposeVariable(i);
             Collection<GraphAbstractHierarchyCell> connectedCells = cell.getPreviousLayerConnectedCells(i);
-            Iterator<GraphAbstractHierarchyCell> iter2 = connectedCells.iterator();
-
-            while (iter2.hasNext()) {
-                GraphAbstractHierarchyCell connectedCell = iter2.next();
+            for (GraphAbstractHierarchyCell connectedCell : connectedCells) {
                 int otherCellRankPosition = connectedCell.getGeneralPurposeVariable(i - 1);
                 connections[rankPosition][otherCellRankPosition] = 201207;
             }
@@ -247,28 +238,23 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
             improved = false;
 
             for (int i = 0; i < model.ranks.size(); i++) {
-                GraphHierarchyRank rank = model.ranks.get(new Integer(i));
+                GraphHierarchyRank rank = model.ranks.get(i);
                 GraphAbstractHierarchyCell[] orderedCells = new GraphAbstractHierarchyCell[rank.size()];
                 Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
                 for (int j = 0; j < orderedCells.length; j++) {
                     GraphAbstractHierarchyCell cell = iter.next();
                     orderedCells[cell.getGeneralPurposeVariable(i)] = cell;
                 }
-
-                List<GraphAbstractHierarchyCell> leftCellAboveConnections = null;
-                List<GraphAbstractHierarchyCell> leftCellBelowConnections = null;
+                List<GraphAbstractHierarchyCell> leftCellAboveConnections;
+                List<GraphAbstractHierarchyCell> leftCellBelowConnections;
                 List<GraphAbstractHierarchyCell> rightCellAboveConnections = null;
                 List<GraphAbstractHierarchyCell> rightCellBelowConnections = null;
-
-                int[] leftAbovePositions = null;
-                int[] leftBelowPositions = null;
+                int[] leftAbovePositions;
+                int[] leftBelowPositions;
                 int[] rightAbovePositions = null;
                 int[] rightBelowPositions = null;
-
-                GraphAbstractHierarchyCell leftCell = null;
+                GraphAbstractHierarchyCell leftCell;
                 GraphAbstractHierarchyCell rightCell = null;
-
                 for (int j = 0; j < (rank.size() - 1); j++) {
                     // For each intra-rank adjacent pair of cells
                     // see if swapping them around would reduce the
@@ -305,42 +291,34 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
 
                     rightAbovePositions = new int[rightCellAboveConnections.size()];
                     rightBelowPositions = new int[rightCellBelowConnections.size()];
-
                     for (int k = 0; k < rightAbovePositions.length; k++) {
                         rightAbovePositions[k] = (rightCellAboveConnections.get(k)).getGeneralPurposeVariable(i + 1);
                     }
-
                     for (int k = 0; k < rightBelowPositions.length; k++) {
                         rightBelowPositions[k] = (rightCellBelowConnections.get(k)).getGeneralPurposeVariable(i - 1);
                     }
-
                     int totalCurrentCrossings = 0;
                     int totalSwitchedCrossings = 0;
-
-                    for (int k = 0; k < leftAbovePositions.length; k++) {
-                        for (int ik = 0; ik < rightAbovePositions.length; ik++) {
-                            if (leftAbovePositions[k] > rightAbovePositions[ik]) {
+                    for (int leftAbovePosition : leftAbovePositions) {
+                        for (int rightAbovePosition : rightAbovePositions) {
+                            if (leftAbovePosition > rightAbovePosition) {
                                 totalCurrentCrossings++;
                             }
-
-                            if (leftAbovePositions[k] < rightAbovePositions[ik]) {
+                            if (leftAbovePosition < rightAbovePosition) {
                                 totalSwitchedCrossings++;
                             }
                         }
                     }
-
-                    for (int k = 0; k < leftBelowPositions.length; k++) {
-                        for (int ik = 0; ik < rightBelowPositions.length; ik++) {
-                            if (leftBelowPositions[k] > rightBelowPositions[ik]) {
+                    for (int leftBelowPosition : leftBelowPositions) {
+                        for (int rightBelowPosition : rightBelowPositions) {
+                            if (leftBelowPosition > rightBelowPosition) {
                                 totalCurrentCrossings++;
                             }
-
-                            if (leftBelowPositions[k] < rightBelowPositions[ik]) {
+                            if (leftBelowPosition < rightBelowPosition) {
                                 totalSwitchedCrossings++;
                             }
                         }
                     }
-
                     if ((totalSwitchedCrossings < totalCurrentCrossings) || (totalSwitchedCrossings == totalCurrentCrossings && nudge)) {
                         int temp = leftCell.getGeneralPurposeVariable(i);
                         leftCell.setGeneralPurposeVariable(i, rightCell.getGeneralPurposeVariable(i));
@@ -398,7 +376,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
      */
     private void medianRank(int rankValue, boolean downwardSweep) {
         int numCellsForRank = nestedBestRanks[rankValue].length;
-        ArrayList<MedianCellSorter> medianValues = new ArrayList<MedianCellSorter>(numCellsForRank);
+        ArrayList<MedianCellSorter> medianValues = new ArrayList<>(numCellsForRank);
         boolean[] reservedPositions = new boolean[numCellsForRank];
 
         for (int i = 0; i < numCellsForRank; i++) {
@@ -435,8 +413,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
                 reservedPositions[cell.getGeneralPurposeVariable(rankValue)] = true;
             }
         }
-
-        MedianCellSorter[] medianArray = medianValues.toArray(new MedianCellSorter[medianValues.size()]);
+        MedianCellSorter[] medianArray = medianValues.toArray(new MedianCellSorter[0]);
         Arrays.sort(medianArray);
 
         // Set the new position of each node within the rank using
@@ -463,14 +440,10 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
     private double medianValue(Collection<GraphAbstractHierarchyCell> connectedCells, int rankValue) {
         double[] medianValues = new double[connectedCells.size()];
         int arrayCount = 0;
-        Iterator<GraphAbstractHierarchyCell> iter = connectedCells.iterator();
-
-        while (iter.hasNext()) {
-            medianValues[arrayCount++] = (iter.next()).getGeneralPurposeVariable(rankValue);
+        for (GraphAbstractHierarchyCell connectedCell : connectedCells) {
+            medianValues[arrayCount++] = connectedCell.getGeneralPurposeVariable(rankValue);
         }
-
         Arrays.sort(medianValues);
-
         if (arrayCount % 2 == 1) {
             // For odd numbers of adjacent vertices return the median
             return medianValues[arrayCount / 2];
@@ -489,13 +462,11 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*,
      * A utility class used to track cells whilst sorting occurs on the median
      * values. Does not violate (x.compareTo(y)==0) == (x.equals(y))
      */
-    protected class MedianCellSorter implements Comparable<Object> {
-
+    protected static class MedianCellSorter implements Comparable<Object> {
         /**
          * The median value of the cell stored
          */
         public double medianValue = 0.0;
-
         /**
          * The cell whose median value is being calculated
          */

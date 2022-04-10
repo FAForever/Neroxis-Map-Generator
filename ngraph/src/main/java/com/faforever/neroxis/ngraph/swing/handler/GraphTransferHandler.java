@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.io.Serial;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,11 +22,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
-/**
- *
- */
+@SuppressWarnings("unused")
 public class GraphTransferHandler extends TransferHandler {
-
+    @Serial
     private static final long serialVersionUID = -6443287704811197675L;
     private static final Logger log = Logger.getLogger(GraphTransferHandler.class.getName());
 

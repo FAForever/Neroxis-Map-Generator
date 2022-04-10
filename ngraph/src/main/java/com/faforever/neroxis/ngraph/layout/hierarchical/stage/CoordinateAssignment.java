@@ -268,16 +268,15 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      */
     private void minNode(GraphHierarchyModel model) {
         // Queue all nodes
-        LinkedList<WeightedCellSorter> nodeList = new LinkedList<WeightedCellSorter>();
+        LinkedList<WeightedCellSorter> nodeList = new LinkedList<>();
 
         // Need to be able to map from cell to cellWrapper
         Map<GraphAbstractHierarchyCell, WeightedCellSorter> map = new Hashtable<GraphAbstractHierarchyCell, WeightedCellSorter>();
         GraphAbstractHierarchyCell[][] rank = new GraphAbstractHierarchyCell[model.maxRank + 1][];
 
         for (int i = 0; i <= model.maxRank; i++) {
-            GraphHierarchyRank rankSet = model.ranks.get(new Integer(i));
-            rank[i] = rankSet.toArray(new GraphAbstractHierarchyCell[rankSet.size()]);
-
+            GraphHierarchyRank rankSet = model.ranks.get(i);
+            rank[i] = rankSet.toArray(new GraphAbstractHierarchyCell[0]);
             for (int j = 0; j < rank[i].length; j++) {
                 // Use the weight to store the rank and visited to store whether
                 // or not the cell is in the list

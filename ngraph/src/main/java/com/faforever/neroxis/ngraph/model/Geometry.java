@@ -272,8 +272,6 @@ public class Geometry extends Rectangle {
 
         // Translate the control points
         if (TRANSLATE_CONTROL_POINTS && points != null) {
-            int count = points.size();
-
             for (Point pt : points) {
                 pt.setX(pt.getX() + dx);
                 pt.setY(pt.getY() + dy);
@@ -299,32 +297,32 @@ public class Geometry extends Rectangle {
             clone.points = new ArrayList<>(pts.size());
 
             for (Point pt : pts) {
-                clone.points.add((Point) pt.clone());
+                clone.points.add(pt.clone());
             }
         }
 
         Point tp = getTargetPoint();
 
         if (tp != null) {
-            clone.setTargetPoint((Point) tp.clone());
+            clone.setTargetPoint(tp.clone());
         }
 
         Point sp = getSourcePoint();
 
         if (sp != null) {
-            setSourcePoint((Point) sp.clone());
+            setSourcePoint(sp.clone());
         }
 
         Point off = getOffset();
 
         if (off != null) {
-            clone.setOffset((Point) off.clone());
+            clone.setOffset(off.clone());
         }
 
         Rectangle alt = getAlternateBounds();
 
         if (alt != null) {
-            setAlternateBounds((Rectangle) alt.clone());
+            setAlternateBounds(alt.clone());
         }
 
         return clone;

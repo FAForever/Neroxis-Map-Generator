@@ -4,13 +4,12 @@ import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskReflectUtil;
-
-import javax.swing.table.AbstractTableModel;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.table.AbstractTableModel;
 
 public class GraphVertexParameterTableModel extends AbstractTableModel {
 
@@ -97,8 +96,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
             Executable executable = vertex.getExecutable();
             if (executable != null) {
                 for (Parameter parameter : executable.getParameters()) {
-                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).noneMatch(annotation -> parameter.getName().equals(annotation.name())
-                            && (!annotation.value().equals("")))) {
+                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).noneMatch(annotation -> parameter.getName().equals(annotation.name()) && (!annotation.value().equals(""))) && !(Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType())))) {
                         parameters.add(parameter);
                     }
                 }

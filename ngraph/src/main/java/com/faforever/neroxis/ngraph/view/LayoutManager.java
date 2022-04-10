@@ -1,5 +1,9 @@
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.event.BeforeUndoEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.LayoutCellsEvent;
+import com.faforever.neroxis.ngraph.event.MoveCellsEvent;
 import com.faforever.neroxis.ngraph.layout.IGraphLayout;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.GraphModel.ChildChange;
@@ -8,9 +12,6 @@ import com.faforever.neroxis.ngraph.model.GraphModel.RootChange;
 import com.faforever.neroxis.ngraph.model.GraphModel.TerminalChange;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
@@ -52,30 +53,24 @@ public class LayoutManager extends EventSource {
      * passed to Cell.is to check if the rule applies to a cell.
      */
     protected Graph graph;
-
     /**
      * Optional string that specifies the value of the attribute to be passed
      * to Cell.is to check if the rule applies to a cell. Default is true.
      */
     protected boolean enabled = true;
-
     /**
      * Optional string that specifies the attributename to be passed to
      * Cell.is to check if the rule applies to a cell. Default is true.
      */
     protected boolean bubbling = true;
-
-    protected IEventListener undoHandler = new IEventListener() {
-        public void invoke(Object source, EventObject evt) {
-            if (isEnabled()) {
-                beforeUndo((UndoableEdit) evt.getProperty("edit"));
-            }
+    protected IEventListener<BeforeUndoEvent> undoHandler = (source, evt) -> {
+        if (isEnabled()) {
+            beforeUndo(evt.getEdit());
         }
     };
-
-    protected IEventListener moveHandler = (source, evt) -> {
+    protected IEventListener<MoveCellsEvent> moveHandler = (source, evt) -> {
         if (isEnabled()) {
-            cellsMoved((List<ICell>) evt.getProperty("cells"), (Point) evt.getProperty("location"));
+            cellsMoved(evt.getCells(), evt.getLocation());
         }
     };
 
@@ -132,8 +127,8 @@ public class LayoutManager extends EventSource {
 
         if (graph != null) {
             IGraphModel model = graph.getModel();
-            model.addListener(Event.BEFORE_UNDO, undoHandler);
-            graph.addListener(Event.MOVE_CELLS, moveHandler);
+            model.addListener(BeforeUndoEvent.class, undoHandler);
+            graph.addListener(MoveCellsEvent.class, moveHandler);
         }
     }
 
@@ -233,8 +228,7 @@ public class LayoutManager extends EventSource {
                         executeLayout(getLayout(cell), cell);
                     }
                 }
-
-                fireEvent(new EventObject(Event.LAYOUT_CELLS, "cells", cells));
+                fireEvent(new LayoutCellsEvent(cells));
             } finally {
                 model.endUpdate();
             }

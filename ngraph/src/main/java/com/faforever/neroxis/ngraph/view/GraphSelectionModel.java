@@ -8,10 +8,10 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.UndoEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Event;
-import com.faforever.neroxis.ngraph.util.EventObject;
-import com.faforever.neroxis.ngraph.util.EventSource;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import java.util.ArrayList;
@@ -74,7 +74,6 @@ public class GraphSelectionModel extends EventSource {
     /**
      * Constructs a new selection model for the specified graph.
      *
-     * @param graph
      */
     public GraphSelectionModel(Graph graph) {
         this.graph = graph;
@@ -97,7 +96,6 @@ public class GraphSelectionModel extends EventSource {
     /**
      * Returns true if the given cell is selected.
      *
-     * @param cell
      * @return Returns true if the given cell is selected.
      */
     public boolean isSelected(Object cell) {
@@ -246,7 +244,7 @@ public class GraphSelectionModel extends EventSource {
             change.execute();
             UndoableEdit edit = new UndoableEdit(this, false);
             edit.add(change);
-            fireEvent(new EventObject(Event.UNDO, "edit", edit));
+            fireEvent(new UndoEvent(edit));
         }
     }
 
@@ -292,7 +290,7 @@ public class GraphSelectionModel extends EventSource {
             Collection<ICell> tmp = added;
             added = removed;
             removed = tmp;
-            model.fireEvent(new EventObject(Event.CHANGE, "added", added, "removed", removed));
+            model.fireEvent(new ChangeEvent(null, null, added, removed));
         }
 
     }

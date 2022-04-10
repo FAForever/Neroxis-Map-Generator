@@ -2,13 +2,13 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
+import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
@@ -18,13 +18,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
@@ -50,11 +47,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    public BooleanMask(BooleanMask other) {
+    protected BooleanMask(BooleanMask other) {
         this(other, (String) null);
     }
 
-    public BooleanMask(BooleanMask other, String name) {
+    protected BooleanMask(BooleanMask other, String name) {
         super(other, name);
     }
 
@@ -988,12 +985,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         } else {
             coordinateList = getAllCoordinatesEqualTo(true);
         }
-        LinkedList<Vector2> chosenCoordinates = new LinkedList<>();
+        List<Vector2> chosenCoordinates = new ArrayList<>();
         enqueue(() -> {
             while (coordinateList.size() > 0) {
                 Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
                 float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
-                chosenCoordinates.addLast(location);
+                chosenCoordinates.add(location);
                 coordinateList.removeIf((loc) -> location.getDistance(loc) < spacing);
                 if (symmetryType != null) {
                     List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);

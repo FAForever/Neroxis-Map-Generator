@@ -18,7 +18,7 @@ public class Resources {
     /**
      * Ordered list of the inserted resource bundles.
      */
-    protected static LinkedList<ResourceBundle> bundles = new LinkedList<ResourceBundle>();
+    protected static LinkedList<ResourceBundle> bundles = new LinkedList<>();
 
     /**
      * Returns the bundles.
