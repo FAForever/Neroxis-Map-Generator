@@ -1,6 +1,7 @@
 package com.faforever.neroxis.ngraph.event;
 
 import com.faforever.neroxis.ngraph.model.ICell;
+import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,7 @@ import lombok.Value;
 @Value
 public class ChangeEvent extends EventObject {
     UndoableEdit edit;
-    List<UndoableEdit.UndoableChange> changes;
+    List<UndoableChange> changes;
     Collection<ICell> added;
     Collection<ICell> removed;
 }

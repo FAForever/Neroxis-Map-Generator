@@ -5,7 +5,6 @@ package com.faforever.neroxis.ngraph.model;
 
 import com.faforever.neroxis.ngraph.event.EventObject;
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
-import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import java.util.List;
 
 /**
@@ -319,49 +318,4 @@ public interface IGraphModel {
      * Removes the given listener from the list of listeners.
      */
     <T extends EventObject> void removeListener(IEventListener<T> listener);
-
-    /**
-     * Defines the interface for an atomic change of the graph model.
-     */
-    abstract class AtomicGraphModelChange implements UndoableChange {
-        /**
-         * Holds the model where the change happened.
-         */
-        protected IGraphModel model;
-
-        /**
-         * Constructs an empty atomic graph model change.
-         */
-        public AtomicGraphModelChange() {
-            this(null);
-        }
-
-        /**
-         * Constructs an atomic graph model change for the given model.
-         */
-        public AtomicGraphModelChange(IGraphModel model) {
-            this.model = model;
-        }
-
-        /**
-         * Returns the model where the change happened.
-         */
-        public IGraphModel getModel() {
-            return model;
-        }
-
-        /**
-         * Sets the model where the change is to be carried out.
-         */
-        public void setModel(IGraphModel model) {
-            this.model = model;
-        }
-
-        /**
-         * Executes the change on the model.
-         */
-        public abstract void execute();
-
-    }
-
 }

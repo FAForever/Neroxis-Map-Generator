@@ -85,6 +85,11 @@ public class PointDouble extends Point2D.Double {
         y = value;
     }
 
+    public void scale(double scale) {
+        this.x *= scale;
+        this.y *= scale;
+    }
+
     public void move(PointDouble point) {
         move(point.x, point.y);
     }

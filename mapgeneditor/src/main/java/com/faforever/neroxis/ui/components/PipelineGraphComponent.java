@@ -11,6 +11,7 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
+import com.faforever.neroxis.ngraph.swing.handler.Rubberband;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import java.awt.Component;
@@ -21,6 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -33,6 +35,7 @@ public class PipelineGraphComponent extends GraphComponent {
     public PipelineGraphComponent(PipelineGraph graph) {
         super(graph);
         setToolTips(true);
+        setFoldingEnabled(false);
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE) {
@@ -54,9 +57,21 @@ public class PipelineGraphComponent extends GraphComponent {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() != MouseEvent.BUTTON1) {
                     handlePopup(e);
+                } else if (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()) {
+                    MaskGraphVertex<?> vertex = graph.getVertexForCell(getCellAt(e.getX(), e.getY()));
+                    if (vertex != null) {
+                        List<ICell> directRelationships = graph.getDirectRelationships(vertex).stream().map(graph::getCellForVertex).filter(Objects::nonNull).collect(Collectors.toList());
+                        if (e.isShiftDown()) {
+                            graph.addSelectionCells(directRelationships);
+                        } else {
+                            graph.setSelectionCells(directRelationships);
+                        }
+                        e.consume();
+                    }
                 }
             }
         });
+        graphControl.addMouseListener(new Rubberband(this));
     }
 
     protected ConnectionHandler createConnectionHandler() {
@@ -225,6 +240,6 @@ public class PipelineGraphComponent extends GraphComponent {
     }
 
     public boolean isPanningEvent(MouseEvent event) {
-        return event != null && getCellAt(event.getX(), event.getY()) == null;
+        return event != null && !event.isShiftDown() && getCellAt(event.getX(), event.getY()) == null;
     }
 }

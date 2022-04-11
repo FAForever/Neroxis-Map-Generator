@@ -22,8 +22,8 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -50,7 +50,7 @@ public class EdgeHandler extends CellHandler {
     protected transient boolean constrainedEvent = false;
 
     protected CellMarker marker = new CellMarker(graphComponent) {
-
+        @Serial
         private static final long serialVersionUID = 8826073441093831764L;
 
         // Only returns edges if they are connectable and never returns
@@ -273,17 +273,15 @@ public class EdgeHandler extends CellHandler {
      * @return Returns the bounds of the preview.
      */
     protected Rectangle getPreviewBounds() {
-        Rectangle bounds = null;
+        Rectangle bounds;
 
         if (isLabel(index)) {
             bounds = state.getLabelBounds().getRectangle();
         } else {
             bounds = new Rectangle(p[0]);
-
-            for (int i = 0; i < p.length; i++) {
-                bounds.add(p[i]);
+            for (java.awt.Point point : p) {
+                bounds.add(point);
             }
-
             bounds.height += 1;
             bounds.width += 1;
         }
@@ -370,9 +368,9 @@ public class EdgeHandler extends CellHandler {
                 } else {
                     PointDouble point = convertPoint(new PointDouble(e.getPoint()), gridEnabledEvent);
                     if (points == null) {
-                        points = Arrays.asList(point);
+                        points = List.of(point);
                     } else if (index - 1 < points.size()) {
-                        points = new ArrayList<PointDouble>(points);
+                        points = new ArrayList<>(points);
                         points.set(index - 1, point);
                     }
                     source = view.getVisibleTerminal(state.getCell(), true);
@@ -504,15 +502,13 @@ public class EdgeHandler extends CellHandler {
                 } else {
                     List<PointDouble> pts = geometry.getPoints();
                     if (pts == null) {
-                        pts = new ArrayList<PointDouble>();
+                        pts = new ArrayList<>();
                         geometry.setPoints(pts);
                     }
-                    if (pts != null) {
-                        if (pointIndex <= pts.size()) {
-                            pts.set(pointIndex - 1, point);
-                        } else if (pointIndex - 1 <= pts.size()) {
-                            pts.add(pointIndex - 1, point);
-                        }
+                    if (pointIndex <= pts.size()) {
+                        pts.set(pointIndex - 1, point);
+                    } else if (pointIndex - 1 <= pts.size()) {
+                        pts.add(pointIndex - 1, point);
                     }
                 }
 

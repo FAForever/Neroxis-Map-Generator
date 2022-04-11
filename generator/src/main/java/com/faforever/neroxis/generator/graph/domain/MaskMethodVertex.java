@@ -37,15 +37,19 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         return (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
     }
 
+    @Override
+    public boolean isMaskParameterSet(String parameter) {
+        if (EXECUTOR.equals(parameter)) {
+            return executor != null;
+        }
+        return super.isMaskParameterSet(parameter);
+    }
+
     public void setParameter(String parameterName, Object parameterValue) {
         if (executable == null) {
             throw new IllegalStateException("Executable is not yet set");
         }
-
-        if (parameterValue != null
-                && EXECUTOR.equals(parameterName)
-                && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass())
-                && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
+        if (parameterValue != null && EXECUTOR.equals(parameterName) && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass()) && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
 
             if (executor != null) {
                 throw new IllegalStateException("executor already set");

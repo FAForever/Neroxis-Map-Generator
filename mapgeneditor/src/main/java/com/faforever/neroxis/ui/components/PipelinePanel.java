@@ -6,11 +6,11 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.graph.domain.GraphContext;
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.generator.graph.io.GraphSerializationUtil;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.ngraph.layout.hierarchical.SingleLayerHierarchicalLayout;
+import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
+import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
@@ -51,7 +51,7 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
-public strictfp class PipelinePanel extends JPanel {
+public strictfp class PipelinePanel extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
     private final PipelineGraph graph = new PipelineGraph();
     private final PipelineGraphComponent graphComponent = new PipelineGraphComponent(graph);
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel(this);
@@ -61,7 +61,7 @@ public strictfp class PipelinePanel extends JPanel {
     private final JComboBox<Integer> spawnCountComboBox = new JComboBox<>();
     private final JComboBox<Integer> numTeamsComboBox = new JComboBox<>();
     private final JComboBox<Symmetry> terrainSymmetryComboBox = new JComboBox<>();
-    SingleLayerHierarchicalLayout layout = new SingleLayerHierarchicalLayout(graph);
+    HierarchicalLayout layout = new HierarchicalLayout(graph);
     @Getter
     @Setter
     private Consumer<Pipeline.Entry> entryVertexSelectionAction;
@@ -76,7 +76,9 @@ public strictfp class PipelinePanel extends JPanel {
     }
 
     private void setupGraph() {
-        graph.addGraphListener(new PanelGraphListener());
+        layout.setTraverseAncestors(false);
+        graph.addGraphListener(this);
+        graphComponent.setTolerance(1);
         graphComponent.setViewportBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         graphComponent.setPreferredSize(new Dimension(800, 800));
         GridBagConstraints constraints = new GridBagConstraints();
@@ -93,8 +95,6 @@ public strictfp class PipelinePanel extends JPanel {
             } else {
                 graphComponent.zoomOut();
             }
-            PointDouble rawPoint = graphComponent.getPointForEvent(e);
-            graphComponent.scrollRectToVisible(new java.awt.Rectangle((int) rawPoint.getX(), (int) rawPoint.getY(), 0, 0));
         });
 
         graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
@@ -116,9 +116,9 @@ public strictfp class PipelinePanel extends JPanel {
             }
         });
         layout.setOrientation(SwingConstants.WEST);
-        layout.setInterRankCellSpacing(150);
-        layout.setInterHierarchySpacing(150);
-        layout.setIntraCellSpacing(150);
+        layout.setInterRankCellSpacing(100);
+        layout.setInterHierarchySpacing(50);
+        layout.setIntraCellSpacing(50);
     }
 
     private void setupVertexEditPanel() {
@@ -311,9 +311,19 @@ public strictfp class PipelinePanel extends JPanel {
             ICell target = edge.getTarget();
             ICell source = edge.getSource();
             ICell parentEdge = graph.getEdgesBetween(cell, target.getParent()).stream().findFirst().orElseThrow(() -> new IllegalStateException("No parent"));
-            RectangleDouble sourceBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
-            RectangleDouble targetBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
-            edge.getGeometry().setPoints(parentEdge.getGeometry().getPoints().stream().filter(point -> !sourceBoundingBox.contains(point.getX(), point.getY()) && !targetBoundingBox.contains(point.getX(), point.getY())).collect(Collectors.toList()));
+            RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
+            RectangleDouble targetParentBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
+            targetParentBoundingBox.grow(20);
+            List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
+                PointDouble transformedPoint = graph.getView().transformControlPoint(graph.getView().getState(edge), point);
+                return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY()) && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
+            }).collect(Collectors.toList());
+            Geometry targetGeometry = target.getGeometry();
+            Geometry targetParentGeometry = target.getParent().getGeometry();
+            RectangleDouble targetRectangle = new RectangleDouble(targetParentGeometry.getX() + targetGeometry.getX() * targetParentGeometry.getWidth(), targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(), targetGeometry.getWidth(), targetGeometry.getHeight());
+            PointDouble endPoint = new PointDouble(targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10, targetRectangle.getCenterY());
+            points.add(endPoint);
+            edge.getGeometry().setPoints(points);
             edge.setTarget(target);
             edge.setSource(source);
         })));
@@ -339,43 +349,33 @@ public strictfp class PipelinePanel extends JPanel {
     }
 
     public void updateIdentifiers(MaskGraphVertex<?> vertex) {
-        MaskGraphVertex<?> nextVertex = vertex;
         String identifier = vertex.getIdentifier();
-        while (nextVertex != null) {
-            graph.getCellForVertex(nextVertex).setValue(identifier);
-            nextVertex.setIdentifier(identifier);
-            nextVertex = graph.outgoingEdgesOf(nextVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(graph::getEdgeTarget).findFirst().orElse(null);
-        }
-        MaskGraphVertex<?> previousVertex = vertex;
-        while (previousVertex != null) {
-            graph.getCellForVertex(previousVertex).setValue(identifier);
-            previousVertex.setIdentifier(identifier);
-            previousVertex = graph.incomingEdgesOf(previousVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(graph::getEdgeSource).findFirst().orElse(null);
-        }
+        graph.getDirectRelationships(vertex).forEach(node -> {
+            node.setIdentifier(identifier);
+            graph.getCellForVertex(node).setValue(identifier);
+        });
         graph.refresh();
     }
 
-    private class PanelGraphListener implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
-        @Override
-        public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-            vertexEditPanel.updatePanel();
-            updateIdentifiers(e.getEdgeSource());
-        }
+    @Override
+    public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
+        vertexEditPanel.updatePanel();
+        updateIdentifiers(e.getEdgeSource());
+    }
 
-        @Override
-        public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-            vertexEditPanel.updatePanel();
-            updateIdentifiers(e.getEdgeTarget());
-        }
+    @Override
+    public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
+        vertexEditPanel.updatePanel();
+        updateIdentifiers(e.getEdgeTarget());
+    }
 
-        @Override
-        public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
-            vertexEditPanel.updatePanel();
-        }
+    @Override
+    public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+        vertexEditPanel.updatePanel();
+    }
 
-        @Override
-        public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
-            vertexEditPanel.updatePanel();
-        }
+    @Override
+    public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+        vertexEditPanel.updatePanel();
     }
 }

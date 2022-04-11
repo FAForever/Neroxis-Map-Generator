@@ -44,15 +44,15 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
     /**
      * The minimum buffer between cells on the same rank
      */
-    protected double intraCellSpacing = 30.0;
+    protected double intraCellSpacing;
     /**
      * The minimum distance between cells on adjacent ranks
      */
-    protected double interRankCellSpacing = 30.0;
+    protected double interRankCellSpacing;
     /**
      * The distance between each parallel edge on each ranks for long edges
      */
-    protected double parallelEdgeSpacing = 4.0;
+    protected double parallelEdgeSpacing;
     /**
      * The buffer on either side of a vertex where edges must not connect.
      */
@@ -92,7 +92,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * The position of the root ( start ) node(s) relative to the rest of the
      * laid out graph
      */
-    protected int orientation = SwingConstants.NORTH;
+    protected int orientation;
     /**
      * The minimum x position node placement starts at
      */
@@ -186,11 +186,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             msg.append("Rank ");
             msg.append(j);
             msg.append(" : ");
-            GraphHierarchyRank rank = model.ranks.get(new Integer(j));
-            Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
-            while (iter.hasNext()) {
-                GraphAbstractHierarchyCell cell = iter.next();
+            GraphHierarchyRank rank = model.ranks.get(j);
+            for (GraphAbstractHierarchyCell cell : rank) {
                 msg.append(cell.getX(j));
                 msg.append("  ");
             }
@@ -228,11 +225,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 // positioning is used
                 if (currentXDelta < bestXDelta) {
                     for (int j = 0; j < model.ranks.size(); j++) {
-                        GraphHierarchyRank rank = model.ranks.get(new Integer(j));
-                        Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
-                        while (iter.hasNext()) {
-                            GraphAbstractHierarchyCell cell = iter.next();
+                        GraphHierarchyRank rank = model.ranks.get(j);
+                        for (GraphAbstractHierarchyCell cell : rank) {
                             cell.setX(j, cell.getGeneralPurposeVariable(j));
                         }
                     }
@@ -241,11 +235,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 } else {
                     // Restore the best positions
                     for (int j = 0; j < model.ranks.size(); j++) {
-                        GraphHierarchyRank rank = model.ranks.get(new Integer(j));
-                        Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
-                        while (iter.hasNext()) {
-                            GraphAbstractHierarchyCell cell = iter.next();
+                        GraphHierarchyRank rank = model.ranks.get(j);
+                        for (GraphAbstractHierarchyCell cell : rank) {
                             cell.setGeneralPurposeVariable(j, (int) cell.getX(j));
                         }
                     }
@@ -317,7 +308,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             double cellMedian = currentPosition;
 
             if (numConnectedNeighbours > 0) {
-                cellMedian = (medianNextLevel * numNextLayerConnected + medianPreviousLevel * numPreviousLayerConnected) / numConnectedNeighbours;
+                cellMedian = (double) (medianNextLevel * numNextLayerConnected + medianPreviousLevel * numPreviousLayerConnected) / numConnectedNeighbours;
             }
 
             // Flag storing whether or not position has changed
@@ -425,7 +416,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      *                      relative to
      */
     protected void rankMedianPosition(int rankValue, GraphHierarchyModel model, int nextRankValue) {
-        GraphHierarchyRank rankSet = model.ranks.get(new Integer(rankValue));
+        GraphHierarchyRank rankSet = model.ranks.get(rankValue);
         Object[] rank = rankSet.toArray();
         // Form an array of the order in which the cells are to be processed
         // , the order is given by the weighted sum of the in or out edges,
@@ -553,11 +544,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      */
     private int calculatedWeightedValue(GraphAbstractHierarchyCell currentCell, Collection<GraphAbstractHierarchyCell> collection) {
         int totalWeight = 0;
-        Iterator<GraphAbstractHierarchyCell> iter = collection.iterator();
-
-        while (iter.hasNext()) {
-            GraphAbstractHierarchyCell cell = iter.next();
-
+        for (GraphAbstractHierarchyCell cell : collection) {
             if (currentCell.isVertex() && cell.isVertex()) {
                 totalWeight++;
             } else if (currentCell.isEdge() && cell.isEdge()) {
@@ -639,7 +626,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * @param model     an internal model of the hierarchical layout
      */
     protected void rankCoordinates(int rankValue, Graph graph, GraphHierarchyModel model) {
-        GraphHierarchyRank rank = model.ranks.get(new Integer(rankValue));
+        GraphHierarchyRank rank = model.ranks.get(rankValue);
         double maxY = 0.0;
         double localX = initialX + (widestRankValue - rankWidths[rankValue]) / 2;
 
@@ -687,8 +674,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             localX += cell.width / 2.0;
             localX += intraCellSpacing;
         }
-
-        if (boundsWarning == true) {
+        if (boundsWarning) {
             log.warning("At least one cell has no bounds");
         }
     }
@@ -713,7 +699,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
         for (int rankValue = model.maxRank; rankValue >= 0; rankValue--) {
             // Keep track of the widest cell on this rank
             double maxCellHeight = 0.0;
-            GraphHierarchyRank rank = model.ranks.get(new Integer(rankValue));
+            GraphHierarchyRank rank = model.ranks.get(rankValue);
             double localX = initialX;
 
             // Store whether or not any of the cells' bounds were unavailable so
@@ -914,7 +900,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * @return whether or not the virtual node can be moved to this position
      */
     protected boolean repositionValid(GraphHierarchyModel model, GraphAbstractHierarchyCell cell, int rank, double position) {
-        GraphHierarchyRank rankSet = model.ranks.get(new Integer(rank));
+        GraphHierarchyRank rankSet = model.ranks.get(rank);
         GraphAbstractHierarchyCell[] rankArray = rankSet.toArray(new GraphAbstractHierarchyCell[rankSet.size()]);
         int rankIndex = -1;
 
@@ -1040,34 +1026,24 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
         // Iterate through each vertex, look at the edges connected in
         // both directions.
         for (int i = 0; i < model.ranks.size(); i++) {
-            GraphHierarchyRank rank = model.ranks.get(new Integer(i));
+            GraphHierarchyRank rank = model.ranks.get(i);
 
             // Iterate over the top rank and fill in the connection information
-            Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-
-            while (iter.hasNext()) {
-                GraphAbstractHierarchyCell cell = iter.next();
-
+            for (GraphAbstractHierarchyCell cell : rank) {
                 if (cell.isVertex()) {
                     GraphAbstractHierarchyCell[] currentCells = (cell.getPreviousLayerConnectedCells(i)).toArray(new GraphAbstractHierarchyCell[cell.getPreviousLayerConnectedCells(i).size()]);
-
                     int currentRank = i - 1;
-
                     // Two loops, last connected cells, and next
                     for (int k = 0; k < 2; k++) {
                         if (currentRank > -1 && currentRank < model.ranks.size() && currentCells != null && currentCells.length > 0) {
                             WeightedCellSorter[] sortedCells = new WeightedCellSorter[currentCells.length];
-
                             for (int j = 0; j < currentCells.length; j++) {
                                 sortedCells[j] = new WeightedCellSorter(currentCells[j], -(int) currentCells[j].getX(currentRank));
                             }
-
                             Arrays.sort(sortedCells);
-
                             GraphHierarchyNode node = (GraphHierarchyNode) cell;
                             double leftLimit = node.x[0] - node.width / 2;
                             double rightLimit = leftLimit + node.width;
-
                             // Connected edge count starts at 1 to allow for buffer
                             // with edge of vertex
                             int connectedEdgeCount = 0;
@@ -1077,21 +1053,17 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                             for (int j = 0; j < sortedCells.length; j++) {
                                 GraphAbstractHierarchyCell innerCell = sortedCells[j].cell;
                                 Collection<GraphHierarchyEdge> connections;
-
                                 if (innerCell.isVertex()) {
                                     // Get the connecting edge
                                     if (k == 0) {
                                         connections = ((GraphHierarchyNode) cell).connectsAsSource;
-
                                     } else {
                                         connections = ((GraphHierarchyNode) cell).connectsAsTarget;
                                     }
-
                                     for (GraphHierarchyEdge connectedEdge : connections) {
                                         if (connectedEdge.source == innerCell || connectedEdge.target == innerCell) {
                                             connectedEdgeCount += connectedEdge.edges.size();
                                             connectedEdgeGroupCount++;
-
                                             connectedEdges[j] = connectedEdge;
                                         }
                                     }
@@ -1101,31 +1073,24 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                                     connectedEdges[j] = (GraphHierarchyEdge) innerCell;
                                 }
                             }
-
                             double requiredWidth = (connectedEdgeCount + 1) * prefHozEdgeSep;
-
                             // Add a buffer on the edges of the vertex if the edge count allows
                             if (cell.width > requiredWidth + (2 * prefHozEdgeSep)) {
                                 leftLimit += prefHozEdgeSep;
                                 rightLimit -= prefHozEdgeSep;
                             }
-
                             double availableWidth = rightLimit - leftLimit;
                             double edgeSpacing = availableWidth / connectedEdgeCount;
-
                             double currentX = leftLimit + edgeSpacing / 2.0;
                             double currentYOffset = minEdgeJetty - prefVertEdgeOff;
                             double maxYOffset = 0;
-
                             for (int j = 0; j < connectedEdges.length; j++) {
                                 int numActualEdges = connectedEdges[j].edges.size();
                                 double[] pos = jettyPositions.get(connectedEdges[j]);
-
                                 if (pos == null || pos.length != 4 * numActualEdges) {
                                     pos = new double[4 * numActualEdges];
                                     jettyPositions.put(connectedEdges[j], pos);
                                 }
-
                                 if (j < (float) connectedEdgeCount / 2.0f) {
                                     currentYOffset += prefVertEdgeOff;
                                 } else if (j > (float) connectedEdgeCount / 2.0f) {
@@ -1133,19 +1098,15 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                                 }
                                 // Ignore the case if equals, this means the second of 2
                                 // jettys with the same y (even number of edges)
-
                                 for (int m = 0; m < numActualEdges; m++) {
                                     pos[m * 4 + k * 2] = currentX;
                                     currentX += edgeSpacing;
                                     pos[m * 4 + k * 2 + 1] = currentYOffset;
                                 }
-
                                 maxYOffset = Math.max(maxYOffset, currentYOffset);
                             }
                         }
-
                         currentCells = (cell.getNextLayerConnectedCells(i)).toArray(new GraphAbstractHierarchyCell[cell.getNextLayerConnectedCells(i).size()]);
-
                         currentRank = i + 1;
                     }
                 }

@@ -15,11 +15,11 @@ import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
+import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
-import com.faforever.neroxis.ngraph.util.UndoableEdit.UndoableChange;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction;
@@ -876,7 +876,7 @@ public class GraphView extends EventSource {
      */
     public void updatePoints(CellState edge, List<PointDouble> points, CellState source, CellState target) {
         if (edge != null) {
-            List<PointDouble> pts = new ArrayList<PointDouble>();
+            List<PointDouble> pts = new ArrayList<>();
             pts.add(edge.getAbsolutePoint(0));
             EdgeStyleFunction edgeStyle = getEdgeStyle(edge, points, source, target);
             if (edgeStyle != null) {
@@ -884,8 +884,8 @@ public class GraphView extends EventSource {
                 CellState trg = getTerminalPort(edge, target, false);
                 edgeStyle.apply(edge, src, trg, points, pts);
             } else if (points != null) {
-                for (int i = 0; i < points.size(); i++) {
-                    pts.add(transformControlPoint(edge, points.get(i)));
+                for (PointDouble point : points) {
+                    pts.add(transformControlPoint(edge, point));
                 }
             }
 

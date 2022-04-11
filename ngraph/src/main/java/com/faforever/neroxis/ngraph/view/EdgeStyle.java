@@ -342,9 +342,9 @@ public class EdgeStyle {
             } else {
                 pt.setX(hint.getX());
             }
-            for (int i = 0; i < hints.size(); i++) {
+            for (PointDouble pointDouble : hints) {
                 horizontal = !horizontal;
-                hint = state.view.transformControlPoint(state, hints.get(i));
+                hint = state.view.transformControlPoint(state, pointDouble);
                 //				Log.show();
                 //				Log.debug('hint', i, hint.x, hint.y);
                 if (horizontal) {

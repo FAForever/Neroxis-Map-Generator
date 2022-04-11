@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ngraph.event;
 
-import com.faforever.neroxis.ngraph.model.IGraphModel;
+import com.faforever.neroxis.ngraph.model.AtomicGraphModelChange;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 
@@ -12,5 +12,5 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ExecuteEvent extends EventObject {
-    IGraphModel.AtomicGraphModelChange change;
+    AtomicGraphModelChange change;
 }

@@ -158,7 +158,6 @@ public class HierarchicalLayout extends GraphLayout {
         // children as the initial set
 
         if (roots == null && parent == null) {
-            // TODO indicate the problem
             return;
         }
 
@@ -173,7 +172,7 @@ public class HierarchicalLayout extends GraphLayout {
         try {
             run(parent);
 
-            if (isResizeParent() && !graph.isCellCollapsed(parent)) {
+            if (parent != null && isResizeParent() && !graph.isCellCollapsed(parent)) {
                 graph.updateGroupBounds(List.of(parent), getParentBorder(), isMoveParent());
             }
         } finally {
@@ -182,22 +181,19 @@ public class HierarchicalLayout extends GraphLayout {
     }
 
     /**
-     * Returns all visible children in the given parent which do not have
+     * Returns all vertices in the given set which do not have
      * incoming edges. If the result is empty then the children with the
      * maximum difference between incoming and outgoing edges are returned.
      * This takes into account edges that are being promoted to the given
      * root due to invisible children or collapsed cells.
      *
-     * @param parent Cell whose children should be checked.
      * @return List of tree roots in parent.
      */
-    public List<ICell> findRoots(ICell parent, Set<ICell> vertices) {
+    public List<ICell> findRoots(Set<ICell> vertices) {
         List<ICell> roots = new ArrayList<>();
-
         ICell best = null;
-        int maxDiff = -100000;
+        int maxDiff = Integer.MIN_VALUE;
         IGraphModel model = graph.getModel();
-
         for (ICell vertex : vertices) {
             if (model.isVertex(vertex) && graph.isCellVisible(vertex)) {
                 List<ICell> conns = this.getEdges(vertex);
@@ -280,7 +276,7 @@ public class HierarchicalLayout extends GraphLayout {
             this.roots = new ArrayList<>();
 
             while (!filledVertexSet.isEmpty()) {
-                List<ICell> candidateRoots = findRoots(parent, filledVertexSet);
+                List<ICell> candidateRoots = findRoots(filledVertexSet);
 
                 for (ICell root : candidateRoots) {
                     Set<ICell> vertexSet = new LinkedHashSet<>();

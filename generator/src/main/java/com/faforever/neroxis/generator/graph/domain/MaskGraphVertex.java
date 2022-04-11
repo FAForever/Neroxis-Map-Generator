@@ -159,25 +159,18 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> implements 
         if (parameterName == null && value == null) {
             return;
         }
-
         if (value == null) {
             clearParameter(parameterName);
             return;
         }
-
-        Parameter parameter = Arrays.stream(executable.getParameters())
-                .filter(param -> param.getName().equals(parameterName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Parameter name does not match any parameter: parameterName=%s, validParameters=[%s]",
-                        parameterName,
-                        Arrays.stream(executable.getParameters()).map(param -> String.format("%s", param.getName())).collect(Collectors.joining(","))))
-                );
-
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType())) && MaskVertexResult.class.isAssignableFrom(value.getClass())) {
-            maskParameters.put(parameter.getName(), (MaskVertexResult) value);
+        Optional<Parameter> parameter = Arrays.stream(executable.getParameters()).filter(param -> param.getName().equals(parameterName)).findFirst();
+        if (parameter.isEmpty()) {
             return;
         }
-
+        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.get().getParameterizedType())) && MaskVertexResult.class.isAssignableFrom(value.getClass())) {
+            maskParameters.put(parameter.get().getName(), (MaskVertexResult) value);
+            return;
+        }
         nonMaskParameters.put(parameterName, (String) value);
     }
 

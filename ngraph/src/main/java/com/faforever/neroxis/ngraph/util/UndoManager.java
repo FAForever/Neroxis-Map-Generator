@@ -67,7 +67,7 @@ public class UndoManager extends EventSource {
      * Clears the command history.
      */
     public void clear() {
-        history = new ArrayList<UndoableEdit>(size);
+        history = new ArrayList<>(size);
         indexOfNextAdd = 0;
         fireEvent(new ClearEvent());
     }

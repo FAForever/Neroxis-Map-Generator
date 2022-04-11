@@ -6,7 +6,7 @@ package com.faforever.neroxis.ngraph.swing.handler;
 import com.faforever.neroxis.ngraph.event.AfterPaintEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.swing.GraphComponent.GraphControl;
+import com.faforever.neroxis.ngraph.swing.GraphControl;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.awt.Color;
@@ -151,10 +151,6 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
-    /**
-     * @param rect
-     * @param e
-     */
     public List<ICell> select(Rectangle rect, MouseEvent e) {
         return graphComponent.selectRegion(rect, e);
     }

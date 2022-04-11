@@ -2,6 +2,7 @@ package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.Constants;
@@ -10,6 +11,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -324,12 +326,19 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
      */
     @Override
     public boolean isValidSource(ICell cell) {
-        return (cell == null && allowDanglingEdges) || (cell != null && (!model.isEdge(cell) || isConnectableEdges()) && isCellConnectable(cell) && cell.getParent() != getDefaultParent() && getVertexForCell(cell).getResultNames().contains((String) cell.getValue()));
+        MaskGraphVertex<?> vertex = getVertexForCell(cell);
+        return vertex != null && cell.getParent() != getDefaultParent() && vertex.getResultNames().contains((String) cell.getValue());
     }
 
     @Override
     public boolean isValidTarget(ICell cell) {
-        return cell != null && cell.getParent() != getDefaultParent() && getVertexForCell(cell).getMaskParameters().contains((String) cell.getValue()) && !cellToVertex.get(cell.getParent()).isMaskParameterSet((String) cell.getValue());
+        MaskGraphVertex<?> vertex = getVertexForCell(cell);
+        return vertex != null && cell.getParent() != getDefaultParent() && vertex.getMaskParameters().contains((String) cell.getValue()) && !vertex.isMaskParameterSet((String) cell.getValue());
+    }
+
+    @Override
+    public boolean isValidConnection(ICell source, ICell target) {
+        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(target).isMaskParameterSet((String) source.getValue());
     }
 
     public MaskGraphVertex<?> getVertexForCell(ICell cell) {
@@ -382,5 +391,20 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             return vertex.getIdentifier() + " -> " + vertex.getExecutableName() + " -> " + cell.getValue();
         }
         return vertex.getIdentifier() + " -> " + vertex.getExecutableName();
+    }
+
+    public Set<MaskGraphVertex<?>> getDirectRelationships(MaskGraphVertex<?> vertex) {
+        Set<MaskGraphVertex<?>> directRelationships = new HashSet<>();
+        MaskGraphVertex<?> nextVertex = vertex;
+        while (nextVertex != null) {
+            directRelationships.add(nextVertex);
+            nextVertex = outgoingEdgesOf(nextVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeTarget).findFirst().orElse(null);
+        }
+        MaskGraphVertex<?> previousVertex = vertex;
+        while (previousVertex != null) {
+            directRelationships.add(previousVertex);
+            previousVertex = incomingEdgesOf(previousVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeSource).findFirst().orElse(null);
+        }
+        return Set.copyOf(directRelationships);
     }
 }

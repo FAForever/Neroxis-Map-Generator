@@ -14,6 +14,7 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * Extends EventSource to implement a graph model. The graph model acts as
@@ -448,14 +447,12 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
         return List.copyOf(parents);
     }
 
-    public static List<ICell> filterCells(List<ICell> cells, Filter filter) {
+    public static List<ICell> filterCells(List<ICell> cells, Function<ICell, Boolean> filter) {
         ArrayList<ICell> result = null;
-
         if (cells != null) {
             result = new ArrayList<>(cells.size());
-
             for (ICell cell : cells) {
-                if (filter.filter(cell)) {
+                if (filter.apply(cell)) {
                     result.add(cell);
                 }
             }
@@ -475,22 +472,19 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
     /**
      * Creates a collection of cells using the visitor pattern.
      */
-    public static List<ICell> filterDescendants(IGraphModel model, Filter filter) {
+    public static List<ICell> filterDescendants(IGraphModel model, Function<ICell, Boolean> filter) {
         return filterDescendants(model, filter, model.getRoot());
     }
 
     /**
      * Creates a collection of cells using the visitor pattern.
      */
-    public static List<ICell> filterDescendants(IGraphModel model, Filter filter, ICell parent) {
+    public static List<ICell> filterDescendants(IGraphModel model, Function<ICell, Boolean> filter, ICell parent) {
         List<ICell> result = new ArrayList<>();
-
-        if (filter == null || filter.filter(parent)) {
+        if (filter == null || filter.apply(parent)) {
             result.add(parent);
         }
-
         int childCount = model.getChildCount(parent);
-
         for (int i = 0; i < childCount; i++) {
             ICell child = model.getChildAt(parent, i);
             result.addAll(filterDescendants(model, filter, child));
@@ -1377,6 +1371,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
     /**
      * Initializes the currentEdit field if the model is deserialized.
      */
+    @Serial
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         currentEdit = createUndoableEdit();
@@ -1415,304 +1410,4 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
 
         return builder.toString();
     }
-
-    //
-    // Visitor patterns
-    //
-
-    public interface Filter {
-
-        boolean filter(ICell cell);
-    }
-
-    //
-    // Atomic changes
-    //
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class RootChange extends AtomicGraphModelChange {
-
-        /**
-         * Holds the new and previous root cell.
-         */
-        protected ICell root, previous;
-
-        public RootChange(GraphModel model, ICell root) {
-            super(model);
-            this.root = root;
-            previous = root;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            root = previous;
-            previous = ((GraphModel) model).rootChanged(previous);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class ChildChange extends AtomicGraphModelChange {
-
-        protected ICell parent, previous, child;
-
-        protected int index, previousIndex;
-
-        public ChildChange(GraphModel model, ICell parent, ICell child) {
-            this(model, parent, child, 0);
-        }
-
-        public ChildChange(GraphModel model, ICell parent, ICell child, int index) {
-            super(model);
-            this.parent = parent;
-            previous = this.parent;
-            this.child = child;
-            this.index = index;
-            previousIndex = index;
-        }
-
-        /**
-         * Gets the source or target terminal field for the given
-         * edge even if the edge is not stored as an incoming or
-         * outgoing edge in the respective terminal.
-         */
-        protected ICell getTerminal(ICell edge, boolean source) {
-            return model.getTerminal(edge, source);
-        }
-
-        /**
-         * Sets the source or target terminal field for the given edge
-         * without inserting an incoming or outgoing edge in the
-         * respective terminal.
-         */
-        protected void setTerminal(ICell edge, ICell terminal, boolean source) {
-            edge.setTerminal(terminal, source);
-        }
-
-        protected void connect(ICell cell, boolean isConnect) {
-            ICell source = getTerminal(cell, true);
-            ICell target = getTerminal(cell, false);
-
-            if (source != null) {
-                if (isConnect) {
-                    ((GraphModel) model).terminalForCellChanged(cell, source, true);
-                } else {
-                    ((GraphModel) model).terminalForCellChanged(cell, null, true);
-                }
-            }
-
-            if (target != null) {
-                if (isConnect) {
-                    ((GraphModel) model).terminalForCellChanged(cell, target, false);
-                } else {
-                    ((GraphModel) model).terminalForCellChanged(cell, null, false);
-                }
-            }
-
-            // Stores the previous terminals in the edge
-            setTerminal(cell, source, true);
-            setTerminal(cell, target, false);
-
-            int childCount = model.getChildCount(cell);
-
-            for (int i = 0; i < childCount; i++) {
-                connect(model.getChildAt(cell, i), isConnect);
-            }
-        }
-
-        /**
-         * Returns the index of the given child inside the given parent.
-         */
-        protected int getChildIndex(Object parent, Object child) {
-            return (parent instanceof ICell && child instanceof ICell) ? ((ICell) parent).getIndex((ICell) child) : 0;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            ICell tmp = model.getParent(child);
-            int tmp2 = getChildIndex(tmp, child);
-
-            if (previous == null) {
-                connect(child, false);
-            }
-
-            tmp = ((GraphModel) model).parentForCellChanged(child, previous, previousIndex);
-
-            if (previous != null) {
-                connect(child, true);
-            }
-
-            parent = previous;
-            previous = tmp;
-            index = previousIndex;
-            previousIndex = tmp2;
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class TerminalChange extends AtomicGraphModelChange {
-
-        protected ICell cell, terminal, previous;
-
-        protected boolean source;
-
-        public TerminalChange(GraphModel model, ICell cell, ICell terminal, boolean source) {
-            super(model);
-            this.cell = cell;
-            this.terminal = terminal;
-            this.previous = this.terminal;
-            this.source = source;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            terminal = previous;
-            previous = ((GraphModel) model).terminalForCellChanged(cell, previous, source);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class ValueChange extends AtomicGraphModelChange {
-
-        protected ICell cell;
-        protected Object value;
-        protected Object previous;
-
-        public ValueChange(GraphModel model, ICell cell, Object value) {
-            super(model);
-            this.cell = cell;
-            this.value = value;
-            this.previous = this.value;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            value = previous;
-            previous = ((GraphModel) model).valueForCellChanged(cell, previous);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class StyleChange extends AtomicGraphModelChange {
-
-        protected ICell cell;
-
-        protected String style, previous;
-
-        public StyleChange(GraphModel model, ICell cell, String style) {
-            super(model);
-            this.cell = cell;
-            this.style = style;
-            this.previous = this.style;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            style = previous;
-            previous = ((GraphModel) model).styleForCellChanged(cell, previous);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class GeometryChange extends AtomicGraphModelChange {
-
-        protected ICell cell;
-
-        protected Geometry geometry, previous;
-
-        public GeometryChange(GraphModel model, ICell cell, Geometry geometry) {
-            super(model);
-            this.cell = cell;
-            this.geometry = geometry;
-            this.previous = this.geometry;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            geometry = previous;
-            previous = ((GraphModel) model).geometryForCellChanged(cell, previous);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class CollapseChange extends AtomicGraphModelChange {
-
-        protected ICell cell;
-
-        protected boolean collapsed, previous;
-
-        public CollapseChange(GraphModel model, ICell cell, boolean collapsed) {
-            super(model);
-            this.cell = cell;
-            this.collapsed = collapsed;
-            this.previous = this.collapsed;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            collapsed = previous;
-            previous = ((GraphModel) model).collapsedStateForCellChanged(cell, previous);
-        }
-
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class VisibleChange extends AtomicGraphModelChange {
-
-        protected ICell cell;
-
-        protected boolean visible, previous;
-
-        public VisibleChange(GraphModel model, ICell cell, boolean visible) {
-            super(model);
-            this.cell = cell;
-            this.visible = visible;
-            this.previous = this.visible;
-        }
-
-        /**
-         * Changes the root of the model.
-         */
-        public void execute() {
-            visible = previous;
-            previous = ((GraphModel) model).visibleStateForCellChanged(cell, previous);
-        }
-
-    }
-
 }

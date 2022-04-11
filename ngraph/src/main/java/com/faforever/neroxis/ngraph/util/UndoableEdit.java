@@ -3,6 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
+import com.faforever.neroxis.ngraph.model.UndoableChange;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,17 +135,4 @@ public class UndoableEdit {
 
         dispatch();
     }
-
-    /**
-     * Defines the requirements for an undoable change.
-     */
-    public interface UndoableChange {
-
-        /**
-         * Undoes or redoes the change depending on its undo state.
-         */
-        void execute();
-
-    }
-
 }
