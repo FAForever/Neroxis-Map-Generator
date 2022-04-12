@@ -33,11 +33,6 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     @Override
-    public Class<? extends Mask<?, ?>> getReturnedClass() {
-        return (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
-    }
-
-    @Override
     public boolean isMaskParameterSet(String parameter) {
         if (EXECUTOR.equals(parameter)) {
             return executor != null;
@@ -100,5 +95,11 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
             return executorClass;
         }
         return super.getMaskParameterClass(parameterName);
+    }
+
+    public MaskMethodVertex copy() {
+        MaskMethodVertex newVertex = new MaskMethodVertex(executable, executorClass);
+        nonMaskParameters.forEach(newVertex::setParameter);
+        return newVertex;
     }
 }

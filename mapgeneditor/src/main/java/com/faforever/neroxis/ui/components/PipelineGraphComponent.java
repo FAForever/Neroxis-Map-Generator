@@ -242,4 +242,8 @@ public class PipelineGraphComponent extends GraphComponent {
     public boolean isPanningEvent(MouseEvent event) {
         return event != null && !event.isShiftDown() && getCellAt(event.getX(), event.getY()) == null;
     }
+
+    public boolean shouldAutoScroll() {
+        return autoScroll && !panningHandler.isActive();
+    }
 }

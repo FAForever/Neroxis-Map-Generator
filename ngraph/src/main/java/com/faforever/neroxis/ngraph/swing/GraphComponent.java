@@ -1457,7 +1457,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * @return the autoScroll
      */
-    public boolean isAutoScroll() {
+    public boolean shouldAutoScroll() {
         return autoScroll;
     }
 

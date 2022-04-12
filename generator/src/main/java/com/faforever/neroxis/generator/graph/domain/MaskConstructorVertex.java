@@ -10,17 +10,12 @@ import lombok.Getter;
 public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
 
     public MaskConstructorVertex(Constructor<? extends Mask<?, ?>> executable) {
-        super(executable, executable == null ? null : executable.getDeclaringClass());
+        super(executable, executable.getDeclaringClass());
     }
 
     @Override
     public String getExecutableName() {
         return "new";
-    }
-
-    @Override
-    public Class<? extends Mask<?, ?>> getReturnedClass() {
-        return executable.getDeclaringClass();
     }
 
     @Override
@@ -37,5 +32,11 @@ public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<
 
     public String toString() {
         return identifier == null ? "" : identifier;
+    }
+
+    public MaskConstructorVertex copy() {
+        MaskConstructorVertex newVertex = new MaskConstructorVertex(executable);
+        nonMaskParameters.forEach(newVertex::setParameter);
+        return newVertex;
     }
 }

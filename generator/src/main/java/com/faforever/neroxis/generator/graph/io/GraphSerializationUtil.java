@@ -9,18 +9,17 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.MaskReflectUtil;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Parameter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.nio.Attribute;
 import org.jgrapht.nio.AttributeType;
 import org.jgrapht.nio.DefaultAttribute;
 import org.jgrapht.nio.dot.DOTExporter;
 import org.jgrapht.nio.dot.DOTImporter;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Parameter;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class GraphSerializationUtil {
     private static final DOTImporter<MaskGraphVertex<?>, MaskMethodEdge> IMPORTER = new DOTImporter<>();
@@ -43,9 +42,6 @@ public class GraphSerializationUtil {
     }
 
     private static MaskGraphVertex<?> getMaskGraphVertexFromAttributes(Map<String, Attribute> attributeMap) {
-        if (attributeMap.isEmpty()) {
-            return new MaskConstructorVertex(null);
-        }
         try {
             Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
             Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());

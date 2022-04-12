@@ -76,7 +76,6 @@ public strictfp class PipelinePanel extends JPanel implements GraphListener<Mask
     }
 
     private void setupGraph() {
-        layout.setTraverseAncestors(false);
         graph.addGraphListener(this);
         graphComponent.setTolerance(1);
         graphComponent.setViewportBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -115,10 +114,12 @@ public strictfp class PipelinePanel extends JPanel implements GraphListener<Mask
                 }
             }
         });
+        layout.setTraverseAncestors(false);
         layout.setOrientation(SwingConstants.WEST);
         layout.setInterRankCellSpacing(100);
         layout.setInterHierarchySpacing(50);
         layout.setIntraCellSpacing(50);
+        layout.setParallelEdgeSpacing(10);
     }
 
     private void setupVertexEditPanel() {

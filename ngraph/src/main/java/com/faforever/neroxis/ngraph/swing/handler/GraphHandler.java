@@ -684,7 +684,7 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
     public void mouseDragged(MouseEvent e) {
         // LATER: Check scrollborder, use scroll-increments, do not
         // scroll when over ruler dragging from library
-        if (graphComponent.isAutoScroll()) {
+        if (graphComponent.shouldAutoScroll()) {
             graphComponent.getGraphControl().scrollRectToVisible(new java.awt.Rectangle(e.getPoint()));
         }
 

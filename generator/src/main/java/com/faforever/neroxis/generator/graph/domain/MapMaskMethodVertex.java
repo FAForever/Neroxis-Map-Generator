@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.graph.domain;
 
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.util.MaskReflectUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -23,11 +22,6 @@ public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
         return executable.getName();
     }
 
-    @Override
-    public Class<? extends Mask<?, ?>> getReturnedClass() {
-        return (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType());
-    }
-
     protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
         Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
             try {
@@ -42,5 +36,11 @@ public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
 
     public String toString() {
         return executable.getName();
+    }
+
+    public MapMaskMethodVertex copy() {
+        MapMaskMethodVertex newVertex = new MapMaskMethodVertex(executable);
+        nonMaskParameters.forEach(newVertex::setParameter);
+        return newVertex;
     }
 }
