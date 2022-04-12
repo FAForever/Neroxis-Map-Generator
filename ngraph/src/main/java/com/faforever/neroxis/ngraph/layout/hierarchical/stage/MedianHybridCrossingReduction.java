@@ -26,12 +26,11 @@ import java.util.Map;
 /**
  * Performs a vertex ordering within ranks as described by Gansner et al 1993
  */
-public class MedianHybridCrossingReduction implements HierarchicalLayoutStage/*, JGraphLayout.Stoppable*/ {
+public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
     /**
      * Reference to the enclosing layout algorithm
      */
     protected HierarchicalLayout layout;
-
     /**
      * The maximum number of iterations to perform whilst reducing edge
      * crossings

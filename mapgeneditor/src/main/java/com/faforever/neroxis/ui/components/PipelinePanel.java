@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -49,7 +48,6 @@ import lombok.Setter;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
-import org.jgrapht.graph.DirectedAcyclicGraph;
 
 public strictfp class PipelinePanel extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
     private final PipelineGraph graph = new PipelineGraph();
@@ -223,7 +221,7 @@ public strictfp class PipelinePanel extends JPanel implements GraphListener<Mask
         buttonPanel.add(importButton);
         JButton exportButton = new JButton();
         exportButton.setText("Export Selected Nodes");
-        exportButton.addActionListener(e -> exportSubGraph());
+        exportButton.addActionListener(e -> exportSelectedCells());
         buttonPanel.add(exportButton);
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -265,11 +263,8 @@ public strictfp class PipelinePanel extends JPanel implements GraphListener<Mask
         }
     }
 
-    private void exportSubGraph() {
-        DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> subGraph = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
-        Set<MaskGraphVertex<?>> selectedVertices = graph.getSelectionCells().stream().map(graph::getVertexForCell).filter(Objects::nonNull).collect(Collectors.toSet());
-        selectedVertices.forEach(subGraph::addVertex);
-        selectedVertices.stream().flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream()).filter(edge -> selectedVertices.contains(graph.getEdgeTarget(edge))).forEach(edge -> subGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge));
+    private void exportSelectedCells() {
+        PipelineGraph subGraph = graph.getSubGraphFromSelectedCells();
         int returnValue = fileChooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();

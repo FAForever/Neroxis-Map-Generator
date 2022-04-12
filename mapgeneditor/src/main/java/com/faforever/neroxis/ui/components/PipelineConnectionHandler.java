@@ -18,7 +18,7 @@ public class PipelineConnectionHandler extends ConnectionHandler {
     }
 
     public String validateConnection(ICell source, ICell target) {
-        if (source == null || target == null || source.getParent() == target.getParent() || !source.isVertex() || !target.isVertex()) {
+        if (source == null || target == null || source.getParent() == target.getParent() || !source.isVertex() || !target.isVertex() || target.getValue() == null || source.getValue() == null) {
             return "";
         }
         PipelineGraph graph = pipelineGraphComponent.getGraph();
@@ -27,7 +27,7 @@ public class PipelineConnectionHandler extends ConnectionHandler {
         if (!sourceVertex.getResultClass((String) source.getValue()).equals(targetVertex.getMaskParameterClass((String) target.getValue()))) {
             return "";
         }
-        if (MaskMethodVertex.EXECUTOR.equals(target.getValue()) && graph.outgoingEdgesOf(sourceVertex).stream().anyMatch(edge -> edge.getParameterName().equals(MaskMethodVertex.EXECUTOR))) {
+        if (MaskMethodVertex.EXECUTOR.equals(target.getValue()) && graph.outgoingEdgesOf(sourceVertex).stream().anyMatch(edge -> MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()) && edge.getResultName().equals(source.getValue()))) {
             return "";
         }
         return super.validateConnection(source, target);

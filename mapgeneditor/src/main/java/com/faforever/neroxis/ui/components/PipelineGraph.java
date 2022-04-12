@@ -15,8 +15,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.jgrapht.GraphType;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -406,5 +408,18 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             previousVertex = incomingEdgesOf(previousVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeSource).findFirst().orElse(null);
         }
         return Set.copyOf(directRelationships);
+    }
+
+    public PipelineGraph getSubGraphFromSelectedCells() {
+        PipelineGraph subGraph = new PipelineGraph();
+        Map<MaskGraphVertex<?>, MaskGraphVertex<?>> vertexCopyMap = new HashMap<>();
+        Set<MaskGraphVertex<?>> selectedVertices = getSelectionCells().stream().map(this::getVertexForCell).filter(Objects::nonNull).collect(Collectors.toSet());
+        selectedVertices.forEach(vertex -> {
+            MaskGraphVertex<?> vertexCopy = vertex.copy();
+            subGraph.addVertex(vertexCopy);
+            vertexCopyMap.put(vertex, vertexCopy);
+        });
+        selectedVertices.stream().flatMap(vertex -> outgoingEdgesOf(vertex).stream()).filter(edge -> selectedVertices.contains(getEdgeTarget(edge))).forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)), vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
+        return subGraph;
     }
 }
