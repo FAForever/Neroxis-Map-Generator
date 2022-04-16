@@ -12,24 +12,21 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import static javax.swing.SwingConstants.CENTER;
+import javax.swing.table.TableCellEditor;
+import lombok.Setter;
 
 public class MaskGraphVertexEditPanel extends JPanel {
     private final GraphVertexParameterTableModel parameterTableModel = new GraphVertexParameterTableModel();
     private final JTable parametersTable = new JTable(parameterTableModel);
     private final JTextField identifierTextField = new JTextField();
     private MaskGraphVertex<?> vertex;
-    private final PipelinePanel pipelinePanel;
-    private PipelineGraph graph;
+    @Setter
+    private GraphPane graphPane;
 
-    public MaskGraphVertexEditPanel(PipelinePanel pipelinePanel) {
-        this.pipelinePanel = pipelinePanel;
+    public MaskGraphVertexEditPanel() {
         setLayout(new GridBagLayout());
         setupIdentifierTextField();
         setupParametersTable();
-    }
-
-    public void setGraphComponent(PipelineGraphComponent graphComponent) {
-        graph = graphComponent.getGraph();
     }
 
     private void setupIdentifierTextField() {
@@ -59,9 +56,9 @@ public class MaskGraphVertexEditPanel extends JPanel {
     }
 
     private void updateIdentifiers() {
-        if (vertex != null) {
+        if (vertex != null && graphPane != null) {
             vertex.setIdentifier(identifierTextField.getText());
-            pipelinePanel.updateIdentifiers(vertex);
+            graphPane.updateIdentifiers(vertex);
         }
     }
 
@@ -91,14 +88,15 @@ public class MaskGraphVertexEditPanel extends JPanel {
     }
 
     public void updatePanel() {
-        if (vertex != null && !graph.containsVertex(vertex)) {
-            setVertex(null);
-            return;
+        TableCellEditor cellEditor = parametersTable.getCellEditor();
+        if (cellEditor != null) {
+            cellEditor.stopCellEditing();
         }
-
         parameterTableModel.setVertex(vertex);
         identifierTextField.setText(vertex == null ? null : vertex.getIdentifier());
         parametersTable.doLayout();
+        revalidate();
+        repaint();
     }
 
 }

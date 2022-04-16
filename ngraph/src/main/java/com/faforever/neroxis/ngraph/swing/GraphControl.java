@@ -143,7 +143,7 @@ public class GraphControl extends JComponent {
      */
     public void updatePreferredSize() {
         double scale = graphComponent.graph.getView().getScale();
-        Dimension d = null;
+        Dimension d;
         if (graphComponent.preferPageSize || graphComponent.pageVisible) {
             Dimension page = graphComponent.getPreferredSizeForPage();
             if (!graphComponent.preferPageSize) {

@@ -4,7 +4,6 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector2;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
@@ -21,7 +20,7 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     @GraphMethod
-    @GraphParameter(name = "name", nullable = true)
+    @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")

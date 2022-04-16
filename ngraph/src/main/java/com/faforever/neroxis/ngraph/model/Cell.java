@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
@@ -63,17 +62,22 @@ public class Cell implements ICell, Cloneable, Serializable {
      * stylename[;key=value]. Default is null.
      */
     protected String style;
-
     /**
      * Specifies whether the cell is a vertex or edge and whether it is
      * connectable, visible and collapsed. Default values are false, false,
      * true, true and false respectively.
      */
-    protected boolean vertex = false, edge = false, connectable = true, visible = true, collapsed = false;
+    protected boolean vertex = false;
+    protected boolean edge = false;
+    protected boolean connectable = true;
+    protected boolean visible = true;
+    protected boolean collapsed = false;
     /**
      * Reference to the parent cell and source and target terminals for edges.
      */
-    protected ICell parent, source, target;
+    protected ICell parent;
+    protected ICell source;
+    protected ICell target;
     /**
      * Holds the child cells and connected edges.
      */
@@ -130,15 +134,15 @@ public class Cell implements ICell, Cloneable, Serializable {
     }
 
     public int getChildCount() {
-        return (children != null) ? children.size() : 0;
+        return children.size();
     }
 
     public int getIndex(ICell child) {
-        return (children != null) ? children.indexOf(child) : -1;
+        return children.indexOf(child);
     }
 
     public ICell getChildAt(int index) {
-        return (children != null) ? children.get(index) : null;
+        return children.get(index);
     }
 
     public ICell insert(ICell child) {
@@ -163,8 +167,7 @@ public class Cell implements ICell, Cloneable, Serializable {
 
     public ICell remove(int index) {
         ICell child = null;
-
-        if (children != null && index >= 0) {
+        if (index >= 0) {
             child = getChildAt(index);
             remove(child);
         }
@@ -173,7 +176,7 @@ public class Cell implements ICell, Cloneable, Serializable {
     }
 
     public ICell remove(ICell child) {
-        if (child != null && children != null) {
+        if (child != null) {
             children.remove(child);
             child.setParent(null);
         }
@@ -188,15 +191,15 @@ public class Cell implements ICell, Cloneable, Serializable {
     }
 
     public int getEdgeCount() {
-        return (edges != null) ? edges.size() : 0;
+        return edges.size();
     }
 
     public int getEdgeIndex(ICell edge) {
-        return (edges != null) ? edges.indexOf(edge) : -1;
+        return edges.indexOf(edge);
     }
 
     public ICell getEdgeAt(int index) {
-        return (edges != null) ? edges.get(index) : null;
+        return edges.get(index);
     }
 
     public ICell insertEdge(ICell edge, boolean isOutgoing) {
@@ -213,7 +216,7 @@ public class Cell implements ICell, Cloneable, Serializable {
 
     public ICell removeEdge(ICell edge, boolean isOutgoing) {
         if (edge != null) {
-            if (edge.getTerminal(!isOutgoing) != this && edges != null) {
+            if (edge.getTerminal(!isOutgoing) != this) {
                 edges.remove(edge);
             }
 
@@ -228,56 +231,6 @@ public class Cell implements ICell, Cloneable, Serializable {
 
         if (terminal != null) {
             terminal.removeEdge(this, isSource);
-        }
-    }
-
-    /**
-     * Returns the specified attribute from the user object if it is an XML
-     * node.
-     *
-     * @param name Name of the attribute whose value should be returned.
-     * @return Returns the value of the given attribute or null.
-     */
-    public String getAttribute(String name) {
-        return getAttribute(name, null);
-    }
-
-    /**
-     * Returns the specified attribute from the user object if it is an XML
-     * node.
-     *
-     * @param name         Name of the attribute whose value should be returned.
-     * @param defaultValue Default value to use if the attribute has no value.
-     * @return Returns the value of the given attribute or defaultValue.
-     */
-    public String getAttribute(String name, String defaultValue) {
-        Object userObject = getValue();
-        String val = null;
-
-        if (userObject instanceof Element) {
-            Element element = (Element) userObject;
-            val = element.getAttribute(name);
-        }
-
-        if (val == null) {
-            val = defaultValue;
-        }
-
-        return val;
-    }
-
-    /**
-     * Sets the specified attribute on the user object if it is an XML node.
-     *
-     * @param name  Name of the attribute whose value should be set.
-     * @param value New value of the attribute.
-     */
-    public void setAttribute(String name, String value) {
-        Object userObject = getValue();
-
-        if (userObject instanceof Element) {
-            Element element = (Element) userObject;
-            element.setAttribute(name, value);
         }
     }
 
@@ -324,17 +277,6 @@ public class Cell implements ICell, Cloneable, Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(64);
-        builder.append(getClass().getSimpleName());
-        builder.append(" [");
-        builder.append("id=");
-        builder.append(id);
-        builder.append(", value=");
-        builder.append(value);
-        builder.append(", geometry=");
-        builder.append(geometry);
-        builder.append("]");
-
-        return builder.toString();
+        return getClass().getSimpleName() + " [" + "id=" + id + ", value=" + value + ", geometry=" + geometry + "]";
     }
 }

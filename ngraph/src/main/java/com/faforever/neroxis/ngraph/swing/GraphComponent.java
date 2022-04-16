@@ -21,6 +21,10 @@ import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
+import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.swing.handler.CellHandler;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
 import com.faforever.neroxis.ngraph.swing.handler.EdgeHandler;
@@ -40,8 +44,6 @@ import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-import com.faforever.neroxis.ngraph.view.EdgeStyle;
-import com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
@@ -1907,7 +1909,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             return new VertexHandler(this, state);
         } else if (graph.getModel().isEdge(state.getCell())) {
             EdgeStyleFunction style = graph.getView().getEdgeStyle(state, null, null, null);
-            if (graph.isLoop(state) || style == EdgeStyle.ElbowConnector || style == EdgeStyle.SideToSide || style == EdgeStyle.TopToBottom) {
+            if (graph.isLoop(state) || style instanceof ElbowConnectorEdgeStyleFunction || style instanceof SideToSideEdgeStyleFunction || style instanceof TopToBottomEdgeStyleFunction) {
                 return new ElbowEdgeHandler(this, state);
             }
             return new EdgeHandler(this, state);

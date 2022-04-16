@@ -275,18 +275,6 @@ public class Constants {
      */
     public static int MAX_HOTSPOT_SIZE = 0;
     /**
-     * Defines the SVG namespace.
-     */
-    public static String NS_SVG = "http://www.w3.org/2000/svg";
-    /**
-     * Defines the XHTML namespace.
-     */
-    public static String NS_XHTML = "http://www.w3.org/1999/xhtml";
-    /**
-     * Defines the XLink namespace.
-     */
-    public static String NS_XLINK = "http://www.w3.org/1999/xlink";
-    /**
      * Comma separated list of default fonts for CSS properties.
      * And the default font family value for new image export.
      * Default is Arial, Helvetica.

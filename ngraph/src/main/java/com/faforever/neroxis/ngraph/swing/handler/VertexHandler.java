@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
@@ -29,7 +30,6 @@ public class VertexHandler extends CellHandler {
      * Workaround for alt-key-state not correct in mouseReleased.
      */
     protected transient boolean gridEnabledEvent = false;
-
     /**
      * Workaround for shift-key-state not correct in mouseReleased.
      */
@@ -39,39 +39,33 @@ public class VertexHandler extends CellHandler {
         super(graphComponent, state);
     }
 
-    protected java.awt.Rectangle[] createHandles() {
-        java.awt.Rectangle[] h;
-
+    protected Rectangle[] createHandles() {
+        Rectangle[] h;
         if (graphComponent.getGraph().isCellResizable(getState().getCell())) {
-            java.awt.Rectangle bounds = getState().getRectangle();
+            Rectangle bounds = getState().getRectangle();
             int half = Constants.HANDLE_SIZE / 2;
-
             int left = bounds.x - half;
             int top = bounds.y - half;
-
             int w2 = bounds.x + (bounds.width / 2) - half;
             int h2 = bounds.y + (bounds.height / 2) - half;
-
             int right = bounds.x + bounds.width - half;
             int bottom = bounds.y + bounds.height - half;
-
-            h = new java.awt.Rectangle[9];
-
+            h = new Rectangle[9];
             int s = Constants.HANDLE_SIZE;
-            h[0] = new java.awt.Rectangle(left, top, s, s);
-            h[1] = new java.awt.Rectangle(w2, top, s, s);
-            h[2] = new java.awt.Rectangle(right, top, s, s);
-            h[3] = new java.awt.Rectangle(left, h2, s, s);
-            h[4] = new java.awt.Rectangle(right, h2, s, s);
-            h[5] = new java.awt.Rectangle(left, bottom, s, s);
-            h[6] = new java.awt.Rectangle(w2, bottom, s, s);
-            h[7] = new java.awt.Rectangle(right, bottom, s, s);
+            h[0] = new Rectangle(left, top, s, s);
+            h[1] = new Rectangle(w2, top, s, s);
+            h[2] = new Rectangle(right, top, s, s);
+            h[3] = new Rectangle(left, h2, s, s);
+            h[4] = new Rectangle(right, h2, s, s);
+            h[5] = new Rectangle(left, bottom, s, s);
+            h[6] = new Rectangle(w2, bottom, s, s);
+            h[7] = new Rectangle(right, bottom, s, s);
         } else {
-            h = new java.awt.Rectangle[1];
+            h = new Rectangle[1];
         }
         int s = Constants.LABEL_HANDLE_SIZE;
         RectangleDouble bounds = state.getLabelBounds();
-        h[h.length - 1] = new java.awt.Rectangle((int) (bounds.getX() + bounds.getWidth() / 2 - s), (int) (bounds.getY() + bounds.getHeight() / 2 - s), 2 * s, 2 * s);
+        h[h.length - 1] = new Rectangle((int) (bounds.getX() + bounds.getWidth() / 2 - s), (int) (bounds.getY() + bounds.getHeight() / 2 - s), 2 * s, 2 * s);
 
         return h;
     }
@@ -110,8 +104,7 @@ public class VertexHandler extends CellHandler {
                         idx = 0;
                     }
                 }
-
-                java.awt.Rectangle rect = state.getLabelBounds().getRectangle();
+                Rectangle rect = state.getLabelBounds().getRectangle();
                 rect.translate(idx, idy);
                 preview.setBounds(rect);
             } else {
@@ -213,7 +206,7 @@ public class VertexHandler extends CellHandler {
                 graph.getModel().setGeometry(cell, geometry);
             } else {
                 RectangleDouble bounds = union(geometry, dx, dy, index);
-                java.awt.Rectangle rect = bounds.getRectangle();
+                Rectangle rect = bounds.getRectangle();
 
                 // Snaps new bounds to grid (unscaled)
                 if (gridEnabledEvent) {
@@ -280,7 +273,7 @@ public class VertexHandler extends CellHandler {
     }
 
     public void paint(Graphics g) {
-        java.awt.Rectangle bounds = getState().getRectangle();
+        Rectangle bounds = getState().getRectangle();
 
         if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {
             Graphics2D g2 = (Graphics2D) g;

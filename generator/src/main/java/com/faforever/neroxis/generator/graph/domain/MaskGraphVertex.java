@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.expression.spel.SpelParseException;
 
 public abstract strictfp class MaskGraphVertex<T extends Executable> {
     public static final String SELF = "self";
@@ -138,17 +140,17 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
                 .findFirst()
                 .map(GraphParameter::value)
                 .orElse(nonMaskParameters.get(parameter.getName()));
-
-        if (rawValue == null && parameterAnnotations.stream()
-                .noneMatch(annotation -> parameter.getName().equals(annotation.name()) && annotation.nullable())) {
-            throw new IllegalArgumentException(String.format("Parameter is null: parameter=%s", parameter.getName()));
+        if ((rawValue == null || rawValue.isBlank()) && parameterAnnotations.stream().noneMatch(annotation -> parameter.getName().equals(annotation.name()) && annotation.nullable())) {
+            throw new IllegalArgumentException(String.format("Parameter is null: parameter=%s, identifier=%s, method=%s", parameter.getName(), identifier, getExecutableName()));
         }
-
         if (rawValue == null || rawValue.isBlank()) {
             return null;
         }
-
-        return graphContext.getValue(rawValue, MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
+        try {
+            return graphContext.getValue(rawValue, identifier, MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
+        } catch (SpelParseException e) {
+            throw new IllegalArgumentException(String.format("Error parsing parameter: parameter=%s, identifier=%s, method=%s", parameter.getName(), identifier, getExecutableName()), e);
+        }
     }
 
     public void setParameter(String parameterName, Object value) {
@@ -179,11 +181,12 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         nonMaskParameters.put(parameterName, null);
     }
 
-    public boolean isNotDefined() {
-        return !Arrays.stream(executable.getParameters()).allMatch(param -> nonMaskParameters.containsKey(param.getName())
-                || maskParameters.containsKey(param.getName())
-                || Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> param.getName().equals(annotation.name()))
-                .anyMatch(annotation -> annotation.nullable() || !annotation.value().equals("")));
+    public boolean isDefined() {
+        return Arrays.stream(executable.getParameters()).allMatch(param -> !StringUtils.isBlank(nonMaskParameters.get(param.getName())) || (maskParameters.get(param.getName()) != null && maskParameters.get(param.getName()).getSourceVertex().isDefined()) || parameterNullable(param));
+    }
+
+    private boolean parameterNullable(Parameter param) {
+        return Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> param.getName().equals(annotation.name())).anyMatch(annotation -> annotation.nullable() || !annotation.value().equals(""));
     }
 
     public boolean isComputed() {
@@ -195,7 +198,7 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     public void prepareResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
-        if (isNotDefined()) {
+        if (!isDefined()) {
             throw new IllegalStateException("Cannot get result all parameters are not fully defined");
         }
         if (!isComputed()) {

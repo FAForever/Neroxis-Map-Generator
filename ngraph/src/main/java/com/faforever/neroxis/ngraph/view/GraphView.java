@@ -16,13 +16,13 @@ import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
+import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.perimeter.Perimeter;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.Utils;
-import com.faforever.neroxis.ngraph.view.EdgeStyle.EdgeStyleFunction;
-import com.faforever.neroxis.ngraph.view.Perimeter.PerimeterFunction;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -654,12 +654,10 @@ public class GraphView extends EventSource {
     public void updateLabel(CellState state) {
         String label = graph.getLabel(state.getCell());
         Map<String, Object> style = state.getStyle();
-
-        // Applies word wrapping to non-HTML labels and stores the result in the
+        // Applies word wrapping to labels and stores the result in the
         // state
-        if (label != null && label.length() > 0 && !graph.isHtmlLabel(state.getCell()) && !graph.getModel().isEdge(state.getCell()) && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
+        if (label != null && label.length() > 0 && !graph.getModel().isEdge(state.getCell()) && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
             double w = getWordWrapWidth(state);
-
             // The lines for wrapping within the given width are calculated for
             // no
             // scale. The reason for this is the granularity of actual displayed
@@ -730,8 +728,7 @@ public class GraphView extends EventSource {
                     vertexBounds = null;
                 }
             }
-
-            state.setLabelBounds(Utils.getLabelPaintBounds(state.getLabel(), style, graph.isHtmlLabel(cell), state.getAbsoluteOffset(), vertexBounds, scale, graph.getModel().isEdge(cell)));
+            state.setLabelBounds(Utils.getLabelPaintBounds(state.getLabel(), style, state.getAbsoluteOffset(), vertexBounds, scale, graph.getModel().isEdge(cell)));
 
             if (overflow.equals("width")) {
                 state.getLabelBounds().setX(state.getX());
@@ -878,17 +875,16 @@ public class GraphView extends EventSource {
         if (edge != null) {
             List<PointDouble> pts = new ArrayList<>();
             pts.add(edge.getAbsolutePoint(0));
-            EdgeStyleFunction edgeStyle = getEdgeStyle(edge, points, source, target);
-            if (edgeStyle != null) {
+            EdgeStyleFunction edgeStyleFunction = getEdgeStyle(edge, points, source, target);
+            if (edgeStyleFunction != null) {
                 CellState src = getTerminalPort(edge, source, true);
                 CellState trg = getTerminalPort(edge, target, false);
-                edgeStyle.apply(edge, src, trg, points, pts);
+                edgeStyleFunction.apply(edge, src, trg, points, pts);
             } else if (points != null) {
                 for (PointDouble point : points) {
                     pts.add(transformControlPoint(edge, point));
                 }
             }
-
             pts.add(edge.getAbsolutePoint(edge.getAbsolutePointCount() - 1));
             edge.setAbsolutePoints(pts);
         }
@@ -1002,7 +998,7 @@ public class GraphView extends EventSource {
     public PointDouble getPerimeterPoint(CellState terminal, PointDouble next, boolean orthogonal, double border) {
         PointDouble point = null;
         if (terminal != null) {
-            PerimeterFunction perimeter = getPerimeterFunction(terminal);
+            Perimeter perimeter = getPerimeterFunction(terminal);
             if (perimeter != null && next != null) {
                 RectangleDouble bounds = getPerimeterBounds(terminal, border);
                 if (bounds.getWidth() > 0 || bounds.getHeight() > 0) {
@@ -1053,9 +1049,9 @@ public class GraphView extends EventSource {
     /**
      * Returns the perimeter function for the given state.
      */
-    public PerimeterFunction getPerimeterFunction(CellState state) {
+    public Perimeter getPerimeterFunction(CellState state) {
         Object perimeter = state.getStyle().get(Constants.STYLE_PERIMETER);
-        return (PerimeterFunction) perimeter;
+        return (Perimeter) perimeter;
     }
 
     /**

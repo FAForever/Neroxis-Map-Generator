@@ -4,6 +4,7 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.arrow.Arrow;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.LineDouble;
 import com.faforever.neroxis.ngraph.util.PointDouble;
@@ -96,11 +97,10 @@ public class ConnectorShape extends BasicShape {
         pe = (PointDouble) pe.clone();
         pe.setX(pe.getX() - strokeX / 2.0);
         pe.setY(pe.getY() - strokeY / 2.0);
-
-        IMarker marker = MarkerRegistry.getMarker(type);
+        Arrow marker = ArrowRegistry.getArrow(type);
 
         if (marker != null) {
-            offset = marker.paintMarker(canvas, state, type, pe, nx, ny, absSize, source);
+            offset = marker.paintArrow(canvas, state, type, pe, nx, ny, absSize, source);
 
             if (offset != null) {
                 offset.setX(offset.getX() - strokeX / 2.0);

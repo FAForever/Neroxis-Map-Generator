@@ -51,6 +51,14 @@ import com.faforever.neroxis.ngraph.model.TerminalChange;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.model.ValueChange;
 import com.faforever.neroxis.ngraph.model.VisibleChange;
+import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.EntityRelationEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.LoopEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.OrthConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.SegmentConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
@@ -434,11 +442,10 @@ public class Graph extends EventSource {
      * Specifies the multiplicities to be used for validation of the graph.
      */
     protected Multiplicity[] multiplicities;
-
     /**
      * Specifies the default style for loops.
      */
-    protected EdgeStyle.EdgeStyleFunction defaultLoopStyle = EdgeStyle.Loop;
+    protected EdgeStyleFunction defaultLoopStyle = new LoopEdgeStyleFunction();
 
     /**
      * Specifies if multiple edges in the same direction between
@@ -473,11 +480,6 @@ public class Graph extends EventSource {
      * getLabel. Default is true.
      */
     protected boolean labelsVisible = true;
-
-    /**
-     * Specifies the return value for isHtmlLabel. Default is false.
-     */
-    protected boolean htmlLabels = false;
 
     /**
      * Specifies if nesting of swimlanes is allowed. Default is true.
@@ -2733,7 +2735,7 @@ public class Graph extends EventSource {
                 String value = getLabel(cell);
 
                 if (value != null && value.length() > 0) {
-                    RectangleDouble size = Utils.getLabelSize(value, style, isHtmlLabel(cell), 1);
+                    RectangleDouble size = Utils.getLabelSize(value, style, 1);
                     double width = size.getWidth() + dx;
                     double height = size.getHeight() + dy;
 
@@ -3874,10 +3876,8 @@ public class Graph extends EventSource {
         if (edge.getStyle().containsKey(Constants.STYLE_ORTHOGONAL)) {
             return Utils.isTrue(edge.getStyle(), Constants.STYLE_ORTHOGONAL);
         }
-
-        EdgeStyle.EdgeStyleFunction tmp = view.getEdgeStyle(edge, null, null, null);
-
-        return tmp == EdgeStyle.SegmentConnector || tmp == EdgeStyle.ElbowConnector || tmp == EdgeStyle.SideToSide || tmp == EdgeStyle.TopToBottom || tmp == EdgeStyle.EntityRelation || tmp == EdgeStyle.OrthConnector;
+        EdgeStyleFunction tmp = view.getEdgeStyle(edge, null, null, null);
+        return tmp instanceof SegmentConnectorEdgeStyleFunction || tmp instanceof ElbowConnectorEdgeStyleFunction || tmp instanceof SideToSideEdgeStyleFunction || tmp instanceof TopToBottomEdgeStyleFunction || tmp instanceof EntityRelationEdgeStyleFunction || tmp instanceof OrthConnectorEdgeStyleFunction;
     }
 
     /**
@@ -4065,20 +4065,6 @@ public class Graph extends EventSource {
         changeSupport.firePropertyChange("labelsVisible", oldValue, labelsVisible);
     }
 
-    public boolean isHtmlLabels() {
-        return htmlLabels;
-    }
-
-    /**
-     * @param value the htmlLabels to set
-     */
-    public void setHtmlLabels(boolean value) {
-        boolean oldValue = htmlLabels;
-        htmlLabels = value;
-
-        changeSupport.firePropertyChange("htmlLabels", oldValue, htmlLabels);
-    }
-
     /**
      * Returns the textual representation for the given cell.
      *
@@ -4133,17 +4119,6 @@ public class Graph extends EventSource {
         } finally {
             model.endUpdate();
         }
-    }
-
-    /**
-     * Returns true if the label must be rendered as HTML markup. The default
-     * implementation returns <htmlLabels>.
-     *
-     * @param cell <Cell> whose label should be displayed as HTML markup.
-     * @return Returns true if the given cell label is HTML markup.
-     */
-    public boolean isHtmlLabel(ICell cell) {
-        return isHtmlLabels();
     }
 
     /**
@@ -4203,7 +4178,7 @@ public class Graph extends EventSource {
      *
      * @return Returns the default loop style.
      */
-    public EdgeStyle.EdgeStyleFunction getDefaultLoopStyle() {
+    public EdgeStyleFunction getDefaultLoopStyle() {
         return defaultLoopStyle;
     }
 
@@ -4212,10 +4187,9 @@ public class Graph extends EventSource {
      *
      * @param value Default style to be used for loops.
      */
-    public void setDefaultLoopStyle(EdgeStyle.EdgeStyleFunction value) {
-        EdgeStyle.EdgeStyleFunction oldValue = defaultLoopStyle;
+    public void setDefaultLoopStyle(EdgeStyleFunction value) {
+        EdgeStyleFunction oldValue = defaultLoopStyle;
         defaultLoopStyle = value;
-
         changeSupport.firePropertyChange("defaultLoopStyle", oldValue, defaultLoopStyle);
     }
 
@@ -5873,7 +5847,7 @@ public class Graph extends EventSource {
                 String label = state.getLabel();
 
                 if (label != null && state.getLabelBounds() != null) {
-                    lab = canvas.drawLabel(label, state, isHtmlLabel(cell));
+                    lab = canvas.drawLabel(label, state);
                 }
             }
 

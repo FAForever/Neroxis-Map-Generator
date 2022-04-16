@@ -3,9 +3,20 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.EntityRelationEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.LoopEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.OrthConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.SegmentConnectorEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.perimeter.EllipsePerimeter;
+import com.faforever.neroxis.ngraph.style.perimeter.HexagonPerimeter;
+import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
+import com.faforever.neroxis.ngraph.style.perimeter.RhombusPerimeter;
+import com.faforever.neroxis.ngraph.style.perimeter.TrianglePerimeter;
 import com.faforever.neroxis.ngraph.util.Constants;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -20,19 +31,18 @@ public class StyleRegistry {
 
     // Registers the known object styles
     static {
-        putValue(Constants.EDGESTYLE_ELBOW, EdgeStyle.ElbowConnector);
-        putValue(Constants.EDGESTYLE_ENTITY_RELATION, EdgeStyle.EntityRelation);
-        putValue(Constants.EDGESTYLE_LOOP, EdgeStyle.Loop);
-        putValue(Constants.EDGESTYLE_SIDETOSIDE, EdgeStyle.SideToSide);
-        putValue(Constants.EDGESTYLE_TOPTOBOTTOM, EdgeStyle.TopToBottom);
-        putValue(Constants.EDGESTYLE_ORTHOGONAL, EdgeStyle.OrthConnector);
-        putValue(Constants.EDGESTYLE_SEGMENT, EdgeStyle.SegmentConnector);
-
-        putValue(Constants.PERIMETER_ELLIPSE, Perimeter.EllipsePerimeter);
-        putValue(Constants.PERIMETER_RECTANGLE, Perimeter.RectanglePerimeter);
-        putValue(Constants.PERIMETER_RHOMBUS, Perimeter.RhombusPerimeter);
-        putValue(Constants.PERIMETER_TRIANGLE, Perimeter.TrianglePerimeter);
-        putValue(Constants.PERIMETER_HEXAGON, Perimeter.HexagonPerimeter);
+        putValue(Constants.EDGESTYLE_ELBOW, new ElbowConnectorEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_ENTITY_RELATION, new EntityRelationEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_LOOP, new LoopEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_SIDETOSIDE, new SideToSideEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_TOPTOBOTTOM, new TopToBottomEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_ORTHOGONAL, new OrthConnectorEdgeStyleFunction());
+        putValue(Constants.EDGESTYLE_SEGMENT, new SegmentConnectorEdgeStyleFunction());
+        putValue(Constants.PERIMETER_ELLIPSE, new EllipsePerimeter());
+        putValue(Constants.PERIMETER_RECTANGLE, new RectanglePerimeter());
+        putValue(Constants.PERIMETER_RHOMBUS, new RhombusPerimeter());
+        putValue(Constants.PERIMETER_TRIANGLE, new TrianglePerimeter());
+        putValue(Constants.PERIMETER_HEXAGON, new HexagonPerimeter());
     }
 
     /**
@@ -53,11 +63,7 @@ public class StyleRegistry {
      * Returns the name for the given value.
      */
     public static String getName(Object value) {
-        Iterator<Map.Entry<String, Object>> it = values.entrySet().iterator();
-
-        while (it.hasNext()) {
-            Map.Entry<String, Object> entry = it.next();
-
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
             if (entry.getValue() == value) {
                 return entry.getKey();
             }

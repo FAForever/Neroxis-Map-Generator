@@ -395,17 +395,25 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         return vertex.getIdentifier() + " -> " + vertex.getExecutableName();
     }
 
+    public MaskGraphVertex<?> getDirectDescendant(MaskGraphVertex<?> vertex) {
+        return outgoingEdgesOf(vertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeTarget).findFirst().orElse(null);
+    }
+
+    public MaskGraphVertex<?> getDirectAncestor(MaskGraphVertex<?> vertex) {
+        return incomingEdgesOf(vertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeSource).findFirst().orElse(null);
+    }
+
     public Set<MaskGraphVertex<?>> getDirectRelationships(MaskGraphVertex<?> vertex) {
         Set<MaskGraphVertex<?>> directRelationships = new HashSet<>();
         MaskGraphVertex<?> nextVertex = vertex;
         while (nextVertex != null) {
             directRelationships.add(nextVertex);
-            nextVertex = outgoingEdgesOf(nextVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeTarget).findFirst().orElse(null);
+            nextVertex = getDirectDescendant(nextVertex);
         }
         MaskGraphVertex<?> previousVertex = vertex;
         while (previousVertex != null) {
             directRelationships.add(previousVertex);
-            previousVertex = incomingEdgesOf(previousVertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeSource).findFirst().orElse(null);
+            previousVertex = getDirectAncestor(previousVertex);
         }
         return Set.copyOf(directRelationships);
     }
@@ -421,5 +429,16 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         });
         selectedVertices.stream().flatMap(vertex -> outgoingEdgesOf(vertex).stream()).filter(edge -> selectedVertices.contains(getEdgeTarget(edge))).forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)), vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
         return subGraph;
+    }
+
+    public void addGraph(PipelineGraph graph) {
+        Map<MaskGraphVertex<?>, MaskGraphVertex<?>> vertexCopyMap = new HashMap<>();
+        Set<MaskGraphVertex<?>> newVertices = graph.vertexSet();
+        newVertices.forEach(vertex -> {
+            MaskGraphVertex<?> vertexCopy = vertex.copy();
+            addVertex(vertexCopy);
+            vertexCopyMap.put(vertex, vertexCopy);
+        });
+        newVertices.stream().flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream()).forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)), vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
     }
 }

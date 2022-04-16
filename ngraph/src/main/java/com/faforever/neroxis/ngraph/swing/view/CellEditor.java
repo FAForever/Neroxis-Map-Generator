@@ -10,7 +10,6 @@ import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -22,7 +21,6 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JEditorPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
@@ -300,47 +298,21 @@ public class CellEditor implements ICellEditor {
         if (state != null) {
             editingCell = cell;
             trigger = evt;
-
             double scale = Math.max(minimumEditorScale, graphComponent.getGraph().getView().getScale());
             scrollPane.setBounds(getEditorBounds(state, scale));
             scrollPane.setVisible(true);
-
             String value = getInitialValue(state, evt);
             JTextComponent currentEditor = null;
-
-            // Configures the style of the in-place editor
-            if (graphComponent.getGraph().isHtmlLabel(cell)) {
-                if (isExtractHtmlBody()) {
-                    value = Utils.getBodyMarkup(value, isReplaceHtmlLinefeeds());
-                }
-
-                editorPane.setDocument(Utils.createHtmlDocumentObject(state.getStyle(), scale));
-                editorPane.setText(value);
-
-                // Workaround for wordwrapping in editor pane
-                // FIXME: Cursor not visible at end of line
-                JPanel wrapper = new JPanel(new BorderLayout());
-                wrapper.setOpaque(false);
-                wrapper.add(editorPane, BorderLayout.CENTER);
-                scrollPane.setViewportView(wrapper);
-
-                currentEditor = editorPane;
-            } else {
-                textArea.setFont(Utils.getFont(state.getStyle(), scale));
-                Color fontColor = Utils.getColor(state.getStyle(), Constants.STYLE_FONTCOLOR, Color.black);
-                textArea.setForeground(fontColor);
-                textArea.setText(value);
-
-                scrollPane.setViewportView(textArea);
-                currentEditor = textArea;
-            }
-
+            textArea.setFont(Utils.getFont(state.getStyle(), scale));
+            Color fontColor = Utils.getColor(state.getStyle(), Constants.STYLE_FONTCOLOR, Color.black);
+            textArea.setForeground(fontColor);
+            textArea.setText(value);
+            scrollPane.setViewportView(textArea);
+            currentEditor = textArea;
             graphComponent.getGraphControl().add(scrollPane, 0);
-
             if (isHideLabel(state)) {
                 graphComponent.redraw(state);
             }
-
             currentEditor.revalidate();
             currentEditor.requestFocusInWindow();
             currentEditor.selectAll();

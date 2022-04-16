@@ -46,9 +46,8 @@ public interface ICanvas {
      *
      * @param text  String that represents the label.
      * @param state State of the cell whose label is to be painted.
-     * @param html  Specifies if the label contains HTML markup.
      * @return Object that represents the label.
      */
-    Object drawLabel(String text, CellState state, boolean html);
+    Object drawLabel(String text, CellState state);
 
 }

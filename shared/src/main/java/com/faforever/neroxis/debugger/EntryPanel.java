@@ -51,6 +51,7 @@ public class EntryPanel extends JPanel {
 
     public void setMask(Mask<?, ?> mask) {
         imagePanel.setMask(mask);
+        titleLabel.setText(String.format("Name: %s Size: %d", mask.getVisualName(), mask.getSize()));
         repaint();
         setValueLabel();
     }

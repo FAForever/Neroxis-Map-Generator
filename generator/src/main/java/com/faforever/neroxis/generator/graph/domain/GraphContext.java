@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
+import com.faforever.neroxis.util.SymmetrySelector;
 import java.util.Random;
 import lombok.Getter;
 import org.springframework.expression.EvaluationContext;
@@ -34,9 +35,11 @@ public strictfp class GraphContext {
     private final float normalizedMexDensity;
     private final int mapSize;
     private final int numSymPoints;
+    private String identifier;
 
-    public GraphContext(long seed, GeneratorParameters generatorParameters, ParameterConstraints parameterConstraints, SymmetrySettings symmetrySettings) {
-        this.symmetrySettings = symmetrySettings;
+    public GraphContext(long seed, GeneratorParameters generatorParameters, ParameterConstraints parameterConstraints) {
+        random = new Random(seed);
+        this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, generatorParameters.getTerrainSymmetry(), generatorParameters.getNumTeams());
         this.generatorParameters = generatorParameters;
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         landDensity = generatorParameters.getLandDensity();
@@ -53,7 +56,6 @@ public strictfp class GraphContext {
         normalizedReclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(reclaimDensity);
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         mapSize = generatorParameters.getMapSize();
-        random = new Random(seed);
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
         placeSpawns(generatorParameters, symmetrySettings);
@@ -79,7 +81,8 @@ public strictfp class GraphContext {
         new SpawnPlacer(map, random.nextLong()).placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation, symmetrySettings);
     }
 
-    public <T> T getValue(String expression, Class<T> clazz) {
+    public <T> T getValue(String expression, String identifier, Class<T> clazz) {
+        this.identifier = identifier;
         return parser.parseExpression(expression).getValue(evalContext, clazz);
     }
 }

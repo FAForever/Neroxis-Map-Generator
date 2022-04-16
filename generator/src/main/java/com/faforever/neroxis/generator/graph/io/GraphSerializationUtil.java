@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.graph.domain.MaskConstructorVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -42,6 +43,13 @@ public class GraphSerializationUtil {
     }
 
     private static MaskGraphVertex<?> getMaskGraphVertexFromAttributes(Map<String, Attribute> attributeMap) {
+        if (attributeMap == null || attributeMap.isEmpty()) {
+            try {
+                return MaskConstructorVertex.ofClass(BooleanMask.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
         try {
             Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
             Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());

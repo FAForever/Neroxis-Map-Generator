@@ -591,17 +591,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected U applyWithSymmetry(SymmetryType symmetryType, Consumer<Point> maskAction) {
         return enqueue(() -> {
-            int minX = getMinXBound(symmetryType);
-            int maxX = getMaxXBound(symmetryType);
-            Point point = new Point();
-            for (int x = minX; x < maxX; x++) {
-                int minY = getMinYBound(x, symmetryType);
-                int maxY = getMaxYBound(x, symmetryType);
-                for (int y = minY; y < maxY; y++) {
-                    point.setLocation(x, y);
-                    maskAction.accept(point);
-                }
-            }
+            loopWithSymmetry(symmetryType, maskAction);
             if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
                 forceSymmetry(SymmetryType.SPAWN);
             }
@@ -697,6 +687,21 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         Point point = new Point();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
+                point.setLocation(x, y);
+                maskAction.accept(point);
+            }
+        }
+    }
+
+    protected void loopWithSymmetry(SymmetryType symmetryType, Consumer<Point> maskAction) {
+        assertNotPipelined();
+        int minX = getMinXBound(symmetryType);
+        int maxX = getMaxXBound(symmetryType);
+        Point point = new Point();
+        for (int x = minX; x < maxX; x++) {
+            int minY = getMinYBound(x, symmetryType);
+            int maxY = getMaxYBound(x, symmetryType);
+            for (int y = minY; y < maxY; y++) {
                 point.setLocation(x, y);
                 maskAction.accept(point);
             }

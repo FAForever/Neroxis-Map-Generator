@@ -15,17 +15,20 @@ import com.faforever.neroxis.ngraph.swing.handler.Rubberband;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
@@ -50,9 +53,28 @@ public class PipelineGraphComponent extends GraphComponent {
                             pipelineGraph.removeVertex(vertex);
                         }
                     });
+                } else if (e.getKeyCode() == KeyEvent.VK_LEFT && e.isControlDown()) {
+                    ICell selectedCell = pipelineGraph.getSelectionCell();
+                    if (selectedCell != null) {
+                        MaskGraphVertex<?> vertex = pipelineGraph.getVertexForCell(selectedCell);
+                        MaskGraphVertex<?> ancestor = pipelineGraph.getDirectAncestor(vertex);
+                        if (ancestor != null) {
+                            graph.setSelectionCell(pipelineGraph.getCellForVertex(ancestor));
+                        }
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && e.isControlDown()) {
+                    ICell selectedCell = pipelineGraph.getSelectionCell();
+                    if (selectedCell != null) {
+                        MaskGraphVertex<?> vertex = pipelineGraph.getVertexForCell(selectedCell);
+                        MaskGraphVertex<?> descendant = pipelineGraph.getDirectDescendant(vertex);
+                        if (descendant != null) {
+                            graph.setSelectionCell(pipelineGraph.getCellForVertex(descendant));
+                        }
+                    }
                 }
             }
         });
+
         graphControl.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() != MouseEvent.BUTTON1) {
@@ -72,6 +94,20 @@ public class PipelineGraphComponent extends GraphComponent {
             }
         });
         graphControl.addMouseListener(new Rubberband(this));
+        addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getWheelRotation() < 0) {
+                    zoomIn();
+                } else {
+                    zoomOut();
+                }
+                JViewport viewport = getViewport();
+                Point point = viewport.getViewRect().getLocation();
+                point.translate(e.getX(), e.getY());
+                viewport.setViewPosition(point);
+            }
+        });
     }
 
     protected ConnectionHandler createConnectionHandler() {
@@ -109,6 +145,8 @@ public class PipelineGraphComponent extends GraphComponent {
                 pipelineGraph.addVertex(newVertex);
                 moveVertexToMouse(newVertex, mouseEvent);
                 pipelineGraph.refresh();
+                pipelineGraph.clearSelection();
+                pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
             }
         }));
         if (constructorMenu.getItemCount() > 0) {
@@ -123,6 +161,8 @@ public class PipelineGraphComponent extends GraphComponent {
                     pipelineGraph.addVertex(newVertex);
                     moveVertexToMouse(newVertex, mouseEvent);
                     pipelineGraph.refresh();
+                    pipelineGraph.clearSelection();
+                    pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
                 }
             }));
             methodMenu.add(subMethodMenu);
@@ -177,6 +217,8 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addEdge(newVertex, target, new MaskMethodEdge(MaskGraphVertex.SELF, MaskMethodVertex.EXECUTOR));
                         moveVertexToMouse(newVertex, mouseEvent);
                         pipelineGraph.refresh();
+                        pipelineGraph.clearSelection();
+                        pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
                     }
                 });
             } else {
@@ -191,6 +233,8 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addEdge(newVertex, target, new MaskMethodEdge(MaskGraphVertex.SELF, MaskMethodVertex.EXECUTOR));
                         moveVertexToMouse(newVertex, mouseEvent);
                         pipelineGraph.refresh();
+                        pipelineGraph.clearSelection();
+                        pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
                     }
                 });
             }
@@ -209,6 +253,8 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addEdge(selected, newVertex, new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
                         moveVertexToMouse(newVertex, mouseEvent);
                         pipelineGraph.refresh();
+                        pipelineGraph.clearSelection();
+                        pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
                     }
                 });
             } else {
@@ -219,6 +265,8 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addEdge(selected, newVertex, new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
                         moveVertexToMouse(newVertex, mouseEvent);
                         pipelineGraph.refresh();
+                        pipelineGraph.clearSelection();
+                        pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
                     }
                 });
             }

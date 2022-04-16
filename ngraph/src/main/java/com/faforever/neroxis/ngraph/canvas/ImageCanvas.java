@@ -53,8 +53,8 @@ public class ImageCanvas implements ICanvas {
         return canvas.drawCell(state);
     }
 
-    public Object drawLabel(String label, CellState state, boolean html) {
-        return canvas.drawLabel(label, state, html);
+    public Object drawLabel(String label, CellState state) {
+        return canvas.drawLabel(label, state);
     }
 
     public double getScale() {

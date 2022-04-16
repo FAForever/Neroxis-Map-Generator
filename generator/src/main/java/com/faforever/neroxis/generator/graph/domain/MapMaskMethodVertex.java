@@ -35,11 +35,12 @@ public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     public String toString() {
-        return executable.getName();
+        return identifier == null ? "" : identifier;
     }
 
     public MapMaskMethodVertex copy() {
         MapMaskMethodVertex newVertex = new MapMaskMethodVertex(executable);
+        newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
     }

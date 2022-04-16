@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.graph.domain;
 
 import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskReflectUtil;
 import java.lang.reflect.InvocationTargetException;
@@ -57,12 +56,8 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     @Override
-    public boolean isNotDefined() {
-        return executor == null
-                || !Arrays.stream(executable.getParameters()).allMatch(param -> nonMaskParameters.containsKey(param.getName())
-                || maskParameters.containsKey(param.getName())
-                || Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> param.getName().equals(annotation.name()))
-                .anyMatch(annotation -> annotation.nullable() || !annotation.value().equals("")));
+    public boolean isDefined() {
+        return executor != null && super.isDefined();
     }
 
     public void clearParameter(String parameterName) {
@@ -99,7 +94,12 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
 
     public MaskMethodVertex copy() {
         MaskMethodVertex newVertex = new MaskMethodVertex(executable, executorClass);
+        newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
+    }
+
+    public String toString() {
+        return identifier == null ? "" : identifier;
     }
 }

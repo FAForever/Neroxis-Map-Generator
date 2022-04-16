@@ -261,10 +261,8 @@ public class GraphSelectionModel extends EventSource {
     }
 
     public static class SelectionChange implements UndoableChange {
-
         protected GraphSelectionModel model;
-
-        protected Collection<ICell> added, removed;
+        protected List<ICell> added, removed;
 
         public SelectionChange(GraphSelectionModel model, Collection<ICell> added, Collection<ICell> removed) {
             this.model = model;
@@ -287,9 +285,6 @@ public class GraphSelectionModel extends EventSource {
                 }
             }
 
-            Collection<ICell> tmp = added;
-            added = removed;
-            removed = tmp;
             model.fireEvent(new ChangeEvent(null, null, added, removed));
         }
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class StencilRegistry {
 
-    protected static Map<String, Stencil> stencils = new HashMap<String, Stencil>();
+    protected static Map<String, Stencil> stencils = new HashMap<>();
 
     /**
      * Adds the given stencil.

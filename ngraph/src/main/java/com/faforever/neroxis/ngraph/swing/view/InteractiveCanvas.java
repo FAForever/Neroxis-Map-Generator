@@ -88,7 +88,7 @@ public class InteractiveCanvas extends Graphics2DCanvas {
                     for (int i = 0; i < pointCount; i++) {
                         PointDouble p1 = state.getAbsolutePoint(i);
 
-                        if (rect.intersectsLine(p0.getX(), p0.getY(), p1.getX(), p1.getY())) {
+                        if (p0 != null && p1 != null && rect.intersectsLine(p0.getX(), p0.getY(), p1.getX(), p1.getY())) {
                             return true;
                         }
 

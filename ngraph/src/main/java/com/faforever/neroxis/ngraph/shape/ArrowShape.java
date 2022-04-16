@@ -8,6 +8,9 @@ import java.awt.Polygon;
 import java.awt.Shape;
 
 public class ArrowShape extends BasicShape {
+    public static final int SPACING = 10;
+    public static final int WIDTH = 30;
+    public static final int SIZE = 30;
 
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         double scale = canvas.getScale();

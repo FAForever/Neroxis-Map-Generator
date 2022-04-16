@@ -102,7 +102,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
     /**
      * Stack of states for save/restore.
      */
-    protected transient Stack<CanvasState> stack = new Stack<CanvasState>();
+    protected transient Stack<CanvasState> stack = new Stack<>();
 
     /**
      * Holds the current path.

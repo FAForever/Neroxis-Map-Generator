@@ -36,7 +36,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @GraphMethod
-    @GraphParameter(name = "name", nullable = true)
+    @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
@@ -715,7 +715,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
-        applyWithSymmetry(SymmetryType.SPAWN, point -> bytes.putFloat(getPrimitive(point)));
+        loopWithSymmetry(SymmetryType.SPAWN, point -> bytes.putFloat(getPrimitive(point)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {

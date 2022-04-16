@@ -14,7 +14,6 @@ import com.faforever.neroxis.ngraph.shape.DoubleEllipseShape;
 import com.faforever.neroxis.ngraph.shape.DoubleRectangleShape;
 import com.faforever.neroxis.ngraph.shape.EllipseShape;
 import com.faforever.neroxis.ngraph.shape.HexagonShape;
-import com.faforever.neroxis.ngraph.shape.HtmlTextShape;
 import com.faforever.neroxis.ngraph.shape.IShape;
 import com.faforever.neroxis.ngraph.shape.ITextShape;
 import com.faforever.neroxis.ngraph.shape.ImageShape;
@@ -54,6 +53,7 @@ import javax.swing.CellRendererPane;
  */
 public class Graphics2DCanvas extends BasicCanvas {
 
+    public static final double LINE_ARCSIZE = 10;
     public static final String TEXT_SHAPE_DEFAULT = "default";
     public static final String TEXT_SHAPE_HTML = "html";
     private static final Logger log = Logger.getLogger(Graphics2DCanvas.class.getName());
@@ -95,7 +95,6 @@ public class Graphics2DCanvas extends BasicCanvas {
         putShape(Constants.SHAPE_SWIMLANE, new SwimlaneShape());
         putShape(Constants.SHAPE_TRIANGLE, new TriangleShape());
         putTextShape(TEXT_SHAPE_DEFAULT, new DefaultTextShape());
-        putTextShape(TEXT_SHAPE_HTML, new HtmlTextShape());
     }
 
     /**
@@ -140,24 +139,14 @@ public class Graphics2DCanvas extends BasicCanvas {
     public IShape getShape(Map<String, Object> style) {
         String name = Utils.getString(style, Constants.STYLE_SHAPE, null);
         IShape shape = shapes.get(name);
-
         if (shape == null && name != null) {
             shape = StencilRegistry.getStencil(name);
         }
-
         return shape;
     }
 
-    public ITextShape getTextShape(Map<String, Object> style, boolean html) {
-        String name;
-
-        if (html) {
-            name = TEXT_SHAPE_HTML;
-        } else {
-            name = TEXT_SHAPE_DEFAULT;
-        }
-
-        return textShapes.get(name);
+    public ITextShape getTextShape(Map<String, Object> style) {
+        return textShapes.get(TEXT_SHAPE_DEFAULT);
     }
 
     public CellRendererPane getRendererPane() {
@@ -197,17 +186,14 @@ public class Graphics2DCanvas extends BasicCanvas {
         return shape;
     }
 
-
-    public Object drawLabel(String text, CellState state, boolean html) {
+    public Object drawLabel(String text, CellState state) {
         Map<String, Object> style = state.getStyle();
-        ITextShape shape = getTextShape(style, html);
-
+        ITextShape shape = getTextShape(style);
         if (graphics2D != null && shape != null && drawLabels && text != null && text.length() > 0) {
             // Creates a temporary graphics instance for drawing this shape
             float opacity = Utils.getFloat(style, Constants.STYLE_TEXT_OPACITY, 100);
             Graphics2D previousGraphics = graphics2D;
             graphics2D = createTemporaryGraphics(style, opacity, null);
-
             // Draws the label background and border
             Color bg = Utils.getColor(style, Constants.STYLE_LABEL_BACKGROUNDCOLOR);
             Color border = Utils.getColor(style, Constants.STYLE_LABEL_BORDERCOLOR);

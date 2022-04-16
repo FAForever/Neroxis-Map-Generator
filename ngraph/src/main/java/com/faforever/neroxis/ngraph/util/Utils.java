@@ -8,7 +8,6 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -32,7 +31,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.text.html.HTMLDocument;
 import org.w3c.dom.Element;
 
 /**
@@ -72,8 +70,8 @@ public class Utils {
      * markup in the label is computed as HTML and all newlines inside the HTML
      * body are converted into linebreaks.
      */
-    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale) {
-        return getLabelSize(label, style, isHtml, scale, 0);
+    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, double scale) {
+        return getLabelSize(label, style, scale, 0);
     }
 
     /**
@@ -81,14 +79,8 @@ public class Utils {
      * markup in the label is computed as HTML and all newlines inside the HTML
      * body are converted into linebreaks.
      */
-    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, boolean isHtml, double scale, double htmlWrapWidth) {
-        RectangleDouble size;
-        if (isHtml) {
-            size = getSizeForHtml(getBodyMarkup(label, true), style, scale, htmlWrapWidth);
-        } else {
-            size = getSizeForString(label, getFont(style), scale);
-        }
-        return size;
+    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, double scale, double htmlWrapWidth) {
+        return getSizeForString(label, getFont(style), scale);
     }
 
     /**
@@ -117,23 +109,22 @@ public class Utils {
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, PointDouble offset, RectangleDouble vertexBounds, double scale) {
-        return getLabelPaintBounds(label, style, isHtml, offset, vertexBounds, scale, false);
+    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, PointDouble offset, RectangleDouble vertexBounds, double scale) {
+        return getLabelPaintBounds(label, style, offset, vertexBounds, scale, false);
     }
 
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, boolean isHtml, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
+    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
         double wrapWidth = 0;
-        if (isHtml && vertexBounds != null && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
+        if (vertexBounds != null && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
             wrapWidth = vertexBounds.getWidth();
         }
-        RectangleDouble size = Utils.getLabelSize(label, style, isHtml, scale, wrapWidth);
+        RectangleDouble size = Utils.getLabelSize(label, style, scale, wrapWidth);
         // Measures font with full scale and scales back
         size.setWidth(size.getWidth() / scale);
         size.setHeight(size.getHeight() / scale);
-
         double x = offset.getX();
         double y = offset.getY();
         double width = 0;
@@ -420,37 +411,6 @@ public class Utils {
         }
 
         return result.toArray(new String[0]);
-    }
-
-    /**
-     * Returns an Rectangle with the size (width and height in pixels) of the
-     * given HTML markup.
-     *
-     * @param markup HTML markup whose size should be returned.
-     */
-    public static RectangleDouble getSizeForHtml(String markup, Map<String, Object> style, double scale, double wrapWidth) {
-        LightweightLabel textRenderer = LightweightLabel.getSharedInstance();
-        if (textRenderer != null) {
-            // First run measures size with no wrapping
-            textRenderer.setText(createHtmlDocument(style, markup));
-            Dimension size = textRenderer.getPreferredSize();
-            // Second run measures size with wrapping if required.
-            // Note that this is only required because max-width
-            // is not supported and we can't get the width of an
-            // inner HTML element (or is this possible?).
-            if (wrapWidth > 0) {
-                textRenderer.setText(createHtmlDocument(style, markup, 1, (int) Math.ceil(wrapWidth - Constants.LABEL_INSET * scale)));
-                Dimension size2 = textRenderer.getPreferredSize();
-
-                // Uses wrapped text size if any text was actually wrapped
-                if (size2.width < size.width) {
-                    size = size2;
-                }
-            }
-            return new RectangleDouble(0, 0, size.width * scale, size.height * scale);
-        } else {
-            return getSizeForString(markup, getFont(style), scale);
-        }
     }
 
     /**
@@ -1229,7 +1189,7 @@ public class Utils {
 
     /**
      * Returns true if the user object is an XML node with the specified type
-     * and and the optional attribute has the specified value or is not
+     * and the optional attribute has the specified value or is not
      * specified.
      *
      * @param value    Object that should be examined as a node.
@@ -1341,161 +1301,5 @@ public class Utils {
         }
 
         return img;
-    }
-
-    /**
-     * Returns a new, empty DOM document.
-     *
-     * @return Returns a new DOM document.
-     */
-    public static String createHtmlDocument(Map<String, Object> style, String text) {
-        return createHtmlDocument(style, text, 1, 0);
-    }
-
-    /**
-     * Returns a new, empty DOM document.
-     *
-     * @return Returns a new DOM document.
-     */
-    public static String createHtmlDocument(Map<String, Object> style, String text, double scale, int width) {
-        return createHtmlDocument(style, text, scale, width, null);
-    }
-
-    /**
-     * Returns a new, empty DOM document. The head argument can be used to
-     * provide an optional HEAD section without the HEAD tags as follows:
-     *
-     * <pre>
-     * Utils.createHtmlDocument(style,  text, 1, 0, "<style type=\"text/css\">.classname { color:red; }</style>")
-     * </pre>
-     *
-     * @return Returns a new DOM document.
-     */
-    public static String createHtmlDocument(Map<String, Object> style, String text, double scale, int width, String head) {
-        return createHtmlDocument(style, text, scale, width, null, null);
-    }
-
-    /**
-     * Returns a new, empty DOM document. The head argument can be used to
-     * provide an optional HEAD section without the HEAD tags as follows:
-     *
-     * <pre>
-     * Utils.createHtmlDocument(style,  text, 1, 0, "<style type=\"text/css\">.classname { color:red; }</style>")
-     * </pre>
-     *
-     * @return Returns a new DOM document.
-     */
-    public static String createHtmlDocument(Map<String, Object> style, String text, double scale, int width, String head, String bodyCss) {
-        StringBuffer css = (bodyCss != null) ? new StringBuffer(bodyCss) : new StringBuffer();
-        css.append("font-family:").append(getString(style, Constants.STYLE_FONTFAMILY, Constants.DEFAULT_FONTFAMILIES)).append(";");
-        css.append("font-size:").append((int) (getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE) * scale)).append("pt;");
-
-        String color = Utils.getString(style, Constants.STYLE_FONTCOLOR);
-
-        if (color != null) {
-            css.append("color:").append(color).append(";");
-        }
-
-        int fontStyle = Utils.getInt(style, Constants.STYLE_FONTSTYLE);
-
-        if ((fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) {
-            css.append("font-weight:bold;");
-        }
-
-        if ((fontStyle & Constants.FONT_ITALIC) == Constants.FONT_ITALIC) {
-            css.append("font-style:italic;");
-        }
-
-        String txtDecor = "";
-
-        if ((fontStyle & Constants.FONT_UNDERLINE) == Constants.FONT_UNDERLINE) {
-            txtDecor = "underline";
-        }
-
-        if ((fontStyle & Constants.FONT_STRIKETHROUGH) == Constants.FONT_STRIKETHROUGH) {
-            txtDecor += " line-through";
-        }
-
-        if (txtDecor.length() > 0) {
-            css.append("text-decoration: ").append(txtDecor).append(";");
-        }
-
-        String align = getString(style, Constants.STYLE_ALIGN, Constants.ALIGN_LEFT);
-
-        if (align.equals(Constants.ALIGN_CENTER)) {
-            css.append("text-align:center;");
-        } else if (align.equals(Constants.ALIGN_RIGHT)) {
-            css.append("text-align:right;");
-        }
-
-        if (width > 0) {
-            // LATER: With max-width support, wrapped text can be measured in 1 step
-            css.append("width:").append(width).append("pt;");
-        }
-
-        String result = "<html>";
-
-        if (head != null) {
-            result += "<head>" + head + "</head>";
-        }
-
-        return result + "<body style=\"" + css + "\">" + text + "</body></html>";
-    }
-
-    /**
-     * Returns a new, empty DOM document.
-     *
-     * @return Returns a new DOM document.
-     */
-    public static HTMLDocument createHtmlDocumentObject(Map<String, Object> style, double scale) {
-        // Applies the font settings
-        HTMLDocument document = new HTMLDocument();
-
-        StringBuilder rule = new StringBuilder("body {");
-        rule.append("font-family:").append(getString(style, Constants.STYLE_FONTFAMILY, Constants.DEFAULT_FONTFAMILIES)).append(";");
-        rule.append("font-size:").append((int) (getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE) * scale)).append("pt;");
-
-        String color = Utils.getString(style, Constants.STYLE_FONTCOLOR);
-
-        if (color != null) {
-            rule.append("color:").append(color).append(";");
-        }
-
-        int fontStyle = Utils.getInt(style, Constants.STYLE_FONTSTYLE);
-
-        if ((fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) {
-            rule.append("font-weight:bold;");
-        }
-
-        if ((fontStyle & Constants.FONT_ITALIC) == Constants.FONT_ITALIC) {
-            rule.append("font-style:italic;");
-        }
-
-        String txtDecor = "";
-
-        if ((fontStyle & Constants.FONT_UNDERLINE) == Constants.FONT_UNDERLINE) {
-            txtDecor = "underline";
-        }
-
-        if ((fontStyle & Constants.FONT_STRIKETHROUGH) == Constants.FONT_STRIKETHROUGH) {
-            txtDecor += " line-through";
-        }
-
-        if (txtDecor.length() > 0) {
-            rule.append("text-decoration: ").append(txtDecor).append(";");
-        }
-
-        String align = getString(style, Constants.STYLE_ALIGN, Constants.ALIGN_LEFT);
-
-        if (align.equals(Constants.ALIGN_CENTER)) {
-            rule.append("text-align:center;");
-        } else if (align.equals(Constants.ALIGN_RIGHT)) {
-            rule.append("text-align:right;");
-        }
-
-        rule.append("}");
-        document.getStyleSheet().addRule(rule.toString());
-
-        return document;
     }
 }

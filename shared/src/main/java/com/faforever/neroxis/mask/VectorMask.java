@@ -5,8 +5,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -663,7 +662,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         int size = getSize();
         int dimension = get(0, 0).getDimension();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4 * dimension);
-        applyWithSymmetry(SymmetryType.SPAWN, point -> {
+        loopWithSymmetry(SymmetryType.SPAWN, point -> {
             Vector<?> value = get(point);
             for (int i = 0; i < dimension; ++i) {
                 bytes.putFloat(value.get(i));

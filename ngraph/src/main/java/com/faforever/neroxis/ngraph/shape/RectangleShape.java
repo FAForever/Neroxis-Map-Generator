@@ -8,11 +8,11 @@ import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Map;
 
 public class RectangleShape extends BasicShape {
+    public static final double RECTANGLE_ROUNDING_FACTOR = 0.15;
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Map<String, Object> style = state.getStyle();
@@ -66,7 +66,7 @@ public class RectangleShape extends BasicShape {
      * Helper method to configure the given wrapper canvas.
      */
     protected int getArcSize(CellState state, double w, double h) {
-        double f = Utils.getDouble(state.getStyle(), Constants.STYLE_ARCSIZE, Constants.RECTANGLE_ROUNDING_FACTOR * 100) / 100;
+        double f = Utils.getDouble(state.getStyle(), Constants.STYLE_ARCSIZE, RECTANGLE_ROUNDING_FACTOR * 100) / 100;
 
         return (int) (Math.min(w, h) * f * 2);
     }

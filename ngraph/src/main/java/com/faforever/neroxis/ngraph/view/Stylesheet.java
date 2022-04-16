@@ -3,6 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
 import com.faforever.neroxis.ngraph.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,9 +60,8 @@ public class Stylesheet {
      */
     protected Map<String, Object> createDefaultVertexStyle() {
         Map<String, Object> style = new HashMap<>();
-
         style.put(Constants.STYLE_SHAPE, Constants.SHAPE_RECTANGLE);
-        style.put(Constants.STYLE_PERIMETER, Perimeter.RectanglePerimeter);
+        style.put(Constants.STYLE_PERIMETER, new RectanglePerimeter());
         style.put(Constants.STYLE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
         style.put(Constants.STYLE_ALIGN, Constants.ALIGN_CENTER);
         style.put(Constants.STYLE_FILLCOLOR, "#C3D9FF");
