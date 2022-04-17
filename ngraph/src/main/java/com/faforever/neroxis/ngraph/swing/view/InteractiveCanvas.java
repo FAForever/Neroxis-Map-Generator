@@ -4,12 +4,11 @@
 package com.faforever.neroxis.ngraph.swing.view;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.shape.ArrowShape;
 import com.faforever.neroxis.ngraph.shape.BasicShape;
 import com.faforever.neroxis.ngraph.shape.IShape;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -72,9 +71,8 @@ public class InteractiveCanvas extends Graphics2DCanvas {
                 Shape realShape = null;
 
                 // FIXME: Check if this should be used for all shapes
-                if (Utils.getString(state.getStyle(), Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_ARROW)) {
+                if (state.getStyle().getShape().getShape() instanceof ArrowShape) {
                     IShape shape = getShape(state.getStyle());
-
                     if (shape instanceof BasicShape) {
                         realShape = ((BasicShape) shape).createShape(this, state);
                     }
@@ -112,10 +110,9 @@ public class InteractiveCanvas extends Graphics2DCanvas {
      */
     public boolean hitSwimlaneContent(GraphComponent graphComponent, CellState swimlane, int x, int y) {
         if (swimlane != null) {
-            int start = (int) Math.max(2, Math.round(Utils.getInt(swimlane.getStyle(), Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE) * graphComponent.getGraph().getView().getScale()));
+            int start = (int) Math.max(2, Math.round(swimlane.getStyle().getEdge().getStartSize() * graphComponent.getGraph().getView().getScale()));
             Rectangle rect = swimlane.getRectangle();
-
-            if (Utils.isTrue(swimlane.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+            if (swimlane.getStyle().getCellProperties().isHorizontal()) {
                 rect.y += start;
                 rect.height -= start;
             } else {

@@ -4,7 +4,7 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.Curve;
 import com.faforever.neroxis.ngraph.util.LineDouble;
 import com.faforever.neroxis.ngraph.util.PointDouble;
@@ -26,7 +26,6 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Draws the edge label along a curve derived from the curve describing
@@ -115,22 +114,20 @@ public class CurveLabelShape implements ITextShape {
         rotationEnabled = value;
     }
 
-    public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Map<String, Object> style) {
+    public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Style style) {
         java.awt.Rectangle rect = state.getLabelBounds().getRectangle();
         Graphics2D g = canvas.getGraphics();
-
         if (labelGlyphs == null) {
             updateLabelBounds(text, style);
         }
-
         if (labelGlyphs != null && (g.getClipBounds() == null || g.getClipBounds().intersects(rect))) {
             // Creates a temporary graphics instance for drawing this shape
-            float opacity = Utils.getFloat(style, Constants.STYLE_OPACITY, 100);
+            float opacity = style.getShape().getOpacity();
             Graphics2D previousGraphics = g;
             g = canvas.createTemporaryGraphics(style, opacity, state);
             Font font = Utils.getFont(style, canvas.getScale());
             g.setFont(font);
-            Color fontColor = Utils.getColor(style, Constants.STYLE_FONTCOLOR, Color.black);
+            Color fontColor = style.getLabel().getTextColor();
             g.setColor(fontColor);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, FONT_FRACTIONALMETRICS);
@@ -165,7 +162,7 @@ public class CurveLabelShape implements ITextShape {
      * @param label the entire string of the label.
      * @param style the edge style
      */
-    public RectangleDouble updateLabelBounds(String label, Map<String, Object> style) {
+    public RectangleDouble updateLabelBounds(String label, Style style) {
         double scale = state.getView().getScale();
         Font font = Utils.getFont(style, scale);
         FontMetrics fm = Utils.getFontMetrics(font);
@@ -474,7 +471,7 @@ public class CurveLabelShape implements ITextShape {
      * @param style the style of the curve
      * @param label the string label to be displayed on the curve
      */
-    protected void calculationLabelPosition(Map<String, Object> style, String label) {
+    protected void calculationLabelPosition(Style style, String label) {
         double curveLength = curve.getCurveLength(Curve.LABEL_CURVE);
         double availableLabelSpace = curveLength - labelPosition.startBuffer - labelPosition.endBuffer;
         labelPosition.startBuffer = Math.max(labelPosition.startBuffer, labelPosition.startBuffer + availableLabelSpace / 2 - labelSize / 2);

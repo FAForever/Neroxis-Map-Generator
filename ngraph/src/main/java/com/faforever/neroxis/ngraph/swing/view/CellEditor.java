@@ -6,8 +6,9 @@ package com.faforever.neroxis.ngraph.swing.view;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
+import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.VerticalAlignment;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
-import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Color;
@@ -265,19 +266,16 @@ public class CellEditor implements ICellEditor {
 
         // Applies the horizontal and vertical label positions
         if (model.isVertex(state.getCell())) {
-            String horizontal = Utils.getString(state.getStyle(), Constants.STYLE_LABEL_POSITION, Constants.ALIGN_CENTER);
-
-            if (horizontal.equals(Constants.ALIGN_LEFT)) {
+            HorizontalAlignment horizontalAlignment = state.getStyle().getLabel().getHorizontalAlignmentPosition();
+            if (horizontalAlignment == HorizontalAlignment.LEFT) {
                 bounds.x -= state.getWidth();
-            } else if (horizontal.equals(Constants.ALIGN_RIGHT)) {
+            } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
                 bounds.x += state.getWidth();
             }
-
-            String vertical = Utils.getString(state.getStyle(), Constants.STYLE_VERTICAL_LABEL_POSITION, Constants.ALIGN_MIDDLE);
-
-            if (vertical.equals(Constants.ALIGN_TOP)) {
+            VerticalAlignment verticalAlignment = state.getStyle().getLabel().getVerticalAlignment();
+            if (verticalAlignment == VerticalAlignment.TOP) {
                 bounds.y -= state.getHeight();
-            } else if (vertical.equals(Constants.ALIGN_BOTTOM)) {
+            } else if (verticalAlignment == VerticalAlignment.BOTTOM) {
                 bounds.y += state.getHeight();
             }
         }
@@ -304,7 +302,7 @@ public class CellEditor implements ICellEditor {
             String value = getInitialValue(state, evt);
             JTextComponent currentEditor = null;
             textArea.setFont(Utils.getFont(state.getStyle(), scale));
-            Color fontColor = Utils.getColor(state.getStyle(), Constants.STYLE_FONTCOLOR, Color.black);
+            Color fontColor = state.getStyle().getLabel().getTextColor();
             textArea.setForeground(fontColor);
             textArea.setText(value);
             scrollPane.setViewportView(textArea);

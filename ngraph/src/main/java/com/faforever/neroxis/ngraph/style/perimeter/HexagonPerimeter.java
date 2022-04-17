@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ngraph.style.perimeter;
 
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Direction;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
@@ -27,8 +27,8 @@ public class HexagonPerimeter implements Perimeter {
         double pi = Math.PI;
         double pi2 = Math.PI / 2;
         PointDouble result;
-        Object direction = (vertex != null) ? Utils.getString(vertex.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST) : Constants.DIRECTION_EAST;
-        boolean vertical = direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH);
+        Direction direction = (vertex != null) ? vertex.getStyle().getShape().getDirection() : Direction.EAST;
+        boolean vertical = direction == Direction.NORTH || direction == Direction.SOUTH;
         PointDouble a = new PointDouble();
         PointDouble b = new PointDouble();
         //Only consider corrects quadrants for the orthogonal case.

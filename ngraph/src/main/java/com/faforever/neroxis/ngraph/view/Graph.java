@@ -51,6 +51,13 @@ import com.faforever.neroxis.ngraph.model.TerminalChange;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.model.ValueChange;
 import com.faforever.neroxis.ngraph.model.VisibleChange;
+import com.faforever.neroxis.ngraph.shape.LabelShape;
+import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.Overflow;
+import com.faforever.neroxis.ngraph.style.Style;
+import com.faforever.neroxis.ngraph.style.SwimlaneStyle;
+import com.faforever.neroxis.ngraph.style.VerticalAlignment;
 import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.EntityRelationEdgeStyleFunction;
@@ -75,7 +82,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -954,19 +960,15 @@ public class Graph extends EventSource {
      * @param cell Cell whose style should be returned.
      * @return Returns the style of the cell.
      */
-    public Map<String, Object> getCellStyle(ICell cell) {
-        Map<String, Object> style = (model.isEdge(cell)) ? stylesheet.getDefaultEdgeStyle() : stylesheet.getDefaultVertexStyle();
-
+    public Style getCellStyle(ICell cell) {
+        Style style = (model.isEdge(cell)) ? stylesheet.getDefaultEdgeStyle() : stylesheet.getDefaultVertexStyle();
         String name = model.getStyle(cell);
-
         if (name != null) {
             style = stylesheet.getCellStyle(name, style);
         }
-
         if (style == null) {
-            style = Stylesheet.EMPTY_STYLE;
+            style = new Style();
         }
-
         return style;
     }
 
@@ -1011,58 +1013,6 @@ public class Graph extends EventSource {
     }
 
     /**
-     * Toggles the boolean value for the given key in the style of the
-     * given cell. If no cell is specified then the selection cell is
-     * used.
-     *
-     * @param key          Key for the boolean value to be toggled.
-     * @param defaultValue Default boolean value if no value is defined.
-     * @param cell         Cell whose style should be modified.
-     */
-    public ICell toggleCellStyle(String key, boolean defaultValue, ICell cell) {
-        return toggleCellStyles(key, defaultValue, List.of(cell)).get(0);
-    }
-
-    /**
-     * Toggles the boolean value for the given key in the style of the
-     * selection cells.
-     *
-     * @param key          Key for the boolean value to be toggled.
-     * @param defaultValue Default boolean value if no value is defined.
-     */
-    public List<ICell> toggleCellStyles(String key, boolean defaultValue) {
-        return toggleCellStyles(key, defaultValue, null);
-    }
-
-    /**
-     * Toggles the boolean value for the given key in the style of the given
-     * cells. If no cells are specified, then the selection cells are used. For
-     * example, this can be used to toggle Constants.STYLE_ROUNDED or any
-     * other style with a boolean value.
-     *
-     * @param key          String representing the key of the boolean style to be toggled.
-     * @param defaultValue Default boolean value if no value is defined.
-     * @param cells        Cells whose styles should be modified.
-     */
-    public List<ICell> toggleCellStyles(String key, boolean defaultValue, List<ICell> cells) {
-        if (cells == null) {
-            cells = getSelectionCells();
-        }
-
-        if (cells != null && cells.size() > 0) {
-            CellState state = view.getState(cells.get(0));
-            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells.get(0));
-
-            if (style != null) {
-                String value = (Utils.isTrue(style, key, defaultValue)) ? "0" : "1";
-                setCellStyles(key, value, cells);
-            }
-        }
-
-        return cells;
-    }
-
-    /**
      * Sets the key to value in the styles of the selection cells.
      *
      * @param key   String representing the key to be assigned.
@@ -1089,76 +1039,6 @@ public class Graph extends EventSource {
         }
 
         StyleUtils.setCellStyles(model, cells, key, value);
-
-        return cells;
-    }
-
-    /**
-     * Toggles the given bit for the given key in the styles of the selection
-     * cells.
-     *
-     * @param key  String representing the key to toggle the flag in.
-     * @param flag Integer that represents the bit to be toggled.
-     */
-    public List<ICell> toggleCellStyleFlags(String key, int flag) {
-        return toggleCellStyleFlags(key, flag, null);
-    }
-
-    /**
-     * Toggles the given bit for the given key in the styles of the specified
-     * cells.
-     *
-     * @param key   String representing the key to toggle the flag in.
-     * @param flag  Integer that represents the bit to be toggled.
-     * @param cells Optional array of <Cells> to change the style for. Default is
-     *              the selection cells.
-     */
-    public List<ICell> toggleCellStyleFlags(String key, int flag, List<ICell> cells) {
-        return setCellStyleFlags(key, flag, null, cells);
-    }
-
-    /**
-     * Sets or toggles the given bit for the given key in the styles of the
-     * selection cells.
-     *
-     * @param key   String representing the key to toggle the flag in.
-     * @param flag  Integer that represents the bit to be toggled.
-     * @param value Boolean value to be used or null if the value should be
-     *              toggled.
-     */
-    public List<ICell> setCellStyleFlags(String key, int flag, boolean value) {
-        return setCellStyleFlags(key, flag, value, null);
-    }
-
-    /**
-     * Sets or toggles the given bit for the given key in the styles of the
-     * specified cells.
-     *
-     * @param key   String representing the key to toggle the flag in.
-     * @param flag  Integer that represents the bit to be toggled.
-     * @param value Boolean value to be used or null if the value should be
-     *              toggled.
-     * @param cells Optional array of cells to change the style for. If no
-     *              cells are specified then the selection cells are used.
-     */
-    public List<ICell> setCellStyleFlags(String key, int flag, Boolean value, List<ICell> cells) {
-        if (cells == null) {
-            cells = getSelectionCells();
-        }
-
-        if (cells != null && cells.size() > 0) {
-            if (value == null) {
-                CellState state = view.getState(cells.get(0));
-                Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cells.get(0));
-
-                if (style != null) {
-                    int current = Utils.getInt(style, key);
-                    value = !((current & flag) == flag);
-                }
-            }
-
-            StyleUtils.setCellStyleFlags(model, cells, key, flag, value);
-        }
 
         return cells;
     }
@@ -2639,24 +2519,19 @@ public class Graph extends EventSource {
 
                     if (isSwimlane(cell)) {
                         CellState state = view.getState(cell);
-                        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
+                        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
                         String cellStyle = model.getStyle(cell);
-
                         if (cellStyle == null) {
                             cellStyle = "";
                         }
-
-                        if (Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true)) {
+                        if (style.getCellProperties().isHorizontal()) {
                             cellStyle = StyleUtils.setStyle(cellStyle, Constants.STYLE_STARTSIZE, String.valueOf(size.getHeight() + 8));
-
                             if (collapsed) {
                                 geo.setHeight(size.getHeight() + 8);
                             }
-
                             geo.setWidth(size.getWidth());
                         } else {
                             cellStyle = StyleUtils.setStyle(cellStyle, Constants.STYLE_STARTSIZE, String.valueOf(size.getWidth() + 8));
-
                             if (collapsed) {
                                 geo.setWidth(size.getWidth() + 8);
                             }
@@ -2702,46 +2577,35 @@ public class Graph extends EventSource {
         RectangleDouble result = null;
         if (cell != null) {
             CellState state = view.getState(cell);
-            Map<String, Object> style = (state != null) ? state.style : getCellStyle(cell);
+            Style style = (state != null) ? state.style : getCellStyle(cell);
             if (style != null && !model.isEdge(cell)) {
                 double dx = 0;
                 double dy = 0;
                 // Adds dimension of image if shape is a label
-                if (getImage(state) != null || Utils.getString(style, Constants.STYLE_IMAGE) != null) {
-                    if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_LABEL)) {
-                        if (Utils.getString(style, Constants.STYLE_VERTICAL_ALIGN, "").equals(Constants.ALIGN_MIDDLE)) {
-                            dx += Utils.getDouble(style, Constants.STYLE_IMAGE_WIDTH, Constants.DEFAULT_IMAGESIZE);
+                if (getImage(state) != null || style.getImage().getImage() != null) {
+                    if (style.getShape().getShape() instanceof LabelShape) {
+                        if (style.getLabel().getVerticalAlignment() == VerticalAlignment.MIDDLE) {
+                            dx += style.getImage().getHeight();
                         }
-
-                        if (Utils.getString(style, Constants.STYLE_ALIGN, "").equals(Constants.ALIGN_CENTER)) {
-                            dy += Utils.getDouble(style, Constants.STYLE_IMAGE_HEIGHT, Constants.DEFAULT_IMAGESIZE);
+                        if (style.getLabel().getHorizontalAlignment() == HorizontalAlignment.CENTER) {
+                            dy += style.getImage().getHeight();
                         }
                     }
                 }
-
                 // Adds spacings
-                double spacing = Utils.getDouble(style, Constants.STYLE_SPACING);
-                dx += 2 * spacing;
-                dx += Utils.getDouble(style, Constants.STYLE_SPACING_LEFT);
-                dx += Utils.getDouble(style, Constants.STYLE_SPACING_RIGHT);
-
-                dy += 2 * spacing;
-                dy += Utils.getDouble(style, Constants.STYLE_SPACING_TOP);
-                dy += Utils.getDouble(style, Constants.STYLE_SPACING_BOTTOM);
-
+                dx += style.getLabel().getLeftSpacing();
+                dx += style.getLabel().getRightSpacing();
+                dy += style.getLabel().getTopSpacing();
+                dy += style.getLabel().getBottomSpacing();
                 // LATER: Add space for collapse/expand icon if applicable
-
                 // Adds space for label
                 String value = getLabel(cell);
-
                 if (value != null && value.length() > 0) {
                     RectangleDouble size = Utils.getLabelSize(value, style, 1);
                     double width = size.getWidth() + dx;
                     double height = size.getHeight() + dy;
-
-                    if (!Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true)) {
+                    if (!style.getCellProperties().isHorizontal()) {
                         double tmp = height;
-
                         height = width;
                         width = tmp;
                     }
@@ -3167,20 +3031,20 @@ public class Graph extends EventSource {
      */
     public ConnectionConstraint getConnectionConstraint(CellState edge, CellState terminal, boolean source) {
         PointDouble point = null;
-        Object x = edge.getStyle().get((source) ? Constants.STYLE_EXIT_X : Constants.STYLE_ENTRY_X);
+        Float x = source ? edge.getStyle().getEdge().getExitX() : edge.getStyle().getEdge().getEntryX();
 
         if (x != null) {
-            Object y = edge.getStyle().get((source) ? Constants.STYLE_EXIT_Y : Constants.STYLE_ENTRY_Y);
+            Float y = source ? edge.getStyle().getEdge().getExitY() : edge.getStyle().getEdge().getEntryY();
 
             if (y != null) {
-                point = new PointDouble(Double.parseDouble(x.toString()), Double.parseDouble(y.toString()));
+                point = new PointDouble(x, y);
             }
         }
 
         boolean perimeter = false;
 
         if (point != null) {
-            perimeter = Utils.isTrue(edge.style, (source) ? Constants.STYLE_EXIT_PERIMETER : Constants.STYLE_ENTRY_PERIMETER, true);
+            perimeter = source ? edge.getStyle().getEdge().isExitPerimeter() : edge.getStyle().getEdge().isEntryPerimeter();
         }
 
         return new ConnectionConstraint(point, perimeter);
@@ -3237,25 +3101,26 @@ public class Graph extends EventSource {
         if (vertex != null && constraint.point != null) {
             RectangleDouble bounds = this.view.getPerimeterBounds(vertex, 0);
             PointDouble cx = new PointDouble(bounds.getCenterX(), bounds.getCenterY());
-            String direction = Utils.getString(vertex.getStyle(), Constants.STYLE_DIRECTION);
+            Direction direction = vertex.getStyle().getShape().getDirection();
             double r1 = 0;
             // Bounds need to be rotated by 90 degrees for further computation
             if (direction != null) {
                 switch (direction) {
-                    case Constants.DIRECTION_NORTH -> r1 += 270;
-                    case Constants.DIRECTION_WEST -> r1 += 180;
-                    case Constants.DIRECTION_SOUTH -> r1 += 90;
-                }
-
-                // Bounds need to be rotated by 90 degrees for further computation
-                if (direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH)) {
-                    bounds.rotate90();
+                    case NORTH -> {
+                        r1 += 270;
+                        bounds.rotate90();
+                    }
+                    case WEST -> r1 += 180;
+                    case SOUTH -> {
+                        r1 += 90;
+                        bounds.rotate90();
+                    }
                 }
             }
             point = new PointDouble(bounds.getX() + constraint.point.getX() * bounds.getWidth(), bounds.getY() + constraint.point.getY() * bounds.getHeight());
 
             // Rotation for direction before projection on perimeter
-            double r2 = Utils.getDouble(vertex.getStyle(), Constants.STYLE_ROTATION);
+            double r2 = vertex.getStyle().getShape().getRotation();
 
             if (constraint.perimeter) {
                 if (r1 != 0) {
@@ -3279,13 +3144,11 @@ public class Graph extends EventSource {
                 r2 += r1;
 
                 if (this.getModel().isVertex(vertex.cell)) {
-                    boolean flipH = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPH).equals("1");
-                    boolean flipV = Utils.getString(vertex.getStyle(), Constants.STYLE_FLIPV).equals("1");
-
+                    boolean flipH = vertex.getStyle().getShape().isFlipHorizontal();
+                    boolean flipV = vertex.getStyle().getShape().isFlipVertical();
                     if (flipH) {
                         point.setX(2 * bounds.getCenterX() - point.getX());
                     }
-
                     if (flipV) {
                         point.setY(2 * bounds.getCenterY() - point.getY());
                     }
@@ -3873,8 +3736,8 @@ public class Graph extends EventSource {
      * @param edge Cell state that represents the edge.
      */
     public boolean isOrthogonal(CellState edge) {
-        if (edge.getStyle().containsKey(Constants.STYLE_ORTHOGONAL)) {
-            return Utils.isTrue(edge.getStyle(), Constants.STYLE_ORTHOGONAL);
+        if (edge.getStyle().getCellProperties().isOrthogonal()) {
+            return true;
         }
         EdgeStyleFunction tmp = view.getEdgeStyle(edge, null, null, null);
         return tmp instanceof SegmentConnectorEdgeStyleFunction || tmp instanceof ElbowConnectorEdgeStyleFunction || tmp instanceof SideToSideEdgeStyleFunction || tmp instanceof TopToBottomEdgeStyleFunction || tmp instanceof EntityRelationEdgeStyleFunction || tmp instanceof OrthConnectorEdgeStyleFunction;
@@ -4090,9 +3953,8 @@ public class Graph extends EventSource {
 
         if (cell != null) {
             CellState state = view.getState(cell);
-            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-            if (labelsVisible && !Utils.isTrue(style, Constants.STYLE_NOLABEL, false)) {
+            Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+            if (labelsVisible && style.getLabel().isVisible()) {
                 result = convertValueToString(cell);
             }
         }
@@ -4140,10 +4002,10 @@ public class Graph extends EventSource {
     public RectangleDouble getStartSize(ICell swimlane) {
         RectangleDouble result = new RectangleDouble();
         CellState state = view.getState(swimlane);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(swimlane);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(swimlane);
         if (style != null) {
-            double size = Utils.getDouble(style, Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE);
-            if (Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true)) {
+            double size = style.getEdge().getStartSize();
+            if (style.getCellProperties().isHorizontal()) {
                 result.setHeight(size);
             } else {
                 result.setWidth(size);
@@ -4161,7 +4023,7 @@ public class Graph extends EventSource {
      * @return Returns the image associated with the given cell state.
      */
     public String getImage(CellState state) {
-        return (state != null && state.getStyle() != null) ? Utils.getString(state.getStyle(), Constants.STYLE_IMAGE) : null;
+        return (state != null && state.getStyle() != null) ? state.getStyle().getImage().getImage() : null;
     }
 
     /**
@@ -4204,10 +4066,10 @@ public class Graph extends EventSource {
         if (cell != null) {
             if (model.getParent(cell) != model.getRoot()) {
                 CellState state = view.getState(cell);
-                Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
+                Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
 
                 if (style != null && !model.isEdge(cell)) {
-                    return Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_SWIMLANE);
+                    return style.getShape().getShape() instanceof SwimlaneStyle;
                 }
             }
         }
@@ -4252,9 +4114,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellEditable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsEditable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_EDITABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsEditable() && !isCellLocked(cell) && style.getCellProperties().isEditable();
     }
 
     public void setCellsEditable(boolean value) {
@@ -4272,9 +4133,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellResizable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsResizable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_RESIZABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsResizable() && !isCellLocked(cell) && style.getCellProperties().isResizable();
     }
 
     public void setCellsResizable(boolean value) {
@@ -4300,9 +4160,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellMovable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsMovable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_MOVABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsMovable() && !isCellLocked(cell) && style.getCellProperties().isMovable();
     }
 
     public void setCellsMovable(boolean value) {
@@ -4338,9 +4197,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellBendable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsBendable() && !isCellLocked(cell) && Utils.isTrue(style, Constants.STYLE_BENDABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsBendable() && !isCellLocked(cell) && style.getCellProperties().isBendable();
     }
 
     public void setCellsBendable(boolean value) {
@@ -4384,9 +4242,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellDeletable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsDeletable() && Utils.isTrue(style, Constants.STYLE_DELETABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsDeletable() && style.getCellProperties().isDeletable();
     }
 
     public void setCellsDeletable(boolean value) {
@@ -4410,9 +4267,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellCloneable(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isCellsCloneable() && Utils.isTrue(style, Constants.STYLE_CLONEABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isCellsCloneable() && style.getCellProperties().isCloneable();
     }
 
     public void setCellsCloneable(boolean value) {
@@ -4457,9 +4313,8 @@ public class Graph extends EventSource {
     public boolean isLabelClipped(ICell cell) {
         if (!isLabelsClipped()) {
             CellState state = view.getState(cell);
-            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-            return style != null && Utils.getString(style, Constants.STYLE_OVERFLOW, "").equals("hidden");
+            Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+            return style != null && style.getLabel().getOverflow() == Overflow.HIDDEN;
         }
 
         return isLabelsClipped();
@@ -4619,9 +4474,8 @@ public class Graph extends EventSource {
      */
     public boolean isAutoSizeCell(ICell cell) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return isAutoSizeCells() || Utils.isTrue(style, Constants.STYLE_AUTOSIZE, false);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return isAutoSizeCells() || style.getCellProperties().isAutosize();
     }
 
     /**
@@ -4858,9 +4712,8 @@ public class Graph extends EventSource {
      */
     public boolean isCellFoldable(ICell cell, boolean collapse) {
         CellState state = view.getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-
-        return model.getChildCount(cell) > 0 && Utils.isTrue(style, Constants.STYLE_FOLDABLE, true);
+        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        return model.getChildCount(cell) > 0 && style.getCellProperties().isFoldable();
     }
 
     /**

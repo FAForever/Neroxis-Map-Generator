@@ -4,28 +4,25 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Rectangle;
-import java.util.Map;
+import java.util.Objects;
 
 public class RectangleShape extends BasicShape {
     public static final double RECTANGLE_ROUNDING_FACTOR = 0.15;
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
-        Map<String, Object> style = state.getStyle();
-
-        if (Utils.isTrue(style, Constants.STYLE_ROUNDED, false)) {
+        Style style = state.getStyle();
+        if (style.getCellProperties().isRounded()) {
             Rectangle tmp = state.getRectangle();
-
             int x = tmp.x;
             int y = tmp.y;
             int w = tmp.width;
             int h = tmp.height;
             int radius = getArcSize(state, w, h);
-
             boolean shadow = hasShadow(canvas, state);
             int shadowOffsetX = (shadow) ? Constants.SHADOW_OFFSETX : 0;
             int shadowOffsetY = (shadow) ? Constants.SHADOW_OFFSETY : 0;
@@ -66,7 +63,7 @@ public class RectangleShape extends BasicShape {
      * Helper method to configure the given wrapper canvas.
      */
     protected int getArcSize(CellState state, double w, double h) {
-        double f = Utils.getDouble(state.getStyle(), Constants.STYLE_ARCSIZE, RECTANGLE_ROUNDING_FACTOR * 100) / 100;
+        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100, RECTANGLE_ROUNDING_FACTOR);
 
         return (int) (Math.min(w, h) * f * 2);
     }

@@ -109,7 +109,7 @@ public class RotationHandler extends MouseAdapter {
     }
 
     public void start(MouseEvent e) {
-        initialAngle = Utils.getDouble(currentState.getStyle(), Constants.STYLE_ROTATION) * Constants.RAD_PER_DEG;
+        initialAngle = currentState.getStyle().getShape().getRotation() * Constants.RAD_PER_DEG;
         currentAngle = initialAngle;
         first = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
 

@@ -4,8 +4,9 @@ import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.canvas.GraphicsCanvas2D;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
+import java.awt.Color;
+import java.util.Objects;
 
 public class SwimlaneShape extends BasicShape {
 
@@ -13,12 +14,12 @@ public class SwimlaneShape extends BasicShape {
      * Returns the bounding box for the gradient box for this shape.
      */
     protected double getTitleSize(Graphics2DCanvas canvas, CellState state) {
-        return Math.max(0, Utils.getFloat(state.getStyle(), Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE) * canvas.getScale());
+        return Math.max(0, state.getStyle().getEdge().getStartSize() * canvas.getScale());
     }
 
     protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
         double start = getTitleSize(canvas, state);
-        if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+        if (state.getStyle().getCellProperties().isHorizontal()) {
             start = Math.min(start, state.getHeight());
             return new RectangleDouble(state.getX(), state.getY(), state.getWidth(), start);
         } else {
@@ -29,26 +30,22 @@ public class SwimlaneShape extends BasicShape {
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         double start = getTitleSize(canvas, state);
-        String fill = Utils.getString(state.getStyle(), Constants.STYLE_SWIMLANE_FILLCOLOR, Constants.NONE);
-        boolean swimlaneLine = Utils.isTrue(state.getStyle(), Constants.STYLE_SWIMLANE_LINE, true);
+        Color fill = state.getStyle().getSwimlane().getColor();
+        boolean swimlaneLine = state.getStyle().getSwimlane().isLine();
         double r = 0;
-
-        if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+        if (state.getStyle().getCellProperties().isHorizontal()) {
             start = Math.min(start, state.getHeight());
         } else {
             start = Math.min(start, state.getWidth());
         }
-
         canvas.getGraphics().translate(state.getX(), state.getY());
-
-        if (!Utils.isTrue(state.getStyle(), Constants.STYLE_ROUNDED)) {
+        if (!state.getStyle().getCellProperties().isRounded()) {
             paintSwimlane(canvas, state, start, fill, swimlaneLine);
         } else {
             r = getArcSize(state, start);
             paintRoundedSwimlane(canvas, state, start, r, fill, swimlaneLine);
         }
-
-        String sep = Utils.getString(state.getStyle(), Constants.STYLE_SEPARATORCOLOR, Constants.NONE);
+        Color sep = state.getStyle().getShape().getSeparatorColor();
         paintSeparator(canvas, state, start, sep);
     }
 
@@ -56,7 +53,7 @@ public class SwimlaneShape extends BasicShape {
      * Helper method to configure the given wrapper canvas.
      */
     protected double getArcSize(CellState state, double start) {
-        double f = Utils.getDouble(state.getStyle(), Constants.STYLE_ARCSIZE, Constants.RECTANGLE_ROUNDING_FACTOR * 100) / 100;
+        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100, RectangleShape.RECTANGLE_ROUNDING_FACTOR);
 
         return start * f * 3;
     }
@@ -66,29 +63,25 @@ public class SwimlaneShape extends BasicShape {
      */
     protected GraphicsCanvas2D configureCanvas(Graphics2DCanvas canvas, CellState state, GraphicsCanvas2D c) {
         c.setShadow(hasShadow(canvas, state));
-        c.setStrokeColor(Utils.getString(state.getStyle(), Constants.STYLE_STROKECOLOR, Constants.NONE));
-        c.setStrokeWidth(Utils.getInt(state.getStyle(), Constants.STYLE_STROKEWIDTH, 1));
-        c.setDashed(Utils.isTrue(state.getStyle(), Constants.STYLE_DASHED, false));
-
-        String fill = Utils.getString(state.getStyle(), Constants.STYLE_FILLCOLOR, Constants.NONE);
-        String gradient = Utils.getString(state.getStyle(), Constants.STYLE_GRADIENTCOLOR, Constants.NONE);
-
-        if (!Constants.NONE.equals(fill) && !Constants.NONE.equals(gradient)) {
+        c.setStrokeColor(state.getStyle().getShape().getStrokeColor());
+        c.setStrokeWidth(state.getStyle().getShape().getStrokeWidth());
+        c.setDashed(state.getStyle().getCellProperties().isDashed());
+        Color fill = state.getStyle().getShape().getFillColor();
+        Color gradient = state.getStyle().getShape().getGradientColor();
+        if (fill != null && gradient != null) {
             RectangleDouble b = getGradientBounds(canvas, state);
-            c.setGradient(fill, gradient, b.getX(), b.getY(), b.getWidth(), b.getHeight(), Utils.getString(state.getStyle(), Constants.STYLE_GRADIENT_DIRECTION, Constants.DIRECTION_NORTH), 1, 1);
+            c.setGradient(fill, gradient, b.getX(), b.getY(), b.getWidth(), b.getHeight(), state.getStyle().getShape().getGradientDirection(), 1, 1);
         } else {
             c.setFillColor(fill);
         }
-
         return c;
     }
 
-    protected void paintSwimlane(Graphics2DCanvas canvas, CellState state, double start, String fill, boolean swimlaneLine) {
+    protected void paintSwimlane(Graphics2DCanvas canvas, CellState state, double start, Color fill, boolean swimlaneLine) {
         GraphicsCanvas2D canvas2D = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
         double width = state.getWidth();
         double height = state.getHeight();
-
-        if (!Constants.NONE.equals(fill)) {
+        if (fill != null) {
             canvas2D.save();
             canvas2D.setFillColor(fill);
             canvas2D.rect(0, 0, width, height);
@@ -98,19 +91,15 @@ public class SwimlaneShape extends BasicShape {
         }
 
         canvas2D.begin();
-
-        if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+        if (state.getStyle().getCellProperties().isHorizontal()) {
             canvas2D.moveTo(0, start);
             canvas2D.lineTo(0, 0);
             canvas2D.lineTo(width, 0);
             canvas2D.lineTo(width, start);
-
             if (swimlaneLine || start >= height) {
                 canvas2D.close();
             }
-
             canvas2D.fillAndStroke();
-
             // Transparent content area
             if (start < height && Constants.NONE.equals(fill)) {
                 canvas2D.begin();
@@ -149,12 +138,11 @@ public class SwimlaneShape extends BasicShape {
      * <p>
      * Paints the swimlane vertex shape.
      */
-    protected void paintRoundedSwimlane(Graphics2DCanvas canvas, CellState state, double start, double r, String fill, boolean swimlaneLine) {
+    protected void paintRoundedSwimlane(Graphics2DCanvas canvas, CellState state, double start, double r, Color fill, boolean swimlaneLine) {
         GraphicsCanvas2D c = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
         double w = state.getWidth();
         double h = state.getHeight();
-
-        if (!Constants.NONE.equals(fill)) {
+        if (fill != null) {
             c.save();
             c.setFillColor(fill);
             c.roundrect(0, 0, w, h, r, r);
@@ -164,15 +152,13 @@ public class SwimlaneShape extends BasicShape {
         }
 
         c.begin();
-
-        if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+        if (state.getStyle().getCellProperties().isHorizontal()) {
             c.moveTo(w, start);
             c.lineTo(w, r);
             c.quadTo(w, 0, w - Math.min(w / 2, r), 0);
             c.lineTo(Math.min(w / 2, r), 0);
             c.quadTo(0, 0, 0, r);
             c.lineTo(0, start);
-
             if (swimlaneLine || start >= h) {
                 c.close();
             }
@@ -223,17 +209,15 @@ public class SwimlaneShape extends BasicShape {
      * <p>
      * Paints the swimlane vertex shape.
      */
-    protected void paintSeparator(Graphics2DCanvas canvas, CellState state, double start, String color) {
+    protected void paintSeparator(Graphics2DCanvas canvas, CellState state, double start, Color color) {
         GraphicsCanvas2D c = new GraphicsCanvas2D(canvas.getGraphics());
         double w = state.getWidth();
         double h = state.getHeight();
-
-        if (!Constants.NONE.equals(color)) {
+        if (color != null) {
             c.setStrokeColor(color);
             c.setDashed(true);
             c.begin();
-
-            if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+            if (state.getStyle().getCellProperties().isHorizontal()) {
                 c.moveTo(w, start);
                 c.lineTo(w, h);
             } else {

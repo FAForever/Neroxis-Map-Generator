@@ -4,11 +4,9 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 
 /**
  * A rectangular shape that contains a single image. See ImageBundle for
@@ -18,10 +16,8 @@ public class ImageShape extends RectangleShape {
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);
-
-        boolean flipH = Utils.isTrue(state.getStyle(), Constants.STYLE_IMAGE_FLIPH, false);
-        boolean flipV = Utils.isTrue(state.getStyle(), Constants.STYLE_IMAGE_FLIPV, false);
-
+        boolean flipH = state.getStyle().getImage().isFlipHorizontal();
+        boolean flipV = state.getStyle().getImage().isFlipVertical();
         canvas.drawImage(getImageBounds(canvas, state), getImageForStyle(canvas, state), Graphics2DCanvas.PRESERVE_IMAGE_ASPECT, flipH, flipV);
     }
 
@@ -38,11 +34,11 @@ public class ImageShape extends RectangleShape {
     }
 
     public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
-        return Utils.getColor(state.getStyle(), Constants.STYLE_IMAGE_BACKGROUND);
+        return state.getStyle().getImage().getBackgroundColor();
     }
 
     public Color getStrokeColor(Graphics2DCanvas canvas, CellState state) {
-        return Utils.getColor(state.getStyle(), Constants.STYLE_IMAGE_BORDER);
+        return state.getStyle().getImage().getBorderColor();
     }
 
 }

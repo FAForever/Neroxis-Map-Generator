@@ -12,10 +12,16 @@ import com.faforever.neroxis.ngraph.event.TranslateEvent;
 import com.faforever.neroxis.ngraph.event.UndoEvent;
 import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
-import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
+import com.faforever.neroxis.ngraph.shape.ArrowShape;
+import com.faforever.neroxis.ngraph.shape.LabelShape;
+import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.Overflow;
+import com.faforever.neroxis.ngraph.style.Style;
+import com.faforever.neroxis.ngraph.style.VerticalAlignment;
+import com.faforever.neroxis.ngraph.style.WhiteSpace;
 import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.perimeter.Perimeter;
 import com.faforever.neroxis.ngraph.util.Constants;
@@ -27,7 +33,6 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -631,19 +636,16 @@ public class GraphView extends EventSource {
      * @param state Cell state whose absolute offset should be updated.
      */
     public void updateVertexLabelOffset(CellState state) {
-        String horizontal = Utils.getString(state.getStyle(), Constants.STYLE_LABEL_POSITION, Constants.ALIGN_CENTER);
-
-        if (horizontal.equals(Constants.ALIGN_LEFT)) {
+        HorizontalAlignment horizontalAlignment = state.getStyle().getLabel().getHorizontalAlignmentPosition();
+        if (horizontalAlignment == HorizontalAlignment.LEFT) {
             state.absoluteOffset.setX(state.absoluteOffset.getX() - state.getWidth());
-        } else if (horizontal.equals(Constants.ALIGN_RIGHT)) {
+        } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
             state.absoluteOffset.setX(state.absoluteOffset.getX() + state.getWidth());
         }
-
-        String vertical = Utils.getString(state.getStyle(), Constants.STYLE_VERTICAL_LABEL_POSITION, Constants.ALIGN_MIDDLE);
-
-        if (vertical.equals(Constants.ALIGN_TOP)) {
+        VerticalAlignment verticalAlignment = state.getStyle().getLabel().getVerticalAlignment();
+        if (verticalAlignment.equals(Constants.ALIGN_TOP)) {
             state.absoluteOffset.setY(state.absoluteOffset.getY() - state.getHeight());
-        } else if (vertical.equals(Constants.ALIGN_BOTTOM)) {
+        } else if (verticalAlignment.equals(Constants.ALIGN_BOTTOM)) {
             state.absoluteOffset.setY(state.absoluteOffset.getY() + state.getHeight());
         }
     }
@@ -653,10 +655,10 @@ public class GraphView extends EventSource {
      */
     public void updateLabel(CellState state) {
         String label = graph.getLabel(state.getCell());
-        Map<String, Object> style = state.getStyle();
+        Style style = state.getStyle();
         // Applies word wrapping to labels and stores the result in the
         // state
-        if (label != null && label.length() > 0 && !graph.getModel().isEdge(state.getCell()) && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
+        if (label != null && label.length() > 0 && !graph.getModel().isEdge(state.getCell()) && style.getLabel().getWhiteSpace() == WhiteSpace.WRAP) {
             double w = getWordWrapWidth(state);
             // The lines for wrapping within the given width are calculated for
             // no
@@ -690,17 +692,15 @@ public class GraphView extends EventSource {
      * Returns the width for wrapping the label of the given state at scale 1.
      */
     public double getWordWrapWidth(CellState state) {
-        Map<String, Object> style = state.getStyle();
-        boolean horizontal = Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true);
+        Style style = state.getStyle();
+        boolean horizontal = style.getCellProperties().isHorizontal();
         double w = 0;
-
         // Computes the available width for the wrapped label
         if (horizontal) {
-            w = (state.getWidth() / scale) - 2 * Constants.LABEL_INSET - 2 * Utils.getDouble(style, Constants.STYLE_SPACING) - Utils.getDouble(style, Constants.STYLE_SPACING_LEFT) - Utils.getDouble(style, Constants.STYLE_SPACING_RIGHT);
+            w = (state.getWidth() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getLeftSpacing() - style.getLabel().getRightSpacing();
         } else {
-            w = (state.getHeight() / scale) - 2 * Constants.LABEL_INSET - 2 * Utils.getDouble(style, Constants.STYLE_SPACING) - Utils.getDouble(style, Constants.STYLE_SPACING_TOP) + Utils.getDouble(style, Constants.STYLE_SPACING_BOTTOM);
+            w = (state.getHeight() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getTopSpacing() + style.getLabel().getBottomSpacing();
         }
-
         return w;
     }
 
@@ -709,19 +709,16 @@ public class GraphView extends EventSource {
      */
     public void updateLabelBounds(CellState state) {
         ICell cell = state.getCell();
-        Map<String, Object> style = state.getStyle();
-        String overflow = Utils.getString(style, Constants.STYLE_OVERFLOW, "");
-
-        if (overflow.equals("fill")) {
+        Style style = state.getStyle();
+        Overflow overflow = style.getLabel().getOverflow();
+        if (overflow == Overflow.FILL) {
             state.setLabelBounds(new RectangleDouble(state));
         } else if (state.getLabel() != null) {
             // For edges, the width of the geometry is used for wrapping HTML
             // labels or no wrapping is applied if the width is set to 0
             RectangleDouble vertexBounds = state;
-
             if (graph.getModel().isEdge(cell)) {
                 Geometry geo = graph.getCellGeometry(cell);
-
                 if (geo != null && geo.getWidth() > 0) {
                     vertexBounds = new RectangleDouble(0, 0, geo.getWidth() * this.getScale(), 0);
                 } else {
@@ -745,58 +742,49 @@ public class GraphView extends EventSource {
     public RectangleDouble updateBoundingBox(CellState state) {
         // Gets the cell bounds and adds shadows and markers
         RectangleDouble rect = new RectangleDouble(state);
-        Map<String, Object> style = state.getStyle();
+        Style style = state.getStyle();
         // Adds extra pixels for the marker and stroke assuming
         // that the border stroke is centered around the bounds
         // and the first pixel is drawn inside the bounds
-        double strokeWidth = Math.max(1, Math.round(Utils.getInt(style, Constants.STYLE_STROKEWIDTH, 1) * scale));
+        double strokeWidth = Math.max(1, Math.round(style.getShape().getStrokeWidth() * scale));
         strokeWidth -= Math.max(1, strokeWidth / 2);
 
         if (graph.getModel().isEdge(state.getCell())) {
             int ms = 0;
-
-            if (style.containsKey(Constants.STYLE_ENDARROW) || style.containsKey(Constants.STYLE_STARTARROW)) {
-                ms = (int) Math.round(Constants.DEFAULT_MARKERSIZE * scale);
+            if (style.getEdge().getStartArrow() != null || style.getEdge().getEndArrow() != null) {
+                ms = (int) Math.round(style.getEdge().getEndSize() * scale);
             }
-
             // Adds the strokewidth
             rect.grow(ms + strokeWidth);
-
             // Adds worst case border for an arrow shape
-            if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_ARROW)) {
+            if (style.getShape().getShape() instanceof ArrowShape) {
                 rect.grow(Constants.ARROW_WIDTH / 2d);
             }
         } else {
             rect.grow(strokeWidth);
         }
-
         // Adds extra pixels for the shadow
-        if (Utils.isTrue(style, Constants.STYLE_SHADOW)) {
+        if (style.getCellProperties().isShadow()) {
             rect.setWidth(rect.getWidth() + Constants.SHADOW_OFFSETX);
             rect.setHeight(rect.getHeight() + Constants.SHADOW_OFFSETY);
         }
-
         // Adds oversize images in labels
-        if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_LABEL)) {
-            if (Utils.getString(style, Constants.STYLE_IMAGE) != null) {
-                double w = Utils.getInt(style, Constants.STYLE_IMAGE_WIDTH, Constants.DEFAULT_IMAGESIZE) * scale;
-                double h = Utils.getInt(style, Constants.STYLE_IMAGE_HEIGHT, Constants.DEFAULT_IMAGESIZE) * scale;
-
+        if (style.getShape().getShape() instanceof LabelShape) {
+            if (style.getImage().getImage() != null) {
+                double w = style.getImage().getWidth() * scale;
+                double h = style.getImage().getHeight() * scale;
                 double x = state.getX();
                 double y = 0;
-
-                String imgAlign = Utils.getString(style, Constants.STYLE_IMAGE_ALIGN, Constants.ALIGN_LEFT);
-                String imgValign = Utils.getString(style, Constants.STYLE_IMAGE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
-
-                if (imgAlign.equals(Constants.ALIGN_RIGHT)) {
+                HorizontalAlignment imgAlign = style.getImage().getHorizontalAlignment();
+                VerticalAlignment imgValign = style.getImage().getVerticalAlignment();
+                if (imgAlign == HorizontalAlignment.RIGHT) {
                     x += state.getWidth() - w;
-                } else if (imgAlign.equals(Constants.ALIGN_CENTER)) {
+                } else if (imgAlign == HorizontalAlignment.CENTER) {
                     x += (state.getWidth() - w) / 2;
                 }
-
-                if (imgValign.equals(Constants.ALIGN_TOP)) {
+                if (imgValign == VerticalAlignment.TOP) {
                     y = state.getY();
-                } else if (imgValign.equals(Constants.ALIGN_BOTTOM)) {
+                } else if (imgValign == VerticalAlignment.BOTTOM) {
                     y = state.getY() + state.getHeight() - h;
                 } else
                 // MIDDLE
@@ -809,7 +797,7 @@ public class GraphView extends EventSource {
 
         // Adds the rotated bounds to the bounding box if the
         // shape is rotated
-        double rotation = Utils.getDouble(style, Constants.STYLE_ROTATION);
+        double rotation = style.getShape().getRotation();
         RectangleDouble bbox = Utils.getBoundingBox(rect, rotation);
 
         // Add the rotated bounding box to the non-rotated so
@@ -903,17 +891,16 @@ public class GraphView extends EventSource {
      * for the given state, control points and terminals.
      */
     public EdgeStyleFunction getEdgeStyle(CellState edge, List<PointDouble> points, Object source, Object target) {
-        Object edgeStyle = null;
+        EdgeStyleFunction edgeStyle = null;
         if (source != null && source == target) {
-            edgeStyle = edge.getStyle().get(Constants.STYLE_LOOP);
+            edgeStyle = edge.getStyle().getEdge().getLoopStyleFunction();
             if (edgeStyle == null) {
                 edgeStyle = graph.getDefaultLoopStyle();
             }
-        } else if (!Utils.isTrue(edge.getStyle(), Constants.STYLE_NOEDGESTYLE, false)) {
-            edgeStyle = edge.getStyle().get(Constants.STYLE_EDGE);
+        } else if (!edge.getStyle().getEdge().isNoEdgeStyle()) {
+            edgeStyle = edge.getStyle().getEdge().getEdgeStyleFunction();
         }
-
-        return (EdgeStyleFunction) edgeStyle;
+        return edgeStyle;
     }
 
     /**
@@ -947,8 +934,8 @@ public class GraphView extends EventSource {
     public void updateFloatingTerminalPoint(CellState edge, CellState start, CellState end, boolean source) {
         start = getTerminalPort(edge, start, source);
         PointDouble next = getNextPoint(edge, end, source);
-        double border = Utils.getDouble(edge.getStyle(), Constants.STYLE_PERIMETER_SPACING);
-        border += Utils.getDouble(edge.getStyle(), (source) ? Constants.STYLE_SOURCE_PERIMETER_SPACING : Constants.STYLE_TARGET_PERIMETER_SPACING);
+        double border = edge.getStyle().getPerimeter().getVertexSpacing();
+        border += source ? edge.getStyle().getPerimeter().getSourceSpacing() : edge.getStyle().getPerimeter().getTargetSpacing();
         PointDouble pt = getPerimeterPoint(start, next, graph.isOrthogonal(edge), border);
         edge.setAbsoluteTerminalPoint(pt, source);
     }
@@ -958,19 +945,11 @@ public class GraphView extends EventSource {
      * port for the given edge.
      */
     public CellState getTerminalPort(CellState state, CellState terminal, boolean source) {
-        String key = (source) ? Constants.STYLE_SOURCE_PORT : Constants.STYLE_TARGET_PORT;
-        String id = Utils.getString(state.style, key);
-
-        if (id != null && graph.getModel() instanceof GraphModel) {
-            CellState tmp = getState(((GraphModel) graph.getModel()).getCell(id));
-
-            // Only uses ports where a cell state exists
-            if (tmp != null) {
-                terminal = tmp;
-            }
+        ICell portCell = source ? state.getStyle().getEdge().getSourcePort() : state.getStyle().getEdge().getTargetPort();
+        if (portCell == null) {
+            return terminal;
         }
-
-        return terminal;
+        return getState(portCell);
     }
 
     /**
@@ -1020,7 +999,7 @@ public class GraphView extends EventSource {
      * @return Returns the x-coordinate of the routing center point.
      */
     public double getRoutingCenterX(CellState state) {
-        float f = (state.getStyle() != null) ? Utils.getFloat(state.getStyle(), Constants.STYLE_ROUTING_CENTER_X) : 0;
+        float f = (state.getStyle() != null) ? state.getStyle().getEdge().getRoutingCenterX() : 0;
 
         return state.getCenterX() + f * state.getWidth();
     }
@@ -1031,7 +1010,7 @@ public class GraphView extends EventSource {
      * @return Returns the y-coordinate of the routing center point.
      */
     public double getRoutingCenterY(CellState state) {
-        float f = (state.getStyle() != null) ? Utils.getFloat(state.getStyle(), Constants.STYLE_ROUTING_CENTER_Y) : 0;
+        float f = (state.getStyle() != null) ? state.getStyle().getEdge().getRoutingCenterY() : 0;
 
         return state.getCenterY() + f * state.getHeight();
     }
@@ -1041,7 +1020,7 @@ public class GraphView extends EventSource {
      */
     public RectangleDouble getPerimeterBounds(CellState terminal, double border) {
         if (terminal != null) {
-            border += Utils.getDouble(terminal.getStyle(), Constants.STYLE_PERIMETER_SPACING);
+            border += terminal.getStyle().getPerimeter().getVertexSpacing();
         }
         return terminal.getPerimeterBounds(border * scale);
     }
@@ -1050,8 +1029,7 @@ public class GraphView extends EventSource {
      * Returns the perimeter function for the given state.
      */
     public Perimeter getPerimeterFunction(CellState state) {
-        Object perimeter = state.getStyle().get(Constants.STYLE_PERIMETER);
-        return (Perimeter) perimeter;
+        return state.getStyle().getPerimeter().getPerimeter();
     }
 
     /**

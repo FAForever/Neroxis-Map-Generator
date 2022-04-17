@@ -4,14 +4,12 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
-import java.util.Map;
 
 public class BasicShape implements IShape {
 
@@ -45,7 +43,7 @@ public class BasicShape implements IShape {
      * @return whether or not the shape is ready to be drawn
      */
     protected boolean configureGraphics(Graphics2DCanvas canvas, CellState state, boolean background) {
-        Map<String, Object> style = state.getStyle();
+        Style style = state.getStyle();
 
         if (background) {
             // Paints the background of the shape
@@ -80,15 +78,15 @@ public class BasicShape implements IShape {
     }
 
     public boolean hasShadow(Graphics2DCanvas canvas, CellState state) {
-        return Utils.isTrue(state.getStyle(), Constants.STYLE_SHADOW, false);
+        return state.getStyle().getCellProperties().isShadow();
     }
 
     public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
-        return Utils.getColor(state.getStyle(), Constants.STYLE_FILLCOLOR);
+        return state.getStyle().getShape().getFillColor();
     }
 
     public Color getStrokeColor(Graphics2DCanvas canvas, CellState state) {
-        return Utils.getColor(state.getStyle(), Constants.STYLE_STROKECOLOR);
+        return state.getStyle().getShape().getStrokeColor();
     }
 
 }

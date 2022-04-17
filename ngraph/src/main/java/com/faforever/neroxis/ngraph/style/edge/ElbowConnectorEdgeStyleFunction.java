@@ -1,8 +1,7 @@
 package com.faforever.neroxis.ngraph.style.edge;
 
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Elbow;
 import com.faforever.neroxis.ngraph.util.PointDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class ElbowConnectorEdgeStyleFunction implements EdgeStyleFunction {
                 }
             }
         }
-        if (!horizontal && (vertical || Utils.getString(state.getStyle(), Constants.STYLE_ELBOW, "").equals(Constants.ELBOW_VERTICAL))) {
+        if (!horizontal && (vertical || state.getStyle().getEdge().getElbow() == Elbow.VERTICAL)) {
             TOP_TO_BOTTOM_EDGE_STYLE.apply(state, source, target, points, result);
         } else {
             SIDE_TO_SIDE_EDGE_STYLE.apply(state, source, target, points, result);

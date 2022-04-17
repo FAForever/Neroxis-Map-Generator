@@ -14,5 +14,5 @@ import com.faforever.neroxis.ngraph.view.Graph;
  * @see Graph#isLabelClipped(ICell)
  */
 public enum Overflow {
-    VISIBLE, HIDDEN, FILL
+    VISIBLE, HIDDEN, FILL, WIDTH
 }

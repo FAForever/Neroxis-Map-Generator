@@ -4,21 +4,24 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.Style;
+import com.faforever.neroxis.ngraph.style.VerticalAlignment;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
-import java.util.Map;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 public class DefaultTextShape implements ITextShape {
-
-    public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Map<String, Object> style) {
+    public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Style style) {
         Rectangle rect = state.getLabelBounds().getRectangle();
         Graphics2D g = canvas.getGraphics();
-
         if (g.getClipBounds() == null || g.getClipBounds().intersects(rect)) {
-            boolean horizontal = Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true);
+            boolean horizontal = style.getCellProperties().isHorizontal();
             double scale = canvas.getScale();
             int x = rect.x;
             int y = rect.y;
@@ -29,15 +32,14 @@ public class DefaultTextShape implements ITextShape {
                 g.rotate(-Math.PI / 2, x + w / 2, y + h / 2);
                 g.translate(w / 2 - h / 2, h / 2 - w / 2);
             }
-
-            Color fontColor = Utils.getColor(style, Constants.STYLE_FONTCOLOR, Color.black);
+            Color fontColor = style.getLabel().getTextColor();
             g.setColor(fontColor);
 
             // Shifts the y-coordinate down by the ascent plus a workaround
             // for the line not starting at the exact vertical location
             Font scaledFont = Utils.getFont(style, scale);
             g.setFont(scaledFont);
-            int fontSize = Utils.getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE);
+            int fontSize = style.getLabel().getFontSize();
             FontMetrics fm = g.getFontMetrics();
             int scaledFontSize = scaledFont.getSize();
             double fontScaleFactor = ((double) scaledFontSize) / ((double) fontSize);
@@ -48,48 +50,38 @@ public class DefaultTextShape implements ITextShape {
             double fontScaleRatio = fontScaleFactor / scale;
             // The y position has to be moved by (1 - ratio) * height / 2
             y += 2 * fm.getMaxAscent() - fm.getHeight() + Constants.LABEL_INSET * scale;
-
-            Object vertAlign = Utils.getString(style, Constants.STYLE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
+            VerticalAlignment verticalAlignment = style.getLabel().getVerticalAlignment();
             double vertAlignProportion = 0.5;
-
-            if (vertAlign.equals(Constants.ALIGN_TOP)) {
+            if (verticalAlignment == VerticalAlignment.TOP) {
                 vertAlignProportion = 0;
-            } else if (vertAlign.equals(Constants.ALIGN_BOTTOM)) {
+            } else if (verticalAlignment == VerticalAlignment.BOTTOM) {
                 vertAlignProportion = 1.0;
             }
-
             y += (1.0 - fontScaleRatio) * h * vertAlignProportion;
-
             // Gets the alignment settings
-            Object align = Utils.getString(style, Constants.STYLE_ALIGN, Constants.ALIGN_CENTER);
-
-            if (align.equals(Constants.ALIGN_LEFT)) {
+            HorizontalAlignment horizontalAlignment = style.getLabel().getHorizontalAlignment();
+            if (horizontalAlignment == HorizontalAlignment.LEFT) {
                 x += Constants.LABEL_INSET * scale;
-            } else if (align.equals(Constants.ALIGN_RIGHT)) {
+            } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
                 x -= Constants.LABEL_INSET * scale;
             }
-
             // Draws the text line by line
             String[] lines = text.split("\n");
-
-            for (int i = 0; i < lines.length; i++) {
+            for (String line : lines) {
                 int dx = 0;
-
-                if (align.equals(Constants.ALIGN_CENTER)) {
-                    int sw = fm.stringWidth(lines[i]);
-
+                if (horizontalAlignment == HorizontalAlignment.CENTER) {
+                    int sw = fm.stringWidth(line);
                     if (horizontal) {
                         dx = (w - sw) / 2;
                     } else {
                         dx = (h - sw) / 2;
                     }
-                } else if (align.equals(Constants.ALIGN_RIGHT)) {
-                    int sw = fm.stringWidth(lines[i]);
+                } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
+                    int sw = fm.stringWidth(line);
                     dx = ((horizontal) ? w : h) - sw;
                 }
-
-                g.drawString(lines[i], x + dx, y);
-                postProcessLine(text, lines[i], fm, canvas, x + dx, y);
+                g.drawString(line, x + dx, y);
+                postProcessLine(text, line, fm, canvas, x + dx, y);
                 y += fm.getHeight() + Constants.LINESPACING;
             }
         }

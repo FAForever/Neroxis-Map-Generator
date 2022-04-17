@@ -4,12 +4,10 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.view.CellState;
 
-import java.util.Map;
-
 public interface ITextShape {
-
-    void paintShape(Graphics2DCanvas canvas, String text, CellState state, Map<String, Object> style);
+    void paintShape(Graphics2DCanvas canvas, String text, CellState state, Style style);
 
 }

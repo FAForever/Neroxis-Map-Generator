@@ -4,6 +4,7 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Curve;
 import com.faforever.neroxis.ngraph.util.LineDouble;
@@ -11,7 +12,6 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.RenderingHints;
 import java.util.List;
-import java.util.Map;
 
 public class CurveShape extends ConnectorShape {
     /**
@@ -41,7 +41,7 @@ public class CurveShape extends ConnectorShape {
         canvas.getGraphics().setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, keyStrokeHint);
     }
 
-    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Map<String, Object> style) {
+    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Style style) {
         double scale = canvas.getScale();
         validateCurve(points, scale, style);
         canvas.paintPolyline(curve.getCurvePoints(Curve.CORE_CURVE), false);
@@ -50,7 +50,7 @@ public class CurveShape extends ConnectorShape {
     /**
      * Forces underlying curve to a valid state
      */
-    public void validateCurve(List<PointDouble> points, double scale, Map<String, Object> style) {
+    public void validateCurve(List<PointDouble> points, double scale, Style style) {
         if (curve == null) {
             curve = new Curve(points);
         } else {

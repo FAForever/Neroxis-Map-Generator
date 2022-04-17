@@ -13,7 +13,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import java.util.List;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -55,38 +54,6 @@ public abstract class GraphLayout implements IGraphLayout {
     public void moveCell(ICell cell, double x, double y) {
         // TODO: Map the position to a child index for
         // the cell to be placed closest to the position
-    }
-
-    /**
-     * Returns the constraint for the given key and cell. This implementation
-     * always returns the value for the given key in the style of the given
-     * cell.
-     *
-     * @param key  Key of the constraint to be returned.
-     * @param cell Cell whose constraint should be returned.
-     */
-    public Object getConstraint(Object key, ICell cell) {
-        return getConstraint(key, cell, null, false);
-    }
-
-    /**
-     * Returns the constraint for the given key and cell. The optional edge and
-     * source arguments are used to return inbound and outgoing routing-
-     * constraints for the given edge and vertex. This implementation always
-     * returns the value for the given key in the style of the given cell.
-     *
-     * @param key    Key of the constraint to be returned.
-     * @param cell   Cell whose constraint should be returned.
-     * @param edge   Optional cell that represents the connection whose constraint
-     *               should be returned. Default is null.
-     * @param source Optional boolean that specifies if the connection is incoming
-     *               or outgoing. Default is false.
-     */
-    public Object getConstraint(Object key, ICell cell, Object edge, boolean source) {
-        CellState state = graph.getView().getState(cell);
-        Map<String, Object> style = (state != null) ? state.getStyle() : graph.getCellStyle(cell);
-
-        return (style != null) ? style.get(key) : null;
     }
 
     /**

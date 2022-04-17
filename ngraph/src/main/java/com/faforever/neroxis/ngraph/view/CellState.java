@@ -4,12 +4,12 @@
 package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,18 +29,16 @@ public class CellState extends RectangleDouble {
      * Reference to the cell that is represented by this state.
      */
     protected ICell cell;
-
     /**
      * Holds the current label value, including newlines which result from
      * word wrapping.
      */
     protected String label;
-
     /**
      * Contains an array of key, value pairs that represent the style of the
      * cell.
      */
-    protected Map<String, Object> style;
+    protected Style style;
     /**
      * Holds the origin for all child cells.
      */
@@ -100,7 +98,7 @@ public class CellState extends RectangleDouble {
      * @param cell  Cell that this state represents.
      * @param style Array of key, value pairs that constitute the style.
      */
-    public CellState(GraphView view, ICell cell, Map<String, Object> style) {
+    public CellState(GraphView view, ICell cell, Style style) {
         setView(view);
         setCell(cell);
         setStyle(style);

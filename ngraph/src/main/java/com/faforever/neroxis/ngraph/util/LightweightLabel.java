@@ -70,7 +70,7 @@ public class LightweightLabel extends JLabel {
      */
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
         // Strings get interned...
-        if (propertyName == "text" || propertyName == "font") {
+        if ("text".equals(propertyName) || "font".equals(propertyName)) {
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
     }

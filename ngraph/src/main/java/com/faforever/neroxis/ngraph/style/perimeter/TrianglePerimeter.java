@@ -12,7 +12,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
 public class TrianglePerimeter implements Perimeter {
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
-        Object direction = (vertex != null) ? Utils.getString(vertex.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST) : Constants.DIRECTION_EAST;
+        Object direction = (vertex != null) ? vertex.getStyle().getShape().getDirection() : Constants.DIRECTION_EAST;
         boolean vertical = direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH);
         double x = bounds.getX();
         double y = bounds.getY();

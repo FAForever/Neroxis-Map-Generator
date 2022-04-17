@@ -5,6 +5,13 @@ package com.faforever.neroxis.ngraph.util;
 
 import com.faforever.neroxis.ngraph.model.CellPath;
 import com.faforever.neroxis.ngraph.model.ICell;
+import com.faforever.neroxis.ngraph.shape.SwimlaneShape;
+import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.FontModifier;
+import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.Style;
+import com.faforever.neroxis.ngraph.style.SwimlaneStyle;
+import com.faforever.neroxis.ngraph.style.VerticalAlignment;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -25,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -66,20 +74,9 @@ public class Utils {
     }
 
     /**
-     * Returns the size for the given label. If isHtml is true then any HTML
-     * markup in the label is computed as HTML and all newlines inside the HTML
-     * body are converted into linebreaks.
+     * Returns the size for the given label.
      */
-    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, double scale) {
-        return getLabelSize(label, style, scale, 0);
-    }
-
-    /**
-     * Returns the size for the given label. If isHtml is true then any HTML
-     * markup in the label is computed as HTML and all newlines inside the HTML
-     * body are converted into linebreaks.
-     */
-    public static RectangleDouble getLabelSize(String label, Map<String, Object> style, double scale, double htmlWrapWidth) {
+    public static RectangleDouble getLabelSize(String label, Style style, double scale) {
         return getSizeForString(label, getFont(style), scale);
     }
 
@@ -109,19 +106,15 @@ public class Utils {
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, PointDouble offset, RectangleDouble vertexBounds, double scale) {
+    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset, RectangleDouble vertexBounds, double scale) {
         return getLabelPaintBounds(label, style, offset, vertexBounds, scale, false);
     }
 
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Map<String, Object> style, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
-        double wrapWidth = 0;
-        if (vertexBounds != null && Utils.getString(style, Constants.STYLE_WHITE_SPACE, "nowrap").equals("wrap")) {
-            wrapWidth = vertexBounds.getWidth();
-        }
-        RectangleDouble size = Utils.getLabelSize(label, style, scale, wrapWidth);
+    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
+        RectangleDouble size = Utils.getLabelSize(label, style, scale);
         // Measures font with full scale and scales back
         size.setWidth(size.getWidth() / scale);
         size.setHeight(size.getHeight() / scale);
@@ -129,16 +122,13 @@ public class Utils {
         double y = offset.getY();
         double width = 0;
         double height = 0;
-
         if (vertexBounds != null) {
             x += vertexBounds.getX();
             y += vertexBounds.getY();
-
-            if (Utils.getString(style, Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_SWIMLANE)) {
+            if (style.getShape().getShape() instanceof SwimlaneStyle) {
                 // Limits the label to the swimlane title
-                boolean horizontal = Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true);
-                double start = Utils.getDouble(style, Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE) * scale;
-
+                boolean horizontal = style.getCellProperties().isHorizontal();
+                double start = style.getEdge().getStartSize() * scale;
                 if (horizontal) {
                     width += vertexBounds.getWidth();
                     height += start;
@@ -162,28 +152,23 @@ public class Utils {
      * labels this width and height is 0.) The scale is used to scale the given
      * size and the spacings in the specified style.
      */
-    public static RectangleDouble getScaledLabelBounds(double x, double y, RectangleDouble size, double outerWidth, double outerHeight, Map<String, Object> style, double scale) {
+    public static RectangleDouble getScaledLabelBounds(double x, double y, RectangleDouble size, double outerWidth, double outerHeight, Style style, double scale) {
         double inset = Constants.LABEL_INSET * scale;
         // Scales the size of the label
         // FIXME: Correct rounded font size and not-rounded scale
         double width = size.getWidth() * scale + 2 * inset;
         double height = size.getHeight() * scale + 2 * inset;
         // Gets the global spacing and orientation
-        boolean horizontal = isTrue(style, Constants.STYLE_HORIZONTAL, true);
-        int spacing = (int) (getInt(style, Constants.STYLE_SPACING) * scale);
-
+        boolean horizontal = style.getCellProperties().isHorizontal();
         // Gets the alignment settings
-        Object align = getString(style, Constants.STYLE_ALIGN, Constants.ALIGN_CENTER);
-        Object valign = getString(style, Constants.STYLE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
-
+        HorizontalAlignment align = style.getLabel().getHorizontalAlignment();
+        VerticalAlignment valign = style.getLabel().getVerticalAlignment();
         // Gets the vertical spacing
-        int top = (int) (getInt(style, Constants.STYLE_SPACING_TOP) * scale);
-        int bottom = (int) (getInt(style, Constants.STYLE_SPACING_BOTTOM) * scale);
-
+        int top = (int) (style.getLabel().getTopSpacing() * scale);
+        int bottom = (int) (style.getLabel().getBottomSpacing() * scale);
         // Gets the horizontal spacing
-        int left = (int) (getInt(style, Constants.STYLE_SPACING_LEFT) * scale);
-        int right = (int) (getInt(style, Constants.STYLE_SPACING_RIGHT) * scale);
-
+        int left = (int) (style.getLabel().getLeftSpacing() * scale);
+        int right = (int) (style.getLabel().getRightSpacing() * scale);
         // Applies the orientation to the spacings and dimension
         if (!horizontal) {
             int tmp = top;
@@ -191,28 +176,27 @@ public class Utils {
             right = bottom;
             bottom = left;
             left = tmp;
-
             double tmp2 = width;
             width = height;
             height = tmp2;
         }
 
         // Computes the position of the label for the horizontal alignment
-        if ((horizontal && align.equals(Constants.ALIGN_CENTER)) || (!horizontal && valign.equals(Constants.ALIGN_MIDDLE))) {
+        if ((horizontal && align == HorizontalAlignment.CENTER) || (!horizontal && valign == VerticalAlignment.MIDDLE)) {
             x += (outerWidth - width) / 2 + left - right;
-        } else if ((horizontal && align.equals(Constants.ALIGN_RIGHT)) || (!horizontal && valign.equals(Constants.ALIGN_BOTTOM))) {
-            x += outerWidth - width - spacing - right;
+        } else if ((horizontal && align == HorizontalAlignment.RIGHT) || (!horizontal && valign == VerticalAlignment.BOTTOM)) {
+            x += outerWidth - width - right;
         } else {
-            x += spacing + left;
+            x += left;
         }
 
         // Computes the position of the label for the vertical alignment
-        if ((!horizontal && align.equals(Constants.ALIGN_CENTER)) || (horizontal && valign.equals(Constants.ALIGN_MIDDLE))) {
+        if ((!horizontal && align == HorizontalAlignment.CENTER) || (horizontal && valign == VerticalAlignment.MIDDLE)) {
             y += (outerHeight - height) / 2 + top - bottom;
-        } else if ((!horizontal && align.equals(Constants.ALIGN_LEFT)) || (horizontal && valign.equals(Constants.ALIGN_BOTTOM))) {
-            y += outerHeight - height - spacing - bottom;
+        } else if ((!horizontal && align == HorizontalAlignment.LEFT) || (horizontal && valign == VerticalAlignment.BOTTOM)) {
+            y += outerHeight - height - bottom;
         } else {
-            y += spacing + top;
+            y += top;
         }
         return new RectangleDouble(x, y, width, height);
     }
@@ -638,7 +622,7 @@ public class Utils {
      * @return the mask of port constraint directions
      */
     public static int getPortConstraints(CellState terminal, CellState edge, boolean source) {
-        return getPortConstraints(terminal, edge, source, Constants.DIRECTION_MASK_ALL);
+        return getPortConstraints(terminal, edge, source, Set.of(Direction.values()));
     }
 
     /**
@@ -652,30 +636,25 @@ public class Utils {
      * @param defaultValue Default value to return if the key is undefined.
      * @return the mask of port constraint directions
      */
-    public static int getPortConstraints(CellState terminal, CellState edge, boolean source, int defaultValue) {
-        Object value = terminal.getStyle().get(Constants.STYLE_PORT_CONSTRAINT);
-
-        if (value == null) {
-            return defaultValue;
-        } else {
-            String directions = value.toString();
-            int returnValue = Constants.DIRECTION_MASK_NONE;
-
-            if (directions.contains(Constants.DIRECTION_NORTH)) {
-                returnValue |= Constants.DIRECTION_MASK_NORTH;
-            }
-            if (directions.contains(Constants.DIRECTION_WEST)) {
-                returnValue |= Constants.DIRECTION_MASK_WEST;
-            }
-            if (directions.contains(Constants.DIRECTION_SOUTH)) {
-                returnValue |= Constants.DIRECTION_MASK_SOUTH;
-            }
-            if (directions.contains(Constants.DIRECTION_EAST)) {
-                returnValue |= Constants.DIRECTION_MASK_EAST;
-            }
-
-            return returnValue;
+    public static int getPortConstraints(CellState terminal, CellState edge, boolean source, Set<Direction> defaultValue) {
+        Set<Direction> directions = terminal.getStyle().getEdge().getPortConstraints();
+        if (directions == null || directions.isEmpty()) {
+            directions = defaultValue;
         }
+        int returnValue = 0;
+        if (directions.contains(Direction.NORTH)) {
+            returnValue |= Direction.NORTH.getMask();
+        }
+        if (directions.contains(Direction.WEST)) {
+            returnValue |= Direction.WEST.getMask();
+        }
+        if (directions.contains(Direction.SOUTH)) {
+            returnValue |= Direction.SOUTH.getMask();
+        }
+        if (directions.contains(Direction.EAST)) {
+            returnValue |= Direction.EAST.getMask();
+        }
+        return returnValue;
     }
 
     public static int reversePortConstraints(int constraint) {
@@ -838,11 +817,9 @@ public class Utils {
             int cy = (int) Math.round(state.getCenterY());
             int width = (int) Math.round(state.getWidth());
             int height = (int) Math.round(state.getHeight());
-
-            if (Utils.getString(state.getStyle(), Constants.STYLE_SHAPE, "").equals(Constants.SHAPE_SWIMLANE)) {
-                int start = Utils.getInt(state.getStyle(), Constants.STYLE_STARTSIZE, Constants.DEFAULT_STARTSIZE);
-
-                if (Utils.isTrue(state.getStyle(), Constants.STYLE_HORIZONTAL, true)) {
+            if (state.getStyle().getShape().getShape() instanceof SwimlaneShape) {
+                int start = (int) state.getStyle().getEdge().getStartSize();
+                if (state.getStyle().getCellProperties().isHorizontal()) {
                     cy = (int) Math.round(state.getY() + start / 2);
                     height = start;
                 } else {
@@ -850,7 +827,6 @@ public class Utils {
                     width = start;
                 }
             }
-
             int w = (int) Math.max(min, width * hotspot);
             int h = (int) Math.max(min, height * hotspot);
 
@@ -1093,29 +1069,24 @@ public class Utils {
         }
     }
 
-    public static Font getFont(Map<String, Object> style) {
+    public static Font getFont(Style style) {
         return getFont(style, 1);
     }
 
-    public static Font getFont(Map<String, Object> style, double scale) {
-        String fontFamily = getString(style, Constants.STYLE_FONTFAMILY, Constants.DEFAULT_FONTFAMILY);
-        int fontSize = getInt(style, Constants.STYLE_FONTSIZE, Constants.DEFAULT_FONTSIZE);
-        int fontStyle = getInt(style, Constants.STYLE_FONTSTYLE);
-
-        int swingFontStyle = ((fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) ? Font.BOLD : Font.PLAIN;
-        swingFontStyle += ((fontStyle & Constants.FONT_ITALIC) == Constants.FONT_ITALIC) ? Font.ITALIC : Font.PLAIN;
-
+    public static Font getFont(Style style, double scale) {
+        String fontFamily = style.getLabel().getFontFamily();
+        int fontSize = style.getLabel().getFontSize();
+        Set<FontModifier> fontModifiers = style.getLabel().getFontModifiers();
+        int swingFontStyle = fontModifiers.contains(FontModifier.BOLD) ? Font.BOLD : Font.PLAIN;
+        swingFontStyle += fontModifiers.contains(FontModifier.ITALIC) ? Font.ITALIC : Font.PLAIN;
         //https://github.com/elonderin/jgraphx/commit/c1c9b0ca7dee2b1e7ace0b0e88c3c06135bf236c
         Map<TextAttribute, Object> fontAttributes = new HashMap<>();
-
-        if ((fontStyle & Constants.FONT_UNDERLINE) == Constants.FONT_UNDERLINE) {
+        if (fontModifiers.contains(FontModifier.UNDERLINE)) {
             fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
         }
-
-        if ((fontStyle & Constants.FONT_STRIKETHROUGH) == Constants.FONT_STRIKETHROUGH) {
+        if (fontModifiers.contains(FontModifier.STRIKETHROUGH)) {
             fontAttributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
         }
-
         return new Font(fontFamily, swingFontStyle, (int) (fontSize * scale)).deriveFont(fontAttributes);
     }
 

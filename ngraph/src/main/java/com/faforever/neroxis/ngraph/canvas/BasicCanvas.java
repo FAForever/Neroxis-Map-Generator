@@ -1,11 +1,10 @@
 package com.faforever.neroxis.ngraph.canvas;
 
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -83,13 +82,11 @@ public abstract class BasicCanvas implements ICanvas {
      * Gets the image path from the given style. If the path is relative (does
      * not start with a slash) then it is appended to the imageBasePath.
      */
-    public String getImageForStyle(Map<String, Object> style) {
-        String filename = Utils.getString(style, Constants.STYLE_IMAGE);
-
+    public String getImageForStyle(Style style) {
+        String filename = style.getImage().getImage();
         if (filename != null && !filename.startsWith("/") && !filename.startsWith("file:/")) {
             filename = imageBasePath + filename;
         }
-
         return filename;
     }
 

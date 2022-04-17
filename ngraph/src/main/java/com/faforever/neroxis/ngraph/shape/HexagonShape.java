@@ -1,11 +1,11 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Utils;
+import com.faforever.neroxis.ngraph.style.Direction;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Shape;
 
 public class HexagonShape extends BasicShape {
 
@@ -15,10 +15,9 @@ public class HexagonShape extends BasicShape {
         int y = temp.y;
         int w = temp.width;
         int h = temp.height;
-        String direction = Utils.getString(state.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_EAST);
+        Direction direction = state.getStyle().getShape().getDirection();
         Polygon hexagon = new Polygon();
-
-        if (direction.equals(Constants.DIRECTION_NORTH) || direction.equals(Constants.DIRECTION_SOUTH)) {
+        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
             hexagon.addPoint(x + (int) (0.5 * w), y);
             hexagon.addPoint(x + w, y + (int) (0.25 * h));
             hexagon.addPoint(x + w, y + (int) (0.75 * h));

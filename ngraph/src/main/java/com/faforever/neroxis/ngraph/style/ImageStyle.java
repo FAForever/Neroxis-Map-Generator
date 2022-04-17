@@ -12,6 +12,6 @@ public class ImageStyle {
     private Color borderColor;
     private boolean flipHorizontal;
     private boolean flipVertical;
-    private VerticalAlignment verticalAlignment;
-    private HorizontalAlignment horizontalAlignment;
+    private VerticalAlignment verticalAlignment = VerticalAlignment.MIDDLE;
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
 }

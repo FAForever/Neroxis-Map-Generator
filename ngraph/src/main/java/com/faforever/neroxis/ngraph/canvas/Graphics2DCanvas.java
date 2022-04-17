@@ -21,14 +21,14 @@ import com.faforever.neroxis.ngraph.shape.LabelShape;
 import com.faforever.neroxis.ngraph.shape.LineShape;
 import com.faforever.neroxis.ngraph.shape.RectangleShape;
 import com.faforever.neroxis.ngraph.shape.RhombusShape;
-import com.faforever.neroxis.ngraph.shape.StencilRegistry;
 import com.faforever.neroxis.ngraph.shape.SwimlaneShape;
 import com.faforever.neroxis.ngraph.shape.TriangleShape;
+import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -136,16 +136,11 @@ public class Graphics2DCanvas extends BasicCanvas {
         textShapes.put(name, shape);
     }
 
-    public IShape getShape(Map<String, Object> style) {
-        String name = Utils.getString(style, Constants.STYLE_SHAPE, null);
-        IShape shape = shapes.get(name);
-        if (shape == null && name != null) {
-            shape = StencilRegistry.getStencil(name);
-        }
-        return shape;
+    public IShape getShape(Style style) {
+        return style.getShape().getShape();
     }
 
-    public ITextShape getTextShape(Map<String, Object> style) {
+    public ITextShape getTextShape(Style style) {
         return textShapes.get(TEXT_SHAPE_DEFAULT);
     }
 
@@ -168,12 +163,12 @@ public class Graphics2DCanvas extends BasicCanvas {
     }
 
     public Object drawCell(CellState state) {
-        Map<String, Object> style = state.getStyle();
+        Style style = state.getStyle();
         IShape shape = getShape(style);
 
         if (graphics2D != null && shape != null) {
             // Creates a temporary graphics instance for drawing this shape
-            float opacity = Utils.getFloat(style, Constants.STYLE_OPACITY, 100);
+            float opacity = style.getShape().getOpacity();
             Graphics2D previousGraphics = graphics2D;
             graphics2D = createTemporaryGraphics(style, opacity, state);
 
@@ -187,18 +182,17 @@ public class Graphics2DCanvas extends BasicCanvas {
     }
 
     public Object drawLabel(String text, CellState state) {
-        Map<String, Object> style = state.getStyle();
-        ITextShape shape = getTextShape(style);
+        Style style = state.getStyle();
+        ITextShape shape = style.getLabel().getTextShape();
         if (graphics2D != null && shape != null && drawLabels && text != null && text.length() > 0) {
             // Creates a temporary graphics instance for drawing this shape
-            float opacity = Utils.getFloat(style, Constants.STYLE_TEXT_OPACITY, 100);
+            float opacity = style.getLabel().getTextOpacity();
             Graphics2D previousGraphics = graphics2D;
             graphics2D = createTemporaryGraphics(style, opacity, null);
             // Draws the label background and border
-            Color bg = Utils.getColor(style, Constants.STYLE_LABEL_BACKGROUNDCOLOR);
-            Color border = Utils.getColor(style, Constants.STYLE_LABEL_BORDERCOLOR);
+            Color bg = style.getLabel().getBackgroundColor();
+            Color border = style.getLabel().getBorderColor();
             paintRectangle(state.getLabelBounds().getRectangle(), bg, border);
-
             // Paints the label and restores the graphics object
             shape.paintShape(this, text, state, style);
             graphics2D.dispose();
@@ -369,55 +363,49 @@ public class Graphics2DCanvas extends BasicCanvas {
             Color previousColor = graphics2D.getColor();
             graphics2D.setColor(SwingConstants.SHADOW_COLOR);
             graphics2D.translate(shadowOffsetX, shadowOffsetY);
-
             // Paints the shadow
             fillShape(shape, false);
-
             // Restores the state of the graphics object
             graphics2D.translate(-shadowOffsetX, -shadowOffsetY);
             graphics2D.setColor(previousColor);
             graphics2D.setPaint(p);
         }
-
         graphics2D.fill(shape);
     }
 
-    public Stroke createStroke(Map<String, Object> style) {
-        double width = Utils.getFloat(style, Constants.STYLE_STROKEWIDTH, 1) * scale;
-        boolean dashed = Utils.isTrue(style, Constants.STYLE_DASHED);
+    public Stroke createStroke(Style style) {
+        double width = style.getShape().getStrokeWidth() * scale;
+        boolean dashed = style.getEdge().isDashed();
         if (dashed) {
-            float[] dashPattern = Utils.getFloatArray(style, Constants.STYLE_DASH_PATTERN, Constants.DEFAULT_DASHED_PATTERN, " ");
+            float[] dashPattern = style.getEdge().getDashPattern();
             float[] scaledDashPattern = new float[dashPattern.length];
-
             for (int i = 0; i < dashPattern.length; i++) {
                 scaledDashPattern[i] = (float) (dashPattern[i] * scale * width);
             }
-
             return new BasicStroke((float) width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, scaledDashPattern, 0.0f);
         } else {
             return new BasicStroke((float) width);
         }
     }
 
-    public Paint createFillPaint(RectangleDouble bounds, Map<String, Object> style) {
-        Color fillColor = Utils.getColor(style, Constants.STYLE_FILLCOLOR);
+    public Paint createFillPaint(RectangleDouble bounds, Style style) {
+        Color fillColor = style.getShape().getFillColor();
         Paint fillPaint = null;
         if (fillColor != null) {
-            Color gradientColor = Utils.getColor(style, Constants.STYLE_GRADIENTCOLOR);
+            Color gradientColor = style.getShape().getGradientColor();
             if (gradientColor != null) {
-                String gradientDirection = Utils.getString(style, Constants.STYLE_GRADIENT_DIRECTION);
+                Direction gradientDirection = style.getShape().getGradientDirection();
                 float x1 = (float) bounds.getX();
                 float y1 = (float) bounds.getY();
                 float x2 = (float) bounds.getX();
                 float y2 = (float) bounds.getY();
-
-                if (gradientDirection == null || gradientDirection.equals(Constants.DIRECTION_SOUTH)) {
+                if (gradientDirection == null || gradientDirection == Direction.SOUTH) {
                     y2 = (float) (bounds.getY() + bounds.getHeight());
-                } else if (gradientDirection.equals(Constants.DIRECTION_EAST)) {
+                } else if (gradientDirection == Direction.EAST) {
                     x2 = (float) (bounds.getX() + bounds.getWidth());
-                } else if (gradientDirection.equals(Constants.DIRECTION_NORTH)) {
+                } else if (gradientDirection == Direction.NORTH) {
                     y1 = (float) (bounds.getY() + bounds.getHeight());
-                } else if (gradientDirection.equals(Constants.DIRECTION_WEST)) {
+                } else if (gradientDirection == Direction.WEST) {
                     x1 = (float) (bounds.getX() + bounds.getWidth());
                 }
 
@@ -428,13 +416,13 @@ public class Graphics2DCanvas extends BasicCanvas {
         return fillPaint;
     }
 
-    public Graphics2D createTemporaryGraphics(Map<String, Object> style, float opacity, RectangleDouble bounds) {
+    public Graphics2D createTemporaryGraphics(Style style, float opacity, RectangleDouble bounds) {
         Graphics2D temporaryGraphics = (Graphics2D) graphics2D.create();
         // Applies the default translate
         temporaryGraphics.translate(translate.getX(), translate.getY());
         // Applies the rotation on the graphics object
         if (bounds != null) {
-            double rotation = Utils.getDouble(style, Constants.STYLE_ROTATION, 0);
+            double rotation = style.getShape().getRotation();
             if (rotation != 0) {
                 temporaryGraphics.rotate(Math.toRadians(rotation), bounds.getCenterX(), bounds.getCenterY());
             }

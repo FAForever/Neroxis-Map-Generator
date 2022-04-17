@@ -3,8 +3,13 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.shape.ConnectorShape;
+import com.faforever.neroxis.ngraph.shape.DefaultTextShape;
+import com.faforever.neroxis.ngraph.shape.RectangleShape;
+import com.faforever.neroxis.ngraph.style.Style;
+import com.faforever.neroxis.ngraph.style.arrow.ClassicArrow;
 import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
-import com.faforever.neroxis.ngraph.util.Constants;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +32,7 @@ public class Stylesheet {
     /**
      * Maps from names to styles.
      */
-    protected Map<String, Map<String, Object>> styles = new HashMap<>();
+    protected Map<String, Style> styles = new HashMap<>();
 
     /**
      * Constructs a new stylesheet and assigns default styles.
@@ -42,14 +47,14 @@ public class Stylesheet {
      *
      * @return All styles in this stylesheet.
      */
-    public Map<String, Map<String, Object>> getStyles() {
+    public Map<String, Style> getStyles() {
         return styles;
     }
 
     /**
      * Sets all styles in the stylesheet.
      */
-    public void setStyles(Map<String, Map<String, Object>> styles) {
+    public void setStyles(Map<String, Style> styles) {
         this.styles = styles;
     }
 
@@ -58,16 +63,14 @@ public class Stylesheet {
      *
      * @return Returns the default vertex style.
      */
-    protected Map<String, Object> createDefaultVertexStyle() {
-        Map<String, Object> style = new HashMap<>();
-        style.put(Constants.STYLE_SHAPE, Constants.SHAPE_RECTANGLE);
-        style.put(Constants.STYLE_PERIMETER, new RectanglePerimeter());
-        style.put(Constants.STYLE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
-        style.put(Constants.STYLE_ALIGN, Constants.ALIGN_CENTER);
-        style.put(Constants.STYLE_FILLCOLOR, "#C3D9FF");
-        style.put(Constants.STYLE_STROKECOLOR, "#6482B9");
-        style.put(Constants.STYLE_FONTCOLOR, "#774400");
-
+    protected Style createDefaultVertexStyle() {
+        Style style = new Style();
+        style.getShape().setShape(new RectangleShape());
+        style.getPerimeter().setPerimeter(new RectanglePerimeter());
+        style.getShape().setFillColor(new Color(195, 217, 255));
+        style.getShape().setStrokeColor(new Color(100, 130, 185));
+        style.getLabel().setTextColor(new Color(119, 68, 0));
+        style.getLabel().setTextShape(new DefaultTextShape());
         return style;
     }
 
@@ -76,16 +79,13 @@ public class Stylesheet {
      *
      * @return Returns the default edge style.
      */
-    protected Map<String, Object> createDefaultEdgeStyle() {
-        Map<String, Object> style = new HashMap<>();
-
-        style.put(Constants.STYLE_SHAPE, Constants.SHAPE_CONNECTOR);
-        style.put(Constants.STYLE_ENDARROW, Constants.ARROW_CLASSIC);
-        style.put(Constants.STYLE_VERTICAL_ALIGN, Constants.ALIGN_MIDDLE);
-        style.put(Constants.STYLE_ALIGN, Constants.ALIGN_CENTER);
-        style.put(Constants.STYLE_STROKECOLOR, "#6482B9");
-        style.put(Constants.STYLE_FONTCOLOR, "#446299");
-
+    protected Style createDefaultEdgeStyle() {
+        Style style = new Style();
+        style.getShape().setShape(new ConnectorShape());
+        style.getEdge().setEndArrow(new ClassicArrow());
+        style.getShape().setStrokeColor(new Color(100, 130, 185));
+        style.getLabel().setTextColor(new Color(68, 98, 153));
+        style.getLabel().setTextShape(new DefaultTextShape());
         return style;
     }
 
@@ -94,7 +94,7 @@ public class Stylesheet {
      *
      * @return Returns the default vertex style.
      */
-    public Map<String, Object> getDefaultVertexStyle() {
+    public Style getDefaultVertexStyle() {
         return styles.get("defaultVertex");
     }
 
@@ -103,7 +103,7 @@ public class Stylesheet {
      *
      * @param value Style to be used for vertices.
      */
-    public void setDefaultVertexStyle(Map<String, Object> value) {
+    public void setDefaultVertexStyle(Style value) {
         putCellStyle("defaultVertex", value);
     }
 
@@ -112,7 +112,7 @@ public class Stylesheet {
      *
      * @return Returns the default edge style.
      */
-    public Map<String, Object> getDefaultEdgeStyle() {
+    public Style getDefaultEdgeStyle() {
         return styles.get("defaultEdge");
     }
 
@@ -121,7 +121,7 @@ public class Stylesheet {
      *
      * @param value Style to be used for edges.
      */
-    public void setDefaultEdgeStyle(Map<String, Object> value) {
+    public void setDefaultEdgeStyle(Style value) {
         putCellStyle("defaultEdge", value);
     }
 
@@ -131,7 +131,7 @@ public class Stylesheet {
      * @param name  Name for the style to be stored.
      * @param style Key, value pairs that define the style.
      */
-    public void putCellStyle(String name, Map<String, Object> style) {
+    public void putCellStyle(String name, Style style) {
         styles.put(name, style);
     }
 
@@ -144,37 +144,12 @@ public class Stylesheet {
      * @param defaultStyle Default style to be returned if no style can be found.
      * @return Returns the style for the given formatted cell style.
      */
-    public Map<String, Object> getCellStyle(String name, Map<String, Object> defaultStyle) {
-        Map<String, Object> style = defaultStyle;
-
+    public Style getCellStyle(String name, Style defaultStyle) {
         if (name != null && name.length() > 0) {
-            String[] pairs = name.split(";");
-
-            if (style != null && !name.startsWith(";")) {
-                style = new HashMap<>(style);
-            } else {
-                style = new HashMap<>();
-            }
-            for (String tmp : pairs) {
-                int c = tmp.indexOf('=');
-                if (c >= 0) {
-                    String key = tmp.substring(0, c);
-                    String value = tmp.substring(c + 1);
-                    if (value.equals(Constants.NONE)) {
-                        style.remove(key);
-                    } else {
-                        style.put(key, value);
-                    }
-                } else {
-                    Map<String, Object> tmpStyle = styles.get(tmp);
-                    if (tmpStyle != null) {
-                        style.putAll(tmpStyle);
-                    }
-                }
-            }
+            return styles.get(name);
+        } else {
+            return defaultStyle;
         }
-
-        return style;
     }
 
 }

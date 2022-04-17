@@ -5,8 +5,7 @@ import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.generator.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.Utils;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import java.util.Collection;
@@ -371,8 +370,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         String result = "";
         if (cell != null) {
             CellState state = view.getState(cell);
-            Map<String, Object> style = (state != null) ? state.getStyle() : getCellStyle(cell);
-            if (labelsVisible && !Utils.isTrue(style, Constants.STYLE_NOLABEL, false)) {
+            Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+            if (labelsVisible && style.getLabel().isVisible()) {
                 if (cell.isVertex() && getDefaultParent().equals(cell.getParent()) && getVertexForCell(cell) != null) {
                     MaskGraphVertex<?> vertex = getVertexForCell(cell);
                     result = String.format("%s\n%s\n%s", convertValueToString(cell), vertex.getExecutableName(), vertex.getExecutorClass().getSimpleName());

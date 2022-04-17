@@ -1,8 +1,7 @@
 package com.faforever.neroxis.ngraph.style.edge;
 
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Direction;
 import com.faforever.neroxis.ngraph.util.PointDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
@@ -28,9 +27,9 @@ public class LoopEdgeStyleFunction implements EdgeStyleFunction {
             double dx = 0;
             double y = 0;
             double dy = 0;
-            double seg = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, graph.getGridSize()) * view.getScale();
-            String dir = Utils.getString(state.getStyle(), Constants.STYLE_DIRECTION, Constants.DIRECTION_WEST);
-            if (dir.equals(Constants.DIRECTION_NORTH) || dir.equals(Constants.DIRECTION_SOUTH)) {
+            double seg = state.getStyle().getEdge().getSegmentSize() * view.getScale();
+            Direction dir = state.getStyle().getShape().getDirection();
+            if (dir == Direction.NORTH || dir == Direction.SOUTH) {
                 x = view.getRoutingCenterX(source);
                 dx = seg;
             } else {
@@ -43,9 +42,9 @@ public class LoopEdgeStyleFunction implements EdgeStyleFunction {
                     dy = Math.max(Math.abs(y - pt.getY()), dy);
                 } else {
                     switch (dir) {
-                        case Constants.DIRECTION_NORTH -> y = source.getY() - 2 * dx;
-                        case Constants.DIRECTION_SOUTH -> y = source.getY() + source.getHeight() + 2 * dx;
-                        case Constants.DIRECTION_EAST -> x = source.getX() - 2 * dy;
+                        case NORTH -> y = source.getY() - 2 * dx;
+                        case SOUTH -> y = source.getY() + source.getHeight() + 2 * dx;
+                        case EAST -> x = source.getX() - 2 * dy;
                         default -> x = source.getX() + source.getWidth() + 2 * dy;
                     }
                 }

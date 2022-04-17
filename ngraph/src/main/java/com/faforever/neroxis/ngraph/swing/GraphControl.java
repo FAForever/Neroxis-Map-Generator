@@ -243,12 +243,12 @@ public class GraphControl extends JComponent {
     protected java.awt.Rectangle getExtendedCellBounds(CellState state) {
         java.awt.Rectangle rect = null;
         // Takes rotation into account
-        double rotation = Utils.getDouble(state.getStyle(), Constants.STYLE_ROTATION);
+        double rotation = state.getStyle().getShape().getRotation();
         RectangleDouble tmp = Utils.getBoundingBox(new RectangleDouble(state), rotation);
         // Adds scaled stroke width
-        int border = (int) Math.ceil(Utils.getDouble(state.getStyle(), Constants.STYLE_STROKEWIDTH) * graphComponent.graph.getView().getScale()) + 1;
+        int border = (int) Math.ceil(state.getStyle().getShape().getStrokeWidth() * graphComponent.graph.getView().getScale()) + 1;
         tmp.grow(border);
-        if (Utils.isTrue(state.getStyle(), Constants.STYLE_SHADOW)) {
+        if (state.getStyle().getCellProperties().isShadow()) {
             tmp.setWidth(tmp.getWidth() + Constants.SHADOW_OFFSETX);
             tmp.setHeight(tmp.getHeight() + Constants.SHADOW_OFFSETX);
         }

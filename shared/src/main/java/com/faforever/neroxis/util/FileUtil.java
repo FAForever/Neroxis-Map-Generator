@@ -3,8 +3,6 @@ package com.faforever.neroxis.util;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.PrettifyOutputStream;
 import com.dslplatform.json.runtime.Settings;
-import lombok.SneakyThrows;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,10 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 
 public strictfp class FileUtil {
-
-    private static final DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
+    private static final DslJson<Object> DSL_JSON = new DslJson<>(Settings.basicSetup());
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {
@@ -76,9 +74,9 @@ public strictfp class FileUtil {
         if ((inputStream = FileUtil.class.getResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
         } else if ((resource = FileUtil.class.getResource(path)) != null) {
-            return dslJson.deserialize(clazz, resource.openStream());
+            return DSL_JSON.deserialize(clazz, resource.openStream());
         } else {
-            return dslJson.deserialize(clazz, new FileInputStream(path));
+            return DSL_JSON.deserialize(clazz, new FileInputStream(path));
         }
     }
 
@@ -87,10 +85,10 @@ public strictfp class FileUtil {
     }
 
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
-        return dslJson.deserialize(clazz, inputStream);
+        return DSL_JSON.deserialize(clazz, inputStream);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {
-        dslJson.serialize(obj, new PrettifyOutputStream(new FileOutputStream(filename)));
+        DSL_JSON.serialize(obj, new PrettifyOutputStream(new FileOutputStream(filename)));
     }
 }

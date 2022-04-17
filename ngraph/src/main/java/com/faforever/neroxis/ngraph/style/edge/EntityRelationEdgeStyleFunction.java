@@ -8,6 +8,7 @@ import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides an entity relation style for edges (as used in database
@@ -20,7 +21,7 @@ public class EntityRelationEdgeStyleFunction implements EdgeStyleFunction {
     public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
         GraphView view = state.getView();
         IGraphModel model = view.getGraph().getModel();
-        double segment = Utils.getDouble(state.getStyle(), Constants.STYLE_SEGMENT, ENTITY_SEGMENT) * state.getView().getScale();
+        double segment = state.getStyle().getEdge().getSegmentSize() * state.getView().getScale();
         PointDouble p0 = state.getAbsolutePoint(0);
         PointDouble pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
         boolean isSourceLeft = false;
@@ -29,7 +30,7 @@ public class EntityRelationEdgeStyleFunction implements EdgeStyleFunction {
             source.setX(p0.getX());
             source.setY(p0.getY());
         } else if (source != null) {
-            int constraint = Utils.getPortConstraints(source, state, true, Constants.DIRECTION_MASK_NONE);
+            int constraint = Utils.getPortConstraints(source, state, true, Set.of());
             if (constraint != Constants.DIRECTION_MASK_NONE) {
                 isSourceLeft = constraint == Constants.DIRECTION_MASK_WEST;
             } else {
@@ -47,7 +48,7 @@ public class EntityRelationEdgeStyleFunction implements EdgeStyleFunction {
             target.setX(pe.getX());
             target.setY(pe.getY());
         } else if (target != null) {
-            int constraint = Utils.getPortConstraints(target, state, false, Constants.DIRECTION_MASK_NONE);
+            int constraint = Utils.getPortConstraints(target, state, false, Set.of());
             if (constraint != Constants.DIRECTION_MASK_NONE) {
                 isTargetLeft = constraint == Constants.DIRECTION_MASK_WEST;
             } else {

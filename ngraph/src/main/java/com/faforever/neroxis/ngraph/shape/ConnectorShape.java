@@ -4,54 +4,44 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.style.arrow.Arrow;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.LineDouble;
 import com.faforever.neroxis.ngraph.util.PointDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ConnectorShape extends BasicShape {
 
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (state.getAbsolutePointCount() > 1 && configureGraphics(canvas, state, false)) {
             List<PointDouble> pts = new ArrayList<>(state.getAbsolutePoints());
-            Map<String, Object> style = state.getStyle();
-
+            Style style = state.getStyle();
             // Paints the markers and updates the points
             // Switch off any dash pattern for markers
-            boolean dashed = Utils.isTrue(style, Constants.STYLE_DASHED);
-            Object dashedValue = style.get(Constants.STYLE_DASHED);
-
+            boolean dashed = style.getEdge().isDashed();
+            Object dashedValue = style.getEdge().getDashPattern();
             if (dashed) {
-                style.remove(Constants.STYLE_DASHED);
+                style.getEdge().setDashed(false);
                 canvas.getGraphics().setStroke(canvas.createStroke(style));
             }
-
             translatePoint(pts, 0, paintMarker(canvas, state, true));
             translatePoint(pts, pts.size() - 1, paintMarker(canvas, state, false));
-
             if (dashed) {
                 // Replace the dash pattern
-                style.put(Constants.STYLE_DASHED, dashedValue);
+                style.getEdge().setDashed(true);
                 canvas.getGraphics().setStroke(canvas.createStroke(style));
             }
-
             paintPolyline(canvas, pts, state.getStyle());
         }
     }
 
-    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Map<String, Object> style) {
-        boolean rounded = isRounded(style) && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
+    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Style style) {
+        boolean rounded = style.getCellProperties().isRounded() && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
         canvas.paintPolyline(points.toArray(new PointDouble[0]), rounded);
-    }
-
-    public boolean isRounded(Map<String, Object> style) {
-        return Utils.isTrue(style, Constants.STYLE_ROUNDED, false);
     }
 
     private void translatePoint(List<PointDouble> points, int index, PointDouble offset) {
@@ -69,11 +59,11 @@ public class ConnectorShape extends BasicShape {
      * @return the offset of the marker from the end of the line
      */
     public PointDouble paintMarker(Graphics2DCanvas canvas, CellState state, boolean source) {
-        Map<String, Object> style = state.getStyle();
-        float strokeWidth = (float) (Utils.getFloat(style, Constants.STYLE_STROKEWIDTH, 1) * canvas.getScale());
-        String type = Utils.getString(style, (source) ? Constants.STYLE_STARTARROW : Constants.STYLE_ENDARROW, "");
-        float size = (Utils.getFloat(style, (source) ? Constants.STYLE_STARTSIZE : Constants.STYLE_ENDSIZE, Constants.DEFAULT_MARKERSIZE));
-        Color color = Utils.getColor(style, Constants.STYLE_STROKECOLOR);
+        Style style = state.getStyle();
+        double strokeWidth = style.getShape().getStrokeWidth() * canvas.getScale();
+        Arrow marker = source ? style.getEdge().getStartArrow() : style.getEdge().getEndArrow();
+        float size = source ? style.getEdge().getStartSize() : style.getEdge().getEndSize();
+        Color color = style.getShape().getStrokeColor();
         canvas.getGraphics().setColor(color);
         double absSize = size * canvas.getScale();
         List<PointDouble> points = state.getAbsolutePoints();
@@ -97,10 +87,9 @@ public class ConnectorShape extends BasicShape {
         pe = (PointDouble) pe.clone();
         pe.setX(pe.getX() - strokeX / 2.0);
         pe.setY(pe.getY() - strokeY / 2.0);
-        Arrow marker = ArrowRegistry.getArrow(type);
 
         if (marker != null) {
-            offset = marker.paintArrow(canvas, state, type, pe, nx, ny, absSize, source);
+            offset = marker.paintArrow(canvas, state, pe, nx, ny, absSize, source);
 
             if (offset != null) {
                 offset.setX(offset.getX() - strokeX / 2.0);

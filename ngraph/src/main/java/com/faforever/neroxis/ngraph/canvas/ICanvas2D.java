@@ -1,6 +1,8 @@
 package com.faforever.neroxis.ngraph.canvas;
 
+import com.faforever.neroxis.ngraph.style.Direction;
 import com.faforever.neroxis.ngraph.util.Constants;
+import java.awt.Color;
 
 /**
  * Requirements for implementing technologies:
@@ -68,7 +70,7 @@ public interface ICanvas2D {
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setStrokeColor(String value);
+    void setStrokeColor(Color value);
 
     /**
      * Sets the dashed state. This should default to false if unset.
@@ -123,7 +125,7 @@ public interface ICanvas2D {
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setFontColor(String value);
+    void setFontColor(Color value);
 
     /**
      * Default value {@link Constants#DEFAULT_FONTFAMILY}.
@@ -142,14 +144,14 @@ public interface ICanvas2D {
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setFontBackgroundColor(String value);
+    void setFontBackgroundColor(Color value);
 
     /**
      * Default value "#000000".
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setFontBorderColor(String value);
+    void setFontBorderColor(Color value);
 
     /**
      * Default value 1. This method may add rendering overhead and should be
@@ -159,25 +161,11 @@ public interface ICanvas2D {
     void setAlpha(double value);
 
     /**
-     * Default value 1. This method may add rendering overhead and should be
-     * used with care.
-     *
-     */
-    void setFillAlpha(double value);
-
-    /**
-     * Default value 1. This method may add rendering overhead and should be
-     * used with care.
-     *
-     */
-    void setStrokeAlpha(double value);
-
-    /**
      * Default value {@link Constants#NONE}.
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setFillColor(String value);
+    void setFillColor(Color value);
 
     /**
      * Prepares the canvas to draw a gradient.
@@ -185,7 +173,7 @@ public interface ICanvas2D {
      * @param direction Direction may be null. Use default value
      *                  {@link Constants#DIRECTION_SOUTH}.
      */
-    void setGradient(String color1, String color2, double x, double y, double w, double h, String direction, double alpha1, double alpha2);
+    void setGradient(Color color1, Color color2, double x, double y, double w, double h, Direction direction, double alpha1, double alpha2);
 
     /**
      * Enables or disables the painting of shadows.
@@ -199,7 +187,7 @@ public interface ICanvas2D {
      *
      * @param value Hex representation of the color or {@link Constants#NONE}.
      */
-    void setShadowColor(String value);
+    void setShadowColor(Color value);
 
     /**
      * Default value {@link Constants#NONE}.

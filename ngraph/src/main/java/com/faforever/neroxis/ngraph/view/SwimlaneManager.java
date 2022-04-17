@@ -9,11 +9,9 @@ import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
-import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
-import com.faforever.neroxis.ngraph.util.Utils;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Manager for swimlanes and nested swimlanes that sets the size of newly added
@@ -159,9 +157,8 @@ public class SwimlaneManager extends EventSource {
     protected boolean isCellHorizontal(ICell cell) {
         if (graph.isSwimlane(cell)) {
             CellState state = graph.getView().getState(cell);
-            Map<String, Object> style = (state != null) ? state.getStyle() : graph.getCellStyle(cell);
-
-            return Utils.isTrue(style, Constants.STYLE_HORIZONTAL, true);
+            Style style = (state != null) ? state.getStyle() : graph.getCellStyle(cell);
+            return style.getCellProperties().isHorizontal();
         }
 
         return !isHorizontal();
