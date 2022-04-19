@@ -1,10 +1,17 @@
 package com.faforever.neroxis.ngraph.style;
 
 import com.faforever.neroxis.ngraph.style.util.StyleMapper;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
-public class Style {
+public class Style implements PropertyChangeListener {
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private final LabelStyle label = new LabelStyle();
     private final EdgeStyle edge = new EdgeStyle();
     private final IndicatorStyle indicator = new IndicatorStyle();
@@ -14,25 +21,43 @@ public class Style {
     private final SwimlaneStyle swimlane = new SwimlaneStyle();
     private final ShapeStyle shape = new ShapeStyle();
     private final CellProperties cellProperties = new CellProperties();
+    @Getter(AccessLevel.NONE)
     private final Style parentStyle;
 
     public Style(Style parentStyle) {
         this.parentStyle = parentStyle;
         if (this.parentStyle != null) {
-            transferState(parentStyle);
-            this.parentStyle.label.addPropertyChangeListener(this.label);
-            this.parentStyle.edge.addPropertyChangeListener(this.edge);
-            this.parentStyle.indicator.addPropertyChangeListener(this.indicator);
-            this.parentStyle.stencil.addPropertyChangeListener(this.stencil);
-            this.parentStyle.perimeter.addPropertyChangeListener(this.perimeter);
-            this.parentStyle.swimlane.addPropertyChangeListener(this.swimlane);
-            this.parentStyle.cellProperties.addPropertyChangeListener(this.cellProperties);
-            this.parentStyle.image.addPropertyChangeListener(this.image);
-            this.parentStyle.shape.addPropertyChangeListener(this.shape);
+            initializeFromParent(parentStyle);
         }
+        addSelfListener();
     }
 
-    public void clearParentListeners() {
+    private void initializeFromParent(Style parentStyle) {
+        transferState(parentStyle);
+        this.parentStyle.label.addPropertyChangeListener(label);
+        this.parentStyle.edge.addPropertyChangeListener(edge);
+        this.parentStyle.indicator.addPropertyChangeListener(indicator);
+        this.parentStyle.stencil.addPropertyChangeListener(stencil);
+        this.parentStyle.perimeter.addPropertyChangeListener(perimeter);
+        this.parentStyle.swimlane.addPropertyChangeListener(swimlane);
+        this.parentStyle.cellProperties.addPropertyChangeListener(cellProperties);
+        this.parentStyle.image.addPropertyChangeListener(image);
+        this.parentStyle.shape.addPropertyChangeListener(shape);
+    }
+
+    private void addSelfListener() {
+        label.addPropertyChangeListener(this);
+        edge.addPropertyChangeListener(this);
+        indicator.addPropertyChangeListener(this);
+        stencil.addPropertyChangeListener(this);
+        perimeter.addPropertyChangeListener(this);
+        swimlane.addPropertyChangeListener(this);
+        cellProperties.addPropertyChangeListener(this);
+        image.addPropertyChangeListener(this);
+        shape.addPropertyChangeListener(this);
+    }
+
+    private void clearParentListeners() {
         if (this.parentStyle != null) {
             this.parentStyle.label.removePropertyChangeListener(this.label);
             this.parentStyle.edge.removePropertyChangeListener(this.edge);
@@ -67,5 +92,19 @@ public class Style {
         Style copy = new Style(null);
         copy.transferState(this);
         return copy;
+    }
+
+    public void clearListeners() {
+        Arrays.stream(changeSupport.getPropertyChangeListeners()).forEach(changeSupport::removePropertyChangeListener);
+        clearParentListeners();
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        changeSupport.firePropertyChange("styleChange", null, null);
     }
 }

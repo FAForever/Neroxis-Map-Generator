@@ -3,8 +3,8 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
+import com.faforever.neroxis.ngraph.event.CellStateEvent;
 import com.faforever.neroxis.ngraph.event.DownEvent;
-import com.faforever.neroxis.ngraph.event.Event;
 import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
 import com.faforever.neroxis.ngraph.event.ScaleEvent;
@@ -309,7 +309,7 @@ public class GraphView extends EventSource {
      * Removes all existing cell states and invokes validate.
      */
     public void reload() {
-        states.values().stream().map(CellState::getStyle).forEach(Style::clearParentListeners);
+        states.values().stream().map(CellState::getStyle).forEach(Style::clearListeners);
         states.clear();
         validate();
     }
@@ -1343,7 +1343,7 @@ public class GraphView extends EventSource {
     public CellState removeState(ICell cell) {
         CellState removed = states.remove(cell);
         if (removed != null) {
-            removed.getStyle().clearParentListeners();
+            removed.getStyle().clearListeners();
         }
         return removed;
     }
@@ -1355,7 +1355,9 @@ public class GraphView extends EventSource {
      * @return Returns a new state for the given cell.
      */
     public CellState createState(ICell cell) {
-        return new CellState(this, cell, graph.getCellStyle(cell));
+        CellState cellState = new CellState(this, cell, graph.getCellStyle(cell));
+        cellState.getStyle().addPropertyChangeListener(evt -> fireEvent(new CellStateEvent(cellState)));
+        return cellState;
     }
 
     @Override
@@ -1440,7 +1442,6 @@ public class GraphView extends EventSource {
             // Removes all existing cell states and revalidates
             view.reload();
             up = !up;
-            String eventName = (up) ? Event.UP : Event.DOWN;
             if (up) {
                 view.fireEvent(new UpEvent(view.currentRoot, previous));
             } else {

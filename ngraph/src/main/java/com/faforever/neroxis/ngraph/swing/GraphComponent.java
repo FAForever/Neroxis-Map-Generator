@@ -5,6 +5,7 @@ package com.faforever.neroxis.ngraph.swing;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.event.AddOverlayEvent;
+import com.faforever.neroxis.ngraph.event.CellStateEvent;
 import com.faforever.neroxis.ngraph.event.ChangeEvent;
 import com.faforever.neroxis.ngraph.event.DownEvent;
 import com.faforever.neroxis.ngraph.event.EventObject;
@@ -322,12 +323,14 @@ public class GraphComponent extends JScrollPane implements Printable {
         updateComponents();
         graphControl.updatePreferredSize();
     };
+    protected IEventListener<CellStateEvent> cellStateHandler = (sender, event) -> redraw(event.getCellState());
     protected PropertyChangeListener viewChangeHandler = evt -> {
         if (evt.getPropertyName().equals("view")) {
             GraphView oldView = (GraphView) evt.getOldValue();
             GraphView newView = (GraphView) evt.getNewValue();
             if (oldView != null) {
                 oldView.removeListener(updateHandler);
+                oldView.removeListener(cellStateHandler);
             }
             if (newView != null) {
                 newView.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
@@ -335,6 +338,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 newView.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
                 newView.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
                 newView.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
+                newView.addListener(CellStateEvent.class, cellStateHandler);
             }
         } else if (evt.getPropertyName().equals("model")) {
             GraphModel oldModel = (GraphModel) evt.getOldValue();
@@ -509,6 +513,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
         view.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
         view.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
+        view.addListener(CellStateEvent.class, cellStateHandler);
         graph.addPropertyChangeListener(viewChangeHandler);
         // Resets the zoom policy if the scale changes
         graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
@@ -2572,10 +2577,13 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     public void redraw(CellState state) {
         if (state != null) {
-            java.awt.Rectangle dirty = state.getBoundingBox().getRectangle();
-            repaintTripleBuffer(new java.awt.Rectangle(dirty));
-            dirty = SwingUtilities.convertRectangle(graphControl, dirty, this);
-            repaint(dirty);
+            RectangleDouble boundingBox = state.getBoundingBox();
+            if (boundingBox != null) {
+                java.awt.Rectangle dirty = boundingBox.getRectangle();
+                repaintTripleBuffer(new java.awt.Rectangle(dirty));
+                dirty = SwingUtilities.convertRectangle(graphControl, dirty, this);
+                repaint(dirty);
+            }
         }
     }
 
