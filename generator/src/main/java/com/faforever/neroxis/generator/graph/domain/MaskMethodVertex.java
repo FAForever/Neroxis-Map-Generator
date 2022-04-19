@@ -44,11 +44,9 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
             throw new IllegalStateException("Executable is not yet set");
         }
         if (parameterValue != null && EXECUTOR.equals(parameterName) && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass()) && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
-
             if (executor != null) {
                 throw new IllegalStateException("executor already set");
             }
-
             executor = (MaskVertexResult) parameterValue;
         } else {
             super.setParameter(parameterName, parameterValue);
@@ -69,13 +67,7 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
-        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
-            try {
-                return getParameterFinalValue(parameter, graphContext);
-            } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray();
+        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> getParameterFinalValue(parameter, graphContext)).toArray();
         Mask<?, ?> result = (Mask<?, ?>) executable.invoke(executor.getResult(), args);
         if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
             results.put(NEW_MASK, result);

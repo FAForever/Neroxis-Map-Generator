@@ -1348,6 +1348,13 @@ public class GraphView extends EventSource {
         return removed;
     }
 
+    public void refreshStyle(ICell cell) {
+        CellState state = getState(cell);
+        if (state != null) {
+            state.setStyle(graph.getCellStyle(cell));
+        }
+    }
+
     /**
      * Creates and returns a cell state for the given cell.
      *

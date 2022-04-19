@@ -11,11 +11,13 @@ import com.faforever.neroxis.ngraph.event.ChangeEvent;
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
+import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -62,6 +64,7 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         graphComponent.setViewportBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         graphComponent.setPreferredSize(new Dimension(800, 800));
         add(graphComponent);
+
         graph.getSelectionModel().addListener(ChangeEvent.class, (sender, event) -> {
             List<ICell> added = event.getAdded();
             if (added != null && !added.isEmpty()) {
@@ -88,6 +91,9 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
                 }
             }
         });
+        Style undefinedStyle = graph.getStylesheet().getDefaultVertexStyle().spawnChild();
+        undefinedStyle.getShape().setFillColor(new Color(255, 128, 128));
+        graph.getStylesheet().putCellStyle("undefined", undefinedStyle);
         layout.setTraverseAncestors(false);
         layout.setOrientation(SwingConstants.WEST);
         layout.setInterRankCellSpacing(100);
@@ -141,7 +147,9 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random, GeneratorParameters.builder().mapSize(mapSize).numTeams(numTeams).spawnCount(spawnCount).terrainSymmetry(terrainSymmetry).build());
         GraphContext graphContext = new GraphContext(random.nextLong(), generatorParameters, parameterConstraints);
         DebugUtil.timedRun("Reset results", () -> graph.forEach(MaskGraphVertex::resetResult));
+        DebugUtil.timedRun("Place Spawns", () -> graphContext.placeSpawns());
         DebugUtil.timedRun("Setup pipeline", () -> graph.forEach(vertex -> {
+            graphComponent.getGraph().updateVertexDefinedStyle(vertex);
             if (!vertex.isDefined()) {
                 return;
             }

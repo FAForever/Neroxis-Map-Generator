@@ -26,10 +26,6 @@ import java.util.Map;
  */
 public class Stylesheet {
     /**
-     * Shared immutable empty hashtable (for undefined cell styles).
-     */
-    public static final Map<String, Object> EMPTY_STYLE = new HashMap<>();
-    /**
      * Maps from names to styles.
      */
     protected Map<String, Style> styles = new HashMap<>();

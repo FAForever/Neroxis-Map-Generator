@@ -55,6 +55,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         MaskGraphVertex<?> edgeSource = e.getEdgeSource();
         edgeTarget.setParameter(parameterName, new MaskVertexResult(edge.getResultName(), edgeSource));
         addVisualEdgeIfNecessary(edgeSource, edgeTarget);
+        updateVertexDefinedStyle(edgeTarget);
         refresh();
     }
 
@@ -98,6 +99,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
         edgeTarget.clearParameter(edge.getParameterName());
         removeVisualEdges(edge, e.getEdgeSource(), edgeTarget);
+        updateVertexDefinedStyle(edgeTarget);
         refresh();
     }
 
@@ -120,11 +122,11 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     @Override
     public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
-        addVisualEdgeIfNecessary(e.getVertex());
+        addVisualVertexIfNecessary(e.getVertex());
         refresh();
     }
 
-    private void addVisualEdgeIfNecessary(MaskGraphVertex<?> vertex) {
+    private void addVisualVertexIfNecessary(MaskGraphVertex<?> vertex) {
         ICell cell = getCellForVertex(vertex);
         if (cell == null) {
             cell = insertVertex(getDefaultParent(), null, vertex.getIdentifier(), 0, 0, baseSize, baseSize);
@@ -139,6 +141,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             vertexToCell.put(vertex, cell);
             cellToVertex.put(cell, vertex);
         }
+        updateVertexDefinedStyle(vertex);
     }
 
     private double getSubCellYPadding(int numMaskParameters, double i) {
@@ -439,5 +442,21 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             vertexCopyMap.put(vertex, vertexCopy);
         });
         newVertices.stream().flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream()).forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)), vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
+    }
+
+    public void updateVertexDefinedStyle(MaskGraphVertex<?> vertex) {
+        ICell vertexCell = getCellForVertex(vertex);
+        if (vertexCell == null) {
+            return;
+        }
+        Set<ICell> cells = new HashSet<>(vertexCell.getChildren());
+        cells.add(vertexCell);
+        cells.forEach(cell -> {
+            if (!vertex.isDefined()) {
+                model.setStyle(cell, "undefined");
+            } else {
+                model.setStyle(cell, null);
+            }
+        });
     }
 }

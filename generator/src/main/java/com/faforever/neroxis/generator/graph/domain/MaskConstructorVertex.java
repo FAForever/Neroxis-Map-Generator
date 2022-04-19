@@ -24,13 +24,7 @@ public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<
 
     @Override
     protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
-        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> {
-            try {
-                return getParameterFinalValue(parameter, graphContext);
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }).toArray();
+        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> getParameterFinalValue(parameter, graphContext)).toArray();
         results.put(SELF, executable.newInstance(args));
     }
 

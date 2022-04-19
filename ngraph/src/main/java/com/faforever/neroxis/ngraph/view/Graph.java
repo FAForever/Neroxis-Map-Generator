@@ -960,7 +960,7 @@ public class Graph extends EventSource {
      * @param cell Cell whose style should be returned.
      * @return Returns the style of the cell.
      */
-    public Style getCellStyle(ICell cell) {
+    protected Style getCellStyle(ICell cell) {
         Style style = (model.isEdge(cell)) ? stylesheet.getDefaultEdgeStyle() : stylesheet.getDefaultVertexStyle();
         String name = model.getStyle(cell);
         return stylesheet.getCellStyle(name, style);

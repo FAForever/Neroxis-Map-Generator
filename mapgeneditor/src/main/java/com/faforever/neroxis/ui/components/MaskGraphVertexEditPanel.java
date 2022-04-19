@@ -70,7 +70,6 @@ public class MaskGraphVertexEditPanel extends JPanel {
         parametersTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
         parametersTable.setPreferredSize(new Dimension(300, -1));
-
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
@@ -78,8 +77,9 @@ public class MaskGraphVertexEditPanel extends JPanel {
         constraints.gridwidth = 2;
         constraints.gridy = 1;
         constraints.weighty = 1;
-
         add(parametersTable, constraints);
+        parameterTableModel.addTableModelListener(e -> graphPane.getGraph().updateVertexDefinedStyle(vertex));
+        parametersTable.addPropertyChangeListener(evt -> graphPane.getGraph().updateVertexDefinedStyle(vertex));
     }
 
     public void setVertex(MaskGraphVertex<?> vertex) {

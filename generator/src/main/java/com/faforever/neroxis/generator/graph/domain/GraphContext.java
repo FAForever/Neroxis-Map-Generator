@@ -58,10 +58,9 @@ public strictfp class GraphContext {
         mapSize = generatorParameters.getMapSize();
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
-        placeSpawns(generatorParameters, symmetrySettings);
     }
 
-    private void placeSpawns(GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+    public void placeSpawns() {
         float spawnSeparation;
         int teamSeparation;
         if (generatorParameters.getNumTeams() < 2) {

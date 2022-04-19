@@ -5,9 +5,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class Style implements PropertyChangeListener {
@@ -21,7 +19,6 @@ public class Style implements PropertyChangeListener {
     private final SwimlaneStyle swimlane = new SwimlaneStyle();
     private final ShapeStyle shape = new ShapeStyle();
     private final CellProperties cellProperties = new CellProperties();
-    @Getter(AccessLevel.NONE)
     private final Style parentStyle;
 
     public Style(Style parentStyle) {
@@ -30,6 +27,10 @@ public class Style implements PropertyChangeListener {
             initializeFromParent(parentStyle);
         }
         addSelfListener();
+    }
+
+    public void resetToParent() {
+        transferState(parentStyle);
     }
 
     private void initializeFromParent(Style parentStyle) {
@@ -92,6 +93,10 @@ public class Style implements PropertyChangeListener {
         Style copy = new Style(null);
         copy.transferState(this);
         return copy;
+    }
+
+    public Style getParent() {
+        return parentStyle.copy();
     }
 
     public void clearListeners() {
