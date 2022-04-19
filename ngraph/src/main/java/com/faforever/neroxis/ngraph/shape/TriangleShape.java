@@ -1,7 +1,7 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.util.Direction;
 import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Polygon;
 import java.awt.Rectangle;

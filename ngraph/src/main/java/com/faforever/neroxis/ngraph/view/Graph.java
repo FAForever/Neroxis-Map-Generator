@@ -52,12 +52,8 @@ import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.model.ValueChange;
 import com.faforever.neroxis.ngraph.model.VisibleChange;
 import com.faforever.neroxis.ngraph.shape.LabelShape;
-import com.faforever.neroxis.ngraph.style.Direction;
-import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
-import com.faforever.neroxis.ngraph.style.Overflow;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.style.SwimlaneStyle;
-import com.faforever.neroxis.ngraph.style.VerticalAlignment;
 import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.EntityRelationEdgeStyleFunction;
@@ -66,6 +62,10 @@ import com.faforever.neroxis.ngraph.style.edge.OrthConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.SegmentConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
+import com.faforever.neroxis.ngraph.style.util.Direction;
+import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.util.Overflow;
+import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
@@ -963,13 +963,7 @@ public class Graph extends EventSource {
     public Style getCellStyle(ICell cell) {
         Style style = (model.isEdge(cell)) ? stylesheet.getDefaultEdgeStyle() : stylesheet.getDefaultVertexStyle();
         String name = model.getStyle(cell);
-        if (name != null) {
-            style = stylesheet.getCellStyle(name, style);
-        }
-        if (style == null) {
-            style = new Style();
-        }
-        return style;
+        return stylesheet.getCellStyle(name, style);
     }
 
     //
@@ -2523,20 +2517,6 @@ public class Graph extends EventSource {
                         String cellStyle = model.getStyle(cell);
                         if (cellStyle == null) {
                             cellStyle = "";
-                        }
-                        if (style.getCellProperties().isHorizontal()) {
-                            cellStyle = StyleUtils.setStyle(cellStyle, Constants.STYLE_STARTSIZE, String.valueOf(size.getHeight() + 8));
-                            if (collapsed) {
-                                geo.setHeight(size.getHeight() + 8);
-                            }
-                            geo.setWidth(size.getWidth());
-                        } else {
-                            cellStyle = StyleUtils.setStyle(cellStyle, Constants.STYLE_STARTSIZE, String.valueOf(size.getWidth() + 8));
-                            if (collapsed) {
-                                geo.setWidth(size.getWidth() + 8);
-                            }
-
-                            geo.setHeight(size.getHeight());
                         }
 
                         model.setStyle(cell, cellStyle);
@@ -4712,7 +4692,7 @@ public class Graph extends EventSource {
      */
     public boolean isCellFoldable(ICell cell, boolean collapse) {
         CellState state = view.getState(cell);
-        Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+        Style style = getCellStyle(cell);
         return model.getChildCount(cell) > 0 && style.getCellProperties().isFoldable();
     }
 

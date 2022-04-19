@@ -4,9 +4,9 @@
 package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.Style;
-import com.faforever.neroxis.ngraph.style.VerticalAlignment;
+import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;

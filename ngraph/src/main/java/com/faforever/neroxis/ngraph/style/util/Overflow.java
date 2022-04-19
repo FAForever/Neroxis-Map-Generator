@@ -1,4 +1,4 @@
-package com.faforever.neroxis.ngraph.style;
+package com.faforever.neroxis.ngraph.style.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;

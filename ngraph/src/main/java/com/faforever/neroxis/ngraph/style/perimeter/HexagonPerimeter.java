@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ngraph.style.perimeter;
 
-import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.util.Direction;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;

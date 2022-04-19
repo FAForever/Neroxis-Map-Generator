@@ -17,13 +17,13 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.shape.ArrowShape;
 import com.faforever.neroxis.ngraph.shape.LabelShape;
-import com.faforever.neroxis.ngraph.style.HorizontalAlignment;
-import com.faforever.neroxis.ngraph.style.Overflow;
 import com.faforever.neroxis.ngraph.style.Style;
-import com.faforever.neroxis.ngraph.style.VerticalAlignment;
-import com.faforever.neroxis.ngraph.style.WhiteSpace;
 import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.perimeter.Perimeter;
+import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
+import com.faforever.neroxis.ngraph.style.util.Overflow;
+import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
+import com.faforever.neroxis.ngraph.style.util.WhiteSpace;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
@@ -309,6 +309,7 @@ public class GraphView extends EventSource {
      * Removes all existing cell states and invokes validate.
      */
     public void reload() {
+        states.values().stream().map(CellState::getStyle).forEach(Style::clearParentListeners);
         states.clear();
         validate();
     }
@@ -643,9 +644,9 @@ public class GraphView extends EventSource {
             state.absoluteOffset.setX(state.absoluteOffset.getX() + state.getWidth());
         }
         VerticalAlignment verticalAlignment = state.getStyle().getLabel().getVerticalAlignment();
-        if (verticalAlignment.equals(Constants.ALIGN_TOP)) {
+        if (verticalAlignment == VerticalAlignment.TOP) {
             state.absoluteOffset.setY(state.absoluteOffset.getY() - state.getHeight());
-        } else if (verticalAlignment.equals(Constants.ALIGN_BOTTOM)) {
+        } else if (verticalAlignment == VerticalAlignment.BOTTOM) {
             state.absoluteOffset.setY(state.absoluteOffset.getY() + state.getHeight());
         }
     }
@@ -675,10 +676,10 @@ public class GraphView extends EventSource {
             String[] lines = Utils.wordWrap(label, Utils.getFontMetrics(Utils.getFont(state.getStyle())), w * Constants.LABEL_SCALE_BUFFER);
 
             if (lines.length > 0) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
 
                 for (String line : lines) {
-                    buffer.append(line + '\n');
+                    buffer.append(line).append('\n');
                 }
 
                 label = buffer.substring(0, buffer.length() - 1);
@@ -1324,17 +1325,12 @@ public class GraphView extends EventSource {
      * @return Returns the state for the given cell.
      */
     public CellState getState(ICell cell, boolean create) {
-        CellState state = null;
-
-        if (cell != null) {
-            state = states.get(cell);
-
-            if (state == null && create && graph.isCellVisible(cell)) {
-                state = createState(cell);
-                states.put(cell, state);
-            }
+        CellState state;
+        state = states.get(cell);
+        if (state == null && create && graph.isCellVisible(cell)) {
+            state = createState(cell);
+            states.put(cell, state);
         }
-
         return state;
     }
 
@@ -1344,8 +1340,12 @@ public class GraphView extends EventSource {
      * @param cell Cell for which the CellState should be removed.
      * @return Returns the CellState that has been removed.
      */
-    public CellState removeState(Object cell) {
-        return (cell != null) ? states.remove(cell) : null;
+    public CellState removeState(ICell cell) {
+        CellState removed = states.remove(cell);
+        if (removed != null) {
+            removed.getStyle().clearParentListeners();
+        }
+        return removed;
     }
 
     /**

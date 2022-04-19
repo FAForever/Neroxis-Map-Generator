@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ngraph.canvas;
 
-import com.faforever.neroxis.ngraph.style.Direction;
+import com.faforever.neroxis.ngraph.style.util.Direction;
 import com.faforever.neroxis.ngraph.util.Constants;
 import java.awt.Color;
 

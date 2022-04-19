@@ -23,6 +23,6 @@ public class StyleChange extends AtomicGraphModelChange {
      */
     public void execute() {
         style = previous;
-        previous = ((GraphModel) model).styleForCellChanged(cell, previous);
+        previous = ((GraphModel) model).styleForCellChanged(cell, style);
     }
 }

@@ -1,4 +1,4 @@
-package com.faforever.neroxis.ngraph.style;
+package com.faforever.neroxis.ngraph.style.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

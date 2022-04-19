@@ -64,7 +64,7 @@ public class Stylesheet {
      * @return Returns the default vertex style.
      */
     protected Style createDefaultVertexStyle() {
-        Style style = new Style();
+        Style style = new Style(null);
         style.getShape().setShape(new RectangleShape());
         style.getPerimeter().setPerimeter(new RectanglePerimeter());
         style.getShape().setFillColor(new Color(195, 217, 255));
@@ -80,7 +80,7 @@ public class Stylesheet {
      * @return Returns the default edge style.
      */
     protected Style createDefaultEdgeStyle() {
-        Style style = new Style();
+        Style style = new Style(null);
         style.getShape().setShape(new ConnectorShape());
         style.getEdge().setEndArrow(new ClassicArrow());
         style.getShape().setStrokeColor(new Color(100, 130, 185));
@@ -145,11 +145,7 @@ public class Stylesheet {
      * @return Returns the style for the given formatted cell style.
      */
     public Style getCellStyle(String name, Style defaultStyle) {
-        if (name != null && name.length() > 0) {
-            return styles.get(name);
-        } else {
-            return defaultStyle;
-        }
+        return styles.getOrDefault(name, defaultStyle).spawnChild();
     }
 
 }
