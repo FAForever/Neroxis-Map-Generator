@@ -56,7 +56,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         edgeTarget.setParameter(parameterName, new MaskVertexResult(edge.getResultName(), edgeSource));
         addVisualEdgeIfNecessary(edgeSource, edgeTarget);
         updateVertexDefinedStyle(edgeTarget);
-        refresh();
     }
 
     private void addVisualEdgeIfNecessary(MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
@@ -100,7 +99,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         edgeTarget.clearParameter(edge.getParameterName());
         removeVisualEdges(edge, e.getEdgeSource(), edgeTarget);
         updateVertexDefinedStyle(edgeTarget);
-        refresh();
     }
 
     private void removeVisualEdges(MaskMethodEdge edge, MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
@@ -123,7 +121,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     @Override
     public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
         addVisualVertexIfNecessary(e.getVertex());
-        refresh();
     }
 
     private void addVisualVertexIfNecessary(MaskGraphVertex<?> vertex) {
@@ -155,7 +152,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     @Override
     public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
         removeVisualVertex(e.getVertex());
-        refresh();
     }
 
     private void removeVisualVertex(MaskGraphVertex<?> vertex) {
@@ -451,8 +447,9 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         }
         Set<ICell> cells = new HashSet<>(vertexCell.getChildren());
         cells.add(vertexCell);
+        boolean vertexDefined = vertex.isDefined();
         cells.forEach(cell -> {
-            if (!vertex.isDefined()) {
+            if (!vertexDefined) {
                 model.setStyle(cell, "undefined");
             } else {
                 model.setStyle(cell, null);

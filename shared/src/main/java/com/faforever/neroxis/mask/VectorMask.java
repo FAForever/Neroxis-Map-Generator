@@ -135,22 +135,22 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     protected void addValueAt(int x, int y, T value) {
-        get(x, y).add(value);
+        mask[x][y].add(value);
     }
 
     @Override
     protected void subtractValueAt(int x, int y, T value) {
-        get(x, y).subtract(value);
+        mask[x][y].subtract(value);
     }
 
     @Override
     protected void multiplyValueAt(int x, int y, T value) {
-        get(x, y).multiply(value);
+        mask[x][y].multiply(value);
     }
 
     @Override
     protected void divideValueAt(int x, int y, T value) {
-        get(x, y).divide(value);
+        mask[x][y].divide(value);
     }
 
     protected void addScalarAt(Point point, float value) {
@@ -162,7 +162,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void addScalarAt(int x, int y, float value) {
-        get(x, y).add(value);
+        mask[x][y].add(value);
     }
 
     protected void subtractScalarAt(Point point, float value) {
@@ -174,7 +174,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void subtractScalarAt(int x, int y, float value) {
-        get(x, y).subtract(value);
+        mask[x][y].subtract(value);
     }
 
     protected void multiplyScalarAt(Point point, float value) {
@@ -186,7 +186,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void multiplyScalarAt(int x, int y, float value) {
-        get(x, y).multiply(value);
+        mask[x][y].multiply(value);
     }
 
     protected void divideScalarAt(Point point, float value) {
@@ -198,7 +198,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void divideScalarAt(int x, int y, float value) {
-        get(x, y).divide(value);
+        mask[x][y].divide(value);
     }
 
     protected void setComponentAt(Point point, float value, int component) {
@@ -210,7 +210,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void setComponentAt(int x, int y, float value, int component) {
-        get(x, y).set(component, value);
+        mask[x][y].set(component, value);
     }
 
     protected void addComponentAt(Point point, float value, int component) {
@@ -222,7 +222,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void addComponentAt(int x, int y, float value, int component) {
-        get(x, y).add(value, component);
+        mask[x][y].add(value, component);
     }
 
     protected void subtractComponentAt(Point point, float value, int component) {
@@ -234,7 +234,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void subtractComponentAt(int x, int y, float value, int component) {
-        get(x, y).subtract(value, component);
+        mask[x][y].subtract(value, component);
     }
 
     protected void multiplyComponentAt(Point point, float value, int component) {
@@ -246,7 +246,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void multiplyComponentAt(int x, int y, float value, int component) {
-        get(x, y).multiply(value, component);
+        mask[x][y].multiply(value, component);
     }
 
     protected void divideComponentAt(Point point, float value, int component) {
@@ -258,7 +258,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     protected void divideComponentAt(int x, int y, float value, int component) {
-        get(x, y).divide(value, component);
+        mask[x][y].divide(value, component);
     }
 
     @GraphMethod

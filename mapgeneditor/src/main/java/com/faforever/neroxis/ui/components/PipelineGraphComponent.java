@@ -22,15 +22,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.event.MenuKeyEvent;
+import javax.swing.event.MenuKeyListener;
 
 public class PipelineGraphComponent extends GraphComponent {
     private PipelineGraph pipelineGraph;
@@ -155,16 +160,37 @@ public class PipelineGraphComponent extends GraphComponent {
         JMenu methodMenu = new JMenu("Create New Method");
         MaskReflectUtil.getMaskClasses().forEach(maskClass -> {
             JMenu subMethodMenu = new JScrollMenu(maskClass.getSimpleName());
-            MaskReflectUtil.getMaskMethods(maskClass).forEach(method -> subMethodMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
-                public void actionPerformed(ActionEvent e) {
-                    MaskMethodVertex newVertex = new MaskMethodVertex(method, maskClass);
-                    pipelineGraph.addVertex(newVertex);
-                    moveVertexToMouse(newVertex, mouseEvent);
-                    pipelineGraph.refresh();
-                    pipelineGraph.clearSelection();
-                    pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
+            subMethodMenu.addMenuKeyListener(new MenuKeyListener() {
+                @Override
+                public void menuKeyTyped(MenuKeyEvent e) {
                 }
-            }));
+
+                @Override
+                public void menuKeyPressed(MenuKeyEvent e) {
+                    Arrays.stream(subMethodMenu.getMenuComponents())
+                          .filter(component -> component instanceof JMenuItem)
+                          .map(component -> (JMenuItem) component)
+                          .filter(menuItem -> ((String) menuItem.getAction()
+                                                                .getValue(Action.NAME)).startsWith(String.valueOf(e.getKeyChar())))
+                          .findFirst()
+                          .ifPresent(jMenuItem -> subMethodMenu.getPopupMenu().setSelected(jMenuItem));
+                }
+
+                @Override
+                public void menuKeyReleased(MenuKeyEvent e) {
+                }
+            });
+            MaskReflectUtil.getMaskMethods(maskClass)
+                           .forEach(method -> subMethodMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
+                               public void actionPerformed(ActionEvent e) {
+                                   MaskMethodVertex newVertex = new MaskMethodVertex(method, maskClass);
+                                   pipelineGraph.addVertex(newVertex);
+                                   moveVertexToMouse(newVertex, mouseEvent);
+                                   pipelineGraph.refresh();
+                                   pipelineGraph.clearSelection();
+                                   pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
+                               }
+                           }));
             methodMenu.add(subMethodMenu);
         });
         if (methodMenu.getItemCount() > 0) {

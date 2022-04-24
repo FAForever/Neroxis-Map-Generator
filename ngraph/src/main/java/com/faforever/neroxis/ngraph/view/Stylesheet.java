@@ -9,6 +9,8 @@ import com.faforever.neroxis.ngraph.shape.RectangleShape;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.style.arrow.ClassicArrow;
 import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
+import com.faforever.neroxis.ngraph.style.util.Overflow;
+import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +64,8 @@ public class Stylesheet {
     protected Style createDefaultVertexStyle() {
         Style style = new Style(null);
         style.getShape().setShape(new RectangleShape());
+        style.getLabel().setOverflow(Overflow.FILL);
+        style.getLabel().setVerticalAlignment(VerticalAlignment.MIDDLE);
         style.getPerimeter().setPerimeter(new RectanglePerimeter());
         style.getShape().setFillColor(new Color(195, 217, 255));
         style.getShape().setStrokeColor(new Color(100, 130, 185));

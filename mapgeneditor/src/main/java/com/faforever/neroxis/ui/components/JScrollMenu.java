@@ -1,9 +1,16 @@
 package com.faforever.neroxis.ui.components;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.MenuElement;
+import javax.swing.UIManager;
 import javax.swing.plaf.MenuItemUI;
 import javax.swing.plaf.PopupMenuUI;
-import java.awt.*;
 
 /**
  * Scrollable JMenu.

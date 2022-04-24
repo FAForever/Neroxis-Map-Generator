@@ -34,7 +34,6 @@ public strictfp class BasicDecalGenerator extends DecalGenerator {
             decalPlacer.placeDecals(fieldDecal.getFinalMask(), generatorParameters.getBiome().getDecalMaterials().getFieldAlbedos(), 64, 128, 24, 32);
             decalPlacer.placeDecals(slopeDecal.getFinalMask(), generatorParameters.getBiome().getDecalMaterials().getSlopeNormals(), 16, 32, 16, 32);
             decalPlacer.placeDecals(slopeDecal.getFinalMask(), generatorParameters.getBiome().getDecalMaterials().getSlopeAlbedos(), 64, 128, 32, 48);
-
         });
     }
 }

@@ -28,6 +28,5 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
             pipelineGraphComponent.getGraph().getAllEdges(((GraphTransferable) data).getCells()).stream().map(ICell::getGeometry).filter(Objects::nonNull).map(Geometry::getPoints).filter(Objects::nonNull).forEach(List::clear);
         }
         super.exportDone(c, data, action);
-        pipelineGraphComponent.getGraph().refresh();
     }
 }

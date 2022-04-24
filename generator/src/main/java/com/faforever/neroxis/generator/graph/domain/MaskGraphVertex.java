@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 
 public abstract strictfp class MaskGraphVertex<T extends Executable> {
@@ -174,7 +175,12 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     public void clearParameter(String parameterName) {
-        Parameter parameter = Arrays.stream(executable.getParameters()).filter(param -> param.getName().equals(parameterName)).findFirst().orElseThrow(() -> new IllegalArgumentException(String.format("Parameter name does not match any parameter: parameterName=%s, validParameters=[%s]", parameterName, Arrays.stream(executable.getParameters()).map(param -> String.format("%s", param.getName())).collect(Collectors.joining(",")))));
+        Parameter parameter = Arrays.stream(executable.getParameters())
+                                    .filter(param -> param.getName().equals(parameterName))
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalArgumentException(String.format("Parameter name does not match any parameter: parameterName=%s, validParameters=[%s]", parameterName, Arrays.stream(executable.getParameters())
+                                                                                                                                                                                                              .map(param -> String.format("%s", param.getName()))
+                                                                                                                                                                                                              .collect(Collectors.joining(",")))));
         if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
             maskParameters.put(parameterName, null);
             return;
@@ -183,11 +189,18 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     public boolean isDefined() {
-        return Arrays.stream(executable.getParameters()).allMatch(this::isParameterWellDefined);
+        GraphContext graphContext = new GraphContext(0L, GeneratorParameters.builder()
+                                                                            .terrainSymmetry(Symmetry.POINT2)
+                                                                            .mapSize(512)
+                                                                            .numTeams(2)
+                                                                            .spawnCount(2)
+                                                                            .build(), ParameterConstraints.builder()
+                                                                                                          .build());
+        return Arrays.stream(executable.getParameters())
+                     .allMatch(parameter -> isParameterWellDefined(parameter, graphContext));
     }
 
-    private boolean isParameterWellDefined(Parameter parameter) {
-        GraphContext graphContext = new GraphContext(0L, GeneratorParameters.builder().terrainSymmetry(Symmetry.POINT2).mapSize(512).numTeams(2).spawnCount(2).build(), ParameterConstraints.builder().build());
+    private boolean isParameterWellDefined(Parameter parameter, GraphContext graphContext) {
         if (executable == null) {
             return false;
         }
@@ -195,7 +208,11 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
             return maskParameters.get(parameter.getName()) != null;
         }
         List<GraphParameter> parameterAnnotations = getGraphAnnotationsForParameter(parameter);
-        String rawValue = parameterAnnotations.stream().filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty()).findFirst().map(GraphParameter::value).orElse(nonMaskParameters.get(parameter.getName()));
+        String rawValue = parameterAnnotations.stream()
+                                              .filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty())
+                                              .findFirst()
+                                              .map(GraphParameter::value)
+                                              .orElse(nonMaskParameters.get(parameter.getName()));
         boolean emptyParameter = rawValue == null || rawValue.isBlank();
         if ((emptyParameter) && !parameterNullable(parameter)) {
             return false;
@@ -205,7 +222,7 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         try {
             graphContext.getValue(rawValue, identifier, MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
             return true;
-        } catch (SpelParseException e) {
+        } catch (SpelParseException | SpelEvaluationException e) {
             return false;
         }
     }

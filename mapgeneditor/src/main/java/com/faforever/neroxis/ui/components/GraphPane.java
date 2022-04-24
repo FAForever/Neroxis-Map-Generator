@@ -189,7 +189,6 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
             edge.setTarget(target);
             edge.setSource(source);
         })));
-        graph.refresh();
     }
 
     private void removeUnusedVertices() {
@@ -215,7 +214,6 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
             node.setIdentifier(identifier);
             graph.getCellForVertex(node).setValue(identifier);
         });
-        graph.refresh();
     }
 
     @Override

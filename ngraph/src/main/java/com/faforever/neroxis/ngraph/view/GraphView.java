@@ -309,7 +309,6 @@ public class GraphView extends EventSource {
      * Removes all existing cell states and invokes validate.
      */
     public void reload() {
-        states.values().stream().map(CellState::getStyle).forEach(Style::clearListeners);
         states.clear();
         validate();
     }
@@ -1341,11 +1340,7 @@ public class GraphView extends EventSource {
      * @return Returns the CellState that has been removed.
      */
     public CellState removeState(ICell cell) {
-        CellState removed = states.remove(cell);
-        if (removed != null) {
-            removed.getStyle().clearListeners();
-        }
-        return removed;
+        return states.remove(cell);
     }
 
     public void refreshStyle(ICell cell) {

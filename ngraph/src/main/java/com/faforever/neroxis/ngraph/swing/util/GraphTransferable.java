@@ -193,13 +193,11 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      */
     public boolean isDataFlavorSupported(DataFlavor flavor) {
         DataFlavor[] flavors = getTransferDataFlavors();
-
-        for (int i = 0; i < flavors.length; i++) {
-            if (flavors[i] != null && flavors[i].equals(flavor)) {
+        for (DataFlavor value : flavors) {
+            if (value != null && value.equals(flavor)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -303,13 +301,11 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      */
     protected boolean isHtmlFlavor(DataFlavor flavor) {
         DataFlavor[] flavors = htmlFlavors;
-
-        for (int i = 0; i < flavors.length; i++) {
-            if (flavors[i].equals(flavor)) {
+        for (DataFlavor value : flavors) {
+            if (value.equals(flavor)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -358,13 +354,11 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      */
     protected boolean isPlainFlavor(DataFlavor flavor) {
         DataFlavor[] flavors = plainFlavors;
-
-        for (int i = 0; i < flavors.length; i++) {
-            if (flavors[i].equals(flavor)) {
+        for (DataFlavor value : flavors) {
+            if (value.equals(flavor)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -392,13 +386,11 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      */
     protected boolean isStringFlavor(DataFlavor flavor) {
         DataFlavor[] flavors = stringFlavors;
-
-        for (int i = 0; i < flavors.length; i++) {
-            if (flavors[i].equals(flavor)) {
+        for (DataFlavor value : flavors) {
+            if (value.equals(flavor)) {
                 return true;
             }
         }
-
         return false;
     }
 
