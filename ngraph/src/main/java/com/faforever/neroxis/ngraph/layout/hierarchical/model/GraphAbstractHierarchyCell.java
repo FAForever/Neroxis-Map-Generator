@@ -14,27 +14,22 @@ public abstract class GraphAbstractHierarchyCell {
      * The maximum rank this cell occupies
      */
     public int maxRank = -1;
-
     /**
      * The minimum rank this cell occupies
      */
     public int minRank = -1;
-
     /**
      * The x position of this cell for each layer it occupies
      */
     public double[] x = new double[1];
-
     /**
      * The y position of this cell for each layer it occupies
      */
     public double[] y = new double[1];
-
     /**
      * The width of this cell
      */
     public double width = 0.0;
-
     /**
      * The height of this cell
      */
@@ -74,16 +69,6 @@ public abstract class GraphAbstractHierarchyCell {
     public abstract List<GraphAbstractHierarchyCell> getPreviousLayerConnectedCells(int layer);
 
     /**
-     * @return whether or not this cell is an edge
-     */
-    public abstract boolean isEdge();
-
-    /**
-     * @return whether or not this cell is a node
-     */
-    public abstract boolean isVertex();
-
-    /**
      * Gets the value of temp for the specified layer
      *
      * @param layer the layer relating to a specific entry into temp
@@ -114,6 +99,16 @@ public abstract class GraphAbstractHierarchyCell {
     }
 
     /**
+     * @return whether or not this cell is a node
+     */
+    public abstract boolean isVertex();
+
+    /**
+     * @return whether or not this cell is an edge
+     */
+    public abstract boolean isEdge();
+
+    /**
      * Gets the value of x on the specified layer
      *
      * @param layer the layer to obtain x for
@@ -142,5 +137,4 @@ public abstract class GraphAbstractHierarchyCell {
             y[layer - minRank - 1] = value;
         }
     }
-
 }

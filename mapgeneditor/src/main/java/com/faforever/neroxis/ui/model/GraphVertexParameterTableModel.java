@@ -27,11 +27,14 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Parameter parameter = parameters.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> String.class;
-            case 1 -> Class.class;
-            default -> Object.class;
+            case 0 -> parameter.getName();
+            case 1 -> vertex == null ? null : MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
+                                                                                 parameter.getParameterizedType());
+            case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
+            default -> null;
         };
     }
 
@@ -46,6 +49,15 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
     }
 
     @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return switch (columnIndex) {
+            case 0 -> String.class;
+            case 1 -> Class.class;
+            default -> Object.class;
+        };
+    }
+
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         if (columnIndex != 2) {
             return false;
@@ -53,7 +65,8 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()));
+        return !Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()));
     }
 
     @Override
@@ -64,24 +77,14 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        if (MaskReflectUtil.classIsNumeric(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))
-                && String.class.equals(aValue.getClass())
-                && ((String) aValue).startsWith(".")) {
+        if (MaskReflectUtil.classIsNumeric(
+                MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))
+            && String.class.equals(aValue.getClass())
+            && ((String) aValue).startsWith(".")) {
             aValue = "0" + aValue;
         }
 
         vertex.setParameter(parameter.getName(), aValue);
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Parameter parameter = parameters.get(rowIndex);
-        return switch (columnIndex) {
-            case 0 -> parameter.getName();
-            case 1 -> vertex == null ? null : MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType());
-            case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
-            default -> null;
-        };
     }
 
     public void setVertex(MaskGraphVertex<?> vertex) {
@@ -96,7 +99,11 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
             Executable executable = vertex.getExecutable();
             if (executable != null) {
                 for (Parameter parameter : executable.getParameters()) {
-                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).noneMatch(annotation -> parameter.getName().equals(annotation.name()) && (!annotation.value().equals(""))) && !(Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType())))) {
+                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class))
+                              .noneMatch(annotation -> parameter.getName().equals(annotation.name())
+                                                       && (!annotation.value().equals("")))
+                        && !(Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
+                                                                                            parameter.getParameterizedType())))) {
                         parameters.add(parameter);
                     }
                 }

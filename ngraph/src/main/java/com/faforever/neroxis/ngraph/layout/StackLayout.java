@@ -17,39 +17,32 @@ public class StackLayout extends GraphLayout {
      * Specifies the orientation of the layout. Default is true.
      */
     protected final boolean horizontal;
-
     /**
      * Specifies the spacing between the cells. Default is 0.
      */
     protected final int spacing;
-
     /**
      * Specifies the horizontal origin of the layout. Default is 0.
      */
     protected final int x0;
-
     /**
      * Specifies the vertical origin of the layout. Default is 0.
      */
     protected final int y0;
-
     /**
      * Border to be added if fill is true. Default is 0.
      */
     protected final int border;
-
     /**
      * Boolean indicating if dimension should be changed to fill out the parent
      * cell. Default is false.
      */
     protected boolean fill = false;
-
     /**
      * If the parent should be resized to match the width/height of the
      * stack. Default is false.
      */
     protected boolean resizeParent = false;
-
     /**
      * Value at which a new column or row should be created. Default is 0.
      */
@@ -92,61 +85,7 @@ public class StackLayout extends GraphLayout {
         this.border = border;
     }
 
-    public boolean isHorizontal() {
-        return horizontal;
-    }
-
-
-    public void moveCell(ICell cell, double x, double y) {
-        IGraphModel model = graph.getModel();
-        ICell parent = model.getParent(cell);
-        boolean horizontal = isHorizontal();
-
-        if (cell != null && parent != null) {
-            int i = 0;
-            double last = 0;
-            int childCount = model.getChildCount(parent);
-            double value = (horizontal) ? x : y;
-            CellState pstate = graph.getView().getState(parent);
-
-            if (pstate != null) {
-                value -= (horizontal) ? pstate.getX() : pstate.getY();
-            }
-
-            for (i = 0; i < childCount; i++) {
-                ICell child = model.getChildAt(parent, i);
-
-                if (child != cell) {
-                    Geometry bounds = model.getGeometry(child);
-
-                    if (bounds != null) {
-                        double tmp = (horizontal) ? bounds.getX() + bounds.getWidth() / 2 : bounds.getY() + bounds.getHeight() / 2;
-
-                        if (last < value && tmp > value) {
-                            break;
-                        }
-
-                        last = tmp;
-                    }
-                }
-            }
-
-            // Changes child order in parent
-            int idx = parent.getIndex(cell);
-            idx = Math.max(0, i - ((i > idx) ? 1 : 0));
-
-            model.add(parent, cell, idx);
-        }
-    }
-
-    /**
-     * Hook for subclassers to return the container size.
-     */
-    public RectangleDouble getContainerSize() {
-        return new RectangleDouble();
-    }
-
-
+    @Override
     public void execute(ICell parent) {
         if (parent != null) {
             boolean horizontal = isHorizontal();
@@ -156,7 +95,8 @@ public class StackLayout extends GraphLayout {
             // Handles special case where the parent is either a layer with no
             // geometry or the current root of the view in which case the size
             // of the graph's container will be used.
-            if (pgeo == null && model.getParent(parent) == model.getRoot() || parent == graph.getView().getCurrentRoot()) {
+            if (pgeo == null && model.getParent(parent) == model.getRoot() || parent == graph.getView()
+                                                                                             .getCurrentRoot()) {
                 RectangleDouble tmp = getContainerSize();
                 pgeo = new Geometry(0, 0, tmp.getWidth(), tmp.getHeight());
             }
@@ -192,7 +132,9 @@ public class StackLayout extends GraphLayout {
 
                             if (wrap != 0 && last != null) {
 
-                                if ((horizontal && last.getX() + last.getWidth() + geo.getWidth() + 2 * spacing > wrap) || (!horizontal && last.getY() + last.getHeight() + geo.getHeight() + 2 * spacing > wrap)) {
+                                if ((horizontal && last.getX() + last.getWidth() + geo.getWidth() + 2 * spacing > wrap)
+                                    || (!horizontal
+                                        && last.getY() + last.getHeight() + geo.getHeight() + 2 * spacing > wrap)) {
                                     last = null;
 
                                     if (horizontal) {
@@ -258,4 +200,58 @@ public class StackLayout extends GraphLayout {
         }
     }
 
+    @Override
+    public void moveCell(ICell cell, double x, double y) {
+        IGraphModel model = graph.getModel();
+        ICell parent = model.getParent(cell);
+        boolean horizontal = isHorizontal();
+
+        if (cell != null && parent != null) {
+            int i = 0;
+            double last = 0;
+            int childCount = model.getChildCount(parent);
+            double value = (horizontal) ? x : y;
+            CellState pstate = graph.getView().getState(parent);
+
+            if (pstate != null) {
+                value -= (horizontal) ? pstate.getX() : pstate.getY();
+            }
+
+            for (i = 0; i < childCount; i++) {
+                ICell child = model.getChildAt(parent, i);
+
+                if (child != cell) {
+                    Geometry bounds = model.getGeometry(child);
+
+                    if (bounds != null) {
+                        double tmp = (horizontal) ? bounds.getX() + bounds.getWidth() / 2 : bounds.getY()
+                                                                                            + bounds.getHeight() / 2;
+
+                        if (last < value && tmp > value) {
+                            break;
+                        }
+
+                        last = tmp;
+                    }
+                }
+            }
+
+            // Changes child order in parent
+            int idx = parent.getIndex(cell);
+            idx = Math.max(0, i - ((i > idx) ? 1 : 0));
+
+            model.add(parent, cell, idx);
+        }
+    }
+
+    public boolean isHorizontal() {
+        return horizontal;
+    }
+
+    /**
+     * Hook for subclassers to return the container size.
+     */
+    public RectangleDouble getContainerSize() {
+        return new RectangleDouble();
+    }
 }

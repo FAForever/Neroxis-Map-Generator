@@ -1,12 +1,12 @@
 package com.faforever.neroxis.util.dds;
 
-import lombok.Data;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import lombok.Data;
 
 @Data
 public strictfp class DDSHeader {
+
     final public static int CAPS_FLAG = 0x1;
     final public static int HEIGHT_FLAG = 0x2;
     final public static int WIDTH_FLAG = 0x4;
@@ -124,6 +124,11 @@ public strictfp class DDSHeader {
             flags &= ~CAPS_FLAG;
         }
         setFlags(flags);
+    }
+
+    public void setFlags(int flags) {
+        this.flags = flags;
+        headerBytesBuffer.putInt(2 * 4, flags);
     }
 
     public boolean getHeightFlag() {
@@ -282,6 +287,11 @@ public strictfp class DDSHeader {
         setCaps1(caps1);
     }
 
+    public void setCaps1(int caps1) {
+        this.caps1 = caps1;
+        headerBytesBuffer.putInt(27 * 4, caps1);
+    }
+
     public boolean getMipMapFlag() {
         return (caps1 & MIPMAP_FLAG) > 0;
     }
@@ -306,6 +316,11 @@ public strictfp class DDSHeader {
             caps2 &= ~CUBEMAP_FLAG;
         }
         setCaps2(caps2);
+    }
+
+    public void setCaps2(int caps2) {
+        this.caps2 = caps2;
+        headerBytesBuffer.putInt(28 * 4, caps2);
     }
 
     public boolean getCubeMapPositiveXFlag() {
@@ -399,11 +414,6 @@ public strictfp class DDSHeader {
         setCaps2(caps2);
     }
 
-    public void setFlags(int flags) {
-        this.flags = flags;
-        headerBytesBuffer.putInt(2 * 4, flags);
-    }
-
     public void setHeight(int height) {
         this.height = height;
         headerBytesBuffer.putInt(3 * 4, height);
@@ -492,16 +502,6 @@ public strictfp class DDSHeader {
         setAlphaPixelsFlag(ABitMask != 0);
     }
 
-    public void setCaps1(int caps1) {
-        this.caps1 = caps1;
-        headerBytesBuffer.putInt(27 * 4, caps1);
-    }
-
-    public void setCaps2(int caps2) {
-        this.caps2 = caps2;
-        headerBytesBuffer.putInt(28 * 4, caps2);
-    }
-
     public void setCaps3(int caps3) {
         this.caps3 = caps3;
         headerBytesBuffer.putInt(29 * 4, caps3);
@@ -515,5 +515,4 @@ public strictfp class DDSHeader {
     public byte[] toBytes() {
         return headerBytesBuffer.array();
     }
-
 }

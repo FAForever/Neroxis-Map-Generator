@@ -47,6 +47,7 @@ import lombok.Setter;
  */
 @Setter
 public class GraphicsCanvas2D implements ICanvas2D {
+
     private static final Logger log = Logger.getLogger(GraphicsCanvas2D.class.getName());
     /**
      * Specifies the image scaling quality. Default is Image.SCALE_SMOOTH.
@@ -189,6 +190,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
     /**
      * Saves the current canvas state.
      */
+    @Override
     public void save() {
         stack.push(state);
         state = cloneState(state);
@@ -198,34 +200,26 @@ public class GraphicsCanvas2D implements ICanvas2D {
     /**
      * Restores the last canvas state.
      */
+    @Override
     public void restore() {
         state.g.dispose();
         state = stack.pop();
     }
 
-    /**
-     * Returns a clone of the given state.
-     */
-    protected CanvasState cloneState(CanvasState state) {
-        try {
-            return (CanvasState) state.clone();
-        } catch (CloneNotSupportedException e) {
-            log.log(Level.SEVERE, "Failed to clone the state", e);
-        }
-        return null;
-    }
-
+    @Override
     public void scale(double value) {
         // This implementation uses custom scale/translate and built-in rotation
         state.scale = state.scale * value;
     }
 
+    @Override
     public void translate(double dx, double dy) {
         // This implementation uses custom scale/translate and built-in rotation
         state.dx += dx;
         state.dy += dy;
     }
 
+    @Override
     public void rotate(double theta, boolean flipH, boolean flipV, double cx, double cy) {
         cx += state.dx;
         cy += state.dy;
@@ -252,6 +246,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
         state.flipV = flipV;
     }
 
+    @Override
     public void setStrokeWidth(double value) {
         // Lazy and cached instantiation strategy for all stroke properties
         if (value != state.strokeWidth) {
@@ -262,6 +257,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
     /**
      * Caches color conversion as it is expensive.
      */
+    @Override
     public void setStrokeColor(Color value) {
         // Lazy and cached instantiation strategy for all stroke properties
         if (state.strokeColor == null || !state.strokeColor.equals(value)) {
@@ -269,76 +265,89 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
+    @Override
     public void setDashed(boolean value) {
         this.setDashed(value, state.fixDash);
     }
 
+    @Override
     public void setDashed(boolean value, boolean fixDash) {
         // Lazy and cached instantiation strategy for all stroke properties
         state.dashed = value;
         state.fixDash = fixDash;
     }
 
+    @Override
     public void setDashPattern(String value) {
         if (value != null && value.length() > 0) {
             state.dashPattern = Utils.parseDashPattern(value);
         }
     }
 
+    @Override
     public void setLineCap(String value) {
         if (!state.lineCap.equals(value)) {
             state.lineCap = value;
         }
     }
 
+    @Override
     public void setLineJoin(String value) {
         if (!state.lineJoin.equals(value)) {
             state.lineJoin = value;
         }
     }
 
+    @Override
     public void setMiterLimit(double value) {
         if (value != state.miterLimit) {
             state.miterLimit = value;
         }
     }
 
+    @Override
     public void setFontSize(double value) {
         if (value != state.fontSize) {
             state.fontSize = value;
         }
     }
 
+    @Override
     public void setFontColor(Color value) {
         if (state.fontColor == null || !state.fontColor.equals(value)) {
             state.fontColor = value;
         }
     }
 
-    public void setFontBackgroundColor(Color value) {
-        if (state.fontBackgroundColor == null || !state.fontBackgroundColor.equals(value)) {
-            state.fontBackgroundColor = null;
-        }
-    }
-
-    public void setFontBorderColor(Color value) {
-        if (state.fontBorderColor == null || !state.fontBorderColor.equals(value)) {
-            state.fontBorderColor = null;
-        }
-    }
-
+    @Override
     public void setFontFamily(String value) {
         if (!state.fontFamily.equals(value)) {
             state.fontFamily = value;
         }
     }
 
+    @Override
     public void setFontStyle(int value) {
         if (value != state.fontStyle) {
             state.fontStyle = value;
         }
     }
 
+    @Override
+    public void setFontBackgroundColor(Color value) {
+        if (state.fontBackgroundColor == null || !state.fontBackgroundColor.equals(value)) {
+            state.fontBackgroundColor = null;
+        }
+    }
+
+    @Override
+    public void setFontBorderColor(Color value) {
+        if (state.fontBorderColor == null || !state.fontBorderColor.equals(value)) {
+            state.fontBorderColor = null;
+        }
+    }
+
+    @Override
     public void setAlpha(double value) {
         if (state.alpha != value) {
             state.g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (value)));
@@ -346,6 +355,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
+    @Override
     public void setFillColor(Color value) {
         if (state.fillColor == null || !state.fillColor.equals(value)) {
             state.fillColor = value;
@@ -354,7 +364,9 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    public void setGradient(Color color1, Color color2, double x, double y, double w, double h, Direction direction, double alpha1, double alpha2) {
+    @Override
+    public void setGradient(Color color1, Color color2, double x, double y, double w, double h, Direction direction,
+                            double alpha1, double alpha2) {
         // LATER: Add lazy instantiation and check if paint already created
         float x1 = (float) ((state.dx + x) * state.scale);
         float y1 = (float) ((state.dy + y) * state.scale);
@@ -382,14 +394,39 @@ public class GraphicsCanvas2D implements ICanvas2D {
         state.gradientPaint = new GradientPaint(x1, y1, c1, x2, y2, c2, true);
     }
 
+    @Override
+    public void setShadow(boolean value) {
+        state.shadow = value;
+    }
+
+    @Override
+    public void setShadowColor(Color value) {
+        state.shadowColor = value;
+    }
+
+    @Override
+    public void setShadowAlpha(double value) {
+        state.shadowAlpha = value;
+    }
+
+    @Override
+    public void setShadowOffset(double dx, double dy) {
+        state.shadowOffsetX = dx;
+        state.shadowOffsetY = dy;
+    }
+
+    @Override
     public void rect(double x, double y, double w, double h) {
         currentPath = new GeneralPath();
-        currentPath.append(new Rectangle2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale, h * state.scale), false);
+        currentPath.append(
+                new Rectangle2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale,
+                                       h * state.scale), false);
     }
 
     /**
      * Implements a rounded rectangle using a path.
      */
+    @Override
     public void roundrect(double x, double y, double w, double h, double dx, double dy) {
         // LATER: Use arc here or quad in VML/SVG for exact match
         begin();
@@ -404,26 +441,28 @@ public class GraphicsCanvas2D implements ICanvas2D {
         quadTo(x, y, x + dx, y);
     }
 
+    @Override
     public void ellipse(double x, double y, double w, double h) {
         currentPath = new GeneralPath();
-        currentPath.append(new Ellipse2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale, h * state.scale), false);
+        currentPath.append(
+                new Ellipse2D.Double((state.dx + x) * state.scale, (state.dy + y) * state.scale, w * state.scale,
+                                     h * state.scale), false);
     }
 
-    public void image(double x, double y, double w, double h, String src, boolean aspect, boolean flipH, boolean flipV) {
+    @Override
+    public void image(double x, double y, double w, double h, String src, boolean aspect, boolean flipH,
+                      boolean flipV) {
         if (src != null && w > 0 && h > 0) {
             Image img = loadImage(src);
             if (img != null) {
                 Rectangle bounds = getImageBounds(img, x, y, w, h, aspect);
                 img = scaleImage(img, bounds.width, bounds.height);
                 if (img != null) {
-                    drawImage(createImageGraphics(bounds.x, bounds.y, bounds.width, bounds.height, flipH, flipV), img, bounds.x, bounds.y);
+                    drawImage(createImageGraphics(bounds.x, bounds.y, bounds.width, bounds.height, flipH, flipV), img,
+                              bounds.x, bounds.y);
                 }
             }
         }
-    }
-
-    protected void drawImage(Graphics2D graphics, Image image, int x, int y) {
-        graphics.drawImage(image, x, y, null);
     }
 
     /**
@@ -473,10 +512,15 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
+    protected void drawImage(Graphics2D graphics, Image image, int x, int y) {
+        graphics.drawImage(image, x, y, null);
+    }
+
     /**
      * Creates a graphic instance for rendering an image.
      */
-    protected final Graphics2D createImageGraphics(double x, double y, double w, double h, boolean flipH, boolean flipV) {
+    protected final Graphics2D createImageGraphics(double x, double y, double w, double h, boolean flipH,
+                                                   boolean flipV) {
         Graphics2D g2 = state.g;
         if (flipH || flipV) {
             g2 = (Graphics2D) g2.create();
@@ -502,37 +546,20 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return g2;
     }
 
-    protected Point2D getMargin(String align, String valign) {
-        double dx = 0;
-        double dy = 0;
-        if (align != null) {
-            if (align.equals(Constants.ALIGN_CENTER)) {
-                dx = -0.5;
-            } else if (align.equals(Constants.ALIGN_RIGHT)) {
-                dx = -1;
-            }
-        }
-        if (valign != null) {
-            if (valign.equals(Constants.ALIGN_MIDDLE)) {
-                dy = -0.5;
-            } else if (valign.equals(Constants.ALIGN_BOTTOM)) {
-                dy = -1;
-            }
-        }
-        return new Point2D.Double(dx, dy);
-    }
-
     /**
      * Draws the given text.
      */
-    public void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap, String format, String overflow, boolean clip, double rotation, String textDirection) {
+    @Override
+    public void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap,
+                     String format, String overflow, boolean clip, double rotation, String textDirection) {
         plainText(x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation);
     }
 
     /**
      * Draws the given text.
      */
-    public void plainText(double x, double y, double w, double h, String str, String align, String valign, boolean wrap, String format, String overflow, boolean clip, double rotation) {
+    public void plainText(double x, double y, double w, double h, String str, String align, String valign, boolean wrap,
+                          String format, String overflow, boolean clip, double rotation) {
         if (state.fontColor != null) {
             x = (state.dx + x) * state.scale;
             y = (state.dy + y) * state.scale;
@@ -577,7 +604,8 @@ public class GraphicsCanvas2D implements ICanvas2D {
                 // Adds support for underlined text via attributed character iterator
                 if (!lines[i].isEmpty()) {
                     boolean isUnderline = (state.fontStyle & Constants.FONT_UNDERLINE) == Constants.FONT_UNDERLINE;
-                    boolean isStrikethrough = (state.fontStyle & Constants.FONT_STRIKETHROUGH) == Constants.FONT_STRIKETHROUGH;
+                    boolean isStrikethrough = (state.fontStyle & Constants.FONT_STRIKETHROUGH)
+                                              == Constants.FONT_STRIKETHROUGH;
                     if (isUnderline || isStrikethrough) {
                         AttributedString as = new AttributedString(lines[i]);
                         as.addAttribute(TextAttribute.FONT, g2.getFont());
@@ -601,7 +629,8 @@ public class GraphicsCanvas2D implements ICanvas2D {
      * Returns a new graphics instance with the correct color and font for
      * text rendering.
      */
-    protected final Graphics2D createTextGraphics(double x, double y, double w, double h, double rotation, boolean clip, String align, String valign) {
+    protected final Graphics2D createTextGraphics(double x, double y, double w, double h, double rotation, boolean clip,
+                                                  String align, String valign) {
         Graphics2D g2 = state.g;
         updateFont();
         if (rotation != 0) {
@@ -621,51 +650,121 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return g2;
     }
 
+    protected Point2D getMargin(String align, String valign) {
+        double dx = 0;
+        double dy = 0;
+        if (align != null) {
+            if (align.equals(Constants.ALIGN_CENTER)) {
+                dx = -0.5;
+            } else if (align.equals(Constants.ALIGN_RIGHT)) {
+                dx = -1;
+            }
+        }
+        if (valign != null) {
+            if (valign.equals(Constants.ALIGN_MIDDLE)) {
+                dy = -0.5;
+            } else if (valign.equals(Constants.ALIGN_BOTTOM)) {
+                dy = -1;
+            }
+        }
+        return new Point2D.Double(dx, dy);
+    }
+
+    protected void updateFont() {
+        int size = (int) Math.round(state.fontSize * state.scale);
+        int style = ((state.fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) ? Font.BOLD : Font.PLAIN;
+        style += ((state.fontStyle & Constants.FONT_ITALIC) == Constants.FONT_ITALIC) ? Font.ITALIC : Font.PLAIN;
+        if (lastFont == null
+            || !lastFontFamily.equals(state.fontFamily)
+            || size != lastFontSize
+            || style != lastFontStyle) {
+            lastFont = createFont(state.fontFamily, style, size);
+            lastFontFamily = state.fontFamily;
+            lastFontStyle = style;
+            lastFontSize = size;
+        }
+        state.g.setFont(lastFont);
+    }
+
+    /**
+     * Hook for subclassers to implement font caching.
+     */
+    protected Font createFont(String family, int style, int size) {
+        return new Font(getFontName(family), style, size);
+    }
+
+    /**
+     * Returns a font name for the given CSS values for font-family.
+     * This implementation returns the first entry for comma-separated
+     * lists of entries.
+     */
+    protected String getFontName(String family) {
+        if (family != null) {
+            int comma = family.indexOf(',');
+            if (comma >= 0) {
+                family = family.substring(0, comma);
+            }
+        }
+        return family;
+    }
+
+    @Override
     public void begin() {
         currentPath = new GeneralPath();
     }
 
+    @Override
     public void moveTo(double x, double y) {
         if (currentPath != null) {
             currentPath.moveTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
         }
     }
 
+    @Override
     public void lineTo(double x, double y) {
         if (currentPath != null) {
             currentPath.lineTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
         }
     }
 
+    @Override
     public void quadTo(double x1, double y1, double x2, double y2) {
         if (currentPath != null) {
-            currentPath.quadTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale), (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale));
+            currentPath.quadTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
+                               (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale));
         }
     }
 
+    @Override
     public void curveTo(double x1, double y1, double x2, double y2, double x3, double y3) {
         if (currentPath != null) {
-            currentPath.curveTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale), (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale), (float) ((state.dx + x3) * state.scale), (float) ((state.dy + y3) * state.scale));
+            currentPath.curveTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
+                                (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale),
+                                (float) ((state.dx + x3) * state.scale), (float) ((state.dy + y3) * state.scale));
         }
     }
 
     /**
      * Closes the current path.
      */
+    @Override
     public void close() {
         if (currentPath != null) {
             currentPath.closePath();
         }
     }
 
+    @Override
     public void stroke() {
         paintCurrentPath(false, true);
     }
 
+    @Override
     public void fill() {
         paintCurrentPath(true, false);
     }
 
+    @Override
     public void fillAndStroke() {
         paintCurrentPath(true, true);
     }
@@ -697,6 +796,58 @@ public class GraphicsCanvas2D implements ICanvas2D {
                 state.g.draw(currentPath);
             }
         }
+    }
+
+    /**
+     * Returns a clone of the given state.
+     */
+    protected CanvasState cloneState(CanvasState state) {
+        try {
+            return (CanvasState) state.clone();
+        } catch (CloneNotSupportedException e) {
+            log.log(Level.SEVERE, "Failed to clone the state", e);
+        }
+        return null;
+    }
+
+    protected void updateStroke() {
+        float sw = (float) Math.max(1, state.strokeWidth * state.scale);
+        int cap = BasicStroke.CAP_BUTT;
+        if (state.lineCap.equals("round")) {
+            cap = BasicStroke.CAP_ROUND;
+        } else if (state.lineCap.equals("square")) {
+            cap = BasicStroke.CAP_SQUARE;
+        }
+        int join = BasicStroke.JOIN_MITER;
+        if (state.lineJoin.equals("round")) {
+            join = BasicStroke.JOIN_ROUND;
+        } else if (state.lineJoin.equals("bevel")) {
+            join = BasicStroke.JOIN_BEVEL;
+        }
+        float miterlimit = (float) state.miterLimit;
+        if (lastStroke == null
+            || lastStrokeWidth != sw
+            || lastCap != cap
+            || lastJoin != join
+            || lastMiterLimit != miterlimit
+            || lastDashed != state.dashed
+            || (state.dashed && lastDashPattern != state.dashPattern)) {
+            float[] dash = null;
+            if (state.dashed) {
+                dash = new float[state.dashPattern.length];
+                for (int i = 0; i < dash.length; i++) {
+                    dash[i] = (float) (state.dashPattern[i] * ((state.fixDash) ? state.scale : sw));
+                }
+            }
+            lastStroke = new BasicStroke(sw, cap, join, miterlimit, dash, 0);
+            lastStrokeWidth = sw;
+            lastCap = cap;
+            lastJoin = join;
+            lastMiterLimit = miterlimit;
+            lastDashed = state.dashed;
+            lastDashPattern = state.dashPattern;
+        }
+        state.g.setStroke(lastStroke);
     }
 
     protected void paintShadow(boolean filled, boolean stroked) {
@@ -731,93 +882,8 @@ public class GraphicsCanvas2D implements ICanvas2D {
         }
     }
 
-    public void setShadow(boolean value) {
-        state.shadow = value;
-    }
-
-    public void setShadowColor(Color value) {
-        state.shadowColor = value;
-    }
-
-    public void setShadowAlpha(double value) {
-        state.shadowAlpha = value;
-    }
-
-    public void setShadowOffset(double dx, double dy) {
-        state.shadowOffsetX = dx;
-        state.shadowOffsetY = dy;
-    }
-
-    protected void updateFont() {
-        int size = (int) Math.round(state.fontSize * state.scale);
-        int style = ((state.fontStyle & Constants.FONT_BOLD) == Constants.FONT_BOLD) ? Font.BOLD : Font.PLAIN;
-        style += ((state.fontStyle & Constants.FONT_ITALIC) == Constants.FONT_ITALIC) ? Font.ITALIC : Font.PLAIN;
-        if (lastFont == null || !lastFontFamily.equals(state.fontFamily) || size != lastFontSize || style != lastFontStyle) {
-            lastFont = createFont(state.fontFamily, style, size);
-            lastFontFamily = state.fontFamily;
-            lastFontStyle = style;
-            lastFontSize = size;
-        }
-        state.g.setFont(lastFont);
-    }
-
-    /**
-     * Hook for subclassers to implement font caching.
-     */
-    protected Font createFont(String family, int style, int size) {
-        return new Font(getFontName(family), style, size);
-    }
-
-    /**
-     * Returns a font name for the given CSS values for font-family.
-     * This implementation returns the first entry for comma-separated
-     * lists of entries.
-     */
-    protected String getFontName(String family) {
-        if (family != null) {
-            int comma = family.indexOf(',');
-            if (comma >= 0) {
-                family = family.substring(0, comma);
-            }
-        }
-        return family;
-    }
-
-    protected void updateStroke() {
-        float sw = (float) Math.max(1, state.strokeWidth * state.scale);
-        int cap = BasicStroke.CAP_BUTT;
-        if (state.lineCap.equals("round")) {
-            cap = BasicStroke.CAP_ROUND;
-        } else if (state.lineCap.equals("square")) {
-            cap = BasicStroke.CAP_SQUARE;
-        }
-        int join = BasicStroke.JOIN_MITER;
-        if (state.lineJoin.equals("round")) {
-            join = BasicStroke.JOIN_ROUND;
-        } else if (state.lineJoin.equals("bevel")) {
-            join = BasicStroke.JOIN_BEVEL;
-        }
-        float miterlimit = (float) state.miterLimit;
-        if (lastStroke == null || lastStrokeWidth != sw || lastCap != cap || lastJoin != join || lastMiterLimit != miterlimit || lastDashed != state.dashed || (state.dashed && lastDashPattern != state.dashPattern)) {
-            float[] dash = null;
-            if (state.dashed) {
-                dash = new float[state.dashPattern.length];
-                for (int i = 0; i < dash.length; i++) {
-                    dash[i] = (float) (state.dashPattern[i] * ((state.fixDash) ? state.scale : sw));
-                }
-            }
-            lastStroke = new BasicStroke(sw, cap, join, miterlimit, dash, 0);
-            lastStrokeWidth = sw;
-            lastCap = cap;
-            lastJoin = join;
-            lastMiterLimit = miterlimit;
-            lastDashed = state.dashed;
-            lastDashPattern = state.dashPattern;
-        }
-        state.g.setStroke(lastStroke);
-    }
-
     protected static class CanvasState implements Cloneable {
+
         protected double alpha = 1;
         protected double scale = 1;
         protected double dx = 0;
@@ -853,6 +919,7 @@ public class GraphicsCanvas2D implements ICanvas2D {
          */
         protected transient Graphics2D g;
 
+        @Override
         public Object clone() throws CloneNotSupportedException {
             return super.clone();
         }

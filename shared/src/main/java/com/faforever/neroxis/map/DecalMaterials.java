@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @CompiledJson
 public strictfp class DecalMaterials {
+
     private String[] fieldNormals;
     private String[] fieldAlbedos;
     private String[] mountainNormals;

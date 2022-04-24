@@ -8,9 +8,11 @@ import com.faforever.neroxis.ngraph.view.CellState;
 
 public class LineShape extends BasicShape {
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (configureGraphics(canvas, state, false)) {
-            boolean rounded = state.getStyle().getCellProperties().isRounded() && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
+            boolean rounded = state.getStyle().getCellProperties().isRounded()
+                              && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
 
             canvas.paintPolyline(createPoints(canvas, state), rounded);
         }
@@ -34,5 +36,4 @@ public class LineShape extends BasicShape {
 
         return points;
     }
-
 }

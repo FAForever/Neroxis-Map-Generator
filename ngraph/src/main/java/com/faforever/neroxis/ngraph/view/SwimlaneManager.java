@@ -26,19 +26,16 @@ public class SwimlaneManager extends EventSource {
      * passed to Cell.is to check if the rule applies to a cell.
      */
     protected Graph graph;
-
     /**
      * Optional string that specifies the value of the attribute to be passed
      * to Cell.is to check if the rule applies to a cell.
      */
     protected boolean enabled;
-
     /**
      * Optional string that specifies the attributename to be passed to
      * Cell.is to check if the rule applies to a cell.
      */
     protected boolean horizontal;
-
     /**
      * Specifies if newly added cells should be resized to match the size of their
      * existing siblings. Default is true.
@@ -240,7 +237,8 @@ public class SwimlaneManager extends EventSource {
                             while (current != null) {
                                 top = current;
                                 current = model.getParent(current);
-                                RectangleDouble tmp = (graph.isSwimlane(current)) ? graph.getStartSize(current) : new RectangleDouble();
+                                RectangleDouble tmp = (graph.isSwimlane(current)) ? graph.getStartSize(
+                                        current) : new RectangleDouble();
                                 size.setWidth(size.getWidth() + tmp.getWidth());
                                 size.setHeight(size.getHeight() + tmp.getHeight());
                             }
@@ -304,5 +302,4 @@ public class SwimlaneManager extends EventSource {
     public void destroy() {
         setGraph(null);
     }
-
 }

@@ -9,6 +9,7 @@ import java.awt.Shape;
 
 public class TriangleShape extends BasicShape {
 
+    @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();
         int x = temp.x;
@@ -37,5 +38,4 @@ public class TriangleShape extends BasicShape {
 
         return triangle;
     }
-
 }

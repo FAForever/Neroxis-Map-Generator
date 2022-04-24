@@ -42,14 +42,6 @@ public class UndoableEdit {
     }
 
     /**
-     * Hook to notify any listeners of the changes after an undo or redo
-     * has been carried out. This implementation is empty.
-     */
-    public void dispatch() {
-        // empty
-    }
-
-    /**
      * Hook to free resources after the edit has been removed from the command
      * history. This implementation is empty.
      */
@@ -121,6 +113,14 @@ public class UndoableEdit {
         }
 
         dispatch();
+    }
+
+    /**
+     * Hook to notify any listeners of the changes after an undo or redo
+     * has been carried out. This implementation is empty.
+     */
+    public void dispatch() {
+        // empty
     }
 
     public void redo() {

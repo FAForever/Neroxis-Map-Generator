@@ -25,16 +25,15 @@ import javax.swing.ImageIcon;
 import javax.swing.plaf.UIResource;
 
 public class GraphTransferable implements Transferable, UIResource, Serializable {
+
     @Serial
     private static final long serialVersionUID = 5123819419918087664L;
     private static final Logger log = Logger.getLogger(GraphTransferable.class.getName());
-
     /**
      * Global switch to disable image support in transferables. Set this to false as a workaround
      * for Data translation failed: not an image format in Java 1.7 on Mac OS X.
      */
     public static boolean enableImageSupport = true;
-
     /**
      * Serialized Data Flavor. Use the following code to switch to local
      * reference flavor:
@@ -58,13 +57,9 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      * </code>
      */
     public static DataFlavor dataFlavor;
-
     private static DataFlavor[] htmlFlavors;
-
     private static DataFlavor[] stringFlavors;
-
     private static DataFlavor[] plainFlavors;
-
     private static DataFlavor[] imageFlavors;
 
     /**
@@ -94,7 +89,8 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
         }
 
         try {
-            dataFlavor = new DataFlavor(DataFlavor.javaSerializedObjectMimeType + "; class=com.faforever.neroxis.ngraph.swing.util.GraphTransferable");
+            dataFlavor = new DataFlavor(DataFlavor.javaSerializedObjectMimeType
+                                        + "; class=com.faforever.neroxis.ngraph.swing.util.GraphTransferable");
         } catch (ClassNotFoundException e) {
             log.log(Level.SEVERE, "Error initializing dataFlavor", e);
         }
@@ -132,6 +128,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
         return image;
     }
 
+    @Override
     public DataFlavor[] getTransferDataFlavors() {
         DataFlavor[] richerFlavors = getRicherFlavors();
 
@@ -191,6 +188,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      * @param flavor the requested flavor for the data
      * @return boolean indicating whether or not the data flavor is supported
      */
+    @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
         DataFlavor[] flavors = getTransferDataFlavors();
         for (DataFlavor value : flavors) {
@@ -212,6 +210,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
      * @throws UnsupportedFlavorException if the requested data flavor is not supported.
      * @see DataFlavor#getRepresentationClass
      */
+    @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         if (isRicherFlavor(flavor)) {
             return getRicherData(flavor);
@@ -262,7 +261,6 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     }
 
     /**
-     * @param flavor
      * @return Returns true if the given flavor is a richer flavor of this
      * transferable.
      */
@@ -280,9 +278,7 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     }
 
     /**
-     * @param flavor
      * @return the richer data flavor of this and the specified
-     * @throws UnsupportedFlavorException
      */
     public Object getRicherData(DataFlavor flavor) throws UnsupportedFlavorException {
         if (flavor.equals(dataFlavor)) {
@@ -325,7 +321,6 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     }
 
     /**
-     * @param flavor
      * @return Returns true if the given flavor is an image flavor of this
      * transferable.
      */
@@ -393,5 +388,4 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
         }
         return false;
     }
-
 }

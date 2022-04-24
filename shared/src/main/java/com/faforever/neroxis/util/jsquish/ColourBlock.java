@@ -25,19 +25,16 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import java.util.Arrays;
-
 import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_X;
 import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Y;
 import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Z;
 import static java.lang.Math.round;
+import java.util.Arrays;
 
 final strictfp class ColourBlock {
 
     private static final int[] remapped = new int[16];
-
     private static final int[] indices = new int[16];
-
     private static final int[] codes = new int[16];
 
     private ColourBlock() {
@@ -48,31 +45,8 @@ final strictfp class ColourBlock {
         return round(scale * colour);
     }
 
-    private static int floatTo565(final Vec colour) {
-        // get the components in the correct range
-        final int r = round(GRID_X * colour.x());
-        final int g = round(GRID_Y * colour.y());
-        final int b = round(GRID_Z * colour.z());
-
-        // pack into a single value
-        return (r << 11) | (g << 5) | b;
-    }
-
-    private static void writeColourBlock(final int a, final int b, final int[] indices, final byte[] block, final int offset) {
-        // write the endpoints
-        block[offset] = (byte) (a & 0xFF);
-        block[offset + 1] = (byte) ((a >> 8) & 0xFF);
-        block[offset + 2] = (byte) (b & 0xff);
-        block[offset + 3] = (byte) ((b >> 8) & 0xFF);
-
-        // write the indices
-        for (int i = 0; i < 4; ++i) {
-            final int index = 4 * i;
-            block[offset + 4 + i] = (byte) (indices[index] | (indices[index + 1] << 2) | (indices[index + 2] << 4) | (indices[index + 3] << 6));
-        }
-    }
-
-    static void writeColourBlock3(final Vec start, final Vec end, final int[] indices, final byte[] block, final int offset) {
+    static void writeColourBlock3(final Vec start, final Vec end, final int[] indices, final byte[] block,
+                                  final int offset) {
         // get the packed values
         int a = floatTo565(start);
         int b = floatTo565(end);
@@ -87,12 +61,13 @@ final strictfp class ColourBlock {
             a = b;
             b = tmp;
             for (int i = 0; i < 16; ++i) {
-                if (indices[i] == 0)
+                if (indices[i] == 0) {
                     remapped[i] = 1;
-                else if (indices[i] == 1)
+                } else if (indices[i] == 1) {
                     remapped[i] = 0;
-                else
+                } else {
                     remapped[i] = indices[i];
+                }
             }
         }
 
@@ -100,7 +75,35 @@ final strictfp class ColourBlock {
         writeColourBlock(a, b, remapped, block, offset);
     }
 
-    static void writeColourBlock4(final Vec start, final Vec end, final int[] indices, final byte[] block, final int offset) {
+    private static int floatTo565(final Vec colour) {
+        // get the components in the correct range
+        final int r = round(GRID_X * colour.x());
+        final int g = round(GRID_Y * colour.y());
+        final int b = round(GRID_Z * colour.z());
+
+        // pack into a single value
+        return (r << 11) | (g << 5) | b;
+    }
+
+    private static void writeColourBlock(final int a, final int b, final int[] indices, final byte[] block,
+                                         final int offset) {
+        // write the endpoints
+        block[offset] = (byte) (a & 0xFF);
+        block[offset + 1] = (byte) ((a >> 8) & 0xFF);
+        block[offset + 2] = (byte) (b & 0xff);
+        block[offset + 3] = (byte) ((b >> 8) & 0xFF);
+
+        // write the indices
+        for (int i = 0; i < 4; ++i) {
+            final int index = 4 * i;
+            block[offset + 4 + i] = (byte) (indices[index] | (indices[index + 1] << 2) | (indices[index + 2] << 4) | (
+                    indices[index + 3]
+                    << 6));
+        }
+    }
+
+    static void writeColourBlock4(final Vec start, final Vec end, final int[] indices, final byte[] block,
+                                  final int offset) {
         // get the packed values
         int a = floatTo565(start);
         int b = floatTo565(end);
@@ -112,8 +115,9 @@ final strictfp class ColourBlock {
             final int tmp = a;
             a = b;
             b = tmp;
-            for (int i = 0; i < 16; ++i)
+            for (int i = 0; i < 16; ++i) {
                 remapped[i] = (indices[i] ^ 0x1) & 0x3;
+            }
         } else if (a == b) {
             // use index 0
             Arrays.fill(remapped, 0);
@@ -167,8 +171,9 @@ final strictfp class ColourBlock {
         // store out the colours
         for (int i = 0; i < 16; ++i) {
             final int index = 4 * indices[i];
-            for (int j = 0; j < 4; ++j)
+            for (int j = 0; j < 4; ++j) {
                 rgba[4 * i + j] = (byte) codes[index + j];
+            }
         }
     }
 

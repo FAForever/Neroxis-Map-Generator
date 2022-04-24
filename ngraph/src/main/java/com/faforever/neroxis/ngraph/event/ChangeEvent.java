@@ -15,6 +15,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ChangeEvent extends EventObject {
+
     UndoableEdit edit;
     List<UndoableChange> changes;
     List<ICell> added;

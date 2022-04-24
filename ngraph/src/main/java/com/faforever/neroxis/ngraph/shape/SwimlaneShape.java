@@ -17,17 +17,7 @@ public class SwimlaneShape extends BasicShape {
         return Math.max(0, state.getStyle().getEdge().getStartSize() * canvas.getScale());
     }
 
-    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
-        double start = getTitleSize(canvas, state);
-        if (state.getStyle().getCellProperties().isHorizontal()) {
-            start = Math.min(start, state.getHeight());
-            return new RectangleDouble(state.getX(), state.getY(), state.getWidth(), start);
-        } else {
-            start = Math.min(start, state.getWidth());
-            return new RectangleDouble(state.getX(), state.getY(), start, state.getHeight());
-        }
-    }
-
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         double start = getTitleSize(canvas, state);
         Color fill = state.getStyle().getSwimlane().getColor();
@@ -49,11 +39,24 @@ public class SwimlaneShape extends BasicShape {
         paintSeparator(canvas, state, start, sep);
     }
 
+    @Override
+    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
+        double start = getTitleSize(canvas, state);
+        if (state.getStyle().getCellProperties().isHorizontal()) {
+            start = Math.min(start, state.getHeight());
+            return new RectangleDouble(state.getX(), state.getY(), state.getWidth(), start);
+        } else {
+            start = Math.min(start, state.getWidth());
+            return new RectangleDouble(state.getX(), state.getY(), start, state.getHeight());
+        }
+    }
+
     /**
      * Helper method to configure the given wrapper canvas.
      */
     protected double getArcSize(CellState state, double start) {
-        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100, RectangleShape.RECTANGLE_ROUNDING_FACTOR);
+        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100,
+                                              RectangleShape.RECTANGLE_ROUNDING_FACTOR);
 
         return start * f * 3;
     }
@@ -70,14 +73,16 @@ public class SwimlaneShape extends BasicShape {
         Color gradient = state.getStyle().getShape().getGradientColor();
         if (fill != null && gradient != null) {
             RectangleDouble b = getGradientBounds(canvas, state);
-            c.setGradient(fill, gradient, b.getX(), b.getY(), b.getWidth(), b.getHeight(), state.getStyle().getShape().getGradientDirection(), 1, 1);
+            c.setGradient(fill, gradient, b.getX(), b.getY(), b.getWidth(), b.getHeight(),
+                          state.getStyle().getShape().getGradientDirection(), 1, 1);
         } else {
             c.setFillColor(fill);
         }
         return c;
     }
 
-    protected void paintSwimlane(Graphics2DCanvas canvas, CellState state, double start, Color fill, boolean swimlaneLine) {
+    protected void paintSwimlane(Graphics2DCanvas canvas, CellState state, double start, Color fill,
+                                 boolean swimlaneLine) {
         GraphicsCanvas2D canvas2D = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
         double width = state.getWidth();
         double height = state.getHeight();
@@ -138,7 +143,8 @@ public class SwimlaneShape extends BasicShape {
      * <p>
      * Paints the swimlane vertex shape.
      */
-    protected void paintRoundedSwimlane(Graphics2DCanvas canvas, CellState state, double start, double r, Color fill, boolean swimlaneLine) {
+    protected void paintRoundedSwimlane(Graphics2DCanvas canvas, CellState state, double start, double r, Color fill,
+                                        boolean swimlaneLine) {
         GraphicsCanvas2D c = configureCanvas(canvas, state, new GraphicsCanvas2D(canvas.getGraphics()));
         double w = state.getWidth();
         double h = state.getHeight();
@@ -229,5 +235,4 @@ public class SwimlaneShape extends BasicShape {
             c.setDashed(false);
         }
     }
-
 }

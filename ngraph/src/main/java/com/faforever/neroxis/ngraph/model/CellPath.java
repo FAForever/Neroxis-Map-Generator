@@ -118,5 +118,4 @@ public class CellPath {
 
         return comp;
     }
-
 }

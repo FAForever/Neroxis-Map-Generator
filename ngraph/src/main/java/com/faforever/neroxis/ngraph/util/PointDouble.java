@@ -10,6 +10,7 @@ import java.io.Serial;
  * Extends awt point with double precision coordinates.
  */
 public class PointDouble extends Point2D.Double {
+
     @Serial
     private static final long serialVersionUID = 6554231393215892186L;
 
@@ -18,6 +19,17 @@ public class PointDouble extends Point2D.Double {
      */
     public PointDouble() {
         this(0, 0);
+    }
+
+    /**
+     * Constructs a new point at (x, y).
+     *
+     * @param x X-coordinate of the point to be created.
+     * @param y Y-coordinate of the point to be created.
+     */
+    public PointDouble(double x, double y) {
+        setX(x);
+        setY(y);
     }
 
     /**
@@ -39,21 +51,11 @@ public class PointDouble extends Point2D.Double {
     }
 
     /**
-     * Constructs a new point at (x, y).
-     *
-     * @param x X-coordinate of the point to be created.
-     * @param y Y-coordinate of the point to be created.
-     */
-    public PointDouble(double x, double y) {
-        setX(x);
-        setY(y);
-    }
-
-    /**
      * Returns the x-coordinate of the point.
      *
      * @return Returns the x-coordinate.
      */
+    @Override
     public double getX() {
         return x;
     }
@@ -72,6 +74,7 @@ public class PointDouble extends Point2D.Double {
      *
      * @return Returns the x-coordinate.
      */
+    @Override
     public double getY() {
         return y;
     }
@@ -83,6 +86,17 @@ public class PointDouble extends Point2D.Double {
      */
     public void setY(double value) {
         y = value;
+    }
+
+    /**
+     * Returns a <code>String</code> that represents the value
+     * of this <code>Point</code>.
+     *
+     * @return a string representation of this <code>Point</code>.
+     */
+    @Override
+    public String toString() {
+        return String.format("Point[%f, %f]", x, y);
     }
 
     public void scale(double scale) {
@@ -116,16 +130,4 @@ public class PointDouble extends Point2D.Double {
     public java.awt.Point toPoint() {
         return new java.awt.Point((int) Math.round(x), (int) Math.round(y));
     }
-
-    /**
-     * Returns a <code>String</code> that represents the value
-     * of this <code>Point</code>.
-     *
-     * @return a string representation of this <code>Point</code>.
-     */
-    @Override
-    public String toString() {
-        return String.format("Point[%f, %f]", x, y);
-    }
-
 }

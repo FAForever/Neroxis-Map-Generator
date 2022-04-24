@@ -20,17 +20,25 @@ import java.util.List;
 public class ElbowEdgeHandler extends EdgeHandler {
 
     /**
-     * @param graphComponent
-     * @param state
+     *
      */
     public ElbowEdgeHandler(GraphComponent graphComponent, CellState state) {
         super(graphComponent, state);
     }
 
     /**
+     * Returns true if the given index is the index of the last handle.
+     */
+    @Override
+    public boolean isLabel(int index) {
+        return index == 3;
+    }
+
+    /**
      * Hook for subclassers to return tooltip texts for certain points on the
      * handle.
      */
+    @Override
     public String getToolTipText(MouseEvent e) {
         int index = getIndexAt(e.getX(), e.getY());
 
@@ -41,17 +49,7 @@ public class ElbowEdgeHandler extends EdgeHandler {
         return null;
     }
 
-    protected boolean isFlipEvent(MouseEvent e) {
-        return e.getClickCount() == 2 && index == 1;
-    }
-
-    /**
-     * Returns true if the given index is the index of the last handle.
-     */
-    public boolean isLabel(int index) {
-        return index == 3;
-    }
-
+    @Override
     protected Rectangle[] createHandles() {
         p = createPoints(state);
         Rectangle[] h = new Rectangle[4];
@@ -64,7 +62,8 @@ public class ElbowEdgeHandler extends EdgeHandler {
         List<PointDouble> points = geometry.getPoints();
         java.awt.Point pt = null;
         if (points == null || points.isEmpty()) {
-            pt = new java.awt.Point((int) (Math.round(p0.getX()) + Math.round((pe.getX() - p0.getX()) / 2)), (int) (Math.round(p0.getY()) + Math.round((pe.getY() - p0.getY()) / 2)));
+            pt = new java.awt.Point((int) (Math.round(p0.getX()) + Math.round((pe.getX() - p0.getX()) / 2)),
+                                    (int) (Math.round(p0.getY()) + Math.round((pe.getY() - p0.getY()) / 2)));
         } else {
             GraphView view = graphComponent.getGraph().getView();
             pt = view.transformControlPoint(state, points.get(0)).toPoint();
@@ -85,4 +84,8 @@ public class ElbowEdgeHandler extends EdgeHandler {
         return h;
     }
 
+    @Override
+    protected boolean isFlipEvent(MouseEvent e) {
+        return e.getClickCount() == 2 && index == 1;
+    }
 }

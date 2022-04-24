@@ -5,8 +5,13 @@ package com.faforever.neroxis.ngraph.swing.handler;
 
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.util.GraphActions;
-
-import javax.swing.*;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 
 /**
  * @author Administrator
@@ -14,7 +19,7 @@ import javax.swing.*;
 public class KeyboardHandler {
 
     /**
-     * @param graphComponent
+     *
      */
     public KeyboardHandler(GraphComponent graphComponent) {
         installKeyboardActions(graphComponent);
@@ -102,5 +107,4 @@ public class KeyboardHandler {
 
         return map;
     }
-
 }

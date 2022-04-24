@@ -9,6 +9,7 @@ import java.awt.Shape;
 
 public class HexagonShape extends BasicShape {
 
+    @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();
         int x = temp.x;
@@ -35,5 +36,4 @@ public class HexagonShape extends BasicShape {
 
         return hexagon;
     }
-
 }

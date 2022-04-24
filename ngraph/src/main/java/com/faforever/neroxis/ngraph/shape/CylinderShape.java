@@ -2,8 +2,7 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 
@@ -12,6 +11,7 @@ public class CylinderShape extends BasicShape {
     /**
      * Draws a cylinder for the given parameters.
      */
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle rect = state.getRectangle();
         int x = rect.x;
@@ -41,5 +41,4 @@ public class CylinderShape extends BasicShape {
             canvas.getGraphics().drawArc(x, y + h - h4, r, h4, 0, -180);
         }
     }
-
 }

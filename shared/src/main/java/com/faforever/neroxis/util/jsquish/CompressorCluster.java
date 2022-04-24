@@ -30,15 +30,14 @@ import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
 final strictfp class CompressorCluster extends CompressorColourFit {
 
-	private static final int MAX_ITERATIONS = 8;
-
-	private static final float TWO_THIRDS = 2.0f / 3.0f;
-	private static final float ONE_THIRD = 1.0f / 3.0f;
-	private static final float HALF = 0.5f;
-	private static final float ZERO = 0.0f;
-	private static final float[] dps = new float[16];
-	private static final float[] weighted = new float[16 * 3];
-	private static final float[] weights = new float[16];
+    private static final int MAX_ITERATIONS = 8;
+    private static final float TWO_THIRDS = 2.0f / 3.0f;
+    private static final float ONE_THIRD = 1.0f / 3.0f;
+    private static final float HALF = 0.5f;
+    private static final float ZERO = 0.0f;
+    private static final float[] dps = new float[16];
+    private static final float[] weighted = new float[16 * 3];
+    private static final float[] weights = new float[16];
     private static final int[] indices = new int[16];
     private static final int[] bestIndices = new int[16];
     private static final float[] alpha = new float[16];
@@ -66,6 +65,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         principle = Matrix.computePrincipleComponent(covariance);
     }
 
+    @Override
     void compress3(final byte[] block, final int offset) {
         final int count = colours.getCount();
 
@@ -117,16 +117,19 @@ final strictfp class CompressorCluster extends CompressorColourFit {
             }
 
             // stop if we didn't improve in this iteration
-            if (bestIteration != iteration)
+            if (bestIteration != iteration) {
                 break;
+            }
 
             // advance if possible
-            if (++iteration == MAX_ITERATIONS)
+            if (++iteration == MAX_ITERATIONS) {
                 break;
+            }
 
             // stop if a new iteration is an ordering that has already been tried
-            if (!constructOrdering(a.set(bestEnd).sub(bestStart), iteration))
+            if (!constructOrdering(a.set(bestEnd).sub(bestStart), iteration)) {
                 break;
+            }
         }
 
         // save the block if necessary
@@ -135,8 +138,9 @@ final strictfp class CompressorCluster extends CompressorColourFit {
             // remap the indices
             final int order = 16 * bestIteration;
 
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < count; ++i) {
                 unordered[orders[order + i]] = bestIndices[i];
+            }
             colours.remapIndices(unordered, bestIndices);
 
             // save the block
@@ -147,6 +151,7 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         }
     }
 
+    @Override
     void compress4(final byte[] block, final int offset) {
         final int count = colours.getCount();
 
@@ -208,17 +213,20 @@ final strictfp class CompressorCluster extends CompressorColourFit {
             }
 
             // stop if we didn't improve in this iteration
-            if (bestIteration != iteration)
+            if (bestIteration != iteration) {
                 break;
+            }
 
             // advance if possible
             ++iteration;
-            if (iteration == MAX_ITERATIONS)
+            if (iteration == MAX_ITERATIONS) {
                 break;
+            }
 
             // stop if a new iteration is an ordering that has already been tried
-            if (!constructOrdering(start.set(bestEnd).sub(bestStart), iteration))
+            if (!constructOrdering(start.set(bestEnd).sub(bestStart), iteration)) {
                 break;
+            }
         }
 
         // save the block if necessary
@@ -226,8 +234,9 @@ final strictfp class CompressorCluster extends CompressorColourFit {
 
             // remap the indices
             final int order = 16 * bestIteration;
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < count; ++i) {
                 unordered[orders[order + i]] = bestIndices[i];
+            }
             colours.remapIndices(unordered, bestIndices);
 
             // save the block
@@ -273,8 +282,9 @@ final strictfp class CompressorCluster extends CompressorColourFit {
                     break;
                 }
             }
-            if (same)
+            if (same) {
                 return false;
+            }
         }
 
         // copy the ordering and weight all the points
@@ -357,7 +367,9 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         } else {
             final float rcp = 1.0f / (alpha2_sum * beta2_sum - alphabeta_sum * alphabeta_sum);
             if (rcp == Float.POSITIVE_INFINITY) // Detect Infinity
+            {
                 return Float.MAX_VALUE;
+            }
 
             aX = (alphax_sumX * beta2_sum - betax_sumX * alphabeta_sum) * rcp;
             aY = (alphax_sumY * beta2_sum - betax_sumY * alphabeta_sum) * rcp;
@@ -383,12 +395,17 @@ final strictfp class CompressorCluster extends CompressorColourFit {
         end.set(bX, bY, bZ);
 
         // compute the error
-        final float eX = aX * aX * alpha2_sum + bX * bX * beta2_sum + xxSum.x() + 2.0f * (aX * bX * alphabeta_sum - aX * alphax_sumX - bX * betax_sumX);
-        final float eY = aY * aY * alpha2_sum + bY * bY * beta2_sum + xxSum.y() + 2.0f * (aY * bY * alphabeta_sum - aY * alphax_sumY - bY * betax_sumY);
-        final float eZ = aZ * aZ * alpha2_sum + bZ * bZ * beta2_sum + xxSum.z() + 2.0f * (aZ * bZ * alphabeta_sum - aZ * alphax_sumZ - bZ * betax_sumZ);
+        final float eX = aX * aX * alpha2_sum + bX * bX * beta2_sum + xxSum.x() + 2.0f * (aX * bX * alphabeta_sum
+                                                                                          - aX * alphax_sumX
+                                                                                          - bX * betax_sumX);
+        final float eY = aY * aY * alpha2_sum + bY * bY * beta2_sum + xxSum.y() + 2.0f * (aY * bY * alphabeta_sum
+                                                                                          - aY * alphax_sumY
+                                                                                          - bY * betax_sumY);
+        final float eZ = aZ * aZ * alpha2_sum + bZ * bZ * beta2_sum + xxSum.z() + 2.0f * (aZ * bZ * alphabeta_sum
+                                                                                          - aZ * alphax_sumZ
+                                                                                          - bZ * betax_sumZ);
 
         // apply the metric to the error term
         return metric.dot(eX, eY, eZ);
     }
-
 }

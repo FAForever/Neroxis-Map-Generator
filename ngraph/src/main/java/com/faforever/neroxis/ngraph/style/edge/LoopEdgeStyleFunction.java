@@ -11,8 +11,10 @@ import java.util.List;
  * Provides a self-reference, aka. loop.
  */
 public class LoopEdgeStyleFunction implements EdgeStyleFunction {
+
     @Override
-    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
+                      List<PointDouble> result) {
         if (source != null) {
             GraphView view = state.getView();
             Graph graph = view.getGraph();

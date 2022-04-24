@@ -2,12 +2,13 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.view.CellState;
-
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 
 public class ActorShape extends BasicShape {
 
+    @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();
         int x = temp.x;
@@ -27,5 +28,4 @@ public class ActorShape extends BasicShape {
 
         return path;
     }
-
 }

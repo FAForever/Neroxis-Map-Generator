@@ -9,15 +9,16 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
 
     public MountainRangeTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .landDensity(.75f, 1f)
-                .mountainDensity(.5f, 1)
-                .mexDensity(.375f, 1)
-                .mapSizes(256, 768)
-                .build();
+                                                   .landDensity(.75f, 1f)
+                                                   .mountainDensity(.5f, 1)
+                                                   .mexDensity(.375f, 1)
+                                                   .mapSizes(256, 768)
+                                                   .build();
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
@@ -27,13 +28,15 @@ public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrain
     @Override
     protected void mountainSetup() {
         int mapSize = map.getSize();
-        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(generatorParameters.getMountainDensity());
+        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
+                                                              .normalize(generatorParameters.getMountainDensity());
         mountains.setSize(mapSize / 2);
 
-        mountains.progressiveWalk((int) (normalizedMountainDensity * 16 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8, mapSize / 4);
+        mountains.progressiveWalk(
+                (int) (normalizedMountainDensity * 16 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8,
+                mapSize / 4);
         mountains.inflate(2);
 
         mountains.setSize(mapSize + 1);
     }
-
 }

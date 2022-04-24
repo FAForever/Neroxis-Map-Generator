@@ -15,10 +15,6 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(size, seed, symmetrySettings, null, false);
     }
 
-    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -26,6 +22,10 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
+    }
+
+    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
     public NormalMask(NormalMask other) {
@@ -41,10 +41,6 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, 1f, null);
     }
 
-    public NormalMask(FloatMask other, float scale) {
-        this(other, scale, null);
-    }
-
     protected NormalMask(FloatMask other, float scale, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
@@ -54,17 +50,42 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         }, other);
     }
 
+    public NormalMask(FloatMask other, float scale) {
+        this(other, scale, null);
+    }
+
     public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, null, false);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name,
+                      boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         Raster imageRaster = sourceImage.getData();
         set(point -> {
             float[] components = imageRaster.getPixel(point.x, point.y, new float[4]);
             return createValue(1f, components[3], components[0], components[1]);
         });
+    }
+
+    @Override
+    protected Vector3 createValue(float scaleFactor, float... components) {
+        assertMatchingDimension(components.length);
+        return new Vector3(components[0], components[1], components[2]).multiply(scaleFactor);
+    }
+
+    @Override
+    public BufferedImage writeToImage(BufferedImage image) {
+        assertSize(image.getHeight());
+        WritableRaster imageRaster = image.getRaster();
+        loop(point -> {
+            Vector3 value = get(point);
+            int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
+            int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);
+            int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+            imageRaster.setPixel(point.x, point.y, new int[]{xV, zV, yV});
+        });
+        return image;
     }
 
     @Override
@@ -88,17 +109,6 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     @Override
-    protected Vector3 createValue(float scaleFactor, float... components) {
-        assertMatchingDimension(components.length);
-        return new Vector3(components[0], components[1], components[2]).multiply(scaleFactor);
-    }
-
-    @Override
-    protected Vector3 getZeroValue() {
-        return new Vector3(0f, 1f, 0f);
-    }
-
-    @Override
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -107,16 +117,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     @Override
-    public BufferedImage writeToImage(BufferedImage image) {
-        assertSize(image.getHeight());
-        WritableRaster imageRaster = image.getRaster();
-        loop(point -> {
-            Vector3 value = get(point);
-            int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-            int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);
-            int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
-            imageRaster.setPixel(point.x, point.y, new int[]{xV, zV, yV});
-        });
-        return image;
+    protected Vector3 getZeroValue() {
+        return new Vector3(0f, 1f, 0f);
     }
 }

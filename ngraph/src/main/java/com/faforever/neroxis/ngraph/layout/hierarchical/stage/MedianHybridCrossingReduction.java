@@ -27,6 +27,7 @@ import java.util.Map;
  * Performs a vertex ordering within ranks as described by Gansner et al 1993
  */
 public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
+
     /**
      * Reference to the enclosing layout algorithm
      */
@@ -36,20 +37,16 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
      * crossings
      */
     protected int maxIterations = 50;
-
     /**
      * Stores each rank as a collection of cells in the best order found for
      * each layer so far
      */
     protected GraphAbstractHierarchyCell[][] nestedBestRanks = null;
-
     /**
      * The total number of crossings found in the best configuration so far
      */
     protected int currentBestCrossings = 0;
-
     protected int iterationsWithoutImprovement = 0;
-
     protected int maxNoImprovementIterations = 2;
 
     /**
@@ -63,6 +60,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
      * Performs a vertex ordering within ranks as described by Gansner et al
      * 1993
      */
+    @Override
     public void execute(Object parent) {
         GraphHierarchyModel model = layout.getModel();
 
@@ -207,141 +205,11 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
                             }
                         }
                     }
-
                 }
             }
         }
 
         return totalCrossings / 2;
-    }
-
-    /**
-     * Takes each possible adjacent cell pair on each rank and checks if
-     * swapping them around reduces the number of crossing
-     *
-     * @param mainLoopIteration the iteration number of the main loop
-     * @param model             the internal model describing the hierarchy
-     */
-    private void transpose(int mainLoopIteration, GraphHierarchyModel model) {
-        boolean improved = true;
-
-        // Track the number of iterations in case of looping
-        int count = 0;
-        int maxCount = 10;
-
-        while (improved && count++ < maxCount) {
-            // On certain iterations allow allow swapping of cell pairs with
-            // equal edge crossings switched or not switched. This help to
-            // nudge a stuck layout into a lower crossing total.
-            boolean nudge = mainLoopIteration % 2 == 1 && count % 2 == 1;
-            improved = false;
-
-            for (int i = 0; i < model.ranks.size(); i++) {
-                GraphHierarchyRank rank = model.ranks.get(i);
-                GraphAbstractHierarchyCell[] orderedCells = new GraphAbstractHierarchyCell[rank.size()];
-                Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
-                for (int j = 0; j < orderedCells.length; j++) {
-                    GraphAbstractHierarchyCell cell = iter.next();
-                    orderedCells[cell.getGeneralPurposeVariable(i)] = cell;
-                }
-                List<GraphAbstractHierarchyCell> leftCellAboveConnections;
-                List<GraphAbstractHierarchyCell> leftCellBelowConnections;
-                List<GraphAbstractHierarchyCell> rightCellAboveConnections = null;
-                List<GraphAbstractHierarchyCell> rightCellBelowConnections = null;
-                int[] leftAbovePositions;
-                int[] leftBelowPositions;
-                int[] rightAbovePositions = null;
-                int[] rightBelowPositions = null;
-                GraphAbstractHierarchyCell leftCell;
-                GraphAbstractHierarchyCell rightCell = null;
-                for (int j = 0; j < (rank.size() - 1); j++) {
-                    // For each intra-rank adjacent pair of cells
-                    // see if swapping them around would reduce the
-                    // number of edges crossing they cause in total
-                    // On every cell pair except the first on each rank, we
-                    // can save processing using the previous values for the
-                    // right cell on the new left cell
-                    if (j == 0) {
-                        leftCell = orderedCells[j];
-                        leftCellAboveConnections = leftCell.getNextLayerConnectedCells(i);
-                        leftCellBelowConnections = leftCell.getPreviousLayerConnectedCells(i);
-
-                        leftAbovePositions = new int[leftCellAboveConnections.size()];
-                        leftBelowPositions = new int[leftCellBelowConnections.size()];
-
-                        for (int k = 0; k < leftAbovePositions.length; k++) {
-                            leftAbovePositions[k] = leftCellAboveConnections.get(k).getGeneralPurposeVariable(i + 1);
-                        }
-
-                        for (int k = 0; k < leftBelowPositions.length; k++) {
-                            leftBelowPositions[k] = (leftCellBelowConnections.get(k)).getGeneralPurposeVariable(i - 1);
-                        }
-                    } else {
-                        leftCellAboveConnections = rightCellAboveConnections;
-                        leftCellBelowConnections = rightCellBelowConnections;
-                        leftAbovePositions = rightAbovePositions;
-                        leftBelowPositions = rightBelowPositions;
-                        leftCell = rightCell;
-                    }
-
-                    rightCell = orderedCells[j + 1];
-                    rightCellAboveConnections = rightCell.getNextLayerConnectedCells(i);
-                    rightCellBelowConnections = rightCell.getPreviousLayerConnectedCells(i);
-
-                    rightAbovePositions = new int[rightCellAboveConnections.size()];
-                    rightBelowPositions = new int[rightCellBelowConnections.size()];
-                    for (int k = 0; k < rightAbovePositions.length; k++) {
-                        rightAbovePositions[k] = (rightCellAboveConnections.get(k)).getGeneralPurposeVariable(i + 1);
-                    }
-                    for (int k = 0; k < rightBelowPositions.length; k++) {
-                        rightBelowPositions[k] = (rightCellBelowConnections.get(k)).getGeneralPurposeVariable(i - 1);
-                    }
-                    int totalCurrentCrossings = 0;
-                    int totalSwitchedCrossings = 0;
-                    for (int leftAbovePosition : leftAbovePositions) {
-                        for (int rightAbovePosition : rightAbovePositions) {
-                            if (leftAbovePosition > rightAbovePosition) {
-                                totalCurrentCrossings++;
-                            }
-                            if (leftAbovePosition < rightAbovePosition) {
-                                totalSwitchedCrossings++;
-                            }
-                        }
-                    }
-                    for (int leftBelowPosition : leftBelowPositions) {
-                        for (int rightBelowPosition : rightBelowPositions) {
-                            if (leftBelowPosition > rightBelowPosition) {
-                                totalCurrentCrossings++;
-                            }
-                            if (leftBelowPosition < rightBelowPosition) {
-                                totalSwitchedCrossings++;
-                            }
-                        }
-                    }
-                    if ((totalSwitchedCrossings < totalCurrentCrossings) || (totalSwitchedCrossings == totalCurrentCrossings && nudge)) {
-                        int temp = leftCell.getGeneralPurposeVariable(i);
-                        leftCell.setGeneralPurposeVariable(i, rightCell.getGeneralPurposeVariable(i));
-                        rightCell.setGeneralPurposeVariable(i, temp);
-                        // With this pair exchanged we have to switch all of
-                        // values for the left cell to the right cell so the
-                        // next iteration for this rank uses it as the left
-                        // cell again
-                        rightCellAboveConnections = leftCellAboveConnections;
-                        rightCellBelowConnections = leftCellBelowConnections;
-                        rightAbovePositions = leftAbovePositions;
-                        rightBelowPositions = leftBelowPositions;
-                        rightCell = leftCell;
-
-                        if (!nudge) {
-                            // Don't count nudges as improvement or we'll end
-                            // up stuck in two combinations and not finishing
-                            // as early as we should
-                            improved = true;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -453,7 +321,138 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
             double leftMedian = medianValues[medianPoint - 1] - medianValues[0];
             double rightMedian = medianValues[arrayCount - 1] - medianValues[medianPoint];
 
-            return (medianValues[medianPoint - 1] * rightMedian + medianValues[medianPoint] * leftMedian) / (leftMedian + rightMedian);
+            return (medianValues[medianPoint - 1] * rightMedian + medianValues[medianPoint] * leftMedian) / (leftMedian
+                                                                                                             + rightMedian);
+        }
+    }
+
+    /**
+     * Takes each possible adjacent cell pair on each rank and checks if
+     * swapping them around reduces the number of crossing
+     *
+     * @param mainLoopIteration the iteration number of the main loop
+     * @param model             the internal model describing the hierarchy
+     */
+    private void transpose(int mainLoopIteration, GraphHierarchyModel model) {
+        boolean improved = true;
+
+        // Track the number of iterations in case of looping
+        int count = 0;
+        int maxCount = 10;
+
+        while (improved && count++ < maxCount) {
+            // On certain iterations allow allow swapping of cell pairs with
+            // equal edge crossings switched or not switched. This help to
+            // nudge a stuck layout into a lower crossing total.
+            boolean nudge = mainLoopIteration % 2 == 1 && count % 2 == 1;
+            improved = false;
+
+            for (int i = 0; i < model.ranks.size(); i++) {
+                GraphHierarchyRank rank = model.ranks.get(i);
+                GraphAbstractHierarchyCell[] orderedCells = new GraphAbstractHierarchyCell[rank.size()];
+                Iterator<GraphAbstractHierarchyCell> iter = rank.iterator();
+                for (int j = 0; j < orderedCells.length; j++) {
+                    GraphAbstractHierarchyCell cell = iter.next();
+                    orderedCells[cell.getGeneralPurposeVariable(i)] = cell;
+                }
+                List<GraphAbstractHierarchyCell> leftCellAboveConnections;
+                List<GraphAbstractHierarchyCell> leftCellBelowConnections;
+                List<GraphAbstractHierarchyCell> rightCellAboveConnections = null;
+                List<GraphAbstractHierarchyCell> rightCellBelowConnections = null;
+                int[] leftAbovePositions;
+                int[] leftBelowPositions;
+                int[] rightAbovePositions = null;
+                int[] rightBelowPositions = null;
+                GraphAbstractHierarchyCell leftCell;
+                GraphAbstractHierarchyCell rightCell = null;
+                for (int j = 0; j < (rank.size() - 1); j++) {
+                    // For each intra-rank adjacent pair of cells
+                    // see if swapping them around would reduce the
+                    // number of edges crossing they cause in total
+                    // On every cell pair except the first on each rank, we
+                    // can save processing using the previous values for the
+                    // right cell on the new left cell
+                    if (j == 0) {
+                        leftCell = orderedCells[j];
+                        leftCellAboveConnections = leftCell.getNextLayerConnectedCells(i);
+                        leftCellBelowConnections = leftCell.getPreviousLayerConnectedCells(i);
+
+                        leftAbovePositions = new int[leftCellAboveConnections.size()];
+                        leftBelowPositions = new int[leftCellBelowConnections.size()];
+
+                        for (int k = 0; k < leftAbovePositions.length; k++) {
+                            leftAbovePositions[k] = leftCellAboveConnections.get(k).getGeneralPurposeVariable(i + 1);
+                        }
+
+                        for (int k = 0; k < leftBelowPositions.length; k++) {
+                            leftBelowPositions[k] = (leftCellBelowConnections.get(k)).getGeneralPurposeVariable(i - 1);
+                        }
+                    } else {
+                        leftCellAboveConnections = rightCellAboveConnections;
+                        leftCellBelowConnections = rightCellBelowConnections;
+                        leftAbovePositions = rightAbovePositions;
+                        leftBelowPositions = rightBelowPositions;
+                        leftCell = rightCell;
+                    }
+
+                    rightCell = orderedCells[j + 1];
+                    rightCellAboveConnections = rightCell.getNextLayerConnectedCells(i);
+                    rightCellBelowConnections = rightCell.getPreviousLayerConnectedCells(i);
+
+                    rightAbovePositions = new int[rightCellAboveConnections.size()];
+                    rightBelowPositions = new int[rightCellBelowConnections.size()];
+                    for (int k = 0; k < rightAbovePositions.length; k++) {
+                        rightAbovePositions[k] = (rightCellAboveConnections.get(k)).getGeneralPurposeVariable(i + 1);
+                    }
+                    for (int k = 0; k < rightBelowPositions.length; k++) {
+                        rightBelowPositions[k] = (rightCellBelowConnections.get(k)).getGeneralPurposeVariable(i - 1);
+                    }
+                    int totalCurrentCrossings = 0;
+                    int totalSwitchedCrossings = 0;
+                    for (int leftAbovePosition : leftAbovePositions) {
+                        for (int rightAbovePosition : rightAbovePositions) {
+                            if (leftAbovePosition > rightAbovePosition) {
+                                totalCurrentCrossings++;
+                            }
+                            if (leftAbovePosition < rightAbovePosition) {
+                                totalSwitchedCrossings++;
+                            }
+                        }
+                    }
+                    for (int leftBelowPosition : leftBelowPositions) {
+                        for (int rightBelowPosition : rightBelowPositions) {
+                            if (leftBelowPosition > rightBelowPosition) {
+                                totalCurrentCrossings++;
+                            }
+                            if (leftBelowPosition < rightBelowPosition) {
+                                totalSwitchedCrossings++;
+                            }
+                        }
+                    }
+                    if ((totalSwitchedCrossings < totalCurrentCrossings) || (totalSwitchedCrossings
+                                                                             == totalCurrentCrossings && nudge)) {
+                        int temp = leftCell.getGeneralPurposeVariable(i);
+                        leftCell.setGeneralPurposeVariable(i, rightCell.getGeneralPurposeVariable(i));
+                        rightCell.setGeneralPurposeVariable(i, temp);
+                        // With this pair exchanged we have to switch all of
+                        // values for the left cell to the right cell so the
+                        // next iteration for this rank uses it as the left
+                        // cell again
+                        rightCellAboveConnections = leftCellAboveConnections;
+                        rightCellBelowConnections = leftCellBelowConnections;
+                        rightAbovePositions = leftAbovePositions;
+                        rightBelowPositions = leftBelowPositions;
+                        rightCell = leftCell;
+
+                        if (!nudge) {
+                            // Don't count nudges as improvement or we'll end
+                            // up stuck in two combinations and not finishing
+                            // as early as we should
+                            improved = true;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -462,6 +461,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
      * values. Does not violate (x.compareTo(y)==0) == (x.equals(y))
      */
     protected static class MedianCellSorter implements Comparable<Object> {
+
         /**
          * The median value of the cell stored
          */
@@ -478,6 +478,7 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
          * @return the standard return you would expect when comparing two
          * double
          */
+        @Override
         public int compareTo(Object arg0) {
             if (arg0 instanceof MedianCellSorter) {
                 if (medianValue < ((MedianCellSorter) arg0).medianValue) {

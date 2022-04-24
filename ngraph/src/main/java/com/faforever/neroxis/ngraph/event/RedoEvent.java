@@ -7,5 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class RedoEvent extends EventObject {
+
     UndoableEdit edit;
 }

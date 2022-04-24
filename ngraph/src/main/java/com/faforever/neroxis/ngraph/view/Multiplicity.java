@@ -11,71 +11,63 @@ import org.w3c.dom.Element;
 public class Multiplicity {
 
     private static final Logger log = Logger.getLogger(Multiplicity.class.getName());
-
     /**
      * Defines the type of the source or target terminal. The type is a string
      * passed to Utils.isNode together with the source or target vertex
      * value as the first argument.
      */
     protected String type;
-
     /**
      * Optional string that specifies the attributename to be passed to
      * Cell.is to check if the rule applies to a cell.
      */
     protected String attr;
-
     /**
      * Optional string that specifies the value of the attribute to be passed
      * to Cell.is to check if the rule applies to a cell.
      */
     protected String value;
-
     /**
      * Boolean that specifies if the rule is applied to the source or target
      * terminal of an edge.
      */
     protected boolean source;
-
     /**
      * Defines the minimum number of connections for which this rule applies.
      * Default is 0.
      */
     protected int min = 0;
-
     /**
      * Defines the maximum number of connections for which this rule applies.
      * A value of 'n' means unlimited times. Default is 'n'.
      */
     protected String max = "n";
-
     /**
      * Holds an array of strings that specify the type of neighbor for which
      * this rule applies. The strings are used in Cell.is on the opposite
      * terminal to check if the rule applies to the connection.
      */
     protected Collection<String> validNeighbors;
-
     /**
      * Boolean indicating if the list of validNeighbors are those that are allowed
      * for this rule or those that are not allowed for this rule.
      */
     protected boolean validNeighborsAllowed = true;
-
     /**
      * Holds the localized error message to be displayed if the number of
      * connections for which the rule applies is smaller than min or greater
      * than max.
      */
     protected String countError;
-
     /**
      * Holds the localized error message to be displayed if the type of the
      * neighbor for a connection does not match the rule.
      */
     protected String typeError;
 
-    public Multiplicity(boolean source, String type, String attr, String value, int min, String max, Collection<String> validNeighbors, String countError, String typeError, boolean validNeighborsAllowed) {
+    public Multiplicity(boolean source, String type, String attr, String value, int min, String max,
+                        Collection<String> validNeighbors, String countError, String typeError,
+                        boolean validNeighborsAllowed) {
         this.source = source;
         this.type = type;
         this.attr = attr;
@@ -106,7 +98,8 @@ public class Multiplicity {
     public String check(Graph graph, ICell edge, ICell source, ICell target, int sourceOut, int targetIn) {
         StringBuilder error = new StringBuilder();
 
-        if ((this.source && checkTerminal(graph, source, edge)) || (!this.source && checkTerminal(graph, target, edge))) {
+        if ((this.source && checkTerminal(graph, source, edge)) || (!this.source && checkTerminal(graph, target,
+                                                                                                  edge))) {
             if (!isUnlimited()) {
                 int m = getMaxValue();
 
@@ -130,39 +123,10 @@ public class Multiplicity {
     /**
      * Checks the type of the given value.
      */
-    public boolean checkNeighbors(Graph graph, ICell edge, ICell source, ICell target) {
-        IGraphModel model = graph.getModel();
-        Object sourceValue = model.getValue(source);
-        Object targetValue = model.getValue(target);
-        boolean isValid = !validNeighborsAllowed;
-
-        for (String tmp : validNeighbors) {
-            if (this.source && checkType(graph, targetValue, tmp)) {
-                isValid = validNeighborsAllowed;
-                break;
-            } else if (!this.source && checkType(graph, sourceValue, tmp)) {
-                isValid = validNeighborsAllowed;
-                break;
-            }
-        }
-
-        return isValid;
-    }
-
-    /**
-     * Checks the type of the given value.
-     */
     public boolean checkTerminal(Graph graph, ICell terminal, ICell edge) {
         Object userObject = graph.getModel().getValue(terminal);
 
         return checkType(graph, userObject, type, attr, value);
-    }
-
-    /**
-     * Checks the type of the given value.
-     */
-    public boolean checkType(Graph graph, Object value, String type) {
-        return checkType(graph, value, type, null, null);
     }
 
     /**
@@ -200,4 +164,32 @@ public class Multiplicity {
         return 0;
     }
 
+    /**
+     * Checks the type of the given value.
+     */
+    public boolean checkNeighbors(Graph graph, ICell edge, ICell source, ICell target) {
+        IGraphModel model = graph.getModel();
+        Object sourceValue = model.getValue(source);
+        Object targetValue = model.getValue(target);
+        boolean isValid = !validNeighborsAllowed;
+
+        for (String tmp : validNeighbors) {
+            if (this.source && checkType(graph, targetValue, tmp)) {
+                isValid = validNeighborsAllowed;
+                break;
+            } else if (!this.source && checkType(graph, sourceValue, tmp)) {
+                isValid = validNeighborsAllowed;
+                break;
+            }
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Checks the type of the given value.
+     */
+    public boolean checkType(Graph graph, Object value, String type) {
+        return checkType(graph, value, type, null, null);
+    }
 }

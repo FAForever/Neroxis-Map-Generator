@@ -31,39 +31,38 @@ public class CellTracker extends CellMarker implements MouseListener, MouseMotio
         graphComponent.getGraphControl().removeMouseMotionListener(this);
     }
 
-
+    @Override
     public void mouseClicked(MouseEvent e) {
         // empty
     }
 
-
-    public void mouseEntered(MouseEvent e) {
-        // empty
-    }
-
-
-    public void mouseExited(MouseEvent e) {
-        // empty
-    }
-
-
+    @Override
     public void mousePressed(MouseEvent e) {
         // empty
     }
 
-
+    @Override
     public void mouseReleased(MouseEvent e) {
         reset();
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // empty
+    }
 
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // empty
+    }
+
+    @Override
     public void mouseDragged(MouseEvent e) {
         // empty
     }
 
-
+    @Override
     public void mouseMoved(MouseEvent e) {
         process(e);
     }
-
 }

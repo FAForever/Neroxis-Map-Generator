@@ -10,6 +10,7 @@ import com.faforever.neroxis.ngraph.view.Graph;
  * Contains all global constants.
  */
 public class Constants {
+
     /**
      * FONT_BOLD
      */
@@ -1060,5 +1061,4 @@ public class Constants {
      * for connecting edges. The type of this value is <code>float</code>.
      */
     public static String STYLE_ROUTING_CENTER_Y = "routingCenterY";
-
 }

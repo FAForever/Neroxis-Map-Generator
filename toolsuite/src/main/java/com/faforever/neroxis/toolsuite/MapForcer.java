@@ -24,7 +24,6 @@ import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.toolsuite.cli.SourceCompletionCandidates;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,17 +31,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
 import static picocli.CommandLine.Option;
 
-@Command(
-        name = "force",
-        mixinStandardHelpOptions = true,
-        description = "Force symmetry on a map",
-        versionProvider = VersionProvider.class,
-        usageHelpAutoWidth = true)
+@Command(name = "force", mixinStandardHelpOptions = true, description = "Force symmetry on a map", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapForcer implements Callable<Integer> {
 
     @Mixin
@@ -55,7 +48,6 @@ public strictfp class MapForcer implements Callable<Integer> {
     private Symmetry symmetry;
     @Option(names = "--source", description = "Which part of the map to use as the base. Values: ${COMPLETION-CANDIDATES}", completionCandidates = SourceCompletionCandidates.class)
     private String source;
-
     private IntegerMask heightMask;
     private boolean useAngle;
     private boolean reverseSide;
@@ -134,11 +126,15 @@ public strictfp class MapForcer implements Callable<Integer> {
         IntegerMask normalMask = new IntegerMask(map.getNormalMap(), null, symmetrySettings, "normal");
         IntegerMask waterMask = new IntegerMask(map.getWaterMap(), null, symmetrySettings, "water");
         IntegerMask waterFoamMask = new IntegerMask(map.getWaterFoamMap(), null, symmetrySettings, "waterFoam");
-        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterFlatnessMap(), null, symmetrySettings, "waterFlatness");
-        IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings, "waterDepthBias");
+        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterFlatnessMap(), null, symmetrySettings,
+                                                        "waterFlatness");
+        IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings,
+                                                         "waterDepthBias");
         IntegerMask terrainTypeMask = new IntegerMask(map.getTerrainType(), null, symmetrySettings, "terrainType");
-        IntegerMask textureMasksLowMask = new IntegerMask(map.getTextureMasksLow(), null, symmetrySettings, "textureMasksLow");
-        IntegerMask textureMasksHighMask = new IntegerMask(map.getTextureMasksHigh(), null, symmetrySettings, "textureMasksHigh");
+        IntegerMask textureMasksLowMask = new IntegerMask(map.getTextureMasksLow(), null, symmetrySettings,
+                                                          "textureMasksLow");
+        IntegerMask textureMasksHighMask = new IntegerMask(map.getTextureMasksHigh(), null, symmetrySettings,
+                                                           "textureMasksHigh");
 
         if (!useAngle) {
             previewMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
@@ -175,17 +171,107 @@ public strictfp class MapForcer implements Callable<Integer> {
         heightMask.writeToImage(map.getHeightmap());
     }
 
+    private void forceWaveGenerators(Collection<WaveGenerator> waveGenerators) {
+        Collection<WaveGenerator> forceedWaveGenerators = new ArrayList<>();
+        waveGenerators.forEach(waveGenerator -> {
+            if (inSourceRegion(waveGenerator.getPosition())) {
+                forceedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(),
+                                                            waveGenerator.getPosition(), waveGenerator.getRotation(),
+                                                            waveGenerator.getVelocity()));
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(waveGenerator.getPosition(),
+                                                                                           SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(waveGenerator.getRotation());
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    Vector3 newPosition = new Vector3(symmetryPoints.get(i));
+                    newPosition.setY(waveGenerator.getPosition().getY());
+                    forceedWaveGenerators.add(
+                            new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), newPosition,
+                                              symmetryRotation.get(i), waveGenerator.getVelocity()));
+                }
+            }
+        });
+        waveGenerators.clear();
+        waveGenerators.addAll(forceedWaveGenerators);
+    }
+
+    private boolean inSourceRegion(Vector3 position) {
+        return (!useAngle && heightMask.inTeamNoBounds(position, reverseSide)) || (useAngle
+                                                                                   && heightMask.inHalfNoBounds(
+                position, angle));
+    }
+
+    private void forceMarkers(Collection<Marker> markers) {
+        Collection<Marker> forceedMarkers = new ArrayList<>();
+        markers.forEach(marker -> {
+            if (inSourceRegion(marker.getPosition())) {
+                forceedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(marker.getPosition(),
+                                                                                           SymmetryType.SPAWN);
+                symmetryPoints.forEach(
+                        symmetryPoint -> forceedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
+            }
+        });
+        if (markers.size() == forceedMarkers.size()) {
+            matchToClosestMarkers(markers, forceedMarkers);
+        }
+        markers.clear();
+        markers.addAll(forceedMarkers);
+    }
+
+    private void matchToClosestMarkers(Collection<? extends Marker> sourceMarkers,
+                                       Collection<? extends Marker> destMarkers) {
+        List<Marker> sourceMarkersCopy = new ArrayList<>(sourceMarkers);
+        for (Marker destMarker : destMarkers) {
+            Marker matchingMarker = sourceMarkersCopy.stream()
+                                                     .min(Comparator.comparingDouble(
+                                                             sourceMarker -> sourceMarker.getPosition()
+                                                                                         .getXZDistance(
+                                                                                                 destMarker.getPosition())))
+                                                     .orElseThrow(() -> new IndexOutOfBoundsException(
+                                                             "List sizes are different"));
+            sourceMarkersCopy.remove(matchingMarker);
+            destMarker.setId(matchingMarker.getId());
+        }
+    }
+
+    private void forceAIMarkers(Collection<AIMarker> aiMarkers) {
+        Collection<AIMarker> forceedAImarkers = new ArrayList<>();
+        aiMarkers.forEach(aiMarker -> {
+            if (inSourceRegion(aiMarker.getPosition())) {
+                forceedAImarkers.add(new AIMarker(aiMarker.getId(), aiMarker.getPosition(), aiMarker.getNeighbors()));
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(aiMarker.getPosition(),
+                                                                                           SymmetryType.SPAWN);
+                symmetryPoints.forEach(symmetryPoint -> {
+                    LinkedHashSet<String> newNeighbors = new LinkedHashSet<>();
+                    aiMarker.getNeighbors()
+                            .forEach(marker -> newNeighbors.add(
+                                    String.format(marker + "s%d", symmetryPoints.indexOf(symmetryPoint))));
+                    forceedAImarkers.add(
+                            new AIMarker(String.format(aiMarker.getId() + "s%d", symmetryPoints.indexOf(symmetryPoint)),
+                                         symmetryPoint, newNeighbors));
+                });
+            }
+        });
+        if (aiMarkers.size() == forceedAImarkers.size()) {
+            matchToClosestMarkers(aiMarkers, forceedAImarkers);
+        }
+        aiMarkers.clear();
+        aiMarkers.addAll(forceedAImarkers);
+    }
+
     private void forceSpawns(Collection<Spawn> spawns) {
         List<Spawn> forceedSpawns = new ArrayList<>();
         spawns.forEach(spawn -> {
             if (inSourceRegion(spawn.getPosition())) {
                 forceedSpawns.add(new Spawn("", spawn.getPosition(), spawn.getNoRushOffset(), 0));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(spawn.getPosition(), SymmetryType.SPAWN);
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(spawn.getPosition(),
+                                                                                           SymmetryType.SPAWN);
                 for (int i = 0; i < symmetryPoints.size(); ++i) {
                     Vector2 symmetryPoint = symmetryPoints.get(i);
                     Vector2 symmetricNoRushOffset = new Vector2(spawn.getNoRushOffset());
                     if (!heightMask.inTeam(symmetryPoint, false)) {
-                        symmetricNoRushOffset.flip(new Vector2(0, 0), heightMask.getSymmetrySettings().getSpawnSymmetry());
+                        symmetricNoRushOffset.flip(new Vector2(0, 0),
+                                                   heightMask.getSymmetrySettings().getSpawnSymmetry());
                     }
                     forceedSpawns.add(new Spawn("", symmetryPoint, symmetricNoRushOffset, i + 1));
                 }
@@ -201,40 +287,21 @@ public strictfp class MapForcer implements Callable<Integer> {
         spawns.addAll(forceedSpawns);
     }
 
-    private void forceMarkers(Collection<Marker> markers) {
-        Collection<Marker> forceedMarkers = new ArrayList<>();
-        markers.forEach(marker -> {
-            if (inSourceRegion(marker.getPosition())) {
-                forceedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(marker.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> forceedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
+    private void forceProps(Collection<Prop> props) {
+        Collection<Prop> forceedProps = new ArrayList<>();
+        props.forEach(prop -> {
+            if (inSourceRegion(prop.getPosition())) {
+                forceedProps.add(new Prop(prop.getPath(), prop.getPosition(), prop.getRotation()));
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(prop.getPosition(),
+                                                                                           SymmetryType.SPAWN);
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(prop.getRotation());
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    forceedProps.add(new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i)));
+                }
             }
         });
-        if (markers.size() == forceedMarkers.size()) {
-            matchToClosestMarkers(markers, forceedMarkers);
-        }
-        markers.clear();
-        markers.addAll(forceedMarkers);
-    }
-
-    private void forceAIMarkers(Collection<AIMarker> aiMarkers) {
-        Collection<AIMarker> forceedAImarkers = new ArrayList<>();
-        aiMarkers.forEach(aiMarker -> {
-            if (inSourceRegion(aiMarker.getPosition())) {
-                forceedAImarkers.add(new AIMarker(aiMarker.getId(), aiMarker.getPosition(), aiMarker.getNeighbors()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(aiMarker.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(symmetryPoint -> {
-                    LinkedHashSet<String> newNeighbors = new LinkedHashSet<>();
-                    aiMarker.getNeighbors().forEach(marker -> newNeighbors.add(String.format(marker + "s%d", symmetryPoints.indexOf(symmetryPoint))));
-                    forceedAImarkers.add(new AIMarker(String.format(aiMarker.getId() + "s%d", symmetryPoints.indexOf(symmetryPoint)), symmetryPoint, newNeighbors));
-                });
-            }
-        });
-        if (aiMarkers.size() == forceedAImarkers.size()) {
-            matchToClosestMarkers(aiMarkers, forceedAImarkers);
-        }
-        aiMarkers.clear();
-        aiMarkers.addAll(forceedAImarkers);
+        props.clear();
+        props.addAll(forceedProps);
     }
 
     private void forceArmy(Army army) {
@@ -250,10 +317,12 @@ public strictfp class MapForcer implements Callable<Integer> {
         units.forEach(unit -> {
             if (inSourceRegion(unit.getPosition())) {
                 forceedUnits.add(new Unit(unit.getId(), unit.getType(), unit.getPosition(), unit.getRotation()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(unit.getPosition(), SymmetryType.SPAWN);
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(unit.getPosition(),
+                                                                                           SymmetryType.SPAWN);
                 ArrayList<Float> symmetryRotation = heightMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    forceedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), symmetryPoints.get(i), symmetryRotation.get(i)));
+                    forceedUnits.add(new Unit(unit.getId() + " sym", unit.getType(), symmetryPoints.get(i),
+                                              symmetryRotation.get(i)));
                 }
             }
         });
@@ -261,68 +330,24 @@ public strictfp class MapForcer implements Callable<Integer> {
         units.addAll(forceedUnits);
     }
 
-    private void forceProps(Collection<Prop> props) {
-        Collection<Prop> forceedProps = new ArrayList<>();
-        props.forEach(prop -> {
-            if (inSourceRegion(prop.getPosition())) {
-                forceedProps.add(new Prop(prop.getPath(), prop.getPosition(), prop.getRotation()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(prop.getPosition(), SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightMask.getSymmetryRotation(prop.getRotation());
-                for (int i = 0; i < symmetryPoints.size(); i++) {
-                    forceedProps.add(new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i)));
-                }
-            }
-        });
-        props.clear();
-        props.addAll(forceedProps);
-    }
-
-    private void forceWaveGenerators(Collection<WaveGenerator> waveGenerators) {
-        Collection<WaveGenerator> forceedWaveGenerators = new ArrayList<>();
-        waveGenerators.forEach(waveGenerator -> {
-            if (inSourceRegion(waveGenerator.getPosition())) {
-                forceedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), waveGenerator.getPosition(), waveGenerator.getRotation(), waveGenerator.getVelocity()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(waveGenerator.getPosition(), SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightMask.getSymmetryRotation(waveGenerator.getRotation());
-                for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 newPosition = new Vector3(symmetryPoints.get(i));
-                    newPosition.setY(waveGenerator.getPosition().getY());
-                    forceedWaveGenerators.add(new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), newPosition, symmetryRotation.get(i), waveGenerator.getVelocity()));
-                }
-            }
-        });
-        waveGenerators.clear();
-        waveGenerators.addAll(forceedWaveGenerators);
-    }
-
     private void forceDecals(Collection<Decal> decals) {
         Collection<Decal> forceedDecals = new ArrayList<>();
         decals.forEach(decal -> {
             if (inSourceRegion(decal.getPosition())) {
-                forceedDecals.add(new Decal(decal.getPath(), decal.getPosition(), decal.getRotation(), decal.getScale(), decal.getCutOffLOD()));
-                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(decal.getPosition(), SymmetryType.SPAWN);
+                forceedDecals.add(new Decal(decal.getPath(), decal.getPosition(), decal.getRotation(), decal.getScale(),
+                                            decal.getCutOffLOD()));
+                List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(decal.getPosition(),
+                                                                                           SymmetryType.SPAWN);
                 List<Float> symmetryRotation = heightMask.getSymmetryRotation(decal.getRotation().getY());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
-                    forceedDecals.add(new Decal(decal.getPath(), new Vector3(symmetryPoints.get(i)), symVectorRotation, decal.getScale(), decal.getCutOffLOD()));
+                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i),
+                                                            decal.getRotation().getZ());
+                    forceedDecals.add(new Decal(decal.getPath(), new Vector3(symmetryPoints.get(i)), symVectorRotation,
+                                                decal.getScale(), decal.getCutOffLOD()));
                 }
             }
         });
         decals.clear();
         decals.addAll(forceedDecals);
-    }
-
-    private void matchToClosestMarkers(Collection<? extends Marker> sourceMarkers, Collection<? extends Marker> destMarkers) {
-        List<Marker> sourceMarkersCopy = new ArrayList<>(sourceMarkers);
-        for (Marker destMarker : destMarkers) {
-            Marker matchingMarker = sourceMarkersCopy.stream().min(Comparator.comparingDouble(sourceMarker -> sourceMarker.getPosition().getXZDistance(destMarker.getPosition())))
-                    .orElseThrow(() -> new IndexOutOfBoundsException("List sizes are different"));
-            sourceMarkersCopy.remove(matchingMarker);
-            destMarker.setId(matchingMarker.getId());
-        }
-    }
-
-    private boolean inSourceRegion(Vector3 position) {
-        return (!useAngle && heightMask.inTeamNoBounds(position, reverseSide)) || (useAngle && heightMask.inHalfNoBounds(position, angle));
     }
 }

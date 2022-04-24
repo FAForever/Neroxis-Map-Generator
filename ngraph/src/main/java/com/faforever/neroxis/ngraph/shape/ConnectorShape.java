@@ -16,6 +16,7 @@ import java.util.List;
 
 public class ConnectorShape extends BasicShape {
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (state.getAbsolutePointCount() > 1 && configureGraphics(canvas, state, false)) {
             List<PointDouble> pts = new ArrayList<>(state.getAbsolutePoints());
@@ -37,11 +38,6 @@ public class ConnectorShape extends BasicShape {
             }
             paintPolyline(canvas, pts, state.getStyle());
         }
-    }
-
-    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Style style) {
-        boolean rounded = style.getCellProperties().isRounded() && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
-        canvas.paintPolyline(points.toArray(new PointDouble[0]), rounded);
     }
 
     private void translatePoint(List<PointDouble> points, int index, PointDouble offset) {
@@ -128,4 +124,9 @@ public class ConnectorShape extends BasicShape {
         return new LineDouble(p0, pe);
     }
 
+    protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Style style) {
+        boolean rounded = style.getCellProperties().isRounded()
+                          && canvas.getScale() > Constants.MIN_SCALE_FOR_ROUNDED_LINES;
+        canvas.paintPolyline(points.toArray(new PointDouble[0]), rounded);
+    }
 }

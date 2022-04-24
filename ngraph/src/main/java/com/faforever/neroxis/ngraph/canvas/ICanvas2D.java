@@ -19,6 +19,7 @@ import java.awt.Color;
  * - Encode result as image (PNG, JPG)
  */
 public interface ICanvas2D {
+
     /**
      * Saves the current state of the canvas.
      */
@@ -110,13 +111,11 @@ public interface ICanvas2D {
 
     /**
      * Sets the miterlimit. This should default to 10 if unset.
-     *
      */
     void setMiterLimit(double value);
 
     /**
      * Default value {@link Constants#DEFAULT_FONTSIZE}.
-     *
      */
     void setFontSize(double value);
 
@@ -129,13 +128,11 @@ public interface ICanvas2D {
 
     /**
      * Default value {@link Constants#DEFAULT_FONTFAMILY}.
-     *
      */
     void setFontFamily(String value);
 
     /**
      * Default value 0. See {@link Constants#STYLE_FONTSTYLE}.
-     *
      */
     void setFontStyle(int value);
 
@@ -156,7 +153,6 @@ public interface ICanvas2D {
     /**
      * Default value 1. This method may add rendering overhead and should be
      * used with care.
-     *
      */
     void setAlpha(double value);
 
@@ -173,7 +169,8 @@ public interface ICanvas2D {
      * @param direction Direction may be null. Use default value
      *                  {@link Constants#DIRECTION_SOUTH}.
      */
-    void setGradient(Color color1, Color color2, double x, double y, double w, double h, Direction direction, double alpha1, double alpha2);
+    void setGradient(Color color1, Color color2, double x, double y, double w, double h, Direction direction,
+                     double alpha1, double alpha2);
 
     /**
      * Enables or disables the painting of shadows.
@@ -200,34 +197,30 @@ public interface ICanvas2D {
 
     /**
      * Next fill or stroke should draw a rectangle.
-     *
      */
     void rect(double x, double y, double w, double h);
 
     /**
      * Next fill or stroke should draw a round rectangle.
-     *
      */
     void roundrect(double x, double y, double w, double h, double dx, double dy);
 
     /**
      * Next fill or stroke should draw an ellipse.
-     *
      */
     void ellipse(double x, double y, double w, double h);
 
     /**
      * Draws the given image.
-     *
      */
     void image(double x, double y, double w, double h, String src, boolean aspect, boolean flipH, boolean flipV);
 
     /**
      * Draws the given string. Possible values for format are empty string for
      * plain text and html for HTML markup.
-     *
      */
-    void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap, String format, String overflow, boolean clip, double rotation, String dir);
+    void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap,
+              String format, String overflow, boolean clip, double rotation, String dir);
 
     /**
      * Begins a new path.
@@ -236,25 +229,21 @@ public interface ICanvas2D {
 
     /**
      * Moves to the given path.
-     *
      */
     void moveTo(double x, double y);
 
     /**
      * Draws a line to the given path.
-     *
      */
     void lineTo(double x, double y);
 
     /**
      * Draws a quadratic curve to the given point.
-     *
      */
     void quadTo(double x1, double y1, double x2, double y2);
 
     /**
      * Draws a bezier curve to the given point.
-     *
      */
     void curveTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
@@ -277,5 +266,4 @@ public interface ICanvas2D {
      * Fills and paints the outline of the current path.
      */
     void fillAndStroke();
-
 }

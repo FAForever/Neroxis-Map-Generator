@@ -27,6 +27,7 @@ import java.util.Map;
  * Constants.DEFAULT_FONTSIZE.
  */
 public class Stylesheet {
+
     /**
      * Maps from names to styles.
      */
@@ -38,22 +39,6 @@ public class Stylesheet {
     public Stylesheet() {
         setDefaultVertexStyle(createDefaultVertexStyle());
         setDefaultEdgeStyle(createDefaultEdgeStyle());
-    }
-
-    /**
-     * Returns all styles as map of name, hashtable pairs.
-     *
-     * @return All styles in this stylesheet.
-     */
-    public Map<String, Style> getStyles() {
-        return styles;
-    }
-
-    /**
-     * Sets all styles in the stylesheet.
-     */
-    public void setStyles(Map<String, Style> styles) {
-        this.styles = styles;
     }
 
     /**
@@ -90,6 +75,22 @@ public class Stylesheet {
     }
 
     /**
+     * Returns all styles as map of name, hashtable pairs.
+     *
+     * @return All styles in this stylesheet.
+     */
+    public Map<String, Style> getStyles() {
+        return styles;
+    }
+
+    /**
+     * Sets all styles in the stylesheet.
+     */
+    public void setStyles(Map<String, Style> styles) {
+        this.styles = styles;
+    }
+
+    /**
      * Returns the default style for vertices.
      *
      * @return Returns the default vertex style.
@@ -105,6 +106,16 @@ public class Stylesheet {
      */
     public void setDefaultVertexStyle(Style value) {
         putCellStyle("defaultVertex", value);
+    }
+
+    /**
+     * Stores the specified style under the given name.
+     *
+     * @param name  Name for the style to be stored.
+     * @param style Key, value pairs that define the style.
+     */
+    public void putCellStyle(String name, Style style) {
+        styles.put(name, style);
     }
 
     /**
@@ -126,16 +137,6 @@ public class Stylesheet {
     }
 
     /**
-     * Stores the specified style under the given name.
-     *
-     * @param name  Name for the style to be stored.
-     * @param style Key, value pairs that define the style.
-     */
-    public void putCellStyle(String name, Style style) {
-        styles.put(name, style);
-    }
-
-    /**
      * Returns the cell style for the specified cell or the given defaultStyle
      * if no style can be found for the given stylename.
      *
@@ -147,5 +148,4 @@ public class Stylesheet {
     public Style getCellStyle(String name, Style defaultStyle) {
         return styles.getOrDefault(name, defaultStyle).spawnChild();
     }
-
 }

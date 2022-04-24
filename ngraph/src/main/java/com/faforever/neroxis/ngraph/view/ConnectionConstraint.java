@@ -10,11 +10,11 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
  * side of an edge to its terminal.
  */
 public class ConnectionConstraint {
+
     /**
      * Point that specifies the fixed location of the connection point.
      */
     protected PointDouble point;
-
     /**
      * Boolean that specifies if the point should be projected onto the perimeter
      * of the terminal.
@@ -76,5 +76,4 @@ public class ConnectionConstraint {
     public void setPerimeter(boolean value) {
         perimeter = value;
     }
-
 }

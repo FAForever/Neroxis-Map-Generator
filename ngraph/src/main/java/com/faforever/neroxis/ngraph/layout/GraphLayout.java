@@ -27,12 +27,10 @@ public abstract class GraphLayout implements IGraphLayout {
      * Holds the enclosing graph.
      */
     protected final Graph graph;
-
     /**
      * The parent cell of the layout, if any
      */
     protected ICell parent;
-
     /**
      * Boolean indicating if the bounding box of the label should be used if
      * its available. Default is true.
@@ -46,11 +44,12 @@ public abstract class GraphLayout implements IGraphLayout {
         this.graph = graph;
     }
 
+    @Override
     public void execute(ICell parent) {
         this.parent = parent;
     }
 
-
+    @Override
     public void moveCell(ICell cell, double x, double y) {
         // TODO: Map the position to a child index for
         // the cell to be placed closest to the position
@@ -99,7 +98,10 @@ public abstract class GraphLayout implements IGraphLayout {
     public boolean isEdgeIgnored(ICell edge) {
         IGraphModel model = graph.getModel();
 
-        return !model.isEdge(edge) || !graph.isCellVisible(edge) || model.getTerminal(edge, true) == null || model.getTerminal(edge, false) == null;
+        return !model.isEdge(edge)
+               || !graph.isCellVisible(edge)
+               || model.getTerminal(edge, true) == null
+               || model.getTerminal(edge, false) == null;
     }
 
     /**
@@ -114,25 +116,6 @@ public abstract class GraphLayout implements IGraphLayout {
      */
     public void setOrthogonalEdge(ICell edge, boolean value) {
         graph.setCellStyles(Constants.STYLE_ORTHOGONAL, (value) ? "1" : "0", List.of(edge));
-    }
-
-    public PointDouble getParentOffset(ICell parent) {
-        PointDouble result = new PointDouble();
-        if (parent != null && parent != this.parent) {
-            IGraphModel model = graph.getModel();
-            if (model.isAncestor(this.parent, parent)) {
-                Geometry parentGeo = model.getGeometry(parent);
-                while (parent != this.parent) {
-                    result.setX(result.getX() + parentGeo.getX());
-                    result.setY(result.getY() + parentGeo.getY());
-
-                    parent = model.getParent(parent);
-                    parentGeo = model.getGeometry(parent);
-                }
-            }
-        }
-
-        return result;
     }
 
     /**
@@ -157,7 +140,6 @@ public abstract class GraphLayout implements IGraphLayout {
                 point.setX(point.getX() - parentOffset.getX());
                 point.setY(point.getY() - parentOffset.getY());
             }
-
         }
 
         geometry.setPoints(points);
@@ -182,7 +164,8 @@ public abstract class GraphLayout implements IGraphLayout {
                 double dy0 = (tmp.getY() - state.getY()) / scale;
                 double dx1 = (tmp.getX() + tmp.getWidth() - state.getX() - state.getWidth()) / scale;
                 double dy1 = (tmp.getY() + tmp.getHeight() - state.getY() - state.getHeight()) / scale;
-                geo = new RectangleDouble(geo.getX() + dx0, geo.getY() + dy0, geo.getWidth() - dx0 + dx1, geo.getHeight() + -dy0 + dy1);
+                geo = new RectangleDouble(geo.getX() + dx0, geo.getY() + dy0, geo.getWidth() - dx0 + dx1,
+                                          geo.getHeight() + -dy0 + dy1);
             }
         }
 
@@ -197,6 +180,25 @@ public abstract class GraphLayout implements IGraphLayout {
             }
         }
         return new RectangleDouble(geo);
+    }
+
+    public PointDouble getParentOffset(ICell parent) {
+        PointDouble result = new PointDouble();
+        if (parent != null && parent != this.parent) {
+            IGraphModel model = graph.getModel();
+            if (model.isAncestor(this.parent, parent)) {
+                Geometry parentGeo = model.getGeometry(parent);
+                while (parent != this.parent) {
+                    result.setX(result.getX() + parentGeo.getX());
+                    result.setY(result.getY() + parentGeo.getY());
+
+                    parent = model.getParent(parent);
+                    parentGeo = model.getGeometry(parent);
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

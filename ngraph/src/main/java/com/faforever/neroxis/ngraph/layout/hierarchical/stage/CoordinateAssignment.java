@@ -1,7 +1,6 @@
 /**
  * Copyright (c) 2005-2015, JGraph Ltd
  */
-
 package com.faforever.neroxis.ngraph.layout.hierarchical.stage;
 
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
@@ -164,7 +163,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * @param orientation          the position of the root node(s) relative to the graph
      * @param initialX             the leftmost coordinate node placement starts at
      */
-    public CoordinateAssignment(HierarchicalLayout layout, double intraCellSpacing, double interRankCellSpacing, int orientation, double initialX, double parallelEdgeSpacing) {
+    public CoordinateAssignment(HierarchicalLayout layout, double intraCellSpacing, double interRankCellSpacing,
+                                int orientation, double initialX, double parallelEdgeSpacing) {
         this.layout = layout;
         this.intraCellSpacing = intraCellSpacing;
         this.interRankCellSpacing = interRankCellSpacing;
@@ -200,6 +200,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
     /**
      * A basic horizontal coordinate assignment algorithm
      */
+    @Override
     public void execute(Object parent) {
         GraphHierarchyModel model = layout.getModel();
         currentXDelta = 0.0;
@@ -252,345 +253,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
     }
 
     /**
-     * Performs one median positioning sweep in both directions
-     *
-     * @param model an internal model of the hierarchical layout
-     */
-    private void minNode(GraphHierarchyModel model) {
-        // Queue all nodes
-        LinkedList<WeightedCellSorter> nodeList = new LinkedList<>();
-
-        // Need to be able to map from cell to cellWrapper
-        Map<GraphAbstractHierarchyCell, WeightedCellSorter> map = new HashMap<>();
-        GraphAbstractHierarchyCell[][] rank = new GraphAbstractHierarchyCell[model.maxRank + 1][];
-
-        for (int i = 0; i <= model.maxRank; i++) {
-            GraphHierarchyRank rankSet = model.ranks.get(i);
-            rank[i] = rankSet.toArray(new GraphAbstractHierarchyCell[0]);
-            for (int j = 0; j < rank[i].length; j++) {
-                // Use the weight to store the rank and visited to store whether
-                // or not the cell is in the list
-                GraphAbstractHierarchyCell cell = rank[i][j];
-                WeightedCellSorter cellWrapper = new WeightedCellSorter(cell, i);
-                cellWrapper.rankIndex = j;
-                cellWrapper.visited = true;
-                nodeList.add(cellWrapper);
-                map.put(cell, cellWrapper);
-            }
-        }
-
-        // Set a limit of the maximum number of times we will access the queue
-        // in case a loop appears
-        int maxTries = nodeList.size() * 10;
-        int count = 0;
-
-        // Don't move cell within this value of their median
-        int tolerance = 1;
-
-        while (!nodeList.isEmpty() && count <= maxTries) {
-            WeightedCellSorter cellWrapper = nodeList.getFirst();
-            GraphAbstractHierarchyCell cell = cellWrapper.cell;
-
-            int rankValue = cellWrapper.weightedValue;
-            int rankIndex = cellWrapper.rankIndex;
-
-            Object[] nextLayerConnectedCells = cell.getNextLayerConnectedCells(rankValue).toArray();
-            Object[] previousLayerConnectedCells = cell.getPreviousLayerConnectedCells(rankValue).toArray();
-
-            int numNextLayerConnected = nextLayerConnectedCells.length;
-            int numPreviousLayerConnected = previousLayerConnectedCells.length;
-
-            int medianNextLevel = medianXValue(nextLayerConnectedCells, rankValue + 1);
-            int medianPreviousLevel = medianXValue(previousLayerConnectedCells, rankValue - 1);
-
-            int numConnectedNeighbours = numNextLayerConnected + numPreviousLayerConnected;
-            int currentPosition = cell.getGeneralPurposeVariable(rankValue);
-            double cellMedian = currentPosition;
-
-            if (numConnectedNeighbours > 0) {
-                cellMedian = (double) (medianNextLevel * numNextLayerConnected + medianPreviousLevel * numPreviousLayerConnected) / numConnectedNeighbours;
-            }
-
-            // Flag storing whether or not position has changed
-            boolean positionChanged = false;
-
-            if (cellMedian < currentPosition - tolerance) {
-                if (rankIndex == 0) {
-                    cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
-                    positionChanged = true;
-                } else {
-                    GraphAbstractHierarchyCell leftCell = rank[rankValue][rankIndex - 1];
-                    int leftLimit = leftCell.getGeneralPurposeVariable(rankValue);
-                    leftLimit = leftLimit + (int) leftCell.width / 2 + (int) intraCellSpacing + (int) cell.width / 2;
-
-                    if (leftLimit < cellMedian) {
-                        cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
-                        positionChanged = true;
-                    } else if (leftLimit < cell.getGeneralPurposeVariable(rankValue) - tolerance) {
-                        cell.setGeneralPurposeVariable(rankValue, leftLimit);
-                        positionChanged = true;
-                    }
-                }
-            } else if (cellMedian > currentPosition + tolerance) {
-                int rankSize = rank[rankValue].length;
-
-                if (rankIndex == rankSize - 1) {
-                    cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
-                    positionChanged = true;
-                } else {
-                    GraphAbstractHierarchyCell rightCell = rank[rankValue][rankIndex + 1];
-                    int rightLimit = rightCell.getGeneralPurposeVariable(rankValue);
-                    rightLimit = rightLimit - (int) rightCell.width / 2 - (int) intraCellSpacing - (int) cell.width / 2;
-
-                    if (rightLimit > cellMedian) {
-                        cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
-                        positionChanged = true;
-                    } else if (rightLimit > cell.getGeneralPurposeVariable(rankValue) + tolerance) {
-                        cell.setGeneralPurposeVariable(rankValue, rightLimit);
-                        positionChanged = true;
-                    }
-                }
-            }
-
-            if (positionChanged) {
-                // Add connected nodes to map and list
-                for (int i = 0; i < nextLayerConnectedCells.length; i++) {
-                    GraphAbstractHierarchyCell connectedCell = (GraphAbstractHierarchyCell) nextLayerConnectedCells[i];
-                    WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
-
-                    if (connectedCellWrapper != null) {
-                        if (connectedCellWrapper.visited == false) {
-                            connectedCellWrapper.visited = true;
-                            nodeList.add(connectedCellWrapper);
-                        }
-                    }
-                }
-
-                // Add connected nodes to map and list
-                for (int i = 0; i < previousLayerConnectedCells.length; i++) {
-                    GraphAbstractHierarchyCell connectedCell = (GraphAbstractHierarchyCell) previousLayerConnectedCells[i];
-                    WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
-
-                    if (connectedCellWrapper != null) {
-                        if (connectedCellWrapper.visited == false) {
-                            connectedCellWrapper.visited = true;
-                            nodeList.add(connectedCellWrapper);
-                        }
-                    }
-                }
-            }
-
-            nodeList.removeFirst();
-            cellWrapper.visited = false;
-            count++;
-        }
-    }
-
-    /**
-     * Performs one median positioning sweep in one direction
-     *
-     * @param i     the iteration of the whole process
-     * @param model an internal model of the hierarchical layout
-     */
-    private void medianPos(int i, GraphHierarchyModel model) {
-        // Reverse sweep direction each time through this method
-        boolean downwardSweep = (i % 2 == 0);
-
-        if (downwardSweep) {
-            for (int j = model.maxRank; j > 0; j--) {
-                rankMedianPosition(j - 1, model, j);
-            }
-        } else {
-            for (int j = 0; j < model.maxRank - 1; j++) {
-                rankMedianPosition(j + 1, model, j);
-            }
-        }
-    }
-
-    /**
-     * Performs median minimisation over one rank.
-     *
-     * @param rankValue     the layer number of this rank
-     * @param model         an internal model of the hierarchical layout
-     * @param nextRankValue the layer number whose connected cels are to be laid out
-     *                      relative to
-     */
-    protected void rankMedianPosition(int rankValue, GraphHierarchyModel model, int nextRankValue) {
-        GraphHierarchyRank rankSet = model.ranks.get(rankValue);
-        Object[] rank = rankSet.toArray();
-        // Form an array of the order in which the cells are to be processed
-        // , the order is given by the weighted sum of the in or out edges,
-        // depending on whether we're travelling up or down the hierarchy.
-        WeightedCellSorter[] weightedValues = new WeightedCellSorter[rank.length];
-        Map<GraphAbstractHierarchyCell, WeightedCellSorter> cellMap = new HashMap<>(rank.length);
-
-        for (int i = 0; i < rank.length; i++) {
-            GraphAbstractHierarchyCell currentCell = (GraphAbstractHierarchyCell) rank[i];
-            weightedValues[i] = new WeightedCellSorter();
-            weightedValues[i].cell = currentCell;
-            weightedValues[i].rankIndex = i;
-            cellMap.put(currentCell, weightedValues[i]);
-            Collection<GraphAbstractHierarchyCell> nextLayerConnectedCells = null;
-
-            if (nextRankValue < rankValue) {
-                nextLayerConnectedCells = currentCell.getPreviousLayerConnectedCells(rankValue);
-            } else {
-                nextLayerConnectedCells = currentCell.getNextLayerConnectedCells(rankValue);
-            }
-
-            // Calculate the weighing based on this node type and those this
-            // node is connected to on the next layer
-            weightedValues[i].weightedValue = calculatedWeightedValue(currentCell, nextLayerConnectedCells);
-        }
-
-        Arrays.sort(weightedValues);
-        // Set the new position of each node within the rank using
-        // its temp variable
-
-        for (int i = 0; i < weightedValues.length; i++) {
-            int numConnectionsNextLevel = 0;
-            GraphAbstractHierarchyCell cell = weightedValues[i].cell;
-            Object[] nextLayerConnectedCells = null;
-            int medianNextLevel = 0;
-
-            if (nextRankValue < rankValue) {
-                nextLayerConnectedCells = cell.getPreviousLayerConnectedCells(rankValue).toArray();
-            } else {
-                nextLayerConnectedCells = cell.getNextLayerConnectedCells(rankValue).toArray();
-            }
-
-            if (nextLayerConnectedCells != null) {
-                numConnectionsNextLevel = nextLayerConnectedCells.length;
-
-                if (numConnectionsNextLevel > 0) {
-                    medianNextLevel = medianXValue(nextLayerConnectedCells, nextRankValue);
-                } else {
-                    // For case of no connections on the next level set the
-                    // median to be the current position and try to be
-                    // positioned there
-                    medianNextLevel = cell.getGeneralPurposeVariable(rankValue);
-                }
-            }
-
-            double leftBuffer = 0.0;
-            double leftLimit = -100000000.0;
-
-            for (int j = weightedValues[i].rankIndex - 1; j >= 0; ) {
-                WeightedCellSorter weightedValue = cellMap.get(rank[j]);
-
-                if (weightedValue != null) {
-                    GraphAbstractHierarchyCell leftCell = weightedValue.cell;
-
-                    if (weightedValue.visited) {
-                        // The left limit is the right hand limit of that
-                        // cell plus any allowance for unallocated cells
-                        // in-between
-                        leftLimit = leftCell.getGeneralPurposeVariable(rankValue) + leftCell.width / 2.0 + intraCellSpacing + leftBuffer + cell.width / 2.0;
-                        j = -1;
-                    } else {
-                        leftBuffer += leftCell.width + intraCellSpacing;
-                        j--;
-                    }
-                }
-            }
-
-            double rightBuffer = 0.0;
-            double rightLimit = 100000000.0;
-
-            for (int j = weightedValues[i].rankIndex + 1; j < weightedValues.length; ) {
-                WeightedCellSorter weightedValue = cellMap.get(rank[j]);
-
-                if (weightedValue != null) {
-                    GraphAbstractHierarchyCell rightCell = weightedValue.cell;
-
-                    if (weightedValue.visited) {
-                        // The left limit is the right hand limit of that
-                        // cell plus any allowance for unallocated cells
-                        // in-between
-                        rightLimit = rightCell.getGeneralPurposeVariable(rankValue) - rightCell.width / 2.0 - intraCellSpacing - rightBuffer - cell.width / 2.0;
-                        j = weightedValues.length;
-                    } else {
-                        rightBuffer += rightCell.width + intraCellSpacing;
-                        j++;
-                    }
-                }
-            }
-
-            if (medianNextLevel >= leftLimit && medianNextLevel <= rightLimit) {
-                cell.setGeneralPurposeVariable(rankValue, medianNextLevel);
-            } else if (medianNextLevel < leftLimit) {
-                // Couldn't place at median value, place as close to that
-                // value as possible
-                cell.setGeneralPurposeVariable(rankValue, (int) leftLimit);
-                currentXDelta += leftLimit - medianNextLevel;
-            } else if (medianNextLevel > rightLimit) {
-                // Couldn't place at median value, place as close to that
-                // value as possible
-                cell.setGeneralPurposeVariable(rankValue, (int) rightLimit);
-                currentXDelta += medianNextLevel - rightLimit;
-            }
-
-            weightedValues[i].visited = true;
-        }
-    }
-
-    /**
-     * Calculates the priority the specified cell has based on the type of its
-     * cell and the cells it is connected to on the next layer
-     *
-     * @param currentCell the cell whose weight is to be calculated
-     * @param collection  the cells the specified cell is connected to
-     * @return the total weighted of the edges between these cells
-     */
-    private int calculatedWeightedValue(GraphAbstractHierarchyCell currentCell, Collection<GraphAbstractHierarchyCell> collection) {
-        int totalWeight = 0;
-        for (GraphAbstractHierarchyCell cell : collection) {
-            if (currentCell.isVertex() && cell.isVertex()) {
-                totalWeight++;
-            } else if (currentCell.isEdge() && cell.isEdge()) {
-                totalWeight += 8;
-            } else {
-                totalWeight += 2;
-            }
-        }
-
-        return totalWeight;
-    }
-
-    /**
-     * Calculates the median position of the connected cell on the specified
-     * rank
-     *
-     * @param connectedCells the cells the candidate connects to on this level
-     * @param rankValue      the layer number of this rank
-     * @return the median rank order ( not x position ) of the connected cells
-     */
-    private int medianXValue(Object[] connectedCells, int rankValue) {
-        if (connectedCells.length == 0) {
-            return 0;
-        }
-
-        int[] medianValues = new int[connectedCells.length];
-
-        for (int i = 0; i < connectedCells.length; i++) {
-            medianValues[i] = ((GraphAbstractHierarchyCell) connectedCells[i]).getGeneralPurposeVariable(rankValue);
-        }
-
-        Arrays.sort(medianValues);
-
-        if (connectedCells.length % 2 == 1) {
-            // For odd numbers of adjacent vertices return the median
-            return medianValues[connectedCells.length / 2];
-        } else {
-            int medianPoint = connectedCells.length / 2;
-            int leftMedian = medianValues[medianPoint - 1];
-            int rightMedian = medianValues[medianPoint];
-
-            return ((leftMedian + rightMedian) / 2);
-        }
-    }
-
-    /**
      * Sets up the layout in an initial positioning. The ranks are all centered
      * as much as possible along the middle vertex in each rank. The other cells
      * are then placed as close as possible on either side.
@@ -612,70 +274,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             if (i > 0) {
                 rankCoordinates(i, facade, model);
             }
-        }
-    }
-
-    /**
-     * Sets up the layout in an initial positioning. All the first cells in each
-     * rank are moved to the left and the rest of the rank inserted as close
-     * together as their size and buffering permits. This method works on just
-     * the specified rank.
-     *
-     * @param rankValue the current rank being processed
-     * @param graph     the facade describing the input graph
-     * @param model     an internal model of the hierarchical layout
-     */
-    protected void rankCoordinates(int rankValue, Graph graph, GraphHierarchyModel model) {
-        GraphHierarchyRank rank = model.ranks.get(rankValue);
-        double maxY = 0.0;
-        double localX = initialX + (widestRankValue - rankWidths[rankValue]) / 2;
-
-        // Store whether or not any of the cells' bounds were unavailable so
-        // to only issue the warning once for all cells
-        boolean boundsWarning = false;
-
-        for (GraphAbstractHierarchyCell cell : rank) {
-            if (cell.isVertex()) {
-                GraphHierarchyNode node = (GraphHierarchyNode) cell;
-                RectangleDouble bounds = layout.getVertexBounds(node.cell);
-
-                if (bounds != null) {
-                    if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
-                        cell.width = bounds.getWidth();
-                        cell.height = bounds.getHeight();
-                    } else {
-                        cell.width = bounds.getHeight();
-                        cell.height = bounds.getWidth();
-                    }
-                } else {
-                    boundsWarning = true;
-                }
-
-                maxY = Math.max(maxY, cell.height);
-            } else if (cell.isEdge()) {
-                GraphHierarchyEdge edge = (GraphHierarchyEdge) cell;
-                // The width is the number of additional parallel edges
-                // time the parallel edge spacing
-                int numEdges = 1;
-
-                if (edge.edges != null) {
-                    numEdges = edge.edges.size();
-                } else {
-                    log.finer("edge.edges is null");
-                }
-
-                cell.width = (numEdges - 1) * parallelEdgeSpacing;
-            }
-
-            // Set the initial x-value as being the best result so far
-            localX += cell.width / 2.0;
-            cell.setX(rankValue, localX);
-            cell.setGeneralPurposeVariable(rankValue, (int) localX);
-            localX += cell.width / 2.0;
-            localX += intraCellSpacing;
-        }
-        if (boundsWarning) {
-            log.warning("At least one cell has no bounds");
         }
     }
 
@@ -778,6 +376,419 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 cell.setY(rankValue, y);
             }
         }
+    }
+
+    /**
+     * Sets up the layout in an initial positioning. All the first cells in each
+     * rank are moved to the left and the rest of the rank inserted as close
+     * together as their size and buffering permits. This method works on just
+     * the specified rank.
+     *
+     * @param rankValue the current rank being processed
+     * @param graph     the facade describing the input graph
+     * @param model     an internal model of the hierarchical layout
+     */
+    protected void rankCoordinates(int rankValue, Graph graph, GraphHierarchyModel model) {
+        GraphHierarchyRank rank = model.ranks.get(rankValue);
+        double maxY = 0.0;
+        double localX = initialX + (widestRankValue - rankWidths[rankValue]) / 2;
+
+        // Store whether or not any of the cells' bounds were unavailable so
+        // to only issue the warning once for all cells
+        boolean boundsWarning = false;
+
+        for (GraphAbstractHierarchyCell cell : rank) {
+            if (cell.isVertex()) {
+                GraphHierarchyNode node = (GraphHierarchyNode) cell;
+                RectangleDouble bounds = layout.getVertexBounds(node.cell);
+
+                if (bounds != null) {
+                    if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
+                        cell.width = bounds.getWidth();
+                        cell.height = bounds.getHeight();
+                    } else {
+                        cell.width = bounds.getHeight();
+                        cell.height = bounds.getWidth();
+                    }
+                } else {
+                    boundsWarning = true;
+                }
+
+                maxY = Math.max(maxY, cell.height);
+            } else if (cell.isEdge()) {
+                GraphHierarchyEdge edge = (GraphHierarchyEdge) cell;
+                // The width is the number of additional parallel edges
+                // time the parallel edge spacing
+                int numEdges = 1;
+
+                if (edge.edges != null) {
+                    numEdges = edge.edges.size();
+                } else {
+                    log.finer("edge.edges is null");
+                }
+
+                cell.width = (numEdges - 1) * parallelEdgeSpacing;
+            }
+
+            // Set the initial x-value as being the best result so far
+            localX += cell.width / 2.0;
+            cell.setX(rankValue, localX);
+            cell.setGeneralPurposeVariable(rankValue, (int) localX);
+            localX += cell.width / 2.0;
+            localX += intraCellSpacing;
+        }
+        if (boundsWarning) {
+            log.warning("At least one cell has no bounds");
+        }
+    }
+
+    /**
+     * Performs one median positioning sweep in both directions
+     *
+     * @param model an internal model of the hierarchical layout
+     */
+    private void minNode(GraphHierarchyModel model) {
+        // Queue all nodes
+        LinkedList<WeightedCellSorter> nodeList = new LinkedList<>();
+
+        // Need to be able to map from cell to cellWrapper
+        Map<GraphAbstractHierarchyCell, WeightedCellSorter> map = new HashMap<>();
+        GraphAbstractHierarchyCell[][] rank = new GraphAbstractHierarchyCell[model.maxRank + 1][];
+
+        for (int i = 0; i <= model.maxRank; i++) {
+            GraphHierarchyRank rankSet = model.ranks.get(i);
+            rank[i] = rankSet.toArray(new GraphAbstractHierarchyCell[0]);
+            for (int j = 0; j < rank[i].length; j++) {
+                // Use the weight to store the rank and visited to store whether
+                // or not the cell is in the list
+                GraphAbstractHierarchyCell cell = rank[i][j];
+                WeightedCellSorter cellWrapper = new WeightedCellSorter(cell, i);
+                cellWrapper.rankIndex = j;
+                cellWrapper.visited = true;
+                nodeList.add(cellWrapper);
+                map.put(cell, cellWrapper);
+            }
+        }
+
+        // Set a limit of the maximum number of times we will access the queue
+        // in case a loop appears
+        int maxTries = nodeList.size() * 10;
+        int count = 0;
+
+        // Don't move cell within this value of their median
+        int tolerance = 1;
+
+        while (!nodeList.isEmpty() && count <= maxTries) {
+            WeightedCellSorter cellWrapper = nodeList.getFirst();
+            GraphAbstractHierarchyCell cell = cellWrapper.cell;
+
+            int rankValue = cellWrapper.weightedValue;
+            int rankIndex = cellWrapper.rankIndex;
+
+            Object[] nextLayerConnectedCells = cell.getNextLayerConnectedCells(rankValue).toArray();
+            Object[] previousLayerConnectedCells = cell.getPreviousLayerConnectedCells(rankValue).toArray();
+
+            int numNextLayerConnected = nextLayerConnectedCells.length;
+            int numPreviousLayerConnected = previousLayerConnectedCells.length;
+
+            int medianNextLevel = medianXValue(nextLayerConnectedCells, rankValue + 1);
+            int medianPreviousLevel = medianXValue(previousLayerConnectedCells, rankValue - 1);
+
+            int numConnectedNeighbours = numNextLayerConnected + numPreviousLayerConnected;
+            int currentPosition = cell.getGeneralPurposeVariable(rankValue);
+            double cellMedian = currentPosition;
+
+            if (numConnectedNeighbours > 0) {
+                cellMedian = (double) (medianNextLevel * numNextLayerConnected
+                                       + medianPreviousLevel * numPreviousLayerConnected) / numConnectedNeighbours;
+            }
+
+            // Flag storing whether or not position has changed
+            boolean positionChanged = false;
+
+            if (cellMedian < currentPosition - tolerance) {
+                if (rankIndex == 0) {
+                    cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
+                    positionChanged = true;
+                } else {
+                    GraphAbstractHierarchyCell leftCell = rank[rankValue][rankIndex - 1];
+                    int leftLimit = leftCell.getGeneralPurposeVariable(rankValue);
+                    leftLimit = leftLimit + (int) leftCell.width / 2 + (int) intraCellSpacing + (int) cell.width / 2;
+
+                    if (leftLimit < cellMedian) {
+                        cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
+                        positionChanged = true;
+                    } else if (leftLimit < cell.getGeneralPurposeVariable(rankValue) - tolerance) {
+                        cell.setGeneralPurposeVariable(rankValue, leftLimit);
+                        positionChanged = true;
+                    }
+                }
+            } else if (cellMedian > currentPosition + tolerance) {
+                int rankSize = rank[rankValue].length;
+
+                if (rankIndex == rankSize - 1) {
+                    cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
+                    positionChanged = true;
+                } else {
+                    GraphAbstractHierarchyCell rightCell = rank[rankValue][rankIndex + 1];
+                    int rightLimit = rightCell.getGeneralPurposeVariable(rankValue);
+                    rightLimit = rightLimit - (int) rightCell.width / 2 - (int) intraCellSpacing - (int) cell.width / 2;
+
+                    if (rightLimit > cellMedian) {
+                        cell.setGeneralPurposeVariable(rankValue, (int) cellMedian);
+                        positionChanged = true;
+                    } else if (rightLimit > cell.getGeneralPurposeVariable(rankValue) + tolerance) {
+                        cell.setGeneralPurposeVariable(rankValue, rightLimit);
+                        positionChanged = true;
+                    }
+                }
+            }
+
+            if (positionChanged) {
+                // Add connected nodes to map and list
+                for (int i = 0; i < nextLayerConnectedCells.length; i++) {
+                    GraphAbstractHierarchyCell connectedCell = (GraphAbstractHierarchyCell) nextLayerConnectedCells[i];
+                    WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
+
+                    if (connectedCellWrapper != null) {
+                        if (connectedCellWrapper.visited == false) {
+                            connectedCellWrapper.visited = true;
+                            nodeList.add(connectedCellWrapper);
+                        }
+                    }
+                }
+
+                // Add connected nodes to map and list
+                for (int i = 0; i < previousLayerConnectedCells.length; i++) {
+                    GraphAbstractHierarchyCell connectedCell = (GraphAbstractHierarchyCell) previousLayerConnectedCells[i];
+                    WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
+
+                    if (connectedCellWrapper != null) {
+                        if (connectedCellWrapper.visited == false) {
+                            connectedCellWrapper.visited = true;
+                            nodeList.add(connectedCellWrapper);
+                        }
+                    }
+                }
+            }
+
+            nodeList.removeFirst();
+            cellWrapper.visited = false;
+            count++;
+        }
+    }
+
+    /**
+     * Calculates the median position of the connected cell on the specified
+     * rank
+     *
+     * @param connectedCells the cells the candidate connects to on this level
+     * @param rankValue      the layer number of this rank
+     * @return the median rank order ( not x position ) of the connected cells
+     */
+    private int medianXValue(Object[] connectedCells, int rankValue) {
+        if (connectedCells.length == 0) {
+            return 0;
+        }
+
+        int[] medianValues = new int[connectedCells.length];
+
+        for (int i = 0; i < connectedCells.length; i++) {
+            medianValues[i] = ((GraphAbstractHierarchyCell) connectedCells[i]).getGeneralPurposeVariable(rankValue);
+        }
+
+        Arrays.sort(medianValues);
+
+        if (connectedCells.length % 2 == 1) {
+            // For odd numbers of adjacent vertices return the median
+            return medianValues[connectedCells.length / 2];
+        } else {
+            int medianPoint = connectedCells.length / 2;
+            int leftMedian = medianValues[medianPoint - 1];
+            int rightMedian = medianValues[medianPoint];
+
+            return ((leftMedian + rightMedian) / 2);
+        }
+    }
+
+    /**
+     * Performs one median positioning sweep in one direction
+     *
+     * @param i     the iteration of the whole process
+     * @param model an internal model of the hierarchical layout
+     */
+    private void medianPos(int i, GraphHierarchyModel model) {
+        // Reverse sweep direction each time through this method
+        boolean downwardSweep = (i % 2 == 0);
+
+        if (downwardSweep) {
+            for (int j = model.maxRank; j > 0; j--) {
+                rankMedianPosition(j - 1, model, j);
+            }
+        } else {
+            for (int j = 0; j < model.maxRank - 1; j++) {
+                rankMedianPosition(j + 1, model, j);
+            }
+        }
+    }
+
+    /**
+     * Performs median minimisation over one rank.
+     *
+     * @param rankValue     the layer number of this rank
+     * @param model         an internal model of the hierarchical layout
+     * @param nextRankValue the layer number whose connected cels are to be laid out
+     *                      relative to
+     */
+    protected void rankMedianPosition(int rankValue, GraphHierarchyModel model, int nextRankValue) {
+        GraphHierarchyRank rankSet = model.ranks.get(rankValue);
+        Object[] rank = rankSet.toArray();
+        // Form an array of the order in which the cells are to be processed
+        // , the order is given by the weighted sum of the in or out edges,
+        // depending on whether we're travelling up or down the hierarchy.
+        WeightedCellSorter[] weightedValues = new WeightedCellSorter[rank.length];
+        Map<GraphAbstractHierarchyCell, WeightedCellSorter> cellMap = new HashMap<>(rank.length);
+
+        for (int i = 0; i < rank.length; i++) {
+            GraphAbstractHierarchyCell currentCell = (GraphAbstractHierarchyCell) rank[i];
+            weightedValues[i] = new WeightedCellSorter();
+            weightedValues[i].cell = currentCell;
+            weightedValues[i].rankIndex = i;
+            cellMap.put(currentCell, weightedValues[i]);
+            Collection<GraphAbstractHierarchyCell> nextLayerConnectedCells = null;
+
+            if (nextRankValue < rankValue) {
+                nextLayerConnectedCells = currentCell.getPreviousLayerConnectedCells(rankValue);
+            } else {
+                nextLayerConnectedCells = currentCell.getNextLayerConnectedCells(rankValue);
+            }
+
+            // Calculate the weighing based on this node type and those this
+            // node is connected to on the next layer
+            weightedValues[i].weightedValue = calculatedWeightedValue(currentCell, nextLayerConnectedCells);
+        }
+
+        Arrays.sort(weightedValues);
+        // Set the new position of each node within the rank using
+        // its temp variable
+
+        for (int i = 0; i < weightedValues.length; i++) {
+            int numConnectionsNextLevel = 0;
+            GraphAbstractHierarchyCell cell = weightedValues[i].cell;
+            Object[] nextLayerConnectedCells = null;
+            int medianNextLevel = 0;
+
+            if (nextRankValue < rankValue) {
+                nextLayerConnectedCells = cell.getPreviousLayerConnectedCells(rankValue).toArray();
+            } else {
+                nextLayerConnectedCells = cell.getNextLayerConnectedCells(rankValue).toArray();
+            }
+
+            if (nextLayerConnectedCells != null) {
+                numConnectionsNextLevel = nextLayerConnectedCells.length;
+
+                if (numConnectionsNextLevel > 0) {
+                    medianNextLevel = medianXValue(nextLayerConnectedCells, nextRankValue);
+                } else {
+                    // For case of no connections on the next level set the
+                    // median to be the current position and try to be
+                    // positioned there
+                    medianNextLevel = cell.getGeneralPurposeVariable(rankValue);
+                }
+            }
+
+            double leftBuffer = 0.0;
+            double leftLimit = -100000000.0;
+
+            for (int j = weightedValues[i].rankIndex - 1; j >= 0; ) {
+                WeightedCellSorter weightedValue = cellMap.get(rank[j]);
+
+                if (weightedValue != null) {
+                    GraphAbstractHierarchyCell leftCell = weightedValue.cell;
+
+                    if (weightedValue.visited) {
+                        // The left limit is the right hand limit of that
+                        // cell plus any allowance for unallocated cells
+                        // in-between
+                        leftLimit = leftCell.getGeneralPurposeVariable(rankValue)
+                                    + leftCell.width / 2.0
+                                    + intraCellSpacing
+                                    + leftBuffer
+                                    + cell.width / 2.0;
+                        j = -1;
+                    } else {
+                        leftBuffer += leftCell.width + intraCellSpacing;
+                        j--;
+                    }
+                }
+            }
+
+            double rightBuffer = 0.0;
+            double rightLimit = 100000000.0;
+
+            for (int j = weightedValues[i].rankIndex + 1; j < weightedValues.length; ) {
+                WeightedCellSorter weightedValue = cellMap.get(rank[j]);
+
+                if (weightedValue != null) {
+                    GraphAbstractHierarchyCell rightCell = weightedValue.cell;
+
+                    if (weightedValue.visited) {
+                        // The left limit is the right hand limit of that
+                        // cell plus any allowance for unallocated cells
+                        // in-between
+                        rightLimit = rightCell.getGeneralPurposeVariable(rankValue)
+                                     - rightCell.width / 2.0
+                                     - intraCellSpacing
+                                     - rightBuffer
+                                     - cell.width / 2.0;
+                        j = weightedValues.length;
+                    } else {
+                        rightBuffer += rightCell.width + intraCellSpacing;
+                        j++;
+                    }
+                }
+            }
+
+            if (medianNextLevel >= leftLimit && medianNextLevel <= rightLimit) {
+                cell.setGeneralPurposeVariable(rankValue, medianNextLevel);
+            } else if (medianNextLevel < leftLimit) {
+                // Couldn't place at median value, place as close to that
+                // value as possible
+                cell.setGeneralPurposeVariable(rankValue, (int) leftLimit);
+                currentXDelta += leftLimit - medianNextLevel;
+            } else if (medianNextLevel > rightLimit) {
+                // Couldn't place at median value, place as close to that
+                // value as possible
+                cell.setGeneralPurposeVariable(rankValue, (int) rightLimit);
+                currentXDelta += medianNextLevel - rightLimit;
+            }
+
+            weightedValues[i].visited = true;
+        }
+    }
+
+    /**
+     * Calculates the priority the specified cell has based on the type of its
+     * cell and the cells it is connected to on the next layer
+     *
+     * @param currentCell the cell whose weight is to be calculated
+     * @param collection  the cells the specified cell is connected to
+     * @return the total weighted of the edges between these cells
+     */
+    private int calculatedWeightedValue(GraphAbstractHierarchyCell currentCell,
+                                        Collection<GraphAbstractHierarchyCell> collection) {
+        int totalWeight = 0;
+        for (GraphAbstractHierarchyCell cell : collection) {
+            if (currentCell.isVertex() && cell.isVertex()) {
+                totalWeight++;
+            } else if (currentCell.isEdge() && cell.isEdge()) {
+                totalWeight += 8;
+            } else {
+                totalWeight += 2;
+            }
+        }
+
+        return totalWeight;
     }
 
     /**
@@ -899,7 +910,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * @param position the x position being sought
      * @return whether or not the virtual node can be moved to this position
      */
-    protected boolean repositionValid(GraphHierarchyModel model, GraphAbstractHierarchyCell cell, int rank, double position) {
+    protected boolean repositionValid(GraphHierarchyModel model, GraphAbstractHierarchyCell cell, int rank,
+                                      double position) {
         GraphHierarchyRank rankSet = model.ranks.get(rank);
         GraphAbstractHierarchyCell[] rankArray = rankSet.toArray(new GraphAbstractHierarchyCell[rankSet.size()]);
         int rankIndex = -1;
@@ -999,6 +1011,34 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
     }
 
     /**
+     * Fixes the position of the specified vertex
+     *
+     * @param cell the vertex to position
+     */
+    protected void setVertexLocation(GraphAbstractHierarchyCell cell) {
+        GraphHierarchyNode node = (GraphHierarchyNode) cell;
+        ICell realCell = node.cell;
+        double positionX = node.x[0] - node.width / 2;
+        double positionY = node.y[0] - node.height / 2;
+
+        //		if (cell.minRank == -1)
+        //		{
+        //			log.warning("invalid rank, never set");
+        //		}
+
+        rankTopY[cell.minRank] = Math.min(rankTopY[cell.minRank], positionY);
+        rankBottomY[cell.minRank] = Math.max(rankBottomY[cell.minRank], positionY + node.height);
+
+        if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
+            layout.setVertexLocation(realCell, positionX, positionY);
+        } else {
+            layout.setVertexLocation(realCell, positionY, positionX);
+        }
+
+        limitX = Math.max(limitX, positionX + node.width);
+    }
+
+    /**
      * Adjust parent cells whose child geometries have changed. The default
      * implementation adjusts the group to just fit around the children with
      * a padding.
@@ -1031,14 +1071,19 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             // Iterate over the top rank and fill in the connection information
             for (GraphAbstractHierarchyCell cell : rank) {
                 if (cell.isVertex()) {
-                    GraphAbstractHierarchyCell[] currentCells = (cell.getPreviousLayerConnectedCells(i)).toArray(new GraphAbstractHierarchyCell[cell.getPreviousLayerConnectedCells(i).size()]);
+                    GraphAbstractHierarchyCell[] currentCells = (cell.getPreviousLayerConnectedCells(i)).toArray(
+                            new GraphAbstractHierarchyCell[cell.getPreviousLayerConnectedCells(i).size()]);
                     int currentRank = i - 1;
                     // Two loops, last connected cells, and next
                     for (int k = 0; k < 2; k++) {
-                        if (currentRank > -1 && currentRank < model.ranks.size() && currentCells != null && currentCells.length > 0) {
+                        if (currentRank > -1
+                            && currentRank < model.ranks.size()
+                            && currentCells != null
+                            && currentCells.length > 0) {
                             WeightedCellSorter[] sortedCells = new WeightedCellSorter[currentCells.length];
                             for (int j = 0; j < currentCells.length; j++) {
-                                sortedCells[j] = new WeightedCellSorter(currentCells[j], -(int) currentCells[j].getX(currentRank));
+                                sortedCells[j] = new WeightedCellSorter(currentCells[j],
+                                                                        -(int) currentCells[j].getX(currentRank));
                             }
                             Arrays.sort(sortedCells);
                             GraphHierarchyNode node = (GraphHierarchyNode) cell;
@@ -1106,7 +1151,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                                 maxYOffset = Math.max(maxYOffset, currentYOffset);
                             }
                         }
-                        currentCells = (cell.getNextLayerConnectedCells(i)).toArray(new GraphAbstractHierarchyCell[cell.getNextLayerConnectedCells(i).size()]);
+                        currentCells = (cell.getNextLayerConnectedCells(i)).toArray(
+                                new GraphAbstractHierarchyCell[cell.getNextLayerConnectedCells(i).size()]);
                         currentRank = i + 1;
                     }
                 }
@@ -1116,8 +1162,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
 
     /**
      * Fixes the control points
-     *
-     * @param cell
      */
     protected void setEdgePosition(GraphAbstractHierarchyCell cell) {
         GraphHierarchyEdge edge = (GraphHierarchyEdge) cell;
@@ -1141,7 +1185,8 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
             double[] jettys = jettyPositions.get(edge);
 
             Object source = edge.isReversed() ? edge.target.cell : edge.source.cell;
-            boolean layoutReversed = this.orientation == SwingConstants.EAST || this.orientation == SwingConstants.SOUTH;
+            boolean layoutReversed = this.orientation == SwingConstants.EAST
+                                     || this.orientation == SwingConstants.SOUTH;
 
             while (parallelEdges.hasNext()) {
                 ICell realEdge = parallelEdges.next();
@@ -1274,34 +1319,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
     }
 
     /**
-     * Fixes the position of the specified vertex
-     *
-     * @param cell the vertex to position
-     */
-    protected void setVertexLocation(GraphAbstractHierarchyCell cell) {
-        GraphHierarchyNode node = (GraphHierarchyNode) cell;
-        ICell realCell = node.cell;
-        double positionX = node.x[0] - node.width / 2;
-        double positionY = node.y[0] - node.height / 2;
-
-        //		if (cell.minRank == -1)
-        //		{
-        //			log.warning("invalid rank, never set");
-        //		}
-
-        rankTopY[cell.minRank] = Math.min(rankTopY[cell.minRank], positionY);
-        rankBottomY[cell.minRank] = Math.max(rankBottomY[cell.minRank], positionY + node.height);
-
-        if (orientation == SwingConstants.NORTH || orientation == SwingConstants.SOUTH) {
-            layout.setVertexLocation(realCell, positionX, positionY);
-        } else {
-            layout.setVertexLocation(realCell, positionY, positionX);
-        }
-
-        limitX = Math.max(limitX, positionX + node.width);
-    }
-
-    /**
      * Hook to add additional processing
      *
      * @param edge     The hierarchical model edge
@@ -1396,22 +1413,18 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
          * The weighted value of the cell stored
          */
         public int weightedValue = 0;
-
         /**
          * Whether or not to flip equal weight values.
          */
         public boolean nudge = false;
-
         /**
          * Whether or not this cell has been visited in the current assignment
          */
         public boolean visited = false;
-
         /**
          * The index this cell is in the model rank
          */
         public int rankIndex;
-
         /**
          * The cell whose median value is being calculated
          */
@@ -1433,6 +1446,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
          * @return the standard return you would expect when comparing two
          * double
          */
+        @Override
         public int compareTo(Object arg0) {
             if (arg0 instanceof WeightedCellSorter) {
                 if (weightedValue > ((WeightedCellSorter) arg0).weightedValue) {
@@ -1451,7 +1465,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * a certain area. This area includes the buffer lengths of cells.
      */
     protected class AreaSpatialCache extends Rectangle2D.Double {
+
         public Set<Object> cells = new HashSet<Object>();
     }
-
 }

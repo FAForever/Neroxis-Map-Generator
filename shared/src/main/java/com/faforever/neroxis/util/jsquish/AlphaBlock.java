@@ -31,13 +31,10 @@ import static java.lang.Math.min;
 final strictfp class AlphaBlock {
 
     private static final int[] swapped = new int[16];
-
     private static final int[] CODES_5 = new int[8];
     private static final int[] CODES_7 = new int[8];
-
     private static final int[] INDICES_5 = new int[16];
     private static final int[] INDICES_7 = new int[16];
-
     private static final int[] CODES = new int[8];
     private static final int[] INDICES = new int[16];
 
@@ -56,10 +53,12 @@ final strictfp class AlphaBlock {
             // set alpha to zero where masked
             final int bit1 = 1 << (2 * i);
             final int bit2 = 1 << (2 * i + 1);
-            if ((mask & bit1) == 0)
+            if ((mask & bit1) == 0) {
                 quant1 = 0;
-            if ((mask & bit2) == 0)
+            }
+            if ((mask & bit2) == 0) {
                 quant2 = 0;
+            }
 
             // pack into the byte
             block[offset + i] = (byte) (quant1 | (quant2 << 4));
@@ -79,6 +78,90 @@ final strictfp class AlphaBlock {
             // convert back up to bytes
             rgba[8 * i + 3] = (byte) (lo | (lo << 4));
             rgba[8 * i + 7] = (byte) (hi | (hi >> 4));
+        }
+    }
+
+    static void compressAlphaDxt5(final byte[] rgba, final int mask, final byte[] block, final int offset) {
+        // get the range for 5-alpha and 7-alpha interpolation
+        int min5 = 255;
+        int max5 = 0;
+        int min7 = 255;
+        int max7 = 0;
+        for (int i = 0; i < 16; ++i) {
+            // check this pixel is valid
+            final int bit = 1 << i;
+            if ((mask & bit) == 0) {
+                continue;
+            }
+
+            // incorporate into the min/max
+            final int value = (rgba[4 * i + 3] & 0xFF);
+            if (value < min7) {
+                min7 = value;
+            }
+            if (value > max7) {
+                max7 = value;
+            }
+            if (value != 0 && value < min5) {
+                min5 = value;
+            }
+            if (value != 255 && value > max5) {
+                max5 = value;
+            }
+        }
+
+        // handle the case that no valid range was found
+        if (min5 > max5) {
+            min5 = max5;
+        }
+        if (min7 > max7) {
+            min7 = max7;
+        }
+
+        // fix the range to be the minimum in each case
+        if (max5 - min5 < 5) {
+            max5 = min(min5 + 5, 255);
+        }
+        if (max5 - min5 < 5) {
+            min5 = max(0, max5 - 5);
+        }
+
+        if (max7 - min7 < 7) {
+            max7 = min(min7 + 7, 255);
+        }
+        if (max7 - min7 < 7) {
+            min7 = max(0, max7 - 7);
+        }
+
+        // set up the 5-alpha code book
+        final int[] codes5 = AlphaBlock.CODES_5;
+
+        codes5[0] = min5;
+        codes5[1] = max5;
+        for (int i = 1; i < 5; ++i) {
+            codes5[1 + i] = ((5 - i) * min5 + i * max5) / 5;
+        }
+        codes5[6] = 0;
+        codes5[7] = 255;
+
+        // set up the 7-alpha code book
+        final int[] codes7 = AlphaBlock.CODES_7;
+
+        codes7[0] = min7;
+        codes7[1] = max7;
+        for (int i = 1; i < 7; ++i) {
+            codes7[1 + i] = ((7 - i) * min7 + i * max7) / 7;
+        }
+
+        // fit the data to both code books
+        int err5 = fitCodes(rgba, mask, codes5, INDICES_5);
+        int err7 = fitCodes(rgba, mask, codes7, INDICES_7);
+
+        // save the block with least error
+        if (err5 <= err7) {
+            writeAlphaBlock5(min5, max5, INDICES_5, block, offset);
+        } else {
+            writeAlphaBlock7(min7, max7, INDICES_7, block, offset);
         }
     }
 
@@ -119,7 +202,36 @@ final strictfp class AlphaBlock {
         return err;
     }
 
-    private static void writeAlphaBlock(final int alpha0, final int alpha1, final int[] indices, final byte[] block, final int offset) {
+    private static void writeAlphaBlock5(final int alpha0, final int alpha1, final int[] indices, final byte[] block,
+                                         final int offset) {
+        // check the relative values of the endpoints
+        final int[] swapped = AlphaBlock.swapped;
+
+        if (alpha0 > alpha1) {
+            // swap the indices
+            for (int i = 0; i < 16; ++i) {
+                int index = indices[i];
+                if (index == 0) {
+                    swapped[i] = 1;
+                } else if (index == 1) {
+                    swapped[i] = 0;
+                } else if (index <= 5) {
+                    swapped[i] = 7 - index;
+                } else {
+                    swapped[i] = index;
+                }
+            }
+
+            // write the block
+            writeAlphaBlock(alpha1, alpha0, swapped, block, offset);
+        } else {
+            // write the block
+            writeAlphaBlock(alpha0, alpha1, indices, block, offset);
+        }
+    }
+
+    private static void writeAlphaBlock(final int alpha0, final int alpha1, final int[] indices, final byte[] block,
+                                        final int offset) {
         // write the first two bytes
         block[offset] = (byte) alpha0;
         block[offset + 1] = (byte) alpha1;
@@ -136,38 +248,14 @@ final strictfp class AlphaBlock {
             }
 
             // store in 3 bytes
-            for (int j = 0; j < 3; ++j)
+            for (int j = 0; j < 3; ++j) {
                 block[offset + dest++] = (byte) ((value >> 8 * j) & 0xff);
-        }
-    }
-
-    private static void writeAlphaBlock5(final int alpha0, final int alpha1, final int[] indices, final byte[] block, final int offset) {
-        // check the relative values of the endpoints
-        final int[] swapped = AlphaBlock.swapped;
-
-        if (alpha0 > alpha1) {
-            // swap the indices
-            for (int i = 0; i < 16; ++i) {
-                int index = indices[i];
-                if (index == 0)
-                    swapped[i] = 1;
-                else if (index == 1)
-                    swapped[i] = 0;
-                else if (index <= 5)
-                    swapped[i] = 7 - index;
-                else
-                    swapped[i] = index;
             }
-
-            // write the block
-            writeAlphaBlock(alpha1, alpha0, swapped, block, offset);
-        } else {
-            // write the block
-            writeAlphaBlock(alpha0, alpha1, indices, block, offset);
         }
     }
 
-    private static void writeAlphaBlock7(final int alpha0, final int alpha1, final int[] indices, final byte[] block, final int offset) {
+    private static void writeAlphaBlock7(final int alpha0, final int alpha1, final int[] indices, final byte[] block,
+                                         final int offset) {
         // check the relative values of the endpoints
         final int[] swapped = AlphaBlock.swapped;
 
@@ -175,12 +263,13 @@ final strictfp class AlphaBlock {
             // swap the indices
             for (int i = 0; i < 16; ++i) {
                 int index = indices[i];
-                if (index == 0)
+                if (index == 0) {
                     swapped[i] = 1;
-                else if (index == 1)
+                } else if (index == 1) {
                     swapped[i] = 0;
-                else
+                } else {
                     swapped[i] = 9 - index;
+                }
             }
 
             // write the block
@@ -189,76 +278,6 @@ final strictfp class AlphaBlock {
             // write the block
             writeAlphaBlock(alpha0, alpha1, indices, block, offset);
         }
-    }
-
-    static void compressAlphaDxt5(final byte[] rgba, final int mask, final byte[] block, final int offset) {
-        // get the range for 5-alpha and 7-alpha interpolation
-        int min5 = 255;
-        int max5 = 0;
-        int min7 = 255;
-        int max7 = 0;
-        for (int i = 0; i < 16; ++i) {
-            // check this pixel is valid
-            final int bit = 1 << i;
-            if ((mask & bit) == 0)
-                continue;
-
-            // incorporate into the min/max
-            final int value = (rgba[4 * i + 3] & 0xFF);
-            if (value < min7)
-                min7 = value;
-            if (value > max7)
-                max7 = value;
-            if (value != 0 && value < min5)
-                min5 = value;
-            if (value != 255 && value > max5)
-                max5 = value;
-        }
-
-        // handle the case that no valid range was found
-        if (min5 > max5)
-            min5 = max5;
-        if (min7 > max7)
-            min7 = max7;
-
-        // fix the range to be the minimum in each case
-        if (max5 - min5 < 5)
-            max5 = min(min5 + 5, 255);
-        if (max5 - min5 < 5)
-            min5 = max(0, max5 - 5);
-
-        if (max7 - min7 < 7)
-            max7 = min(min7 + 7, 255);
-        if (max7 - min7 < 7)
-            min7 = max(0, max7 - 7);
-
-        // set up the 5-alpha code book
-        final int[] codes5 = AlphaBlock.CODES_5;
-
-        codes5[0] = min5;
-        codes5[1] = max5;
-        for (int i = 1; i < 5; ++i)
-            codes5[1 + i] = ((5 - i) * min5 + i * max5) / 5;
-        codes5[6] = 0;
-        codes5[7] = 255;
-
-        // set up the 7-alpha code book
-        final int[] codes7 = AlphaBlock.CODES_7;
-
-        codes7[0] = min7;
-        codes7[1] = max7;
-        for (int i = 1; i < 7; ++i)
-            codes7[1 + i] = ((7 - i) * min7 + i * max7) / 7;
-
-        // fit the data to both code books
-        int err5 = fitCodes(rgba, mask, codes5, INDICES_5);
-        int err7 = fitCodes(rgba, mask, codes7, INDICES_7);
-
-        // save the block with least error
-        if (err5 <= err7)
-            writeAlphaBlock5(min5, max5, INDICES_5, block, offset);
-        else
-            writeAlphaBlock7(min7, max7, INDICES_7, block, offset);
     }
 
     static void decompressAlphaDxt5(final byte[] rgba, final byte[] block, final int offset) {
@@ -306,8 +325,8 @@ final strictfp class AlphaBlock {
         }
 
         // write out the indexed codebook values
-        for (int i = 0; i < 16; ++i)
+        for (int i = 0; i < 16; ++i) {
             rgba[4 * i + 3] = (byte) codes[indices[i]];
+        }
     }
-
 }

@@ -25,5 +25,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class MarkEvent extends EventObject {
+
     CellState state;
 }

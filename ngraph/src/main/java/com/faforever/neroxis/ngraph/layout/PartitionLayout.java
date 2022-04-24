@@ -19,19 +19,16 @@ public class PartitionLayout extends GraphLayout {
      * Default is true.
      */
     protected final boolean horizontal;
-
     /**
      * Integer that specifies the absolute spacing in pixels between the
      * children. Default is 0.
      */
     protected final int spacing;
-
     /**
      * Integer that specifies the absolute inset in pixels for the parent that
      * contains the children. Default is 0.
      */
     protected final int border;
-
     /**
      * Boolean that specifies if vertices should be resized. Default is true.
      */
@@ -72,49 +69,7 @@ public class PartitionLayout extends GraphLayout {
         this.border = border;
     }
 
-
-    public void moveCell(ICell cell, double x, double y) {
-        IGraphModel model = graph.getModel();
-        ICell parent = model.getParent(cell);
-
-        if (cell != null && parent != null) {
-            int i = 0;
-            double last = 0;
-            int childCount = model.getChildCount(parent);
-
-            // Finds index of the closest swimlane
-            // TODO: Take into account the orientation
-            for (i = 0; i < childCount; i++) {
-                ICell child = model.getChildAt(parent, i);
-                RectangleDouble bounds = getVertexBounds(child);
-
-                if (bounds != null) {
-                    double tmp = bounds.getX() + bounds.getWidth() / 2;
-
-                    if (last < x && tmp > x) {
-                        break;
-                    }
-
-                    last = tmp;
-                }
-            }
-
-            // Changes child order in parent
-            int idx = parent.getIndex(cell);
-            idx = Math.max(0, i - ((i > idx) ? 1 : 0));
-
-            model.add(parent, cell, idx);
-        }
-    }
-
-    /**
-     * Hook for subclassers to return the container size.
-     */
-    public RectangleDouble getContainerSize() {
-        return new RectangleDouble();
-    }
-
-
+    @Override
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
         Geometry pgeo = model.getGeometry(parent);
@@ -195,4 +150,45 @@ public class PartitionLayout extends GraphLayout {
         }
     }
 
+    @Override
+    public void moveCell(ICell cell, double x, double y) {
+        IGraphModel model = graph.getModel();
+        ICell parent = model.getParent(cell);
+
+        if (cell != null && parent != null) {
+            int i = 0;
+            double last = 0;
+            int childCount = model.getChildCount(parent);
+
+            // Finds index of the closest swimlane
+            // TODO: Take into account the orientation
+            for (i = 0; i < childCount; i++) {
+                ICell child = model.getChildAt(parent, i);
+                RectangleDouble bounds = getVertexBounds(child);
+
+                if (bounds != null) {
+                    double tmp = bounds.getX() + bounds.getWidth() / 2;
+
+                    if (last < x && tmp > x) {
+                        break;
+                    }
+
+                    last = tmp;
+                }
+            }
+
+            // Changes child order in parent
+            int idx = parent.getIndex(cell);
+            idx = Math.max(0, i - ((i > idx) ? 1 : 0));
+
+            model.add(parent, cell, idx);
+        }
+    }
+
+    /**
+     * Hook for subclassers to return the container size.
+     */
+    public RectangleDouble getContainerSize() {
+        return new RectangleDouble();
+    }
 }

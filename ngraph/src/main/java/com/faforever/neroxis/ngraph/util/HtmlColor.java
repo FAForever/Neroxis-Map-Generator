@@ -225,7 +225,8 @@ public class HtmlColor {
             }
         } else if (str.length() == 4) {
             // Adds support for special short notation of hex colors, eg. #abc=#aabbcc
-            str = new String(new char[]{'#', str.charAt(1), str.charAt(1), str.charAt(2), str.charAt(2), str.charAt(3), str.charAt(3)});
+            str = new String(new char[]{'#', str.charAt(1), str.charAt(1), str.charAt(2), str.charAt(2), str.charAt(
+                    3), str.charAt(3)});
         }
 
         int value = 0;
@@ -279,5 +280,4 @@ public class HtmlColor {
     protected static float parseAlpha(String alpha) {
         return Float.parseFloat(alpha);
     }
-
 }

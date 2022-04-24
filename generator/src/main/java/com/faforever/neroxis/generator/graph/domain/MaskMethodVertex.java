@@ -10,6 +10,7 @@ import lombok.Getter;
 
 @Getter
 public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
+
     public static final String NEW_MASK = "new";
     public static final String EXECUTOR = "exec";
     private MaskVertexResult executor;
@@ -22,8 +23,13 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         maskParameters.put(EXECUTOR, null);
         if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
             results.put(NEW_MASK, null);
-            resultClasses.put(NEW_MASK, (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass, executable.getGenericReturnType()));
+            resultClasses.put(NEW_MASK, (Class<? extends Mask<?, ?>>) MaskReflectUtil.getActualTypeClass(executorClass,
+                                                                                                         executable.getGenericReturnType()));
         }
+    }
+
+    public String toString() {
+        return identifier == null ? "" : identifier;
     }
 
     @Override
@@ -39,11 +45,15 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         return super.isMaskParameterSet(parameter);
     }
 
+    @Override
     public void setParameter(String parameterName, Object parameterValue) {
         if (executable == null) {
             throw new IllegalStateException("Executable is not yet set");
         }
-        if (parameterValue != null && EXECUTOR.equals(parameterName) && MaskVertexResult.class.isAssignableFrom(parameterValue.getClass()) && executable.getDeclaringClass().isAssignableFrom(((MaskVertexResult) parameterValue).getResultClass())) {
+        if (parameterValue != null && EXECUTOR.equals(parameterName) && MaskVertexResult.class.isAssignableFrom(
+                parameterValue.getClass()) && executable.getDeclaringClass()
+                                                        .isAssignableFrom(
+                                                                ((MaskVertexResult) parameterValue).getResultClass())) {
             if (executor != null) {
                 throw new IllegalStateException("executor already set");
             }
@@ -58,6 +68,7 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         return executor != null && super.isDefined();
     }
 
+    @Override
     public void clearParameter(String parameterName) {
         if (EXECUTOR.equals(parameterName)) {
             executor = null;
@@ -66,8 +77,11 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         }
     }
 
+    @Override
     protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
-        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> getParameterFinalValue(parameter, graphContext)).toArray();
+        Object[] args = Arrays.stream(executable.getParameters())
+                              .map(parameter -> getParameterFinalValue(parameter, graphContext))
+                              .toArray();
         Mask<?, ?> result = (Mask<?, ?>) executable.invoke(executor.getResult(), args);
         if (!executable.getAnnotation(GraphMethod.class).returnsSelf()) {
             results.put(NEW_MASK, result);
@@ -77,6 +91,7 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         }
     }
 
+    @Override
     public Class<? extends Mask<?, ?>> getMaskParameterClass(String parameterName) {
         if (EXECUTOR.equals(parameterName)) {
             return executorClass;
@@ -84,14 +99,11 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         return super.getMaskParameterClass(parameterName);
     }
 
+    @Override
     public MaskMethodVertex copy() {
         MaskMethodVertex newVertex = new MaskMethodVertex(executable, executorClass);
         newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
-    }
-
-    public String toString() {
-        return identifier == null ? "" : identifier;
     }
 }

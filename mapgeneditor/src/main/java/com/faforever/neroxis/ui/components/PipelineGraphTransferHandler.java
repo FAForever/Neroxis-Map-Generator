@@ -13,19 +13,30 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 public class PipelineGraphTransferHandler extends GraphTransferHandler {
+
     private final PipelineGraphComponent pipelineGraphComponent;
 
     public PipelineGraphTransferHandler(PipelineGraphComponent pipelineGraphComponent) {
         this.pipelineGraphComponent = pipelineGraphComponent;
     }
 
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, RectangleDouble bounds, ImageIcon icon) {
+    @Override
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells,
+                                                     RectangleDouble bounds, ImageIcon icon) {
         return new GraphTransferable(cells, bounds, icon);
     }
 
+    @Override
     public void exportDone(JComponent c, Transferable data, int action) {
         if (c instanceof GraphComponent && data instanceof GraphTransferable) {
-            pipelineGraphComponent.getGraph().getAllEdges(((GraphTransferable) data).getCells()).stream().map(ICell::getGeometry).filter(Objects::nonNull).map(Geometry::getPoints).filter(Objects::nonNull).forEach(List::clear);
+            pipelineGraphComponent.getGraph()
+                                  .getAllEdges(((GraphTransferable) data).getCells())
+                                  .stream()
+                                  .map(ICell::getGeometry)
+                                  .filter(Objects::nonNull)
+                                  .map(Geometry::getPoints)
+                                  .filter(Objects::nonNull)
+                                  .forEach(List::clear);
         }
         super.exportDone(c, data, action);
     }

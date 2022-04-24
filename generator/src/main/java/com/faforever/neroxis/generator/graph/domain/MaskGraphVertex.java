@@ -25,6 +25,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 
 public abstract strictfp class MaskGraphVertex<T extends Executable> {
+
     public static final String SELF = "self";
     protected final Map<String, String> nonMaskParameters = new LinkedHashMap<>();
     protected final Map<String, MaskVertexResult> maskParameters = new LinkedHashMap<>();
@@ -40,16 +41,20 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     protected String identifier;
 
     protected MaskGraphVertex(T executable, Class<? extends Mask<?, ?>> executorClass) {
-        if (executable == null || (!executable.getDeclaringClass().isAssignableFrom(executorClass) && !executable.getDeclaringClass().equals(MapMaskMethods.class))) {
+        if (executable == null || (!executable.getDeclaringClass().isAssignableFrom(executorClass)
+                                   && !executable.getDeclaringClass().equals(MapMaskMethods.class))) {
             throw new IllegalArgumentException("Executable not runnable by executor class");
         }
         this.executable = executable;
         this.executorClass = executorClass;
         results.put(SELF, null);
         resultClasses.put(SELF, executorClass);
-        Arrays.stream(this.executable.getAnnotationsByType(GraphParameter.class)).filter(parameterAnnotation -> !parameterAnnotation.value().equals("")).forEach(parameterAnnotation -> setParameter(parameterAnnotation.name(), parameterAnnotation.value()));
+        Arrays.stream(this.executable.getAnnotationsByType(GraphParameter.class))
+              .filter(parameterAnnotation -> !parameterAnnotation.value().equals(""))
+              .forEach(parameterAnnotation -> setParameter(parameterAnnotation.name(), parameterAnnotation.value()));
         Arrays.stream(executable.getParameters()).forEach(parameter -> {
-            if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
+            if (Mask.class.isAssignableFrom(
+                    MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
                 maskParameters.put(parameter.getName(), null);
             } else {
                 nonMaskParameters.put(parameter.getName(), null);
@@ -57,9 +62,45 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         });
     }
 
-    public abstract String getExecutableName();
+    public void setParameter(String parameterName, Object value) {
+        if (parameterName == null && value == null) {
+            return;
+        }
+        if (value == null) {
+            clearParameter(parameterName);
+            return;
+        }
+        Optional<Parameter> parameter = Arrays.stream(executable.getParameters())
+                                              .filter(param -> param.getName().equals(parameterName))
+                                              .findFirst();
+        if (parameter.isEmpty()) {
+            return;
+        }
+        if (Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(executorClass, parameter.get().getParameterizedType()))
+            && MaskVertexResult.class.isAssignableFrom(value.getClass())) {
+            maskParameters.put(parameter.get().getName(), (MaskVertexResult) value);
+            return;
+        }
+        nonMaskParameters.put(parameterName, (String) value);
+    }
 
-    protected abstract void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException;
+    public void clearParameter(String parameterName) {
+        Parameter parameter = Arrays.stream(executable.getParameters())
+                                    .filter(param -> param.getName().equals(parameterName))
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalArgumentException(String.format(
+                                            "Parameter name does not match any parameter: parameterName=%s, validParameters=[%s]",
+                                            parameterName, Arrays.stream(executable.getParameters())
+                                                                 .map(param -> String.format("%s", param.getName()))
+                                                                 .collect(Collectors.joining(",")))));
+        if (Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
+            maskParameters.put(parameterName, null);
+            return;
+        }
+        nonMaskParameters.put(parameterName, null);
+    }
 
     public boolean isMaskParameterSet(String parameter) {
         return maskParameters.get(parameter) != null;
@@ -78,18 +119,25 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
 
         List<GraphParameter> parameterAnnotations = getGraphAnnotationsForParameter(parameter);
 
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
+        if (Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
             return Optional.ofNullable(maskParameters.get(parameter.getName()))
-                    .map(MaskVertexResult::getSourceVertex)
-                    .map(MaskGraphVertex::getIdentifier)
-                    .orElse(null);
+                           .map(MaskVertexResult::getSourceVertex)
+                           .map(MaskGraphVertex::getIdentifier)
+                           .orElse(null);
         }
 
         return parameterAnnotations.stream()
-                .filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty())
-                .findFirst()
-                .map(GraphParameter::value)
-                .orElse(nonMaskParameters.get(parameter.getName()));
+                                   .filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty())
+                                   .findFirst()
+                                   .map(GraphParameter::value)
+                                   .orElse(nonMaskParameters.get(parameter.getName()));
+    }
+
+    private List<GraphParameter> getGraphAnnotationsForParameter(Parameter parameter) {
+        return Arrays.stream(executable.getAnnotationsByType(GraphParameter.class))
+                     .filter(annotation -> parameter.getName().equals(annotation.name()))
+                     .collect(Collectors.toList());
     }
 
     public Mask<?, ?> getResult(String resultName) {
@@ -100,6 +148,16 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
             throw new IllegalArgumentException("Result name not recognized");
         }
         return results.get(resultName);
+    }
+
+    public Class<? extends Mask<?, ?>> getMaskParameterClass(String parameterName) {
+        return (Class<? extends Mask<?, ?>>) Arrays.stream(executable.getParameters())
+                                                   .filter(parameter -> parameter.getName().equals(parameterName))
+                                                   .map(parameter -> MaskReflectUtil.getActualTypeClass(executorClass,
+                                                                                                        parameter.getParameterizedType()))
+                                                   .filter(clazz -> Mask.class.isAssignableFrom(clazz))
+                                                   .findFirst()
+                                                   .orElse(null);
     }
 
     public Mask<?, ?> getImmutableResult(String resultName) {
@@ -120,72 +178,62 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         return resultClasses.get(resultName);
     }
 
-    public Class<? extends Mask<?, ?>> getMaskParameterClass(String parameterName) {
-        return (Class<? extends Mask<?, ?>>) Arrays.stream(executable.getParameters()).filter(parameter -> parameter.getName().equals(parameterName)).map(parameter -> MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType())).filter(clazz -> Mask.class.isAssignableFrom(clazz)).findFirst().orElse(null);
-    }
-
-    private List<GraphParameter> getGraphAnnotationsForParameter(Parameter parameter) {
-        return Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).filter(annotation -> parameter.getName().equals(annotation.name())).collect(Collectors.toList());
-    }
-
-    protected Object getParameterFinalValue(Parameter parameter, GraphContext graphContext) throws GraphComputationException {
+    protected Object getParameterFinalValue(Parameter parameter,
+                                            GraphContext graphContext) throws GraphComputationException {
         if (executable == null) {
             throw new GraphComputationException("Executable is null");
         }
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
+        if (Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
             return maskParameters.get(parameter.getName()).getResult();
         }
         List<GraphParameter> parameterAnnotations = getGraphAnnotationsForParameter(parameter);
 
         String rawValue = parameterAnnotations.stream()
-                .filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty())
-                .findFirst()
-                .map(GraphParameter::value)
-                .orElse(nonMaskParameters.get(parameter.getName()));
-        if ((rawValue == null || rawValue.isBlank()) && parameterAnnotations.stream().noneMatch(annotation -> parameter.getName().equals(annotation.name()) && annotation.nullable())) {
-            throw new GraphComputationException(String.format("Parameter is null: parameter=%s, identifier=%s, method=%s", parameter.getName(), identifier, getExecutableName()));
+                                              .filter(parameterAnnotation -> !parameterAnnotation.value().isEmpty())
+                                              .findFirst()
+                                              .map(GraphParameter::value)
+                                              .orElse(nonMaskParameters.get(parameter.getName()));
+        if ((rawValue == null || rawValue.isBlank()) && parameterAnnotations.stream()
+                                                                            .noneMatch(annotation -> parameter.getName()
+                                                                                                              .equals(annotation.name())
+                                                                                                     && annotation.nullable())) {
+            throw new GraphComputationException(
+                    String.format("Parameter is null: parameter=%s, identifier=%s, method=%s", parameter.getName(),
+                                  identifier, getExecutableName()));
         }
         if (rawValue == null || rawValue.isBlank()) {
             return null;
         }
         try {
-            return graphContext.getValue(rawValue, identifier, MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
+            return graphContext.getValue(rawValue, identifier, MaskReflectUtil.getActualTypeClass(executorClass,
+                                                                                                  parameter.getParameterizedType()));
         } catch (SpelParseException e) {
-            throw new GraphComputationException(String.format("Error parsing parameter: parameter=%s, identifier=%s, method=%s", parameter.getName(), identifier, getExecutableName()), e);
+            throw new GraphComputationException(
+                    String.format("Error parsing parameter: parameter=%s, identifier=%s, method=%s",
+                                  parameter.getName(), identifier, getExecutableName()), e);
         }
     }
 
-    public void setParameter(String parameterName, Object value) {
-        if (parameterName == null && value == null) {
-            return;
-        }
-        if (value == null) {
-            clearParameter(parameterName);
-            return;
-        }
-        Optional<Parameter> parameter = Arrays.stream(executable.getParameters()).filter(param -> param.getName().equals(parameterName)).findFirst();
-        if (parameter.isEmpty()) {
-            return;
-        }
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.get().getParameterizedType())) && MaskVertexResult.class.isAssignableFrom(value.getClass())) {
-            maskParameters.put(parameter.get().getName(), (MaskVertexResult) value);
-            return;
-        }
-        nonMaskParameters.put(parameterName, (String) value);
+    public abstract String getExecutableName();
+
+    public void clearParameterValues() {
+        nonMaskParameters.clear();
     }
 
-    public void clearParameter(String parameterName) {
-        Parameter parameter = Arrays.stream(executable.getParameters())
-                                    .filter(param -> param.getName().equals(parameterName))
-                                    .findFirst()
-                                    .orElseThrow(() -> new IllegalArgumentException(String.format("Parameter name does not match any parameter: parameterName=%s, validParameters=[%s]", parameterName, Arrays.stream(executable.getParameters())
-                                                                                                                                                                                                              .map(param -> String.format("%s", param.getName()))
-                                                                                                                                                                                                              .collect(Collectors.joining(",")))));
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
-            maskParameters.put(parameterName, null);
-            return;
+    public void prepareResults(
+            GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+        if (!isDefined()) {
+            throw new IllegalStateException("Cannot get result all parameters are not fully defined");
         }
-        nonMaskParameters.put(parameterName, null);
+        if (!isComputed()) {
+            computeResults(graphContext);
+            results.forEach((key, value) -> immutableResults.put(key, value.mock()));
+        }
+    }
+
+    public boolean isComputed() {
+        return results.values().stream().noneMatch(Objects::isNull);
     }
 
     public boolean isDefined() {
@@ -194,8 +242,8 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
                                                                             .mapSize(512)
                                                                             .numTeams(2)
                                                                             .spawnCount(2)
-                                                                            .build(), ParameterConstraints.builder()
-                                                                                                          .build());
+                                                                            .build(),
+                                                     ParameterConstraints.builder().build());
         return Arrays.stream(executable.getParameters())
                      .allMatch(parameter -> isParameterWellDefined(parameter, graphContext));
     }
@@ -204,7 +252,8 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         if (executable == null) {
             return false;
         }
-        if (Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
+        if (Mask.class.isAssignableFrom(
+                MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()))) {
             return maskParameters.get(parameter.getName()) != null;
         }
         List<GraphParameter> parameterAnnotations = getGraphAnnotationsForParameter(parameter);
@@ -220,7 +269,8 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
             return true;
         }
         try {
-            graphContext.getValue(rawValue, identifier, MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
+            graphContext.getValue(rawValue, identifier,
+                                  MaskReflectUtil.getActualTypeClass(executorClass, parameter.getParameterizedType()));
             return true;
         } catch (SpelParseException | SpelEvaluationException e) {
             return false;
@@ -228,26 +278,13 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     private boolean parameterNullable(Parameter parameter) {
-        return getGraphAnnotationsForParameter(parameter).stream().anyMatch(annotation -> annotation.nullable() || !annotation.value().equals(""));
+        return getGraphAnnotationsForParameter(parameter).stream()
+                                                         .anyMatch(annotation -> annotation.nullable()
+                                                                                 || !annotation.value().equals(""));
     }
 
-    public boolean isComputed() {
-        return results.values().stream().noneMatch(Objects::isNull);
-    }
-
-    public void clearParameterValues() {
-        nonMaskParameters.clear();
-    }
-
-    public void prepareResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException {
-        if (!isDefined()) {
-            throw new IllegalStateException("Cannot get result all parameters are not fully defined");
-        }
-        if (!isComputed()) {
-            computeResults(graphContext);
-            results.forEach((key, value) -> immutableResults.put(key, value.mock()));
-        }
-    }
+    protected abstract void computeResults(
+            GraphContext graphContext) throws InvocationTargetException, IllegalAccessException, InstantiationException;
 
     public List<String> getMaskParameters() {
         return List.copyOf(maskParameters.keySet());

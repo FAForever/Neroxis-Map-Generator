@@ -17,6 +17,7 @@ import java.awt.Shape;
 import java.awt.image.ImageObserver;
 
 public class InteractiveCanvas extends Graphics2DCanvas {
+
     protected ImageObserver imageObserver = null;
 
     public InteractiveCanvas() {
@@ -36,21 +37,27 @@ public class InteractiveCanvas extends Graphics2DCanvas {
     }
 
     /**
-     * Overrides graphics call to use image observer.
-     */
-    protected void drawImageImpl(Image image, int x, int y) {
-        graphics2D.drawImage(image, x, y, imageObserver);
-    }
-
-    /**
      * Returns the size for the given image.
      */
+    @Override
     protected Dimension getImageSize(Image image) {
         return new Dimension(image.getWidth(imageObserver), image.getHeight(imageObserver));
     }
 
+    /**
+     * Overrides graphics call to use image observer.
+     */
+    @Override
+    protected void drawImageImpl(Image image, int x, int y) {
+        graphics2D.drawImage(image, x, y, imageObserver);
+    }
+
     public boolean contains(GraphComponent graphComponent, Rectangle rect, CellState state) {
-        return state != null && state.getX() >= rect.x && state.getY() >= rect.y && state.getX() + state.getWidth() <= rect.x + rect.width && state.getY() + state.getHeight() <= rect.y + rect.height;
+        return state != null
+               && state.getX() >= rect.x
+               && state.getY() >= rect.y
+               && state.getX() + state.getWidth() <= rect.x + rect.width
+               && state.getY() + state.getHeight() <= rect.y + rect.height;
     }
 
     public boolean intersects(GraphComponent graphComponent, Rectangle rect, CellState state) {
@@ -86,7 +93,8 @@ public class InteractiveCanvas extends Graphics2DCanvas {
                     for (int i = 0; i < pointCount; i++) {
                         PointDouble p1 = state.getAbsolutePoint(i);
 
-                        if (p0 != null && p1 != null && rect.intersectsLine(p0.getX(), p0.getY(), p1.getX(), p1.getY())) {
+                        if (p0 != null && p1 != null && rect.intersectsLine(p0.getX(), p0.getY(), p1.getX(),
+                                                                            p1.getY())) {
                             return true;
                         }
 
@@ -110,7 +118,8 @@ public class InteractiveCanvas extends Graphics2DCanvas {
      */
     public boolean hitSwimlaneContent(GraphComponent graphComponent, CellState swimlane, int x, int y) {
         if (swimlane != null) {
-            int start = (int) Math.max(2, Math.round(swimlane.getStyle().getEdge().getStartSize() * graphComponent.getGraph().getView().getScale()));
+            int start = (int) Math.max(2, Math.round(
+                    swimlane.getStyle().getEdge().getStartSize() * graphComponent.getGraph().getView().getScale()));
             Rectangle rect = swimlane.getRectangle();
             if (swimlane.getStyle().getCellProperties().isHorizontal()) {
                 rect.y += start;
@@ -125,5 +134,4 @@ public class InteractiveCanvas extends Graphics2DCanvas {
 
         return false;
     }
-
 }

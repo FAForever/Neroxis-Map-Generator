@@ -10,28 +10,26 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
+import static com.faforever.neroxis.util.ImageUtil.compareImages;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
-import picocli.CommandLine;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static com.faforever.neroxis.util.ImageUtil.compareImages;
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import picocli.CommandLine;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
@@ -58,16 +56,12 @@ public class MapGeneratorTest {
 
     @BeforeEach
     public void setup() {
-        keywordArgs = new String[]{"--seed", Long.toString(seed),
-                "--spawn-count", Byte.toString(spawnCount),
-                "--land-density", Float.toString(landDensity),
-                "--plateau-density", Float.toString(plateauDensity),
-                "--mountain-density", Float.toString(mountainDensity),
-                "--ramp-density", Float.toString(rampDensity),
-                "--reclaim-density", Float.toString(reclaimDensity),
-                "--mex-density", Float.toString(mexDensity),
-                "--map-size", Integer.toString(mapSize),
-                "--num-teams", Integer.toString(numTeams)};
+        keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(
+                spawnCount), "--land-density", Float.toString(landDensity), "--plateau-density", Float.toString(
+                plateauDensity), "--mountain-density", Float.toString(
+                mountainDensity), "--ramp-density", Float.toString(rampDensity), "--reclaim-density", Float.toString(
+                reclaimDensity), "--mex-density", Float.toString(mexDensity), "--map-size", Integer.toString(
+                mapSize), "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
     }
@@ -125,7 +119,6 @@ public class MapGeneratorTest {
         assertEquals(512, map.getSize());
     }
 
-
     @Test
     public void TestDeterminism() {
         new CommandLine(instance).execute(keywordArgs);
@@ -142,6 +135,27 @@ public class MapGeneratorTest {
             assertSCMapEquality(map1, map2);
             assertArrayEquals(hashArray1, hashArray2);
         }
+    }
+
+    private void assertSCMapEquality(SCMap map1, SCMap map2) {
+        assertEquals(map1.getName(), map2.getName());
+        assertEquals(map1.getSpawns(), map2.getSpawns());
+        assertEquals(map1.getMexes(), map2.getMexes());
+        assertEquals(map1.getHydros(), map2.getHydros());
+        assertEquals(map1.getArmies(), map2.getArmies());
+        assertEquals(map1.getProps(), map2.getProps());
+        assertEquals(map1.getBiome(), map2.getBiome());
+        assertEquals(map1.getSize(), map2.getSize());
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
+        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
+        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
+        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
+        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
+        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
+        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
+        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
+        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 
     @Test
@@ -344,57 +358,45 @@ public class MapGeneratorTest {
         BufferedImage mapPreview = map.getPreview();
 
         assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
-                mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
+                          mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
     @Test
     public void TestMultiVisibilityOptionsFail() {
         instance = new MapGenerator();
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE", "--tournament-style"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE",
+                                                               "--tournament-style"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
     }
 
     @Test
     public void TestMultiTuningOptionsFail() {
         instance = new MapGenerator();
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
-        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
-    }
-
-    private void assertSCMapEquality(SCMap map1, SCMap map2) {
-        assertEquals(map1.getName(), map2.getName());
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
-        assertTrue(compareImages(map1.getHeightmap(), map2.getHeightmap()));
-        assertTrue(compareImages(map1.getNormalMap(), map2.getNormalMap()));
-        assertTrue(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
-        assertTrue(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
-        assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
-        assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
-        assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
-        assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
     }
 
     @AfterEach
     public void cleanup() throws IOException {
         DebugUtil.DEBUG = false;
         Files.list(Path.of("."))
-                .filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
-                .forEach(FileUtil::deleteRecursiveIfExists);
+             .filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
+             .forEach(FileUtil::deleteRecursiveIfExists);
     }
-
 }
 
 

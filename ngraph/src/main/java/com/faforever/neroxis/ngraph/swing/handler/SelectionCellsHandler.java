@@ -35,32 +35,26 @@ import javax.swing.SwingUtilities;
 public class SelectionCellsHandler implements MouseListener, MouseMotionListener {
 
     private static final long serialVersionUID = -882368002120921842L;
-
     /**
      * Defines the default value for maxHandlers. Default is 100.
      */
     public static int DEFAULT_MAX_HANDLERS = 100;
-
     /**
      * Reference to the enclosing graph component.
      */
     protected GraphComponent graphComponent;
-
     /**
      * Specifies if this handler is enabled.
      */
     protected boolean enabled = true;
-
     /**
      * Specifies if this handler is visible.
      */
     protected boolean visible = true;
-
     /**
      * Reference to the enclosing graph component.
      */
     protected Rectangle bounds = null;
-
     /**
      * Defines the maximum number of handlers to paint individually.
      * Default is DEFAULT_MAX_HANDLES.
@@ -75,7 +69,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
             refresh();
         }
     };
-
     protected transient PropertyChangeListener labelMoveHandler = evt -> {
         if (evt.getPropertyName().equals("vertexLabelsMovable") || evt.getPropertyName().equals("edgeLabelsMovable")) {
             refresh();
@@ -112,7 +105,8 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
             graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) refreshHandler);
             graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) refreshHandler);
             graph.getView().addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) refreshHandler);
-            graph.getView().addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) refreshHandler);
+            graph.getView()
+                 .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) refreshHandler);
             graph.getView().addListener(DownEvent.class, (IEventListener<DownEvent>) refreshHandler);
             graph.getView().addListener(UpEvent.class, (IEventListener<UpEvent>) refreshHandler);
             // Refreshes the handles if moveVertexLabels or moveEdgeLabels changes
@@ -132,16 +126,15 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
+    public void paintHandles(Graphics g) {
+
+        for (CellHandler cellHandler : handlers.values()) {
+            cellHandler.paint(g);
+        }
+    }
+
     public GraphComponent getGraphComponent() {
         return graphComponent;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
     }
 
     public boolean isVisible() {
@@ -152,43 +145,11 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         visible = value;
     }
 
-    public int getMaxHandlers() {
-        return maxHandlers;
-    }
-
-    public void setMaxHandlers(int value) {
-        maxHandlers = value;
-    }
-
     public CellHandler getHandler(Object cell) {
         return handlers.get(cell);
     }
 
-    /**
-     * Dispatches the mousepressed event to the subhandles. This is
-     * called from the connection handler as subhandles have precedence
-     * over the connection handler.
-     */
-    public void mousePressed(MouseEvent e) {
-        if (graphComponent.isEnabled() && !graphComponent.isForceMarqueeEvent(e) && isEnabled()) {
-            Iterator<CellHandler> it = handlers.values().iterator();
-
-            while (it.hasNext() && !e.isConsumed()) {
-                it.next().mousePressed(e);
-            }
-        }
-    }
-
-    public void mouseMoved(MouseEvent e) {
-        if (graphComponent.isEnabled() && isEnabled()) {
-            Iterator<CellHandler> it = handlers.values().iterator();
-
-            while (it.hasNext() && !e.isConsumed()) {
-                it.next().mouseMoved(e);
-            }
-        }
-    }
-
+    @Override
     public void mouseDragged(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             Iterator<CellHandler> it = handlers.values().iterator();
@@ -199,16 +160,23 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
     }
 
-    public void mouseReleased(MouseEvent e) {
+    @Override
+    public void mouseMoved(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled()) {
             Iterator<CellHandler> it = handlers.values().iterator();
 
             while (it.hasNext() && !e.isConsumed()) {
-                it.next().mouseReleased(e);
+                it.next().mouseMoved(e);
             }
         }
+    }
 
-        reset();
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
     }
 
     /**
@@ -226,12 +194,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         }
 
         return tip;
-    }
-
-    public void reset() {
-        for (CellHandler cellHandler : handlers.values()) {
-            cellHandler.reset();
-        }
     }
 
     public void refresh() {
@@ -300,26 +262,61 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         bounds = handleBounds;
     }
 
-    public void paintHandles(Graphics g) {
-
-        for (CellHandler cellHandler : handlers.values()) {
-            cellHandler.paint(g);
-        }
+    public int getMaxHandlers() {
+        return maxHandlers;
     }
 
+    public void setMaxHandlers(int value) {
+        maxHandlers = value;
+    }
 
+    @Override
     public void mouseClicked(MouseEvent arg0) {
         // empty
     }
 
+    /**
+     * Dispatches the mousepressed event to the subhandles. This is
+     * called from the connection handler as subhandles have precedence
+     * over the connection handler.
+     */
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (graphComponent.isEnabled() && !graphComponent.isForceMarqueeEvent(e) && isEnabled()) {
+            Iterator<CellHandler> it = handlers.values().iterator();
 
+            while (it.hasNext() && !e.isConsumed()) {
+                it.next().mousePressed(e);
+            }
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (graphComponent.isEnabled() && isEnabled()) {
+            Iterator<CellHandler> it = handlers.values().iterator();
+
+            while (it.hasNext() && !e.isConsumed()) {
+                it.next().mouseReleased(e);
+            }
+        }
+
+        reset();
+    }
+
+    public void reset() {
+        for (CellHandler cellHandler : handlers.values()) {
+            cellHandler.reset();
+        }
+    }
+
+    @Override
     public void mouseEntered(MouseEvent arg0) {
         // empty
     }
 
-
+    @Override
     public void mouseExited(MouseEvent arg0) {
         // empty
     }
-
 }

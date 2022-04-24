@@ -41,69 +41,54 @@ import javax.swing.text.html.MinimalHTMLWriter;
 public class CellEditor implements ICellEditor {
 
     private static final String CANCEL_EDITING = "cancel-editing";
-
     private static final String INSERT_BREAK = "insert-break";
-
     private static final String SUBMIT_TEXT = "submit-text";
-
     public static int DEFAULT_MIN_WIDTH = 100;
-
     public static int DEFAULT_MIN_HEIGHT = 60;
-
     public static double DEFAULT_MINIMUM_EDITOR_SCALE = 1;
-
     protected GraphComponent graphComponent;
-
     /**
      * Defines the minimum scale to be used for the editor. Set this to
      * 0 if the font size in the editor
      */
     protected double minimumEditorScale = DEFAULT_MINIMUM_EDITOR_SCALE;
-
     protected int minimumWidth = DEFAULT_MIN_WIDTH;
-
     protected int minimumHeight = DEFAULT_MIN_HEIGHT;
-
     protected transient ICell editingCell;
-
     protected transient EventObject trigger;
-
     protected transient JScrollPane scrollPane;
-
     /**
      * Holds the editor for plain text editing.
      */
     protected transient JTextArea textArea;
-
     /**
      * Holds the editor for HTML editing.
      */
     protected transient JEditorPane editorPane;
-
     /**
      * Specifies if the text content of the HTML body should be extracted
      * before and after editing for HTML markup. Default is true.
      */
     protected boolean extractHtmlBody = true;
-
     /**
      * Specifies if linefeeds should be replaced with BREAKS before editing,
      * and BREAKS should be replaced with linefeeds after editing. This
      * value is ignored if extractHtmlBody is false. Default is true.
      */
     protected boolean replaceLinefeeds = true;
-
     /**
      * Specifies if shift ENTER should submit text if enterStopsCellEditing
      * is true. Default is false.
      */
     protected boolean shiftEnterSubmitsText = false;
     protected AbstractAction cancelEditingAction = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             stopEditing(true);
         }
     };
     protected AbstractAction textSubmitAction = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
             stopEditing(false);
         }
@@ -152,45 +137,118 @@ public class CellEditor implements ICellEditor {
     }
 
     /**
-     * Returns replaceHtmlLinefeeds
+     * Returns the current editor or null if no editing is in progress.
      */
-    public boolean isExtractHtmlBody() {
-        return extractHtmlBody;
+    public Component getEditor() {
+        if (textArea.getParent() != null) {
+            return textArea;
+        } else if (editingCell != null) {
+            return editorPane;
+        }
+
+        return null;
+    }
+
+    @Override
+    public Object getEditingCell() {
+        return editingCell;
+    }
+
+    @Override
+    public void startEditing(ICell cell, EventObject evt) {
+        if (editingCell != null) {
+            stopEditing(true);
+        }
+
+        CellState state = graphComponent.getGraph().getView().getState(cell);
+
+        if (state != null) {
+            editingCell = cell;
+            trigger = evt;
+            double scale = Math.max(minimumEditorScale, graphComponent.getGraph().getView().getScale());
+            scrollPane.setBounds(getEditorBounds(state, scale));
+            scrollPane.setVisible(true);
+            String value = getInitialValue(state, evt);
+            JTextComponent currentEditor = null;
+            textArea.setFont(Utils.getFont(state.getStyle(), scale));
+            Color fontColor = state.getStyle().getLabel().getTextColor();
+            textArea.setForeground(fontColor);
+            textArea.setText(value);
+            scrollPane.setViewportView(textArea);
+            currentEditor = textArea;
+            graphComponent.getGraphControl().add(scrollPane, 0);
+            if (isHideLabel(state)) {
+                graphComponent.redraw(state);
+            }
+            currentEditor.revalidate();
+            currentEditor.requestFocusInWindow();
+            currentEditor.selectAll();
+
+            configureActionMaps();
+        }
     }
 
     /**
-     * Sets extractHtmlBody
+     * Returns the bounds to be used for the editor.
      */
-    public void setExtractHtmlBody(boolean value) {
-        extractHtmlBody = value;
+    public Rectangle getEditorBounds(CellState state, double scale) {
+        IGraphModel model = state.getView().getGraph().getModel();
+        Rectangle bounds = null;
+
+        if (useLabelBounds(state)) {
+            bounds = state.getLabelBounds().getRectangle();
+            bounds.height += 10;
+        } else {
+            bounds = state.getRectangle();
+        }
+
+        // Applies the horizontal and vertical label positions
+        if (model.isVertex(state.getCell())) {
+            HorizontalAlignment horizontalAlignment = state.getStyle().getLabel().getHorizontalAlignmentPosition();
+            if (horizontalAlignment == HorizontalAlignment.LEFT) {
+                bounds.x -= state.getWidth();
+            } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
+                bounds.x += state.getWidth();
+            }
+            VerticalAlignment verticalAlignment = state.getStyle().getLabel().getVerticalAlignment();
+            if (verticalAlignment == VerticalAlignment.TOP) {
+                bounds.y -= state.getHeight();
+            } else if (verticalAlignment == VerticalAlignment.BOTTOM) {
+                bounds.y += state.getHeight();
+            }
+        }
+
+        bounds.setSize((int) Math.max(bounds.getWidth(), Math.round(minimumWidth * scale)),
+                       (int) Math.max(bounds.getHeight(), Math.round(minimumHeight * scale)));
+
+        return bounds;
     }
 
     /**
-     * Returns replaceHtmlLinefeeds
+     * Returns true if the label bounds of the state should be used for the
+     * editor.
      */
-    public boolean isReplaceHtmlLinefeeds() {
-        return replaceLinefeeds;
+    protected boolean useLabelBounds(CellState state) {
+        IGraphModel model = state.getView().getGraph().getModel();
+        Geometry geometry = model.getGeometry(state.getCell());
+
+        return ((geometry != null && geometry.getOffset() != null && !geometry.isRelative() && (geometry.getOffset()
+                                                                                                        .getX() != 0
+                                                                                                || geometry.getOffset()
+                                                                                                           .getY()
+                                                                                                   != 0))
+                || model.isEdge(state.getCell()));
     }
 
     /**
-     * Sets replaceHtmlLinefeeds
+     * Gets the initial editing value for the given cell.
      */
-    public void setReplaceHtmlLinefeeds(boolean value) {
-        replaceLinefeeds = value;
+    protected String getInitialValue(CellState state, EventObject trigger) {
+        return graphComponent.getEditingValue(state.getCell(), trigger);
     }
 
-    /**
-     * Returns shiftEnterSubmitsText
-     */
-    public boolean isShiftEnterSubmitsText() {
-        return shiftEnterSubmitsText;
-    }
-
-    /**
-     * Sets shiftEnterSubmitsText
-     */
-    public void setShiftEnterSubmitsText(boolean value) {
-        shiftEnterSubmitsText = value;
+    protected boolean isHideLabel(CellState state) {
+        return true;
     }
 
     /**
@@ -227,103 +285,20 @@ public class CellEditor implements ICellEditor {
     }
 
     /**
-     * Returns the current editor or null if no editing is in progress.
+     * Returns shiftEnterSubmitsText
      */
-    public Component getEditor() {
-        if (textArea.getParent() != null) {
-            return textArea;
-        } else if (editingCell != null) {
-            return editorPane;
-        }
-
-        return null;
+    public boolean isShiftEnterSubmitsText() {
+        return shiftEnterSubmitsText;
     }
 
     /**
-     * Returns true if the label bounds of the state should be used for the
-     * editor.
+     * Sets shiftEnterSubmitsText
      */
-    protected boolean useLabelBounds(CellState state) {
-        IGraphModel model = state.getView().getGraph().getModel();
-        Geometry geometry = model.getGeometry(state.getCell());
-
-        return ((geometry != null && geometry.getOffset() != null && !geometry.isRelative() && (geometry.getOffset().getX() != 0 || geometry.getOffset().getY() != 0)) || model.isEdge(state.getCell()));
+    public void setShiftEnterSubmitsText(boolean value) {
+        shiftEnterSubmitsText = value;
     }
 
-    /**
-     * Returns the bounds to be used for the editor.
-     */
-    public Rectangle getEditorBounds(CellState state, double scale) {
-        IGraphModel model = state.getView().getGraph().getModel();
-        Rectangle bounds = null;
-
-        if (useLabelBounds(state)) {
-            bounds = state.getLabelBounds().getRectangle();
-            bounds.height += 10;
-        } else {
-            bounds = state.getRectangle();
-        }
-
-        // Applies the horizontal and vertical label positions
-        if (model.isVertex(state.getCell())) {
-            HorizontalAlignment horizontalAlignment = state.getStyle().getLabel().getHorizontalAlignmentPosition();
-            if (horizontalAlignment == HorizontalAlignment.LEFT) {
-                bounds.x -= state.getWidth();
-            } else if (horizontalAlignment == HorizontalAlignment.RIGHT) {
-                bounds.x += state.getWidth();
-            }
-            VerticalAlignment verticalAlignment = state.getStyle().getLabel().getVerticalAlignment();
-            if (verticalAlignment == VerticalAlignment.TOP) {
-                bounds.y -= state.getHeight();
-            } else if (verticalAlignment == VerticalAlignment.BOTTOM) {
-                bounds.y += state.getHeight();
-            }
-        }
-
-        bounds.setSize((int) Math.max(bounds.getWidth(), Math.round(minimumWidth * scale)), (int) Math.max(bounds.getHeight(), Math.round(minimumHeight * scale)));
-
-        return bounds;
-    }
-
-
-    public void startEditing(ICell cell, EventObject evt) {
-        if (editingCell != null) {
-            stopEditing(true);
-        }
-
-        CellState state = graphComponent.getGraph().getView().getState(cell);
-
-        if (state != null) {
-            editingCell = cell;
-            trigger = evt;
-            double scale = Math.max(minimumEditorScale, graphComponent.getGraph().getView().getScale());
-            scrollPane.setBounds(getEditorBounds(state, scale));
-            scrollPane.setVisible(true);
-            String value = getInitialValue(state, evt);
-            JTextComponent currentEditor = null;
-            textArea.setFont(Utils.getFont(state.getStyle(), scale));
-            Color fontColor = state.getStyle().getLabel().getTextColor();
-            textArea.setForeground(fontColor);
-            textArea.setText(value);
-            scrollPane.setViewportView(textArea);
-            currentEditor = textArea;
-            graphComponent.getGraphControl().add(scrollPane, 0);
-            if (isHideLabel(state)) {
-                graphComponent.redraw(state);
-            }
-            currentEditor.revalidate();
-            currentEditor.requestFocusInWindow();
-            currentEditor.selectAll();
-
-            configureActionMaps();
-        }
-    }
-
-    protected boolean isHideLabel(CellState state) {
-        return true;
-    }
-
-
+    @Override
     public void stopEditing(boolean cancel) {
         if (editingCell != null) {
             scrollPane.transferFocusUpCycle();
@@ -349,13 +324,6 @@ public class CellEditor implements ICellEditor {
     }
 
     /**
-     * Gets the initial editing value for the given cell.
-     */
-    protected String getInitialValue(CellState state, EventObject trigger) {
-        return graphComponent.getEditingValue(state.getCell(), trigger);
-    }
-
-    /**
      * Returns the current editing value.
      */
     public String getCurrentValue() {
@@ -374,9 +342,32 @@ public class CellEditor implements ICellEditor {
         return result;
     }
 
+    /**
+     * Returns replaceHtmlLinefeeds
+     */
+    public boolean isExtractHtmlBody() {
+        return extractHtmlBody;
+    }
 
-    public Object getEditingCell() {
-        return editingCell;
+    /**
+     * Sets extractHtmlBody
+     */
+    public void setExtractHtmlBody(boolean value) {
+        extractHtmlBody = value;
+    }
+
+    /**
+     * Returns replaceHtmlLinefeeds
+     */
+    public boolean isReplaceHtmlLinefeeds() {
+        return replaceLinefeeds;
+    }
+
+    /**
+     * Sets replaceHtmlLinefeeds
+     */
+    public void setReplaceHtmlLinefeeds(boolean value) {
+        replaceLinefeeds = value;
     }
 
     /**
@@ -425,6 +416,8 @@ public class CellEditor implements ICellEditor {
      * Workaround for inserted linefeeds when getting text from HTML editor.
      */
     class NoLinefeedHtmlEditorKit extends HTMLEditorKit {
+
+        @Override
         public void write(Writer out, Document doc, int pos, int len) throws IOException, BadLocationException {
             if (doc instanceof HTMLDocument) {
                 NoLinefeedHtmlWriter w = new NoLinefeedHtmlWriter(out, (HTMLDocument) doc, pos, len);
@@ -449,13 +442,14 @@ public class CellEditor implements ICellEditor {
      * Subclassed to make setLineLength visible for the custom editor kit.
      */
     class NoLinefeedHtmlWriter extends HTMLWriter {
+
         public NoLinefeedHtmlWriter(Writer buf, HTMLDocument doc, int pos, int len) {
             super(buf, doc, pos, len);
         }
 
+        @Override
         protected void setLineLength(int l) {
             super.setLineLength(l);
         }
     }
-
 }

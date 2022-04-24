@@ -8,6 +8,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class RemoveOverlayEvent extends EventObject {
+
     ICell cell;
     ICellOverlay overlay;
 }

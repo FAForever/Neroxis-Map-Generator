@@ -6,6 +6,18 @@ import com.faforever.neroxis.util.Pipeline;
 
 public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGenerator {
 
+    @Override
+    public void placePropsWithExclusion() {
+        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+            Biome biome = generatorParameters.getBiome();
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(),
+                                  3f, 7f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+        });
+    }
+
+    @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
         float reclaimDensity = generatorParameters.getReclaimDensity();
@@ -18,15 +30,5 @@ public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGene
         treeMask.inflate(2).erode(.5f);
         treeMask.setSize(mapSize + 1);
         treeMask.multiply(passableLand.copy().deflate(8)).fillEdge(8, false);
-    }
-
-    @Override
-    public void placePropsWithExclusion() {
-        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = generatorParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
-        });
     }
 }

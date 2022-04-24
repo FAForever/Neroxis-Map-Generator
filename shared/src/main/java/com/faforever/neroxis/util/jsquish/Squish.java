@@ -29,33 +29,22 @@ import lombok.Getter;
 
 public strictfp final class Squish {
 
-
     private static final ColourSet colours = new ColourSet();
 
     private Squish() {
     }
 
-    public static int getStorageRequirements(final int width, final int height, final CompressionType type) {
-        if (width <= 0 || height <= 0)
-            throw new IllegalArgumentException("Invalid image dimensions specified: " + width + " x " + height);
-
-        final int blockcount = ((width + 3) / 4) * ((height + 3) / 4);
-
-        return blockcount * type.blockSize;
-    }
-
-    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks, final CompressionType type) {
-        return compressImage(rgba, width, height, blocks, type, CompressionMethod.CLUSTER_FIT, CompressionMetric.PERCEPTUAL, false);
-    }
-
-    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks, final CompressionType type, final CompressionMethod method) {
-        return compressImage(rgba, width, height, blocks, type, method, CompressionMetric.PERCEPTUAL, false);
+    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks,
+                                       final CompressionType type) {
+        return compressImage(rgba, width, height, blocks, type, CompressionMethod.CLUSTER_FIT,
+                             CompressionMetric.PERCEPTUAL, false);
     }
 
     // TODO: Add interface for ByteBuffers
     // TODO: Allow concurrent calls: Un-static everything, create basic compressors once, objectify alpha compressors (DXT3 & DXT5 implementations)
     public static byte[] compressImage(final byte[] rgba, final int width, final int height, byte[] blocks,
-                                       final CompressionType type, final CompressionMethod method, final CompressionMetric metric, final boolean weightAlpha) {
+                                       final CompressionType type, final CompressionMethod method,
+                                       final CompressionMetric metric, final boolean weightAlpha) {
         blocks = checkCompressInput(rgba, width, height, blocks, type);
 
         final byte[] sourceRGBA = new byte[64];
@@ -77,8 +66,9 @@ public strictfp final class Squish {
                         if (sx < width && sy < height) {
                             // copy the rgba value
                             int sourcePixel = 4 * (width * sy + sx);
-                            for (int i = 0; i < 4; ++i)
+                            for (int i = 0; i < 4; ++i) {
                                 sourceRGBA[targetPixel++] = rgba[sourcePixel++];
+                            }
 
                             // enable this pixel
                             mask |= (1 << (4 * py + px));
@@ -100,20 +90,34 @@ public strictfp final class Squish {
         return blocks;
     }
 
-    private static byte[] checkCompressInput(final byte[] rgba, final int width, final int height, byte[] blocks, final CompressionType type) {
+    private static byte[] checkCompressInput(final byte[] rgba, final int width, final int height, byte[] blocks,
+                                             final CompressionType type) {
         final int storageSize = getStorageRequirements(width, height, type);
 
-        if (rgba == null || rgba.length < (width * height * 4))
+        if (rgba == null || rgba.length < (width * height * 4)) {
             throw new IllegalArgumentException("Invalid source image data specified.");
+        }
 
-        if (blocks == null || blocks.length < storageSize)
+        if (blocks == null || blocks.length < storageSize) {
             blocks = new byte[storageSize];
+        }
 
         return blocks;
     }
 
+    public static int getStorageRequirements(final int width, final int height, final CompressionType type) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Invalid image dimensions specified: " + width + " x " + height);
+        }
+
+        final int blockcount = ((width + 3) / 4) * ((height + 3) / 4);
+
+        return blockcount * type.blockSize;
+    }
+
     private static void compress(final byte[] rgba, final int mask, final byte[] block, final int offset,
-                                 final CompressionType type, final CompressionMethod method, final CompressionMetric metric, final boolean weightAlpha) {
+                                 final CompressionType type, final CompressionMethod method,
+                                 final CompressionMetric metric, final boolean weightAlpha) {
         // get the block locations
         final int colourBlock = offset + type.blockOffset;
 
@@ -137,7 +141,13 @@ public strictfp final class Squish {
         }
     }
 
-    public static byte[] decompressImage(byte[] rgba, final int width, final int height, final byte[] blocks, final CompressionType type) {
+    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks,
+                                       final CompressionType type, final CompressionMethod method) {
+        return compressImage(rgba, width, height, blocks, type, method, CompressionMetric.PERCEPTUAL, false);
+    }
+
+    public static byte[] decompressImage(byte[] rgba, final int width, final int height, final byte[] blocks,
+                                         final CompressionType type) {
         rgba = checkDecompressInput(rgba, width, height, blocks, type);
 
         final byte[] targetRGBA = new byte[64];
@@ -177,19 +187,23 @@ public strictfp final class Squish {
         return rgba;
     }
 
-    private static byte[] checkDecompressInput(byte[] rgba, final int width, final int height, final byte[] blocks, final CompressionType type) {
+    private static byte[] checkDecompressInput(byte[] rgba, final int width, final int height, final byte[] blocks,
+                                               final CompressionType type) {
         final int storageSize = getStorageRequirements(width, height, type);
 
-        if (blocks == null || blocks.length < storageSize)
+        if (blocks == null || blocks.length < storageSize) {
             throw new IllegalArgumentException("Invalid source image data specified.");
+        }
 
-        if (rgba == null || rgba.length < (width * height * 4))
+        if (rgba == null || rgba.length < (width * height * 4)) {
             rgba = new byte[(width * height * 4)];
+        }
 
         return rgba;
     }
 
-    private static void decompress(final byte[] rgba, final byte[] block, final int offset, final CompressionType type) {
+    private static void decompress(final byte[] rgba, final byte[] block, final int offset,
+                                   final CompressionType type) {
         // get the block locations
         final int colourBlockOffset = offset + type.blockOffset;
 
@@ -197,18 +211,15 @@ public strictfp final class Squish {
         ColourBlock.decompressColour(rgba, block, colourBlockOffset, type == CompressionType.DXT1);
 
         // decompress alpha separately if necessary
-        if (type == CompressionType.DXT3)
+        if (type == CompressionType.DXT3) {
             AlphaBlock.decompressAlphaDxt3(rgba, block, offset);
-        else if (type == CompressionType.DXT5)
+        } else if (type == CompressionType.DXT5) {
             AlphaBlock.decompressAlphaDxt5(rgba, block, offset);
+        }
     }
 
     public enum CompressionType {
-
-        DXT1(8),
-        DXT3(16),
-        DXT5(16);
-
+        DXT1(8), DXT3(16), DXT5(16);
         @Getter
         public final int blockSize;
         @Getter
@@ -221,33 +232,27 @@ public strictfp final class Squish {
     }
 
     public enum CompressionMethod {
-
         CLUSTER_FIT() {
-            CompressorColourFit getCompressor(final ColourSet colours, final CompressionType type, final CompressionMetric metric) {
+            @Override
+            CompressorColourFit getCompressor(final ColourSet colours, final CompressionType type,
+                                              final CompressionMetric metric) {
                 return new CompressorCluster(colours, type, metric);
-
             }
-        },
-        RANGE_FIT() {
-            CompressorColourFit getCompressor(final ColourSet colours, final CompressionType type, final CompressionMetric metric) {
+        }, RANGE_FIT() {
+            @Override
+            CompressorColourFit getCompressor(final ColourSet colours, final CompressionType type,
+                                              final CompressionMetric metric) {
                 return new CompressorRange(colours, type, metric);
-
             }
         };
 
         abstract CompressorColourFit getCompressor(ColourSet colours, CompressionType type, CompressionMetric metric);
-
     }
 
     public enum CompressionMetric {
-
-        PERCEPTUAL(0.2126f, 0.7152f, 0.0722f),
-        UNIFORM(1.0f, 1.0f, 1.0f);
-
+        PERCEPTUAL(0.2126f, 0.7152f, 0.0722f), UNIFORM(1.0f, 1.0f, 1.0f);
         public final float r;
-
         public final float g;
-
         public final float b;
 
         CompressionMetric(final float r, final float g, final float b) {
@@ -259,7 +264,5 @@ public strictfp final class Squish {
         public float dot(final float x, final float y, final float z) {
             return r * x + g * y + b * z;
         }
-
     }
-
 }

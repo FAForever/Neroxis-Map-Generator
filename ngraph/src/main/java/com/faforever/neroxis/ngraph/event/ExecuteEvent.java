@@ -12,5 +12,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ExecuteEvent extends EventObject {
+
     AtomicGraphModelChange change;
 }

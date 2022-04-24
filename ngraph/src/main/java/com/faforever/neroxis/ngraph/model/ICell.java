@@ -301,5 +301,4 @@ public interface ICell {
      * @return Returns a clone of this cell.
      */
     Object clone() throws CloneNotSupportedException;
-
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class RootChange extends AtomicGraphModelChange {
+
     /**
      * Holds the new and previous root cell.
      */
@@ -22,6 +23,7 @@ public class RootChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         root = previous;
         previous = ((GraphModel) model).rootChanged(previous);

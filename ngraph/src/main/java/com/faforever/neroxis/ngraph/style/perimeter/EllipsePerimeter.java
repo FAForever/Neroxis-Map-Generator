@@ -8,6 +8,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Describes an elliptic perimeter.
  */
 public class EllipsePerimeter implements Perimeter {
+
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         double x = bounds.getX();

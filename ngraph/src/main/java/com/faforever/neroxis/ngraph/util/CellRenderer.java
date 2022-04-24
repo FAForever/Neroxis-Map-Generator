@@ -15,8 +15,26 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class CellRenderer {
+
     private CellRenderer() {
         // static class
+    }
+
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, Color background,
+                                                    boolean antiAlias, RectangleDouble clip) {
+        return createBufferedImage(graph, cells, scale, background, antiAlias, clip, new Graphics2DCanvas());
+    }
+
+    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale,
+                                                    final Color background, final boolean antiAlias,
+                                                    RectangleDouble clip, final Graphics2DCanvas graphicsCanvas) {
+        ImageCanvas canvas = (ImageCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
+            @Override
+            public ICanvas createCanvas(int width, int height) {
+                return new ImageCanvas(graphicsCanvas, width, height, background, antiAlias);
+            }
+        });
+        return (canvas != null) ? canvas.destroy() : null;
     }
 
     /**
@@ -26,7 +44,8 @@ public class CellRenderer {
      * @param graph Graph to be painted onto the canvas.
      * @return Returns the image that represents the canvas.
      */
-    public static ICanvas drawCells(Graph graph, List<ICell> cells, double scale, RectangleDouble clip, CanvasFactory factory) {
+    public static ICanvas drawCells(Graph graph, List<ICell> cells, double scale, RectangleDouble clip,
+                                    CanvasFactory factory) {
         ICanvas canvas = null;
         if (cells == null) {
             cells = List.of(graph.getModel().getRoot());
@@ -79,19 +98,6 @@ public class CellRenderer {
         return canvas;
     }
 
-    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, Color background, boolean antiAlias, RectangleDouble clip) {
-        return createBufferedImage(graph, cells, scale, background, antiAlias, clip, new Graphics2DCanvas());
-    }
-
-    public static BufferedImage createBufferedImage(Graph graph, List<ICell> cells, double scale, final Color background, final boolean antiAlias, RectangleDouble clip, final Graphics2DCanvas graphicsCanvas) {
-        ImageCanvas canvas = (ImageCanvas) drawCells(graph, cells, scale, clip, new CanvasFactory() {
-            public ICanvas createCanvas(int width, int height) {
-                return new ImageCanvas(graphicsCanvas, width, height, background, antiAlias);
-            }
-        });
-        return (canvas != null) ? canvas.destroy() : null;
-    }
-
     public static abstract class CanvasFactory {
 
         /**
@@ -99,7 +105,5 @@ public class CellRenderer {
          * size of the required graphics buffer / document / container is known.
          */
         public abstract ICanvas createCanvas(int width, int height);
-
     }
-
 }

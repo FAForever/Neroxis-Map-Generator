@@ -8,5 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class RemoveCellsFromParentEvent extends EventObject {
+
     List<ICell> cells;
 }

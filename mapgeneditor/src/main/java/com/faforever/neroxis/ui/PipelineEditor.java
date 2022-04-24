@@ -31,6 +31,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(name = "Editor", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Tool for creating generator pipelines")
 public strictfp class PipelineEditor implements Callable<Integer> {
+
     private final JFrame frame = new JFrame();
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
     private final EntryPanel entryPanel = new EntryPanel();
@@ -92,6 +93,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     private void addNewGraphTab() {
         GraphPane graphPane = new GraphPane();
         graphPane.getGraphComponent().addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 boolean controlDown = e.isControlDown();
                 GraphPane graphPane = (GraphPane) tabbedPane.getSelectedComponent();
@@ -158,7 +160,9 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         spawnCountComboBox.addActionListener(e -> {
             Object selected = numTeamsComboBox.getSelectedItem();
             numTeamsComboBox.removeAllItems();
-            IntStream.range(1, 9).filter(i -> ((int) spawnCountComboBox.getSelectedItem() % i) == 0).forEach(numTeamsComboBox::addItem);
+            IntStream.range(1, 9)
+                     .filter(i -> ((int) spawnCountComboBox.getSelectedItem() % i) == 0)
+                     .forEach(numTeamsComboBox::addItem);
             if (selected != null) {
                 numTeamsComboBox.setSelectedItem(selected);
             }
@@ -171,7 +175,9 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             Object selected = terrainSymmetryComboBox.getSelectedItem();
             terrainSymmetryComboBox.removeAllItems();
             if (numTeamsComboBox.getSelectedItem() != null) {
-                Arrays.stream(Symmetry.values()).filter(symmetry -> (symmetry.getNumSymPoints() % (int) numTeamsComboBox.getSelectedItem()) == 0).forEach(terrainSymmetryComboBox::addItem);
+                Arrays.stream(Symmetry.values())
+                      .filter(symmetry -> (symmetry.getNumSymPoints() % (int) numTeamsComboBox.getSelectedItem()) == 0)
+                      .forEach(terrainSymmetryComboBox::addItem);
                 if (selected != null) {
                     terrainSymmetryComboBox.setSelectedItem(selected);
                 }
@@ -228,17 +234,10 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     }
 
     private void runGraph() {
-        ((GraphPane) tabbedPane.getSelectedComponent()).runGraph((Integer) numTeamsComboBox.getSelectedItem(), (Integer) mapSizeComboBox.getSelectedItem(), (Integer) spawnCountComboBox.getSelectedItem(), (Symmetry) terrainSymmetryComboBox.getSelectedItem());
-    }
-
-    private void exportGraph() {
-        int returnValue = fileChooser.showOpenDialog(frame);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            int index = tabbedPane.getSelectedIndex();
-            ((GraphPane) tabbedPane.getComponentAt(index)).exportGraph(file);
-            ((CloseableTabComponent) tabbedPane.getTabComponentAt(index)).setTitle(file.getName());
-        }
+        ((GraphPane) tabbedPane.getSelectedComponent()).runGraph((Integer) numTeamsComboBox.getSelectedItem(),
+                                                                 (Integer) mapSizeComboBox.getSelectedItem(),
+                                                                 (Integer) spawnCountComboBox.getSelectedItem(),
+                                                                 (Symmetry) terrainSymmetryComboBox.getSelectedItem());
     }
 
     private void importGraph() {
@@ -250,6 +249,16 @@ public strictfp class PipelineEditor implements Callable<Integer> {
                 ((CloseableTabComponent) tabbedPane.getTabComponentAt(index)).setTitle(file.getName());
             }
             ((GraphPane) tabbedPane.getComponentAt(index)).importGraph(file);
+        }
+    }
+
+    private void exportGraph() {
+        int returnValue = fileChooser.showOpenDialog(frame);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            int index = tabbedPane.getSelectedIndex();
+            ((GraphPane) tabbedPane.getComponentAt(index)).exportGraph(file);
+            ((CloseableTabComponent) tabbedPane.getTabComponentAt(index)).setTitle(file.getName());
         }
     }
 

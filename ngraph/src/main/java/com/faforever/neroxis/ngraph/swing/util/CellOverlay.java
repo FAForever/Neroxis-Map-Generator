@@ -12,23 +12,19 @@ import javax.swing.JComponent;
 public class CellOverlay extends JComponent implements ICellOverlay {
 
     private static final long serialVersionUID = 921991820491141221L;
-
     protected ImageIcon imageIcon;
-
     /**
      * Holds the horizontal alignment for the overlay.
      * Default is ALIGN_RIGHT. For edges, the overlay
      * always appears in the center of the edge.
      */
     protected Object align = Constants.ALIGN_RIGHT;
-
     /**
      * Holds the vertical alignment for the overlay.
      * Default is bottom. For edges, the overlay
      * always appears in the center of the edge.
      */
     protected Object verticalAlign = Constants.ALIGN_BOTTOM;
-
     /**
      * Defines the overlapping for the overlay, that is,
      * the proportional distance from the origin to the
@@ -70,10 +66,12 @@ public class CellOverlay extends JComponent implements ICellOverlay {
         verticalAlign = value;
     }
 
+    @Override
     public void paint(Graphics g) {
         g.drawImage(imageIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
     }
 
+    @Override
     public RectangleDouble getBounds(CellState state) {
         boolean isEdge = state.getView().getGraph().getModel().isEdge(state.getCell());
         double s = state.getView().getScale();
@@ -110,7 +108,7 @@ public class CellOverlay extends JComponent implements ICellOverlay {
                 pt.setY(state.getY() + state.getHeight());
             }
         }
-        return new RectangleDouble(pt.getX() - w * defaultOverlap * s, pt.getY() - h * defaultOverlap * s, w * s, h * s);
+        return new RectangleDouble(pt.getX() - w * defaultOverlap * s, pt.getY() - h * defaultOverlap * s, w * s,
+                                   h * s);
     }
-
 }

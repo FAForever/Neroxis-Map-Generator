@@ -8,6 +8,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Describes a rectangular perimeter for the given bounds.
  */
 public class RectanglePerimeter implements Perimeter {
+
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         double cx = bounds.getCenterX();

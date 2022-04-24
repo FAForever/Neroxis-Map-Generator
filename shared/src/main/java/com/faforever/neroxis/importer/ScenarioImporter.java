@@ -3,11 +3,10 @@ package com.faforever.neroxis.importer;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.vector.Vector2;
-import org.luaj.vm2.LuaValue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.luaj.vm2.LuaValue;
 
 public strictfp class ScenarioImporter {
 
@@ -28,13 +27,12 @@ public strictfp class ScenarioImporter {
         map.setDescription(lua.get("description").checkjstring());
         map.setNoRushRadius((float) lua.get("norushradius").checkdouble());
         map.getSpawns().forEach(spawn -> {
-            if (lua.get("norushoffsetX_" + spawn.getId()) != LuaValue.NIL && lua.get("norushoffsetY_" + spawn.getId()) != LuaValue.NIL) {
+            if (lua.get("norushoffsetX_" + spawn.getId()) != LuaValue.NIL
+                && lua.get("norushoffsetY_" + spawn.getId()) != LuaValue.NIL) {
                 float xOffset = (float) lua.get("norushoffsetX_" + spawn.getId()).checkdouble();
                 float yOffset = (float) lua.get("norushoffsetY_" + spawn.getId()).checkdouble();
                 spawn.setNoRushOffset(new Vector2(xOffset, yOffset));
             }
         });
-
-
     }
 }

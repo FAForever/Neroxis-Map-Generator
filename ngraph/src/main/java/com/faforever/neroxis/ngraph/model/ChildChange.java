@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ChildChange extends AtomicGraphModelChange {
+
     protected ICell parent, previous, child;
     protected int index, previousIndex;
 
@@ -78,6 +79,7 @@ public class ChildChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         ICell tmp = model.getParent(child);
         int tmp2 = getChildIndex(tmp, child);

@@ -20,6 +20,7 @@ import javax.swing.JComponent;
  * @author Administrator
  */
 public class CellHandler {
+
     public static final int HANDLE_SIZE = 7;
     public static final int LABEL_HANDLE_SIZE = 4;
     /**
@@ -30,32 +31,26 @@ public class CellHandler {
      * Holds the cell state associated with this handler.
      */
     protected CellState state;
-
     /**
      * Holds the rectangles that define the handles.
      */
     protected java.awt.Rectangle[] handles;
-
     /**
      * Specifies if the handles should be painted. Default is true.
      */
     protected boolean handlesVisible = true;
-
     /**
      * Holds the bounding box of the handler.
      */
     protected transient java.awt.Rectangle bounds;
-
     /**
      * Holds the component that is used for preview.
      */
     protected transient JComponent preview;
-
     /**
      * Holds the start location of the mouse gesture.
      */
     protected transient Point first;
-
     /**
      * Holds the index of the handle that was clicked.
      */
@@ -70,10 +65,6 @@ public class CellHandler {
     public CellHandler(GraphComponent graphComponent, CellState state) {
         this.graphComponent = graphComponent;
         refresh(state);
-    }
-
-    public boolean isActive() {
-        return first != null;
     }
 
     /**
@@ -96,6 +87,48 @@ public class CellHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Creates the rectangles that define the handles.
+     */
+    protected java.awt.Rectangle[] createHandles() {
+        return null;
+    }
+
+    /**
+     * Returns true if the handle at the specified index is visible.
+     */
+    protected boolean isHandleVisible(int index) {
+        return !isLabel(index) || isLabelMovable();
+    }
+
+    /**
+     * Returns true if the given index is the index of the last handle.
+     */
+    public boolean isLabel(int index) {
+        return index == getHandleCount() - 1;
+    }
+
+    /**
+     * Returns the number of handles in this handler.
+     */
+    protected int getHandleCount() {
+        return (handles != null) ? handles.length : 0;
+    }
+
+    /**
+     * Returns true if the label is movable.
+     */
+    public boolean isLabelMovable() {
+        Graph graph = graphComponent.getGraph();
+        String label = graph.getLabel(state.getCell());
+
+        return graph.isLabelMovable(state.getCell()) && label != null && label.length() > 0;
+    }
+
+    public boolean isActive() {
+        return first != null;
     }
 
     public GraphComponent getGraphComponent() {
@@ -124,56 +157,26 @@ public class CellHandler {
     }
 
     /**
-     * Returns true if the label is movable.
-     */
-    public boolean isLabelMovable() {
-        Graph graph = graphComponent.getGraph();
-        String label = graph.getLabel(state.getCell());
-
-        return graph.isLabelMovable(state.getCell()) && label != null && label.length() > 0;
-    }
-
-    /**
-     * Returns true if the handles should be painted.
-     */
-    public boolean isHandlesVisible() {
-        return handlesVisible;
-    }
-
-    /**
-     * Specifies if the handles should be painted.
-     */
-    public void setHandlesVisible(boolean handlesVisible) {
-        this.handlesVisible = handlesVisible;
-    }
-
-    /**
-     * Returns true if the given index is the index of the last handle.
-     */
-    public boolean isLabel(int index) {
-        return index == getHandleCount() - 1;
-    }
-
-    /**
-     * Creates the rectangles that define the handles.
-     */
-    protected java.awt.Rectangle[] createHandles() {
-        return null;
-    }
-
-    /**
-     * Returns the number of handles in this handler.
-     */
-    protected int getHandleCount() {
-        return (handles != null) ? handles.length : 0;
-    }
-
-    /**
      * Hook for subclassers to return tooltip texts for certain points on the
      * handle.
      */
     public String getToolTipText(MouseEvent e) {
         return null;
+    }
+
+    /**
+     * Processes the given event.
+     */
+    public void mousePressed(MouseEvent e) {
+        if (!e.isConsumed()) {
+            int tmp = getIndexAt(e.getX(), e.getY());
+
+            if (!isIgnoredEvent(e) && tmp >= 0 && isHandleEnabled(tmp)) {
+                graphComponent.stopEditing(true);
+                start(e, tmp);
+                e.consume();
+            }
+        }
     }
 
     /**
@@ -199,18 +202,51 @@ public class CellHandler {
     }
 
     /**
-     * Processes the given event.
+     * Returns true if the given event should be ignored.
      */
-    public void mousePressed(MouseEvent e) {
-        if (!e.isConsumed()) {
-            int tmp = getIndexAt(e.getX(), e.getY());
+    protected boolean isIgnoredEvent(MouseEvent e) {
+        return graphComponent.isEditEvent(e);
+    }
 
-            if (!isIgnoredEvent(e) && tmp >= 0 && isHandleEnabled(tmp)) {
-                graphComponent.stopEditing(true);
-                start(e, tmp);
-                e.consume();
-            }
+    /**
+     * Returns true if the handle at the specified index is enabled.
+     */
+    protected boolean isHandleEnabled(int index) {
+        return true;
+    }
+
+    /**
+     * Starts handling a gesture at the given handle index.
+     */
+    public void start(MouseEvent e, int index) {
+        this.index = index;
+        first = e.getPoint();
+        preview = createPreview();
+
+        if (preview != null) {
+            graphComponent.getGraphControl().add(preview, 0);
         }
+    }
+
+    /**
+     * Creates the preview for this handler.
+     */
+    protected JComponent createPreview() {
+        return null;
+    }
+
+    /**
+     * Returns true if the handles should be painted.
+     */
+    public boolean isHandlesVisible() {
+        return handlesVisible;
+    }
+
+    /**
+     * Specifies if the handles should be painted.
+     */
+    public void setHandlesVisible(boolean handlesVisible) {
+        this.handlesVisible = handlesVisible;
     }
 
     /**
@@ -234,6 +270,13 @@ public class CellHandler {
     }
 
     /**
+     * Returns the cursor for the given event and handle.
+     */
+    protected Cursor getCursor(MouseEvent e, int index) {
+        return null;
+    }
+
+    /**
      * Processes the given event.
      */
     public void mouseDragged(MouseEvent e) {
@@ -248,33 +291,6 @@ public class CellHandler {
     }
 
     /**
-     * Starts handling a gesture at the given handle index.
-     */
-    public void start(MouseEvent e, int index) {
-        this.index = index;
-        first = e.getPoint();
-        preview = createPreview();
-
-        if (preview != null) {
-            graphComponent.getGraphControl().add(preview, 0);
-        }
-    }
-
-    /**
-     * Returns true if the given event should be ignored.
-     */
-    protected boolean isIgnoredEvent(MouseEvent e) {
-        return graphComponent.isEditEvent(e);
-    }
-
-    /**
-     * Creates the preview for this handler.
-     */
-    protected JComponent createPreview() {
-        return null;
-    }
-
-    /**
      * Resets the state of the handler and removes the preview.
      */
     public void reset() {
@@ -285,13 +301,6 @@ public class CellHandler {
         }
 
         first = null;
-    }
-
-    /**
-     * Returns the cursor for the given event and handle.
-     */
-    protected Cursor getCursor(MouseEvent e, int index) {
-        return null;
     }
 
     /**
@@ -328,20 +337,6 @@ public class CellHandler {
     }
 
     /**
-     * Returns true if the handle at the specified index is enabled.
-     */
-    protected boolean isHandleEnabled(int index) {
-        return true;
-    }
-
-    /**
-     * Returns true if the handle at the specified index is visible.
-     */
-    protected boolean isHandleVisible(int index) {
-        return !isLabel(index) || isLabelMovable();
-    }
-
-    /**
      * Returns the color to be used to fill the handle at the specified index.
      */
     protected Color getHandleFillColor(int index) {
@@ -366,5 +361,4 @@ public class CellHandler {
     protected void destroy() {
         // nop
     }
-
 }

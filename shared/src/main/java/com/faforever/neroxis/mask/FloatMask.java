@@ -25,14 +25,11 @@ import java.util.stream.IntStream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
+
     private float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
-    }
-
-    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
     }
 
     @GraphMethod
@@ -44,6 +41,10 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         super(size, seed, symmetrySettings, name, parallel);
     }
 
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
+    }
+
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, 1f, null, false);
     }
@@ -52,15 +53,25 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name, boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply(point -> setPrimitive(point, imageBuffer.getElemFloat(point.x + point.y * size) * scaleFactor));
+    }
+
+    protected void setPrimitive(Point point, float value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    protected void setPrimitive(int x, int y, float value) {
+        mask[x][y] = value;
     }
 
     protected FloatMask(FloatMask other) {
@@ -69,11 +80,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     protected FloatMask(FloatMask other, String name) {
         super(other, name);
-    }
-
-    @Override
-    protected void initializeMask(int size) {
-        enqueue(() -> mask = new float[size][size]);
     }
 
     protected FloatMask(BooleanMask other, float low, float high) {
@@ -88,11 +94,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1,
+                                                                          VectorMask<T, U> other2) {
         this(other1, other2, null);
     }
 
-    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, String name) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1,
+                                                                          VectorMask<T, U> other2, String name) {
         this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name, other1.isParallel());
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
@@ -107,7 +115,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, vector, null);
     }
 
-    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, String name) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector,
+                                                                          String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
@@ -120,7 +129,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, index, null);
     }
 
-    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
+    protected <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index,
+                                                                          String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
@@ -129,182 +139,56 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    @Override
-    public Float getAvg() {
-        assertNotPipelined();
+    @GraphMethod
+    public FloatMask addPerlinNoise(int resolution, float scale) {
         int size = getSize();
-        return getSum() / size / size;
+        int gradientSize = size / resolution;
+        float gradientScale = (float) size / gradientSize;
+        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, random.nextLong(),
+                                                      new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors",
+                                                      isParallel());
+        gradientVectors.randomize(-1f, 1f).normalize();
+        FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", isParallel());
+        noise.enqueue(dependencies -> {
+            Vector2Mask source = (Vector2Mask) dependencies.get(0);
+            noise.apply(point -> {
+                int x = point.x;
+                int y = point.y;
+                int xLow = (int) (x / gradientScale);
+                float dXLow = x / gradientScale - xLow;
+                int xHigh = xLow + 1;
+                float dXHigh = x / gradientScale - xHigh;
+                int yLow = (int) (y / gradientScale);
+                float dYLow = y / gradientScale - yLow;
+                int yHigh = yLow + 1;
+                float dYHigh = y / gradientScale - yHigh;
+                float topLeft = new Vector2(dXLow, dYLow).dot(source.get(xLow, yLow));
+                float topRight = new Vector2(dXLow, dYHigh).dot(source.get(xLow, yHigh));
+                float bottomLeft = new Vector2(dXHigh, dYLow).dot(source.get(xHigh, yLow));
+                float bottomRight = new Vector2(dXHigh, dYHigh).dot(source.get(xHigh, yHigh));
+                noise.setPrimitive(point, MathUtil.smootherStep(MathUtil.smootherStep(topLeft, bottomLeft, dXLow),
+                                                                MathUtil.smootherStep(topRight, bottomRight, dXLow),
+                                                                dYLow));
+            });
+            float noiseMin = noise.getMin();
+            float noiseMax = noise.getMax();
+            float noiseRange = noiseMax - noiseMin;
+            noise.apply(
+                    point -> noise.setPrimitive(point, (noise.getPrimitive(point) - noiseMin) / noiseRange * scale));
+        }, gradientVectors);
+        return enqueue(dependencies -> add((FloatMask) dependencies.get(0)), noise);
     }
 
     @Override
-    public Float getZeroValue() {
-        return 0f;
-    }
-
-    @Override
-    protected FloatMask fill(Float value) {
-        return enqueue(() -> {
-            int maskSize = mask.length;
-            mask[0][0] = value;
-            for (int i = 1; i < maskSize; i += i) {
-                System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
-            }
-            for (int r = 1; r < maskSize; ++r) {
-                System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
-            }
-        });
-    }
-
-    protected FloatMask fill(float[][] maskToFillFrom) {
-        int maskSize = maskToFillFrom.length;
-        mask = new float[maskSize][maskSize];
-        for (int r = 0; r < maskSize; ++r) {
-            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
-        }
-        return this;
-    }
-
-    @Override
-    public Float get(int x, int y) {
-        return getPrimitive(x, y);
-    }
-
-    @Override
-    protected void set(int x, int y, Float value) {
-        setPrimitive(x, y, value);
-    }
-
-    public float getPrimitive(Vector2 location) {
-        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+    public Float getMin() {
+        return (float) Arrays.stream(mask)
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .min()
+                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     protected void setPrimitive(Vector2 location, float value) {
         setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
-    }
-
-    public float getPrimitive(Point point) {
-        return getPrimitive(point.x, point.y);
-    }
-
-    protected void setPrimitive(Point point, float value) {
-        setPrimitive(point.x, point.y, value);
-    }
-
-    public float getPrimitive(int x, int y) {
-        return mask[x][y];
-    }
-
-    protected void setPrimitive(int x, int y, float value) {
-        mask[x][y] = value;
-    }
-
-    @Override
-    public int getImmediateSize() {
-        return mask.length;
-    }
-
-    @Override
-    protected FloatMask setSizeInternal(int newSize) {
-        return enqueue(() -> {
-            int oldSize = getSize();
-            if (oldSize == 1) {
-                float value = getPrimitive(0, 0);
-                initializeMask(newSize);
-                fill(value);
-            } else if (oldSize != newSize) {
-                float[][] oldMask = mask;
-                initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                apply(point -> setPrimitive(point, oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]));
-            }
-        });
-    }
-
-    @Override
-    protected FloatMask copyFrom(FloatMask other) {
-        return enqueue(dependencies -> fill(((FloatMask) dependencies.get(0)).mask), other);
-    }
-
-    @Override
-    protected void addValueAt(int x, int y, Float value) {
-        mask[x][y] += value;
-    }
-
-    @Override
-    protected void subtractValueAt(int x, int y, Float value) {
-        mask[x][y] -= value;
-    }
-
-    @Override
-    protected void multiplyValueAt(int x, int y, Float value) {
-        mask[x][y] *= value;
-    }
-
-    @Override
-    protected void divideValueAt(int x, int y, Float value) {
-        mask[x][y] /= value;
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask add(FloatMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            apply(point -> mask[point.x][point.y] += source.mask[point.x][point.y]);
-        }, other);
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask subtract(FloatMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            apply(point -> mask[point.x][point.y] -= source.mask[point.x][point.y]);
-        }, other);
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask multiply(FloatMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            apply(point -> mask[point.x][point.y] *= source.mask[point.x][point.y]);
-        }, other);
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask divide(FloatMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            apply(point -> mask[point.x][point.y] /= source.mask[point.x][point.y]);
-        }, other);
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask blur(int radius) {
-        int[][] innerCount = getInnerCount();
-        return apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
-    }
-
-    @Override
-    @GraphMethod
-    public FloatMask blur(int radius, BooleanMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            int[][] innerCount = getInnerCount();
-            apply(point -> {
-                if (limiter.get(point)) {
-                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
-                }
-            });
-        }, other);
     }
 
     protected Vector3 calculateNormalAt(Point point, float scale) {
@@ -334,18 +218,11 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public Float getSum() {
-        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).sum();
-    }
-
-    @Override
-    public Float getMin() {
-        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).min().orElseThrow(() -> new IllegalStateException("Empty Mask"));
-    }
-
-    @Override
     public Float getMax() {
-        return (float) Arrays.stream(mask).flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i])).max().orElseThrow(() -> new IllegalStateException("Empty Mask"));
+        return (float) Arrays.stream(mask)
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .max()
+                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @GraphMethod
@@ -364,42 +241,58 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * range + minValue);
     }
 
-    @GraphMethod
-    public FloatMask addPerlinNoise(int resolution, float scale) {
+    public float getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    public float getPrimitive(int x, int y) {
+        return mask[x][y];
+    }
+
+    public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
+                                float depositionRate, float maxOffset, float iterationScale) {
         int size = getSize();
-        int gradientSize = size / resolution;
-        float gradientScale = (float) size / gradientSize;
-        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1,
-                random.nextLong(), new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors", isParallel());
-        gradientVectors.randomize(-1f, 1f).normalize();
-        FloatMask noise = new FloatMask(size,
-                null, symmetrySettings, getName() + "PerlinNoise", isParallel());
-        noise.enqueue(dependencies -> {
-            Vector2Mask source = (Vector2Mask) dependencies.get(0);
-            noise.apply(point -> {
-                int x = point.x;
-                int y = point.y;
-                int xLow = (int) (x / gradientScale);
-                float dXLow = x / gradientScale - xLow;
-                int xHigh = xLow + 1;
-                float dXHigh = x / gradientScale - xHigh;
-                int yLow = (int) (y / gradientScale);
-                float dYLow = y / gradientScale - yLow;
-                int yHigh = yLow + 1;
-                float dYHigh = y / gradientScale - yHigh;
-                float topLeft = new Vector2(dXLow, dYLow).dot(source.get(xLow, yLow));
-                float topRight = new Vector2(dXLow, dYHigh).dot(source.get(xLow, yHigh));
-                float bottomLeft = new Vector2(dXHigh, dYLow).dot(source.get(xHigh, yLow));
-                float bottomRight = new Vector2(dXHigh, dYHigh).dot(source.get(xHigh, yHigh));
-                noise.setPrimitive(point, MathUtil.smootherStep(MathUtil.smootherStep(topLeft, bottomLeft, dXLow),
-                        MathUtil.smootherStep(topRight, bottomRight, dXLow), dYLow));
-            });
-            float noiseMin = noise.getMin();
-            float noiseMax = noise.getMax();
-            float noiseRange = noiseMax - noiseMin;
-            noise.apply(point -> noise.setPrimitive(point, (noise.getPrimitive(point) - noiseMin) / noiseRange * scale));
-        }, gradientVectors);
-        return enqueue(dependencies -> add((FloatMask) dependencies.get(0)), noise);
+        for (int i = 0; i < numDrops; ++i) {
+            waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate,
+                      depositionRate, maxOffset, iterationScale);
+        }
+        return forceSymmetry(SymmetryType.SPAWN);
+    }
+
+    @GraphMethod
+    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision,
+                                                                 float floatMax) {
+        for (int x = 0; x < levelOfPrecision; x++) {
+            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax),
+                                          floatMax);
+        }
+        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
+        return this;
+    }
+
+    @GraphMethod
+    public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
+        FloatMask areasToRemove = copy().copyAsBooleanMask(minValue, maxValue)
+                                        .removeAreasOutsideSizeRange(minSize, maxSize)
+                                        .invert()
+                                        .copyAsFloatMask(0f, 1f);
+        return subtract(areasToRemove).clampMin(0f);
+    }
+
+    @Override
+    public Float getAvg() {
+        assertNotPipelined();
+        int size = getSize();
+        return getSum() / size / size;
+    }
+
+    @GraphMethod
+    public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
+        return enqueue(() -> {
+            FloatMask brush = loadBrush(brushName, null);
+            brush.multiply(intensity / brush.getMax()).setSize(size);
+            addWithOffset(brush, location, true, wrapEdges);
+        });
     }
 
     @GraphMethod
@@ -410,11 +303,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
             FloatMask distanceField = source.copyAsDistanceField();
             add(distanceField.multiply(scale));
         }, other);
-    }
-
-    @GraphMethod
-    public FloatMask sqrt() {
-        return apply(point -> setPrimitive(point, (float) StrictMath.sqrt(getPrimitive(point))));
     }
 
     @GraphMethod
@@ -459,13 +347,58 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
-                                float depositionRate, float maxOffset, float iterationScale) {
-        int size = getSize();
-        for (int i = 0; i < numDrops; ++i) {
-            waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate, depositionRate, maxOffset, iterationScale);
-        }
-        return forceSymmetry(SymmetryType.SPAWN);
+    @GraphMethod
+    public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density,
+                                                   float intensity, boolean wrapEdges) {
+        enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry()
+                                                                                                  .getNumSymPoints());
+            useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
+        }, other);
+        return this;
+    }
+
+    @GraphMethod
+    public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity,
+                                        boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            assertSmallerSize(size);
+            ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
+            int length = possibleLocations.size();
+            FloatMask brush = loadBrush(brushName, null);
+            brush.multiply(intensity / brush.getMax()).setSize(size);
+            for (int i = 0; i < numUses; i++) {
+                Vector2 location = possibleLocations.get(random.nextInt(length));
+                addWithOffset(brush, location, true, wrapEdges);
+            }
+        }, other);
+    }
+
+    public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
+        float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
+        float slope = (float) StrictMath.tan(lightDirection.getElevation());
+        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE),
+                                                 getName() + "Shadow", isParallel());
+        return shadowMask.enqueue(dependencies -> shadowMask.apply(point -> {
+            Vector2 location = new Vector2(point);
+            if (shadowMask.getPrimitive(location)) {
+                return;
+            }
+            float startHeight = getPrimitive(location);
+            int dist = 1;
+            location.addPolar(angle, 1);
+            while (inBounds(location)) {
+                if (startHeight - getPrimitive(location) > dist * slope) {
+                    shadowMask.setPrimitive(location, true);
+                } else {
+                    break;
+                }
+                location.addPolar(angle, 1);
+                ++dist;
+            }
+        }), this).inflate(1).deflate(1);
     }
 
     private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
@@ -510,71 +443,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }
     }
 
-    private float transformAverage(float value) {
-        return value / 1000f;
-    }
-
-    @GraphMethod
-    public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
-        FloatMask areasToRemove = copy().copyAsBooleanMask(minValue, maxValue).removeAreasOutsideSizeRange(minSize, maxSize).invert().copyAsFloatMask(0f, 1f);
-        return subtract(areasToRemove).clampMin(0f);
+    public float getPrimitive(Vector2 location) {
+        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
     @GraphMethod
     public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
         return subtract(copy().removeAreasOutsideRangeAndSize(minSize, maxSize, minIntensity, maxIntensity));
-    }
-
-    @GraphMethod
-    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
-        for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax), floatMax);
-        }
-        removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
-        return this;
-    }
-
-    @Override
-    protected int[][] getInnerCount() {
-        int size = getSize();
-        int[][] innerCount = new int[size][size];
-        apply(point -> calculateInnerValue(innerCount, point, StrictMath.round(getPrimitive(point) * 1000)));
-        return innerCount;
-    }
-
-    @GraphMethod
-    public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
-        return enqueue(() -> {
-            FloatMask brush = loadBrush(brushName, null);
-            brush.multiply(intensity / brush.getMax()).setSize(size);
-            addWithOffset(brush, location, true, wrapEdges);
-        });
-    }
-
-    @GraphMethod
-    public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
-        return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
-            assertSmallerSize(size);
-            ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
-            int length = possibleLocations.size();
-            FloatMask brush = loadBrush(brushName, null);
-            brush.multiply(intensity / brush.getMax()).setSize(size);
-            for (int i = 0; i < numUses; i++) {
-                Vector2 location = possibleLocations.get(random.nextInt(length));
-                addWithOffset(brush, location, true, wrapEdges);
-            }
-        }, other);
-    }
-
-    @GraphMethod
-    public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
-        enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
-            int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.getSpawnSymmetry().getNumSymPoints());
-            useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
-        }, other);
-        return this;
     }
 
     @GraphMethod(returnsSelf = false)
@@ -589,28 +464,22 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return normalMask;
     }
 
-    public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
-        float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
-        float slope = (float) StrictMath.tan(lightDirection.getElevation());
-        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE), getName() + "Shadow", isParallel());
-        return shadowMask.enqueue(dependencies -> shadowMask.apply(point -> {
-            Vector2 location = new Vector2(point);
-            if (shadowMask.getPrimitive(location)) {
-                return;
-            }
-            float startHeight = getPrimitive(location);
-            int dist = 1;
-            location.addPolar(angle, 1);
-            while (inBounds(location)) {
-                if (startHeight - getPrimitive(location) > dist * slope) {
-                    shadowMask.setPrimitive(location, true);
-                } else {
-                    break;
-                }
-                location.addPolar(angle, 1);
-                ++dist;
-            }
-        }), this).inflate(1).deflate(1);
+    public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {
+        return writeToImage(image, scaleFactor, 0f);
+    }
+
+    public BufferedImage writeToImage(BufferedImage image, float scaleFactor, float offsetFactor) {
+        assertSize(image.getHeight());
+        int size = getSize();
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        loop(point -> imageBuffer.setElemFloat(point.x + point.y * size,
+                                               (getPrimitive(point) - offsetFactor) * scaleFactor));
+        return image;
+    }
+
+    @Override
+    protected void addValueAt(int x, int y, Float value) {
+        mask[x][y] += value;
     }
 
     @GraphMethod
@@ -646,11 +515,21 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 }
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
-                float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
+                float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY()
+                                                                                          + vertex.getX()
+                                                                                            * vertex.getX())) / (2
+                                                                                                                 * current.getX()
+                                                                                                                 - 2
+                                                                                                                   * vertex.getX());
                 while (xIntersect <= intersections.get(index).getX()) {
                     index -= 1;
                     vertex = vertices.get(index);
-                    xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY() + vertex.getX() * vertex.getX())) / (2 * current.getX() - 2 * vertex.getX());
+                    xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY()
+                                                                                        + vertex.getX()
+                                                                                          * vertex.getX())) / (2
+                                                                                                               * current.getX()
+                                                                                                               - 2
+                                                                                                                 * vertex.getX());
                 }
                 index += 1;
                 if (index < vertices.size()) {
@@ -683,6 +562,178 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }
     }
 
+    @GraphMethod
+    public FloatMask sqrt() {
+        return apply(point -> setPrimitive(point, (float) StrictMath.sqrt(getPrimitive(point))));
+    }
+
+    @Override
+    protected FloatMask copyFrom(FloatMask other) {
+        return enqueue(dependencies -> fill(((FloatMask) dependencies.get(0)).mask), other);
+    }
+
+    @Override
+    protected void initializeMask(int size) {
+        enqueue(() -> mask = new float[size][size]);
+    }
+
+    @Override
+    public int getImmediateSize() {
+        return mask.length;
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask blur(int radius) {
+        int[][] innerCount = getInnerCount();
+        return apply(
+                point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            int[][] innerCount = getInnerCount();
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public Float get(int x, int y) {
+        return getPrimitive(x, y);
+    }
+
+    @Override
+    protected void subtractValueAt(int x, int y, Float value) {
+        mask[x][y] -= value;
+    }
+
+    @Override
+    protected void set(int x, int y, Float value) {
+        setPrimitive(x, y, value);
+    }
+
+    @Override
+    protected FloatMask fill(Float value) {
+        return enqueue(() -> {
+            int maskSize = mask.length;
+            mask[0][0] = value;
+            for (int i = 1; i < maskSize; i += i) {
+                System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
+            }
+            for (int r = 1; r < maskSize; ++r) {
+                System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+            }
+        });
+    }
+
+    @Override
+    protected void multiplyValueAt(int x, int y, Float value) {
+        mask[x][y] *= value;
+    }
+
+    @Override
+    public Float getZeroValue() {
+        return 0f;
+    }
+
+    @Override
+    protected FloatMask setSizeInternal(int newSize) {
+        return enqueue(() -> {
+            int oldSize = getSize();
+            if (oldSize == 1) {
+                float value = getPrimitive(0, 0);
+                initializeMask(newSize);
+                fill(value);
+            } else if (oldSize != newSize) {
+                float[][] oldMask = mask;
+                initializeMask(newSize);
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+                apply(point -> setPrimitive(point, oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]));
+            }
+        });
+    }
+
+    @Override
+    protected void divideValueAt(int x, int y, Float value) {
+        mask[x][y] /= value;
+    }
+
+    private float transformAverage(float value) {
+        return value / 1000f;
+    }
+
+    @Override
+    protected int[][] getInnerCount() {
+        int size = getSize();
+        int[][] innerCount = new int[size][size];
+        apply(point -> calculateInnerValue(innerCount, point, StrictMath.round(getPrimitive(point) * 1000)));
+        return innerCount;
+    }
+
+    @Override
+    public Float getSum() {
+        return (float) Arrays.stream(mask)
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .sum();
+    }
+
+    protected FloatMask fill(float[][] maskToFillFrom) {
+        int maskSize = maskToFillFrom.length;
+        mask = new float[maskSize][maskSize];
+        for (int r = 0; r < maskSize; ++r) {
+            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
+        }
+        return this;
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask add(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] += source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask subtract(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] -= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask multiply(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] *= source.mask[point.x][point.y]);
+        }, other);
+    }
+
+    @Override
+    @GraphMethod
+    public FloatMask divide(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            apply(point -> mask[point.x][point.y] /= source.mask[point.x][point.y]);
+        }, other);
+    }
+
     @Override
     public BufferedImage toImage() {
         int size = getSize();
@@ -697,18 +748,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public BufferedImage writeToImage(BufferedImage image) {
         return writeToImage(image, 1f, 0f);
-    }
-
-    public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {
-        return writeToImage(image, scaleFactor, 0f);
-    }
-
-    public BufferedImage writeToImage(BufferedImage image, float scaleFactor, float offsetFactor) {
-        assertSize(image.getHeight());
-        int size = getSize();
-        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-        loop(point -> imageBuffer.setElemFloat(point.x + point.y * size, (getPrimitive(point) - offsetFactor) * scaleFactor));
-        return image;
     }
 
     @Override

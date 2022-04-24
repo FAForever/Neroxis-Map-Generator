@@ -20,6 +20,7 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class LabelStyle implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private WhiteSpace whiteSpace = WhiteSpace.NO_WRAP;
     private Overflow overflow = Overflow.VISIBLE;
@@ -76,9 +77,11 @@ public class LabelStyle implements PropertyChangeListener {
             setVerticalAlignment((VerticalAlignment) newValue);
         } else if (propertyName.equals(Fields.horizontalAlignment) && Objects.equals(oldValue, horizontalAlignment)) {
             setHorizontalAlignment((HorizontalAlignment) newValue);
-        } else if (propertyName.equals(Fields.verticalAlignmentPosition) && Objects.equals(oldValue, verticalAlignmentPosition)) {
+        } else if (propertyName.equals(Fields.verticalAlignmentPosition) && Objects.equals(oldValue,
+                                                                                           verticalAlignmentPosition)) {
             setVerticalAlignmentPosition((VerticalAlignment) newValue);
-        } else if (propertyName.equals(Fields.horizontalAlignmentPosition) && Objects.equals(oldValue, horizontalAlignmentPosition)) {
+        } else if (propertyName.equals(Fields.horizontalAlignmentPosition) && Objects.equals(oldValue,
+                                                                                             horizontalAlignmentPosition)) {
             setHorizontalAlignmentPosition((HorizontalAlignment) newValue);
         } else if (propertyName.equals(Fields.visible) && Objects.equals(oldValue, visible)) {
             setVisible((boolean) newValue);

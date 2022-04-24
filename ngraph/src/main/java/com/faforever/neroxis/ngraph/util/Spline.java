@@ -8,9 +8,7 @@ import java.util.List;
 public class Spline {
 
     private Spline1D splineX;
-
     private Spline1D splineY;
-
     /**
      * Total length tracing the points on the spline
      */
@@ -28,13 +26,6 @@ public class Spline {
 
             init(x, y);
         }
-    }
-
-    /**
-     * Creates a new Spline.
-     */
-    public void Spline2D(double[] x, double[] y) {
-        init(x, y);
     }
 
     protected void init(double[] x, double[] y) {
@@ -86,6 +77,13 @@ public class Spline {
 
         splineX = new Spline1D(t, x);
         splineY = new Spline1D(t, y);
+    }
+
+    /**
+     * Creates a new Spline.
+     */
+    public void Spline2D(double[] x, double[] y) {
+        init(x, y);
     }
 
     /**

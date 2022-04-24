@@ -15,10 +15,12 @@ import java.util.Set;
  * schema diagrams).
  */
 public class EntityRelationEdgeStyleFunction implements EdgeStyleFunction {
+
     public static final double ENTITY_SEGMENT = 30;
 
     @Override
-    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
+                      List<PointDouble> result) {
         GraphView view = state.getView();
         IGraphModel model = view.getGraph().getModel();
         double segment = state.getStyle().getEdge().getSegmentSize() * state.getView().getScale();

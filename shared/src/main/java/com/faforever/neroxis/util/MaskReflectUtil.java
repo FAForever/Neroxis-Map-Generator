@@ -10,7 +10,6 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector2Mask;
 import com.faforever.neroxis.mask.Vector3Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MaskReflectUtil {
+
     private static final Map<Class<? extends Mask<?, ?>>, Constructor<? extends Mask<?, ?>>> MASK_CONSTRUCTOR_MAP = new LinkedHashMap<>();
     private static final Map<Class<? extends Mask<?, ?>>, List<Method>> MASK_METHOD_MAP = new LinkedHashMap<>();
     private static final Map<Class<? extends Mask<?, ?>>, Map<String, Class<?>>> MASK_GENERIC_MAP = new LinkedHashMap<>();
@@ -38,16 +38,17 @@ public class MaskReflectUtil {
         getAllMaskClasses().forEach(clazz -> {
             if (Mask.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
                 List<Method> maskMethods = Arrays.stream(clazz.getMethods())
-                        .filter(method -> method.isAnnotationPresent(GraphMethod.class))
-                        .filter(method -> !method.isBridge())
-                        .sorted(Comparator.comparing(Method::getName))
-                        .collect(Collectors.toList());
+                                                 .filter(method -> method.isAnnotationPresent(GraphMethod.class))
+                                                 .filter(method -> !method.isBridge())
+                                                 .sorted(Comparator.comparing(Method::getName))
+                                                 .collect(Collectors.toList());
                 MASK_METHOD_MAP.put(clazz, maskMethods);
 
                 Arrays.stream(clazz.getConstructors())
-                        .filter(constructor -> constructor.isAnnotationPresent(GraphMethod.class))
-                        .findFirst()
-                        .ifPresent(constructor -> MASK_CONSTRUCTOR_MAP.put(clazz, (Constructor<? extends Mask<?, ?>>) constructor));
+                      .filter(constructor -> constructor.isAnnotationPresent(GraphMethod.class))
+                      .findFirst()
+                      .ifPresent(constructor -> MASK_CONSTRUCTOR_MAP.put(clazz,
+                                                                         (Constructor<? extends Mask<?, ?>>) constructor));
 
                 Map<String, Class<?>> genericMap = new HashMap<>();
 
@@ -63,13 +64,13 @@ public class MaskReflectUtil {
         });
 
         Arrays.stream(MapMaskMethods.class.getMethods())
-                .filter(method -> method.isAnnotationPresent(GraphMethod.class))
-                .sorted(Comparator.comparing(Method::getName))
-                .forEach(method -> {
-                    Class<? extends Mask<?, ?>> executorClass = (Class<? extends Mask<?, ?>>) method.getReturnType();
+              .filter(method -> method.isAnnotationPresent(GraphMethod.class))
+              .sorted(Comparator.comparing(Method::getName))
+              .forEach(method -> {
+                  Class<? extends Mask<?, ?>> executorClass = (Class<? extends Mask<?, ?>>) method.getReturnType();
 
-                    MASK_METHOD_MAP.get(executorClass).add(method);
-                });
+                  MASK_METHOD_MAP.get(executorClass).add(method);
+              });
     }
 
     public static List<Method> getMaskMethods(Class<? extends Mask<?, ?>> maskClass) {
@@ -85,7 +86,8 @@ public class MaskReflectUtil {
     }
 
     private static List<Class<? extends Mask<?, ?>>> getAllMaskClasses() {
-        return List.of(BooleanMask.class, FloatMask.class, NormalMask.class, IntegerMask.class, Vector2Mask.class, Vector3Mask.class, Vector4Mask.class);
+        return List.of(BooleanMask.class, FloatMask.class, NormalMask.class, IntegerMask.class, Vector2Mask.class,
+                       Vector3Mask.class, Vector4Mask.class);
     }
 
     public static Class<?> getActualTypeClass(Class<? extends Mask<?, ?>> maskClass, Type type) {
@@ -98,29 +100,24 @@ public class MaskReflectUtil {
 
     public static String getExecutableString(Executable executable) {
         String parametersString = Arrays.stream(executable.getParameters())
-                .limit(4)
-                .map(Parameter::getName)
-                .collect(Collectors.joining(", "));
+                                        .limit(4)
+                                        .map(Parameter::getName)
+                                        .collect(Collectors.joining(", "));
         String parametersEllipsis = executable.getParameters().length > 4 ? "..." : "";
         if (executable instanceof Constructor) {
-            return String.format("%s(%s%s)",
-                    executable.getDeclaringClass().getSimpleName(),
-                    parametersString,
-                    parametersEllipsis);
+            return String.format("%s(%s%s)", executable.getDeclaringClass().getSimpleName(), parametersString,
+                                 parametersEllipsis);
         } else {
-            return String.format("%s(%s%s)",
-                    executable.getName(),
-                    parametersString,
-                    parametersEllipsis);
+            return String.format("%s(%s%s)", executable.getName(), parametersString, parametersEllipsis);
         }
     }
 
     public static boolean classIsNumeric(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
-                || int.class.equals(clazz)
-                || float.class.equals(clazz)
-                || double.class.equals(clazz)
-                || byte.class.equals(clazz)
-                || short.class.equals(clazz);
+               || int.class.equals(clazz)
+               || float.class.equals(clazz)
+               || double.class.equals(clazz)
+               || byte.class.equals(clazz)
+               || short.class.equals(clazz);
     }
 }

@@ -11,6 +11,7 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class CellProperties implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private boolean orthogonal = true;
     private boolean glass;
@@ -90,12 +91,6 @@ public class CellProperties implements PropertyChangeListener {
         changeSupport.firePropertyChange(Fields.shadow, old, shadow);
     }
 
-    public void setRounded(boolean rounded) {
-        boolean old = this.rounded;
-        this.rounded = rounded;
-        changeSupport.firePropertyChange(Fields.rounded, old, rounded);
-    }
-
     public void setDashed(boolean dashed) {
         boolean old = this.dashed;
         this.dashed = dashed;
@@ -148,6 +143,12 @@ public class CellProperties implements PropertyChangeListener {
         boolean old = this.autosize;
         this.autosize = autosize;
         changeSupport.firePropertyChange(Fields.autosize, old, autosize);
+    }
+
+    public void setRounded(boolean rounded) {
+        boolean old = this.rounded;
+        this.rounded = rounded;
+        changeSupport.firePropertyChange(Fields.rounded, old, rounded);
     }
 
     public void setHorizontal(boolean horizontal) {

@@ -9,14 +9,13 @@ import java.util.Arrays;
  * One dimension of a spline curve
  */
 public class Spline1D {
+
     protected double[] len;
     protected double[] pos1D;
-
     protected double[] a;
     protected double[] b;
     protected double[] c;
     protected double[] d;
-
     /**
      * tracks the last index found since that is mostly commonly the next one used
      */
@@ -49,87 +48,6 @@ public class Spline1D {
         if (len.length > 1) {
             calculateCoefficients();
         }
-    }
-
-    /**
-     * Returns an interpolated value.
-     *
-     * @param x
-     * @return the interpolated value
-     */
-    public double getValue(double x) {
-        if (len.length == 0) {
-            return Double.NaN;
-        }
-
-        if (len.length == 1) {
-            if (len[0] == x) {
-                return pos1D[0];
-            } else {
-                return Double.NaN;
-            }
-        }
-
-        int index = Arrays.binarySearch(len, x);
-        if (index > 0) {
-            return pos1D[index];
-        }
-
-        index = -(index + 1) - 1;
-        //TODO linear interpolation or extrapolation
-        if (index < 0) {
-            return pos1D[0];
-        }
-
-        return a[index] + b[index] * (x - len[index]) + c[index] * Math.pow(x - len[index], 2) + d[index] * Math.pow(x - len[index], 3);
-    }
-
-    /**
-     * Returns an interpolated value. To be used when a long sequence of values
-     * are required in order, but ensure checkValues() is called beforehand to
-     * ensure the boundary checks from getValue() are made
-     *
-     * @param x
-     * @return the interpolated value
-     */
-    public double getFastValue(double x) {
-        // Fast check to see if previous index is still valid
-        if (storageIndex > -1 && storageIndex < len.length - 1 && x > len[storageIndex] && x < len[storageIndex + 1]) {
-
-        } else {
-            int index = Arrays.binarySearch(len, x);
-            if (index > 0) {
-                return pos1D[index];
-            }
-            index = -(index + 1) - 1;
-            storageIndex = index;
-        }
-
-        //TODO linear interpolation or extrapolation
-        if (storageIndex < 0) {
-            return pos1D[0];
-        }
-        double value = x - len[storageIndex];
-        return a[storageIndex] + b[storageIndex] * value + c[storageIndex] * (value * value) + d[storageIndex] * (value * value * value);
-    }
-
-    /**
-     * Returns the first derivation at x.
-     *
-     * @param x
-     * @return the first derivation at x
-     */
-    public double getDx(double x) {
-        if (len.length == 0 || len.length == 1) {
-            return 0;
-        }
-
-        int index = Arrays.binarySearch(len, x);
-        if (index < 0) {
-            index = -(index + 1) - 1;
-        }
-
-        return b[index] + 2 * c[index] * (x - len[index]) + 3 * d[index] * Math.pow(x - len[index], 2);
     }
 
     /**
@@ -207,5 +125,86 @@ public class Spline1D {
         for (int i = b.length - 2; i >= 0; i--) {
             b[i] = (b[i] - A[i][i + 1] * b[i + 1]) / A[i][i];
         }
+    }
+
+    /**
+     * Returns an interpolated value.
+     *
+     * @return the interpolated value
+     */
+    public double getValue(double x) {
+        if (len.length == 0) {
+            return Double.NaN;
+        }
+
+        if (len.length == 1) {
+            if (len[0] == x) {
+                return pos1D[0];
+            } else {
+                return Double.NaN;
+            }
+        }
+
+        int index = Arrays.binarySearch(len, x);
+        if (index > 0) {
+            return pos1D[index];
+        }
+
+        index = -(index + 1) - 1;
+        //TODO linear interpolation or extrapolation
+        if (index < 0) {
+            return pos1D[0];
+        }
+
+        return a[index] + b[index] * (x - len[index]) + c[index] * Math.pow(x - len[index], 2) + d[index] * Math.pow(
+                x - len[index], 3);
+    }
+
+    /**
+     * Returns an interpolated value. To be used when a long sequence of values
+     * are required in order, but ensure checkValues() is called beforehand to
+     * ensure the boundary checks from getValue() are made
+     *
+     * @return the interpolated value
+     */
+    public double getFastValue(double x) {
+        // Fast check to see if previous index is still valid
+        if (storageIndex > -1 && storageIndex < len.length - 1 && x > len[storageIndex] && x < len[storageIndex + 1]) {
+
+        } else {
+            int index = Arrays.binarySearch(len, x);
+            if (index > 0) {
+                return pos1D[index];
+            }
+            index = -(index + 1) - 1;
+            storageIndex = index;
+        }
+
+        //TODO linear interpolation or extrapolation
+        if (storageIndex < 0) {
+            return pos1D[0];
+        }
+        double value = x - len[storageIndex];
+        return a[storageIndex] + b[storageIndex] * value + c[storageIndex] * (value * value) + d[storageIndex] * (value
+                                                                                                                  * value
+                                                                                                                  * value);
+    }
+
+    /**
+     * Returns the first derivation at x.
+     *
+     * @return the first derivation at x
+     */
+    public double getDx(double x) {
+        if (len.length == 0 || len.length == 1) {
+            return 0;
+        }
+
+        int index = Arrays.binarySearch(len, x);
+        if (index < 0) {
+            index = -(index + 1) - 1;
+        }
+
+        return b[index] + 2 * c[index] * (x - len[index]) + 3 * d[index] * Math.pow(x - len[index], 2);
     }
 }

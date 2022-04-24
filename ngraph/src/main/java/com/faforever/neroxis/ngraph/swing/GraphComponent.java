@@ -123,6 +123,7 @@ import javax.swing.TransferHandler;
  */
 @SuppressWarnings("unused")
 public class GraphComponent extends JScrollPane implements Printable {
+
     public static final int GRID_STYLE_DOT = 0;
     public static final int GRID_STYLE_CROSS = 1;
     public static final int GRID_STYLE_LINE = 2;
@@ -335,7 +336,8 @@ public class GraphComponent extends JScrollPane implements Printable {
             if (newView != null) {
                 newView.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
                 newView.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
-                newView.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
+                newView.addListener(ScaleAndTranslateEvent.class,
+                                    (IEventListener<ScaleAndTranslateEvent>) updateHandler);
                 newView.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
                 newView.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
                 newView.addListener(CellStateEvent.class, cellStateHandler);
@@ -423,6 +425,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected void installFocusHandler() {
         graphControl.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent e) {
                 if (!hasFocus()) {
                     requestFocus();
@@ -436,6 +439,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected void installKeyHandler() {
         addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE && isEscapeEnabled()) {
                     escape(e);
@@ -449,6 +453,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected void installResizeHandler() {
         addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentResized(ComponentEvent e) {
                 zoomAndCenter();
             }
@@ -461,6 +466,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected void installDoubleClickHandler() {
         graphControl.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseReleased(MouseEvent e) {
                 if (isEnabled()) {
                     if (!e.isConsumed() && isEditEvent(e)) {
@@ -483,59 +489,11 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @return Returns the object that contains the graph.
-     */
-    public Graph getGraph() {
-        return graph;
-    }
-
-    public void setGraph(Graph value) {
-        Graph oldValue = graph;
-        // Uninstalls listeners for existing graph
-        if (graph != null) {
-            graph.removeListener(repaintHandler);
-            graph.getModel().removeListener(updateHandler);
-            graph.getView().removeListener(updateHandler);
-            graph.removePropertyChangeListener(viewChangeHandler);
-            graph.getView().removeListener(scaleHandler);
-        }
-        graph = value;
-        // Updates the buffer if the model changes
-        graph.addListener(RepaintEvent.class, repaintHandler);
-        // Installs the update handler to sync the overlays and controls
-        graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) updateHandler);
-        // Repaint after the following events is handled via
-        // Graph.repaint-events
-        // The respective handlers are installed in Graph.setView
-        GraphView view = graph.getView();
-        view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
-        view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
-        view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
-        view.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
-        view.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
-        view.addListener(CellStateEvent.class, cellStateHandler);
-        graph.addPropertyChangeListener(viewChangeHandler);
-        // Resets the zoom policy if the scale changes
-        graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
-        graph.getView().addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
-        // Invoke the update handler once for initial state
-        updateHandler.invoke(graph.getView(), null);
-        firePropertyChange("graph", oldValue, graph);
-    }
-
-    /**
      * Creates the inner control that handles tooltips, preferred size and can
      * draw cells onto a canvas.
      */
     protected GraphControl createGraphControl() {
         return new GraphControl(this);
-    }
-
-    /**
-     * @return Returns the control that renders the graph.
-     */
-    public GraphControl getGraphControl() {
-        return graphControl;
     }
 
     /**
@@ -647,6 +605,13 @@ public class GraphComponent extends JScrollPane implements Printable {
         }
     }
 
+    /**
+     * @return Returns the object that contains the graph.
+     */
+    public Graph getGraph() {
+        return graph;
+    }
+
     public ImageIcon getBackgroundImage() {
         return backgroundImage;
     }
@@ -655,25 +620,6 @@ public class GraphComponent extends JScrollPane implements Printable {
         ImageIcon oldValue = backgroundImage;
         backgroundImage = value;
         firePropertyChange("backgroundImage", oldValue, backgroundImage);
-    }
-
-    /**
-     * @return the pageVisible
-     */
-    public boolean isPageVisible() {
-        return pageVisible;
-    }
-
-    /**
-     * Fires a property change event for <code>pageVisible</code>. zoomAndCenter
-     * should be called if this is set to true.
-     *
-     * @param value the pageVisible to set
-     */
-    public void setPageVisible(boolean value) {
-        boolean oldValue = pageVisible;
-        pageVisible = value;
-        firePropertyChange("pageVisible", oldValue, pageVisible);
     }
 
     /**
@@ -692,22 +638,6 @@ public class GraphComponent extends JScrollPane implements Printable {
         boolean oldValue = preferPageSize;
         preferPageSize = value;
         firePropertyChange("preferPageSize", oldValue, preferPageSize);
-    }
-
-    /**
-     * @return the pageBreaksVisible
-     */
-    public boolean isPageBreaksVisible() {
-        return pageBreaksVisible;
-    }
-
-    /**
-     * @param value the pageBreaksVisible to set
-     */
-    public void setPageBreaksVisible(boolean value) {
-        boolean oldValue = pageBreaksVisible;
-        pageBreaksVisible = value;
-        firePropertyChange("pageBreaksVisible", oldValue, pageBreaksVisible);
     }
 
     /**
@@ -769,56 +699,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @return the pageBackgroundColor
-     */
-    public Color getPageBackgroundColor() {
-        return pageBackgroundColor;
-    }
-
-    /**
-     * Sets the color that appears behind the page.
-     *
-     * @param value the pageBackgroundColor to set
-     */
-    public void setPageBackgroundColor(Color value) {
-        Color oldValue = pageBackgroundColor;
-        pageBackgroundColor = value;
-        firePropertyChange("pageBackgroundColor", oldValue, pageBackgroundColor);
-    }
-
-    /**
-     * @return the pageShadowColor
-     */
-    public Color getPageShadowColor() {
-        return pageShadowColor;
-    }
-
-    /**
-     * @param value the pageShadowColor to set
-     */
-    public void setPageShadowColor(Color value) {
-        Color oldValue = pageShadowColor;
-        pageShadowColor = value;
-        firePropertyChange("pageShadowColor", oldValue, pageShadowColor);
-    }
-
-    /**
-     * @return the pageShadowColor
-     */
-    public Color getPageBorderColor() {
-        return pageBorderColor;
-    }
-
-    /**
-     * @param value the pageBorderColor to set
-     */
-    public void setPageBorderColor(Color value) {
-        Color oldValue = pageBorderColor;
-        pageBorderColor = value;
-        firePropertyChange("pageBorderColor", oldValue, pageBorderColor);
-    }
-
-    /**
      * @return the keepSelectionVisibleOnZoom
      */
     public boolean isKeepSelectionVisibleOnZoom() {
@@ -877,6 +757,137 @@ public class GraphComponent extends JScrollPane implements Printable {
             zoom(zoomPolicy == ZOOM_POLICY_PAGE, true);
         }
         firePropertyChange("zoomPolicy", oldValue, zoomPolicy);
+    }
+
+    public void setGraph(Graph value) {
+        Graph oldValue = graph;
+        // Uninstalls listeners for existing graph
+        if (graph != null) {
+            graph.removeListener(repaintHandler);
+            graph.getModel().removeListener(updateHandler);
+            graph.getView().removeListener(updateHandler);
+            graph.removePropertyChangeListener(viewChangeHandler);
+            graph.getView().removeListener(scaleHandler);
+        }
+        graph = value;
+        // Updates the buffer if the model changes
+        graph.addListener(RepaintEvent.class, repaintHandler);
+        // Installs the update handler to sync the overlays and controls
+        graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) updateHandler);
+        // Repaint after the following events is handled via
+        // Graph.repaint-events
+        // The respective handlers are installed in Graph.setView
+        GraphView view = graph.getView();
+        view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
+        view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
+        view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
+        view.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
+        view.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
+        view.addListener(CellStateEvent.class, cellStateHandler);
+        graph.addPropertyChangeListener(viewChangeHandler);
+        // Resets the zoom policy if the scale changes
+        graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
+        graph.getView()
+             .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
+        // Invoke the update handler once for initial state
+        updateHandler.invoke(graph.getView(), null);
+        firePropertyChange("graph", oldValue, graph);
+    }
+
+    public boolean isEditEvent(MouseEvent e) {
+        return e != null && e.getClickCount() == 2;
+    }
+
+    public void zoom(final boolean page, final boolean center) {
+        if (pageVisible && !zooming) {
+            zooming = true;
+            try {
+                int off = (getPageShadowColor() != null) ? 8 : 0;
+                // Adds some extra space for the shadow and border
+                double width = getViewport().getWidth() - off;
+                double height = getViewport().getHeight() - off;
+                Dimension d = getPreferredSizeForPage();
+                double pageWidth = d.width;
+                double pageHeight = d.height;
+                double scaleX = width / pageWidth;
+                double scaleY = (page) ? height / pageHeight : scaleX;
+                // Rounds the new scale to 5% steps
+                final double newScale = (double) ((int) (Math.min(scaleX, scaleY) * 20)) / 20;
+                if (newScale > 0) {
+                    GraphView graphView = graph.getView();
+                    final double scale = graphView.getScale();
+                    PointDouble translate = (centerPage) ? getPageTranslate(newScale) : new PointDouble();
+                    graphView.scaleAndTranslate(newScale, translate.getX(), translate.getY());
+                    // Causes two repaints, see zoomTo for more details
+                    final double factor = newScale / scale;
+                    SwingUtilities.invokeLater(() -> {
+                        if (center) {
+                            if (page) {
+                                scrollToCenter(true);
+                                scrollToCenter(false);
+                            } else {
+                                scrollToCenter(true);
+                                maintainScrollBar(false, factor, false);
+                            }
+                        } else if (factor != 1) {
+                            maintainScrollBar(true, factor, false);
+                            maintainScrollBar(false, factor, false);
+                        }
+                    });
+                }
+            } finally {
+                zooming = false;
+            }
+        }
+    }
+
+    /**
+     * Returns the (unscaled) preferred size for the current page format (scaled
+     * by pageScale).
+     */
+    protected Dimension getPreferredSizeForPage() {
+        return new Dimension((int) Math.round(pageFormat.getWidth() * pageScale * horizontalPageCount),
+                             (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
+    }
+
+    /**
+     * @return the pageShadowColor
+     */
+    public Color getPageShadowColor() {
+        return pageShadowColor;
+    }
+
+    /**
+     * @param value the pageShadowColor to set
+     */
+    public void setPageShadowColor(Color value) {
+        Color oldValue = pageShadowColor;
+        pageShadowColor = value;
+        firePropertyChange("pageShadowColor", oldValue, pageShadowColor);
+    }
+
+    /**
+     * Should be called by a hook inside GraphView/Graph
+     */
+    protected PointDouble getPageTranslate(double scale) {
+        Dimension d = getPreferredSizeForPage();
+        Dimension bd = new Dimension(d);
+        if (!preferPageSize) {
+            bd.width += 2 * getHorizontalPageBorder();
+            bd.height += 2 * getVerticalPageBorder();
+        }
+        double width = Math.max(bd.width, (getViewport().getWidth() - 8) / scale);
+        double height = Math.max(bd.height, (getViewport().getHeight() - 8) / scale);
+        double dx = Math.max(0, (width - d.width) / 2);
+        double dy = Math.max(0, (height - d.height) / 2);
+        return new PointDouble(dx, dy);
+    }
+
+    /**
+     * Returns the horizontal border between the page and the control.
+     */
+    public int getHorizontalPageBorder() {
+        return (int) Math.round(0.5 * pageFormat.getHeight() * pageScale);
     }
 
     /**
@@ -986,51 +997,10 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Returns the (unscaled) preferred size for the current page format (scaled
-     * by pageScale).
-     */
-    protected Dimension getPreferredSizeForPage() {
-        return new Dimension((int) Math.round(pageFormat.getWidth() * pageScale * horizontalPageCount), (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
-    }
-
-    /**
      * Returns the vertical border between the page and the control.
      */
     public int getVerticalPageBorder() {
         return (int) Math.round(pageFormat.getWidth() * pageScale);
-    }
-
-    /**
-     * Returns the horizontal border between the page and the control.
-     */
-    public int getHorizontalPageBorder() {
-        return (int) Math.round(0.5 * pageFormat.getHeight() * pageScale);
-    }
-
-    /**
-     * Returns the scaled preferred size for the current graph.
-     */
-    protected Dimension getScaledPreferredSizeForGraph() {
-        RectangleDouble bounds = graph.getGraphBounds();
-        int border = graph.getBorder();
-        return new Dimension((int) Math.round(bounds.getX() + bounds.getWidth()) + border + 1, (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
-    }
-
-    /**
-     * Should be called by a hook inside GraphView/Graph
-     */
-    protected PointDouble getPageTranslate(double scale) {
-        Dimension d = getPreferredSizeForPage();
-        Dimension bd = new Dimension(d);
-        if (!preferPageSize) {
-            bd.width += 2 * getHorizontalPageBorder();
-            bd.height += 2 * getVerticalPageBorder();
-        }
-        double width = Math.max(bd.width, (getViewport().getWidth() - 8) / scale);
-        double height = Math.max(bd.height, (getViewport().getHeight() - 8) / scale);
-        double dx = Math.max(0, (width - d.width) / 2);
-        double dy = Math.max(0, (height - d.height) / 2);
-        return new PointDouble(dx, dy);
     }
 
     /**
@@ -1058,15 +1028,6 @@ public class GraphComponent extends JScrollPane implements Printable {
         zoom(zoomFactor);
     }
 
-    /**
-     * Function: zoomOut
-     * <p>
-     * Zooms out of the graph by <zoomFactor>.
-     */
-    public void zoomOut() {
-        zoom(1 / zoomFactor);
-    }
-
     public void zoom(double factor) {
         GraphView view = graph.getView();
         double newScale = (double) ((int) (view.getScale() * 100 * factor)) / 100;
@@ -1079,6 +1040,25 @@ public class GraphComponent extends JScrollPane implements Printable {
                 maintainScrollBar(true, factor, centerZoom);
                 maintainScrollBar(false, factor, centerZoom);
             }
+        }
+    }
+
+    public void scrollToCenter(boolean horizontal) {
+        JScrollBar scrollBar = (horizontal) ? getHorizontalScrollBar() : getVerticalScrollBar();
+        if (scrollBar != null) {
+            final BoundedRangeModel model = scrollBar.getModel();
+            final int newValue = ((model.getMaximum()) / 2) - model.getExtent() / 2;
+            model.setValue(newValue);
+        }
+    }
+
+    protected void maintainScrollBar(boolean horizontal, double factor, boolean center) {
+        JScrollBar scrollBar = (horizontal) ? getHorizontalScrollBar() : getVerticalScrollBar();
+        if (scrollBar != null) {
+            BoundedRangeModel model = scrollBar.getModel();
+            int newValue = (int) Math.round(model.getValue() * factor) + (int) Math.round(
+                    (center) ? (model.getExtent() * (factor - 1) / 2) : 0);
+            model.setValue(newValue);
         }
     }
 
@@ -1101,6 +1081,25 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
+     * Returns the scaled preferred size for the current graph.
+     */
+    protected Dimension getScaledPreferredSizeForGraph() {
+        RectangleDouble bounds = graph.getGraphBounds();
+        int border = graph.getBorder();
+        return new Dimension((int) Math.round(bounds.getX() + bounds.getWidth()) + border + 1,
+                             (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
+    }
+
+    /**
+     * Function: zoomOut
+     * <p>
+     * Zooms out of the graph by <zoomFactor>.
+     */
+    public void zoomOut() {
+        zoom(1 / zoomFactor);
+    }
+
+    /**
      * Function: zoomActual
      * <p>
      * Resets the zoom and panning in the view.
@@ -1111,6 +1110,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         if (isPageVisible()) {
             // Causes two repaints, see zoomTo for more details
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     Dimension pageSize = getPreferredSizeForPage();
                     if (getViewport().getWidth() > pageSize.getWidth()) {
@@ -1131,67 +1131,6 @@ public class GraphComponent extends JScrollPane implements Printable {
                     }
                 }
             });
-        }
-    }
-
-    public void zoom(final boolean page, final boolean center) {
-        if (pageVisible && !zooming) {
-            zooming = true;
-            try {
-                int off = (getPageShadowColor() != null) ? 8 : 0;
-                // Adds some extra space for the shadow and border
-                double width = getViewport().getWidth() - off;
-                double height = getViewport().getHeight() - off;
-                Dimension d = getPreferredSizeForPage();
-                double pageWidth = d.width;
-                double pageHeight = d.height;
-                double scaleX = width / pageWidth;
-                double scaleY = (page) ? height / pageHeight : scaleX;
-                // Rounds the new scale to 5% steps
-                final double newScale = (double) ((int) (Math.min(scaleX, scaleY) * 20)) / 20;
-                if (newScale > 0) {
-                    GraphView graphView = graph.getView();
-                    final double scale = graphView.getScale();
-                    PointDouble translate = (centerPage) ? getPageTranslate(newScale) : new PointDouble();
-                    graphView.scaleAndTranslate(newScale, translate.getX(), translate.getY());
-                    // Causes two repaints, see zoomTo for more details
-                    final double factor = newScale / scale;
-                    SwingUtilities.invokeLater(() -> {
-                        if (center) {
-                            if (page) {
-                                scrollToCenter(true);
-                                scrollToCenter(false);
-                            } else {
-                                scrollToCenter(true);
-                                maintainScrollBar(false, factor, false);
-                            }
-                        } else if (factor != 1) {
-                            maintainScrollBar(true, factor, false);
-                            maintainScrollBar(false, factor, false);
-                        }
-                    });
-                }
-            } finally {
-                zooming = false;
-            }
-        }
-    }
-
-    protected void maintainScrollBar(boolean horizontal, double factor, boolean center) {
-        JScrollBar scrollBar = (horizontal) ? getHorizontalScrollBar() : getVerticalScrollBar();
-        if (scrollBar != null) {
-            BoundedRangeModel model = scrollBar.getModel();
-            int newValue = (int) Math.round(model.getValue() * factor) + (int) Math.round((center) ? (model.getExtent() * (factor - 1) / 2) : 0);
-            model.setValue(newValue);
-        }
-    }
-
-    public void scrollToCenter(boolean horizontal) {
-        JScrollBar scrollBar = (horizontal) ? getHorizontalScrollBar() : getVerticalScrollBar();
-        if (scrollBar != null) {
-            final BoundedRangeModel model = scrollBar.getModel();
-            final int newValue = ((model.getMaximum()) / 2) - model.getExtent() / 2;
-            model.setValue(newValue);
         }
     }
 
@@ -1235,47 +1174,10 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Returns the bottom-most cell that intersects the given point (x, y) in
-     * the cell hierarchy starting at the given parent.
-     *
-     * @param x      X-coordinate of the location to be checked.
-     * @param y      Y-coordinate of the location to be checked.
-     * @param parent <Cell> that should be used as the root of the recursion.
-     *               Default is <defaultParent>.
-     * @return Returns the child at the given location.
+     * @return the pageVisible
      */
-    public ICell getCellAt(int x, int y, boolean hitSwimlaneContent, ICell parent) {
-        if (parent == null) {
-            parent = graph.getDefaultParent();
-        }
-        if (parent != null) {
-            PointDouble previousTranslate = canvas.getTranslate();
-            double previousScale = canvas.getScale();
-            try {
-                canvas.setScale(graph.getView().getScale());
-                canvas.setTranslate(0, 0);
-                IGraphModel model = graph.getModel();
-                GraphView view = graph.getView();
-                java.awt.Rectangle hit = new java.awt.Rectangle(x, y, 1, 1);
-                int childCount = model.getChildCount(parent);
-                for (int i = childCount - 1; i >= 0; i--) {
-                    ICell cell = model.getChildAt(parent, i);
-                    ICell result = getCellAt(x, y, hitSwimlaneContent, cell);
-                    if (result != null) {
-                        return result;
-                    } else if (graph.isCellVisible(cell)) {
-                        CellState state = view.getState(cell);
-                        if (state != null && canvas.intersects(this, hit, state) && (!graph.isSwimlane(cell) || hitSwimlaneContent || (transparentSwimlaneContent && !canvas.hitSwimlaneContent(this, state, x, y)))) {
-                            return cell;
-                        }
-                    }
-                }
-            } finally {
-                canvas.setScale(previousScale);
-                canvas.setTranslate((int) previousTranslate.getX(), (int) previousTranslate.getY());
-            }
-        }
-        return null;
+    public boolean isPageVisible() {
+        return pageVisible;
     }
 
     public boolean isSwimlaneSelectionEnabled() {
@@ -1378,11 +1280,71 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
+     * Fires a property change event for <code>pageVisible</code>. zoomAndCenter
+     * should be called if this is set to true.
+     *
+     * @param value the pageVisible to set
+     */
+    public void setPageVisible(boolean value) {
+        boolean oldValue = pageVisible;
+        pageVisible = value;
+        firePropertyChange("pageVisible", oldValue, pageVisible);
+    }
+
+    /**
      * Returns true if the absolute value of one of the given parameters is
      * greater than the tolerance.
      */
     public boolean isSignificant(double dx, double dy) {
         return Math.abs(dx) > tolerance || Math.abs(dy) > tolerance;
+    }
+
+    /**
+     * Returns the bottom-most cell that intersects the given point (x, y) in
+     * the cell hierarchy starting at the given parent.
+     *
+     * @param x      X-coordinate of the location to be checked.
+     * @param y      Y-coordinate of the location to be checked.
+     * @param parent <Cell> that should be used as the root of the recursion.
+     *               Default is <defaultParent>.
+     * @return Returns the child at the given location.
+     */
+    public ICell getCellAt(int x, int y, boolean hitSwimlaneContent, ICell parent) {
+        if (parent == null) {
+            parent = graph.getDefaultParent();
+        }
+        if (parent != null) {
+            PointDouble previousTranslate = canvas.getTranslate();
+            double previousScale = canvas.getScale();
+            try {
+                canvas.setScale(graph.getView().getScale());
+                canvas.setTranslate(0, 0);
+                IGraphModel model = graph.getModel();
+                GraphView view = graph.getView();
+                java.awt.Rectangle hit = new java.awt.Rectangle(x, y, 1, 1);
+                int childCount = model.getChildCount(parent);
+                for (int i = childCount - 1; i >= 0; i--) {
+                    ICell cell = model.getChildAt(parent, i);
+                    ICell result = getCellAt(x, y, hitSwimlaneContent, cell);
+                    if (result != null) {
+                        return result;
+                    } else if (graph.isCellVisible(cell)) {
+                        CellState state = view.getState(cell);
+                        if (state != null && canvas.intersects(this, hit, state) && (!graph.isSwimlane(cell)
+                                                                                     || hitSwimlaneContent
+                                                                                     || (transparentSwimlaneContent
+                                                                                         && !canvas.hitSwimlaneContent(
+                                this, state, x, y)))) {
+                            return cell;
+                        }
+                    }
+                }
+            } finally {
+                canvas.setScale(previousScale);
+                canvas.setTranslate((int) previousTranslate.getX(), (int) previousTranslate.getY());
+            }
+        }
+        return null;
     }
 
     /**
@@ -1400,20 +1362,16 @@ public class GraphComponent extends JScrollPane implements Printable {
         return null;
     }
 
-    public java.awt.Rectangle getFoldingIconBounds(CellState state, ImageIcon icon) {
-        IGraphModel model = graph.getModel();
-        boolean isEdge = model.isEdge(state.getCell());
-        double scale = getGraph().getView().getScale();
-        int x = (int) Math.round(state.getX() + 4 * scale);
-        int y = (int) Math.round(state.getY() + 4 * scale);
-        int w = (int) Math.max(8, icon.getIconWidth() * scale);
-        int h = (int) Math.max(8, icon.getIconHeight() * scale);
-        if (isEdge) {
-            PointDouble pt = graph.getView().getPoint(state);
-            x = (int) pt.getX() - w / 2;
-            y = (int) pt.getY() - h / 2;
-        }
-        return new java.awt.Rectangle(x, y, w, h);
+    /**
+     * @return Returns true if the given event should toggle selected cells.
+     */
+    public boolean isToggleEvent(MouseEvent event) {
+        // NOTE: IsMetaDown always returns true for right-clicks on the Mac, so
+        // toggle selection for left mouse buttons requires CMD key to be pressed,
+        // but toggle for right mouse buttons requires CTRL to be pressed.
+        return event != null && ((Utils.IS_MAC) ? ((SwingUtilities.isLeftMouseButton(event) && event.isMetaDown()) || (
+                SwingUtilities.isRightMouseButton(event)
+                && event.isControlDown())) : event.isControlDown());
     }
 
     public boolean hitFoldingIcon(ICell cell, int x, int y) {
@@ -1432,6 +1390,38 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
         return false;
+    }
+
+    /**
+     * @return the foldingEnabled
+     */
+    public boolean isFoldingEnabled() {
+        return foldingEnabled;
+    }
+
+    /**
+     * @param value the foldingEnabled to set
+     */
+    public void setFoldingEnabled(boolean value) {
+        boolean oldValue = foldingEnabled;
+        foldingEnabled = value;
+        firePropertyChange("foldingEnabled", oldValue, foldingEnabled);
+    }
+
+    public java.awt.Rectangle getFoldingIconBounds(CellState state, ImageIcon icon) {
+        IGraphModel model = graph.getModel();
+        boolean isEdge = model.isEdge(state.getCell());
+        double scale = getGraph().getView().getScale();
+        int x = (int) Math.round(state.getX() + 4 * scale);
+        int y = (int) Math.round(state.getY() + 4 * scale);
+        int w = (int) Math.max(8, icon.getIconWidth() * scale);
+        int h = (int) Math.max(8, icon.getIconHeight() * scale);
+        if (isEdge) {
+            PointDouble pt = graph.getView().getPoint(state);
+            x = (int) pt.getX() - w / 2;
+            y = (int) pt.getY() - h / 2;
+        }
+        return new java.awt.Rectangle(x, y, w, h);
     }
 
     /**
@@ -1556,24 +1546,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     /**
      * @return the gridVisible
      */
-    public boolean isGridVisible() {
-        return gridVisible;
-    }
-
-    /**
-     * Fires a property change event for <code>gridVisible</code>.
-     *
-     * @param value the gridVisible to set
-     */
-    public void setGridVisible(boolean value) {
-        boolean oldValue = gridVisible;
-        gridVisible = value;
-        firePropertyChange("gridVisible", oldValue, gridVisible);
-    }
-
-    /**
-     * @return the gridVisible
-     */
     public boolean isAntiAlias() {
         return antiAlias;
     }
@@ -1643,39 +1615,18 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * @return the gridColor
+     * Returns all cells which may be imported via datatransfer.
      */
-    public Color getGridColor() {
-        return gridColor;
+    public List<ICell> getImportableCells(List<ICell> cells) {
+        return GraphModel.filterCells(cells, this::canImportCell);
     }
 
     /**
-     * Fires a property change event for <code>gridColor</code>.
-     *
-     * @param value the gridColor to set
+     * Returns true if the given cell can be imported via datatransfer. This
+     * returns importEnabled.
      */
-    public void setGridColor(Color value) {
-        Color oldValue = gridColor;
-        gridColor = value;
-        firePropertyChange("gridColor", oldValue, gridColor);
-    }
-
-    /**
-     * @return the gridStyle
-     */
-    public int getGridStyle() {
-        return gridStyle;
-    }
-
-    /**
-     * Fires a property change event for <code>gridStyle</code>.
-     *
-     * @param value the gridStyle to set
-     */
-    public void setGridStyle(int value) {
-        int oldValue = gridStyle;
-        gridStyle = value;
-        firePropertyChange("gridStyle", oldValue, gridStyle);
+    public boolean canImportCell(ICell cell) {
+        return isImportEnabled();
     }
 
     /**
@@ -1695,18 +1646,75 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Returns all cells which may be imported via datatransfer.
+     * Returns true if the given cell can be exported via datatransfer.
      */
-    public List<ICell> getImportableCells(List<ICell> cells) {
-        return GraphModel.filterCells(cells, this::canImportCell);
+    public boolean canExportCell(ICell cell) {
+        return isExportEnabled();
     }
 
     /**
-     * Returns true if the given cell can be imported via datatransfer. This
-     * returns importEnabled.
+     * Returns all cells which may be exported via datatransfer.
      */
-    public boolean canImportCell(ICell cell) {
-        return isImportEnabled();
+    public List<ICell> getExportableCells(List<ICell> cells) {
+        return GraphModel.filterCells(cells, this::canExportCell);
+    }
+
+    /**
+     * Prints the specified page on the specified graphics using
+     * <code>pageFormat</code> for the page format.
+     *
+     * @param g           The graphics to paint the graph on.
+     * @param printFormat The page format to use for printing.
+     * @param page        The page to print
+     * @return Returns {@link Printable#PAGE_EXISTS} or
+     * {@link Printable#NO_SUCH_PAGE}.
+     */
+    @Override
+    public int print(Graphics g, PageFormat printFormat, int page) {
+        int result = NO_SUCH_PAGE;
+        // Disables double-buffering before printing
+        RepaintManager currentManager = RepaintManager.currentManager(GraphComponent.this);
+        currentManager.setDoubleBufferingEnabled(false);
+        // Gets the current state of the view
+        GraphView view = graph.getView();
+        // Stores the old state of the view
+        boolean eventsEnabled = view.isEventsEnabled();
+        PointDouble translate = view.getTranslate();
+        // Disables firing of scale events so that there is no
+        // repaint or update of the original graph while pages
+        // are being printed
+        view.setEventsEnabled(false);
+        // Uses the view to create temporary cell states for each cell
+        TemporaryCellStates tempStates = new TemporaryCellStates(view, 1 / pageScale);
+        try {
+            view.setTranslate(new PointDouble(0, 0));
+            Graphics2DCanvas canvas = createCanvas();
+            canvas.setGraphics((Graphics2D) g);
+            canvas.setScale(1 / pageScale);
+            view.revalidate();
+            RectangleDouble graphBounds = graph.getGraphBounds();
+            Dimension pSize = new Dimension((int) Math.ceil(graphBounds.getX() + graphBounds.getWidth()) + 1,
+                                            (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
+            int w = (int) (printFormat.getImageableWidth());
+            int h = (int) (printFormat.getImageableHeight());
+            int cols = (int) Math.max(Math.ceil((double) (pSize.width - 5) / (double) w), 1);
+            int rows = (int) Math.max(Math.ceil((double) (pSize.height - 5) / (double) h), 1);
+            if (page < cols * rows) {
+                int dx = (int) ((page % cols) * printFormat.getImageableWidth());
+                int dy = (int) (Math.floor(page / cols) * printFormat.getImageableHeight());
+                g.translate(-dx + (int) printFormat.getImageableX(), -dy + (int) printFormat.getImageableY());
+                g.setClip(dx, dy, (int) (dx + printFormat.getWidth()), (int) (dy + printFormat.getHeight()));
+                graph.drawGraph(canvas);
+                result = PAGE_EXISTS;
+            }
+        } finally {
+            view.setTranslate(translate);
+            tempStates.destroy();
+            view.setEventsEnabled(eventsEnabled);
+            // Enables double-buffering after printing
+            currentManager.setDoubleBufferingEnabled(true);
+        }
+        return result;
     }
 
     /**
@@ -1726,54 +1734,10 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Returns all cells which may be exported via datatransfer.
-     */
-    public List<ICell> getExportableCells(List<ICell> cells) {
-        return GraphModel.filterCells(cells, this::canExportCell);
-    }
-
-    /**
-     * Returns true if the given cell can be exported via datatransfer.
-     */
-    public boolean canExportCell(ICell cell) {
-        return isExportEnabled();
-    }
-
-    /**
-     * @return the foldingEnabled
-     */
-    public boolean isFoldingEnabled() {
-        return foldingEnabled;
-    }
-
-    /**
-     * @param value the foldingEnabled to set
-     */
-    public void setFoldingEnabled(boolean value) {
-        boolean oldValue = foldingEnabled;
-        foldingEnabled = value;
-        firePropertyChange("foldingEnabled", oldValue, foldingEnabled);
-    }
-
-    public boolean isEditEvent(MouseEvent e) {
-        return e != null && e.getClickCount() == 2;
-    }
-
-    /**
      * @return Returns true if the given event should toggle selected cells.
      */
     public boolean isCloneEvent(MouseEvent event) {
         return event != null && event.isControlDown();
-    }
-
-    /**
-     * @return Returns true if the given event should toggle selected cells.
-     */
-    public boolean isToggleEvent(MouseEvent event) {
-        // NOTE: IsMetaDown always returns true for right-clicks on the Mac, so
-        // toggle selection for left mouse buttons requires CMD key to be pressed,
-        // but toggle for right mouse buttons requires CTRL to be pressed.
-        return event != null && ((Utils.IS_MAC) ? ((SwingUtilities.isLeftMouseButton(event) && event.isMetaDown()) || (SwingUtilities.isRightMouseButton(event) && event.isControlDown())) : event.isControlDown());
     }
 
     /**
@@ -1830,68 +1794,8 @@ public class GraphComponent extends JScrollPane implements Printable {
         return pt;
     }
 
-    /**
-     * Prints the specified page on the specified graphics using
-     * <code>pageFormat</code> for the page format.
-     *
-     * @param g           The graphics to paint the graph on.
-     * @param printFormat The page format to use for printing.
-     * @param page        The page to print
-     * @return Returns {@link Printable#PAGE_EXISTS} or
-     * {@link Printable#NO_SUCH_PAGE}.
-     */
-    public int print(Graphics g, PageFormat printFormat, int page) {
-        int result = NO_SUCH_PAGE;
-        // Disables double-buffering before printing
-        RepaintManager currentManager = RepaintManager.currentManager(GraphComponent.this);
-        currentManager.setDoubleBufferingEnabled(false);
-        // Gets the current state of the view
-        GraphView view = graph.getView();
-        // Stores the old state of the view
-        boolean eventsEnabled = view.isEventsEnabled();
-        PointDouble translate = view.getTranslate();
-        // Disables firing of scale events so that there is no
-        // repaint or update of the original graph while pages
-        // are being printed
-        view.setEventsEnabled(false);
-        // Uses the view to create temporary cell states for each cell
-        TemporaryCellStates tempStates = new TemporaryCellStates(view, 1 / pageScale);
-        try {
-            view.setTranslate(new PointDouble(0, 0));
-            Graphics2DCanvas canvas = createCanvas();
-            canvas.setGraphics((Graphics2D) g);
-            canvas.setScale(1 / pageScale);
-            view.revalidate();
-            RectangleDouble graphBounds = graph.getGraphBounds();
-            Dimension pSize = new Dimension((int) Math.ceil(graphBounds.getX() + graphBounds.getWidth()) + 1, (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
-            int w = (int) (printFormat.getImageableWidth());
-            int h = (int) (printFormat.getImageableHeight());
-            int cols = (int) Math.max(Math.ceil((double) (pSize.width - 5) / (double) w), 1);
-            int rows = (int) Math.max(Math.ceil((double) (pSize.height - 5) / (double) h), 1);
-            if (page < cols * rows) {
-                int dx = (int) ((page % cols) * printFormat.getImageableWidth());
-                int dy = (int) (Math.floor(page / cols) * printFormat.getImageableHeight());
-                g.translate(-dx + (int) printFormat.getImageableX(), -dy + (int) printFormat.getImageableY());
-                g.setClip(dx, dy, (int) (dx + printFormat.getWidth()), (int) (dy + printFormat.getHeight()));
-                graph.drawGraph(canvas);
-                result = PAGE_EXISTS;
-            }
-        } finally {
-            view.setTranslate(translate);
-            tempStates.destroy();
-            view.setEventsEnabled(eventsEnabled);
-            // Enables double-buffering after printing
-            currentManager.setDoubleBufferingEnabled(true);
-        }
-        return result;
-    }
-
     public InteractiveCanvas getCanvas() {
         return canvas;
-    }
-
-    public BufferedImage getTripleBuffer() {
-        return tripleBuffer;
     }
 
     /**
@@ -1905,6 +1809,10 @@ public class GraphComponent extends JScrollPane implements Printable {
         return new InteractiveCanvas();
     }
 
+    public BufferedImage getTripleBuffer() {
+        return tripleBuffer;
+    }
+
     /**
      * @param state Cell state for which a handler should be created.
      * @return Returns the handler to be used for the given cell state.
@@ -1914,16 +1822,78 @@ public class GraphComponent extends JScrollPane implements Printable {
             return new VertexHandler(this, state);
         } else if (graph.getModel().isEdge(state.getCell())) {
             EdgeStyleFunction style = graph.getView().getEdgeStyle(state, null, null, null);
-            if (graph.isLoop(state) || style instanceof ElbowConnectorEdgeStyleFunction || style instanceof SideToSideEdgeStyleFunction || style instanceof TopToBottomEdgeStyleFunction) {
+            if (graph.isLoop(state)
+                || style instanceof ElbowConnectorEdgeStyleFunction
+                || style instanceof SideToSideEdgeStyleFunction
+                || style instanceof TopToBottomEdgeStyleFunction) {
                 return new ElbowEdgeHandler(this, state);
             }
             return new EdgeHandler(this, state);
         }
         return new CellHandler(this, state);
     }
-    //
-    // Heavyweights
-    //
+
+    /**
+     * Validates the graph by validating each descendant of the given cell or
+     * the root of the model. Context is an object that contains the validation
+     * state for the complete validation run. The validation errors are attached
+     * to their cells using <setWarning>. This function returns true if no
+     * validation errors exist in the graph.
+     *
+     * @param cell    Cell to start the validation recursion.
+     * @param context Object that represents the global validation state.
+     */
+    public String validateGraph(ICell cell, HashMap<Object, Object> context) {
+        IGraphModel model = graph.getModel();
+        GraphView view = graph.getView();
+        boolean isValid = true;
+        int childCount = model.getChildCount(cell);
+        for (int i = 0; i < childCount; i++) {
+            ICell tmp = model.getChildAt(cell, i);
+            HashMap<Object, Object> ctx = context;
+            if (graph.isValidRoot(tmp)) {
+                ctx = new HashMap<>();
+            }
+            String warn = validateGraph(tmp, ctx);
+            if (warn != null) {
+                String html = warn.replaceAll("\n", "<br>");
+                int len = html.length();
+                setCellWarning(tmp, html.substring(0, Math.max(0, len - 4)));
+            } else {
+                setCellWarning(tmp, null);
+            }
+            isValid = isValid && warn == null;
+        }
+        StringBuilder warning = new StringBuilder();
+        // Adds error for invalid children if collapsed (children invisible)
+        if (graph.isCellCollapsed(cell) && !isValid) {
+            warning.append(Resources.get("containsValidationErrors", "Contains Validation Errors")).append("\n");
+        }
+        // Checks edges and cells using the defined multiplicities
+        if (model.isEdge(cell)) {
+            String tmp = graph.getEdgeValidationError(cell, model.getTerminal(cell, true),
+                                                      model.getTerminal(cell, false));
+            if (tmp != null) {
+                warning.append(tmp);
+            }
+        } else {
+            String tmp = graph.getCellValidationError(cell);
+            if (tmp != null) {
+                warning.append(tmp);
+            }
+        }
+        // Checks custom validation rules
+        String err = graph.validateCell(cell, context);
+        if (err != null) {
+            warning.append(err);
+        }
+        // Updates the display with the warning icons before any potential
+        // alerts are displayed
+        if (model.getParent(cell) == null) {
+            view.validate();
+        }
+        return (warning.length() > 0 || !isValid) ? warning.toString() : null;
+    }
 
     /**
      * Hook for subclassers to create the array of heavyweights for the given
@@ -2026,9 +1996,6 @@ public class GraphComponent extends JScrollPane implements Printable {
         }
         return result;
     }
-    //
-    // Validation and overlays
-    //
 
     /**
      * Validates the graph by validating each descendant of the given cell or
@@ -2042,100 +2009,43 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Validates the graph by validating each descendant of the given cell or
-     * the root of the model. Context is an object that contains the validation
-     * state for the complete validation run. The validation errors are attached
-     * to their cells using <setWarning>. This function returns true if no
-     * validation errors exist in the graph.
+     * Creates an overlay for the given cell using the warning and image or
+     * warningImage and returns the new overlay. If the warning is null or a
+     * zero length string, then all overlays are removed from the cell instead.
      *
-     * @param cell    Cell to start the validation recursion.
-     * @param context Object that represents the global validation state.
+     * @param cell    Cell whose warning should be set.
+     * @param warning String that represents the warning to be displayed.
+     * @param icon    Optional image to be used for the overlay. Default is
+     *                warningImageBasename.
+     * @param select  Optional boolean indicating if a click on the overlay should
+     *                select the corresponding cell. Default is false.
      */
-    public String validateGraph(ICell cell, HashMap<Object, Object> context) {
-        IGraphModel model = graph.getModel();
-        GraphView view = graph.getView();
-        boolean isValid = true;
-        int childCount = model.getChildCount(cell);
-        for (int i = 0; i < childCount; i++) {
-            ICell tmp = model.getChildAt(cell, i);
-            HashMap<Object, Object> ctx = context;
-            if (graph.isValidRoot(tmp)) {
-                ctx = new HashMap<>();
+    public ICellOverlay setCellWarning(final ICell cell, String warning, ImageIcon icon, boolean select) {
+        if (warning != null && warning.length() > 0) {
+            icon = (icon != null) ? icon : warningIcon;
+            // Creates the overlay with the image and warning
+            CellOverlay overlay = new CellOverlay(icon, warning);
+            // Adds a handler for single mouseclicks to select the cell
+            if (select) {
+                overlay.addMouseListener(new MouseAdapter() {
+                    /**
+                     * Selects the associated cell in the graph
+                     */
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (getGraph().isEnabled()) {
+                            getGraph().setSelectionCell(cell);
+                        }
+                    }
+                });
+                overlay.setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
-            String warn = validateGraph(tmp, ctx);
-            if (warn != null) {
-                String html = warn.replaceAll("\n", "<br>");
-                int len = html.length();
-                setCellWarning(tmp, html.substring(0, Math.max(0, len - 4)));
-            } else {
-                setCellWarning(tmp, null);
-            }
-            isValid = isValid && warn == null;
-        }
-        StringBuilder warning = new StringBuilder();
-        // Adds error for invalid children if collapsed (children invisible)
-        if (graph.isCellCollapsed(cell) && !isValid) {
-            warning.append(Resources.get("containsValidationErrors", "Contains Validation Errors")).append("\n");
-        }
-        // Checks edges and cells using the defined multiplicities
-        if (model.isEdge(cell)) {
-            String tmp = graph.getEdgeValidationError(cell, model.getTerminal(cell, true), model.getTerminal(cell, false));
-            if (tmp != null) {
-                warning.append(tmp);
-            }
+            // Sets and returns the overlay in the graph
+            return addCellOverlay(cell, overlay);
         } else {
-            String tmp = graph.getCellValidationError(cell);
-            if (tmp != null) {
-                warning.append(tmp);
-            }
+            removeCellOverlays(cell);
         }
-        // Checks custom validation rules
-        String err = graph.validateCell(cell, context);
-        if (err != null) {
-            warning.append(err);
-        }
-        // Updates the display with the warning icons before any potential
-        // alerts are displayed
-        if (model.getParent(cell) == null) {
-            view.validate();
-        }
-        return (warning.length() > 0 || !isValid) ? warning.toString() : null;
-    }
-
-    /**
-     * Adds an overlay for the specified cell. This method fires an addoverlay
-     * event and returns the new overlay.
-     *
-     * @param cell    Cell to add the overlay for.
-     * @param overlay Overlay to be added for the cell.
-     */
-    public ICellOverlay addCellOverlay(ICell cell, ICellOverlay overlay) {
-        ICellOverlay[] arr = getCellOverlays(cell);
-        if (arr == null) {
-            arr = new ICellOverlay[]{overlay};
-        } else {
-            ICellOverlay[] arr2 = new ICellOverlay[arr.length + 1];
-            System.arraycopy(arr, 0, arr2, 0, arr.length);
-            arr2[arr.length] = overlay;
-            arr = arr2;
-        }
-        overlays.put(cell, arr);
-        CellState state = graph.getView().getState(cell);
-        if (state != null) {
-            updateCellOverlayComponent(state, overlay);
-        }
-        eventSource.fireEvent(new AddOverlayEvent(cell, overlay));
-        return overlay;
-    }
-
-    /**
-     * Returns the array of overlays for the given cell or null, if no overlays
-     * are defined.
-     *
-     * @param cell Cell whose overlays should be returned.
-     */
-    public ICellOverlay[] getCellOverlays(Object cell) {
-        return overlays.get(cell);
+        return null;
     }
 
     /**
@@ -2181,6 +2091,9 @@ public class GraphComponent extends JScrollPane implements Printable {
         }
         return ovls;
     }
+    //
+    // Heavyweights
+    //
 
     /**
      * Notified when an overlay has been removed from the graph. This
@@ -2199,24 +2112,29 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Notified when an overlay has been removed from the graph. This
-     * implementation removes the given overlay from its parent if it is a
-     * component inside a component hierarchy.
+     * Adds an overlay for the specified cell. This method fires an addoverlay
+     * event and returns the new overlay.
+     *
+     * @param cell    Cell to add the overlay for.
+     * @param overlay Overlay to be added for the cell.
      */
-    protected void updateCellOverlayComponent(CellState state, ICellOverlay overlay) {
-        if (overlay instanceof Component) {
-            Component comp = (Component) overlay;
-            if (comp.getParent() == null) {
-                getGraphControl().add(comp, 0);
-            }
-            RectangleDouble rect = overlay.getBounds(state);
-            if (rect != null) {
-                comp.setBounds(rect.getRectangle());
-                comp.setVisible(true);
-            } else {
-                comp.setVisible(false);
-            }
+    public ICellOverlay addCellOverlay(ICell cell, ICellOverlay overlay) {
+        ICellOverlay[] arr = getCellOverlays(cell);
+        if (arr == null) {
+            arr = new ICellOverlay[]{overlay};
+        } else {
+            ICellOverlay[] arr2 = new ICellOverlay[arr.length + 1];
+            System.arraycopy(arr, 0, arr2, 0, arr.length);
+            arr2[arr.length] = overlay;
+            arr = arr2;
         }
+        overlays.put(cell, arr);
+        CellState state = graph.getView().getState(cell);
+        if (state != null) {
+            updateCellOverlayComponent(state, overlay);
+        }
+        eventSource.fireEvent(new AddOverlayEvent(cell, overlay));
+        return overlay;
     }
 
     /**
@@ -2276,42 +2194,44 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
-     * Creates an overlay for the given cell using the warning and image or
-     * warningImage and returns the new overlay. If the warning is null or a
-     * zero length string, then all overlays are removed from the cell instead.
+     * Returns the array of overlays for the given cell or null, if no overlays
+     * are defined.
      *
-     * @param cell    Cell whose warning should be set.
-     * @param warning String that represents the warning to be displayed.
-     * @param icon    Optional image to be used for the overlay. Default is
-     *                warningImageBasename.
-     * @param select  Optional boolean indicating if a click on the overlay should
-     *                select the corresponding cell. Default is false.
+     * @param cell Cell whose overlays should be returned.
      */
-    public ICellOverlay setCellWarning(final ICell cell, String warning, ImageIcon icon, boolean select) {
-        if (warning != null && warning.length() > 0) {
-            icon = (icon != null) ? icon : warningIcon;
-            // Creates the overlay with the image and warning
-            CellOverlay overlay = new CellOverlay(icon, warning);
-            // Adds a handler for single mouseclicks to select the cell
-            if (select) {
-                overlay.addMouseListener(new MouseAdapter() {
-                    /**
-                     * Selects the associated cell in the graph
-                     */
-                    public void mousePressed(MouseEvent e) {
-                        if (getGraph().isEnabled()) {
-                            getGraph().setSelectionCell(cell);
-                        }
-                    }
-                });
-                overlay.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    public ICellOverlay[] getCellOverlays(Object cell) {
+        return overlays.get(cell);
+    }
+
+    /**
+     * Notified when an overlay has been removed from the graph. This
+     * implementation removes the given overlay from its parent if it is a
+     * component inside a component hierarchy.
+     */
+    protected void updateCellOverlayComponent(CellState state, ICellOverlay overlay) {
+        if (overlay instanceof Component) {
+            Component comp = (Component) overlay;
+            if (comp.getParent() == null) {
+                getGraphControl().add(comp, 0);
             }
-            // Sets and returns the overlay in the graph
-            return addCellOverlay(cell, overlay);
-        } else {
-            removeCellOverlays(cell);
+            RectangleDouble rect = overlay.getBounds(state);
+            if (rect != null) {
+                comp.setBounds(rect.getRectangle());
+                comp.setVisible(true);
+            } else {
+                comp.setVisible(false);
+            }
         }
-        return null;
+    }
+    //
+    // Validation and overlays
+    //
+
+    /**
+     * @return Returns the control that renders the graph.
+     */
+    public GraphControl getGraphControl() {
+        return graphControl;
     }
 
     /**
@@ -2415,11 +2335,63 @@ public class GraphComponent extends JScrollPane implements Printable {
         return new java.awt.Rectangle(x0, y0, w, h);
     }
 
+    /**
+     * @return the pageBackgroundColor
+     */
+    public Color getPageBackgroundColor() {
+        return pageBackgroundColor;
+    }
+
+    /**
+     * Sets the color that appears behind the page.
+     *
+     * @param value the pageBackgroundColor to set
+     */
+    public void setPageBackgroundColor(Color value) {
+        Color oldValue = pageBackgroundColor;
+        pageBackgroundColor = value;
+        firePropertyChange("pageBackgroundColor", oldValue, pageBackgroundColor);
+    }
+
+    /**
+     * @return the pageShadowColor
+     */
+    public Color getPageBorderColor() {
+        return pageBorderColor;
+    }
+
+    /**
+     * @param value the pageBorderColor to set
+     */
+    public void setPageBorderColor(Color value) {
+        Color oldValue = pageBorderColor;
+        pageBorderColor = value;
+        firePropertyChange("pageBorderColor", oldValue, pageBorderColor);
+    }
+
+    /**
+     * @return the pageBreaksVisible
+     */
+    public boolean isPageBreaksVisible() {
+        return pageBreaksVisible;
+    }
+
+    /**
+     * @param value the pageBreaksVisible to set
+     */
+    public void setPageBreaksVisible(boolean value) {
+        boolean oldValue = pageBreaksVisible;
+        pageBreaksVisible = value;
+        firePropertyChange("pageBreaksVisible", oldValue, pageBreaksVisible);
+    }
+
     protected void paintBackgroundImage(Graphics g) {
         if (backgroundImage != null) {
             PointDouble translate = graph.getView().getTranslate();
             double scale = graph.getView().getScale();
-            g.drawImage(backgroundImage.getImage(), (int) (translate.getX() * scale), (int) (translate.getY() * scale), (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale), this);
+            g.drawImage(backgroundImage.getImage(), (int) (translate.getX() * scale), (int) (translate.getY() * scale),
+                        (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale),
+                        this);
         }
     }
 
@@ -2521,7 +2493,19 @@ public class GraphComponent extends JScrollPane implements Printable {
                     int iye = (int) Math.round(ye);
                     // Creates a set of strokes with individual dash offsets
                     // for each direction
-                    Stroke[] strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{3, 1}, Math.max(0, iys) % 4), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2}, Math.max(0, iys) % 4), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2}, Math.max(0, iys) % 4)};
+                    Stroke[] strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
+                                                                    new float[]{3, 1},
+                                                                    Math.max(0, iys) % 4), new BasicStroke(1,
+                                                                                                           BasicStroke.CAP_BUTT,
+                                                                                                           BasicStroke.JOIN_MITER,
+                                                                                                           1,
+                                                                                                           new float[]{2, 2},
+                                                                                                           Math.max(0,
+                                                                                                                    iys)
+                                                                                                           % 4), new BasicStroke(
+                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
+                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
+                            Math.max(0, iys) % 4)};
                     for (double x = xs; x <= xe; x += stepping) {
                         g2.setStroke(strokes[((int) (x / stepping)) % strokes.length]);
                         // FIXME: Workaround for rounding errors when adding
@@ -2533,7 +2517,19 @@ public class GraphComponent extends JScrollPane implements Printable {
                         int ix = (int) Math.round(xx);
                         g.drawLine(ix, iys, ix, iye);
                     }
-                    strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2}, Math.max(0, ixs) % 4), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2}, Math.max(0, ixs) % 4)};
+                    strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
+                                                           new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1,
+                                                                                                                     BasicStroke.CAP_BUTT,
+                                                                                                                     BasicStroke.JOIN_MITER,
+                                                                                                                     1,
+                                                                                                                     new float[]{2, 2},
+                                                                                                                     Math.max(
+                                                                                                                             0,
+                                                                                                                             ixs)
+                                                                                                                     % 4), new BasicStroke(
+                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
+                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
+                            Math.max(0, ixs) % 4)};
                     for (double y = ys; y <= ye; y += stepping) {
                         g2.setStroke(strokes[((int) (y / stepping)) % strokes.length]);
                         // FIXME: Workaround for rounding errors when adding
@@ -2568,6 +2564,60 @@ public class GraphComponent extends JScrollPane implements Printable {
             }
         }
     }
+
+    /**
+     * @return the gridVisible
+     */
+    public boolean isGridVisible() {
+        return gridVisible;
+    }
+
+    /**
+     * Fires a property change event for <code>gridVisible</code>.
+     *
+     * @param value the gridVisible to set
+     */
+    public void setGridVisible(boolean value) {
+        boolean oldValue = gridVisible;
+        gridVisible = value;
+        firePropertyChange("gridVisible", oldValue, gridVisible);
+    }
+
+    /**
+     * @return the gridColor
+     */
+    public Color getGridColor() {
+        return gridColor;
+    }
+
+    /**
+     * Fires a property change event for <code>gridColor</code>.
+     *
+     * @param value the gridColor to set
+     */
+    public void setGridColor(Color value) {
+        Color oldValue = gridColor;
+        gridColor = value;
+        firePropertyChange("gridColor", oldValue, gridColor);
+    }
+
+    /**
+     * @return the gridStyle
+     */
+    public int getGridStyle() {
+        return gridStyle;
+    }
+
+    /**
+     * Fires a property change event for <code>gridStyle</code>.
+     *
+     * @param value the gridStyle to set
+     */
+    public void setGridStyle(int value) {
+        int oldValue = gridStyle;
+        gridStyle = value;
+        firePropertyChange("gridStyle", oldValue, gridStyle);
+    }
     //
     // Triple Buffering
     //
@@ -2584,6 +2634,24 @@ public class GraphComponent extends JScrollPane implements Printable {
                 dirty = SwingUtilities.convertRectangle(graphControl, dirty, this);
                 repaint(dirty);
             }
+        }
+    }
+
+    /**
+     * Clears and repaints the triple buffer at the given rectangle or repaints
+     * the complete buffer if no rectangle is specified.
+     */
+    public void repaintTripleBuffer(java.awt.Rectangle dirty) {
+        if (tripleBuffered && tripleBufferGraphics != null) {
+            if (dirty == null) {
+                dirty = new java.awt.Rectangle(tripleBuffer.getWidth(), tripleBuffer.getHeight());
+            }
+            // Clears and repaints the dirty rectangle using the
+            // graphics canvas as a renderer
+            Utils.clearRect(tripleBufferGraphics, dirty, null);
+            tripleBufferGraphics.setClip(dirty);
+            graphControl.drawGraph(tripleBufferGraphics, true);
+            tripleBufferGraphics.setClip(null);
         }
     }
 
@@ -2608,6 +2676,17 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     /**
+     * Destroys the tripleBuffer and tripleBufferGraphics objects.
+     */
+    public void destroyTripleBuffer() {
+        if (tripleBuffer != null) {
+            tripleBuffer = null;
+            tripleBufferGraphics.dispose();
+            tripleBufferGraphics = null;
+        }
+    }
+
+    /**
      * Creates the tripleBufferGraphics and tripleBuffer for the given dimension
      * and draws the complete graph onto the triplebuffer.
      */
@@ -2620,35 +2699,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             repaintTripleBuffer(null);
         } catch (OutOfMemoryError error) {
             log.log(Level.SEVERE, "Failed to create a triple buffer", error);
-        }
-    }
-
-    /**
-     * Destroys the tripleBuffer and tripleBufferGraphics objects.
-     */
-    public void destroyTripleBuffer() {
-        if (tripleBuffer != null) {
-            tripleBuffer = null;
-            tripleBufferGraphics.dispose();
-            tripleBufferGraphics = null;
-        }
-    }
-
-    /**
-     * Clears and repaints the triple buffer at the given rectangle or repaints
-     * the complete buffer if no rectangle is specified.
-     */
-    public void repaintTripleBuffer(java.awt.Rectangle dirty) {
-        if (tripleBuffered && tripleBufferGraphics != null) {
-            if (dirty == null) {
-                dirty = new java.awt.Rectangle(tripleBuffer.getWidth(), tripleBuffer.getHeight());
-            }
-            // Clears and repaints the dirty rectangle using the
-            // graphics canvas as a renderer
-            Utils.clearRect(tripleBufferGraphics, dirty, null);
-            tripleBufferGraphics.setClip(dirty);
-            graphControl.drawGraph(tripleBufferGraphics, true);
-            tripleBufferGraphics.setClip(null);
         }
     }
     //
@@ -2686,37 +2736,47 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     public static class MouseRedirector implements MouseListener, MouseMotionListener {
+
         protected GraphComponent graphComponent;
 
         public MouseRedirector(GraphComponent graphComponent) {
             this.graphComponent = graphComponent;
         }
 
-        public void mouseClicked(MouseEvent e) {
-            graphComponent.getGraphControl().dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, graphComponent.getGraphControl()));
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            mouseClicked(e);
         }
 
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            graphComponent.getGraphControl()
+                          .dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e,
+                                                                          graphComponent.getGraphControl()));
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            mouseClicked(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            mouseClicked(e);
+        }
+
+        @Override
         public void mouseEntered(MouseEvent e) {
             // Redirecting this would cause problems on the Mac
             // and is technically incorrect anyway
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
             mouseClicked(e);
         }
 
-        public void mousePressed(MouseEvent e) {
-            mouseClicked(e);
-        }
-
-        public void mouseReleased(MouseEvent e) {
-            mouseClicked(e);
-        }
-
-        public void mouseDragged(MouseEvent e) {
-            mouseClicked(e);
-        }
-
+        @Override
         public void mouseMoved(MouseEvent e) {
             mouseClicked(e);
         }

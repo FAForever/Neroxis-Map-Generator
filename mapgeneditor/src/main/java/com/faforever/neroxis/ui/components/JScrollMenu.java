@@ -25,6 +25,15 @@ public class JScrollMenu extends JMenu {
      */
     private JPopupMenu popupMenu;
 
+    /**
+     * Constructs a menu whose properties are taken from the <code>Action</code> supplied.
+     *
+     * @param a an <code>Action</code>
+     */
+    public JScrollMenu(Action a) {
+        this();
+        setAction(a);
+    }
 
     /**
      * Constructs a new <code>JMenu</code> with no text.
@@ -42,16 +51,20 @@ public class JScrollMenu extends JMenu {
         super(s);
     }
 
-    /**
-     * Constructs a menu whose properties are taken from the <code>Action</code> supplied.
-     *
-     * @param a an <code>Action</code>
-     */
-    public JScrollMenu(Action a) {
-        this();
-        setAction(a);
+    @Override
+    public void updateUI() {
+        setUI((MenuItemUI) UIManager.getUI(this));
+
+        if (popupMenu != null) {
+            popupMenu.setUI((PopupMenuUI) UIManager.getUI(popupMenu));
+        }
     }
 
+    @Override
+    public boolean isPopupMenuVisible() {
+        ensurePopupMenuCreated();
+        return popupMenu.isVisible();
+    }
 
     /**
      * Lazily creates the popup menu. This method will create the popup using the <code>JScrollPopupMenu</code> class.
@@ -63,23 +76,6 @@ public class JScrollMenu extends JMenu {
             popupListener = createWinListener(popupMenu);
         }
     }
-
-    @Override
-    public void updateUI() {
-        setUI((MenuItemUI) UIManager.getUI(this));
-
-        if (popupMenu != null) {
-            popupMenu.setUI((PopupMenuUI) UIManager.getUI(popupMenu));
-        }
-    }
-
-
-    @Override
-    public boolean isPopupMenuVisible() {
-        ensurePopupMenuCreated();
-        return popupMenu.isVisible();
-    }
-
 
     @Override
     public void setMenuLocation(int x, int y) {
@@ -108,7 +104,6 @@ public class JScrollMenu extends JMenu {
         popupMenu.add(c, index);
         return c;
     }
-
 
     @Override
     public void addSeparator() {
@@ -159,7 +154,6 @@ public class JScrollMenu extends JMenu {
         ensurePopupMenuCreated();
         popupMenu.insert(new JPopupMenu.Separator(), index);
     }
-
 
     @Override
     public void remove(JMenuItem item) {
@@ -220,7 +214,6 @@ public class JScrollMenu extends JMenu {
     public MenuElement[] getSubElements() {
         return popupMenu == null ? new MenuElement[0] : new MenuElement[]{popupMenu};
     }
-
 
     @Override
     public void applyComponentOrientation(ComponentOrientation o) {

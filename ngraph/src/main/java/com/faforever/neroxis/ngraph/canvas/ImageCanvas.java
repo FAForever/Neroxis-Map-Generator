@@ -20,16 +20,15 @@ import java.awt.image.BufferedImage;
 public class ImageCanvas implements ICanvas {
 
     protected Graphics2DCanvas canvas;
-
     protected Graphics2D previousGraphics;
-
     protected BufferedImage image;
 
     public ImageCanvas(Graphics2DCanvas canvas, int width, int height, Color background, boolean antiAlias) {
         this(canvas, width, height, background, antiAlias, true);
     }
 
-    public ImageCanvas(Graphics2DCanvas canvas, int width, int height, Color background, boolean antiAlias, boolean textAntiAlias) {
+    public ImageCanvas(Graphics2DCanvas canvas, int width, int height, Color background, boolean antiAlias,
+                       boolean textAntiAlias) {
         this.canvas = canvas;
         previousGraphics = canvas.getGraphics();
         image = Utils.createBufferedImage(width, height, background);
@@ -49,28 +48,34 @@ public class ImageCanvas implements ICanvas {
         return image;
     }
 
-    public Object drawCell(CellState state) {
-        return canvas.drawCell(state);
+    @Override
+    public void setTranslate(double dx, double dy) {
+        canvas.setTranslate(dx, dy);
     }
 
-    public Object drawLabel(String label, CellState state) {
-        return canvas.drawLabel(label, state);
-    }
-
-    public double getScale() {
-        return canvas.getScale();
-    }
-
-    public void setScale(double scale) {
-        canvas.setScale(scale);
-    }
-
+    @Override
     public PointDouble getTranslate() {
         return canvas.getTranslate();
     }
 
-    public void setTranslate(double dx, double dy) {
-        canvas.setTranslate(dx, dy);
+    @Override
+    public double getScale() {
+        return canvas.getScale();
+    }
+
+    @Override
+    public void setScale(double scale) {
+        canvas.setScale(scale);
+    }
+
+    @Override
+    public Object drawCell(CellState state) {
+        return canvas.drawCell(state);
+    }
+
+    @Override
+    public Object drawLabel(String label, CellState state) {
+        return canvas.drawLabel(label, state);
     }
 
     public BufferedImage destroy() {
@@ -88,5 +93,4 @@ public class ImageCanvas implements ICanvas {
 
         return tmp;
     }
-
 }

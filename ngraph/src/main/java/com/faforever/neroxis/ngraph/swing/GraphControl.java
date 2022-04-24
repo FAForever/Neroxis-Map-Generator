@@ -24,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 public class GraphControl extends JComponent {
+
     @Serial
     private static final long serialVersionUID = -8916603170766739124L;
     private final GraphComponent graphComponent;
@@ -37,6 +38,7 @@ public class GraphControl extends JComponent {
     public GraphControl(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
         addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseReleased(MouseEvent e) {
                 if (translate.x != 0 || translate.y != 0) {
                     translate = new java.awt.Point(0, 0);
@@ -119,24 +121,6 @@ public class GraphControl extends JComponent {
         }
     }
 
-    public String getToolTipText(MouseEvent e) {
-        String tip = graphComponent.getSelectionCellsHandler().getToolTipText(e);
-        if (tip == null) {
-            ICell cell = graphComponent.getCellAt(e.getX(), e.getY());
-            if (cell != null) {
-                if (graphComponent.hitFoldingIcon(cell, e.getX(), e.getY())) {
-                    tip = Resources.get("collapse-expand");
-                } else {
-                    tip = graphComponent.graph.getToolTipForCell(cell);
-                }
-            }
-        }
-        if (tip != null && tip.length() > 0) {
-            return tip;
-        }
-        return super.getToolTipText(e);
-    }
-
     /**
      * Updates the preferred size for the given scale if the page size
      * should be preferred or the page is visible.
@@ -166,14 +150,7 @@ public class GraphControl extends JComponent {
         }
     }
 
-    public void paint(Graphics graphics) {
-        graphics.translate(translate.x, translate.y);
-        graphComponent.eventSource.fireEvent(new BeforePaintEvent(graphics));
-        super.paint(graphics);
-        graphComponent.eventSource.fireEvent(new AfterPaintEvent(graphics));
-        graphics.translate(-translate.x, -translate.y);
-    }
-
+    @Override
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
         // Draws the background
@@ -202,6 +179,34 @@ public class GraphControl extends JComponent {
             }
         }
         graphComponent.eventSource.fireEvent(new PaintEvent(graphics));
+    }
+
+    @Override
+    public void paint(Graphics graphics) {
+        graphics.translate(translate.x, translate.y);
+        graphComponent.eventSource.fireEvent(new BeforePaintEvent(graphics));
+        super.paint(graphics);
+        graphComponent.eventSource.fireEvent(new AfterPaintEvent(graphics));
+        graphics.translate(-translate.x, -translate.y);
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        String tip = graphComponent.getSelectionCellsHandler().getToolTipText(e);
+        if (tip == null) {
+            ICell cell = graphComponent.getCellAt(e.getX(), e.getY());
+            if (cell != null) {
+                if (graphComponent.hitFoldingIcon(cell, e.getX(), e.getY())) {
+                    tip = Resources.get("collapse-expand");
+                } else {
+                    tip = graphComponent.graph.getToolTipForCell(cell);
+                }
+            }
+        }
+        if (tip != null && tip.length() > 0) {
+            return tip;
+        }
+        return super.getToolTipText(e);
     }
 
     public void drawGraph(Graphics2D g, boolean drawLabels) {
@@ -246,7 +251,8 @@ public class GraphControl extends JComponent {
         double rotation = state.getStyle().getShape().getRotation();
         RectangleDouble tmp = Utils.getBoundingBox(new RectangleDouble(state), rotation);
         // Adds scaled stroke width
-        int border = (int) Math.ceil(state.getStyle().getShape().getStrokeWidth() * graphComponent.graph.getView().getScale()) + 1;
+        int border = (int) Math.ceil(
+                state.getStyle().getShape().getStrokeWidth() * graphComponent.graph.getView().getScale()) + 1;
         tmp.grow(border);
         if (state.getStyle().getCellProperties().isShadow()) {
             tmp.setWidth(tmp.getWidth() + Constants.SHADOW_OFFSETX);
@@ -271,7 +277,8 @@ public class GraphControl extends JComponent {
      */
     public void drawCell(ICanvas canvas, ICell cell) {
         CellState state = graphComponent.graph.getView().getState(cell);
-        if (state != null && isCellDisplayable(state.getCell()) && (!(canvas instanceof Graphics2DCanvas) || hitClip((Graphics2DCanvas) canvas, state))) {
+        if (state != null && isCellDisplayable(state.getCell()) && (!(canvas instanceof Graphics2DCanvas) || hitClip(
+                (Graphics2DCanvas) canvas, state))) {
             graphComponent.graph.drawState(canvas, state, cell != graphComponent.cellEditor.getEditingCell());
         }
         // Handles special ordering for edges (all in foreground
@@ -313,7 +320,8 @@ public class GraphControl extends JComponent {
             Graphics2D g2 = g2c.getGraphics();
             // Draws the collapse/expand icons
             boolean isEdge = model.isEdge(state.getCell());
-            if (state.getCell() != graphComponent.graph.getCurrentRoot() && (model.isVertex(state.getCell()) || isEdge)) {
+            if (state.getCell() != graphComponent.graph.getCurrentRoot() && (model.isVertex(state.getCell())
+                                                                             || isEdge)) {
                 ImageIcon icon = graphComponent.getFoldingIcon(state);
                 if (icon != null) {
                     java.awt.Rectangle bounds = graphComponent.getFoldingIconBounds(state, icon);
@@ -329,6 +337,7 @@ public class GraphControl extends JComponent {
      * graph display.
      */
     protected boolean isCellDisplayable(Object cell) {
-        return cell != graphComponent.graph.getView().getCurrentRoot() && cell != graphComponent.graph.getModel().getRoot();
+        return cell != graphComponent.graph.getView().getCurrentRoot() && cell != graphComponent.graph.getModel()
+                                                                                                      .getRoot();
     }
 }

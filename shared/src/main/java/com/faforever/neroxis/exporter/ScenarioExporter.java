@@ -2,7 +2,6 @@ package com.faforever.neroxis.exporter;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
-
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -46,8 +45,9 @@ public strictfp class ScenarioExporter {
         out.writeBytes("          armies = {");
         for (Spawn spawn : map.getSpawns()) {
             out.writeBytes("'" + spawn.getId() + "'");
-            if (map.getSpawns().indexOf(spawn) < map.getSpawns().size() - 1)
+            if (map.getSpawns().indexOf(spawn) < map.getSpawns().size() - 1) {
                 out.writeBytes(",");
+            }
         }
         out.writeBytes("},\n");
         out.writeBytes("        },\n");

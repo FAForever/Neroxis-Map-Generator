@@ -16,6 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EventSource {
+
     /**
      * Holds the event names and associated listeners in an array. The array
      * contains the event name followed by the respective listener for each
@@ -83,7 +84,8 @@ public class EventSource {
                 sender = this;
             }
             Object finalSender = sender;
-            eventListeners.getOrDefault(event.getClass(), List.of()).forEach(listener -> ((IEventListener<T>) listener).invoke(finalSender, event));
+            eventListeners.getOrDefault(event.getClass(), List.of())
+                          .forEach(listener -> ((IEventListener<T>) listener).invoke(finalSender, event));
         }
     }
 
@@ -91,6 +93,7 @@ public class EventSource {
      * Defines the requirements for an object that listens to an event source.
      */
     public interface IEventListener<T extends EventObject> {
+
         /**
          * Called when the graph model has changed.
          *
@@ -99,5 +102,4 @@ public class EventSource {
          */
         void invoke(Object sender, T event);
     }
-
 }

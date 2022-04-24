@@ -14,6 +14,7 @@ import lombok.Setter;
 
 @Getter
 public class CloseableTabComponent extends JPanel {
+
     private final JLabel title = new JLabel();
     private final JButton closeButton = new JButton();
     private final JTabbedPane tabbedPane;

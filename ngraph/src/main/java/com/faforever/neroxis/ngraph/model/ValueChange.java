@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ValueChange extends AtomicGraphModelChange {
+
     protected ICell cell;
     protected Object value;
     protected Object previous;
@@ -22,6 +23,7 @@ public class ValueChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         value = previous;
         previous = ((GraphModel) model).valueForCellChanged(cell, previous);

@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class GeometryChange extends AtomicGraphModelChange {
+
     protected ICell cell;
     protected Geometry geometry, previous;
 
@@ -21,6 +22,7 @@ public class GeometryChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         geometry = previous;
         previous = ((GraphModel) model).geometryForCellChanged(cell, previous);

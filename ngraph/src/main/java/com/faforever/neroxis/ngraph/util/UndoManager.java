@@ -33,12 +33,10 @@ public class UndoManager extends EventSource {
      * Maximum command history size. 0 means unlimited history. Default is 100.
      */
     protected int size;
-
     /**
      * List that contains the steps of the command history.
      */
     protected List<UndoableEdit> history;
-
     /**
      * Index of the element to be added next.
      */
@@ -59,10 +57,6 @@ public class UndoManager extends EventSource {
         clear();
     }
 
-    public boolean isEmpty() {
-        return history.isEmpty();
-    }
-
     /**
      * Clears the command history.
      */
@@ -70,6 +64,10 @@ public class UndoManager extends EventSource {
         history = new ArrayList<>(size);
         indexOfNextAdd = 0;
         fireEvent(new ClearEvent());
+    }
+
+    public boolean isEmpty() {
+        return history.isEmpty();
     }
 
     /**
@@ -143,5 +141,4 @@ public class UndoManager extends EventSource {
             edit.die();
         }
     }
-
 }

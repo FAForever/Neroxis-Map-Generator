@@ -25,7 +25,7 @@ public class EdgeLabelLayout extends GraphLayout {
         super(graph);
     }
 
-
+    @Override
     public void execute(ICell parent) {
         GraphView view = graph.getView();
         IGraphModel model = graph.getModel();
@@ -115,5 +115,4 @@ public class EdgeLabelLayout extends GraphLayout {
             }
         }
     }
-
 }

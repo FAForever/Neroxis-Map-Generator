@@ -14,6 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RectangleDouble extends Rectangle2D.Double {
+
     @Serial
     private static final long serialVersionUID = -3793966043543578946L;
 
@@ -22,6 +23,18 @@ public class RectangleDouble extends Rectangle2D.Double {
      */
     public RectangleDouble() {
         this(0, 0, 0, 0);
+    }
+
+    /**
+     * Constructs a rectangle using the given parameters.
+     *
+     * @param x      X-coordinate of the new rectangle.
+     * @param y      Y-coordinate of the new rectangle.
+     * @param width  Width of the new rectangle.
+     * @param height Height of the new rectangle.
+     */
+    public RectangleDouble(double x, double y, double width, double height) {
+        super(x, y, width, height);
     }
 
     /**
@@ -42,24 +55,43 @@ public class RectangleDouble extends Rectangle2D.Double {
         this(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
-    /**
-     * Constructs a rectangle using the given parameters.
-     *
-     * @param x      X-coordinate of the new rectangle.
-     * @param y      Y-coordinate of the new rectangle.
-     * @param width  Width of the new rectangle.
-     * @param height Height of the new rectangle.
-     */
-    public RectangleDouble(double x, double y, double width, double height) {
-        super(x, y, width, height);
-    }
-
     public void setX(double value) {
         x = value;
     }
 
     public void setY(double value) {
         y = value;
+    }
+
+    /**
+     * Returns the x-coordinate of the center.
+     *
+     * @return Returns the x-coordinate of the center.
+     */
+    @Override
+    public double getCenterX() {
+        return getX() + getWidth() / 2;
+    }
+
+    /**
+     * Returns the y-coordinate of the center.
+     *
+     * @return Returns the y-coordinate of the center.
+     */
+    @Override
+    public double getCenterY() {
+        return getY() + getHeight() / 2;
+    }
+
+    /**
+     * Returns a new instance of the same rectangle.
+     */
+    @Override
+    public RectangleDouble clone() {
+        RectangleDouble clone = (RectangleDouble) super.clone();
+        clone.setWidth(getWidth());
+        clone.setHeight(getHeight());
+        return clone;
     }
 
     /**
@@ -78,24 +110,6 @@ public class RectangleDouble extends Rectangle2D.Double {
      */
     public void setHeight(double value) {
         height = value;
-    }
-
-    /**
-     * Returns the x-coordinate of the center.
-     *
-     * @return Returns the x-coordinate of the center.
-     */
-    public double getCenterX() {
-        return getX() + getWidth() / 2;
-    }
-
-    /**
-     * Returns the y-coordinate of the center.
-     *
-     * @return Returns the y-coordinate of the center.
-     */
-    public double getCenterY() {
-        return getY() + getHeight() / 2;
     }
 
     /**
@@ -183,19 +197,12 @@ public class RectangleDouble extends Rectangle2D.Double {
     public boolean equals(Object obj) {
         if (obj instanceof RectangleDouble) {
             RectangleDouble rect = (RectangleDouble) obj;
-            return rect.getX() == getX() && rect.getY() == getY() && rect.getWidth() == getWidth() && rect.getHeight() == getHeight();
+            return rect.getX() == getX()
+                   && rect.getY() == getY()
+                   && rect.getWidth() == getWidth()
+                   && rect.getHeight() == getHeight();
         }
         return false;
-    }
-
-    /**
-     * Returns a new instance of the same rectangle.
-     */
-    public RectangleDouble clone() {
-        RectangleDouble clone = (RectangleDouble) super.clone();
-        clone.setWidth(getWidth());
-        clone.setHeight(getHeight());
-        return clone;
     }
 
     /**
@@ -207,7 +214,16 @@ public class RectangleDouble extends Rectangle2D.Double {
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [" + "x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
+        return getClass().getSimpleName()
+               + " ["
+               + "x="
+               + x
+               + ", y="
+               + y
+               + ", width="
+               + width
+               + ", height="
+               + height
+               + "]";
     }
-
 }

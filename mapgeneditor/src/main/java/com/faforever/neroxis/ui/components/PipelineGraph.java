@@ -27,8 +27,11 @@ import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
 public class PipelineGraph extends Graph implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge>, Iterable<MaskGraphVertex<?>>, org.jgrapht.Graph<MaskGraphVertex<?>, MaskMethodEdge> {
-    private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
-    private final ListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> listenableGraph = new DefaultListenableGraph<>(dag);
+
+    private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag = new DirectedAcyclicGraph<>(
+            MaskMethodEdge.class);
+    private final ListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> listenableGraph = new DefaultListenableGraph<>(
+            dag);
     private final Map<MaskGraphVertex<?>, ICell> vertexToCell = new HashMap<>();
     private final Map<MaskMethodEdge, ICell> edgeToCell = new HashMap<>();
     private final Map<ICell, MaskGraphVertex<?>> cellToVertex = new HashMap<>();
@@ -58,40 +61,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         updateVertexDefinedStyle(edgeTarget);
     }
 
-    private void addVisualEdgeIfNecessary(MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
-        MaskMethodEdge edge = getEdge(edgeSource, edgeTarget);
-        ICell parentSourceCell = getCellForVertex(edgeSource);
-        ICell parentTargetCell = getCellForVertex(edgeTarget);
-        if (parentSourceCell == null) {
-            throw new IllegalStateException(String.format("Cell does not exist for vertex `%s`", edgeSource.getIdentifier()));
-        }
-        if (parentTargetCell == null) {
-            throw new IllegalStateException(String.format("Cell does not exist for vertex `%s`", edgeTarget.getIdentifier()));
-        }
-        List<ICell> knownEdges = getEdgesBetween(parentSourceCell, parentTargetCell);
-        ICell cell;
-        if (knownEdges.isEmpty()) {
-            cell = insertEdge(getDefaultParent(), null, null, parentSourceCell, parentTargetCell);
-        } else {
-            cell = knownEdges.get(0);
-        }
-        cell.setVisible(false);
-        edgeToCell.put(edge, cell);
-        cellToEdge.put(cell, edge);
-        ICell resultCell = getCellForVertex(edgeSource, edge.getResultName());
-        ICell parameterCell = getCellForVertex(edgeTarget, edge.getParameterName());
-        if (resultCell == null) {
-            throw new IllegalStateException(String.format("Cell does not exist for vertex `%s` `%s`", edgeSource.getIdentifier(), edge.getResultName()));
-        }
-        if (parameterCell == null) {
-            throw new IllegalStateException(String.format("Cell does not exist for vertex `%s` `%s`", edgeTarget.getIdentifier(), edge.getParameterName()));
-        }
-        List<ICell> knownSubEdges = getEdgesBetween(resultCell, parameterCell);
-        if (knownSubEdges.isEmpty()) {
-            insertEdge(getDefaultParent(), null, null, resultCell, parameterCell);
-        }
-    }
-
     @Override
     public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
         MaskMethodEdge edge = e.getEdge();
@@ -118,6 +87,79 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         }
     }
 
+    public ICell getCellForVertex(MaskGraphVertex<?> vertex, String subName) {
+        ICell parentCell = vertexToCell.get(vertex);
+        if (subName == null || parentCell == null) {
+            return parentCell;
+        }
+        return parentCell.getChildren()
+                         .stream()
+                         .filter(child -> subName.equals(child.getValue()))
+                         .findFirst()
+                         .orElse(null);
+    }
+
+    public void updateVertexDefinedStyle(MaskGraphVertex<?> vertex) {
+        ICell vertexCell = getCellForVertex(vertex);
+        if (vertexCell == null) {
+            return;
+        }
+        Set<ICell> cells = new HashSet<>(vertexCell.getChildren());
+        cells.add(vertexCell);
+        boolean vertexDefined = vertex.isDefined();
+        cells.forEach(cell -> {
+            if (!vertexDefined) {
+                model.setStyle(cell, "undefined");
+            } else {
+                model.setStyle(cell, null);
+            }
+        });
+    }
+
+    public ICell getCellForVertex(MaskGraphVertex<?> vertex) {
+        return getCellForVertex(vertex, null);
+    }
+
+    private void addVisualEdgeIfNecessary(MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
+        MaskMethodEdge edge = getEdge(edgeSource, edgeTarget);
+        ICell parentSourceCell = getCellForVertex(edgeSource);
+        ICell parentTargetCell = getCellForVertex(edgeTarget);
+        if (parentSourceCell == null) {
+            throw new IllegalStateException(
+                    String.format("Cell does not exist for vertex `%s`", edgeSource.getIdentifier()));
+        }
+        if (parentTargetCell == null) {
+            throw new IllegalStateException(
+                    String.format("Cell does not exist for vertex `%s`", edgeTarget.getIdentifier()));
+        }
+        List<ICell> knownEdges = getEdgesBetween(parentSourceCell, parentTargetCell);
+        ICell cell;
+        if (knownEdges.isEmpty()) {
+            cell = insertEdge(getDefaultParent(), null, null, parentSourceCell, parentTargetCell);
+        } else {
+            cell = knownEdges.get(0);
+        }
+        cell.setVisible(false);
+        edgeToCell.put(edge, cell);
+        cellToEdge.put(cell, edge);
+        ICell resultCell = getCellForVertex(edgeSource, edge.getResultName());
+        ICell parameterCell = getCellForVertex(edgeTarget, edge.getParameterName());
+        if (resultCell == null) {
+            throw new IllegalStateException(
+                    String.format("Cell does not exist for vertex `%s` `%s`", edgeSource.getIdentifier(),
+                                  edge.getResultName()));
+        }
+        if (parameterCell == null) {
+            throw new IllegalStateException(
+                    String.format("Cell does not exist for vertex `%s` `%s`", edgeTarget.getIdentifier(),
+                                  edge.getParameterName()));
+        }
+        List<ICell> knownSubEdges = getEdgesBetween(resultCell, parameterCell);
+        if (knownSubEdges.isEmpty()) {
+            insertEdge(getDefaultParent(), null, null, resultCell, parameterCell);
+        }
+    }
+
     @Override
     public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
         addVisualVertexIfNecessary(e.getVertex());
@@ -129,11 +171,15 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             cell = insertVertex(getDefaultParent(), null, vertex.getIdentifier(), 0, 0, baseSize, baseSize);
             int numMaskParameters = vertex.getMaskParameters().size();
             for (int i = 0; i < numMaskParameters; ++i) {
-                insertVertex(cell, null, vertex.getMaskParameters().get(i), widthPadding, getSubCellYPadding(numMaskParameters, i), baseSize * widthFactor, getSubCellHeight(numMaskParameters), null, true);
+                insertVertex(cell, null, vertex.getMaskParameters().get(i), widthPadding,
+                             getSubCellYPadding(numMaskParameters, i), baseSize * widthFactor,
+                             getSubCellHeight(numMaskParameters), null, true);
             }
             int numResults = vertex.getResultNames().size();
             for (int i = 0; i < numResults; ++i) {
-                insertVertex(cell, null, vertex.getResultNames().get(i), 1 - widthFactor - widthPadding, getSubCellYPadding(numResults, i), baseSize * widthFactor, getSubCellHeight(numResults), null, true);
+                insertVertex(cell, null, vertex.getResultNames().get(i), 1 - widthFactor - widthPadding,
+                             getSubCellYPadding(numResults, i), baseSize * widthFactor, getSubCellHeight(numResults),
+                             null, true);
             }
             vertexToCell.put(vertex, cell);
             cellToVertex.put(cell, vertex);
@@ -192,8 +238,9 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     }
 
     @Override
-    public boolean addEdge(MaskGraphVertex<?> sourceVertex, MaskGraphVertex<?> targetVertex, MaskMethodEdge maskMethodEdge) {
-        return listenableGraph.addEdge(sourceVertex, targetVertex, maskMethodEdge);
+    public boolean isValidConnection(ICell source, ICell target) {
+        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(
+                target).isMaskParameterSet((String) source.getValue());
     }
 
     @Override
@@ -327,18 +374,49 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     @Override
     public boolean isValidSource(ICell cell) {
         MaskGraphVertex<?> vertex = getVertexForCell(cell);
-        return vertex != null && cell.getParent() != getDefaultParent() && vertex.getResultNames().contains((String) cell.getValue());
+        return vertex != null && cell.getParent() != getDefaultParent() && vertex.getResultNames()
+                                                                                 .contains((String) cell.getValue());
+    }
+
+    @Override
+    public String getLabel(ICell cell) {
+        String result = "";
+        if (cell != null) {
+            CellState state = view.getState(cell);
+            Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
+            if (labelsVisible && style.getLabel().isVisible()) {
+                if (cell.isVertex() && getDefaultParent().equals(cell.getParent()) && getVertexForCell(cell) != null) {
+                    MaskGraphVertex<?> vertex = getVertexForCell(cell);
+                    result = String.format("%s\n%s\n%s", convertValueToString(cell), vertex.getExecutableName(),
+                                           vertex.getExecutorClass().getSimpleName());
+                } else {
+                    result = convertValueToString(cell);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getToolTipForCell(ICell cell) {
+        MaskGraphVertex<?> vertex = getVertexForCell(cell);
+        if (vertex == null) {
+            return "";
+        }
+        if (cell.getParent() != getDefaultParent()) {
+            return vertex.getIdentifier() + " -> " + vertex.getExecutableName() + " -> " + cell.getValue();
+        }
+        return vertex.getIdentifier() + " -> " + vertex.getExecutableName();
     }
 
     @Override
     public boolean isValidTarget(ICell cell) {
         MaskGraphVertex<?> vertex = getVertexForCell(cell);
-        return vertex != null && cell.getParent() != getDefaultParent() && vertex.getMaskParameters().contains((String) cell.getValue()) && !vertex.isMaskParameterSet((String) cell.getValue());
-    }
-
-    @Override
-    public boolean isValidConnection(ICell source, ICell target) {
-        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(target).isMaskParameterSet((String) source.getValue());
+        return vertex != null
+               && cell.getParent() != getDefaultParent()
+               && vertex.getMaskParameters()
+                        .contains((String) cell.getValue())
+               && !vertex.isMaskParameterSet((String) cell.getValue());
     }
 
     public MaskGraphVertex<?> getVertexForCell(ICell cell) {
@@ -352,53 +430,13 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         return cellToEdge.get(cell);
     }
 
-    public ICell getCellForVertex(MaskGraphVertex<?> vertex) {
-        return getCellForVertex(vertex, null);
-    }
-
-    public ICell getCellForVertex(MaskGraphVertex<?> vertex, String subName) {
-        ICell parentCell = vertexToCell.get(vertex);
-        if (subName == null || parentCell == null) {
-            return parentCell;
-        }
-        return parentCell.getChildren().stream().filter(child -> subName.equals(child.getValue())).findFirst().orElse(null);
-    }
-
-    @Override
-    public String getLabel(ICell cell) {
-        String result = "";
-        if (cell != null) {
-            CellState state = view.getState(cell);
-            Style style = (state != null) ? state.getStyle() : getCellStyle(cell);
-            if (labelsVisible && style.getLabel().isVisible()) {
-                if (cell.isVertex() && getDefaultParent().equals(cell.getParent()) && getVertexForCell(cell) != null) {
-                    MaskGraphVertex<?> vertex = getVertexForCell(cell);
-                    result = String.format("%s\n%s\n%s", convertValueToString(cell), vertex.getExecutableName(), vertex.getExecutorClass().getSimpleName());
-                } else {
-                    result = convertValueToString(cell);
-                }
-            }
-        }
-        return result;
-    }
-
-    public String getToolTipForCell(ICell cell) {
-        MaskGraphVertex<?> vertex = getVertexForCell(cell);
-        if (vertex == null) {
-            return "";
-        }
-        if (cell.getParent() != getDefaultParent()) {
-            return vertex.getIdentifier() + " -> " + vertex.getExecutableName() + " -> " + cell.getValue();
-        }
-        return vertex.getIdentifier() + " -> " + vertex.getExecutableName();
-    }
-
     public MaskGraphVertex<?> getDirectDescendant(MaskGraphVertex<?> vertex) {
-        return outgoingEdgesOf(vertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeTarget).findFirst().orElse(null);
-    }
-
-    public MaskGraphVertex<?> getDirectAncestor(MaskGraphVertex<?> vertex) {
-        return incomingEdgesOf(vertex).stream().filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName()) && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName())).map(this::getEdgeSource).findFirst().orElse(null);
+        return outgoingEdgesOf(vertex).stream()
+                                      .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
+                                                      && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
+                                      .map(this::getEdgeTarget)
+                                      .findFirst()
+                                      .orElse(null);
     }
 
     public Set<MaskGraphVertex<?>> getDirectRelationships(MaskGraphVertex<?> vertex) {
@@ -416,17 +454,39 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         return Set.copyOf(directRelationships);
     }
 
+    public MaskGraphVertex<?> getDirectAncestor(MaskGraphVertex<?> vertex) {
+        return incomingEdgesOf(vertex).stream()
+                                      .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
+                                                      && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
+                                      .map(this::getEdgeSource)
+                                      .findFirst()
+                                      .orElse(null);
+    }
+
     public PipelineGraph getSubGraphFromSelectedCells() {
         PipelineGraph subGraph = new PipelineGraph();
         Map<MaskGraphVertex<?>, MaskGraphVertex<?>> vertexCopyMap = new HashMap<>();
-        Set<MaskGraphVertex<?>> selectedVertices = getSelectionCells().stream().map(this::getVertexForCell).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<MaskGraphVertex<?>> selectedVertices = getSelectionCells().stream()
+                                                                      .map(this::getVertexForCell)
+                                                                      .filter(Objects::nonNull)
+                                                                      .collect(Collectors.toSet());
         selectedVertices.forEach(vertex -> {
             MaskGraphVertex<?> vertexCopy = vertex.copy();
             subGraph.addVertex(vertexCopy);
             vertexCopyMap.put(vertex, vertexCopy);
         });
-        selectedVertices.stream().flatMap(vertex -> outgoingEdgesOf(vertex).stream()).filter(edge -> selectedVertices.contains(getEdgeTarget(edge))).forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)), vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
+        selectedVertices.stream()
+                        .flatMap(vertex -> outgoingEdgesOf(vertex).stream())
+                        .filter(edge -> selectedVertices.contains(getEdgeTarget(edge)))
+                        .forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)),
+                                                          vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
         return subGraph;
+    }
+
+    @Override
+    public boolean addEdge(MaskGraphVertex<?> sourceVertex, MaskGraphVertex<?> targetVertex,
+                           MaskMethodEdge maskMethodEdge) {
+        return listenableGraph.addEdge(sourceVertex, targetVertex, maskMethodEdge);
     }
 
     public void addGraph(PipelineGraph graph) {
@@ -437,23 +497,9 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             addVertex(vertexCopy);
             vertexCopyMap.put(vertex, vertexCopy);
         });
-        newVertices.stream().flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream()).forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)), vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
-    }
-
-    public void updateVertexDefinedStyle(MaskGraphVertex<?> vertex) {
-        ICell vertexCell = getCellForVertex(vertex);
-        if (vertexCell == null) {
-            return;
-        }
-        Set<ICell> cells = new HashSet<>(vertexCell.getChildren());
-        cells.add(vertexCell);
-        boolean vertexDefined = vertex.isDefined();
-        cells.forEach(cell -> {
-            if (!vertexDefined) {
-                model.setStyle(cell, "undefined");
-            } else {
-                model.setStyle(cell, null);
-            }
-        });
+        newVertices.stream()
+                   .flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream())
+                   .forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)),
+                                            vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
     }
 }

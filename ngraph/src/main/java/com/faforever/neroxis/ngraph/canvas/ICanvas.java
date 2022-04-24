@@ -11,6 +11,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * a graph.
  */
 public interface ICanvas {
+
     /**
      * Sets the translation for the following drawing requests.
      */
@@ -49,5 +50,4 @@ public interface ICanvas {
      * @return Object that represents the label.
      */
     Object drawLabel(String text, CellState state);
-
 }

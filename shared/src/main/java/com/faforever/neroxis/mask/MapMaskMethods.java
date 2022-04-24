@@ -20,9 +20,13 @@ public class MapMaskMethods {
     @GraphMethod
     @GraphParameter(name = "map", value = "map")
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask connectTeams(SCMap map, long seed, BooleanMask exec, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize) {
+    public static BooleanMask connectTeams(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
+                                           int maxMiddlePoints, int numConnections, float maxStepSize) {
         Random random = new Random(seed);
-        List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
+        List<Spawn> startTeamSpawns = map.getSpawns()
+                                         .stream()
+                                         .filter(spawn -> spawn.getTeamID() == 0)
+                                         .collect(Collectors.toList());
         for (int i = 0; i < numConnections; ++i) {
             Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
             int numMiddlePoints;
@@ -34,7 +38,8 @@ public class MapMaskMethods {
             Vector2 start = new Vector2(startSpawn.getPosition());
             Vector2 end = new Vector2(start);
             float maxMiddleDistance = start.getDistance(end);
-            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+                         (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
         return exec;
     }
@@ -42,9 +47,14 @@ public class MapMaskMethods {
     @GraphMethod
     @GraphParameter(name = "map", value = "map")
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask connectTeamsAroundCenter(SCMap map, long seed, BooleanMask exec, int minMiddlePoints, int maxMiddlePoints, int numConnections, float maxStepSize, int bound) {
+    public static BooleanMask connectTeamsAroundCenter(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
+                                                       int maxMiddlePoints, int numConnections, float maxStepSize,
+                                                       int bound) {
         Random random = new Random(seed);
-        List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
+        List<Spawn> startTeamSpawns = map.getSpawns()
+                                         .stream()
+                                         .filter(spawn -> spawn.getTeamID() == 0)
+                                         .collect(Collectors.toList());
         for (int i = 0; i < numConnections; ++i) {
             Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
             int numMiddlePoints;
@@ -61,7 +71,8 @@ public class MapMaskMethods {
             end.addPolar(offCenterAngle, random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f);
             end.clampMax(exec.getSize() - bound).clampMin(bound);
             float maxMiddleDistance = start.getDistance(end);
-            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2, (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+                         (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
         return exec;
     }
@@ -69,9 +80,13 @@ public class MapMaskMethods {
     @GraphMethod
     @GraphParameter(name = "map", value = "map")
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask connectTeammates(SCMap map, long seed, BooleanMask exec, int maxMiddlePoints, int numConnections, float maxStepSize) {
+    public static BooleanMask connectTeammates(SCMap map, long seed, BooleanMask exec, int maxMiddlePoints,
+                                               int numConnections, float maxStepSize) {
         Random random = new Random(seed);
-        List<Spawn> startTeamSpawns = map.getSpawns().stream().filter(spawn -> spawn.getTeamID() == 0).collect(Collectors.toList());
+        List<Spawn> startTeamSpawns = map.getSpawns()
+                                         .stream()
+                                         .filter(spawn -> spawn.getTeamID() == 0)
+                                         .collect(Collectors.toList());
         if (startTeamSpawns.size() > 1) {
             startTeamSpawns.forEach(startSpawn -> {
                 for (int i = 0; i < numConnections; ++i) {
@@ -82,7 +97,8 @@ public class MapMaskMethods {
                     Vector2 start = new Vector2(startSpawn.getPosition());
                     Vector2 end = new Vector2(endSpawn.getPosition());
                     float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                    exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
+                    exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0,
+                              (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
                 }
             });
         }
@@ -91,21 +107,26 @@ public class MapMaskMethods {
 
     @GraphMethod
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask pathInCenterBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    public static BooleanMask pathInCenterBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
+                                                 int maxMiddlePoints, int bound, float maxAngleError) {
         Random random = new Random(seed);
         for (int i = 0; i < numPaths; i++) {
-            Vector2 start = new Vector2(random.nextInt(exec.getSize() + 1 - bound * 2) + bound, random.nextInt(exec.getSize() + 1 - bound * 2) + bound);
-            Vector2 end = new Vector2(random.nextInt(exec.getSize() + 1 - bound * 2) + bound, random.nextInt(exec.getSize() + 1 - bound * 2) + bound);
+            Vector2 start = new Vector2(random.nextInt(exec.getSize() + 1 - bound * 2) + bound,
+                                        random.nextInt(exec.getSize() + 1 - bound * 2) + bound);
+            Vector2 end = new Vector2(random.nextInt(exec.getSize() + 1 - bound * 2) + bound,
+                                      random.nextInt(exec.getSize() + 1 - bound * 2) + bound);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-            exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
+            exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError,
+                      SymmetryType.TERRAIN);
         }
         return exec;
     }
 
     @GraphMethod
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask pathInEdgeBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    public static BooleanMask pathInEdgeBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
+                                               int maxMiddlePoints, int bound, float maxAngleError) {
         Random random = new Random(seed);
         for (int i = 0; i < numPaths; i++) {
             int startX = random.nextInt(bound) + (random.nextBoolean() ? 0 : exec.getSize() - bound);
@@ -116,7 +137,8 @@ public class MapMaskMethods {
             Vector2 end = new Vector2(endX, endY);
             int numMiddlePoints = random.nextInt(maxMiddlePoints);
             float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-            exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
+            exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError,
+                      SymmetryType.TERRAIN);
         }
         return exec;
     }
@@ -124,7 +146,8 @@ public class MapMaskMethods {
     @GraphMethod
     @GraphParameter(name = "map", value = "map")
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    public static BooleanMask pathAroundSpawns(SCMap map, long seed, BooleanMask exec, float maxStepSize, int numPaths, int maxMiddlePoints, int bound, float maxAngleError) {
+    public static BooleanMask pathAroundSpawns(SCMap map, long seed, BooleanMask exec, float maxStepSize, int numPaths,
+                                               int maxMiddlePoints, int bound, float maxAngleError) {
         Random random = new Random(seed);
         map.getSpawns().forEach(spawn -> {
             Vector2 start = new Vector2(spawn.getPosition());
@@ -134,7 +157,8 @@ public class MapMaskMethods {
                 Vector2 end = new Vector2(endX, endY);
                 int numMiddlePoints = random.nextInt(maxMiddlePoints);
                 float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError, SymmetryType.TERRAIN);
+                exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError,
+                          SymmetryType.TERRAIN);
             }
         });
         return exec;
@@ -153,7 +177,8 @@ public class MapMaskMethods {
     @GraphMethod
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "map", value = "map")
-    public static BooleanMask fillSpawnCircleWithProbability(SCMap map, long seed, BooleanMask exec, float spawnSize, float probability) {
+    public static BooleanMask fillSpawnCircleWithProbability(SCMap map, long seed, BooleanMask exec, float spawnSize,
+                                                             float probability) {
         Random random = new Random(seed);
         if (random.nextFloat() < probability) {
             map.getSpawns().forEach(spawn -> {

@@ -12,6 +12,7 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class SwimlaneStyle implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     /**
      * Specifies whether the line between the title region of a swimlane should be visible.
@@ -39,15 +40,15 @@ public class SwimlaneStyle implements PropertyChangeListener {
         }
     }
 
-    public void setLine(boolean line) {
-        boolean old = this.line;
-        this.line = line;
-        changeSupport.firePropertyChange(Fields.line, old, line);
-    }
-
     public void setColor(Color color) {
         Color old = this.color;
         this.color = color;
         changeSupport.firePropertyChange(Fields.color, old, color);
+    }
+
+    public void setLine(boolean line) {
+        boolean old = this.line;
+        this.line = line;
+        changeSupport.firePropertyChange(Fields.line, old, line);
     }
 }

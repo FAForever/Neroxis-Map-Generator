@@ -17,7 +17,6 @@ import com.faforever.neroxis.ngraph.view.Graph;
 public class OrthogonalLayout extends GraphLayout {
 
     protected OrthogonalModel orthModel;
-
     /**
      * Whether or not to route the edges along grid lines only, if the grid
      * is enabled. Default is false
@@ -33,5 +32,4 @@ public class OrthogonalLayout extends GraphLayout {
         // Create the rectangulation
 
     }
-
 }

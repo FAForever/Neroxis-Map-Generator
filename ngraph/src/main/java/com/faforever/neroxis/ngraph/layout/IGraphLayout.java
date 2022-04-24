@@ -28,5 +28,4 @@ public interface IGraphLayout {
      * @param y    Y-coordinate of the new cell location.
      */
     void moveCell(ICell cell, double x, double y);
-
 }

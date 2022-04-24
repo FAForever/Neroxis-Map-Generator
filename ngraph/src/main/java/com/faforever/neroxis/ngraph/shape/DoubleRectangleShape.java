@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 public class DoubleRectangleShape extends RectangleShape {
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);
         int inset = (int) Math.round((state.getStyle().getShape().getStrokeWidth() + 3) * canvas.getScale());
@@ -18,5 +19,4 @@ public class DoubleRectangleShape extends RectangleShape {
 
         canvas.getGraphics().drawRect(x, y, w, h);
     }
-
 }

@@ -15,18 +15,17 @@ import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
-
 import java.util.Arrays;
 
 public strictfp class LowMexStyleGenerator extends StyleGenerator {
 
     public LowMexStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .mexDensity(0f, .25f)
-                .mapSizes(256, 640)
-                .spawnCount(0, 4)
-                .numTeams(2, 2)
-                .build();
+                                                   .mexDensity(0f, .25f)
+                                                   .mapSizes(256, 640)
+                                                   .spawnCount(0, 4)
+                                                   .numTeams(2, 2)
+                                                   .build();
         weight = .5f;
     }
 
@@ -35,10 +34,12 @@ public strictfp class LowMexStyleGenerator extends StyleGenerator {
         super.initialize(generatorParameters, seed);
         resourceGenerator = new LowMexResourceGenerator();
         terrainGenerators.addAll(Arrays.asList(new BasicTerrainGenerator(), new OneIslandTerrainGenerator(),
-                new LittleMountainTerrainGenerator(), new ValleyTerrainGenerator()));
-        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
-                new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator(),
-                new HighReclaimPropGenerator()));
+                                               new LittleMountainTerrainGenerator(), new ValleyTerrainGenerator()));
+        propGenerators.addAll(
+                Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
+                              new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(),
+                              new RockFieldPropGenerator(), new SmallBattlePropGenerator(),
+                              new HighReclaimPropGenerator()));
     }
 }
 

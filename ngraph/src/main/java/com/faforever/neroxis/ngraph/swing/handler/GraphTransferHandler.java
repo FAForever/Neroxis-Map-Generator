@@ -24,58 +24,49 @@ import javax.swing.TransferHandler;
 
 @SuppressWarnings("unused")
 public class GraphTransferHandler extends TransferHandler {
+
     @Serial
     private static final long serialVersionUID = -6443287704811197675L;
     private static final Logger log = Logger.getLogger(GraphTransferHandler.class.getName());
-
     /**
      * Boolean that specifies if an image of the cells should be created for
      * each transferable. Default is true.
      */
     public static boolean DEFAULT_TRANSFER_IMAGE_ENABLED = true;
-
     /**
      * Specifies the background color of the transfer image. If no
      * color is given here then the background color of the enclosing
      * graph component is used. Default is Color.WHITE.
      */
     public static Color DEFAULT_BACKGROUNDCOLOR = Color.WHITE;
-
     /**
      * Reference to the original cells for removal after a move.
      */
     protected List<ICell> originalCells;
-
     /**
      * Reference to the last imported cell array.
      */
     protected Transferable lastImported;
-
     /**
      * Sets the value for the initialImportCount. Default is 1. Updated in
      * exportDone to contain 0 after a cut and 1 after a copy.
      */
     protected int initialImportCount = 1;
-
     /**
      * Counter for the last imported cell array.
      */
     protected int importCount = 0;
-
     /**
      * Specifies if a transfer image should be created for the transferable.
      * Default is DEFAULT_TRANSFER_IMAGE.
      */
     protected boolean transferImageEnabled = DEFAULT_TRANSFER_IMAGE_ENABLED;
-
     /**
      * Specifies the background color for the transfer image. Default is
      * DEFAULT_BACKGROUNDCOLOR.
      */
     protected Color transferImageBackground = DEFAULT_BACKGROUNDCOLOR;
-
     protected java.awt.Point location;
-
     protected java.awt.Point offset;
 
     public int getImportCount() {
@@ -102,13 +93,6 @@ public class GraphTransferHandler extends TransferHandler {
         this.transferImageBackground = transferImageBackground;
     }
 
-    /**
-     * Returns true if the DnD operation started from this handler.
-     */
-    public boolean isLocalDrag() {
-        return originalCells != null;
-    }
-
     public void setLocation(java.awt.Point value) {
         location = value;
     }
@@ -117,102 +101,11 @@ public class GraphTransferHandler extends TransferHandler {
         offset = value;
     }
 
-    public boolean canImport(JComponent comp, DataFlavor[] flavors) {
-        for (DataFlavor flavor : flavors) {
-            if (flavor != null && flavor.equals(GraphTransferable.dataFlavor)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * (non-Javadoc)
-     *
-     * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
-     */
-    public Transferable createTransferable(JComponent c) {
-        if (c instanceof GraphComponent) {
-            GraphComponent graphComponent = (GraphComponent) c;
-            Graph graph = graphComponent.getGraph();
-
-            if (!graph.isSelectionEmpty()) {
-                originalCells = graphComponent.getExportableCells(graph.getSelectionCells());
-
-                if (!originalCells.isEmpty()) {
-                    ImageIcon icon = (transferImageEnabled) ? createTransferableImage(graphComponent, originalCells) : null;
-
-                    return createGraphTransferable(graphComponent, originalCells, icon);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, ImageIcon icon) {
-        Graph graph = graphComponent.getGraph();
-        PointDouble tr = graph.getView().getTranslate();
-        double scale = graph.getView().getScale();
-        RectangleDouble bounds = graph.getPaintBounds(cells);
-
-        // Removes the scale and translation from the bounds
-        bounds.setX(bounds.getX() / scale - tr.getX());
-        bounds.setY(bounds.getY() / scale - tr.getY());
-        bounds.setWidth(bounds.getWidth() / scale);
-        bounds.setHeight(bounds.getHeight() / scale);
-
-        return createGraphTransferable(graphComponent, cells, bounds, icon);
-    }
-
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, RectangleDouble bounds, ImageIcon icon) {
-        return new GraphTransferable(graphComponent.getGraph().cloneCells(cells), bounds, icon);
-    }
-
-    public ImageIcon createTransferableImage(GraphComponent graphComponent, List<ICell> cells) {
-        ImageIcon icon = null;
-        Color bg = (transferImageBackground != null) ? transferImageBackground : graphComponent.getBackground();
-        Image img = CellRenderer.createBufferedImage(graphComponent.getGraph(), cells, 1, bg, graphComponent.isAntiAlias(), null, graphComponent.getCanvas());
-
-        if (img != null) {
-            icon = new ImageIcon(img);
-        }
-
-        return icon;
-    }
-
-    public void exportDone(JComponent c, Transferable data, int action) {
-        initialImportCount = 1;
-
-        if (c instanceof GraphComponent && data instanceof GraphTransferable) {
-            // Requires that the graph handler resets the location to null if the drag leaves the
-            // component. This is the condition to identify a cross-component move.
-            boolean isLocalDrop = location != null;
-
-            if (action == TransferHandler.MOVE && !isLocalDrop) {
-                removeCells((GraphComponent) c, originalCells);
-                initialImportCount = 0;
-            }
-        }
-
-        originalCells = null;
-        location = null;
-        offset = null;
-    }
-
-    protected void removeCells(GraphComponent graphComponent, List<ICell> cells) {
-        graphComponent.getGraph().removeCells(cells);
-    }
-
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
-    }
-
     /**
      * Checks if the GraphTransferable data flavour is supported and calls
      * importGraphTransferable if possible.
      */
+    @Override
     public boolean importData(JComponent c, Transferable t) {
         boolean result = false;
 
@@ -232,7 +125,6 @@ public class GraphTransferHandler extends TransferHandler {
                         if (gt.getCells() != null) {
                             result = importGraphTransferable(graphComponent, gt);
                         }
-
                     }
                 }
             } catch (Exception ex) {
@@ -241,6 +133,13 @@ public class GraphTransferHandler extends TransferHandler {
         }
 
         return result;
+    }
+
+    /**
+     * Returns true if the DnD operation started from this handler.
+     */
+    public boolean isLocalDrag() {
+        return originalCells != null;
     }
 
     /**
@@ -305,26 +204,6 @@ public class GraphTransferHandler extends TransferHandler {
     }
 
     /**
-     * Returns the drop target for the given transferable and location.
-     */
-    protected ICell getDropTarget(GraphComponent graphComponent, GraphTransferable gt) {
-        List<ICell> cells = gt.getCells();
-        ICell target = null;
-
-        // Finds the target cell at the given location and checks if the
-        // target is not already the parent of the first imported cell
-        if (location != null) {
-            target = graphComponent.getGraph().getDropTarget(cells, location, graphComponent.getCellAt(location.x, location.y));
-
-            if (!cells.isEmpty() && graphComponent.getGraph().getModel().getParent(cells.get(0)) == target) {
-                target = null;
-            }
-        }
-
-        return target;
-    }
-
-    /**
      * Gets a drop target using getDropTarget and imports the cells using
      * Graph.splitEdge or GraphComponent.importCells depending on the
      * drop target and the return values of Graph.isSplitEnabled and
@@ -348,4 +227,123 @@ public class GraphTransferHandler extends TransferHandler {
         return cells;
     }
 
+    @Override
+    public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+        for (DataFlavor flavor : flavors) {
+            if (flavor != null && flavor.equals(GraphTransferable.dataFlavor)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int getSourceActions(JComponent c) {
+        return COPY_OR_MOVE;
+    }
+
+    /**
+     * (non-Javadoc)
+     *
+     * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
+     */
+    @Override
+    public Transferable createTransferable(JComponent c) {
+        if (c instanceof GraphComponent) {
+            GraphComponent graphComponent = (GraphComponent) c;
+            Graph graph = graphComponent.getGraph();
+
+            if (!graph.isSelectionEmpty()) {
+                originalCells = graphComponent.getExportableCells(graph.getSelectionCells());
+
+                if (!originalCells.isEmpty()) {
+                    ImageIcon icon = (transferImageEnabled) ? createTransferableImage(graphComponent,
+                                                                                      originalCells) : null;
+
+                    return createGraphTransferable(graphComponent, originalCells, icon);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public ImageIcon createTransferableImage(GraphComponent graphComponent, List<ICell> cells) {
+        ImageIcon icon = null;
+        Color bg = (transferImageBackground != null) ? transferImageBackground : graphComponent.getBackground();
+        Image img = CellRenderer.createBufferedImage(graphComponent.getGraph(), cells, 1, bg,
+                                                     graphComponent.isAntiAlias(), null, graphComponent.getCanvas());
+
+        if (img != null) {
+            icon = new ImageIcon(img);
+        }
+
+        return icon;
+    }
+
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells, ImageIcon icon) {
+        Graph graph = graphComponent.getGraph();
+        PointDouble tr = graph.getView().getTranslate();
+        double scale = graph.getView().getScale();
+        RectangleDouble bounds = graph.getPaintBounds(cells);
+
+        // Removes the scale and translation from the bounds
+        bounds.setX(bounds.getX() / scale - tr.getX());
+        bounds.setY(bounds.getY() / scale - tr.getY());
+        bounds.setWidth(bounds.getWidth() / scale);
+        bounds.setHeight(bounds.getHeight() / scale);
+
+        return createGraphTransferable(graphComponent, cells, bounds, icon);
+    }
+
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells,
+                                                     RectangleDouble bounds, ImageIcon icon) {
+        return new GraphTransferable(graphComponent.getGraph().cloneCells(cells), bounds, icon);
+    }
+
+    @Override
+    public void exportDone(JComponent c, Transferable data, int action) {
+        initialImportCount = 1;
+
+        if (c instanceof GraphComponent && data instanceof GraphTransferable) {
+            // Requires that the graph handler resets the location to null if the drag leaves the
+            // component. This is the condition to identify a cross-component move.
+            boolean isLocalDrop = location != null;
+
+            if (action == TransferHandler.MOVE && !isLocalDrop) {
+                removeCells((GraphComponent) c, originalCells);
+                initialImportCount = 0;
+            }
+        }
+
+        originalCells = null;
+        location = null;
+        offset = null;
+    }
+
+    protected void removeCells(GraphComponent graphComponent, List<ICell> cells) {
+        graphComponent.getGraph().removeCells(cells);
+    }
+
+    /**
+     * Returns the drop target for the given transferable and location.
+     */
+    protected ICell getDropTarget(GraphComponent graphComponent, GraphTransferable gt) {
+        List<ICell> cells = gt.getCells();
+        ICell target = null;
+
+        // Finds the target cell at the given location and checks if the
+        // target is not already the parent of the first imported cell
+        if (location != null) {
+            target = graphComponent.getGraph()
+                                   .getDropTarget(cells, location, graphComponent.getCellAt(location.x, location.y));
+
+            if (!cells.isEmpty() && graphComponent.getGraph().getModel().getParent(cells.get(0)) == target) {
+                target = null;
+            }
+        }
+
+        return target;
+    }
 }

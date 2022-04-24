@@ -7,6 +7,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class UpdateCellSizeEvent extends EventObject {
+
     ICell cell;
     boolean ignoreChildren;
 }

@@ -59,13 +59,11 @@ public class GraphSelectionModel extends EventSource {
      * Reference to the enclosing graph.
      */
     protected Graph graph;
-
     /**
      * Specifies if only one selected item at a time is allowed.
      * Default is false.
      */
     protected boolean singleSelection = false;
-
     /**
      * Holds the selection cells.
      */
@@ -73,7 +71,6 @@ public class GraphSelectionModel extends EventSource {
 
     /**
      * Constructs a new selection model for the specified graph.
-     *
      */
     public GraphSelectionModel(Graph graph) {
         this.graph = graph;
@@ -91,15 +88,6 @@ public class GraphSelectionModel extends EventSource {
      */
     public void setSingleSelection(boolean singleSelection) {
         this.singleSelection = singleSelection;
-    }
-
-    /**
-     * Returns true if the given cell is selected.
-     *
-     * @return Returns true if the given cell is selected.
-     */
-    public boolean isSelected(Object cell) {
-        return cell != null && cells.contains(cell);
     }
 
     /**
@@ -172,20 +160,6 @@ public class GraphSelectionModel extends EventSource {
     }
 
     /**
-     * Returns the first selectable cell in the given array of cells.
-     *
-     * @param cells Array of cells to return the first selectable cell for.
-     * @return Returns the first cell that may be selected.
-     */
-    protected ICell getFirstSelectableCell(List<ICell> cells) {
-        if (cells != null) {
-            return cells.stream().filter(graph::isCellSelectable).findFirst().orElse(null);
-        }
-
-        return null;
-    }
-
-    /**
      * Adds the given cell to the selection.
      */
     public void addCell(ICell cell) {
@@ -216,6 +190,39 @@ public class GraphSelectionModel extends EventSource {
     }
 
     /**
+     * Returns the first selectable cell in the given array of cells.
+     *
+     * @param cells Array of cells to return the first selectable cell for.
+     * @return Returns the first cell that may be selected.
+     */
+    protected ICell getFirstSelectableCell(List<ICell> cells) {
+        if (cells != null) {
+            return cells.stream().filter(graph::isCellSelectable).findFirst().orElse(null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns true if the given cell is selected.
+     *
+     * @return Returns true if the given cell is selected.
+     */
+    public boolean isSelected(Object cell) {
+        return cell != null && cells.contains(cell);
+    }
+
+    protected void changeSelection(Collection<ICell> added, Collection<ICell> removed) {
+        if ((added != null && !added.isEmpty()) || (removed != null && !removed.isEmpty())) {
+            SelectionChange change = new SelectionChange(this, added, removed);
+            change.execute();
+            UndoableEdit edit = new UndoableEdit(this, false);
+            edit.add(change);
+            fireEvent(new UndoEvent(edit));
+        }
+    }
+
+    /**
      * Removes the given cell from the selection.
      */
     public void removeCell(ICell cell) {
@@ -238,16 +245,6 @@ public class GraphSelectionModel extends EventSource {
         }
     }
 
-    protected void changeSelection(Collection<ICell> added, Collection<ICell> removed) {
-        if ((added != null && !added.isEmpty()) || (removed != null && !removed.isEmpty())) {
-            SelectionChange change = new SelectionChange(this, added, removed);
-            change.execute();
-            UndoableEdit edit = new UndoableEdit(this, false);
-            edit.add(change);
-            fireEvent(new UndoEvent(edit));
-        }
-    }
-
     protected void cellAdded(ICell cell) {
         if (cell != null) {
             cells.add(cell);
@@ -261,6 +258,7 @@ public class GraphSelectionModel extends EventSource {
     }
 
     public static class SelectionChange implements UndoableChange {
+
         protected GraphSelectionModel model;
         protected List<ICell> added, removed;
 
@@ -270,6 +268,7 @@ public class GraphSelectionModel extends EventSource {
             this.removed = (removed != null) ? new ArrayList<>(removed) : null;
         }
 
+        @Override
         public void execute() {
             if (removed != null) {
 
@@ -287,7 +286,5 @@ public class GraphSelectionModel extends EventSource {
 
             model.fireEvent(new ChangeEvent(null, null, added, removed));
         }
-
     }
-
 }

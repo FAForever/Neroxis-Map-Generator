@@ -15,11 +15,8 @@ import java.awt.event.MouseEvent;
 public class PanningHandler extends MouseAdapter {
 
     private static final long serialVersionUID = 7969814728058376339L;
-
     protected GraphComponent graphComponent;
-
     protected boolean enabled = true;
-
     protected transient Point start;
 
     public PanningHandler(GraphComponent graphComponent) {
@@ -27,6 +24,13 @@ public class PanningHandler extends MouseAdapter {
 
         graphComponent.getGraphControl().addMouseListener(this);
         graphComponent.getGraphControl().addMouseMotionListener(this);
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (isEnabled() && !e.isConsumed() && graphComponent.isPanningEvent(e) && !e.isPopupTrigger()) {
+            start = e.getPoint();
+        }
     }
 
     public boolean isEnabled() {
@@ -37,12 +41,21 @@ public class PanningHandler extends MouseAdapter {
         enabled = value;
     }
 
-    public void mousePressed(MouseEvent e) {
-        if (isEnabled() && !e.isConsumed() && graphComponent.isPanningEvent(e) && !e.isPopupTrigger()) {
-            start = e.getPoint();
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (!e.isConsumed() && start != null) {
+            int dx = Math.abs(start.x - e.getX());
+            int dy = Math.abs(start.y - e.getY());
+
+            if (graphComponent.isSignificant(dx, dy)) {
+                e.consume();
+            }
         }
+
+        start = null;
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         if (!e.isConsumed() && start != null) {
             int dx = e.getX() - start.x;
@@ -57,19 +70,6 @@ public class PanningHandler extends MouseAdapter {
 
             e.consume();
         }
-    }
-
-    public void mouseReleased(MouseEvent e) {
-        if (!e.isConsumed() && start != null) {
-            int dx = Math.abs(start.x - e.getX());
-            int dy = Math.abs(start.y - e.getY());
-
-            if (graphComponent.isSignificant(dx, dy)) {
-                e.consume();
-            }
-        }
-
-        start = null;
     }
 
     /**

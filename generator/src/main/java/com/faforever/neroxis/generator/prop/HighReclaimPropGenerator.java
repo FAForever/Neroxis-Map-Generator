@@ -9,15 +9,33 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
 
     public HighReclaimPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .mountainDensity(.5f, 1f)
-                .plateauDensity(.5f, 1f)
-                .rampDensity(0f, .5f)
-                .reclaimDensity(.8f, 1f)
-                .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
-                .build();
+                                                   .mountainDensity(.5f, 1f)
+                                                   .plateauDensity(.5f, 1f)
+                                                   .rampDensity(0f, .5f)
+                                                   .reclaimDensity(.8f, 1f)
+                                                   .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
+                                                   .build();
         weight = .5f;
     }
 
+    @Override
+    public void placePropsWithExclusion() {
+        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
+            Biome biome = generatorParameters.getBiome();
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(),
+                                  3f, 7f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
+            propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
+                                  biome.getPropMaterials().getBoulders(), 30f);
+        });
+    }
+
+    @Override
+    public void placeUnits() {
+    }
+
+    @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
         float reclaimDensity = generatorParameters.getReclaimDensity();
@@ -33,19 +51,5 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
         treeMask.inflate(2).erode(.5f);
         treeMask.setSize(mapSize + 1);
         treeMask.multiply(passableLand.copy().deflate(8)).fillEdge(8, false);
-    }
-
-    public void placePropsWithExclusion() {
-        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = generatorParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(), 3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getBoulders(), 3f, 8f);
-            propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getBoulders(), 30f);
-        });
-    }
-
-    @Override
-    public void placeUnits() {
     }
 }

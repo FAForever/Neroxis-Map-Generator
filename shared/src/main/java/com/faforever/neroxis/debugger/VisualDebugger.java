@@ -13,6 +13,7 @@ import javax.swing.WindowConstants;
 import lombok.Value;
 
 public strictfp class VisualDebugger {
+
     private static DefaultListModel<MaskListItem> listModel;
     private static JFrame frame;
     private static JList<MaskListItem> list;
@@ -27,10 +28,6 @@ public strictfp class VisualDebugger {
         String name = mask.getVisualName();
         name = name == null ? mask.getName() : name;
         updateList(name + " " + method + " " + line, mask.mock());
-    }
-
-    public static boolean isCreated() {
-        return frame != null;
     }
 
     public static void createGui() {
@@ -48,16 +45,8 @@ public strictfp class VisualDebugger {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
-    private static void setupCanvas() {
-        canvas = new EntryPanel();
-        canvas.setPreferredSize(new Dimension(650, 650));
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 1;
-        constraints.weightx = 1;
-        constraints.gridy = 0;
-        constraints.weighty = 1;
-        frame.add(canvas, constraints);
+    public static boolean isCreated() {
+        return frame != null;
     }
 
     private static void setupList() {
@@ -84,6 +73,25 @@ public strictfp class VisualDebugger {
         frame.add(listScroller, constraints);
     }
 
+    private static void updateVisibleCanvas(MaskListItem maskListItem) {
+        String maskName = maskListItem.getMaskName();
+        Mask<?, ?> mask = maskListItem.getMask();
+        canvas.setMask(mask);
+        frame.setTitle(String.format("Mask: %s MaskSize: %d", maskName, mask.getSize()));
+    }
+
+    private static void setupCanvas() {
+        canvas = new EntryPanel();
+        canvas.setPreferredSize(new Dimension(650, 650));
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 1;
+        constraints.weightx = 1;
+        constraints.gridy = 0;
+        constraints.weighty = 1;
+        frame.add(canvas, constraints);
+    }
+
     public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask) {
         if (!uniqueMaskName.isEmpty()) {
             int ind = listModel.getSize();
@@ -102,15 +110,9 @@ public strictfp class VisualDebugger {
         }
     }
 
-    private static void updateVisibleCanvas(MaskListItem maskListItem) {
-        String maskName = maskListItem.getMaskName();
-        Mask<?, ?> mask = maskListItem.getMask();
-        canvas.setMask(mask);
-        frame.setTitle(String.format("Mask: %s MaskSize: %d", maskName, mask.getSize()));
-    }
-
     @Value
     public static class MaskListItem {
+
         String maskName;
         Mask<?, ?> mask;
 

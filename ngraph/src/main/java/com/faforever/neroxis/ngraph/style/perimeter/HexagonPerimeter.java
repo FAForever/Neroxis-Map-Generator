@@ -11,6 +11,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * for a description of the parameters.
  */
 public class HexagonPerimeter implements Perimeter {
+
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         double x = bounds.getX();
@@ -32,7 +33,8 @@ public class HexagonPerimeter implements Perimeter {
         PointDouble a = new PointDouble();
         PointDouble b = new PointDouble();
         //Only consider corrects quadrants for the orthogonal case.
-        if ((px < x) && (py < y) || (px < x) && (py > y + h) || (px > x + w) && (py < y) || (px > x + w) && (py > y + h)) {
+        if ((px < x) && (py < y) || (px < x) && (py > y + h) || (px > x + w) && (py < y) || (px > x + w) && (py
+                                                                                                             > y + h)) {
             orthogonal = false;
         }
         if (orthogonal) {

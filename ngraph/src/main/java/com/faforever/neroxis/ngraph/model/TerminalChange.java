@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TerminalChange extends AtomicGraphModelChange {
+
     protected ICell cell, terminal, previous;
     protected boolean source;
 
@@ -22,6 +23,7 @@ public class TerminalChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         terminal = previous;
         previous = ((GraphModel) model).terminalForCellChanged(cell, previous, source);

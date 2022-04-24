@@ -1,7 +1,6 @@
 /**
  * Copyright (c) 2007-2013, JGraph Ltd
  */
-
 package com.faforever.neroxis.ngraph.layout;
 
 import com.faforever.neroxis.ngraph.model.GraphModel;
@@ -98,7 +97,6 @@ public class OrganicLayout extends GraphLayout {
      * only used in the fine tuning phase.
      */
     protected boolean isOptimizeEdgeDistance = true;
-
     /**
      * Whether or not edges crosses will be calculated as an energy cost
      * function. This function is CPU intensive, though if some iterations
@@ -107,13 +105,11 @@ public class OrganicLayout extends GraphLayout {
      * of the layout.
      */
     protected boolean isOptimizeEdgeCrossing = true;
-
     /**
      * Whether or not edge lengths will be calculated as an energy cost
      * function. This function not CPU intensive.
      */
     protected boolean isOptimizeEdgeLength = true;
-
     /**
      * Whether or not nodes will contribute an energy cost as they approach
      * the bound of the graph. The cost increases to a limit close to the
@@ -121,30 +117,25 @@ public class OrganicLayout extends GraphLayout {
      * is not CPU intensive
      */
     protected boolean isOptimizeBorderLine = true;
-
     /**
      * Whether or not node distribute will contribute an energy cost where
      * nodes are close together. The function is moderately CPU intensive.
      */
     protected boolean isOptimizeNodeDistribution = true;
-
     /**
      * when {@link #moveRadius}reaches this value, the algorithm is terminated
      */
     protected double minMoveRadius = 2.0;
-
     /**
      * The current radius around each node where the next position energy
      * values will be calculated for a possible move
      */
     protected double moveRadius;
-
     /**
      * The initial value of <code>moveRadius</code>. If this is set to zero
      * the layout will automatically determine a suitable value.
      */
     protected double initialMoveRadius = 0.0;
-
     /**
      * The factor by which the <code>moveRadius</code> is multiplied by after
      * every iteration. A value of 0.75 is a good balance between performance
@@ -153,14 +144,12 @@ public class OrganicLayout extends GraphLayout {
      * termination condition to occur more quickly.
      */
     protected double radiusScaleFactor = 0.75;
-
     /**
      * The average amount of area allocated per node. If <code> bounds</code>
      * is not set this value mutiplied by the number of nodes to find
      * the total graph area. The graph is assumed square.
      */
     protected double averageNodeArea = 160000;
-
     /**
      * The radius below which fine tuning of the layout should start
      * This involves allowing the distance between nodes and edges to be
@@ -168,13 +157,11 @@ public class OrganicLayout extends GraphLayout {
      * zero, the layout will automatically determine a suitable value
      */
     protected double fineTuningRadius = 40.0;
-
     /**
      * Limit to the number of iterations that may take place. This is only
      * reached if one of the termination conditions does not occur first.
      */
     protected int maxIterations = 1000;
-
     /**
      * Cost factor applied to energy calculations involving the distance
      * nodes and edges. Increasing this value tends to cause nodes to move away
@@ -183,7 +170,6 @@ public class OrganicLayout extends GraphLayout {
      * distances to be taken into account.
      */
     protected double edgeDistanceCostFactor = 3000;
-
     /**
      * Cost factor applied to energy calculations involving edges that cross
      * over one another. Increasing this value tends to result in fewer edge
@@ -192,7 +178,6 @@ public class OrganicLayout extends GraphLayout {
      * to be taken into account.
      */
     protected double edgeCrossingCostFactor = 6000;
-
     /**
      * Cost factor applied to energy calculations involving the general node
      * distribution of the graph. Increasing this value tends to result in
@@ -202,7 +187,6 @@ public class OrganicLayout extends GraphLayout {
      * distribution to be applied.
      */
     protected double nodeDistributionCostFactor = 30000;
-
     /**
      * Cost factor applied to energy calculations for node promixity to the
      * notional border of the graph. Increasing this value results in
@@ -212,7 +196,6 @@ public class OrganicLayout extends GraphLayout {
      * repulsion to be applied.
      */
     protected double borderLineCostFactor = 5;
-
     /**
      * Cost factor applied to energy calculations for the edge lengths.
      * Increasing this value results in the layout attempting to shorten all
@@ -222,32 +205,26 @@ public class OrganicLayout extends GraphLayout {
      * shortening to be applied.
      */
     protected double edgeLengthCostFactor = 0.02;
-
     /**
      * The x coordinate of the final graph
      */
     protected double boundsX = 0.0;
-
     /**
      * The y coordinate of the final graph
      */
     protected double boundsY = 0.0;
-
     /**
      * The width coordinate of the final graph
      */
     protected double boundsWidth = 0.0;
-
     /**
      * The height coordinate of the final graph
      */
     protected double boundsHeight = 0.0;
-
     /**
      * current iteration number of the layout
      */
     protected int iteration;
-
     /**
      * determines, in how many segments the circle around cells is divided, to
      * find a new position for the cell. Doubling this value doubles the CPU
@@ -256,41 +233,34 @@ public class OrganicLayout extends GraphLayout {
      * small performance hit. The change is described in the method comment.
      */
     protected int triesPerCell = 8;
-
     /**
      * prevents from dividing with zero and from creating excessive energy
      * values
      */
     protected double minDistanceLimit = 2;
-
     /**
      * cached version of <code>minDistanceLimit</code> squared
      */
     protected double minDistanceLimitSquared;
-
     /**
      * distance limit beyond which energy costs due to object repulsive is
      * not calculated as it would be too insignificant
      */
     protected double maxDistanceLimit = 100;
-
     /**
      * cached version of <code>maxDistanceLimit</code> squared
      */
     protected double maxDistanceLimitSquared;
-
     /**
      * Keeps track of how many consecutive round have passed without any energy
      * changes
      */
     protected int unchangedEnergyRoundCount;
-
     /**
      * The number of round of no node moves taking placed that the layout
      * terminates
      */
     protected int unchangedEnergyRoundTermination = 5;
-
     /**
      * Whether or not to use approximate node dimensions or not. Set to true
      * the radius squared of the smaller dimension is used. Set to false the
@@ -298,17 +268,14 @@ public class OrganicLayout extends GraphLayout {
      * and heightSquared is used in the obvious manner.
      */
     protected boolean approxNodeDimensions = true;
-
     /**
      * Internal models collection of nodes ( vertices ) to be laid out
      */
     protected List<CellWrapper> vertices;
-
     /**
      * Internal models collection of edges to be laid out
      */
     protected List<CellWrapper> edges;
-
     /**
      * Array of the x portion of the normalised test vectors that
      * are tested for a lower energy around each vertex. The vector
@@ -316,7 +283,6 @@ public class OrganicLayout extends GraphLayout {
      * radius to obtain test points for each vector in the array.
      */
     protected double[] xNormTry;
-
     /**
      * Array of the y portion of the normalised test vectors that
      * are tested for a lower energy around each vertex. The vector
@@ -324,7 +290,6 @@ public class OrganicLayout extends GraphLayout {
      * radius to obtain test points for each vector in the array.
      */
     protected double[] yNormTry;
-
     /**
      * Whether or not fine tuning is on. The determines whether or not
      * node to edge distances are calculated in the total system energy.
@@ -337,13 +302,11 @@ public class OrganicLayout extends GraphLayout {
      * is always calculated.
      */
     protected boolean isFineTuning = true;
-
     /**
      * Specifies if the STYLE_NOEDGESTYLE flag should be set on edges that are
      * modified by the result. Default is true.
      */
     protected boolean disableEdgeStyle = true;
-
     /**
      * Specifies if all edge points of traversed edges should be removed.
      * Default is true.
@@ -369,18 +332,9 @@ public class OrganicLayout extends GraphLayout {
     }
 
     /**
-     * Returns true if the given vertex has no connected edges.
-     *
-     * @param vertex Object that represents the vertex to be tested.
-     * @return Returns true if the vertex should be ignored.
-     */
-    public boolean isVertexIgnored(ICell vertex) {
-        return false;
-    }
-
-    /**
      * Implements <GraphLayout.execute>.
      */
+    @Override
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
         GraphView view = graph.getView();
@@ -397,7 +351,8 @@ public class OrganicLayout extends GraphLayout {
                 // Only deal with sources. To be valid in the layout, each edge must be attached
                 // at both source and target to a vertex in the layout. Doing this avoids processing
                 // each edge twice.
-                if (view.getVisibleTerminal(edge, true) == vertex && vertexSet.contains(view.getVisibleTerminal(edge, false))) {
+                if (view.getVisibleTerminal(edge, true) == vertex && vertexSet.contains(
+                        view.getVisibleTerminal(edge, false))) {
                     validEdges.add(edge);
                 }
             }
@@ -481,7 +436,6 @@ public class OrganicLayout extends GraphLayout {
 
         unchangedEnergyRoundCount = 0;
 
-
         // Form internal model of edges
         this.edges = new ArrayList<>();
 
@@ -520,7 +474,6 @@ public class OrganicLayout extends GraphLayout {
             xNormTry[i] = Math.cos(angle);
             yNormTry[i] = Math.sin(angle);
         }
-
 
         int childCount = model.getChildCount(parent);
 
@@ -562,6 +515,17 @@ public class OrganicLayout extends GraphLayout {
         } finally {
             model.endUpdate();
         }
+    }
+
+    /**
+     * Returns true if the given vertex has no connected edges.
+     *
+     * @param vertex Object that represents the vertex to be tested.
+     * @return Returns true if the vertex should be ignored.
+     */
+    @Override
+    public boolean isVertexIgnored(ICell vertex) {
+        return false;
     }
 
     /**
@@ -610,7 +574,8 @@ public class OrganicLayout extends GraphLayout {
                 vertices.get(i).y = vertices.get(i).y + movey;
 
                 // calculate the energy delta from this move
-                double energyDelta = calcEnergyDelta(i, oldNodeDistribution, oldEdgeDistance, oldEdgeCrossing, oldBorderLine, oldEdgeLength, oldAdditionFactors);
+                double energyDelta = calcEnergyDelta(i, oldNodeDistribution, oldEdgeDistance, oldEdgeCrossing,
+                                                     oldBorderLine, oldEdgeLength, oldAdditionFactors);
 
                 if (energyDelta < 0) {
                     // energy of moved node is lower, finish tries for this
@@ -655,7 +620,6 @@ public class OrganicLayout extends GraphLayout {
         }
 
         moveRadius = newMoveRadius;
-
     }
 
     /**
@@ -675,7 +639,9 @@ public class OrganicLayout extends GraphLayout {
      *                                   sub-classes
      * @return the delta of the new energy cost to the old energy cost
      */
-    protected double calcEnergyDelta(int index, double oldNodeDistribution, double oldEdgeDistance, double oldEdgeCrossing, double oldBorderLine, double oldEdgeLength, double oldAdditionalFactorsEnergy) {
+    protected double calcEnergyDelta(int index, double oldNodeDistribution, double oldEdgeDistance,
+                                     double oldEdgeCrossing, double oldBorderLine, double oldEdgeLength,
+                                     double oldAdditionalFactorsEnergy) {
         double energyDelta = 0.0;
         energyDelta += getNodeDistribution(index) * 2.0;
         energyDelta -= oldNodeDistribution * 2.0;
@@ -769,18 +735,24 @@ public class OrganicLayout extends GraphLayout {
             // Avoid very small distances and convert negative distance (i.e
             // outside the border to small positive ones )
             double l = vertices.get(i).x - boundsX;
-            if (l < minDistanceLimit)
+            if (l < minDistanceLimit) {
                 l = minDistanceLimit;
+            }
             double t = vertices.get(i).y - boundsY;
-            if (t < minDistanceLimit)
+            if (t < minDistanceLimit) {
                 t = minDistanceLimit;
+            }
             double r = boundsX + boundsWidth - vertices.get(i).x;
-            if (r < minDistanceLimit)
+            if (r < minDistanceLimit) {
                 r = minDistanceLimit;
+            }
             double b = boundsY + boundsHeight - vertices.get(i).y;
-            if (b < minDistanceLimit)
+            if (b < minDistanceLimit) {
                 b = minDistanceLimit;
-            energy += borderLineCostFactor * ((1000000.0 / (t * t)) + (1000000.0 / (l * l)) + (1000000.0 / (b * b)) + (1000000.0 / (r * r)));
+            }
+            energy += borderLineCostFactor * ((1000000.0 / (t * t)) + (1000000.0 / (l * l)) + (1000000.0 / (b * b)) + (
+                    1000000.0
+                    / (r * r)));
         }
         return energy;
     }
@@ -803,20 +775,43 @@ public class OrganicLayout extends GraphLayout {
     }
 
     /**
-     * This method calculates the energy due to the length of the specified
-     * edge. The energy is proportional to the length of the edge, making
-     * shorter edges preferable in the layout.
+     * This method calculates the energy of the distance between Cells and
+     * Edges. This version of the edge distance cost calculates the energy
+     * cost from a specified <strong>node</strong>. The distance cost to all
+     * unconnected edges is calculated and the total returned.
      *
-     * @param i the index of the edge in the array <code>e</code>
-     * @return the total edge length energy of the specified edge
+     * @param i the index of the node in the array <code>v</code>
+     * @return the total edge distance energy of the node
      */
-    protected double getEdgeLength(int i) {
-        if (isOptimizeEdgeLength) {
-            double edgeLength = Point2D.distance(vertices.get(edges.get(i).source).x, vertices.get(edges.get(i).source).y, vertices.get(edges.get(i).target).x, vertices.get(edges.get(i).target).y);
-            return (edgeLengthCostFactor * edgeLength * edgeLength);
-        } else {
-            return 0.0;
+    protected double getEdgeDistanceFromNode(int i) {
+        double energy = 0.0;
+        // This function is only performed during fine tuning for performance
+        if (isOptimizeEdgeDistance && isFineTuning) {
+            int[] edges = vertices.get(i).relevantEdges;
+            for (int edge : edges) {
+                // Note that the distance value is squared
+                double distSquare = Line2D.ptSegDistSq(vertices.get(this.edges.get(edge).source).x,
+                                                       vertices.get(this.edges.get(edge).source).y,
+                                                       vertices.get(this.edges.get(edge).target).x,
+                                                       vertices.get(this.edges.get(edge).target).y, vertices.get(i).x,
+                                                       vertices.get(i).y);
+
+                distSquare -= vertices.get(i).radiusSquared;
+
+                // prevents from dividing with Zero. No Math.abs() call
+                // for performance
+                if (distSquare < minDistanceLimitSquared) {
+                    distSquare = minDistanceLimitSquared;
+                }
+
+                // Only bother with the divide if the node and edge are
+                // fairly close together
+                if (distSquare < maxDistanceLimitSquared) {
+                    energy += edgeDistanceCostFactor / distSquare;
+                }
+            }
         }
+        return energy;
     }
 
     /**
@@ -835,6 +830,26 @@ public class OrganicLayout extends GraphLayout {
         }
 
         return energy;
+    }
+
+    /**
+     * This method calculates the energy due to the length of the specified
+     * edge. The energy is proportional to the length of the edge, making
+     * shorter edges preferable in the layout.
+     *
+     * @param i the index of the edge in the array <code>e</code>
+     * @return the total edge length energy of the specified edge
+     */
+    protected double getEdgeLength(int i) {
+        if (isOptimizeEdgeLength) {
+            double edgeLength = Point2D.distance(vertices.get(edges.get(i).source).x,
+                                                 vertices.get(edges.get(i).source).y,
+                                                 vertices.get(edges.get(i).target).x,
+                                                 vertices.get(edges.get(i).target).y);
+            return (edgeLengthCostFactor * edgeLength * edgeLength);
+        } else {
+            return 0.0;
+        }
     }
 
     /**
@@ -871,14 +886,18 @@ public class OrganicLayout extends GraphLayout {
                     // overlap and this is a cheap way to avoid most of the
                     // processing
                     // Some long code to avoid a Math.max call...
-                    if (checkBoundingPoints(iP1X, iP2X, jP1X, jP2X))
+                    if (checkBoundingPoints(iP1X, iP2X, jP1X, jP2X)) {
                         continue;
+                    }
 
-                    if (checkBoundingPoints(iP1Y, iP2Y, jP1Y, jP2Y))
+                    if (checkBoundingPoints(iP1Y, iP2Y, jP1Y, jP2Y)) {
                         continue;
+                    }
 
                     // Ignore if any end points are coincident
-                    if (((iP1X != jP1X) && (iP1Y != jP1Y)) && ((iP1X != jP2X) && (iP1Y != jP2Y)) && ((iP2X != jP1X) && (iP2Y != jP1Y)) && ((iP2X != jP2X) && (iP2Y != jP2Y))) {
+                    if (((iP1X != jP1X) && (iP1Y != jP1Y)) && ((iP1X != jP2X) && (iP1Y != jP2Y)) && ((iP2X != jP1X) && (
+                            iP2Y
+                            != jP1Y)) && ((iP2X != jP2X) && (iP2Y != jP2Y))) {
                         // Values of zero returned from Line2D.relativeCCW are
                         // ignored because the point being exactly on the line
                         // is very rare for double and we've already checked if
@@ -891,7 +910,10 @@ public class OrganicLayout extends GraphLayout {
                         // otherwise. Because of ignoring the zero this code
                         // below can behave like only a 1 or -1 will be
                         // returned. See Lines2D.linesIntersects().
-                        boolean intersects = ((Line2D.relativeCCW(iP1X, iP1Y, iP2X, iP2Y, jP1X, jP1Y) != Line2D.relativeCCW(iP1X, iP1Y, iP2X, iP2Y, jP2X, jP2Y)) && (Line2D.relativeCCW(jP1X, jP1Y, jP2X, jP2Y, iP1X, iP1Y) != Line2D.relativeCCW(jP1X, jP1Y, jP2X, jP2Y, iP2X, iP2Y)));
+                        boolean intersects = ((Line2D.relativeCCW(iP1X, iP1Y, iP2X, iP2Y, jP1X, jP1Y)
+                                               != Line2D.relativeCCW(iP1X, iP1Y, iP2X, iP2Y, jP2X, jP2Y))
+                                              && (Line2D.relativeCCW(jP1X, jP1Y, jP2X, jP2Y, iP1X, iP1Y)
+                                                  != Line2D.relativeCCW(jP1X, jP1Y, jP2X, jP2Y, iP2X, iP2Y)));
 
                         if (intersects) {
                             n++;
@@ -909,42 +931,6 @@ public class OrganicLayout extends GraphLayout {
         double minj = Math.min(j1, j2);
         double maxj = Math.max(j1, j2);
         return maxi < minj || mini > maxj;
-    }
-
-    /**
-     * This method calculates the energy of the distance between Cells and
-     * Edges. This version of the edge distance cost calculates the energy
-     * cost from a specified <strong>node</strong>. The distance cost to all
-     * unconnected edges is calculated and the total returned.
-     *
-     * @param i the index of the node in the array <code>v</code>
-     * @return the total edge distance energy of the node
-     */
-    protected double getEdgeDistanceFromNode(int i) {
-        double energy = 0.0;
-        // This function is only performed during fine tuning for performance
-        if (isOptimizeEdgeDistance && isFineTuning) {
-            int[] edges = vertices.get(i).relevantEdges;
-            for (int edge : edges) {
-                // Note that the distance value is squared
-                double distSquare = Line2D.ptSegDistSq(vertices.get(this.edges.get(edge).source).x, vertices.get(this.edges.get(edge).source).y, vertices.get(this.edges.get(edge).target).x, vertices.get(this.edges.get(edge).target).y, vertices.get(i).x, vertices.get(i).y);
-
-                distSquare -= vertices.get(i).radiusSquared;
-
-                // prevents from dividing with Zero. No Math.abs() call
-                // for performance
-                if (distSquare < minDistanceLimitSquared) {
-                    distSquare = minDistanceLimitSquared;
-                }
-
-                // Only bother with the divide if the node and edge are
-                // fairly close together
-                if (distSquare < maxDistanceLimitSquared) {
-                    energy += edgeDistanceCostFactor / distSquare;
-                }
-            }
-        }
-        return energy;
     }
 
     /**
@@ -981,14 +967,19 @@ public class OrganicLayout extends GraphLayout {
             for (int j = 0; j < vertices.size(); j++) {
                 // Don't calculate for connected nodes
                 if (edges.get(i).source != j && edges.get(i).target != j) {
-                    double distSquare = Line2D.ptSegDistSq(vertices.get(edges.get(i).source).x, vertices.get(edges.get(i).source).y, vertices.get(edges.get(i).target).x, vertices.get(edges.get(i).target).y, vertices.get(j).x, vertices.get(j).y);
+                    double distSquare = Line2D.ptSegDistSq(vertices.get(edges.get(i).source).x,
+                                                           vertices.get(edges.get(i).source).y,
+                                                           vertices.get(edges.get(i).target).x,
+                                                           vertices.get(edges.get(i).target).y, vertices.get(j).x,
+                                                           vertices.get(j).y);
 
                     distSquare -= vertices.get(j).radiusSquared;
 
                     // prevents from dividing with Zero. No Math.abs() call
                     // for performance
-                    if (distSquare < minDistanceLimitSquared)
+                    if (distSquare < minDistanceLimitSquared) {
                         distSquare = minDistanceLimitSquared;
+                    }
 
                     // Only bother with the divide if the node and edge are
                     // fairly close together
@@ -1089,47 +1080,39 @@ public class OrganicLayout extends GraphLayout {
          * The actual graph cell this wrapper represents
          */
         protected ICell cell;
-
         /**
          * All edge that repel this cell, only used for nodes. This array
          * is equivalent to all edges unconnected to this node
          */
         protected int[] relevantEdges = null;
-
         /**
          * the index of all connected edges in the <code>e</code> array
          * to this node. This is only used for nodes.
          */
         protected int[] connectedEdges = null;
-
         /**
          * The x-coordinate position of this cell, nodes only
          */
         protected double x;
-
         /**
          * The y-coordinate position of this cell, nodes only
          */
         protected double y;
-
         /**
          * The approximate radius squared of this cell, nodes only. If
          * approxNodeDimensions is true on the layout this value holds the
          * width of the node squared
          */
         protected double radiusSquared;
-
         /**
          * The height of the node squared, only used if approxNodeDimensions
          * is set to true.
          */
         protected double heightSquared;
-
         /**
          * The index of the node attached to this edge as source, edges only
          */
         protected int source;
-
         /**
          * The index of the node attached to this edge as target, edges only
          */

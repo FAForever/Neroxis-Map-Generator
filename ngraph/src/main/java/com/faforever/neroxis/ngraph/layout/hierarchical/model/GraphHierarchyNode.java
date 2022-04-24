@@ -24,22 +24,18 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
      * Shared empty connection map to return instead of null in applyMap.
      */
     public static Collection<GraphHierarchyEdge> emptyConnectionMap = List.of();
-
     /**
      * The graph cell this object represents.
      */
     public ICell cell;
-
     /**
      * Collection of hierarchy edges that have this node as a target
      */
     public Collection<GraphHierarchyEdge> connectsAsTarget = emptyConnectionMap;
-
     /**
      * Collection of hierarchy edges that have this node as a source
      */
     public Collection<GraphHierarchyEdge> connectsAsSource = emptyConnectionMap;
-
     /**
      * Assigns a unique hashcode for each node. Used by the model dfs instead
      * of copying HashSets
@@ -70,6 +66,7 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
      * @param layer the layer this cell is on
      * @return the cells this cell connects to on the next layer up
      */
+    @Override
     @SuppressWarnings("unchecked")
     public List<GraphAbstractHierarchyCell> getNextLayerConnectedCells(int layer) {
         if (nextLayerConnectedCells == null) {
@@ -97,6 +94,7 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
      * @param layer the layer this cell is on
      * @return the cells this cell connects to on the next layer down
      */
+    @Override
     @SuppressWarnings("unchecked")
     public List<GraphAbstractHierarchyCell> getPreviousLayerConnectedCells(int layer) {
         if (previousLayerConnectedCells == null) {
@@ -118,25 +116,12 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
     }
 
     /**
-     * @return whether or not this cell is an edge
-     */
-    public boolean isEdge() {
-        return false;
-    }
-
-    /**
-     * @return whether or not this cell is a node
-     */
-    public boolean isVertex() {
-        return true;
-    }
-
-    /**
      * Gets the value of temp for the specified layer
      *
      * @param layer the layer relating to a specific entry into temp
      * @return the value for that layer
      */
+    @Override
     public int getGeneralPurposeVariable(int layer) {
         return temp[0];
     }
@@ -147,14 +132,34 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
      * @param layer the layer relating to a specific entry into temp
      * @param value the value for that layer
      */
+    @Override
     public void setGeneralPurposeVariable(int layer, int value) {
         temp[0] = value;
+    }
+
+    /**
+     * @return whether or not this cell is a node
+     */
+    @Override
+    public boolean isVertex() {
+        return true;
+    }
+
+    /**
+     * @return whether or not this cell is an edge
+     */
+    @Override
+    public boolean isEdge() {
+        return false;
     }
 
     public boolean isAncestor(GraphHierarchyNode otherNode) {
         // Firstly, the hash code of this node needs to be shorter than the
         // other node
-        if (otherNode != null && hashCode != null && otherNode.hashCode != null && hashCode.length < otherNode.hashCode.length) {
+        if (otherNode != null
+            && hashCode != null
+            && otherNode.hashCode != null
+            && hashCode.length < otherNode.hashCode.length) {
 
             // Secondly, this hash code must match the start of the other
             // node's hash code. Arrays.equals cannot be used here since
@@ -171,5 +176,4 @@ public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
 
         return false;
     }
-
 }

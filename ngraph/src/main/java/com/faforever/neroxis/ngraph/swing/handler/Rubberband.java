@@ -30,28 +30,23 @@ public class Rubberband implements MouseListener, MouseMotionListener {
      * Default is Constants.RUBBERBAND_BORDERCOLOR.
      */
     protected Color borderColor = SwingConstants.RUBBERBAND_BORDERCOLOR;
-
     /**
      * Defines the color to be used for filling the rubberband selection.
      * Default is Constants.RUBBERBAND_FILLCOLOR.
      */
     protected Color fillColor = SwingConstants.RUBBERBAND_FILLCOLOR;
-
     /**
      * Reference to the enclosing graph container.
      */
     protected GraphComponent graphComponent;
-
     /**
      * Specifies if the rubberband is enabled.
      */
     protected boolean enabled = true;
-
     /**
      * Holds the point where the selection has started.
      */
     protected transient Point first;
-
     /**
      * Holds the current rubberband bounds.
      */
@@ -72,6 +67,7 @@ public class Rubberband implements MouseListener, MouseMotionListener {
 
         // Handles escape keystrokes
         graphComponent.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE && graphComponent.isEscapeEnabled()) {
                     reset();
@@ -82,18 +78,28 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         // LATER: Add destroy method for removing above listeners
     }
 
-    /**
-     * Returns the enabled state.
-     */
-    public boolean isEnabled() {
-        return enabled;
+    public void paintRubberband(Graphics g) {
+        if (first != null && bounds != null && graphComponent.isSignificant(bounds.width, bounds.height)) {
+            Rectangle rect = new Rectangle(bounds);
+            g.setColor(fillColor);
+            Utils.fillClippedRect(g, rect.x, rect.y, rect.width, rect.height);
+            g.setColor(borderColor);
+            rect.width -= 1;
+            rect.height -= 1;
+            g.drawRect(rect.x, rect.y, rect.width, rect.height);
+        }
     }
 
     /**
-     * Sets the enabled state.
+     * Resets the rubberband selection without carrying out the selection.
      */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void reset() {
+        first = null;
+
+        if (bounds != null) {
+            graphComponent.getGraphControl().repaint(bounds);
+            bounds = null;
+        }
     }
 
     /**
@@ -124,56 +130,7 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         fillColor = value;
     }
 
-    /**
-     * Returns true if the given event should start the rubberband selection.
-     */
-    public boolean isRubberbandTrigger(MouseEvent e) {
-        return true;
-    }
-
-    /**
-     * Starts the rubberband selection at the given point.
-     */
-    public void start(Point point) {
-        first = point;
-        bounds = new Rectangle(first);
-    }
-
-    /**
-     * Resets the rubberband selection without carrying out the selection.
-     */
-    public void reset() {
-        first = null;
-
-        if (bounds != null) {
-            graphComponent.getGraphControl().repaint(bounds);
-            bounds = null;
-        }
-    }
-
-    public List<ICell> select(Rectangle rect, MouseEvent e) {
-        return graphComponent.selectRegion(rect, e);
-    }
-
-    public void paintRubberband(Graphics g) {
-        if (first != null && bounds != null && graphComponent.isSignificant(bounds.width, bounds.height)) {
-            Rectangle rect = new Rectangle(bounds);
-            g.setColor(fillColor);
-            Utils.fillClippedRect(g, rect.x, rect.y, rect.width, rect.height);
-            g.setColor(borderColor);
-            rect.width -= 1;
-            rect.height -= 1;
-            g.drawRect(rect.x, rect.y, rect.width, rect.height);
-        }
-    }
-
-    public void mousePressed(MouseEvent e) {
-        if (!e.isConsumed() && isEnabled() && isRubberbandTrigger(e) && !e.isPopupTrigger()) {
-            start(e.getPoint());
-            e.consume();
-        }
-    }
-
+    @Override
     public void mouseDragged(MouseEvent e) {
         if (!e.isConsumed() && first != null) {
             Rectangle oldBounds = new Rectangle(bounds);
@@ -195,7 +152,8 @@ public class Rubberband implements MouseListener, MouseMotionListener {
 
                 if (bounds.x + bounds.width != oldBounds.x + oldBounds.width) {
                     int minright = Math.min(bounds.x + bounds.width, oldBounds.x + oldBounds.width);
-                    Rectangle tmp = new Rectangle(minright - 1, union.y, union.x + union.width - minright + 1, union.height);
+                    Rectangle tmp = new Rectangle(minright - 1, union.y, union.x + union.width - minright + 1,
+                                                  union.height);
                     control.repaint(tmp);
                 }
 
@@ -207,7 +165,8 @@ public class Rubberband implements MouseListener, MouseMotionListener {
 
                 if (bounds.y + bounds.height != oldBounds.y + oldBounds.height) {
                     int minbottom = Math.min(bounds.y + bounds.height, oldBounds.y + oldBounds.height);
-                    Rectangle tmp = new Rectangle(union.x, minbottom - 1, union.width, union.y + union.height - minbottom + 1);
+                    Rectangle tmp = new Rectangle(union.x, minbottom - 1, union.width,
+                                                  union.y + union.height - minbottom + 1);
                     control.repaint(tmp);
                 }
 
@@ -220,6 +179,54 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
+    @Override
+    public void mouseMoved(MouseEvent arg0) {
+        // empty
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent arg0) {
+        // empty
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (!e.isConsumed() && isEnabled() && isRubberbandTrigger(e) && !e.isPopupTrigger()) {
+            start(e.getPoint());
+            e.consume();
+        }
+    }
+
+    /**
+     * Returns the enabled state.
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Sets the enabled state.
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    /**
+     * Returns true if the given event should start the rubberband selection.
+     */
+    public boolean isRubberbandTrigger(MouseEvent e) {
+        return true;
+    }
+
+    /**
+     * Starts the rubberband selection at the given point.
+     */
+    public void start(Point point) {
+        first = point;
+        bounds = new Rectangle(first);
+    }
+
+    @Override
     public void mouseReleased(MouseEvent e) {
         Rectangle rect = bounds;
         reset();
@@ -228,27 +235,19 @@ public class Rubberband implements MouseListener, MouseMotionListener {
             select(rect, e);
             e.consume();
         }
-
     }
 
-
-    public void mouseClicked(MouseEvent arg0) {
-        // empty
+    public List<ICell> select(Rectangle rect, MouseEvent e) {
+        return graphComponent.selectRegion(rect, e);
     }
 
-
+    @Override
     public void mouseEntered(MouseEvent arg0) {
         // empty
     }
 
-
+    @Override
     public void mouseExited(MouseEvent arg0) {
         // empty
     }
-
-
-    public void mouseMoved(MouseEvent arg0) {
-        // empty
-    }
-
 }

@@ -17,6 +17,7 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class EdgeStyle implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private boolean noEdgeStyle;
     private EdgeStyleFunction edgeStyleFunction;

@@ -16,13 +16,11 @@ public abstract class BasicCanvas implements ICanvas {
      * Specifies if image aspect should be preserved in drawImage. Default is true.
      */
     public static boolean PRESERVE_IMAGE_ASPECT = true;
-
     /**
      * Defines the default value for the imageBasePath in all GDI canvases.
      * Default is an empty string.
      */
     public static String DEFAULT_IMAGEBASEPATH = "";
-
     /**
      * Defines the base path for images with relative paths. Trailing slash
      * is required. Default value is DEFAULT_IMAGEBASEPATH.
@@ -32,17 +30,14 @@ public abstract class BasicCanvas implements ICanvas {
      * Specifies the current translation. Default is (0,0).
      */
     protected PointDouble translate = new PointDouble();
-
     /**
      * Specifies the current scale. Default is 1.
      */
     protected double scale = 1;
-
     /**
      * Specifies whether labels should be painted. Default is true.
      */
     protected boolean drawLabels = true;
-
     /**
      * Cache for images.
      */
@@ -51,6 +46,7 @@ public abstract class BasicCanvas implements ICanvas {
     /**
      * Sets the current translate.
      */
+    @Override
     public void setTranslate(double dx, double dy) {
         translate = new PointDouble(dx, dy);
     }
@@ -89,5 +85,4 @@ public abstract class BasicCanvas implements ICanvas {
         }
         return filename;
     }
-
 }

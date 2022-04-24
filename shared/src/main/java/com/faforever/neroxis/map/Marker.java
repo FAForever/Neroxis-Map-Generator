@@ -14,6 +14,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public strictfp class Marker extends PositionedObject {
+
     private String id;
 
     public Marker(String id, Vector3 position) {

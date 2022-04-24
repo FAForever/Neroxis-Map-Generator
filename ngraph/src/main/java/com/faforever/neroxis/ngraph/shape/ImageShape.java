@@ -14,31 +14,35 @@ import java.awt.Rectangle;
  */
 public class ImageShape extends RectangleShape {
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);
         boolean flipH = state.getStyle().getImage().isFlipHorizontal();
         boolean flipV = state.getStyle().getImage().isFlipVertical();
-        canvas.drawImage(getImageBounds(canvas, state), getImageForStyle(canvas, state), Graphics2DCanvas.PRESERVE_IMAGE_ASPECT, flipH, flipV);
+        canvas.drawImage(getImageBounds(canvas, state), getImageForStyle(canvas, state),
+                         Graphics2DCanvas.PRESERVE_IMAGE_ASPECT, flipH, flipV);
     }
 
     public Rectangle getImageBounds(Graphics2DCanvas canvas, CellState state) {
         return state.getRectangle();
     }
 
-    public boolean hasGradient(Graphics2DCanvas canvas, CellState state) {
-        return false;
-    }
-
     public String getImageForStyle(Graphics2DCanvas canvas, CellState state) {
         return canvas.getImageForStyle(state.getStyle());
     }
 
+    @Override
+    public boolean hasGradient(Graphics2DCanvas canvas, CellState state) {
+        return false;
+    }
+
+    @Override
     public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
         return state.getStyle().getImage().getBackgroundColor();
     }
 
+    @Override
     public Color getStrokeColor(Graphics2DCanvas canvas, CellState state) {
         return state.getStyle().getImage().getBorderColor();
     }
-
 }

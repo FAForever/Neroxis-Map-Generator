@@ -14,6 +14,7 @@ import javax.swing.Action;
  *
  */
 public class GraphActions {
+
     static final Action deleteAction = new DeleteAction("delete");
     static final Action editAction = new EditAction("edit");
     static final Action groupAction = new GroupAction("group");
@@ -225,17 +226,16 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 4610112721356742702L;
 
-
         public EditAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() instanceof GraphComponent) {
                 ((GraphComponent) e.getSource()).startEditing();
             }
         }
-
     }
 
     public static class DeleteAction extends AbstractAction {
@@ -243,11 +243,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = -8212339796803275529L;
 
-
         public DeleteAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -255,7 +255,6 @@ public class GraphActions {
                 graph.removeCells();
             }
         }
-
     }
 
     public static class GroupAction extends AbstractAction {
@@ -263,16 +262,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
-
         public GroupAction(String name) {
             super(name);
         }
 
-        protected int getGroupBorder(Graph graph) {
-            return 2 * graph.getGridSize();
-
-        }
-
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -281,6 +275,9 @@ public class GraphActions {
             }
         }
 
+        protected int getGroupBorder(Graph graph) {
+            return 2 * graph.getGridSize();
+        }
     }
 
     public static class UngroupAction extends AbstractAction {
@@ -288,11 +285,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 2247770767961318251L;
 
-
         public UngroupAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -300,7 +297,6 @@ public class GraphActions {
                 graph.setSelectionCells(graph.ungroupCells());
             }
         }
-
     }
 
     public static class RemoveFromParentAction extends AbstractAction {
@@ -308,11 +304,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 7169443038859140811L;
 
-
         public RemoveFromParentAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -320,7 +316,6 @@ public class GraphActions {
                 graph.removeCellsFromParent();
             }
         }
-
     }
 
     public static class UpdateGroupBoundsAction extends AbstractAction {
@@ -328,15 +323,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
-
         public UpdateGroupBoundsAction(String name) {
             super(name);
         }
 
-        protected int getGroupBorder(Graph graph) {
-            return 2 * graph.getGridSize();
-        }
-
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -345,6 +336,9 @@ public class GraphActions {
             }
         }
 
+        protected int getGroupBorder(Graph graph) {
+            return 2 * graph.getGridSize();
+        }
     }
 
     public static class LayerAction extends AbstractAction {
@@ -352,11 +346,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 562519299806253741L;
 
-
         public LayerAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -365,7 +359,6 @@ public class GraphActions {
                 graph.orderCells(toBack);
             }
         }
-
     }
 
     public static class FoldAction extends AbstractAction {
@@ -373,11 +366,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 4078517503905239901L;
 
-
         public FoldAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -386,7 +379,6 @@ public class GraphActions {
                 graph.foldCells(collapse);
             }
         }
-
     }
 
     public static class DrillAction extends AbstractAction {
@@ -394,11 +386,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = 5464382323663870291L;
 
-
         public DrillAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -414,7 +406,6 @@ public class GraphActions {
                 }
             }
         }
-
     }
 
     public static class ZoomAction extends AbstractAction {
@@ -422,11 +413,11 @@ public class GraphActions {
         @Serial
         private static final long serialVersionUID = -7500195051313272384L;
 
-
         public ZoomAction(String name) {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
 
@@ -443,7 +434,6 @@ public class GraphActions {
                 }
             }
         }
-
     }
 
     public static class SelectAction extends AbstractAction {
@@ -455,6 +445,7 @@ public class GraphActions {
             super(name);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Graph graph = getGraph(e);
 
@@ -480,7 +471,5 @@ public class GraphActions {
                 }
             }
         }
-
     }
-
 }

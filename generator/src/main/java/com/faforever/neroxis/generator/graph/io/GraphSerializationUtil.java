@@ -23,6 +23,7 @@ import org.jgrapht.nio.dot.DOTExporter;
 import org.jgrapht.nio.dot.DOTImporter;
 
 public class GraphSerializationUtil {
+
     private static final DOTImporter<MaskGraphVertex<?>, MaskMethodEdge> IMPORTER = new DOTImporter<>();
     private static final DOTExporter<MaskGraphVertex<?>, MaskMethodEdge> EXPORTER = new DOTExporter<>();
     private static final String PARAMETER_VALUE_PREFIX = "paramValue";
@@ -51,8 +52,10 @@ public class GraphSerializationUtil {
             }
         }
         try {
-            Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
-            Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());
+            Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(
+                    attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
+            Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(
+                    attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());
             int parameterCount = Integer.parseInt(attributeMap.get(PARAMETER_COUNT_ATTRIBUTE).getValue());
             Class<?>[] parameterTypes = new Class[parameterCount];
             String[] parameterValues = new String[parameterCount];
@@ -68,11 +71,16 @@ public class GraphSerializationUtil {
             if (MaskConstructorVertex.class.equals(vertexClass)) {
                 vertex = new MaskConstructorVertex(maskClass.getConstructor(parameterTypes));
             } else if (MaskMethodVertex.class.equals(vertexClass)) {
-                vertex = new MaskMethodVertex(maskClass.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes), maskClass);
+                vertex = new MaskMethodVertex(
+                        maskClass.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes),
+                        maskClass);
             } else if (MapMaskMethodVertex.class.equals(vertexClass)) {
-                vertex = new MapMaskMethodVertex(MapMaskMethods.class.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(), parameterTypes));
+                vertex = new MapMaskMethodVertex(
+                        MapMaskMethods.class.getMethod(attributeMap.get(EXECUTABLE_ATTRIBUTE).getValue(),
+                                                       parameterTypes));
             } else {
-                throw new IllegalArgumentException(String.format("Unrecognized vertex class: %s", vertexClass.getName()));
+                throw new IllegalArgumentException(
+                        String.format("Unrecognized vertex class: %s", vertexClass.getName()));
             }
 
             Parameter[] parameters = vertex.getExecutable().getParameters();
@@ -87,11 +95,23 @@ public class GraphSerializationUtil {
         }
     }
 
+    private static Class<?> getClassFromString(String className) throws ClassNotFoundException {
+        return switch (className) {
+            case "int" -> int.class;
+            case "boolean" -> boolean.class;
+            case "long" -> long.class;
+            case "short" -> short.class;
+            case "float" -> float.class;
+            default -> Class.forName(className);
+        };
+    }
+
     private static MaskMethodEdge getMaskMethodEdgeFromAttributes(Map<String, Attribute> attributeMap) {
         if (attributeMap.isEmpty()) {
             return new MaskMethodEdge(null, null);
         }
-        return new MaskMethodEdge(attributeMap.get(RESULT_NAME_ATTRIBUTE).getValue(), attributeMap.get(PARAMETER_NAME_ATTRIBUTE).getValue());
+        return new MaskMethodEdge(attributeMap.get(RESULT_NAME_ATTRIBUTE).getValue(),
+                                  attributeMap.get(PARAMETER_NAME_ATTRIBUTE).getValue());
     }
 
     private static Map<String, Attribute> getAttributeMap(MaskMethodEdge maskMethodEdge) {
@@ -112,21 +132,16 @@ public class GraphSerializationUtil {
         Parameter[] parameters = vertex.getExecutable().getParameters();
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
-            if (!Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))) {
-                attributeMap.put(PARAMETER_VALUE_PREFIX + i, objectToAttribute(vertex.getParameterExpression(parameter)));
+            if (!Mask.class.isAssignableFrom(
+                    MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))) {
+                attributeMap.put(PARAMETER_VALUE_PREFIX + i,
+                                 objectToAttribute(vertex.getParameterExpression(parameter)));
             }
-            attributeMap.put(PARAMETER_CLASS_PREFIX + i, DefaultAttribute.createAttribute(parameter.getType().getName()));
+            attributeMap.put(PARAMETER_CLASS_PREFIX + i,
+                             DefaultAttribute.createAttribute(parameter.getType().getName()));
         }
         attributeMap.put(PARAMETER_COUNT_ATTRIBUTE, DefaultAttribute.createAttribute(parameters.length));
         return attributeMap;
-    }
-
-    public static void exportGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, File outputFile) throws IOException {
-        DebugUtil.timedRun("Graph Export", () -> EXPORTER.exportGraph(graph, outputFile));
-    }
-
-    public static void importGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, File inputFile) throws IOException {
-        DebugUtil.timedRun("Graph Import", () -> IMPORTER.importGraph(graph, inputFile));
     }
 
     private static Attribute objectToAttribute(Object object) {
@@ -151,14 +166,12 @@ public class GraphSerializationUtil {
         }
     }
 
-    private static Class<?> getClassFromString(String className) throws ClassNotFoundException {
-        return switch (className) {
-            case "int" -> int.class;
-            case "boolean" -> boolean.class;
-            case "long" -> long.class;
-            case "short" -> short.class;
-            case "float" -> float.class;
-            default -> Class.forName(className);
-        };
+    public static void exportGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph,
+                                   File outputFile) throws IOException {
+        DebugUtil.timedRun("Graph Export", () -> EXPORTER.exportGraph(graph, outputFile));
+    }
+
+    public static void importGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, File inputFile) throws IOException {
+        DebugUtil.timedRun("Graph Import", () -> IMPORTER.importGraph(graph, inputFile));
     }
 }

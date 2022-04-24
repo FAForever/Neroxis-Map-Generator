@@ -12,6 +12,7 @@ import java.util.List;
  * Contains various style helper methods for use with Graph.
  */
 public class StyleUtils {
+
     /**
      * Returns the stylename in a style of the form stylename[;key=value] or an
      * empty string if the given style does not contain a stylename.
@@ -55,6 +56,24 @@ public class StyleUtils {
     }
 
     /**
+     * Adds the specified stylename to the given style if it does not already
+     * contain the stylename.
+     */
+    public static String addStylename(String style, String stylename) {
+        if (indexOfStylename(style, stylename) < 0) {
+            if (style == null) {
+                style = "";
+            } else if (style.length() > 0 && style.charAt(style.length() - 1) != ';') {
+                style += ';';
+            }
+
+            style += stylename;
+        }
+
+        return style;
+    }
+
+    /**
      * Returns the index of the given stylename in the given style. This returns
      * -1 if the given stylename does not occur (as a stylename) in the given
      * style, otherwise it returns the index of the first character.
@@ -74,24 +93,6 @@ public class StyleUtils {
         }
 
         return -1;
-    }
-
-    /**
-     * Adds the specified stylename to the given style if it does not already
-     * contain the stylename.
-     */
-    public static String addStylename(String style, String stylename) {
-        if (indexOfStylename(style, stylename) < 0) {
-            if (style == null) {
-                style = "";
-            } else if (style.length() > 0 && style.charAt(style.length() - 1) != ';') {
-                style += ';';
-            }
-
-            style += stylename;
-        }
-
-        return style;
     }
 
     /**

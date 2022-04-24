@@ -4,9 +4,11 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public class MaskMethodEdgeComparator implements Comparator<MaskMethodEdge> {
+
     @Override
     public int compare(MaskMethodEdge o1, MaskMethodEdge o2) {
-        if (o1 == o2 || (Objects.equals(o1.getResultName(), o2.getResultName()) && Objects.equals(o1.getParameterName(), o2.getParameterName()))) {
+        if (o1 == o2 || (Objects.equals(o1.getResultName(), o2.getResultName()) && Objects.equals(o1.getParameterName(),
+                                                                                                  o2.getParameterName()))) {
             return 0;
         }
 

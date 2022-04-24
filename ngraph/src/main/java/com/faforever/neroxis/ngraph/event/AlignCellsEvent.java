@@ -8,6 +8,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class AlignCellsEvent extends EventObject {
+
     List<ICell> cells;
     String align;
 }

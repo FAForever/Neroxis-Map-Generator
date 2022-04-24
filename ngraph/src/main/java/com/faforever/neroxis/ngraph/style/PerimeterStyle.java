@@ -12,6 +12,7 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class PerimeterStyle implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     /**
      * This is the distance between the source

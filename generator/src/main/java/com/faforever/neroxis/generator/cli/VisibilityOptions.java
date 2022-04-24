@@ -2,12 +2,12 @@ package com.faforever.neroxis.generator.cli;
 
 import com.faforever.neroxis.generator.Visibility;
 import lombok.Getter;
-
 import static picocli.CommandLine.Option;
 
 @Getter
 @SuppressWarnings("unused")
 public strictfp class VisibilityOptions {
+
     @Option(names = "--visibility", order = 1, description = "Visibility for the generated map. Values: ${COMPLETION-CANDIDATES}")
     private Visibility visibility;
 

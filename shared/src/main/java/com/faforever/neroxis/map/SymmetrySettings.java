@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public strictfp class SymmetrySettings {
+
     private Symmetry terrainSymmetry;
     private Symmetry teamSymmetry;
     private Symmetry spawnSymmetry;

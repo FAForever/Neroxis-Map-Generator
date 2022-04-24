@@ -6,8 +6,10 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Polygon;
 
 public class DiamondArrow implements Arrow {
+
     @Override
-    public PointDouble paintArrow(Graphics2DCanvas canvas, CellState state, PointDouble pe, double nx, double ny, double size, boolean source) {
+    public PointDouble paintArrow(Graphics2DCanvas canvas, CellState state, PointDouble pe, double nx, double ny,
+                                  double size, boolean source) {
         Polygon poly = new Polygon();
         poly.addPoint((int) Math.round(pe.getX()), (int) Math.round(pe.getY()));
         poly.addPoint((int) Math.round(pe.getX() - nx / 2 - ny / 2), (int) Math.round(pe.getY() + nx / 2 - ny / 2));

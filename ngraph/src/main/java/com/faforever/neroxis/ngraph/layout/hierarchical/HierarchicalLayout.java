@@ -31,73 +31,62 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HierarchicalLayout extends GraphLayout {
+
     /**
      * The root nodes of the layout
      */
     protected List<ICell> roots = null;
-
     /**
      * Specifies if the parent should be resized after the layout so that it
      * contains all the child cells. Default is true. @See parentBorder.
      */
     protected boolean resizeParent = true;
-
     /**
      * Specifies if the parent should be moved if resizeParent is enabled.
      * Default is false. @See resizeParent.
      */
     protected boolean moveParent = false;
-
     /**
      * The border to be added around the children if the parent is to be
      * resized using resizeParent. Default is 0. @See resizeParent.
      */
     protected int parentBorder = 0;
-
     /**
      * The spacing buffer added between cells on the same layer
      */
     protected double intraCellSpacing = 30.0;
-
     /**
      * The spacing buffer added between cell on adjacent layers
      */
     protected double interRankCellSpacing = 50.0;
-
     /**
      * The spacing buffer between unconnected hierarchies
      */
     protected double interHierarchySpacing = 60.0;
-
     /**
      * The distance between each parallel edge on each ranks for long edges
      */
     protected double parallelEdgeSpacing = 10.0;
-
     /**
      * The position of the root node(s) relative to the laid out graph in.
      * Default is <code>SwingConstants.NORTH</code>, i.e. top-down.
      */
     protected int orientation;
-
     /**
      * Specifies if the STYLE_NOEDGESTYLE flag should be set on edges that are
      * modified by the result. Default is true.
      */
     protected boolean disableEdgeStyle = true;
-
     /**
      * Whether or not to perform local optimisations and iterate multiple times
      * through the algorithm
      */
     protected boolean fineTuning = true;
-
     /**
      * Whether or not to navigate edges whose terminal vertices
      * have different parents but are in the same ancestry chain
      */
     protected boolean traverseAncestors = true;
-
     /**
      * The internal model formed of the layout
      */
@@ -136,6 +125,7 @@ public class HierarchicalLayout extends GraphLayout {
      *
      * @param parent Parent cell that contains the children to be laid out.
      */
+    @Override
     public void execute(ICell parent) {
         execute(parent, null);
     }
@@ -249,10 +239,15 @@ public class HierarchicalLayout extends GraphLayout {
 
         for (ICell edge : edges) {
             CellState state = graph.getView().getState(edge);
-            ICell source = (state != null) ? state.getVisibleTerminal(true) : graph.getView().getVisibleTerminal(edge, true);
-            ICell target = (state != null) ? state.getVisibleTerminal(false) : graph.getView().getVisibleTerminal(edge, false);
+            ICell source = (state != null) ? state.getVisibleTerminal(true) : graph.getView()
+                                                                                   .getVisibleTerminal(edge, true);
+            ICell target = (state != null) ? state.getVisibleTerminal(false) : graph.getView()
+                                                                                    .getVisibleTerminal(edge, false);
 
-            if (((source != target) && ((target == cell && (parent == null || graph.isValidAncestor(source, parent, traverseAncestors))) || (source == cell && (parent == null || graph.isValidAncestor(target, parent, traverseAncestors)))))) {
+            if (((source != target) && ((target == cell && (parent == null || graph.isValidAncestor(source, parent,
+                                                                                                    traverseAncestors)))
+                                        || (source == cell && (parent == null || graph.isValidAncestor(target, parent,
+                                                                                                       traverseAncestors)))))) {
                 result.add(edge);
             }
         }
@@ -299,7 +294,6 @@ public class HierarchicalLayout extends GraphLayout {
         }
 
         // Iterate through the result removing parents who have children in this layout
-
 
         // Perform a layout for each separate hierarchy
         // Track initial coordinate x-positioning
@@ -355,7 +349,8 @@ public class HierarchicalLayout extends GraphLayout {
      *                    null for the first step of the traversal.
      * @param allVertices Array of cell paths for the visited cells.
      */
-    protected void traverse(ICell vertex, boolean directed, ICell edge, Set<ICell> allVertices, Set<ICell> currentComp, List<Set<ICell>> hierarchyVertices, Set<ICell> filledVertexSet) {
+    protected void traverse(ICell vertex, boolean directed, ICell edge, Set<ICell> allVertices, Set<ICell> currentComp,
+                            List<Set<ICell>> hierarchyVertices, Set<ICell> filledVertexSet) {
         GraphView view = graph.getView();
         IGraphModel model = graph.getModel();
 
@@ -435,7 +430,8 @@ public class HierarchicalLayout extends GraphLayout {
      * Executes the placement stage using CoordinateAssignment.
      */
     public double placementStage(double initialX, Object parent) {
-        CoordinateAssignment placementStage = new CoordinateAssignment(this, intraCellSpacing, interRankCellSpacing, orientation, initialX, parallelEdgeSpacing);
+        CoordinateAssignment placementStage = new CoordinateAssignment(this, intraCellSpacing, interRankCellSpacing,
+                                                                       orientation, initialX, parallelEdgeSpacing);
         placementStage.setFineTuning(fineTuning);
         placementStage.execute(parent);
 
@@ -448,5 +444,4 @@ public class HierarchicalLayout extends GraphLayout {
     public String toString() {
         return "Hierarchical";
     }
-
 }

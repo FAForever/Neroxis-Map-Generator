@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Repeatable(GraphParameters.class)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public strictfp @interface GraphParameter {
+
     String name();
 
     String value() default "";

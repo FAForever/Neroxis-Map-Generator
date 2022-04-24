@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class Style implements PropertyChangeListener {
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private final LabelStyle label = new LabelStyle();
     private final EdgeStyle edge = new EdgeStyle();
@@ -29,10 +30,6 @@ public class Style implements PropertyChangeListener {
         addSelfListener();
     }
 
-    public void resetToParent() {
-        transferState(parentStyle);
-    }
-
     private void initializeFromParent(Style parentStyle) {
         transferState(parentStyle);
         this.parentStyle.label.addPropertyChangeListener(label);
@@ -44,32 +41,6 @@ public class Style implements PropertyChangeListener {
         this.parentStyle.cellProperties.addPropertyChangeListener(cellProperties);
         this.parentStyle.image.addPropertyChangeListener(image);
         this.parentStyle.shape.addPropertyChangeListener(shape);
-    }
-
-    private void addSelfListener() {
-        label.addPropertyChangeListener(this);
-        edge.addPropertyChangeListener(this);
-        indicator.addPropertyChangeListener(this);
-        stencil.addPropertyChangeListener(this);
-        perimeter.addPropertyChangeListener(this);
-        swimlane.addPropertyChangeListener(this);
-        cellProperties.addPropertyChangeListener(this);
-        image.addPropertyChangeListener(this);
-        shape.addPropertyChangeListener(this);
-    }
-
-    private void clearParentListeners() {
-        if (this.parentStyle != null) {
-            this.parentStyle.label.removePropertyChangeListener(this.label);
-            this.parentStyle.edge.removePropertyChangeListener(this.edge);
-            this.parentStyle.indicator.removePropertyChangeListener(this.indicator);
-            this.parentStyle.stencil.removePropertyChangeListener(this.stencil);
-            this.parentStyle.perimeter.removePropertyChangeListener(this.perimeter);
-            this.parentStyle.swimlane.removePropertyChangeListener(this.swimlane);
-            this.parentStyle.cellProperties.removePropertyChangeListener(this.cellProperties);
-            this.parentStyle.image.removePropertyChangeListener(this.image);
-            this.parentStyle.shape.removePropertyChangeListener(this.shape);
-        }
     }
 
     private void transferState(Style source) {
@@ -85,8 +56,28 @@ public class Style implements PropertyChangeListener {
         styleMapper.copy(source.cellProperties, cellProperties);
     }
 
+    private void addSelfListener() {
+        label.addPropertyChangeListener(this);
+        edge.addPropertyChangeListener(this);
+        indicator.addPropertyChangeListener(this);
+        stencil.addPropertyChangeListener(this);
+        perimeter.addPropertyChangeListener(this);
+        swimlane.addPropertyChangeListener(this);
+        cellProperties.addPropertyChangeListener(this);
+        image.addPropertyChangeListener(this);
+        shape.addPropertyChangeListener(this);
+    }
+
+    public void resetToParent() {
+        transferState(parentStyle);
+    }
+
     public Style spawnChild() {
         return new Style(this);
+    }
+
+    public Style getParent() {
+        return parentStyle.copy();
     }
 
     public Style copy() {
@@ -95,13 +86,23 @@ public class Style implements PropertyChangeListener {
         return copy;
     }
 
-    public Style getParent() {
-        return parentStyle.copy();
-    }
-
     public void clearListeners() {
         Arrays.stream(changeSupport.getPropertyChangeListeners()).forEach(changeSupport::removePropertyChangeListener);
         clearParentListeners();
+    }
+
+    private void clearParentListeners() {
+        if (this.parentStyle != null) {
+            this.parentStyle.label.removePropertyChangeListener(this.label);
+            this.parentStyle.edge.removePropertyChangeListener(this.edge);
+            this.parentStyle.indicator.removePropertyChangeListener(this.indicator);
+            this.parentStyle.stencil.removePropertyChangeListener(this.stencil);
+            this.parentStyle.perimeter.removePropertyChangeListener(this.perimeter);
+            this.parentStyle.swimlane.removePropertyChangeListener(this.swimlane);
+            this.parentStyle.cellProperties.removePropertyChangeListener(this.cellProperties);
+            this.parentStyle.image.removePropertyChangeListener(this.image);
+            this.parentStyle.shape.removePropertyChangeListener(this.shape);
+        }
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

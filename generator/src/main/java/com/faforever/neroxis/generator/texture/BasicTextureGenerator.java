@@ -10,10 +10,10 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
-
 import java.io.IOException;
 
 public strictfp class BasicTextureGenerator extends TextureGenerator {
+
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
     protected FloatMask accentGroundTexture;
@@ -36,10 +36,12 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask reflectance;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         realLand = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation());
-        realPlateaus = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation() + 3f);
+        realPlateaus = heightmap.copyAsBooleanMask(
+                generatorParameters.getBiome().getWaterSettings().getElevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
@@ -51,17 +53,16 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     }
 
     @Override
-    public void setupPipeline() {
-        setupTexturePipeline();
-        setupPreviewPipeline();
-    }
-
-    @Override
     public void setTextures() {
-        Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture, normals);
+        Pipeline.await(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture, steepHillsTexture,
+                       waterBeachTexture, rockTexture, accentRockTexture, normals);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
-            map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(), accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(), accentSlopesTexture.getFinalMask());
-            map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(), waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(), accentRockTexture.getFinalMask());
+            map.setTextureMasksScaled(map.getTextureMasksLow(), accentGroundTexture.getFinalMask(),
+                                      accentPlateauTexture.getFinalMask(), slopesTexture.getFinalMask(),
+                                      accentSlopesTexture.getFinalMask());
+            map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture.getFinalMask(),
+                                      waterBeachTexture.getFinalMask(), rockTexture.getFinalMask(),
+                                      accentRockTexture.getFinalMask());
         });
     }
 
@@ -69,7 +70,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     public void setCompressedDecals() {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), generatorParameters.getBiome().getLightingSettings()));
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
+                                                              generatorParameters.getBiome().getLightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
@@ -77,17 +79,29 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     @Override
     public void generatePreview() {
         Pipeline.await(accentGroundPreviewTexture, accentPlateauPreviewTexture, slopesPreviewTexture,
-                accentSlopesPreviewTexture, steepHillsPreviewTexture, waterBeachPreviewTexture, rockPreviewTexture,
-                accentRockPreviewTexture, reflectance, heightmapPreview);
+                       accentSlopesPreviewTexture, steepHillsPreviewTexture, waterBeachPreviewTexture,
+                       rockPreviewTexture, accentRockPreviewTexture, reflectance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
-                        accentGroundPreviewTexture.getFinalMask(), accentPlateauPreviewTexture.getFinalMask(), slopesPreviewTexture.getFinalMask(), accentSlopesPreviewTexture.getFinalMask(),
-                        steepHillsPreviewTexture.getFinalMask(), waterBeachPreviewTexture.getFinalMask(), rockPreviewTexture.getFinalMask(), accentRockPreviewTexture.getFinalMask());
+                                                 accentGroundPreviewTexture.getFinalMask(),
+                                                 accentPlateauPreviewTexture.getFinalMask(),
+                                                 slopesPreviewTexture.getFinalMask(),
+                                                 accentSlopesPreviewTexture.getFinalMask(),
+                                                 steepHillsPreviewTexture.getFinalMask(),
+                                                 waterBeachPreviewTexture.getFinalMask(),
+                                                 rockPreviewTexture.getFinalMask(),
+                                                 accentRockPreviewTexture.getFinalMask());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public void setupPipeline() {
+        setupTexturePipeline();
+        setupPreviewPipeline();
     }
 
     protected void setupTexturePipeline() {
@@ -100,17 +114,44 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
 
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
-        shadows.add(shadowsInWater, 1f).blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512))).clampMax(1f);
+        shadows.add(shadowsInWater, 1f)
+               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
+               .clampMax(1f);
         int textureSize = generatorParameters.getMapSize() + 1;
         int mapSize = generatorParameters.getMapSize();
-        accentGroundTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(realWater, 0f).blur(2);
-        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(realPlateaus.copy().invert(), 0f).blur(8);
+        accentGroundTexture.setSize(textureSize)
+                           .addPerlinNoise(mapSize / 8, 1f)
+                           .addGaussianNoise(.05f)
+                           .clampMax(1f)
+                           .setToValue(realWater, 0f)
+                           .blur(2);
+        accentPlateauTexture.setSize(textureSize)
+                            .addPerlinNoise(mapSize / 16, 1f)
+                            .addGaussianNoise(.05f)
+                            .clampMax(1f)
+                            .setToValue(realPlateaus.copy().invert(), 0f)
+                            .blur(8);
         slopesTexture.init(slopes, 0f, .75f).blur(16).add(slopes, .5f).blur(16).clampMax(1f);
-        accentSlopesTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, .5f).addGaussianNoise(.05f).clampMax(1f).setToValue(accentSlopes.copy().invert(), 0f).blur(16);
-        steepHillsTexture.setSize(textureSize).addPerlinNoise(mapSize / 8, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(steepHills.copy().invert(), 0f).blur(8);
+        accentSlopesTexture.setSize(textureSize)
+                           .addPerlinNoise(mapSize / 16, .5f)
+                           .addGaussianNoise(.05f)
+                           .clampMax(1f)
+                           .setToValue(accentSlopes.copy().invert(), 0f)
+                           .blur(16);
+        steepHillsTexture.setSize(textureSize)
+                         .addPerlinNoise(mapSize / 8, 1f)
+                         .addGaussianNoise(.05f)
+                         .clampMax(1f)
+                         .setToValue(steepHills.copy().invert(), 0f)
+                         .blur(8);
         waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f).addGaussianNoise(.05f).clampMax(1f).setToValue(accentRock.copy().invert(), 0f).blur(2);
+        accentRockTexture.setSize(textureSize)
+                         .addPerlinNoise(mapSize / 16, 1f)
+                         .addGaussianNoise(.05f)
+                         .clampMax(1f)
+                         .setToValue(accentRock.copy().invert(), 0f)
+                         .blur(2);
     }
 
     protected void setupPreviewPipeline() {
@@ -123,6 +164,11 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         rockPreviewTexture = rockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         accentRockPreviewTexture = accentRockTexture.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        reflectance = heightmap.copy().copyAsNormalMask(8f).resample(PreviewGenerator.PREVIEW_SIZE).copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection()).add(1f).divide(2f);
+        reflectance = heightmap.copy()
+                               .copyAsNormalMask(8f)
+                               .resample(PreviewGenerator.PREVIEW_SIZE)
+                               .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection())
+                               .add(1f)
+                               .divide(2f);
     }
 }

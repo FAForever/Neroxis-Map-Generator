@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public strictfp class Decal extends PositionedObject {
+
     private final String path;
     private final Vector3 rotation;
     private Vector3 scale;
@@ -45,6 +46,5 @@ public strictfp class Decal extends PositionedObject {
         this.scale = scale;
         this.cutOffLOD = cutOffLOD;
     }
-
 }
 

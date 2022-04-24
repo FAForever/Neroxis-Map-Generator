@@ -8,6 +8,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class CellsOrderedEvent extends EventObject {
+
     List<ICell> cells;
     boolean back;
 }

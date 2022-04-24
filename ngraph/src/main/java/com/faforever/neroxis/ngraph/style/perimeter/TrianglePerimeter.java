@@ -10,6 +10,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Describes a triangle perimeter.
  */
 public class TrianglePerimeter implements Perimeter {
+
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         Object direction = (vertex != null) ? vertex.getStyle().getShape().getDirection() : Constants.DIRECTION_EAST;
@@ -48,7 +49,11 @@ public class TrianglePerimeter implements Perimeter {
         }
         PointDouble result = null;
         if (base) {
-            if (orthogonal && ((vertical && next.getX() >= start.getX() && next.getX() <= end.getX()) || (!vertical && next.getY() >= start.getY() && next.getY() <= end.getY()))) {
+            if (orthogonal && ((vertical && next.getX() >= start.getX() && next.getX() <= end.getX()) || (!vertical
+                                                                                                          && next.getY()
+                                                                                                             >= start.getY()
+                                                                                                          && next.getY()
+                                                                                                             <= end.getY()))) {
                 if (vertical) {
                     result = new PointDouble(next.getX(), start.getY());
                 } else {
@@ -82,9 +87,11 @@ public class TrianglePerimeter implements Perimeter {
                 cy = pt.getY();
             }
             if ((vertical && next.getX() <= x + w / 2) || (!vertical && next.getY() <= y + h / 2)) {
-                result = Utils.intersection(next.getX(), next.getY(), cx, cy, start.getX(), start.getY(), corner.getX(), corner.getY());
+                result = Utils.intersection(next.getX(), next.getY(), cx, cy, start.getX(), start.getY(), corner.getX(),
+                                            corner.getY());
             } else {
-                result = Utils.intersection(next.getX(), next.getY(), cx, cy, corner.getX(), corner.getY(), end.getX(), end.getY());
+                result = Utils.intersection(next.getX(), next.getY(), cx, cy, corner.getX(), corner.getY(), end.getX(),
+                                            end.getY());
             }
         }
         if (result == null) {

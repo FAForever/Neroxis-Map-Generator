@@ -25,72 +25,59 @@ public class CompactTreeLayout extends GraphLayout {
      * Specifies the orientation of the layout. Default is true.
      */
     protected boolean horizontal;
-
     /**
      * Specifies if edge directions should be inverted. Default is false.
      */
     protected boolean invert;
-
     /**
      * If the parents should be resized to match the width/height of the
      * children. Default is true.
      */
     protected boolean resizeParent = true;
-
     /**
      * Padding added to resized parents
      */
     protected int groupPadding = 10;
-
     /**
      * A set of the parents that need updating based on children
      * process as part of the layout
      */
     protected Set<ICell> parentsChanged = null;
-
     /**
      * Specifies if the tree should be moved to the top, left corner
      * if it is inside a top-level layer. Default is false.
      */
     protected boolean moveTree = false;
-
     /**
      * Specifies if all edge points of traversed edges should be removed.
      * Default is true.
      */
     protected boolean resetEdges = true;
-
     /**
      * Holds the levelDistance. Default is 10.
      */
     protected int levelDistance = 10;
-
     /**
      * Holds the nodeDistance. Default is 20.
      */
     protected int nodeDistance = 20;
-
     /**
      * The preferred horizontal distance between edges exiting a vertex
      */
     protected int prefHozEdgeSep = 5;
-
     /**
      * The preferred vertical offset between edges exiting a vertex
      */
     protected int prefVertEdgeOff = 2;
-
     /**
      * The minimum distance for an edge jetty from a vertex
      */
     protected int minEdgeJetty = 12;
-
     /**
      * The size of the vertical buffer in the center of inter-rank channels
      * where edge control points should not be placed
      */
     protected int channelBuffer = 4;
-
     /**
      * Whether or not to apply the internal tree edge routing
      */
@@ -110,6 +97,12 @@ public class CompactTreeLayout extends GraphLayout {
         this.invert = invert;
     }
 
+    @Override
+    public void execute(ICell parent) {
+        super.execute(parent);
+        execute(parent, null);
+    }
+
     /**
      * Returns a boolean indicating if the given <Cell> should be ignored as a
      * vertex. This returns true if the cell has no connections.
@@ -117,14 +110,9 @@ public class CompactTreeLayout extends GraphLayout {
      * @param vertex Object that represents the vertex to be tested.
      * @return Returns true if the vertex should be ignored.
      */
+    @Override
     public boolean isVertexIgnored(ICell vertex) {
         return super.isVertexIgnored(vertex) || graph.getConnections(vertex).isEmpty();
-    }
-
-
-    public void execute(ICell parent) {
-        super.execute(parent);
-        execute(parent, null);
     }
 
     /**
@@ -336,7 +324,8 @@ public class CompactTreeLayout extends GraphLayout {
 
                     // Checks if terminal in same swimlane
                     CellState state = view.getState(edge);
-                    ICell target = (state != null) ? state.getVisibleTerminal(invert) : view.getVisibleTerminal(edge, invert);
+                    ICell target = (state != null) ? state.getVisibleTerminal(invert) : view.getVisibleTerminal(edge,
+                                                                                                                invert);
                     TreeNode tmp = dfs(target, parent, visited);
 
                     if (tmp != null && model.getGeometry(target) != null) {
@@ -396,7 +385,8 @@ public class CompactTreeLayout extends GraphLayout {
         return bounds;
     }
 
-    protected RectangleDouble verticalLayout(TreeNode node, Object parent, double x0, double y0, RectangleDouble bounds) {
+    protected RectangleDouble verticalLayout(TreeNode node, Object parent, double x0, double y0,
+                                             RectangleDouble bounds) {
         node.x += x0 + node.offsetY;
         node.y += y0 + node.offsetX;
         bounds = apply(node, bounds);
@@ -585,7 +575,9 @@ public class CompactTreeLayout extends GraphLayout {
             if (bounds == null) {
                 bounds = new RectangleDouble(g.getX(), g.getY(), g.getWidth(), g.getHeight());
             } else {
-                bounds = new RectangleDouble(Math.min(bounds.getX(), g.getX()), Math.min(bounds.getY(), g.getY()), Math.max(bounds.getX() + bounds.getWidth(), g.getX() + g.getWidth()), Math.max(bounds.getY() + bounds.getHeight(), g.getY() + g.getHeight()));
+                bounds = new RectangleDouble(Math.min(bounds.getX(), g.getX()), Math.min(bounds.getY(), g.getY()),
+                                             Math.max(bounds.getX() + bounds.getWidth(), g.getX() + g.getWidth()),
+                                             Math.max(bounds.getY() + bounds.getHeight(), g.getY() + g.getHeight()));
             }
         }
 
@@ -719,30 +711,25 @@ public class CompactTreeLayout extends GraphLayout {
     }
 
     protected static class TreeNode {
+
         protected ICell cell;
-
         protected double x, y, width, height, offsetX, offsetY;
-
         protected TreeNode child, next; // parent, sibling
-
         protected Polygon contour = new Polygon();
 
         public TreeNode(ICell cell) {
             this.cell = cell;
         }
-
     }
 
     protected static class Polygon {
 
         protected Polyline lowerHead, lowerTail, upperHead, upperTail;
-
     }
 
     protected static class Polyline {
 
         protected double dx, dy;
-
         protected Polyline next;
 
         protected Polyline(double dx, double dy, Polyline next) {
@@ -750,7 +737,6 @@ public class CompactTreeLayout extends GraphLayout {
             this.dy = dy;
             this.next = next;
         }
-
     }
 
     /**
@@ -764,17 +750,14 @@ public class CompactTreeLayout extends GraphLayout {
          * The weighted value of the cell stored
          */
         public int weightedValue = 0;
-
         /**
          * Whether or not to flip equal weight values.
          */
         public boolean nudge = false;
-
         /**
          * Whether or not this cell has been visited in the current assignment
          */
         public boolean visited = false;
-
         /**
          * The cell whose median value is being calculated
          */
@@ -796,6 +779,7 @@ public class CompactTreeLayout extends GraphLayout {
          * @return the standard return you would expect when comparing two
          * double
          */
+        @Override
         public int compareTo(Object arg0) {
             if (arg0 instanceof WeightedCellSorter) {
                 if (weightedValue > ((WeightedCellSorter) arg0).weightedValue) {
@@ -808,5 +792,4 @@ public class CompactTreeLayout extends GraphLayout {
             return 0;
         }
     }
-
 }

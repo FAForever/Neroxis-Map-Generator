@@ -9,6 +9,7 @@ import com.faforever.neroxis.ngraph.view.Graph;
  * A custom graph model
  */
 public class OrthogonalModel {
+
     public OrthogonalModel(Graph graph) {
         //
     }

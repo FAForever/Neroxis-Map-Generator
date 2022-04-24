@@ -23,6 +23,7 @@ import java.util.List;
  * offset vector from the resulting point.
  */
 public class Geometry extends RectangleDouble {
+
     @Serial
     private static final long serialVersionUID = 2649828026610336589L;
     /**
@@ -53,7 +54,6 @@ public class Geometry extends RectangleDouble {
      * Default is null.
      */
     protected PointDouble offset;
-
     /**
      * Specifies if the coordinates in the geometry are to be interpreted as
      * relative coordinates. Default is false. This is used to mark a geometry
@@ -80,106 +80,6 @@ public class Geometry extends RectangleDouble {
      */
     public Geometry(double x, double y, double width, double height) {
         super(x, y, width, height);
-    }
-
-    /**
-     * Returns the alternate bounds.
-     */
-    public RectangleDouble getAlternateBounds() {
-        return alternateBounds;
-    }
-
-    /**
-     * Sets the alternate bounds to the given rectangle.
-     *
-     * @param rect Rectangle to be used for the alternate bounds.
-     */
-    public void setAlternateBounds(RectangleDouble rect) {
-        alternateBounds = rect;
-    }
-
-    /**
-     * Returns the source point.
-     *
-     * @return Returns the source point.
-     */
-    public PointDouble getSourcePoint() {
-        return sourcePoint;
-    }
-
-    /**
-     * Sets the source point.
-     *
-     * @param sourcePoint Source point to be used.
-     */
-    public void setSourcePoint(PointDouble sourcePoint) {
-        this.sourcePoint = sourcePoint;
-    }
-
-    /**
-     * Returns the target point.
-     *
-     * @return Returns the target point.
-     */
-    public PointDouble getTargetPoint() {
-        return targetPoint;
-    }
-
-    /**
-     * Sets the target point.
-     *
-     * @param targetPoint Target point to be used.
-     */
-    public void setTargetPoint(PointDouble targetPoint) {
-        this.targetPoint = targetPoint;
-    }
-
-    /**
-     * Returns the list of control points.
-     */
-    public List<PointDouble> getPoints() {
-        return points;
-    }
-
-    /**
-     * Sets the list of control points to the given list.
-     *
-     * @param value List that contains the new control points.
-     */
-    public void setPoints(List<PointDouble> value) {
-        points = value;
-    }
-
-    /**
-     * Returns the offset.
-     */
-    public PointDouble getOffset() {
-        return offset;
-    }
-
-    /**
-     * Sets the offset to the given point.
-     *
-     * @param offset Point to be used for the offset.
-     */
-    public void setOffset(PointDouble offset) {
-        this.offset = offset;
-    }
-
-    /**
-     * Returns true of the geometry is relative.
-     */
-    public boolean isRelative() {
-        return relative;
-    }
-
-    /**
-     * Sets the relative state of the geometry.
-     *
-     * @param value Boolean value to be used as the new relative state.
-     */
-    public void setRelative(boolean value) {
-        relative = value;
     }
 
     /**
@@ -275,6 +175,7 @@ public class Geometry extends RectangleDouble {
     /**
      * Returns a clone of the cell.
      */
+    @Override
     public Geometry clone() {
         Geometry clone = (Geometry) super.clone();
 
@@ -315,4 +216,103 @@ public class Geometry extends RectangleDouble {
         return clone;
     }
 
+    /**
+     * Returns true of the geometry is relative.
+     */
+    public boolean isRelative() {
+        return relative;
+    }
+
+    /**
+     * Sets the relative state of the geometry.
+     *
+     * @param value Boolean value to be used as the new relative state.
+     */
+    public void setRelative(boolean value) {
+        relative = value;
+    }
+
+    /**
+     * Returns the list of control points.
+     */
+    public List<PointDouble> getPoints() {
+        return points;
+    }
+
+    /**
+     * Sets the list of control points to the given list.
+     *
+     * @param value List that contains the new control points.
+     */
+    public void setPoints(List<PointDouble> value) {
+        points = value;
+    }
+
+    /**
+     * Returns the target point.
+     *
+     * @return Returns the target point.
+     */
+    public PointDouble getTargetPoint() {
+        return targetPoint;
+    }
+
+    /**
+     * Sets the target point.
+     *
+     * @param targetPoint Target point to be used.
+     */
+    public void setTargetPoint(PointDouble targetPoint) {
+        this.targetPoint = targetPoint;
+    }
+
+    /**
+     * Returns the source point.
+     *
+     * @return Returns the source point.
+     */
+    public PointDouble getSourcePoint() {
+        return sourcePoint;
+    }
+
+    /**
+     * Sets the source point.
+     *
+     * @param sourcePoint Source point to be used.
+     */
+    public void setSourcePoint(PointDouble sourcePoint) {
+        this.sourcePoint = sourcePoint;
+    }
+
+    /**
+     * Returns the offset.
+     */
+    public PointDouble getOffset() {
+        return offset;
+    }
+
+    /**
+     * Sets the offset to the given point.
+     *
+     * @param offset Point to be used for the offset.
+     */
+    public void setOffset(PointDouble offset) {
+        this.offset = offset;
+    }
+
+    /**
+     * Returns the alternate bounds.
+     */
+    public RectangleDouble getAlternateBounds() {
+        return alternateBounds;
+    }
+
+    /**
+     * Sets the alternate bounds to the given rectangle.
+     *
+     * @param rect Rectangle to be used for the alternate bounds.
+     */
+    public void setAlternateBounds(RectangleDouble rect) {
+        alternateBounds = rect;
+    }
 }

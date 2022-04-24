@@ -14,6 +14,7 @@ import java.awt.RenderingHints;
 import java.util.List;
 
 public class CurveShape extends ConnectorShape {
+
     /**
      * Cache of the points between which drawing straight lines views as a
      * curve
@@ -32,6 +33,7 @@ public class CurveShape extends ConnectorShape {
         return curve;
     }
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Object keyStrokeHint = canvas.getGraphics().getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
         canvas.getGraphics().setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -41,6 +43,34 @@ public class CurveShape extends ConnectorShape {
         canvas.getGraphics().setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, keyStrokeHint);
     }
 
+    /**
+     * Hook to override creation of the vector that the marker is drawn along
+     * since it may not be the same as the vector between any two control
+     * points
+     *
+     * @param points     the guide points of the connector
+     * @param source     whether the marker is at the source end
+     * @param markerSize the scaled maximum length of the marker
+     * @return a line describing the vector the marker should be drawn along
+     */
+    @Override
+    protected LineDouble getMarkerVector(List<PointDouble> points, boolean source, double markerSize) {
+        double curveLength = curve.getCurveLength(Curve.CORE_CURVE);
+        double markerRatio = markerSize / curveLength;
+        if (markerRatio >= 1.0) {
+            markerRatio = 1.0;
+        }
+        if (source) {
+            LineDouble sourceVector = curve.getCurveParallel(Curve.CORE_CURVE, markerRatio);
+            return new LineDouble(sourceVector.getP1(), points.get(0));
+        } else {
+            LineDouble targetVector = curve.getCurveParallel(Curve.CORE_CURVE, 1.0 - markerRatio);
+            int pointCount = points.size();
+            return new LineDouble(targetVector.getP1(), points.get(pointCount - 1));
+        }
+    }
+
+    @Override
     protected void paintPolyline(Graphics2DCanvas canvas, List<PointDouble> points, Style style) {
         double scale = canvas.getScale();
         validateCurve(points, scale, style);
@@ -57,31 +87,5 @@ public class CurveShape extends ConnectorShape {
             curve.updateCurve(points);
         }
         curve.setLabelBuffer(scale * Constants.DEFAULT_LABEL_BUFFER);
-    }
-
-    /**
-     * Hook to override creation of the vector that the marker is drawn along
-     * since it may not be the same as the vector between any two control
-     * points
-     *
-     * @param points     the guide points of the connector
-     * @param source     whether the marker is at the source end
-     * @param markerSize the scaled maximum length of the marker
-     * @return a line describing the vector the marker should be drawn along
-     */
-    protected LineDouble getMarkerVector(List<PointDouble> points, boolean source, double markerSize) {
-        double curveLength = curve.getCurveLength(Curve.CORE_CURVE);
-        double markerRatio = markerSize / curveLength;
-        if (markerRatio >= 1.0) {
-            markerRatio = 1.0;
-        }
-        if (source) {
-            LineDouble sourceVector = curve.getCurveParallel(Curve.CORE_CURVE, markerRatio);
-            return new LineDouble(sourceVector.getP1(), points.get(0));
-        } else {
-            LineDouble targetVector = curve.getCurveParallel(Curve.CORE_CURVE, 1.0 - markerRatio);
-            int pointCount = points.size();
-            return new LineDouble(targetVector.getP1(), points.get(pointCount - 1));
-        }
     }
 }

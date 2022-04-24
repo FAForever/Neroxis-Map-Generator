@@ -9,8 +9,10 @@ import java.util.List;
  * Provides a vertical elbow edge.
  */
 public class TopToBottomEdgeStyleFunction implements EdgeStyleFunction {
+
     @Override
-    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
+                      List<PointDouble> result) {
         GraphView view = state.getView();
         PointDouble pt = ((points != null && points.size() > 0) ? points.get(0) : null);
         PointDouble p0 = state.getAbsolutePoint(0);

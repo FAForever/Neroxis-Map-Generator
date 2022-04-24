@@ -37,6 +37,7 @@ public class ParallelEdgeLayout extends GraphLayout {
         this.spacing = spacing;
     }
 
+    @Override
     public void execute(ICell parent) {
         Map<String, List<ICell>> lookup = findParallels(parent);
 
@@ -143,5 +144,4 @@ public class ParallelEdgeLayout extends GraphLayout {
             setEdgePoints(edge, List.of(new PointDouble(x, y)));
         }
     }
-
 }

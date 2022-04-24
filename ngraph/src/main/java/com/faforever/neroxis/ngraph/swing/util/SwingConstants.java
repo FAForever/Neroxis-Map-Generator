@@ -19,7 +19,6 @@ import javax.swing.border.LineBorder;
 public class SwingConstants {
 
     private static final Logger log = Logger.getLogger(SwingConstants.class.getName());
-
     /**
      * Contains an empty image of size 1, 1.
      */
@@ -76,17 +75,20 @@ public class SwingConstants {
      * Defines the stroke used for painting selected edges. Default is a dashed
      * line.
      */
-    public static Stroke EDGE_SELECTION_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{3, 3}, 0.0f);
+    public static Stroke EDGE_SELECTION_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f,
+                                                                 new float[]{3, 3}, 0.0f);
     /**
      * Defines the stroke used for painting the border of selected vertices.
      * Default is a dashed line.
      */
-    public static Stroke VERTEX_SELECTION_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{3, 3}, 0.0f);
+    public static Stroke VERTEX_SELECTION_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+                                                                   10.0f, new float[]{3, 3}, 0.0f);
     /**
      * Defines the stroke used for painting the preview for new and existing edges
      * that are being changed. Default is a dashed line.
      */
-    public static Stroke PREVIEW_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{3, 3}, 0.0f);
+    public static Stroke PREVIEW_STROKE = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f,
+                                                          new float[]{3, 3}, 0.0f);
     /**
      * Defines the border used for painting the preview when vertices are being
      * resized, or cells and labels are being moved.
@@ -95,6 +97,7 @@ public class SwingConstants {
         @Serial
         private static final long serialVersionUID = 1348016511717964310L;
 
+        @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             ((Graphics2D) g).setStroke(VERTEX_SELECTION_STROKE);
             super.paintBorder(c, g, x, y, width, height);

@@ -17,31 +17,26 @@ public class CircleLayout extends GraphLayout {
      * Integer specifying the size of the radius. Default is 100.
      */
     protected double radius;
-
     /**
      * Boolean specifying if the circle should be moved to the top,
      * left corner specified by x0 and y0. Default is false.
      */
     protected boolean moveCircle = true;
-
     /**
      * Integer specifying the left coordinate of the circle.
      * Default is 0.
      */
     protected double x0 = 0;
-
     /**
      * Integer specifying the top coordinate of the circle.
      * Default is 0.
      */
     protected double y0 = 0;
-
     /**
      * Specifies if all edge points of traversed edges should be removed.
      * Default is true.
      */
     protected boolean resetEdges = false;
-
     /**
      * Specifies if the STYLE_NOEDGESTYLE flag should be set on edges that are
      * modified by the result. Default is true.
@@ -65,7 +60,7 @@ public class CircleLayout extends GraphLayout {
         this.radius = radius;
     }
 
-
+    @Override
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
 
@@ -143,5 +138,4 @@ public class CircleLayout extends GraphLayout {
             }
         }
     }
-
 }

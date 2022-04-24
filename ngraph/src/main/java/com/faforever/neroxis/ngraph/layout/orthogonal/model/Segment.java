@@ -6,6 +6,4 @@ package com.faforever.neroxis.ngraph.layout.orthogonal.model;
 /**
  *
  */
-public class Segment {
-
-}
+public class Segment {}

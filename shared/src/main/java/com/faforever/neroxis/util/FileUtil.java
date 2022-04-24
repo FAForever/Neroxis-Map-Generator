@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import lombok.SneakyThrows;
 
 public strictfp class FileUtil {
+
     private static final DslJson<Object> DSL_JSON = new DslJson<>(Settings.basicSetup());
 
     @SneakyThrows
@@ -62,6 +63,10 @@ public strictfp class FileUtil {
         return stringBuilder.toString();
     }
 
+    public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {
+        return deserialize(path.toString(), clazz);
+    }
+
     /**
      * Deserializes a file
      *
@@ -78,10 +83,6 @@ public strictfp class FileUtil {
         } else {
             return DSL_JSON.deserialize(clazz, new FileInputStream(path));
         }
-    }
-
-    public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {
-        return deserialize(path.toString(), clazz);
     }
 
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {

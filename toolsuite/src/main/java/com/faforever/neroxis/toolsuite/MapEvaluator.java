@@ -16,8 +16,6 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import picocli.CommandLine;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,29 +24,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-
+import picocli.CommandLine;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
-@Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry",
-        versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+@Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapEvaluator implements Callable<Integer> {
 
-    @Spec
-    private CommandLine.Model.CommandSpec spec;
-
-    @Mixin
-    private RequiredMapPathMixin requiredMapPathMixin;
-
-    @Option(names = "--debug", description = "Turn on debugging mode")
-    public void setDebugging(boolean debug) {
-        DebugUtil.DEBUG = debug;
-    }
-
-    private SCMap map;
-    private FloatMask heightMask;
     float terrainScore;
     float spawnScore;
     float propScore;
@@ -56,6 +40,17 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     float hydroScore;
     float unitScore;
     boolean oddVsEven;
+    @Spec
+    private CommandLine.Model.CommandSpec spec;
+    @Mixin
+    private RequiredMapPathMixin requiredMapPathMixin;
+    private SCMap map;
+    private FloatMask heightMask;
+
+    @Option(names = "--debug", description = "Turn on debugging mode")
+    public void setDebugging(boolean debug) {
+        DebugUtil.DEBUG = debug;
+    }
 
     @Override
     public Integer call() {
@@ -76,10 +71,13 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     }
 
     private void evaluate() {
-        List<Symmetry> symmetries = Arrays.stream(Symmetry.values()).filter(symmetry -> symmetry.getNumSymPoints() == 2).collect(Collectors.toList());
+        List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
+                                          .filter(symmetry -> symmetry.getNumSymPoints() == 2)
+                                          .collect(Collectors.toList());
         for (Symmetry symmetry : symmetries) {
             SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
-            heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(), "heightMask");
+            heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
+                                       "heightMask");
             evaluateTerrain();
             evaluateSpawns();
             evaluateMexes();
@@ -95,6 +93,40 @@ public strictfp class MapEvaluator implements Callable<Integer> {
             System.out.printf("Prop Difference for Symmetry %s: %.2f%n", symmetry, propScore);
             System.out.printf("Unit Difference for Symmetry %s: %.2f%n", symmetry, unitScore);
         }
+    }
+
+    private void evaluateTerrain() {
+        DebugUtil.timedRun("evaluateTerrain", () -> terrainScore = getMaskScore(heightMask));
+    }
+
+    private static <T extends Mask<?, T>> float getMaskScore(T mask) {
+        String visualName = "diff" + mask.getVisualName();
+        T maskCopy = mask.copy();
+        maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
+        float totalError;
+        if (mask instanceof BooleanMask) {
+            ((BooleanMask) maskCopy).subtract((BooleanMask) mask);
+            totalError = (float) ((BooleanMask) maskCopy).getCount();
+        } else if (mask instanceof FloatMask) {
+            ((FloatMask) maskCopy).subtract((FloatMask) mask).multiply((FloatMask) maskCopy);
+            totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
+        } else if (mask instanceof IntegerMask) {
+            ((IntegerMask) maskCopy).subtract((IntegerMask) mask).multiply((IntegerMask) maskCopy);
+            totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
+        } else {
+            throw new IllegalArgumentException("Not a supported Mask type");
+        }
+        if (DebugUtil.DEBUG) {
+            maskCopy.startVisualDebugger(visualName).show();
+        }
+        return totalError / mask.getSize() / mask.getSize();
+    }
+
+    private void evaluateSpawns() {
+        DebugUtil.timedRun("evaluateSpawns", () -> {
+            spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
+            oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
+        });
     }
 
     private static float getPositionedObjectScore(List<? extends PositionedObject> objects, Mask<?, ?> mask) {
@@ -159,40 +191,6 @@ public strictfp class MapEvaluator implements Callable<Integer> {
         return true;
     }
 
-    private static <T extends Mask<?, T>> float getMaskScore(T mask) {
-        String visualName = "diff" + mask.getVisualName();
-        T maskCopy = mask.copy();
-        maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
-        float totalError;
-        if (mask instanceof BooleanMask) {
-            ((BooleanMask) maskCopy).subtract((BooleanMask) mask);
-            totalError = (float) ((BooleanMask) maskCopy).getCount();
-        } else if (mask instanceof FloatMask) {
-            ((FloatMask) maskCopy).subtract((FloatMask) mask).multiply((FloatMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
-        } else if (mask instanceof IntegerMask) {
-            ((IntegerMask) maskCopy).subtract((IntegerMask) mask).multiply((IntegerMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
-        } else {
-            throw new IllegalArgumentException("Not a supported Mask type");
-        }
-        if (DebugUtil.DEBUG) {
-            maskCopy.startVisualDebugger(visualName).show();
-        }
-        return totalError / mask.getSize() / mask.getSize();
-    }
-
-    private void evaluateTerrain() {
-        DebugUtil.timedRun("evaluateTerrain", () -> terrainScore = getMaskScore(heightMask));
-    }
-
-    private void evaluateSpawns() {
-        DebugUtil.timedRun("evaluateSpawns", () -> {
-            spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
-            oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
-        });
-    }
-
     private void evaluateMexes() {
         DebugUtil.timedRun("evaluateMexes", () -> mexScore = getPositionedObjectScore(map.getMexes(), heightMask));
     }
@@ -206,7 +204,15 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     }
 
     private void evaluateUnits() {
-        DebugUtil.timedRun("evaluateUnits", () -> unitScore = getPositionedObjectScore(map.getArmies().stream().flatMap(army -> army.getGroups().stream()
-                .flatMap(group -> group.getUnits().stream())).collect(Collectors.toList()), heightMask));
+        DebugUtil.timedRun("evaluateUnits", () -> unitScore = getPositionedObjectScore(map.getArmies()
+                                                                                          .stream()
+                                                                                          .flatMap(
+                                                                                                  army -> army.getGroups()
+                                                                                                              .stream()
+                                                                                                              .flatMap(
+                                                                                                                      group -> group.getUnits()
+                                                                                                                                    .stream()))
+                                                                                          .collect(Collectors.toList()),
+                                                                                       heightMask));
     }
 }

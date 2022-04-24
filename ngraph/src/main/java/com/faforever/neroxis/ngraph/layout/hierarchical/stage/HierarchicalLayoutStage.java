@@ -23,5 +23,4 @@ public interface HierarchicalLayoutStage {
      * use.
      */
     void execute(Object parent);
-
 }

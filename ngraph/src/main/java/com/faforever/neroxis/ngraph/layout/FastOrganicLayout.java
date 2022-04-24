@@ -20,119 +20,99 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FastOrganicLayout extends GraphLayout {
+
     /**
      * Specifies if the top left corner of the input cells should be the origin
      * of the layout result. Default is true.
      */
     protected boolean useInputOrigin = true;
-
     /**
      * Specifies if all edge points of traversed edges should be removed.
      * Default is true.
      */
     protected boolean resetEdges = true;
-
     /**
      * Specifies if the STYLE_NOEDGESTYLE flag should be set on edges that are
      * modified by the result. Default is true.
      */
     protected boolean disableEdgeStyle = true;
-
     /**
      * The force constant by which the attractive forces are divided and the
      * replusive forces are multiple by the square of. The value equates to the
      * average radius there is of free space around each node. Default is 50.
      */
     protected double forceConstant = 50;
-
     /**
      * Cache of <forceConstant>^2 for performance.
      */
     protected double forceConstantSquared = 0;
-
     /**
      * Minimal distance limit. Default is 2. Prevents of
      * dividing by zero.
      */
     protected double minDistanceLimit = 2;
-
     /**
      * Cached version of <minDistanceLimit> squared.
      */
     protected double minDistanceLimitSquared = 0;
-
     /**
      * The maximum distance between vertices, beyond which their
      * repulsion no longer has an effect
      */
     protected double maxDistanceLimit = 500;
-
     /**
      * Start value of temperature. Default is 200.
      */
     protected double initialTemp = 200;
-
     /**
      * Temperature to limit displacement at later stages of layout.
      */
     protected double temperature = 0;
-
     /**
      * Total number of iterations to run the layout though.
      */
     protected double maxIterations = 0;
-
     /**
      * Current iteration count.
      */
     protected double iteration = 0;
-
     /**
      * An array of all vertices to be laid out.
      */
     protected List<ICell> vertexArray;
-
     /**
      * An array of locally stored X co-ordinate displacements for the vertices.
      */
     protected double[] dispX;
-
     /**
      * An array of locally stored Y co-ordinate displacements for the vertices.
      */
     protected double[] dispY;
-
     /**
      * An array of locally stored co-ordinate positions for the vertices.
      */
     protected double[][] cellLocation;
-
     /**
      * The approximate radius of each cell, nodes only.
      */
     protected double[] radius;
-
     /**
      * The approximate radius squared of each cell, nodes only.
      */
     protected double[] radiusSquared;
-
     /**
      * Array of booleans representing the movable states of the vertices.
      */
     protected boolean[] isMoveable;
-
     /**
      * Local copy of cell neighbours.
      */
     protected int[][] neighbours;
-
     /**
      * Boolean flag that specifies if the layout is allowed to run. If this is
      * set to false, then the layout exits in the following iteration.
      */
     protected boolean allowedToRun = true;
-
     /**
      * Maps from vertices to indices.
      */
@@ -145,37 +125,16 @@ public class FastOrganicLayout extends GraphLayout {
         super(graph);
     }
 
-    /**
-     * Returns a boolean indicating if the given <Cell> should be ignored as a
-     * vertex. This returns true if the cell has no connections.
-     *
-     * @param vertex Object that represents the vertex to be tested.
-     * @return Returns true if the vertex should be ignored.
-     */
-    public boolean isVertexIgnored(ICell vertex) {
-        return super.isVertexIgnored(vertex) || graph.getConnections(vertex).isEmpty();
-    }
-
-    /**
-     * Reduces the temperature of the layout from an initial setting in a linear
-     * fashion to zero.
-     */
-    protected void reduceTemperature() {
-        temperature = initialTemp * (1.0 - iteration / maxIterations);
-    }
-
-
-    public void moveCell(ICell cell, double x, double y) {
-        // TODO: Map the position to a child index for
-        // the cell to be placed closest to the position
-    }
-
-
+    @Override
     public void execute(ICell parent) {
         IGraphModel model = graph.getModel();
 
-        vertexArray = graph.getChildVertices(parent).stream().filter(vertex -> !isVertexIgnored(vertex)).collect(Collectors.toList());
-        RectangleDouble initialBounds = (useInputOrigin) ? graph.getBoundsForCells(vertexArray, false, false, true) : null;
+        vertexArray = graph.getChildVertices(parent)
+                           .stream()
+                           .filter(vertex -> !isVertexIgnored(vertex))
+                           .collect(Collectors.toList());
+        RectangleDouble initialBounds = (useInputOrigin) ? graph.getBoundsForCells(vertexArray, false, false,
+                                                                                   true) : null;
         int n = vertexArray.size();
 
         dispX = new double[n];
@@ -337,80 +296,22 @@ public class FastOrganicLayout extends GraphLayout {
         }
     }
 
-    /**
-     * Takes the displacements calculated for each cell and applies them to the
-     * local cache of cell positions. Limits the displacement to the current
-     * temperature.
-     */
-    protected void calcPositions() {
-        for (int index = 0; index < vertexArray.size(); index++) {
-            if (isMoveable[index]) {
-                // Get the distance of displacement for this node for this
-                // iteration
-                double deltaLength = Math.sqrt(dispX[index] * dispX[index] + dispY[index] * dispY[index]);
-
-                if (deltaLength < 0.001) {
-                    deltaLength = 0.001;
-                }
-
-                // Scale down by the current temperature if less than the
-                // displacement distance
-                double newXDisp = dispX[index] / deltaLength * Math.min(deltaLength, temperature);
-                double newYDisp = dispY[index] / deltaLength * Math.min(deltaLength, temperature);
-
-                // reset displacements
-                dispX[index] = 0;
-                dispY[index] = 0;
-
-                // Update the cached cell locations
-                cellLocation[index][0] += newXDisp;
-                cellLocation[index][1] += newYDisp;
-            }
-        }
+    @Override
+    public void moveCell(ICell cell, double x, double y) {
+        // TODO: Map the position to a child index for
+        // the cell to be placed closest to the position
     }
 
     /**
-     * Calculates the attractive forces between all laid out nodes linked by
-     * edges
+     * Returns a boolean indicating if the given <Cell> should be ignored as a
+     * vertex. This returns true if the cell has no connections.
+     *
+     * @param vertex Object that represents the vertex to be tested.
+     * @return Returns true if the vertex should be ignored.
      */
-    protected void calcAttraction() {
-        // Check the neighbours of each vertex and calculate the attractive
-        // force of the edge connecting them
-        for (int i = 0; i < vertexArray.size(); i++) {
-            for (int k = 0; k < neighbours[i].length; k++) {
-                // Get the index of the othe cell in the vertex array
-                int j = neighbours[i][k];
-
-                // Do not proceed self-loops
-                if (i != j) {
-                    double xDelta = cellLocation[i][0] - cellLocation[j][0];
-                    double yDelta = cellLocation[i][1] - cellLocation[j][1];
-
-                    // The distance between the nodes
-                    double deltaLengthSquared = xDelta * xDelta + yDelta * yDelta - radiusSquared[i] - radiusSquared[j];
-
-                    if (deltaLengthSquared < minDistanceLimitSquared) {
-                        deltaLengthSquared = minDistanceLimitSquared;
-                    }
-
-                    double deltaLength = Math.sqrt(deltaLengthSquared);
-                    double force = (deltaLengthSquared) / forceConstant;
-
-                    double displacementX = (xDelta / deltaLength) * force;
-                    double displacementY = (yDelta / deltaLength) * force;
-
-                    if (isMoveable[i]) {
-                        this.dispX[i] -= displacementX;
-                        this.dispY[i] -= displacementY;
-                    }
-
-                    if (isMoveable[j]) {
-                        dispX[j] += displacementX;
-                        dispY[j] += displacementY;
-                    }
-                }
-            }
-        }
+    @Override
+    public boolean isVertexIgnored(ICell vertex) {
+        return super.isVertexIgnored(vertex) || graph.getConnections(vertex).isEmpty();
     }
 
     /**
@@ -471,4 +372,87 @@ public class FastOrganicLayout extends GraphLayout {
         }
     }
 
+    /**
+     * Calculates the attractive forces between all laid out nodes linked by
+     * edges
+     */
+    protected void calcAttraction() {
+        // Check the neighbours of each vertex and calculate the attractive
+        // force of the edge connecting them
+        for (int i = 0; i < vertexArray.size(); i++) {
+            for (int k = 0; k < neighbours[i].length; k++) {
+                // Get the index of the othe cell in the vertex array
+                int j = neighbours[i][k];
+
+                // Do not proceed self-loops
+                if (i != j) {
+                    double xDelta = cellLocation[i][0] - cellLocation[j][0];
+                    double yDelta = cellLocation[i][1] - cellLocation[j][1];
+
+                    // The distance between the nodes
+                    double deltaLengthSquared = xDelta * xDelta + yDelta * yDelta - radiusSquared[i] - radiusSquared[j];
+
+                    if (deltaLengthSquared < minDistanceLimitSquared) {
+                        deltaLengthSquared = minDistanceLimitSquared;
+                    }
+
+                    double deltaLength = Math.sqrt(deltaLengthSquared);
+                    double force = (deltaLengthSquared) / forceConstant;
+
+                    double displacementX = (xDelta / deltaLength) * force;
+                    double displacementY = (yDelta / deltaLength) * force;
+
+                    if (isMoveable[i]) {
+                        this.dispX[i] -= displacementX;
+                        this.dispY[i] -= displacementY;
+                    }
+
+                    if (isMoveable[j]) {
+                        dispX[j] += displacementX;
+                        dispY[j] += displacementY;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Takes the displacements calculated for each cell and applies them to the
+     * local cache of cell positions. Limits the displacement to the current
+     * temperature.
+     */
+    protected void calcPositions() {
+        for (int index = 0; index < vertexArray.size(); index++) {
+            if (isMoveable[index]) {
+                // Get the distance of displacement for this node for this
+                // iteration
+                double deltaLength = Math.sqrt(dispX[index] * dispX[index] + dispY[index] * dispY[index]);
+
+                if (deltaLength < 0.001) {
+                    deltaLength = 0.001;
+                }
+
+                // Scale down by the current temperature if less than the
+                // displacement distance
+                double newXDisp = dispX[index] / deltaLength * Math.min(deltaLength, temperature);
+                double newYDisp = dispY[index] / deltaLength * Math.min(deltaLength, temperature);
+
+                // reset displacements
+                dispX[index] = 0;
+                dispY[index] = 0;
+
+                // Update the cached cell locations
+                cellLocation[index][0] += newXDisp;
+                cellLocation[index][1] += newYDisp;
+            }
+        }
+    }
+
+    /**
+     * Reduces the temperature of the layout from an initial setting in a linear
+     * fashion to zero.
+     */
+    protected void reduceTemperature() {
+        temperature = initialTemp * (1.0 - iteration / maxIterations);
+    }
 }

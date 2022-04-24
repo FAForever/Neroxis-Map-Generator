@@ -10,6 +10,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 public class PipelineConnectionHandler extends ConnectionHandler {
+
     private final PipelineGraphComponent pipelineGraphComponent;
 
     public PipelineConnectionHandler(PipelineGraphComponent graphComponent) {
@@ -17,22 +18,37 @@ public class PipelineConnectionHandler extends ConnectionHandler {
         pipelineGraphComponent = graphComponent;
     }
 
+    @Override
     public String validateConnection(ICell source, ICell target) {
-        if (source == null || target == null || source.getParent() == target.getParent() || !source.isVertex() || !target.isVertex() || target.getValue() == null || source.getValue() == null) {
+        if (source == null
+            || target == null
+            || source.getParent() == target.getParent()
+            || !source.isVertex()
+            || !target.isVertex()
+            || target.getValue() == null
+            || source.getValue() == null) {
             return "";
         }
         PipelineGraph graph = pipelineGraphComponent.getGraph();
         MaskGraphVertex<?> sourceVertex = graph.getVertexForCell(source);
         MaskGraphVertex<?> targetVertex = graph.getVertexForCell(target);
-        if (!sourceVertex.getResultClass((String) source.getValue()).equals(targetVertex.getMaskParameterClass((String) target.getValue()))) {
+        if (!sourceVertex.getResultClass((String) source.getValue())
+                         .equals(targetVertex.getMaskParameterClass((String) target.getValue()))) {
             return "";
         }
-        if (MaskMethodVertex.EXECUTOR.equals(target.getValue()) && graph.outgoingEdgesOf(sourceVertex).stream().anyMatch(edge -> MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()) && edge.getResultName().equals(source.getValue()))) {
+        if (MaskMethodVertex.EXECUTOR.equals(target.getValue()) && graph.outgoingEdgesOf(sourceVertex)
+                                                                        .stream()
+                                                                        .anyMatch(
+                                                                                edge -> MaskMethodVertex.EXECUTOR.equals(
+                                                                                        edge.getParameterName())
+                                                                                        && edge.getResultName()
+                                                                                               .equals(source.getValue()))) {
             return "";
         }
         return super.validateConnection(source, target);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         if (isActive()) {
             if (error != null) {
@@ -41,12 +57,15 @@ public class PipelineConnectionHandler extends ConnectionHandler {
                 }
             } else if (first != null) {
                 PipelineGraph graph = pipelineGraphComponent.getGraph();
-                if (connectPreview.isActive() && (marker.hasValidState() || isCreateTarget() || graph.isAllowDanglingEdges())) {
+                if (connectPreview.isActive() && (marker.hasValidState()
+                                                  || isCreateTarget()
+                                                  || graph.isAllowDanglingEdges())) {
                     ICell cell = connectPreview.stop(true, e);
                     MaskGraphVertex<?> source = graph.getVertexForCell(cell.getSource());
                     MaskGraphVertex<?> target = graph.getVertexForCell(cell.getTarget());
                     graph.removeCells(List.of(cell));
-                    graph.addEdge(source, target, new MaskMethodEdge((String) cell.getSource().getValue(), (String) cell.getTarget().getValue()));
+                    graph.addEdge(source, target, new MaskMethodEdge((String) cell.getSource().getValue(),
+                                                                     (String) cell.getTarget().getValue()));
                     e.consume();
                 }
             }

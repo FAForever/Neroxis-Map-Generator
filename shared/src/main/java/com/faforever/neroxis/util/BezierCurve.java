@@ -1,18 +1,17 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.util.vector.Vector2;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 @EqualsAndHashCode
 public strictfp class BezierCurve {
-    private static final Map<Integer, Integer[]> COEFFICIENTS_MAP = new HashMap<>();
 
+    private static final Map<Integer, Integer[]> COEFFICIENTS_MAP = new HashMap<>();
     protected final Vector2[] controlPoints;
     protected final Integer[] coefficients;
     @Getter
@@ -43,21 +42,16 @@ public strictfp class BezierCurve {
         return coefficients;
     }
 
-    public Vector2 getStart() {
-        return controlPoints[0];
-    }
-
-    public Vector2 getEnd() {
-        return controlPoints[controlPoints.length - 1];
-    }
-
     public Vector2 getPoint(float t) {
         if (t < 0 || t > 1) {
             throw new IllegalArgumentException("t must be between 0 and 1");
         }
         Vector2 pointOnCurve = new Vector2();
         for (int i = 0; i < controlPoints.length; ++i) {
-            pointOnCurve.add(controlPoints[i].copy().multiply((float) (coefficients[i] * StrictMath.pow((1 - t), (order - i)) * StrictMath.pow(t, i))));
+            pointOnCurve.add(controlPoints[i].copy()
+                                             .multiply((float) (coefficients[i]
+                                                                * StrictMath.pow((1 - t), (order - i))
+                                                                * StrictMath.pow(t, i))));
         }
         return pointOnCurve;
     }
@@ -71,10 +65,21 @@ public strictfp class BezierCurve {
         return rotate(angleDifference).scale(distanceRatio).translate(positionDifference);
     }
 
-    private BezierCurve rotate(float angle) {
-        Vector2 origin = controlPoints[0].copy();
+    public Vector2 getStart() {
+        return controlPoints[0];
+    }
+
+    public Vector2 getEnd() {
+        return controlPoints[controlPoints.length - 1];
+    }
+
+    private BezierCurve translate(Vector2 translationVector) {
+        return translate(translationVector.getX(), translationVector.getY());
+    }
+
+    private BezierCurve translate(float xTranslation, float yTranslation) {
         for (Vector2 controlPoint : controlPoints) {
-            controlPoint.subtract(origin).rotate(angle).add(origin);
+            controlPoint.add(xTranslation, yTranslation);
         }
         return this;
     }
@@ -87,13 +92,10 @@ public strictfp class BezierCurve {
         return this;
     }
 
-    private BezierCurve translate(Vector2 translationVector) {
-        return translate(translationVector.getX(), translationVector.getY());
-    }
-
-    private BezierCurve translate(float xTranslation, float yTranslation) {
+    private BezierCurve rotate(float angle) {
+        Vector2 origin = controlPoints[0].copy();
         for (Vector2 controlPoint : controlPoints) {
-            controlPoint.add(xTranslation, yTranslation);
+            controlPoint.subtract(origin).rotate(angle).add(origin);
         }
         return this;
     }

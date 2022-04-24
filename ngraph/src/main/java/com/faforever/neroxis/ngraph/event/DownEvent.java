@@ -7,6 +7,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class DownEvent extends EventObject {
+
     ICell root;
     ICell previous;
 }

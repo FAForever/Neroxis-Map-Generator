@@ -6,11 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TemporaryCellStates {
-    protected GraphView view;
 
+    protected GraphView view;
     protected HashMap<ICell, CellState> oldStates;
     protected RectangleDouble oldBounds;
-
     protected double oldScale;
 
     /**
@@ -18,13 +17,6 @@ public class TemporaryCellStates {
      */
     public TemporaryCellStates(GraphView view) {
         this(view, 1, null);
-    }
-
-    /**
-     * Constructs a new temporary cell states instance.
-     */
-    public TemporaryCellStates(GraphView view, double scale) {
-        this(view, scale, null);
     }
 
     /**
@@ -66,6 +58,13 @@ public class TemporaryCellStates {
     }
 
     /**
+     * Constructs a new temporary cell states instance.
+     */
+    public TemporaryCellStates(GraphView view, double scale) {
+        this(view, scale, null);
+    }
+
+    /**
      * Destroys the cell states and restores the state of the graph view.
      */
     public void destroy() {
@@ -73,5 +72,4 @@ public class TemporaryCellStates {
         view.setStates(oldStates);
         view.setGraphBounds(oldBounds);
     }
-
 }

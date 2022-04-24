@@ -1,8 +1,14 @@
 package com.faforever.neroxis.ui.components;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.LayoutManager;
 import java.awt.event.MouseWheelEvent;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 
 /**
  * Scrollable JPopupMenu.
@@ -11,12 +17,13 @@ import java.awt.event.MouseWheelEvent;
  * @author rammar
  */
 public class JScrollPopupMenu extends JPopupMenu {
+
     protected int maximumVisibleRows = 10;
+    private JScrollBar popupScrollBar;
 
     public JScrollPopupMenu() {
         this(null);
     }
-
 
     public JScrollPopupMenu(String label) {
         super(label);
@@ -25,16 +32,15 @@ public class JScrollPopupMenu extends JPopupMenu {
         super.add(getScrollBar());
         addMouseWheelListener(event -> {
             JScrollBar scrollBar = getScrollBar();
-            int amount = (event.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
-                    ? event.getUnitsToScroll() * scrollBar.getUnitIncrement()
-                    : (event.getWheelRotation() < 0 ? -1 : 1) * scrollBar.getBlockIncrement();
+            int amount = (event.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) ? event.getUnitsToScroll()
+                                                                                        * scrollBar.getUnitIncrement() :
+                    (event.getWheelRotation() < 0 ? -1 : 1)
+                    * scrollBar.getBlockIncrement();
 
             scrollBar.setValue(scrollBar.getValue() + amount);
             event.consume();
         });
     }
-
-    private JScrollBar popupScrollBar;
 
     protected JScrollBar getScrollBar() {
         if (popupScrollBar == null) {
@@ -58,12 +64,14 @@ public class JScrollPopupMenu extends JPopupMenu {
         this.maximumVisibleRows = maximumVisibleRows;
     }
 
+    @Override
     public void paintChildren(Graphics g) {
         Insets insets = getInsets();
         g.clipRect(insets.left, insets.top, getWidth(), getHeight() - insets.top - insets.bottom);
         super.paintChildren(g);
     }
 
+    @Override
     protected void addImpl(Component comp, Object constraints, int index) {
         super.addImpl(comp, constraints, index);
 
@@ -72,6 +80,7 @@ public class JScrollPopupMenu extends JPopupMenu {
         }
     }
 
+    @Override
     public void remove(int index) {
         // can't remove the scrollbar
         ++index;
@@ -83,6 +92,7 @@ public class JScrollPopupMenu extends JPopupMenu {
         }
     }
 
+    @Override
     public void show(Component invoker, int x, int y) {
         JScrollBar scrollBar = getScrollBar();
         if (scrollBar.isVisible()) {
@@ -122,6 +132,7 @@ public class JScrollPopupMenu extends JPopupMenu {
     }
 
     protected static class ScrollPopupMenuLayout implements LayoutManager {
+
         @Override
         public void addLayoutComponent(String name, Component comp) {
         }

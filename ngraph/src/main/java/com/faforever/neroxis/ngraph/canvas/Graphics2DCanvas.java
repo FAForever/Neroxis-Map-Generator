@@ -61,12 +61,10 @@ public class Graphics2DCanvas extends BasicCanvas {
      * Specifies the image scaling quality. Default is Image.SCALE_SMOOTH.
      */
     public static int IMAGE_SCALING = Image.SCALE_SMOOTH;
-
     /**
      * Maps from names to IVertexShape instances.
      */
     protected static Map<String, IShape> shapes = new HashMap<>();
-
     /**
      * Maps from names to ITextShape instances. There are currently three different
      * hardcoded text shapes available here: default, html and wrapped.
@@ -101,7 +99,6 @@ public class Graphics2DCanvas extends BasicCanvas {
      * Optional renderer pane to be used for HTML label rendering.
      */
     protected CellRendererPane rendererPane;
-
     /**
      * Global graphics handle to the image.
      */
@@ -136,10 +133,6 @@ public class Graphics2DCanvas extends BasicCanvas {
         textShapes.put(name, shape);
     }
 
-    public IShape getShape(Style style) {
-        return style.getShape().getShape();
-    }
-
     public ITextShape getTextShape(Style style) {
         return textShapes.get(TEXT_SHAPE_DEFAULT);
     }
@@ -162,6 +155,7 @@ public class Graphics2DCanvas extends BasicCanvas {
         this.graphics2D = graphics2D;
     }
 
+    @Override
     public Object drawCell(CellState state) {
         Style style = state.getStyle();
         IShape shape = getShape(style);
@@ -181,6 +175,31 @@ public class Graphics2DCanvas extends BasicCanvas {
         return shape;
     }
 
+    public IShape getShape(Style style) {
+        return style.getShape().getShape();
+    }
+
+    public Graphics2D createTemporaryGraphics(Style style, float opacity, RectangleDouble bounds) {
+        Graphics2D temporaryGraphics = (Graphics2D) graphics2D.create();
+        // Applies the default translate
+        temporaryGraphics.translate(translate.getX(), translate.getY());
+        // Applies the rotation on the graphics object
+        if (bounds != null) {
+            double rotation = style.getShape().getRotation();
+            if (rotation != 0) {
+                temporaryGraphics.rotate(Math.toRadians(rotation), bounds.getCenterX(), bounds.getCenterY());
+            }
+        }
+
+        // Applies the opacity to the graphics object
+        if (opacity != 100) {
+            temporaryGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity / 100));
+        }
+
+        return temporaryGraphics;
+    }
+
+    @Override
     public Object drawLabel(String text, CellState state) {
         Style style = state.getStyle();
         ITextShape shape = style.getLabel().getTextShape();
@@ -206,7 +225,8 @@ public class Graphics2DCanvas extends BasicCanvas {
         drawImage(bounds, imageUrl, PRESERVE_IMAGE_ASPECT, false, false);
     }
 
-    public void drawImage(java.awt.Rectangle bounds, String imageUrl, boolean preserveAspect, boolean flipH, boolean flipV) {
+    public void drawImage(java.awt.Rectangle bounds, String imageUrl, boolean preserveAspect, boolean flipH,
+                          boolean flipV) {
         if (imageUrl != null && bounds.getWidth() > 0 && bounds.getHeight() > 0) {
             Image img = loadImage(imageUrl);
 
@@ -227,7 +247,8 @@ public class Graphics2DCanvas extends BasicCanvas {
                     h = bounds.height;
                 }
 
-                Image scaledImage = (w == size.width && h == size.height) ? img : img.getScaledInstance(w, h, IMAGE_SCALING);
+                Image scaledImage = (w == size.width && h == size.height) ? img : img.getScaledInstance(w, h,
+                                                                                                        IMAGE_SCALING);
 
                 if (scaledImage != null) {
                     AffineTransform af = null;
@@ -265,17 +286,17 @@ public class Graphics2DCanvas extends BasicCanvas {
     }
 
     /**
-     * Implements the actual graphics call.
-     */
-    protected void drawImageImpl(Image image, int x, int y) {
-        graphics2D.drawImage(image, x, y, null);
-    }
-
-    /**
      * Returns the size for the given image.
      */
     protected Dimension getImageSize(Image image) {
         return new Dimension(image.getWidth(null), image.getHeight(null));
+    }
+
+    /**
+     * Implements the actual graphics call.
+     */
+    protected void drawImageImpl(Image image, int x, int y) {
+        graphics2D.drawImage(image, x, y, null);
     }
 
     public void paintPolyline(PointDouble[] points, boolean rounded) {
@@ -309,7 +330,9 @@ public class Graphics2DCanvas extends BasicCanvas {
                     PointDouble next = points[i + 1];
 
                     // Uses next non-overlapping point
-                    while (i < points.length - 2 && Math.round(next.getX() - tmp.getX()) == 0 && Math.round(next.getY() - tmp.getY()) == 0) {
+                    while (i < points.length - 2
+                           && Math.round(next.getX() - tmp.getX()) == 0
+                           && Math.round(next.getY() - tmp.getY()) == 0) {
                         next = points[i + 2];
                         i++;
                     }
@@ -382,7 +405,8 @@ public class Graphics2DCanvas extends BasicCanvas {
             for (int i = 0; i < dashPattern.length; i++) {
                 scaledDashPattern[i] = (float) (dashPattern[i] * scale * width);
             }
-            return new BasicStroke((float) width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, scaledDashPattern, 0.0f);
+            return new BasicStroke((float) width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f,
+                                   scaledDashPattern, 0.0f);
         } else {
             return new BasicStroke((float) width);
         }
@@ -415,25 +439,4 @@ public class Graphics2DCanvas extends BasicCanvas {
 
         return fillPaint;
     }
-
-    public Graphics2D createTemporaryGraphics(Style style, float opacity, RectangleDouble bounds) {
-        Graphics2D temporaryGraphics = (Graphics2D) graphics2D.create();
-        // Applies the default translate
-        temporaryGraphics.translate(translate.getX(), translate.getY());
-        // Applies the rotation on the graphics object
-        if (bounds != null) {
-            double rotation = style.getShape().getRotation();
-            if (rotation != 0) {
-                temporaryGraphics.rotate(Math.toRadians(rotation), bounds.getCenterX(), bounds.getCenterY());
-            }
-        }
-
-        // Applies the opacity to the graphics object
-        if (opacity != 100) {
-            temporaryGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity / 100));
-        }
-
-        return temporaryGraphics;
-    }
-
 }

@@ -1,13 +1,13 @@
 package com.faforever.neroxis.util.vector;
 
-import lombok.EqualsAndHashCode;
-
 import java.util.Arrays;
 import java.util.Random;
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 @SuppressWarnings("unchecked")
 public abstract strictfp class Vector<T extends Vector<T>> {
+
     public static final int X = 0;
     public static final int Y = 1;
     public static final int Z = 2;
@@ -16,7 +16,6 @@ public abstract strictfp class Vector<T extends Vector<T>> {
     public static final int G = 1;
     public static final int B = 2;
     public static final int A = 3;
-
     protected final float[] components;
 
     protected Vector(int dimension) {
@@ -29,10 +28,6 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public abstract T copy();
 
-    public int getDimension() {
-        return components.length;
-    }
-
     public float get(int i) {
         return components[i];
     }
@@ -43,6 +38,14 @@ public abstract strictfp class Vector<T extends Vector<T>> {
 
     public void set(T other) {
         System.arraycopy(other.components, 0, components, 0, getDimension());
+    }
+
+    private void assertEqualDimension(int dimension) {
+        int thisDimension = getDimension();
+        if (dimension != thisDimension) {
+            throw new IllegalArgumentException(
+                    String.format("Dimensions do not match: This %d other %d", thisDimension, dimension));
+        }
     }
 
     public T randomize(Random random, float minValue, float maxValue) {
@@ -77,6 +80,10 @@ public abstract strictfp class Vector<T extends Vector<T>> {
             components[i] = StrictMath.max(components[i], values[i]);
         }
         return (T) this;
+    }
+
+    public int getDimension() {
+        return components.length;
     }
 
     public T max(T other) {
@@ -300,6 +307,10 @@ public abstract strictfp class Vector<T extends Vector<T>> {
         return (float) StrictMath.sqrt(sum);
     }
 
+    public float getAngle(T other) {
+        return (float) StrictMath.acos(dot(other) / getMagnitude() / other.getMagnitude());
+    }
+
     public float dot(T other) {
         float sum = 0;
         int dimension = getDimension();
@@ -309,23 +320,12 @@ public abstract strictfp class Vector<T extends Vector<T>> {
         return sum;
     }
 
-    public float getAngle(T other) {
-        return (float) StrictMath.acos(dot(other) / getMagnitude() / other.getMagnitude());
-    }
-
     public T roundToNearestHalfPoint() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             components[i] = StrictMath.round(components[i] - .5f) + .5f;
         }
         return (T) this;
-    }
-
-    private void assertEqualDimension(int dimension) {
-        int thisDimension = getDimension();
-        if (dimension != thisDimension) {
-            throw new IllegalArgumentException(String.format("Dimensions do not match: This %d other %d", thisDimension, dimension));
-        }
     }
 
     public float[] toArray() {

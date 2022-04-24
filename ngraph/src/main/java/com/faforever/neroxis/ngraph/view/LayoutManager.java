@@ -92,18 +92,19 @@ public class LayoutManager extends EventSource {
         enabled = value;
     }
 
-    /**
-     * @return the bubbling
-     */
-    public boolean isBubbling() {
-        return bubbling;
-    }
+    protected void cellsMoved(List<ICell> cells, Point location) {
+        if (cells != null && location != null) {
+            IGraphModel model = getGraph().getModel();
 
-    /**
-     * @param value the bubbling to set
-     */
-    public void setBubbling(boolean value) {
-        bubbling = value;
+            // Checks if a layout exists to take care of the moving
+            for (ICell cell : cells) {
+                IGraphLayout layout = getLayout(model.getParent(cell));
+
+                if (layout != null) {
+                    layout.moveCell(cell, location.x, location.y);
+                }
+            }
+        }
     }
 
     /**
@@ -134,21 +135,6 @@ public class LayoutManager extends EventSource {
 
     protected IGraphLayout getLayout(ICell parent) {
         return null;
-    }
-
-    protected void cellsMoved(List<ICell> cells, Point location) {
-        if (cells != null && location != null) {
-            IGraphModel model = getGraph().getModel();
-
-            // Checks if a layout exists to take care of the moving
-            for (ICell cell : cells) {
-                IGraphLayout layout = getLayout(model.getParent(cell));
-
-                if (layout != null) {
-                    layout.moveCell(cell, location.x, location.y);
-                }
-            }
-        }
     }
 
     protected void beforeUndo(UndoableEdit edit) {
@@ -216,6 +202,20 @@ public class LayoutManager extends EventSource {
         return result;
     }
 
+    /**
+     * @return the bubbling
+     */
+    public boolean isBubbling() {
+        return bubbling;
+    }
+
+    /**
+     * @param value the bubbling to set
+     */
+    public void setBubbling(boolean value) {
+        bubbling = value;
+    }
+
     protected void layoutCells(List<ICell> cells) {
         if (!cells.isEmpty()) {
             // Invokes the layouts while removing duplicates
@@ -244,5 +244,4 @@ public class LayoutManager extends EventSource {
     public void destroy() {
         setGraph(null);
     }
-
 }

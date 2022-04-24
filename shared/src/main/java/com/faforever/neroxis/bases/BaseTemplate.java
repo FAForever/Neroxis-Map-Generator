@@ -8,28 +8,23 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.serial.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
-import lombok.Value;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import lombok.Value;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 
 @Value
 public strictfp class BaseTemplate {
+
     Vector2 center;
     LinkedHashMap<String, LinkedHashSet<Vector2>> units;
 
     public BaseTemplate(Vector2 center, String templateFile) throws IOException {
         this.center = center;
         this.units = BaseTemplate.loadUnits(templateFile);
-    }
-
-    public BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
-        this.center = center;
-        this.units = units;
     }
 
     public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String file) throws IOException {
@@ -39,20 +34,6 @@ public strictfp class BaseTemplate {
             return loadUnitsFromSCUnits(file);
         }
         throw new IllegalArgumentException("File format not valid");
-    }
-
-    private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(String scUnitsFile) throws IOException {
-        LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
-        SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scUnitsFile), SCUnitSet.class);
-        for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
-            unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
-            if (units.containsKey(unit.getID())) {
-                units.get(unit.getID()).add(new Vector2(unit.getPos()));
-            } else {
-                units.put(unit.getID(), new LinkedHashSet<>(List.of(new Vector2(unit.getPos()))));
-            }
-        }
-        return units;
     }
 
     private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromLua(String luaFile) throws IOException {
@@ -75,10 +56,31 @@ public strictfp class BaseTemplate {
         return units;
     }
 
+    public BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
+        this.center = center;
+        this.units = units;
+    }
+
+    private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(
+            String scUnitsFile) throws IOException {
+        LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
+        SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scUnitsFile),
+                                                   SCUnitSet.class);
+        for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
+            unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
+            if (units.containsKey(unit.getID())) {
+                units.get(unit.getID()).add(new Vector2(unit.getPos()));
+            } else {
+                units.put(unit.getID(), new LinkedHashSet<>(List.of(new Vector2(unit.getPos()))));
+            }
+        }
+        return units;
+    }
+
     public void addUnits(Army army, Group group) {
-        units.forEach((name, positions) ->
-                positions.forEach(position ->
-                        group.addUnit(new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name, new Vector2(position).add(center), 0))));
+        units.forEach((name, positions) -> positions.forEach(position -> group.addUnit(
+                new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), group.getUnitCount()), name,
+                         new Vector2(position).add(center), 0))));
     }
 
     public void flip(Symmetry symmetry) {

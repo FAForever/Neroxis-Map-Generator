@@ -26,6 +26,7 @@ import java.util.Set;
  * self-loop and groups parallels together under one edge object.
  */
 public class GraphHierarchyModel {
+
     /**
      * High value to start source layering scan rank value from
      */
@@ -136,7 +137,8 @@ public class GraphHierarchyModel {
      * @param internalVertices the blank internal vertices to have their information filled
      *                         in using the real vertices
      */
-    protected void createInternalCells(HierarchicalLayout layout, List<ICell> vertices, GraphHierarchyNode[] internalVertices) {
+    protected void createInternalCells(HierarchicalLayout layout, List<ICell> vertices,
+                                       GraphHierarchyNode[] internalVertices) {
         Graph graph = layout.getGraph();
 
         // Create internal edges
@@ -173,7 +175,9 @@ public class GraphHierarchyModel {
                     List<ICell> undirectedEdges = graph.getEdgesBetween(vertex, cell, false);
                     List<ICell> directedEdges = graph.getEdgesBetween(vertex, cell, true);
 
-                    if (undirectedEdges != null && !undirectedEdges.isEmpty() && (edgeMapper.get(undirectedEdges.get(0)) == null) && (directedEdges.size() * 2 >= undirectedEdges.size())) {
+                    if (undirectedEdges != null && !undirectedEdges.isEmpty() && (edgeMapper.get(undirectedEdges.get(0))
+                                                                                  == null) && (directedEdges.size() * 2
+                                                                                               >= undirectedEdges.size())) {
 
                         GraphHierarchyEdge internalEdge = new GraphHierarchyEdge(undirectedEdges);
 
@@ -405,7 +409,8 @@ public class GraphHierarchyModel {
      * @param trackAncestors whether or not the search is to keep track all nodes directly
      *                       above this one in the search path
      */
-    public void visit(CellVisitor visitor, List<GraphHierarchyNode> dfsRoots, boolean trackAncestors, Set<GraphHierarchyNode> seenNodes) {
+    public void visit(CellVisitor visitor, List<GraphHierarchyNode> dfsRoots, boolean trackAncestors,
+                      Set<GraphHierarchyNode> seenNodes) {
         // Run dfs through on all roots
         if (dfsRoots != null) {
             for (int i = 0; i < dfsRoots.size(); i++) {
@@ -444,7 +449,8 @@ public class GraphHierarchyModel {
      *                       ancestor node of the current node
      * @param layer          the layer on the dfs tree ( not the same as the model ranks )
      */
-    public void dfs(GraphHierarchyNode parent, GraphHierarchyNode root, GraphHierarchyEdge connectingEdge, CellVisitor visitor, Set<GraphHierarchyNode> seen, int layer) {
+    public void dfs(GraphHierarchyNode parent, GraphHierarchyNode root, GraphHierarchyEdge connectingEdge,
+                    CellVisitor visitor, Set<GraphHierarchyNode> seen, int layer) {
         if (root != null) {
             if (!seen.contains(root)) {
                 visitor.visit(parent, root, connectingEdge, layer, 0);
@@ -483,7 +489,8 @@ public class GraphHierarchyModel {
      * @param childHash      the new hash code for this node
      * @param layer          the layer on the dfs tree ( not the same as the model ranks )
      */
-    public void dfs(GraphHierarchyNode parent, GraphHierarchyNode root, GraphHierarchyEdge connectingEdge, CellVisitor visitor, Set<GraphHierarchyNode> seen, int[] ancestors, int childHash, int layer) {
+    public void dfs(GraphHierarchyNode parent, GraphHierarchyNode root, GraphHierarchyEdge connectingEdge,
+                    CellVisitor visitor, Set<GraphHierarchyNode> seen, int[] ancestors, int childHash, int layer) {
         // Explanation of custom hash set. Previously, the ancestors variable
         // was passed through the dfs as a HashSet. The ancestors were copied
         // into a new HashSet and when the new child was processed it was also
@@ -603,6 +610,7 @@ public class GraphHierarchyModel {
          * @param seen           an int indicating whether this cell has been seen
          *                       previously
          */
-        void visit(GraphHierarchyNode parent, GraphHierarchyNode cell, GraphHierarchyEdge connectingEdge, int layer, int seen);
+        void visit(GraphHierarchyNode parent, GraphHierarchyNode cell, GraphHierarchyEdge connectingEdge, int layer,
+                   int seen);
     }
 }

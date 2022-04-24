@@ -10,12 +10,14 @@ import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 
 public abstract strictfp class ResourceGenerator extends ElementGenerator {
+
     protected MexPlacer mexPlacer;
     protected HydroPlacer hydroPlacer;
     protected BooleanMask unbuildable;
     protected BooleanMask passableLand;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         this.unbuildable = terrainGenerator.getUnbuildable();
         this.passableLand = terrainGenerator.getPassableLand();
@@ -26,5 +28,4 @@ public abstract strictfp class ResourceGenerator extends ElementGenerator {
     public abstract void placeResources();
 
     protected abstract int getMexCount();
-
 }

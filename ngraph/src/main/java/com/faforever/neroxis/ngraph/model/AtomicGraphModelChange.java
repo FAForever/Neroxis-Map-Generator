@@ -4,6 +4,7 @@ package com.faforever.neroxis.ngraph.model;
  * Defines the interface for an atomic change of the graph model.
  */
 public abstract class AtomicGraphModelChange implements UndoableChange {
+
     /**
      * Holds the model where the change happened.
      */

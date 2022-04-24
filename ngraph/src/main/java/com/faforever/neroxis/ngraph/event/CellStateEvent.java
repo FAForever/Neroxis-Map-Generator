@@ -7,5 +7,6 @@ import lombok.Value;
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class CellStateEvent extends EventObject {
+
     CellState cellState;
 }

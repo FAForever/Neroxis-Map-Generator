@@ -10,8 +10,10 @@ import java.util.List;
  * as an interactive handler for this style.
  */
 public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
+
     @Override
-    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
+                      List<PointDouble> result) {
         // Creates array of all way- and terminalpoints
         List<PointDouble> pts = state.getAbsolutePoints();
         boolean horizontal = true;
@@ -37,8 +39,12 @@ public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
             for (int i = 0; i < 2; i++) {
                 boolean fixedVertAlign = currentPt != null && currentPt.getX() == currentHint.getX();
                 boolean fixedHozAlign = currentPt != null && currentPt.getY() == currentHint.getY();
-                boolean inHozChan = currentTerm != null && (currentHint.getY() >= currentTerm.getY() && currentHint.getY() <= currentTerm.getY() + currentTerm.getHeight());
-                boolean inVertChan = currentTerm != null && (currentHint.getX() >= currentTerm.getX() && currentHint.getX() <= currentTerm.getX() + currentTerm.getWidth());
+                boolean inHozChan = currentTerm != null && (currentHint.getY() >= currentTerm.getY()
+                                                            && currentHint.getY()
+                                                               <= currentTerm.getY() + currentTerm.getHeight());
+                boolean inVertChan = currentTerm != null && (currentHint.getX() >= currentTerm.getX()
+                                                             && currentHint.getX()
+                                                                <= currentTerm.getX() + currentTerm.getWidth());
                 hozChan = fixedHozAlign || (currentPt == null && inHozChan);
                 vertChan = fixedVertAlign || (currentPt == null && inVertChan);
                 if (currentPt != null && (!fixedHozAlign && !fixedVertAlign) && (inHozChan || inVertChan)) {
@@ -57,9 +63,21 @@ public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
                 currentPt = pts.get(lastInx);
                 currentHint = view.transformControlPoint(state, points.get(pointsLen - 1));
             }
-            if (horizontal && ((pts.get(0) != null && pts.get(0).getY() != hint.getY()) || (pts.get(0) == null && source != null && (hint.getY() < source.getY() || hint.getY() > source.getY() + source.getHeight())))) {
+            if (horizontal && ((pts.get(0) != null && pts.get(0).getY() != hint.getY()) || (pts.get(0) == null
+                                                                                            && source != null
+                                                                                            && (hint.getY()
+                                                                                                < source.getY()
+                                                                                                || hint.getY()
+                                                                                                   > source.getY()
+                                                                                                     + source.getHeight())))) {
                 result.add(new PointDouble(pt.getX(), hint.getY()));
-            } else if (!horizontal && ((pts.get(0) != null && pts.get(0).getX() != hint.getX()) || (pts.get(0) == null && source != null && (hint.getX() < source.getX() || hint.getX() > source.getX() + source.getWidth())))) {
+            } else if (!horizontal && ((pts.get(0) != null && pts.get(0).getX() != hint.getX()) || (pts.get(0) == null
+                                                                                                    && source != null
+                                                                                                    && (hint.getX()
+                                                                                                        < source.getX()
+                                                                                                        || hint.getX()
+                                                                                                           > source.getX()
+                                                                                                             + source.getWidth())))) {
                 result.add(new PointDouble(hint.getX(), pt.getY()));
             }
             if (horizontal) {
@@ -89,9 +107,18 @@ public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
         if (pt == null && target != null) {
             pt = new PointDouble(view.getRoutingCenterX(target), view.getRoutingCenterY(target));
         }
-        if (horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getY() != hint.getY()) || (pts.get(lastInx) == null && target != null && (hint.getY() < target.getY() || hint.getY() > target.getY() + target.getHeight())))) {
+        if (horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getY() != hint.getY()) || (pts.get(lastInx)
+                                                                                                    == null
+                                                                                                    && target != null
+                                                                                                    && (hint.getY()
+                                                                                                        < target.getY()
+                                                                                                        || hint.getY()
+                                                                                                           > target.getY()
+                                                                                                             + target.getHeight())))) {
             result.add(new PointDouble(pt.getX(), hint.getY()));
-        } else if (!horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getX() != hint.getX()) || (pts.get(lastInx) == null && target != null && (hint.getX() < target.getX() || hint.getX() > target.getX() + target.getWidth())))) {
+        } else if (!horizontal && ((pts.get(lastInx) != null && pts.get(lastInx).getX() != hint.getX()) || (pts.get(
+                lastInx) == null && target != null && (hint.getX() < target.getX()
+                                                       || hint.getX() > target.getX() + target.getWidth())))) {
             result.add(new PointDouble(hint.getX(), pt.getY()));
         }
         // Removes bends inside the source terminal for floating ports
@@ -102,7 +129,8 @@ public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
         }
         // Removes bends inside the target terminal
         if (pts.get(lastInx) == null && target != null) {
-            while (result.size() > 1 && target.contains(result.get(result.size() - 1).getX(), result.get(result.size() - 1).getY())) {
+            while (result.size() > 1 && target.contains(result.get(result.size() - 1).getX(),
+                                                        result.get(result.size() - 1).getY())) {
                 result.remove(result.size() - 1);
             }
         }

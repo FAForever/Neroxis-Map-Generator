@@ -22,20 +22,24 @@ public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
         return executable.getName();
     }
 
+    @Override
     protected void computeResults(GraphContext graphContext) throws InvocationTargetException, IllegalAccessException {
-        Object[] args = Arrays.stream(executable.getParameters()).map(parameter -> getParameterFinalValue(parameter, graphContext)).toArray();
+        Object[] args = Arrays.stream(executable.getParameters())
+                              .map(parameter -> getParameterFinalValue(parameter, graphContext))
+                              .toArray();
         Mask<?, ?> result = (Mask<?, ?>) executable.invoke(null, args);
         results.put(SELF, result);
     }
 
-    public String toString() {
-        return identifier == null ? "" : identifier;
-    }
-
+    @Override
     public MapMaskMethodVertex copy() {
         MapMaskMethodVertex newVertex = new MapMaskMethodVertex(executable);
         newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
+    }
+
+    public String toString() {
+        return identifier == null ? "" : identifier;
     }
 }

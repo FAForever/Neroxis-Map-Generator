@@ -4,8 +4,7 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import java.awt.*;
+import java.awt.Point;
 import java.util.function.Function;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
@@ -19,32 +18,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         super(other, name);
     }
 
-    public abstract T getAvg();
-
-    protected void addValueAt(Point point, T value) {
-        addValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void addValueAt(int x, int y, T value);
-
-    protected void subtractValueAt(Point point, T value) {
-        subtractValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void subtractValueAt(int x, int y, T value);
-
-    protected void multiplyValueAt(Point point, T value) {
-        multiplyValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void multiplyValueAt(int x, int y, T value);
-
-    protected void divideValueAt(Point point, T value) {
-        divideValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void divideValueAt(int x, int y, T value);
-
     public abstract T getSum();
 
     @GraphMethod
@@ -55,6 +28,16 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
             add(source::get);
         }, other);
     }
+
+    protected U add(Function<Point, T> valueFunction) {
+        return apply(point -> addValueAt(point, valueFunction.apply(point)));
+    }
+
+    protected void addValueAt(Point point, T value) {
+        addValueAt(point.x, point.y, value);
+    }
+
+    protected abstract void addValueAt(int x, int y, T value);
 
     @GraphMethod
     public U add(BooleanMask other, T value) {
@@ -102,6 +85,18 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     public U subtract(T val) {
         return subtract(point -> val);
     }
+
+    protected U subtract(Function<Point, T> valueFunction) {
+        return apply(point -> subtractValueAt(point, valueFunction.apply(point)));
+    }
+
+    protected void subtractValueAt(Point point, T value) {
+        subtractValueAt(point.x, point.y, value);
+    }
+
+    protected abstract void subtractValueAt(int x, int y, T value);
+
+    public abstract T getAvg();
 
     @GraphMethod
     public U subtract(U other) {
@@ -153,6 +148,16 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    protected U multiply(Function<Point, T> valueFunction) {
+        return apply(point -> multiplyValueAt(point, valueFunction.apply(point)));
+    }
+
+    protected void multiplyValueAt(Point point, T value) {
+        multiplyValueAt(point.x, point.y, value);
+    }
+
+    protected abstract void multiplyValueAt(int x, int y, T value);
+
     @GraphMethod
     public U multiply(T val) {
         return multiply(point -> val);
@@ -199,6 +204,16 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    protected U divide(Function<Point, T> valueFunction) {
+        return apply(point -> divideValueAt(point, valueFunction.apply(point)));
+    }
+
+    protected void divideValueAt(Point point, T value) {
+        divideValueAt(point.x, point.y, value);
+    }
+
+    protected abstract void divideValueAt(int x, int y, T value);
+
     @GraphMethod
     public U divide(T val) {
         return divide(point -> val);
@@ -236,47 +251,31 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    protected U add(Function<Point, T> valueFunction) {
-        return apply(point -> addValueAt(point, valueFunction.apply(point)));
-    }
-
     protected U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> addValueAt(spoint, value));
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> addValueAt(symPoint, value));
         });
-    }
-
-    protected U subtract(Function<Point, T> valueFunction) {
-        return apply(point -> subtractValueAt(point, valueFunction.apply(point)));
     }
 
     protected U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> subtractValueAt(spoint, value));
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> subtractValueAt(symPoint, value));
         });
-    }
-
-    protected U multiply(Function<Point, T> valueFunction) {
-        return apply(point -> multiplyValueAt(point, valueFunction.apply(point)));
     }
 
     protected U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyValueAt(spoint, value));
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> multiplyValueAt(symPoint, value));
         });
-    }
-
-    protected U divide(Function<Point, T> valueFunction) {
-        return apply(point -> divideValueAt(point, valueFunction.apply(point)));
     }
 
     protected U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
         return applyWithSymmetry(symmetryType, point -> {
             T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> divideValueAt(spoint, value));
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> divideValueAt(symPoint, value));
         });
     }
 

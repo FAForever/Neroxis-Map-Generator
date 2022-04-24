@@ -15,6 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 @Getter
 public strictfp class GraphContext {
+
     private final Random random;
     private final SymmetrySettings symmetrySettings;
     private final ExpressionParser parser;
@@ -39,7 +40,9 @@ public strictfp class GraphContext {
 
     public GraphContext(long seed, GeneratorParameters generatorParameters, ParameterConstraints parameterConstraints) {
         random = new Random(seed);
-        this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random, generatorParameters.getTerrainSymmetry(), generatorParameters.getNumTeams());
+        this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
+                                                                                        generatorParameters.getTerrainSymmetry(),
+                                                                                        generatorParameters.getNumTeams());
         this.generatorParameters = generatorParameters;
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         landDensity = generatorParameters.getLandDensity();
@@ -71,13 +74,16 @@ public strictfp class GraphContext {
             teamSeparation = map.getSize() / generatorParameters.getNumTeams();
         } else {
             if (generatorParameters.getNumTeams() < 8) {
-                spawnSeparation = random.nextInt(map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16) + map.getSize() / 16f;
+                spawnSeparation = random.nextInt(
+                        map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
+                                  + map.getSize() / 16f;
             } else {
                 spawnSeparation = 0;
             }
             teamSeparation = map.getSize() / generatorParameters.getNumTeams();
         }
-        new SpawnPlacer(map, random.nextLong()).placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation, symmetrySettings);
+        new SpawnPlacer(map, random.nextLong()).placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation,
+                                                            teamSeparation, symmetrySettings);
     }
 
     public <T> T getValue(String expression, String identifier, Class<T> clazz) {

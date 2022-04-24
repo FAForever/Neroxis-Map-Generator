@@ -42,6 +42,7 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 
 public strictfp class GraphPane extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
+
     @Getter
     private final PipelineGraph graph = new PipelineGraph();
     @Getter
@@ -102,6 +103,12 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         layout.setParallelEdgeSpacing(10);
     }
 
+    private void vertexSelected(MaskGraphVertex<?> vertex) {
+        if (maskVertexSelectionAction != null) {
+            maskVertexSelectionAction.accept(vertex);
+        }
+    }
+
     public void clearGraph() {
         Set<MaskGraphVertex<?>> vertices = new HashSet<>(graph.vertexSet());
         graph.removeAllVertices(vertices);
@@ -116,6 +123,17 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         }
     }
 
+    private void removeUnusedVertices() {
+        List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
+        graph.forEach(maskGraphVertex -> {
+            maskGraphVertex.resetResult();
+            if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
+                verticesToRemove.add(maskGraphVertex);
+            }
+        });
+        graph.removeAllVertices(verticesToRemove);
+    }
+
     public void importGraph(File file) {
         try {
             GraphSerializationUtil.importGraph(graph, file);
@@ -125,26 +143,22 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         layoutGraph();
     }
 
-    public void importGraph(PipelineGraph subGraph) {
-        graph.addGraph(subGraph);
-        layoutGraph();
-    }
-
-    public void exportSelectedCells(File file) {
-        PipelineGraph subGraph = graph.getSubGraphFromSelectedCells();
-        try {
-            GraphSerializationUtil.exportGraph(subGraph, file);
-        } catch (IOException ex) {
-            throw new IllegalArgumentException("Could not write graph");
-        }
-    }
-
     public void runGraph(int numTeams, int mapSize, int spawnCount, Symmetry terrainSymmetry) {
         Pipeline.reset();
         layoutGraph();
         Random random = new Random();
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
-        GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random, GeneratorParameters.builder().mapSize(mapSize).numTeams(numTeams).spawnCount(spawnCount).terrainSymmetry(terrainSymmetry).build());
+        GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random,
+                                                                                           GeneratorParameters.builder()
+                                                                                                              .mapSize(
+                                                                                                                      mapSize)
+                                                                                                              .numTeams(
+                                                                                                                      numTeams)
+                                                                                                              .spawnCount(
+                                                                                                                      spawnCount)
+                                                                                                              .terrainSymmetry(
+                                                                                                                      terrainSymmetry)
+                                                                                                              .build());
         GraphContext graphContext = new GraphContext(random.nextLong(), generatorParameters, parameterConstraints);
         DebugUtil.timedRun("Reset results", () -> graph.forEach(MaskGraphVertex::resetResult));
         DebugUtil.timedRun("Place Spawns", () -> graphContext.placeSpawns());
@@ -169,43 +183,58 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
 
     public void layoutGraph() {
         layout.execute(graph.getDefaultParent());
-        graph.getDefaultParent().getChildren().forEach(cell -> cell.getChildren().forEach(child -> graph.getOutgoingEdges(child).forEach(edge -> {
-            ICell target = edge.getTarget();
-            ICell source = edge.getSource();
-            ICell parentEdge = graph.getEdgesBetween(cell, target.getParent()).stream().findFirst().orElseThrow(() -> new IllegalStateException("No parent"));
-            RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
-            RectangleDouble targetParentBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
-            targetParentBoundingBox.grow(20);
-            List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
-                PointDouble transformedPoint = graph.getView().transformControlPoint(graph.getView().getState(edge), point);
-                return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY()) && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
-            }).collect(Collectors.toList());
-            Geometry targetGeometry = target.getGeometry();
-            Geometry targetParentGeometry = target.getParent().getGeometry();
-            RectangleDouble targetRectangle = new RectangleDouble(targetParentGeometry.getX() + targetGeometry.getX() * targetParentGeometry.getWidth(), targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(), targetGeometry.getWidth(), targetGeometry.getHeight());
-            PointDouble endPoint = new PointDouble(targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10, targetRectangle.getCenterY());
-            points.add(endPoint);
-            edge.getGeometry().setPoints(points);
-            edge.setTarget(target);
-            edge.setSource(source);
-        })));
+        graph.getDefaultParent()
+             .getChildren()
+             .forEach(cell -> cell.getChildren().forEach(child -> graph.getOutgoingEdges(child).forEach(edge -> {
+                 ICell target = edge.getTarget();
+                 ICell source = edge.getSource();
+                 ICell parentEdge = graph.getEdgesBetween(cell, target.getParent())
+                                         .stream()
+                                         .findFirst()
+                                         .orElseThrow(() -> new IllegalStateException("No parent"));
+                 RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
+                 RectangleDouble targetParentBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
+                 targetParentBoundingBox.grow(20);
+                 List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
+                     PointDouble transformedPoint = graph.getView()
+                                                         .transformControlPoint(graph.getView().getState(edge), point);
+                     return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY())
+                            && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
+                 }).collect(Collectors.toList());
+                 Geometry targetGeometry = target.getGeometry();
+                 Geometry targetParentGeometry = target.getParent().getGeometry();
+                 RectangleDouble targetRectangle = new RectangleDouble(
+                         targetParentGeometry.getX() + targetGeometry.getX() * targetParentGeometry.getWidth(),
+                         targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(),
+                         targetGeometry.getWidth(), targetGeometry.getHeight());
+                 PointDouble endPoint = new PointDouble(
+                         targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10,
+                         targetRectangle.getCenterY());
+                 points.add(endPoint);
+                 edge.getGeometry().setPoints(points);
+                 edge.setTarget(target);
+                 edge.setSource(source);
+             })));
     }
 
-    private void removeUnusedVertices() {
-        List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
-        graph.forEach(maskGraphVertex -> {
-            maskGraphVertex.resetResult();
-            if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
-                verticesToRemove.add(maskGraphVertex);
-            }
-        });
-        graph.removeAllVertices(verticesToRemove);
+    public void importGraph(PipelineGraph subGraph) {
+        graph.addGraph(subGraph);
+        layoutGraph();
     }
 
-    private void vertexSelected(MaskGraphVertex<?> vertex) {
-        if (maskVertexSelectionAction != null) {
-            maskVertexSelectionAction.accept(vertex);
+    public void exportSelectedCells(File file) {
+        PipelineGraph subGraph = graph.getSubGraphFromSelectedCells();
+        try {
+            GraphSerializationUtil.exportGraph(subGraph, file);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Could not write graph");
         }
+    }
+
+    @Override
+    public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
+        updateIdentifiers(e.getEdgeSource());
+        graphChangedAction.run();
     }
 
     public void updateIdentifiers(MaskGraphVertex<?> vertex) {
@@ -214,12 +243,6 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
             node.setIdentifier(identifier);
             graph.getCellForVertex(node).setValue(identifier);
         });
-    }
-
-    @Override
-    public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-        updateIdentifiers(e.getEdgeSource());
-        graphChangedAction.run();
     }
 
     @Override

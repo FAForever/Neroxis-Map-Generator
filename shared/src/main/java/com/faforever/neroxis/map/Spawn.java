@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public strictfp class Spawn extends Marker {
+
     private Vector2 noRushOffset;
     private int teamID;
 

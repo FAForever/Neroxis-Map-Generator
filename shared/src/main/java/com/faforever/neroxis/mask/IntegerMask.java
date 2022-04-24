@@ -16,14 +16,11 @@ import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
+
     private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
-    }
-
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
     }
 
     @GraphMethod
@@ -33,6 +30,10 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
+    }
+
+    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
     protected IntegerMask(IntegerMask other) {
@@ -55,24 +56,65 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         }, other);
     }
 
-    @Override
-    protected void initializeMask(int size) {
-        enqueue(() -> mask = new int[size][size]);
+    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(sourceImage, seed, symmetrySettings, name, false);
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, null, false);
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(sourceImage, seed, symmetrySettings, name, false);
-    }
-
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name,
+                       boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply(point -> setPrimitive(point, imageBuffer.getElem(point.x + point.y * size)));
+    }
+
+    protected void setPrimitive(Point point, int value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    protected void setPrimitive(int x, int y, int value) {
+        mask[x][y] = value;
+    }
+
+    public int getPrimitive(Vector2 location) {
+        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+    }
+
+    public int getPrimitive(int x, int y) {
+        return mask[x][y];
+    }
+
+    protected void setPrimitive(Vector2 location, int value) {
+        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+    }
+
+    @Override
+    public Integer getMin() {
+        return Arrays.stream(mask)
+                     .flatMapToInt(Arrays::stream)
+                     .min()
+                     .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+    }
+
+    @Override
+    public Integer getMax() {
+        return Arrays.stream(mask)
+                     .flatMapToInt(Arrays::stream)
+                     .max()
+                     .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+    }
+
+    public int getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    @Override
+    protected IntegerMask copyFrom(IntegerMask other) {
+        return enqueue(dependencies -> fill(((IntegerMask) dependencies.get(0)).mask), other);
     }
 
     private int transformAverage(float value) {
@@ -114,74 +156,20 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    protected void initializeMask(int size) {
+        enqueue(() -> mask = new int[size][size]);
+    }
+
+    @Override
+    public Integer getAvg() {
+        assertNotPipelined();
+        int size = getSize();
+        return getSum() / size / size;
+    }
+
+    @Override
     protected void set(int x, int y, Integer value) {
         setPrimitive(x, y, value);
-    }
-
-    public int getPrimitive(Vector2 location) {
-        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
-    }
-
-    protected void setPrimitive(Vector2 location, int value) {
-        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
-    }
-
-    public int getPrimitive(Point point) {
-        return getPrimitive(point.x, point.y);
-    }
-
-    protected void setPrimitive(Point point, int value) {
-        setPrimitive(point.x, point.y, value);
-    }
-
-    public int getPrimitive(int x, int y) {
-        return mask[x][y];
-    }
-
-    protected void setPrimitive(int x, int y, int value) {
-        mask[x][y] = value;
-    }
-
-    @Override
-    public int getImmediateSize() {
-        return mask.length;
-    }
-
-    @Override
-    protected IntegerMask setSizeInternal(int newSize) {
-        return enqueue(() -> {
-            int oldSize = getSize();
-            if (oldSize == 1) {
-                int value = getPrimitive(0, 0);
-                initializeMask(newSize);
-                fill(value);
-            } else if (oldSize != newSize) {
-                int[][] oldMask = mask;
-                initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                apply(point -> setPrimitive(point, oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]));
-            }
-        });
-    }
-
-    @Override
-    protected IntegerMask copyFrom(IntegerMask other) {
-        return enqueue(dependencies -> fill(((IntegerMask) dependencies.get(0)).mask), other);
-    }
-
-    @Override
-    public Integer getSum() {
-        return Arrays.stream(mask).flatMapToInt(Arrays::stream).sum();
-    }
-
-    @Override
-    public Integer getMin() {
-        return Arrays.stream(mask).flatMapToInt(Arrays::stream).min().orElseThrow(() -> new IllegalStateException("Empty Mask"));
-    }
-
-    @Override
-    public Integer getMax() {
-        return Arrays.stream(mask).flatMapToInt(Arrays::stream).max().orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override
@@ -202,6 +190,16 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     protected void divideValueAt(int x, int y, Integer value) {
         mask[x][y] /= value;
+    }
+
+    @Override
+    public int getImmediateSize() {
+        return mask.length;
+    }
+
+    @Override
+    public Integer getSum() {
+        return Arrays.stream(mask).flatMapToInt(Arrays::stream).sum();
     }
 
     @Override
@@ -226,12 +224,37 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     @GraphMethod
+    public IntegerMask blur(int radius) {
+        int[][] innerCount = getInnerCount();
+        return apply(
+                point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+    }
+
+    @Override
+    @GraphMethod
     public IntegerMask multiply(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             IntegerMask source = (IntegerMask) dependencies.get(0);
             apply(point -> mask[point.x][point.y] *= source.mask[point.x][point.y]);
         }, other);
+    }
+
+    @Override
+    protected IntegerMask setSizeInternal(int newSize) {
+        return enqueue(() -> {
+            int oldSize = getSize();
+            if (oldSize == 1) {
+                int value = getPrimitive(0, 0);
+                initializeMask(newSize);
+                fill(value);
+            } else if (oldSize != newSize) {
+                int[][] oldMask = mask;
+                initializeMask(newSize);
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+                apply(point -> setPrimitive(point, oldMask[coordinateMap.get(point.x)][coordinateMap.get(point.y)]));
+            }
+        });
     }
 
     @Override
@@ -242,13 +265,6 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
             IntegerMask source = (IntegerMask) dependencies.get(0);
             apply(point -> mask[point.x][point.y] /= source.mask[point.x][point.y]);
         }, other);
-    }
-
-    @Override
-    @GraphMethod
-    public IntegerMask blur(int radius) {
-        int[][] innerCount = getInnerCount();
-        return apply(point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
     }
 
     @Override
@@ -264,13 +280,6 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 }
             });
         }, other);
-    }
-
-    @Override
-    public Integer getAvg() {
-        assertNotPipelined();
-        int size = getSize();
-        return getSum() / size / size;
     }
 
     @Override

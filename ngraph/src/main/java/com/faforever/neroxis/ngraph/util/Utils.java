@@ -47,17 +47,14 @@ import org.w3c.dom.Element;
 public class Utils {
 
     private static final Logger log = Logger.getLogger(Utils.class.getName());
-
     /**
      * True if the machine is a Mac.
      */
     public static boolean IS_MAC = System.getProperty("os.name").toLowerCase().contains("mac");
-
     /**
      * True if the machine is running a linux kernel.
      */
     public static boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
-
     /**
      * Static Graphics used for Font Metrics.
      */
@@ -71,13 +68,6 @@ public class Utils {
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to initialize font graphics", e);
         }
-    }
-
-    /**
-     * Returns the size for the given label.
-     */
-    public static RectangleDouble getLabelSize(String label, Style style, double scale) {
-        return getSizeForString(label, getFont(style), scale);
     }
 
     /**
@@ -106,14 +96,16 @@ public class Utils {
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset, RectangleDouble vertexBounds, double scale) {
+    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset,
+                                                      RectangleDouble vertexBounds, double scale) {
         return getLabelPaintBounds(label, style, offset, vertexBounds, scale, false);
     }
 
     /**
      * Returns the paint bounds for the given label.
      */
-    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset, RectangleDouble vertexBounds, double scale, boolean isEdge) {
+    public static RectangleDouble getLabelPaintBounds(String label, Style style, PointDouble offset,
+                                                      RectangleDouble vertexBounds, double scale, boolean isEdge) {
         RectangleDouble size = Utils.getLabelSize(label, style, scale);
         // Measures font with full scale and scales back
         size.setWidth(size.getWidth() / scale);
@@ -146,73 +138,10 @@ public class Utils {
     }
 
     /**
-     * Returns the bounds for a label for the given location and size, taking
-     * into account the alignment and spacing in the specified style, as well as
-     * the width and height of the rectangle that contains the label. (For edge
-     * labels this width and height is 0.) The scale is used to scale the given
-     * size and the spacings in the specified style.
+     * Returns the size for the given label.
      */
-    public static RectangleDouble getScaledLabelBounds(double x, double y, RectangleDouble size, double outerWidth, double outerHeight, Style style, double scale) {
-        double inset = Constants.LABEL_INSET * scale;
-        // Scales the size of the label
-        // FIXME: Correct rounded font size and not-rounded scale
-        double width = size.getWidth() * scale + 2 * inset;
-        double height = size.getHeight() * scale + 2 * inset;
-        // Gets the global spacing and orientation
-        boolean horizontal = style.getCellProperties().isHorizontal();
-        // Gets the alignment settings
-        HorizontalAlignment align = style.getLabel().getHorizontalAlignment();
-        VerticalAlignment valign = style.getLabel().getVerticalAlignment();
-        // Gets the vertical spacing
-        int top = (int) (style.getLabel().getTopSpacing() * scale);
-        int bottom = (int) (style.getLabel().getBottomSpacing() * scale);
-        // Gets the horizontal spacing
-        int left = (int) (style.getLabel().getLeftSpacing() * scale);
-        int right = (int) (style.getLabel().getRightSpacing() * scale);
-        // Applies the orientation to the spacings and dimension
-        if (!horizontal) {
-            int tmp = top;
-            top = right;
-            right = bottom;
-            bottom = left;
-            left = tmp;
-            double tmp2 = width;
-            width = height;
-            height = tmp2;
-        }
-
-        // Computes the position of the label for the horizontal alignment
-        if ((horizontal && align == HorizontalAlignment.CENTER) || (!horizontal && valign == VerticalAlignment.MIDDLE)) {
-            x += (outerWidth - width) / 2 + left - right;
-        } else if ((horizontal && align == HorizontalAlignment.RIGHT) || (!horizontal && valign == VerticalAlignment.BOTTOM)) {
-            x += outerWidth - width - right;
-        } else {
-            x += left;
-        }
-
-        // Computes the position of the label for the vertical alignment
-        if ((!horizontal && align == HorizontalAlignment.CENTER) || (horizontal && valign == VerticalAlignment.MIDDLE)) {
-            y += (outerHeight - height) / 2 + top - bottom;
-        } else if ((!horizontal && align == HorizontalAlignment.LEFT) || (horizontal && valign == VerticalAlignment.BOTTOM)) {
-            y += outerHeight - height - bottom;
-        } else {
-            y += top;
-        }
-        return new RectangleDouble(x, y, width, height);
-    }
-
-    /**
-     * Returns the font metrics of the static font graphics instance
-     *
-     * @param font The font whose metrics are to be returned
-     * @return the font metrics of the specified font
-     */
-    public static FontMetrics getFontMetrics(Font font) {
-        if (fontGraphics != null) {
-            return fontGraphics.getFontMetrics(font);
-        }
-
-        return null;
+    public static RectangleDouble getLabelSize(String label, Style style, double scale) {
+        return getSizeForString(label, getFont(style), scale);
     }
 
     /**
@@ -250,11 +179,108 @@ public class Utils {
                 if (boundingBox == null) {
                     boundingBox = bounds;
                 } else {
-                    boundingBox.setFrame(0, 0, Math.max(boundingBox.getWidth(), bounds.getWidth()), boundingBox.getHeight() + lineHeight);
+                    boundingBox.setFrame(0, 0, Math.max(boundingBox.getWidth(), bounds.getWidth()),
+                                         boundingBox.getHeight() + lineHeight);
                 }
             }
         }
         return new RectangleDouble(boundingBox);
+    }
+
+    public static Font getFont(Style style) {
+        return getFont(style, 1);
+    }
+
+    public static Font getFont(Style style, double scale) {
+        String fontFamily = style.getLabel().getFontFamily();
+        int fontSize = style.getLabel().getFontSize();
+        Set<FontModifier> fontModifiers = style.getLabel().getFontModifiers();
+        int swingFontStyle = fontModifiers.contains(FontModifier.BOLD) ? Font.BOLD : Font.PLAIN;
+        swingFontStyle += fontModifiers.contains(FontModifier.ITALIC) ? Font.ITALIC : Font.PLAIN;
+        //https://github.com/elonderin/jgraphx/commit/c1c9b0ca7dee2b1e7ace0b0e88c3c06135bf236c
+        Map<TextAttribute, Object> fontAttributes = new HashMap<>();
+        if (fontModifiers.contains(FontModifier.UNDERLINE)) {
+            fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+        }
+        if (fontModifiers.contains(FontModifier.STRIKETHROUGH)) {
+            fontAttributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
+        }
+        return new Font(fontFamily, swingFontStyle, (int) (fontSize * scale)).deriveFont(fontAttributes);
+    }
+
+    /**
+     * Returns the bounds for a label for the given location and size, taking
+     * into account the alignment and spacing in the specified style, as well as
+     * the width and height of the rectangle that contains the label. (For edge
+     * labels this width and height is 0.) The scale is used to scale the given
+     * size and the spacings in the specified style.
+     */
+    public static RectangleDouble getScaledLabelBounds(double x, double y, RectangleDouble size, double outerWidth,
+                                                       double outerHeight, Style style, double scale) {
+        double inset = Constants.LABEL_INSET * scale;
+        // Scales the size of the label
+        // FIXME: Correct rounded font size and not-rounded scale
+        double width = size.getWidth() * scale + 2 * inset;
+        double height = size.getHeight() * scale + 2 * inset;
+        // Gets the global spacing and orientation
+        boolean horizontal = style.getCellProperties().isHorizontal();
+        // Gets the alignment settings
+        HorizontalAlignment align = style.getLabel().getHorizontalAlignment();
+        VerticalAlignment valign = style.getLabel().getVerticalAlignment();
+        // Gets the vertical spacing
+        int top = (int) (style.getLabel().getTopSpacing() * scale);
+        int bottom = (int) (style.getLabel().getBottomSpacing() * scale);
+        // Gets the horizontal spacing
+        int left = (int) (style.getLabel().getLeftSpacing() * scale);
+        int right = (int) (style.getLabel().getRightSpacing() * scale);
+        // Applies the orientation to the spacings and dimension
+        if (!horizontal) {
+            int tmp = top;
+            top = right;
+            right = bottom;
+            bottom = left;
+            left = tmp;
+            double tmp2 = width;
+            width = height;
+            height = tmp2;
+        }
+
+        // Computes the position of the label for the horizontal alignment
+        if ((horizontal && align == HorizontalAlignment.CENTER) || (!horizontal
+                                                                    && valign == VerticalAlignment.MIDDLE)) {
+            x += (outerWidth - width) / 2 + left - right;
+        } else if ((horizontal && align == HorizontalAlignment.RIGHT) || (!horizontal
+                                                                          && valign == VerticalAlignment.BOTTOM)) {
+            x += outerWidth - width - right;
+        } else {
+            x += left;
+        }
+
+        // Computes the position of the label for the vertical alignment
+        if ((!horizontal && align == HorizontalAlignment.CENTER) || (horizontal
+                                                                     && valign == VerticalAlignment.MIDDLE)) {
+            y += (outerHeight - height) / 2 + top - bottom;
+        } else if ((!horizontal && align == HorizontalAlignment.LEFT) || (horizontal
+                                                                          && valign == VerticalAlignment.BOTTOM)) {
+            y += outerHeight - height - bottom;
+        } else {
+            y += top;
+        }
+        return new RectangleDouble(x, y, width, height);
+    }
+
+    /**
+     * Returns the font metrics of the static font graphics instance
+     *
+     * @param font The font whose metrics are to be returned
+     * @return the font metrics of the specified font
+     */
+    public static FontMetrics getFontMetrics(Font font) {
+        if (fontGraphics != null) {
+            return fontGraphics.getFontMetrics(font);
+        }
+
+        return null;
     }
 
     /**
@@ -402,7 +428,8 @@ public class Utils {
      * <p>
      * Converts the given arc to a series of curves.
      */
-    public static double[] arcToCurves(double x0, double y0, double r1, double r2, double angle, double largeArcFlag, double sweepFlag, double x, double y) {
+    public static double[] arcToCurves(double x0, double y0, double r1, double r2, double angle, double largeArcFlag,
+                                       double sweepFlag, double x, double y) {
         x -= x0;
         y -= y0;
 
@@ -528,6 +555,17 @@ public class Utils {
     }
 
     /**
+     * Rotates the given point by the given cos and sin.
+     */
+    public static PointDouble getRotatedPoint(PointDouble pt, double cos, double sin, PointDouble c) {
+        double x = pt.getX() - c.getX();
+        double y = pt.getY() - c.getY();
+        double x1 = x * cos - y * sin;
+        double y1 = y * cos + x * sin;
+        return new PointDouble(x1 + c.getX(), y1 + c.getY());
+    }
+
+    /**
      * Find the first character matching the input character in the given
      * string where the character has no letter preceding it.
      *
@@ -560,7 +598,6 @@ public class Utils {
                     return result;
                 }
             }
-
         }
 
         return result;
@@ -601,17 +638,6 @@ public class Utils {
     }
 
     /**
-     * Rotates the given point by the given cos and sin.
-     */
-    public static PointDouble getRotatedPoint(PointDouble pt, double cos, double sin, PointDouble c) {
-        double x = pt.getX() - c.getX();
-        double y = pt.getY() - c.getY();
-        double x1 = x * cos - y * sin;
-        double y1 = y * cos + x * sin;
-        return new PointDouble(x1 + c.getX(), y1 + c.getY());
-    }
-
-    /**
      * Returns an integer mask of the port constraints of the given map
      *
      * @param terminal the cached cell state of the cell to determine the
@@ -636,7 +662,8 @@ public class Utils {
      * @param defaultValue Default value to return if the key is undefined.
      * @return the mask of port constraint directions
      */
-    public static int getPortConstraints(CellState terminal, CellState edge, boolean source, Set<Direction> defaultValue) {
+    public static int getPortConstraints(CellState terminal, CellState edge, boolean source,
+                                         Set<Direction> defaultValue) {
         Set<Direction> directions = terminal.getStyle().getEdge().getPortConstraints();
         if (directions == null || directions.isEmpty()) {
             directions = defaultValue;
@@ -741,7 +768,8 @@ public class Utils {
      * @param y3 Y-coordinate of the second line's endpoint.
      * @return Returns the intersection between the two lines.
      */
-    public static PointDouble intersection(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
+    public static PointDouble intersection(double x0, double y0, double x1, double y1, double x2, double y2, double x3,
+                                           double y3) {
         double denom = ((y3 - y2) * (x1 - x0)) - ((x3 - x2) * (y1 - y0));
         double nume_a = ((x3 - x2) * (y0 - y2)) - ((y3 - y2) * (x0 - x2));
         double nume_b = ((x1 - x0) * (y0 - y2)) - ((y1 - y0) * (x0 - x2));
@@ -1069,36 +1097,15 @@ public class Utils {
         }
     }
 
-    public static Font getFont(Style style) {
-        return getFont(style, 1);
-    }
-
-    public static Font getFont(Style style, double scale) {
-        String fontFamily = style.getLabel().getFontFamily();
-        int fontSize = style.getLabel().getFontSize();
-        Set<FontModifier> fontModifiers = style.getLabel().getFontModifiers();
-        int swingFontStyle = fontModifiers.contains(FontModifier.BOLD) ? Font.BOLD : Font.PLAIN;
-        swingFontStyle += fontModifiers.contains(FontModifier.ITALIC) ? Font.ITALIC : Font.PLAIN;
-        //https://github.com/elonderin/jgraphx/commit/c1c9b0ca7dee2b1e7ace0b0e88c3c06135bf236c
-        Map<TextAttribute, Object> fontAttributes = new HashMap<>();
-        if (fontModifiers.contains(FontModifier.UNDERLINE)) {
-            fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-        }
-        if (fontModifiers.contains(FontModifier.STRIKETHROUGH)) {
-            fontAttributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
-        }
-        return new Font(fontFamily, swingFontStyle, (int) (fontSize * scale)).deriveFont(fontAttributes);
-    }
-
-    public static String hexString(Color color) {
-        return HtmlColor.hexString(color);
-    }
-
     /**
      * Shortcut for parseColor with no transparency.
      */
     public static Color parseColor(String colorString) throws NumberFormatException {
         return HtmlColor.parseColor(colorString);
+    }
+
+    public static String hexString(Color color) {
+        return HtmlColor.hexString(color);
     }
 
     /**
@@ -1168,7 +1175,6 @@ public class Utils {
      * @return Returns true if the node name of the user object is equal to the
      * given type.
      */
-
     public static boolean isNode(Object value, String nodeName) {
         return isNode(value, nodeName, null, null);
     }
@@ -1198,24 +1204,12 @@ public class Utils {
     }
 
     public static void setAntiAlias(Graphics2D g, boolean antiAlias, boolean textAntiAlias) {
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, (antiAlias) ? RenderingHints.VALUE_RENDER_QUALITY : RenderingHints.VALUE_RENDER_SPEED);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, (antiAlias) ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, (textAntiAlias) ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-    }
-
-    /**
-     * Clears the given area of the specified graphics object with the given
-     * color or makes the region transparent.
-     */
-    public static void clearRect(Graphics2D g, java.awt.Rectangle rect, Color background) {
-        if (background != null) {
-            g.setColor(background);
-            g.fillRect(rect.x, rect.y, rect.width, rect.height);
-        } else {
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f));
-            g.fillRect(rect.x, rect.y, rect.width, rect.height);
-            g.setComposite(AlphaComposite.SrcOver);
-        }
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,
+                           (antiAlias) ? RenderingHints.VALUE_RENDER_QUALITY : RenderingHints.VALUE_RENDER_SPEED);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                           (antiAlias) ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                           (textAntiAlias) ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 
     /**
@@ -1223,7 +1217,8 @@ public class Utils {
      * memory to create the image then a OutOfMemoryError is thrown.
      */
     public static BufferedImage createBufferedImage(int w, int h, Color background) {
-        return Utils.createBufferedImage(w, h, background, (background != null) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
+        return Utils.createBufferedImage(w, h, background, (background
+                                                            != null) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
     }
 
     /**
@@ -1245,6 +1240,21 @@ public class Utils {
         }
 
         return result;
+    }
+
+    /**
+     * Clears the given area of the specified graphics object with the given
+     * color or makes the region transparent.
+     */
+    public static void clearRect(Graphics2D g, java.awt.Rectangle rect, Color background) {
+        if (background != null) {
+            g.setColor(background);
+            g.fillRect(rect.x, rect.y, rect.width, rect.height);
+        } else {
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f));
+            g.fillRect(rect.x, rect.y, rect.width, rect.height);
+            g.setComposite(AlphaComposite.SrcOver);
+        }
     }
 
     /**

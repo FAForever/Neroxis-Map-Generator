@@ -10,6 +10,7 @@ import java.io.Serial;
  * Implements a line with double precision coordinates.
  */
 public class LineDouble extends Line2D.Double {
+
     @Serial
     private static final long serialVersionUID = -4730972599169158546L;
 
@@ -32,6 +33,7 @@ public class LineDouble extends Line2D.Double {
      *
      * @return Returns the end point of the line.
      */
+    @Override
     public PointDouble getP1() {
         return new PointDouble(x1, y1);
     }
@@ -41,6 +43,7 @@ public class LineDouble extends Line2D.Double {
      *
      * @return Returns the end point of the line.
      */
+    @Override
     public PointDouble getP2() {
         return new PointDouble(x2, y2);
     }

@@ -17,6 +17,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 public class DefaultTextShape implements ITextShape {
+
+    @Override
     public void paintShape(Graphics2DCanvas canvas, String text, CellState state, Style style) {
         Rectangle rect = state.getLabelBounds().getRectangle();
         Graphics2D g = canvas.getGraphics();

@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
  * perimeter points etc. Feel free to contribute a fix!
  */
 public class RotationHandler extends MouseAdapter {
+
     private static final double PI4 = Math.PI / 4;
     public static ImageIcon ROTATE_ICON;
 
@@ -42,20 +43,14 @@ public class RotationHandler extends MouseAdapter {
      * Reference to the enclosing graph component.
      */
     protected GraphComponent graphComponent;
-
     /**
      * Specifies if this handler is enabled. Default is true.
      */
     protected boolean enabled = true;
-
     protected JComponent handle;
-
     protected CellState currentState;
-
     protected double initialAngle;
-
     protected double currentAngle;
-
     protected Point first;
 
     /**
@@ -77,18 +72,6 @@ public class RotationHandler extends MouseAdapter {
         handle.addMouseMotionListener(this);
     }
 
-    public GraphComponent getGraphComponent() {
-        return graphComponent;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
-    }
-
     protected JComponent createHandle() {
         JLabel label = new JLabel(ROTATE_ICON);
         label.setSize(ROTATE_ICON.getIconWidth(), ROTATE_ICON.getIconHeight());
@@ -97,10 +80,25 @@ public class RotationHandler extends MouseAdapter {
         return label;
     }
 
-    public boolean isStateHandled(CellState state) {
-        return graphComponent.getGraph().getModel().isVertex(state.getCell());
+    public void paint(Graphics g) {
+        if (currentState != null && first != null) {
+            java.awt.Rectangle rect = currentState.getRectangle();
+            double deg = currentAngle * Constants.DEG_PER_RAD;
+
+            if (deg != 0) {
+                ((Graphics2D) g).rotate(Math.toRadians(deg), currentState.getCenterX(), currentState.getCenterY());
+            }
+
+            Utils.setAntiAlias((Graphics2D) g, true, false);
+            g.drawRect(rect.x, rect.y, rect.width, rect.height);
+        }
     }
 
+    public GraphComponent getGraphComponent() {
+        return graphComponent;
+    }
+
+    @Override
     public void mousePressed(MouseEvent e) {
         if (currentState != null && handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
             start(e);
@@ -118,64 +116,7 @@ public class RotationHandler extends MouseAdapter {
         }
     }
 
-    public void mouseMoved(MouseEvent e) {
-        if (graphComponent.isEnabled() && isEnabled()) {
-            if (handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
-                graphComponent.getGraphControl().setCursor(new Cursor(Cursor.HAND_CURSOR));
-                e.consume();
-            } else if (currentState == null || !currentState.getRectangle().contains(e.getPoint())) {
-                CellState eventState = graphComponent.getGraph().getView().getState(graphComponent.getCellAt(e.getX(), e.getY(), false));
-
-                CellState state = null;
-
-                if (eventState != null && isStateHandled(eventState)) {
-                    state = eventState;
-                }
-
-                if (currentState != state) {
-                    currentState = state;
-
-                    if (currentState == null && handle.getParent() != null) {
-                        handle.setVisible(false);
-                        handle.getParent().remove(handle);
-                    } else if (currentState != null) {
-                        if (handle.getParent() == null) {
-                            // Adds component for rendering the handles (preview is separate)
-                            graphComponent.getGraphControl().add(handle, 0);
-                            handle.setVisible(true);
-                        }
-
-                        handle.setLocation((int) (currentState.getX() + currentState.getWidth() - handle.getWidth() - 4), (int) (currentState.getY() + currentState.getHeight() - handle.getWidth() - 4));
-                    }
-                }
-            }
-        }
-    }
-
-    public void mouseDragged(MouseEvent e) {
-        if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
-            RectangleDouble dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);
-            Point pt = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
-
-            double cx = currentState.getCenterX();
-            double cy = currentState.getCenterY();
-            double dx = pt.getX() - cx;
-            double dy = pt.getY() - cy;
-            double c = Math.sqrt(dx * dx + dy * dy);
-
-            currentAngle = ((pt.getX() > cx) ? -1 : 1) * Math.acos(dy / c) + PI4 + initialAngle;
-
-            dirty.add(Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD));
-            dirty.grow(1);
-
-            // TODO: Compute dirty rectangle and repaint
-            graphComponent.getGraphControl().repaint(dirty.getRectangle());
-            e.consume();
-        } else if (handle.getParent() != null) {
-            handle.getParent().remove(handle);
-        }
-    }
-
+    @Override
     public void mouseReleased(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
             double deg = 0;
@@ -206,6 +147,82 @@ public class RotationHandler extends MouseAdapter {
         currentState = null;
     }
 
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && first != null) {
+            RectangleDouble dirty = Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD);
+            Point pt = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
+
+            double cx = currentState.getCenterX();
+            double cy = currentState.getCenterY();
+            double dx = pt.getX() - cx;
+            double dy = pt.getY() - cy;
+            double c = Math.sqrt(dx * dx + dy * dy);
+
+            currentAngle = ((pt.getX() > cx) ? -1 : 1) * Math.acos(dy / c) + PI4 + initialAngle;
+
+            dirty.add(Utils.getBoundingBox(currentState, currentAngle * Constants.DEG_PER_RAD));
+            dirty.grow(1);
+
+            // TODO: Compute dirty rectangle and repaint
+            graphComponent.getGraphControl().repaint(dirty.getRectangle());
+            e.consume();
+        } else if (handle.getParent() != null) {
+            handle.getParent().remove(handle);
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        if (graphComponent.isEnabled() && isEnabled()) {
+            if (handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
+                graphComponent.getGraphControl().setCursor(new Cursor(Cursor.HAND_CURSOR));
+                e.consume();
+            } else if (currentState == null || !currentState.getRectangle().contains(e.getPoint())) {
+                CellState eventState = graphComponent.getGraph()
+                                                     .getView()
+                                                     .getState(graphComponent.getCellAt(e.getX(), e.getY(), false));
+
+                CellState state = null;
+
+                if (eventState != null && isStateHandled(eventState)) {
+                    state = eventState;
+                }
+
+                if (currentState != state) {
+                    currentState = state;
+
+                    if (currentState == null && handle.getParent() != null) {
+                        handle.setVisible(false);
+                        handle.getParent().remove(handle);
+                    } else if (currentState != null) {
+                        if (handle.getParent() == null) {
+                            // Adds component for rendering the handles (preview is separate)
+                            graphComponent.getGraphControl().add(handle, 0);
+                            handle.setVisible(true);
+                        }
+
+                        handle.setLocation(
+                                (int) (currentState.getX() + currentState.getWidth() - handle.getWidth() - 4),
+                                (int) (currentState.getY() + currentState.getHeight() - handle.getWidth() - 4));
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isStateHandled(CellState state) {
+        return graphComponent.getGraph().getModel().isVertex(state.getCell());
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
+    }
+
     public void reset() {
         if (handle.getParent() != null) {
             handle.getParent().remove(handle);
@@ -225,19 +242,4 @@ public class RotationHandler extends MouseAdapter {
             graphComponent.getGraphControl().repaint(dirty.getRectangle());
         }
     }
-
-    public void paint(Graphics g) {
-        if (currentState != null && first != null) {
-            java.awt.Rectangle rect = currentState.getRectangle();
-            double deg = currentAngle * Constants.DEG_PER_RAD;
-
-            if (deg != 0) {
-                ((Graphics2D) g).rotate(Math.toRadians(deg), currentState.getCenterX(), currentState.getCenterY());
-            }
-
-            Utils.setAntiAlias((Graphics2D) g, true, false);
-            g.drawRect(rect.x, rect.y, rect.width, rect.height);
-        }
-    }
-
 }

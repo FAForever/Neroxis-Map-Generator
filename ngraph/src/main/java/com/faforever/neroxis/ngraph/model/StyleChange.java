@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class StyleChange extends AtomicGraphModelChange {
+
     protected ICell cell;
     protected String style, previous;
 
@@ -21,6 +22,7 @@ public class StyleChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         style = previous;
         previous = ((GraphModel) model).styleForCellChanged(cell, style);

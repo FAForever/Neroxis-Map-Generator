@@ -13,23 +13,7 @@ import java.awt.geom.GeneralPath;
 
 public class LabelShape extends ImageShape {
 
-    /**
-     * Draws the glass effect
-     */
-    public static void drawGlassEffect(Graphics2DCanvas canvas, CellState state) {
-        double size = 0.4;
-        canvas.getGraphics().setPaint(new GradientPaint((float) state.getX(), (float) state.getY(), new Color(1, 1, 1, 0.9f), (float) (state.getX()), (float) (state.getY() + state.getHeight() * size), new Color(1, 1, 1, 0.3f)));
-        float sw = (float) (state.getStyle().getShape().getStrokeWidth() * canvas.getScale() / 2);
-
-        GeneralPath path = new GeneralPath();
-        path.moveTo((float) state.getX() - sw, (float) state.getY() - sw);
-        path.lineTo((float) state.getX() - sw, (float) (state.getY() + state.getHeight() * size));
-        path.quadTo((float) (state.getX() + state.getWidth() * 0.5), (float) (state.getY() + state.getHeight() * 0.7), (float) (state.getX() + state.getWidth() + sw), (float) (state.getY() + state.getHeight() * size));
-        path.lineTo((float) (state.getX() + state.getWidth() + sw), (float) state.getY() - sw);
-        path.closePath();
-        canvas.getGraphics().fill(path);
-    }
-
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);
         if (state.getStyle().getCellProperties().isGlass()) {
@@ -37,6 +21,28 @@ public class LabelShape extends ImageShape {
         }
     }
 
+    /**
+     * Draws the glass effect
+     */
+    public static void drawGlassEffect(Graphics2DCanvas canvas, CellState state) {
+        double size = 0.4;
+        canvas.getGraphics()
+              .setPaint(new GradientPaint((float) state.getX(), (float) state.getY(), new Color(1, 1, 1, 0.9f),
+                                          (float) (state.getX()), (float) (state.getY() + state.getHeight() * size),
+                                          new Color(1, 1, 1, 0.3f)));
+        float sw = (float) (state.getStyle().getShape().getStrokeWidth() * canvas.getScale() / 2);
+
+        GeneralPath path = new GeneralPath();
+        path.moveTo((float) state.getX() - sw, (float) state.getY() - sw);
+        path.lineTo((float) state.getX() - sw, (float) (state.getY() + state.getHeight() * size));
+        path.quadTo((float) (state.getX() + state.getWidth() * 0.5), (float) (state.getY() + state.getHeight() * 0.7),
+                    (float) (state.getX() + state.getWidth() + sw), (float) (state.getY() + state.getHeight() * size));
+        path.lineTo((float) (state.getX() + state.getWidth() + sw), (float) state.getY() - sw);
+        path.closePath();
+        canvas.getGraphics().fill(path);
+    }
+
+    @Override
     public Rectangle getImageBounds(Graphics2DCanvas canvas, CellState state) {
         Style style = state.getStyle();
         double scale = canvas.getScale();
@@ -64,16 +70,18 @@ public class LabelShape extends ImageShape {
         return imageBounds.getRectangle();
     }
 
-    public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
-        return state.getStyle().getShape().getFillColor();
-    }
-
-    public Color getStrokeColor(Graphics2DCanvas canvas, CellState state) {
-        return state.getStyle().getShape().getStrokeColor();
-    }
-
+    @Override
     public boolean hasGradient(Graphics2DCanvas canvas, CellState state) {
         return true;
     }
 
+    @Override
+    public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
+        return state.getStyle().getShape().getFillColor();
+    }
+
+    @Override
+    public Color getStrokeColor(Graphics2DCanvas canvas, CellState state) {
+        return state.getStyle().getShape().getStrokeColor();
+    }
 }

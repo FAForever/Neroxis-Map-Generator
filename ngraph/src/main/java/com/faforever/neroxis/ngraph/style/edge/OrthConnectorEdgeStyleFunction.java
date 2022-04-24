@@ -12,6 +12,7 @@ import java.util.List;
  * respects port constraints
  */
 public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
+
     private static final SegmentConnectorEdgeStyleFunction SEGMENT_CONNECTOR_EDGE_STYLE = new SegmentConnectorEdgeStyleFunction();
     private static final double ORTH_BUFFER = 10;
     private static final double[][] DIR_VECTORS = new double[][]{{-1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 0}};
@@ -41,7 +42,8 @@ public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
     private static final int TARGET_MASK = 2048;
 
     @Override
-    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points, List<PointDouble> result) {
+    public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
+                      List<PointDouble> result) {
         Graph graph = state.getView().getGraph();
         boolean sourceEdge = source != null && graph.getModel().isEdge(source.getCell());
         boolean targetEdge = target != null && graph.getModel().isEdge(target.getCell());
@@ -139,8 +141,10 @@ public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
             int[] dirPref = new int[2];
             int[] horPref = new int[2];
             int[] vertPref = new int[2];
-            horPref[0] = sourceLeftDist >= sourceRightDist ? Constants.DIRECTION_MASK_WEST : Constants.DIRECTION_MASK_EAST;
-            vertPref[0] = sourceTopDist >= sourceBottomDist ? Constants.DIRECTION_MASK_NORTH : Constants.DIRECTION_MASK_SOUTH;
+            horPref[0] = sourceLeftDist
+                         >= sourceRightDist ? Constants.DIRECTION_MASK_WEST : Constants.DIRECTION_MASK_EAST;
+            vertPref[0] = sourceTopDist
+                          >= sourceBottomDist ? Constants.DIRECTION_MASK_NORTH : Constants.DIRECTION_MASK_SOUTH;
             horPref[1] = Utils.reversePortConstraints(horPref[0]);
             vertPref[1] = Utils.reversePortConstraints(vertPref[0]);
             double preferredHorizDist = Math.max(sourceLeftDist, sourceRightDist);
@@ -215,7 +219,10 @@ public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
                     dirPref[i] = (dirPref[i] & 0xFFFF) | ((dirPref[i] & 0xF000000) >> 8);
                 }
                 dir[i] = dirPref[i] & 0xF;
-                if (portConstraint[i] == Constants.DIRECTION_MASK_WEST || portConstraint[i] == Constants.DIRECTION_MASK_NORTH || portConstraint[i] == Constants.DIRECTION_MASK_EAST || portConstraint[i] == Constants.DIRECTION_MASK_SOUTH) {
+                if (portConstraint[i] == Constants.DIRECTION_MASK_WEST
+                    || portConstraint[i] == Constants.DIRECTION_MASK_NORTH
+                    || portConstraint[i] == Constants.DIRECTION_MASK_EAST
+                    || portConstraint[i] == Constants.DIRECTION_MASK_SOUTH) {
                     dir[i] = portConstraint[i];
                 }
             }
@@ -243,7 +250,8 @@ public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
                 }
             }
             int currentIndex = 0;
-            int lastOrientation = (dir[0] & (Constants.DIRECTION_MASK_EAST | Constants.DIRECTION_MASK_WEST)) > 0 ? 0 : 1;
+            int lastOrientation = (dir[0] & (Constants.DIRECTION_MASK_EAST | Constants.DIRECTION_MASK_WEST))
+                                  > 0 ? 0 : 1;
             int currentOrientation;
             for (int j : routePattern) {
                 int nextDirection = j & 0xF;
@@ -305,7 +313,8 @@ public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
                     WAY_POINTS_1[currentIndex][0] += direction[0] * Math.abs(VERTEX_SEPERATIONS[directionIndex] / 2);
                     WAY_POINTS_1[currentIndex][1] += direction[1] * Math.abs(VERTEX_SEPERATIONS[directionIndex] / 2);
                 }
-                if (currentIndex > 0 && WAY_POINTS_1[currentIndex][currentOrientation] == WAY_POINTS_1[currentIndex - 1][currentOrientation]) {
+                if (currentIndex > 0 && WAY_POINTS_1[currentIndex][currentOrientation] == WAY_POINTS_1[currentIndex
+                                                                                                       - 1][currentOrientation]) {
                     currentIndex--;
                 } else {
                     lastOrientation = currentOrientation;

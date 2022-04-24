@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArrowRegistry {
+
     protected static Map<String, Arrow> arrows = new HashMap<>();
 
     static {

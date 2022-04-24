@@ -10,27 +10,19 @@ import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.toolsuite.cli.LocationOptions;
 import com.faforever.neroxis.util.vector.Vector2;
-import picocli.CommandLine;
-
 import java.util.concurrent.Callable;
-
+import picocli.CommandLine;
 import static picocli.CommandLine.ArgGroup;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
-@Command(
-        name = "resize",
-        mixinStandardHelpOptions = true,
-        description = "Change the map size",
-        versionProvider = VersionProvider.class,
-        usageHelpAutoWidth = true)
+@Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapResizer implements Callable<Integer> {
 
     @Spec
     private CommandLine.Model.CommandSpec spec;
-
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
     @Mixin
@@ -39,7 +31,6 @@ public strictfp class MapResizer implements Callable<Integer> {
     private DebugMixin debugMixin;
     @ArgGroup(exclusive = false, heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n")
     private LocationOptions locationOptions;
-
     private int newMapSize;
     private int scaledSize;
 

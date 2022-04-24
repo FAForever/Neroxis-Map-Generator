@@ -24,8 +24,11 @@ import javax.swing.JPanel;
 
 public class VertexHandler extends CellHandler {
 
-    public static Cursor[] CURSORS = new Cursor[]{new Cursor(Cursor.NW_RESIZE_CURSOR), new Cursor(Cursor.N_RESIZE_CURSOR), new Cursor(Cursor.NE_RESIZE_CURSOR), new Cursor(Cursor.W_RESIZE_CURSOR), new Cursor(Cursor.E_RESIZE_CURSOR), new Cursor(Cursor.SW_RESIZE_CURSOR), new Cursor(Cursor.S_RESIZE_CURSOR), new Cursor(Cursor.SE_RESIZE_CURSOR), new Cursor(Cursor.MOVE_CURSOR)};
-
+    public static Cursor[] CURSORS = new Cursor[]{new Cursor(Cursor.NW_RESIZE_CURSOR), new Cursor(
+            Cursor.N_RESIZE_CURSOR), new Cursor(Cursor.NE_RESIZE_CURSOR), new Cursor(
+            Cursor.W_RESIZE_CURSOR), new Cursor(Cursor.E_RESIZE_CURSOR), new Cursor(
+            Cursor.SW_RESIZE_CURSOR), new Cursor(Cursor.S_RESIZE_CURSOR), new Cursor(
+            Cursor.SE_RESIZE_CURSOR), new Cursor(Cursor.MOVE_CURSOR)};
     /**
      * Workaround for alt-key-state not correct in mouseReleased.
      */
@@ -39,6 +42,7 @@ public class VertexHandler extends CellHandler {
         super(graphComponent, state);
     }
 
+    @Override
     protected Rectangle[] createHandles() {
         Rectangle[] h;
         if (graphComponent.getGraph().isCellResizable(getState().getCell())) {
@@ -65,11 +69,13 @@ public class VertexHandler extends CellHandler {
         }
         int s = Constants.LABEL_HANDLE_SIZE;
         RectangleDouble bounds = state.getLabelBounds();
-        h[h.length - 1] = new Rectangle((int) (bounds.getX() + bounds.getWidth() / 2 - s), (int) (bounds.getY() + bounds.getHeight() / 2 - s), 2 * s, 2 * s);
+        h[h.length - 1] = new Rectangle((int) (bounds.getX() + bounds.getWidth() / 2 - s),
+                                        (int) (bounds.getY() + bounds.getHeight() / 2 - s), 2 * s, 2 * s);
 
         return h;
     }
 
+    @Override
     protected JComponent createPreview() {
         JPanel preview = new JPanel();
         preview.setBorder(SwingConstants.PREVIEW_BORDER);
@@ -79,6 +85,16 @@ public class VertexHandler extends CellHandler {
         return preview;
     }
 
+    @Override
+    protected Cursor getCursor(MouseEvent e, int index) {
+        if (index >= 0 && index <= CURSORS.length) {
+            return CURSORS[index];
+        }
+
+        return null;
+    }
+
+    @Override
     public void mouseDragged(MouseEvent e) {
         if (!e.isConsumed() && first != null) {
             gridEnabledEvent = graphComponent.isGridEnabledEvent(e);
@@ -129,6 +145,7 @@ public class VertexHandler extends CellHandler {
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         if (!e.isConsumed() && first != null) {
             if (preview != null && preview.isVisible()) {
@@ -222,12 +239,31 @@ public class VertexHandler extends CellHandler {
         }
     }
 
-    protected Cursor getCursor(MouseEvent e, int index) {
-        if (index >= 0 && index <= CURSORS.length) {
-            return CURSORS[index];
+    @Override
+    public void paint(Graphics g) {
+        Rectangle bounds = getState().getRectangle();
+
+        if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {
+            Graphics2D g2 = (Graphics2D) g;
+
+            Stroke stroke = g2.getStroke();
+            g2.setStroke(getSelectionStroke());
+            g.setColor(getSelectionColor());
+            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            g2.setStroke(stroke);
         }
 
-        return null;
+        super.paint(g);
+    }
+
+    @Override
+    public Color getSelectionColor() {
+        return SwingConstants.VERTEX_SELECTION_COLOR;
+    }
+
+    @Override
+    public Stroke getSelectionStroke() {
+        return SwingConstants.VERTEX_SELECTION_STROKE;
     }
 
     protected RectangleDouble union(RectangleDouble bounds, double dx, double dy, int index) {
@@ -263,29 +299,4 @@ public class VertexHandler extends CellHandler {
         }
         return new RectangleDouble(left, top, width, height);
     }
-
-    public Color getSelectionColor() {
-        return SwingConstants.VERTEX_SELECTION_COLOR;
-    }
-
-    public Stroke getSelectionStroke() {
-        return SwingConstants.VERTEX_SELECTION_STROKE;
-    }
-
-    public void paint(Graphics g) {
-        Rectangle bounds = getState().getRectangle();
-
-        if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {
-            Graphics2D g2 = (Graphics2D) g;
-
-            Stroke stroke = g2.getStroke();
-            g2.setStroke(getSelectionStroke());
-            g.setColor(getSelectionColor());
-            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-            g2.setStroke(stroke);
-        }
-
-        super.paint(g);
-    }
-
 }

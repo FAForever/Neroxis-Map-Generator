@@ -12,8 +12,10 @@ import java.awt.Rectangle;
 import java.util.Objects;
 
 public class RectangleShape extends BasicShape {
+
     public static final double RECTANGLE_ROUNDING_FACTOR = 0.15;
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Style style = state.getStyle();
         if (style.getCellProperties().isRounded()) {
@@ -31,7 +33,9 @@ public class RectangleShape extends BasicShape {
                 // Paints the optional shadow
                 if (shadow) {
                     canvas.getGraphics().setColor(SwingConstants.SHADOW_COLOR);
-                    canvas.getGraphics().fillRoundRect(x + Constants.SHADOW_OFFSETX, y + Constants.SHADOW_OFFSETY, w, h, radius, radius);
+                    canvas.getGraphics()
+                          .fillRoundRect(x + Constants.SHADOW_OFFSETX, y + Constants.SHADOW_OFFSETY, w, h, radius,
+                                         radius);
                 }
 
                 // Paints the background
@@ -63,9 +67,9 @@ public class RectangleShape extends BasicShape {
      * Helper method to configure the given wrapper canvas.
      */
     protected int getArcSize(CellState state, double w, double h) {
-        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100, RECTANGLE_ROUNDING_FACTOR);
+        double f = Objects.requireNonNullElse(state.getStyle().getShape().getArcSize() / 100,
+                                              RECTANGLE_ROUNDING_FACTOR);
 
         return (int) (Math.min(w, h) * f * 2);
     }
-
 }

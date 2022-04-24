@@ -11,7 +11,6 @@
 package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,17 +24,14 @@ public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
      * together within one hierarchy edge.
      */
     public List<ICell> edges;
-
     /**
      * The node this edge is sourced at
      */
     public GraphHierarchyNode source;
-
     /**
      * The node this edge targets
      */
     public GraphHierarchyNode target;
-
     /**
      * Whether or not the direction of this edge has been reversed
      * internally to create a DAG for the hierarchical layout
@@ -81,6 +77,7 @@ public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
      * @param layer the layer this cell is on
      * @return the cells this cell connects to on the next layer up
      */
+    @Override
     @SuppressWarnings("unchecked")
     public List<GraphAbstractHierarchyCell> getNextLayerConnectedCells(int layer) {
         if (nextLayerConnectedCells == null) {
@@ -106,6 +103,7 @@ public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
      * @param layer the layer this cell is on
      * @return the cells this cell connects to on the next layer down
      */
+    @Override
     @SuppressWarnings("unchecked")
     public List<GraphAbstractHierarchyCell> getPreviousLayerConnectedCells(int layer) {
         if (previousLayerConnectedCells == null) {
@@ -126,25 +124,12 @@ public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
     }
 
     /**
-     * @return whether or not this cell is an edge
-     */
-    public boolean isEdge() {
-        return true;
-    }
-
-    /**
-     * @return whether or not this cell is a node
-     */
-    public boolean isVertex() {
-        return false;
-    }
-
-    /**
      * Gets the value of temp for the specified layer
      *
      * @param layer the layer relating to a specific entry into temp
      * @return the value for that layer
      */
+    @Override
     public int getGeneralPurposeVariable(int layer) {
         return temp[layer - minRank - 1];
     }
@@ -155,8 +140,24 @@ public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
      * @param layer the layer relating to a specific entry into temp
      * @param value the value for that layer
      */
+    @Override
     public void setGeneralPurposeVariable(int layer, int value) {
         temp[layer - minRank - 1] = value;
     }
 
+    /**
+     * @return whether or not this cell is a node
+     */
+    @Override
+    public boolean isVertex() {
+        return false;
+    }
+
+    /**
+     * @return whether or not this cell is an edge
+     */
+    @Override
+    public boolean isEdge() {
+        return true;
+    }
 }

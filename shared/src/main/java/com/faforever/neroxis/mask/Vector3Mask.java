@@ -14,10 +14,6 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         this(size, seed, symmetrySettings, null, false);
     }
 
-    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -25,6 +21,10 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
+    }
+
+    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
     public Vector3Mask(Vector3Mask other) {
@@ -51,23 +51,25 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name, boolean parallel) {
         super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
-    }
-
-    @Override
-    protected Vector3[][] getNullMask(int size) {
-        return new Vector3[size][size];
     }
 
     @Override
     protected Vector3 createValue(float scaleFactor, float... components) {
         assertMatchingDimension(components.length);
         return new Vector3(components[0], components[1], components[2]).multiply(scaleFactor);
+    }
+
+    @Override
+    protected Vector3[][] getNullMask(int size) {
+        return new Vector3[size][size];
     }
 
     @GraphMethod
@@ -85,11 +87,6 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     @Override
-    protected Vector3 getZeroValue() {
-        return new Vector3(0f, 0f, 0f);
-    }
-
-    @Override
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -97,7 +94,16 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         Vector3 maxComponents = getMaxComponents();
         Vector3 minComponents = getMinComponents();
         Vector3 rangeComponents = maxComponents.copy().subtract(minComponents);
-        loop(point -> imageRaster.setPixel(point.x, point.y, get(point).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray()));
+        loop(point -> imageRaster.setPixel(point.x, point.y, get(point).copy()
+                                                                       .subtract(minComponents)
+                                                                       .divide(rangeComponents)
+                                                                       .multiply(255f)
+                                                                       .toArray()));
         return image;
+    }
+
+    @Override
+    protected Vector3 getZeroValue() {
+        return new Vector3(0f, 0f, 0f);
     }
 }

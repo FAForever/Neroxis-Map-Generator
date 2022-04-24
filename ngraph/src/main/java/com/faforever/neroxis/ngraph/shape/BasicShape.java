@@ -13,6 +13,7 @@ import java.awt.Shape;
 
 public class BasicShape implements IShape {
 
+    @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Shape shape = createShape(canvas, state);
 
@@ -47,7 +48,8 @@ public class BasicShape implements IShape {
 
         if (background) {
             // Paints the background of the shape
-            Paint fillPaint = hasGradient(canvas, state) ? canvas.createFillPaint(getGradientBounds(canvas, state), style) : null;
+            Paint fillPaint = hasGradient(canvas, state) ? canvas.createFillPaint(getGradientBounds(canvas, state),
+                                                                                  style) : null;
 
             if (fillPaint != null) {
                 canvas.getGraphics().setPaint(fillPaint);
@@ -69,16 +71,12 @@ public class BasicShape implements IShape {
         }
     }
 
-    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
-        return state;
-    }
-
     public boolean hasGradient(Graphics2DCanvas canvas, CellState state) {
         return true;
     }
 
-    public boolean hasShadow(Graphics2DCanvas canvas, CellState state) {
-        return state.getStyle().getCellProperties().isShadow();
+    protected RectangleDouble getGradientBounds(Graphics2DCanvas canvas, CellState state) {
+        return state;
     }
 
     public Color getFillColor(Graphics2DCanvas canvas, CellState state) {
@@ -89,4 +87,7 @@ public class BasicShape implements IShape {
         return state.getStyle().getShape().getStrokeColor();
     }
 
+    public boolean hasShadow(Graphics2DCanvas canvas, CellState state) {
+        return state.getStyle().getCellProperties().isShadow();
+    }
 }

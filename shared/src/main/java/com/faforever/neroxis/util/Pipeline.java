@@ -24,18 +24,20 @@ import lombok.Getter;
 
 public strictfp class Pipeline {
 
-    public static boolean HASH_MASK = false;
-
     private static final List<Entry> pipeline = new ArrayList<>();
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors());
+    public static boolean HASH_MASK = false;
     private static CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
     private static String[] hashArray;
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
     public static void reset() {
         started = new CompletableFuture<>();
         pipeline.clear();
     }
 
-    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
+    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
+                           Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
         if (isRunning()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -52,37 +54,39 @@ public strictfp class Pipeline {
         String finalCallingLine = callingLine;
         String finalCallingMethod = callingMethod;
         CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies)
-                .thenAcceptAsync(dependencies -> {
-                            long startTime = System.currentTimeMillis();
-                            boolean visualDebug = executingMask.isVisualDebug();
-                            executingMask.setVisualDebug(false);
-                            function.accept(dependencies);
-                            long functionTime = System.currentTimeMillis() - startTime;
-                            startTime = System.currentTimeMillis();
-                            if (HASH_MASK) {
-                                try {
-                                    hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), finalCallingLine, executingMask.getName(), finalCallingMethod);
-                                } catch (NoSuchAlgorithmException e) {
-                                    System.err.println("Cannot hash mask");
-                                }
-                            }
-                            long hashTime = System.currentTimeMillis() - startTime;
-                            if (DebugUtil.DEBUG) {
-                                System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
-                                        functionTime,
-                                        hashTime,
-                                        executingMask.getName(),
-                                        index,
-                                        finalCallingLine,
-                                        finalCallingMethod
-                                );
-                            }
-                            executingMask.setVisualDebug(visualDebug);
-                            if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE && !executingMask.isMock())) {
-                                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
-                            }
-                        },
-                        executorService);
+                                                    .thenAcceptAsync(dependencies -> {
+                                                        long startTime = System.currentTimeMillis();
+                                                        boolean visualDebug = executingMask.isVisualDebug();
+                                                        executingMask.setVisualDebug(false);
+                                                        function.accept(dependencies);
+                                                        long functionTime = System.currentTimeMillis() - startTime;
+                                                        startTime = System.currentTimeMillis();
+                                                        if (HASH_MASK) {
+                                                            try {
+                                                                hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
+                                                                                                 executingMask.toHash(),
+                                                                                                 finalCallingLine,
+                                                                                                 executingMask.getName(),
+                                                                                                 finalCallingMethod);
+                                                            } catch (NoSuchAlgorithmException e) {
+                                                                System.err.println("Cannot hash mask");
+                                                            }
+                                                        }
+                                                        long hashTime = System.currentTimeMillis() - startTime;
+                                                        if (DebugUtil.DEBUG) {
+                                                            System.out.printf(
+                                                                    "Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
+                                                                    functionTime, hashTime, executingMask.getName(),
+                                                                    index, finalCallingLine, finalCallingMethod);
+                                                        }
+                                                        executingMask.setVisualDebug(visualDebug);
+                                                        if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
+                                                                                                 && !executingMask.isMock())) {
+                                                            VisualDebugger.visualizeMask(executingMask,
+                                                                                         finalCallingMethod,
+                                                                                         finalCallingLine);
+                                                        }
+                                                    }, executorService);
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
 
@@ -90,37 +94,8 @@ public strictfp class Pipeline {
         pipeline.add(entry);
     }
 
-    public static void start() {
-        System.out.println("Starting pipeline");
-        hashArray = new String[getPipelineSize()];
-
-        if (DebugUtil.DEBUG) {
-            pipeline.forEach(entry -> System.out.printf("Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
-                    entry.toString(),
-                    entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getExecutingMask().getName(),
-                    entry.getLine(),
-                    entry.getMethodName()
-            ));
-        }
-        started.complete(null);
-    }
-
-    public static void join() {
-        pipeline.forEach(e -> e.getFuture().join());
-        System.out.println("Pipeline completed!");
-    }
-
     public static boolean isRunning() {
         return started.isDone();
-    }
-
-    public static void await(Mask<?, ?>... masks) {
-        if (!isRunning()) {
-            throw new IllegalStateException("Pipeline not started cannot await");
-        }
-        getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
     }
 
     public static List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
@@ -140,12 +115,6 @@ public strictfp class Pipeline {
         return dependencies;
     }
 
-    public static Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
-        return pipeline.stream()
-                .filter(entry -> mask.equals(entry.getExecutingMask()))
-                .reduce((first, second) -> second);
-    }
-
     /**
      * Returns a future that completes once all dependencies are met and returns their result
      *
@@ -157,23 +126,55 @@ public strictfp class Pipeline {
             return started;
         }
 
-        CompletableFuture<?>[] futures = dependencyList.stream().map(Entry::getFuture).toArray(CompletableFuture<?>[]::new);
+        CompletableFuture<?>[] futures = dependencyList.stream()
+                                                       .map(Entry::getFuture)
+                                                       .toArray(CompletableFuture<?>[]::new);
 
         if (futures.length == 0) {
             return started;
         }
 
         return CompletableFuture.allOf(futures)
-                .thenApplyAsync(aVoid ->
-                                dependencyList.stream()
-                                        .map(Entry::getResult)
-                                        .collect(Collectors.toList()),
-                        executorService
-                );
+                                .thenApplyAsync(aVoid -> dependencyList.stream()
+                                                                       .map(Entry::getResult)
+                                                                       .collect(Collectors.toList()), executorService);
+    }
+
+    public static Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
+        return pipeline.stream()
+                       .filter(entry -> mask.equals(entry.getExecutingMask()))
+                       .reduce((first, second) -> second);
+    }
+
+    public static void start() {
+        System.out.println("Starting pipeline");
+        hashArray = new String[getPipelineSize()];
+
+        if (DebugUtil.DEBUG) {
+            pipeline.forEach(entry -> System.out.printf(
+                    "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
+                    entry.toString(),
+                    entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
+        }
+        started.complete(null);
     }
 
     public static int getPipelineSize() {
         return pipeline.size();
+    }
+
+    public static void join() {
+        pipeline.forEach(e -> e.getFuture().join());
+        System.out.println("Pipeline completed!");
+    }
+
+    public static void await(Mask<?, ?>... masks) {
+        if (!isRunning()) {
+            throw new IllegalStateException("Pipeline not started cannot await");
+        }
+        getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
     }
 
     public static void toFile(Path path) throws IOException {
@@ -200,6 +201,7 @@ public strictfp class Pipeline {
 
     @Getter
     public static strictfp class Entry {
+
         private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies = new HashSet<>();
         private final CompletableFuture<Void> future;
@@ -209,14 +211,15 @@ public strictfp class Pipeline {
         private final String line;
         private Mask<?, ?> immutableResult;
 
-
-        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies, CompletableFuture<Void> future, String method, String line) {
+        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
+                     CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies.addAll(dependencies);
             this.methodName = method;
             this.line = line;
-            this.future = future.thenRunAsync(() -> immutableResult = executingMask.isMock() ? executingMask : executingMask.mock());
+            this.future = future.thenRunAsync(
+                    () -> immutableResult = executingMask.isMock() ? executingMask : executingMask.mock());
         }
 
         public Mask<?, ?> getResult() {

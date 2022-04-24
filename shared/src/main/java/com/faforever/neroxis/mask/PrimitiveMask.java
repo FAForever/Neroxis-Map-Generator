@@ -1,8 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-
-import java.awt.*;
+import java.awt.Point;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
@@ -43,5 +42,4 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
         return (float) count / area;
     }
-
 }

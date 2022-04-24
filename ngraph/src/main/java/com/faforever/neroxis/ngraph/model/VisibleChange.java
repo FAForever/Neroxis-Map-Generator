@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class VisibleChange extends AtomicGraphModelChange {
+
     protected ICell cell;
     protected boolean visible, previous;
 
@@ -21,6 +22,7 @@ public class VisibleChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         visible = previous;
         previous = ((GraphModel) model).visibleStateForCellChanged(cell, previous);

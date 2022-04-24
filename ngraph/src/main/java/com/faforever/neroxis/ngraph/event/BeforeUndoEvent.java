@@ -13,5 +13,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class BeforeUndoEvent extends EventObject {
+
     UndoableEdit edit;
 }

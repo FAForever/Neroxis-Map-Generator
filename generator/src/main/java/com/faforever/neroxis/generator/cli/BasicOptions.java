@@ -8,9 +8,9 @@ import picocli.CommandLine;
 @Getter
 @Setter
 public class BasicOptions {
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
-
     @CommandLine.Option(names = "--seed", order = 1, description = "Seed for the generated map")
     private Long seed;
     @CommandLine.Option(names = "--spawn-count", order = 3, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)

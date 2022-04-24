@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Curve {
+
     /**
      * Defines the key for the central curve index
      */
@@ -181,7 +182,11 @@ public class Curve {
     public LineDouble getCurveParallel(String index, double distance) {
         PointDouble[] pointsCurve = getCurvePoints(index);
         double[] curveIntervals = getIntervals(index);
-        if (pointsCurve != null && pointsCurve.length > 0 && curveIntervals != null && distance >= 0.0 && distance <= 1.0) {
+        if (pointsCurve != null
+            && pointsCurve.length > 0
+            && curveIntervals != null
+            && distance >= 0.0
+            && distance <= 1.0) {
             // If the curve is zero length, it will only have one point
             // We can't calculate in this case
             if (pointsCurve.length == 1) {
@@ -192,7 +197,8 @@ public class Curve {
             PointDouble firstPointOfSeg = pointsCurve[lowerLimit];
             double segVectorX = pointsCurve[lowerLimit + 1].getX() - firstPointOfSeg.getX();
             double segVectorY = pointsCurve[lowerLimit + 1].getY() - firstPointOfSeg.getY();
-            double distanceAlongSeg = (distance - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1] - curveIntervals[lowerLimit]);
+            double distanceAlongSeg = (distance - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1]
+                                                                                 - curveIntervals[lowerLimit]);
             double segLength = Math.sqrt(segVectorX * segVectorX + segVectorY * segVectorY);
             double startPointX = firstPointOfSeg.getX() + segVectorX * distanceAlongSeg;
             double startPointY = firstPointOfSeg.getY() + segVectorY * distanceAlongSeg;
@@ -214,7 +220,13 @@ public class Curve {
     public PointDouble[] getCurveSection(String index, double start, double end) {
         PointDouble[] pointsCurve = getCurvePoints(index);
         double[] curveIntervals = getIntervals(index);
-        if (pointsCurve != null && pointsCurve.length > 0 && curveIntervals != null && start >= 0.0 && start <= 1.0 && end >= 0.0 && end <= 1.0) {
+        if (pointsCurve != null
+            && pointsCurve.length > 0
+            && curveIntervals != null
+            && start >= 0.0
+            && start <= 1.0
+            && end >= 0.0
+            && end <= 1.0) {
             // If the curve is zero length, it will only have one point
             // We can't calculate in this case
             if (pointsCurve.length == 1) {
@@ -225,8 +237,10 @@ public class Curve {
             PointDouble firstPointOfSeg = pointsCurve[lowerLimit];
             double segVectorX = pointsCurve[lowerLimit + 1].getX() - firstPointOfSeg.getX();
             double segVectorY = pointsCurve[lowerLimit + 1].getY() - firstPointOfSeg.getY();
-            double distanceAlongSeg = (start - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1] - curveIntervals[lowerLimit]);
-            PointDouble startPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
+            double distanceAlongSeg = (start - curveIntervals[lowerLimit]) / (curveIntervals[lowerLimit + 1]
+                                                                              - curveIntervals[lowerLimit]);
+            PointDouble startPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg,
+                                                     firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
             List<PointDouble> result = new ArrayList<PointDouble>();
             result.add(startPoint);
 
@@ -245,8 +259,10 @@ public class Curve {
                 firstPointOfSeg = pointsCurve[lowerLimit - 1];
                 segVectorX = pointsCurve[lowerLimit].getX() - firstPointOfSeg.getX();
                 segVectorY = pointsCurve[lowerLimit].getY() - firstPointOfSeg.getY();
-                distanceAlongSeg = (end - curveIntervals[lowerLimit - 1]) / (curveIntervals[lowerLimit] - curveIntervals[lowerLimit - 1]);
-                PointDouble endPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg, firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
+                distanceAlongSeg = (end - curveIntervals[lowerLimit - 1]) / (curveIntervals[lowerLimit]
+                                                                             - curveIntervals[lowerLimit - 1]);
+                PointDouble endPoint = new PointDouble(firstPointOfSeg.getX() + segVectorX * distanceAlongSeg,
+                                                       firstPointOfSeg.getY() + segVectorY * distanceAlongSeg);
                 result.add(endPoint);
             }
             PointDouble[] resultArray = new PointDouble[result.size()];
@@ -277,13 +293,15 @@ public class Curve {
             // rectangle, then for any of the curve segments intersecting
             // with the rectangle sides
             for (int i = 1; i < pointsCurve.length; i++) {
-                if (Rect.contains(pointsCurve[i].getX(), pointsCurve[i].getY()) || Rect.contains(pointsCurve[i - 1].getX(), pointsCurve[i - 1].getY())) {
+                if (Rect.contains(pointsCurve[i].getX(), pointsCurve[i].getY()) || Rect.contains(
+                        pointsCurve[i - 1].getX(), pointsCurve[i - 1].getY())) {
                     return true;
                 }
             }
 
             for (int i = 1; i < pointsCurve.length; i++) {
-                if (Rect.intersectLine(pointsCurve[i].getX(), pointsCurve[i].getY(), pointsCurve[i - 1].getX(), pointsCurve[i - 1].getY()) != null) {
+                if (Rect.intersectLine(pointsCurve[i].getX(), pointsCurve[i].getY(), pointsCurve[i - 1].getX(),
+                                       pointsCurve[i - 1].getY()) != null) {
                     return true;
                 }
             }
@@ -347,7 +365,8 @@ public class Curve {
                 double distToStartSeg = curveIntervals[segIndex - 1] * getCurveLength(index);
                 double intersectOffsetX = intersectPoint.getX() - startSegX;
                 double intersectOffsetY = intersectPoint.getY() - startSegY;
-                double lenToIntersect = Math.sqrt(intersectOffsetX * intersectOffsetX + intersectOffsetY * intersectOffsetY);
+                double lenToIntersect = Math.sqrt(
+                        intersectOffsetX * intersectOffsetX + intersectOffsetY * intersectOffsetY);
                 result = distToStartSeg + lenToIntersect;
             }
         }
@@ -409,7 +428,6 @@ public class Curve {
             if (hitPoint != null) {
 
             }
-
         }
 
         return null;
@@ -448,7 +466,8 @@ public class Curve {
         PointDouble[] pointsCurve = getCurvePoints(index);
         if (pointsCurve != null && pointsCurve.length > 1) {
             for (int i = startSegment; i < pointsCurve.length; i++) {
-                if (rect.intersectLine(pointsCurve[i].getX(), pointsCurve[i].getY(), pointsCurve[i - 1].getX(), pointsCurve[i - 1].getY()) != null) {
+                if (rect.intersectLine(pointsCurve[i].getX(), pointsCurve[i].getY(), pointsCurve[i - 1].getX(),
+                                       pointsCurve[i - 1].getY()) != null) {
                     return i;
                 }
             }
@@ -487,15 +506,15 @@ public class Curve {
      * Calculates the position of an absolute in terms relative
      * to this curve.
      *
-     * @param absPoint the point whose relative point is to calculated
-     * @param index    the index of the curve whom the relative position is to be
-     *                 calculated from
+     * @param absymPoint the point whose relative point is to calculated
+     * @param index      the index of the curve whom the relative position is to be
+     *                   calculated from
      * @return an Rectangle where the x is the distance along the curve
      * (0 to 1), y is the orthogonal offset from the closest segment on the
      * curve and (width, height) is an additional Cartesian offset applied
      * after the other calculations
      */
-    public RectangleDouble getRelativeFromAbsPoint(PointDouble absPoint, String index) {
+    public RectangleDouble getRelativeFromAbsymPoint(PointDouble absymPoint, String index) {
         // Work out which segment the absolute point is closest to
         PointDouble[] currentCurve = getCurvePoints(index);
         double[] currentIntervals = getIntervals(index);
@@ -504,7 +523,7 @@ public class Curve {
         LineDouble segment = new LineDouble(currentCurve[0], currentCurve[1]);
         for (int i = 1; i < currentCurve.length; i++) {
             segment.setPoints(currentCurve[i - 1], currentCurve[i]);
-            double segDistSq = segment.ptSegDistSq(absPoint);
+            double segDistSq = segment.ptSegDistSq(absymPoint);
 
             if (segDistSq < closestSegDistSq) {
                 closestSegDistSq = segDistSq;
@@ -521,7 +540,7 @@ public class Curve {
         PointDouble startSegPt = currentCurve[closestSegment];
         PointDouble endSegPt = currentCurve[closestSegment + 1];
         LineDouble closestSeg = new LineDouble(startSegPt, endSegPt);
-        double lineDistSq = closestSeg.ptLineDistSq(absPoint);
+        double lineDistSq = closestSeg.ptLineDistSq(absymPoint);
         double orthogonalOffset = Math.sqrt(Math.min(lineDistSq, closestSegDistSq));
         double segX = endSegPt.getX() - startSegPt.getX();
         double segY = endSegPt.getY() - startSegPt.getY();
@@ -531,10 +550,10 @@ public class Curve {
         // The orthogonal offset could be in one of two opposite vectors
         // Try both solutions, one will be closer to one of the segment
         // end points (unless the point is on the line)
-        double candidateOffX1 = (absPoint.getX() - segNormY * orthogonalOffset) - endSegPt.getX();
-        double candidateOffY1 = (absPoint.getY() + segNormX * orthogonalOffset) - endSegPt.getY();
-        double candidateOffX2 = (absPoint.getX() + segNormY * orthogonalOffset) - endSegPt.getX();
-        double candidateOffY2 = (absPoint.getY() - segNormX * orthogonalOffset) - endSegPt.getY();
+        double candidateOffX1 = (absymPoint.getX() - segNormY * orthogonalOffset) - endSegPt.getX();
+        double candidateOffY1 = (absymPoint.getY() + segNormX * orthogonalOffset) - endSegPt.getY();
+        double candidateOffX2 = (absymPoint.getX() + segNormY * orthogonalOffset) - endSegPt.getX();
+        double candidateOffY2 = (absymPoint.getY() - segNormX * orthogonalOffset) - endSegPt.getY();
 
         double candidateDist1 = (candidateOffX1 * candidateOffX1) + (candidateOffY1 * candidateOffY1);
         double candidateDist2 = (candidateOffX2 * candidateOffX2) + (candidateOffY2 * candidateOffY2);
@@ -546,8 +565,8 @@ public class Curve {
             orthogonalOffset = -orthogonalOffset;
         }
 
-        orthOffsetPointX = absPoint.getX() - segNormY * orthogonalOffset;
-        orthOffsetPointY = absPoint.getY() + segNormX * orthogonalOffset;
+        orthOffsetPointX = absymPoint.getX() - segNormY * orthogonalOffset;
+        orthOffsetPointY = absymPoint.getY() + segNormX * orthogonalOffset;
 
         double distAlongEdge = 0;
         double cartOffsetX = 0;
@@ -561,8 +580,10 @@ public class Curve {
             // segment
 
             // Not exact distances, but the equation holds
-            double distToStartPoint = Math.abs(orthOffsetPointX - startSegPt.getX()) + Math.abs(orthOffsetPointY - startSegPt.getY());
-            double distToEndPoint = Math.abs(orthOffsetPointX - endSegPt.getX()) + Math.abs(orthOffsetPointY - endSegPt.getY());
+            double distToStartPoint = Math.abs(orthOffsetPointX - startSegPt.getX()) + Math.abs(
+                    orthOffsetPointY - startSegPt.getY());
+            double distToEndPoint = Math.abs(orthOffsetPointX - endSegPt.getX()) + Math.abs(
+                    orthOffsetPointY - endSegPt.getY());
             if (distToStartPoint < distToEndPoint) {
                 distAlongEdge = currentIntervals[closestSegment];
                 cartOffsetX = orthOffsetPointX - startSegPt.getX();
@@ -576,8 +597,12 @@ public class Curve {
             // The point, when orthogonally offset, lies on the segment
             // work out what proportion along the segment, and therefore
             // the entire curve, the offset point lies.
-            double segmentLen = Math.sqrt((endSegPt.getX() - startSegPt.getX()) * (endSegPt.getX() - startSegPt.getX()) + (endSegPt.getY() - startSegPt.getY()) * (endSegPt.getY() - startSegPt.getY()));
-            double offsetLen = Math.sqrt((orthOffsetPointX - startSegPt.getX()) * (orthOffsetPointX - startSegPt.getX()) + (orthOffsetPointY - startSegPt.getY()) * (orthOffsetPointY - startSegPt.getY()));
+            double segmentLen = Math.sqrt((endSegPt.getX() - startSegPt.getX()) * (endSegPt.getX() - startSegPt.getX())
+                                          + (endSegPt.getY() - startSegPt.getY()) * (endSegPt.getY()
+                                                                                     - startSegPt.getY()));
+            double offsetLen = Math.sqrt((orthOffsetPointX - startSegPt.getX()) * (orthOffsetPointX - startSegPt.getX())
+                                         + (orthOffsetPointY - startSegPt.getY()) * (orthOffsetPointY
+                                                                                     - startSegPt.getY()));
             double proportionAlongSeg = offsetLen / segmentLen;
             double segProportingDiff = currentIntervals[closestSegment + 1] - currentIntervals[closestSegment];
             distAlongEdge = currentIntervals[closestSegment] + segProportingDiff * proportionAlongSeg;
@@ -821,7 +846,8 @@ public class Curve {
             if (i == 1) {
                 // Special case to work out the very end points at
                 // the start of the curve
-                PointDouble startPoint = new PointDouble(segEndPoint.getX() - (normSegVectorY * labelBuffer), segEndPoint.getY() + (normSegVectorX * labelBuffer));
+                PointDouble startPoint = new PointDouble(segEndPoint.getX() - (normSegVectorY * labelBuffer),
+                                                         segEndPoint.getY() + (normSegVectorX * labelBuffer));
                 labelCurvePoints.add(startPoint);
                 updateBounds(startPoint.getX(), startPoint.getY());
             }
@@ -835,7 +861,8 @@ public class Curve {
             if (i == currentCurve.length - 1) {
                 // Special case to work out the very end points at
                 // the start of the curve
-                PointDouble endPoint = new PointDouble(segStartPoint.getX() - (normSegVectorY * labelBuffer), segStartPoint.getY() + (normSegVectorX * labelBuffer));
+                PointDouble endPoint = new PointDouble(segStartPoint.getX() - (normSegVectorY * labelBuffer),
+                                                       segStartPoint.getY() + (normSegVectorX * labelBuffer));
                 labelCurvePoints.add(endPoint);
                 updateBounds(endPoint.getX(), endPoint.getY());
             }

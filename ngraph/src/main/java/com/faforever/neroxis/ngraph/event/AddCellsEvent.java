@@ -8,6 +8,7 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class AddCellsEvent extends EventObject {
+
     List<ICell> cells;
     ICell parent;
     Integer index;

@@ -15,10 +15,6 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         this(size, seed, symmetrySettings, null, false);
     }
 
-    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -26,6 +22,10 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
+    }
+
+    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
     public Vector2Mask(Vector2Mask other) {
@@ -40,11 +40,13 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name, boolean parallel) {
         super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
     }
 
@@ -60,11 +62,6 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     @Override
-    protected Vector2 getZeroValue() {
-        return new Vector2(0f, 0f);
-    }
-
-    @Override
     public BufferedImage toImage() {
         int size = getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -73,10 +70,19 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         Vector2 minComponents = getMinComponents();
         Vector2 rangeComponents = maxComponents.copy().subtract(minComponents);
         loop(point -> {
-            float[] maskArray = get(point).copy().subtract(minComponents).divide(rangeComponents).multiply(255f).toArray();
+            float[] maskArray = get(point).copy()
+                                          .subtract(minComponents)
+                                          .divide(rangeComponents)
+                                          .multiply(255f)
+                                          .toArray();
             float[] pixelArray = Arrays.copyOf(maskArray, 3);
             imageRaster.setPixel(point.x, point.y, pixelArray);
         });
         return image;
+    }
+
+    @Override
+    protected Vector2 getZeroValue() {
+        return new Vector2(0f, 0f);
     }
 }

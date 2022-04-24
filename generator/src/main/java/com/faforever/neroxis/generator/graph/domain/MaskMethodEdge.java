@@ -8,6 +8,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public strictfp class MaskMethodEdge {
+
     private final String resultName;
     private final String parameterName;
 

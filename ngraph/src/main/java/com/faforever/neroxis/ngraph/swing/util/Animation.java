@@ -16,16 +16,15 @@ import javax.swing.Timer;
  * actual animation or listen to Event.EXECUTE.
  */
 public class Animation extends EventSource {
+
     /**
      * Specifies the default delay for animations in ms. Default is 20.
      */
     public static int DEFAULT_DELAY = 20;
-
     /**
      * Default is DEFAULT_DELAY.
      */
     protected int delay;
-
     /**
      * Time instance that is used for timing the animation.
      */
@@ -72,11 +71,10 @@ public class Animation extends EventSource {
     public void startAnimation() {
         if (timer == null) {
             timer = new Timer(delay, new ActionListener() {
-
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     updateAnimation();
                 }
-
             });
 
             timer.start();
@@ -102,5 +100,4 @@ public class Animation extends EventSource {
             fireEvent(new DoneEvent());
         }
     }
-
 }

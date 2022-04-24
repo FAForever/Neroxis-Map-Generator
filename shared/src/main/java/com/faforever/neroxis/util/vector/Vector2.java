@@ -1,8 +1,8 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
-
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.LinkedHashSet;
 
 public strictfp class Vector2 extends Vector<Vector2> {
@@ -11,12 +11,28 @@ public strictfp class Vector2 extends Vector<Vector2> {
         super(2);
     }
 
+    public Vector2(Vector2 other) {
+        this(other.getX(), other.getY());
+    }
+
     public Vector2(float x, float y) {
         super(x, y);
     }
 
-    public Vector2(Vector2 other) {
-        this(other.getX(), other.getY());
+    public float getX() {
+        return components[Vector.X];
+    }
+
+    public void setX(float x) {
+        components[Vector.X] = x;
+    }
+
+    public float getY() {
+        return components[Vector.Y];
+    }
+
+    public void setY(float y) {
+        components[Vector.Y] = y;
     }
 
     public Vector2(Vector3 location) {
@@ -33,10 +49,6 @@ public strictfp class Vector2 extends Vector<Vector2> {
         this((float) other.getX(), (float) other.getY());
     }
 
-    public float getX() {
-        return components[Vector.X];
-    }
-
     public void set(Dimension other) {
         setX((float) other.getWidth());
         setY((float) other.getHeight());
@@ -45,18 +57,6 @@ public strictfp class Vector2 extends Vector<Vector2> {
     public void set(Point other) {
         setX((float) other.getX());
         setY((float) other.getY());
-    }
-
-    public void setX(float x) {
-        components[Vector.X] = x;
-    }
-
-    public float getY() {
-        return components[Vector.Y];
-    }
-
-    public void setY(float y) {
-        components[Vector.Y] = y;
     }
 
     public float angleTo(Vector3 location) {
@@ -75,7 +75,8 @@ public strictfp class Vector2 extends Vector<Vector2> {
         while (currentPoint.getDistance(location) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.angleTo(location);
-            currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)), (float) (currentPoint.getY() + StrictMath.sin(angle)));
+            currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)),
+                                       (float) (currentPoint.getY() + StrictMath.sin(angle)));
         }
         return line;
     }

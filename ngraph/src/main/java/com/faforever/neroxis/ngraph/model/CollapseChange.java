@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CollapseChange extends AtomicGraphModelChange {
+
     protected ICell cell;
     protected boolean collapsed, previous;
 
@@ -21,6 +22,7 @@ public class CollapseChange extends AtomicGraphModelChange {
     /**
      * Changes the root of the model.
      */
+    @Override
     public void execute() {
         collapsed = previous;
         previous = ((GraphModel) model).collapsedStateForCellChanged(cell, previous);

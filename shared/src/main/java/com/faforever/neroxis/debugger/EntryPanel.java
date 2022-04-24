@@ -21,6 +21,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.MouseInputAdapter;
 
 public class EntryPanel extends JPanel {
+
     private final JLabel titleLabel = new JLabel();
     private final JLabel valueLabel = new JLabel();
     private final ImagePanel imagePanel = new ImagePanel();
@@ -60,12 +61,14 @@ public class EntryPanel extends JPanel {
         if (imagePanel.mask != null) {
             Vector2 maskCoords = imagePanel.getMouseOnMask();
             if (imagePanel.mask.inBounds(maskCoords)) {
-                valueLabel.setText(String.format("X: %5.0f, Y: %5.0f Value: %s", maskCoords.getX(), maskCoords.getY(), imagePanel.mask.get(maskCoords).toString()));
+                valueLabel.setText(String.format("X: %5.0f, Y: %5.0f Value: %s", maskCoords.getX(), maskCoords.getY(),
+                                                 imagePanel.mask.get(maskCoords).toString()));
             }
         }
     }
 
     private class ImagePanel extends JPanel {
+
         private final Vector2 lastMousePosition = new Vector2();
         private final Vector2 fractionalImageOffset = new Vector2();
         private final Vector2 imageZoomFactor = new Vector2();
@@ -80,6 +83,18 @@ public class EntryPanel extends JPanel {
             addMouseWheelListener(canvasMouseListener);
             image = new BufferedImage(512, 512, BufferedImage.TYPE_INT_RGB);
             paintCheckerboard();
+        }
+
+        private void paintCheckerboard() {
+            for (int x = 0; x < image.getWidth(); ++x) {
+                for (int y = 0; y < image.getHeight(); ++y) {
+                    if ((x / 4 + y / 4) % 2 == 0) {
+                        image.setRGB(x, y, Color.GRAY.getRGB());
+                    } else {
+                        image.setRGB(x, y, Color.DARK_GRAY.getRGB());
+                    }
+                }
+            }
         }
 
         public void setMask(Mask<?, ?> mask) {
@@ -99,16 +114,14 @@ public class EntryPanel extends JPanel {
             return canvasCoordinatesToMaskCoordinates(lastMousePosition).floor();
         }
 
-        private void paintCheckerboard() {
-            for (int x = 0; x < image.getWidth(); ++x) {
-                for (int y = 0; y < image.getHeight(); ++y) {
-                    if ((x / 4 + y / 4) % 2 == 0) {
-                        image.setRGB(x, y, Color.GRAY.getRGB());
-                    } else {
-                        image.setRGB(x, y, Color.DARK_GRAY.getRGB());
-                    }
-                }
-            }
+        private Vector2 canvasCoordinatesToMaskCoordinates(Vector2 canvasCoords) {
+            return canvasCoordinatesToFractionalMaskCoordinates(canvasCoords).multiply(mask.getSize());
+        }
+
+        private Vector2 canvasCoordinatesToFractionalMaskCoordinates(Vector2 canvasCoords) {
+            return canvasCoords.copy()
+                               .divide(getFullScalingVector().multiply(mask.getSize()))
+                               .subtract(fractionalImageOffset);
         }
 
         private Vector2 getFullScalingVector() {
@@ -117,14 +130,6 @@ public class EntryPanel extends JPanel {
 
         private float getUserScaleFactor() {
             return (float) StrictMath.pow(2, userZoomLevel);
-        }
-
-        private Vector2 canvasCoordinatesToMaskCoordinates(Vector2 canvasCoords) {
-            return canvasCoordinatesToFractionalMaskCoordinates(canvasCoords).multiply(mask.getSize());
-        }
-
-        private Vector2 canvasCoordinatesToFractionalMaskCoordinates(Vector2 canvasCoords) {
-            return canvasCoords.copy().divide(getFullScalingVector().multiply(mask.getSize())).subtract(fractionalImageOffset);
         }
 
         @Override
@@ -151,12 +156,15 @@ public class EntryPanel extends JPanel {
         }
 
         private class CanvasMouseListener extends MouseInputAdapter {
+
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (mask != null) {
                     lastMousePosition.set(e.getPoint());
                     Vector2 oldMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
-                    userZoomLevel = (float) StrictMath.min(StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0), MathUtil.log2(imagePanel.mask.getSize()));
+                    userZoomLevel = (float) StrictMath.min(
+                            StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0),
+                            MathUtil.log2(imagePanel.mask.getSize()));
                     Vector2 newMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
                     fractionalImageOffset.subtract(oldMousePositionOnMask).add(newMousePositionOnMask);
                     boundOffset();
@@ -172,7 +180,10 @@ public class EntryPanel extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 if (mask != null) {
                     Vector2 newMousePosition = new Vector2(e.getPoint());
-                    fractionalImageOffset.subtract(lastMousePosition.copy().subtract(newMousePosition).divide(getFullScalingVector().multiply(imagePanel.mask.getSize())));
+                    fractionalImageOffset.subtract(lastMousePosition.copy()
+                                                                    .subtract(newMousePosition)
+                                                                    .divide(getFullScalingVector().multiply(
+                                                                            imagePanel.mask.getSize())));
                     boundOffset();
                     lastMousePosition.set(newMousePosition);
                     repaint();

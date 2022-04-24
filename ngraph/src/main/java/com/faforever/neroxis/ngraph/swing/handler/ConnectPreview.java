@@ -28,10 +28,9 @@ import java.util.List;
  * icon, while the preview is used to draw the line.
  */
 public class ConnectPreview extends EventSource {
+
     protected GraphComponent graphComponent;
-
     protected CellState previewState;
-
     protected CellState sourceState;
     protected PointDouble startPoint;
 
@@ -42,110 +41,6 @@ public class ConnectPreview extends EventSource {
             Graphics g = evt.getGraphics();
             paint(g);
         });
-    }
-
-    /**
-     * Creates a new instance of Shape for previewing the edge.
-     */
-    protected ICell createCell(CellState startState, String style) {
-        Graph graph = graphComponent.getGraph();
-        ICell cell = graph.createEdge(null, null, "", (startState != null) ? startState.getCell() : null, null, style);
-        startState.getCell().insertEdge(cell, true);
-
-        return cell;
-    }
-
-    public boolean isActive() {
-        return sourceState != null;
-    }
-
-    public CellState getSourceState() {
-        return sourceState;
-    }
-
-    public CellState getPreviewState() {
-        return previewState;
-    }
-
-    public PointDouble getStartPoint() {
-        return startPoint;
-    }
-
-    /**
-     * Updates the style of the edge preview from the incoming edge
-     */
-    public void start(MouseEvent event, CellState startState, String style) {
-        Graph graph = graphComponent.getGraph();
-        sourceState = startState;
-        startPoint = transformScreenPoint(startState.getCenterX(), startState.getCenterY());
-        ICell cell = createCell(startState, style);
-        graph.getView().validateCell(cell);
-        previewState = graph.getView().getState(cell);
-        fireEvent(new StartEvent(previewState, event));
-    }
-
-    public void update(MouseEvent event, CellState targetState, double x, double y) {
-        Graph graph = graphComponent.getGraph();
-        ICell cell = previewState.getCell();
-        RectangleDouble dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
-        if (cell.getTarget() != null) {
-            cell.getTarget().removeEdge(cell, false);
-        }
-        if (targetState != null) {
-            targetState.getCell().insertEdge(cell, false);
-        }
-
-        Geometry geo = graph.getCellGeometry(previewState.getCell());
-
-        geo.setTerminalPoint(startPoint, true);
-        geo.setTerminalPoint(transformScreenPoint(x, y), false);
-        revalidate(previewState);
-        fireEvent(new ContinueEvent(x, y, null, null, event));
-
-        // Repaints the dirty region
-        // TODO: Cache the new dirty region for next repaint
-        java.awt.Rectangle tmp = getDirtyRect(dirty);
-
-        if (tmp != null) {
-            graphComponent.getGraphControl().repaint(tmp);
-        } else {
-            graphComponent.getGraphControl().repaint();
-        }
-    }
-
-    protected java.awt.Rectangle getDirtyRect() {
-        return getDirtyRect(null);
-    }
-
-    protected java.awt.Rectangle getDirtyRect(RectangleDouble dirty) {
-        if (previewState != null) {
-            RectangleDouble tmp = graphComponent.getGraph().getPaintBounds(List.of(previewState.getCell()));
-            if (dirty != null) {
-                dirty.add(tmp);
-            } else {
-                dirty = tmp;
-            }
-            if (dirty != null) {
-                // TODO: Take arrow size into account
-                dirty.grow(2);
-
-                return dirty.getRectangle();
-            }
-        }
-
-        return null;
-    }
-
-    protected PointDouble transformScreenPoint(double x, double y) {
-        Graph graph = graphComponent.getGraph();
-        PointDouble tr = graph.getView().getTranslate();
-        double scale = graph.getView().getScale();
-        return new PointDouble(graph.snap(x / scale - tr.getX()), graph.snap(y / scale - tr.getY()));
-    }
-
-    public void revalidate(CellState state) {
-        state.getView().invalidate(state.getCell());
-        state.getView().validateCellState(state.getCell());
     }
 
     public void paint(Graphics g) {
@@ -184,6 +79,106 @@ public class ConnectPreview extends EventSource {
      */
     protected void paintPreview(Graphics2DCanvas canvas) {
         graphComponent.getGraphControl().drawCell(graphComponent.getCanvas(), previewState.getCell());
+    }
+
+    public boolean isActive() {
+        return sourceState != null;
+    }
+
+    public CellState getSourceState() {
+        return sourceState;
+    }
+
+    public CellState getPreviewState() {
+        return previewState;
+    }
+
+    public PointDouble getStartPoint() {
+        return startPoint;
+    }
+
+    /**
+     * Updates the style of the edge preview from the incoming edge
+     */
+    public void start(MouseEvent event, CellState startState, String style) {
+        Graph graph = graphComponent.getGraph();
+        sourceState = startState;
+        startPoint = transformScreenPoint(startState.getCenterX(), startState.getCenterY());
+        ICell cell = createCell(startState, style);
+        graph.getView().validateCell(cell);
+        previewState = graph.getView().getState(cell);
+        fireEvent(new StartEvent(previewState, event));
+    }
+
+    protected PointDouble transformScreenPoint(double x, double y) {
+        Graph graph = graphComponent.getGraph();
+        PointDouble tr = graph.getView().getTranslate();
+        double scale = graph.getView().getScale();
+        return new PointDouble(graph.snap(x / scale - tr.getX()), graph.snap(y / scale - tr.getY()));
+    }
+
+    /**
+     * Creates a new instance of Shape for previewing the edge.
+     */
+    protected ICell createCell(CellState startState, String style) {
+        Graph graph = graphComponent.getGraph();
+        ICell cell = graph.createEdge(null, null, "", (startState != null) ? startState.getCell() : null, null, style);
+        startState.getCell().insertEdge(cell, true);
+
+        return cell;
+    }
+
+    public void update(MouseEvent event, CellState targetState, double x, double y) {
+        Graph graph = graphComponent.getGraph();
+        ICell cell = previewState.getCell();
+        RectangleDouble dirty = graphComponent.getGraph().getPaintBounds(java.util.List.of(previewState.getCell()));
+        if (cell.getTarget() != null) {
+            cell.getTarget().removeEdge(cell, false);
+        }
+        if (targetState != null) {
+            targetState.getCell().insertEdge(cell, false);
+        }
+
+        Geometry geo = graph.getCellGeometry(previewState.getCell());
+
+        geo.setTerminalPoint(startPoint, true);
+        geo.setTerminalPoint(transformScreenPoint(x, y), false);
+        revalidate(previewState);
+        fireEvent(new ContinueEvent(x, y, null, null, event));
+
+        // Repaints the dirty region
+        // TODO: Cache the new dirty region for next repaint
+        java.awt.Rectangle tmp = getDirtyRect(dirty);
+
+        if (tmp != null) {
+            graphComponent.getGraphControl().repaint(tmp);
+        } else {
+            graphComponent.getGraphControl().repaint();
+        }
+    }
+
+    public void revalidate(CellState state) {
+        state.getView().invalidate(state.getCell());
+        state.getView().validateCellState(state.getCell());
+    }
+
+    protected java.awt.Rectangle getDirtyRect(RectangleDouble dirty) {
+        if (previewState != null) {
+            RectangleDouble tmp = graphComponent.getGraph().getPaintBounds(List.of(previewState.getCell()));
+            if (dirty != null) {
+                dirty.add(tmp);
+            } else {
+                dirty = tmp;
+            }
+            if (dirty != null) {
+                // TODO: Take arrow size into account
+                dirty.grow(2);
+
+                return dirty.getRectangle();
+            }
+        }
+
+        return null;
     }
 
     public Object stop(boolean commit) {
@@ -232,4 +227,7 @@ public class ConnectPreview extends EventSource {
         return result;
     }
 
+    protected java.awt.Rectangle getDirtyRect() {
+        return getDirtyRect(null);
+    }
 }

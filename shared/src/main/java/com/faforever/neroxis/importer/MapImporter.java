@@ -1,7 +1,6 @@
 package com.faforever.neroxis.importer;
 
 import com.faforever.neroxis.map.SCMap;
-
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -17,5 +16,4 @@ public strictfp class MapImporter {
         }
         return map;
     }
-
 }

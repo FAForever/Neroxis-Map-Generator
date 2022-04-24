@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 public class Resources {
 
     private static final Logger log = Logger.getLogger(Resources.class.getName());
-
     /**
      * Ordered list of the inserted resource bundles.
      */
@@ -60,17 +59,6 @@ public class Resources {
 
     public static String get(String key) {
         return get(key, null, null);
-    }
-
-    public static String get(String key, String defaultValue) {
-        return get(key, null, defaultValue);
-    }
-
-    /**
-     * Returns the value for the specified resource key.
-     */
-    public static String get(String key, String[] params) {
-        return get(key, params, null);
     }
 
     /**
@@ -135,4 +123,14 @@ public class Resources {
         return null;
     }
 
+    public static String get(String key, String defaultValue) {
+        return get(key, null, defaultValue);
+    }
+
+    /**
+     * Returns the value for the specified resource key.
+     */
+    public static String get(String key, String[] params) {
+        return get(key, params, null);
+    }
 }

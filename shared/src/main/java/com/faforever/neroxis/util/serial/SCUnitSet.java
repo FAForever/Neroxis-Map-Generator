@@ -9,15 +9,16 @@ import lombok.Value;
 /**
  * Used in disk operations to be converted into a material later
  */
-
 @Data
 @CompiledJson
 public strictfp class SCUnitSet {
+
     public SCUnit[] Units;
     public Vector3 Center;
 
     @Value
     public static strictfp class SCUnit {
+
         String ID;
         Vector3 pos;
         Vector4 rot;

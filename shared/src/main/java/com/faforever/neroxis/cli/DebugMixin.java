@@ -2,7 +2,6 @@ package com.faforever.neroxis.cli;
 
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
-
 import static picocli.CommandLine.Option;
 
 public class DebugMixin {

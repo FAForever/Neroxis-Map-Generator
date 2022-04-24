@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public strictfp class Biome {
+
     final String name;
     final TerrainMaterials terrainMaterials;
     final PropMaterials propMaterials;

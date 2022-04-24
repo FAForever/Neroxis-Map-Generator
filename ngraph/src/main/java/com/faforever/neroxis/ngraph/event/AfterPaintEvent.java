@@ -7,5 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class AfterPaintEvent extends EventObject {
+
     Graphics graphics;
 }

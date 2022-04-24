@@ -4,7 +4,6 @@ import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -35,5 +34,4 @@ public class GeneratedMapDetector {
 
         System.out.println("Map is not sourced from generated map");
     }
-
 }

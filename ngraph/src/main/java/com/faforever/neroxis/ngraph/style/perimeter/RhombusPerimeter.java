@@ -9,6 +9,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Describes a rhombus (aka diamond) perimeter.
  */
 public class RhombusPerimeter implements Perimeter {
+
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         double x = bounds.getX();

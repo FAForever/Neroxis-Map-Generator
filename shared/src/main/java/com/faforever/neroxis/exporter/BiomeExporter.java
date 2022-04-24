@@ -4,8 +4,7 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.dds.DDSReader;
-
-import java.awt.*;
+import java.awt.Color;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,7 +57,8 @@ public strictfp class BiomeExporter {
                 avgB += pixColor.getBlue();
                 avgG += pixColor.getGreen();
             }
-            return new Color((int) avgR / pixels.length, (int) avgG / pixels.length, (int) avgB / pixels.length).getRGB();
+            return new Color((int) avgR / pixels.length, (int) avgG / pixels.length,
+                             (int) avgB / pixels.length).getRGB();
         }
         return null;
     }

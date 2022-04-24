@@ -6,12 +6,12 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public strictfp class DecalPlacer {
+
     private final SCMap map;
     private final Random random;
 
@@ -20,7 +20,8 @@ public strictfp class DecalPlacer {
         random = new Random(seed);
     }
 
-    public void placeDecals(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation, float minScale, float maxScale) {
+    public void placeDecals(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation,
+                            float minScale, float maxScale) {
         if (paths != null && paths.length > 0) {
             BooleanMask spawnMaskCopy = spawnMask.copy();
             spawnMaskCopy.limitToSymmetryRegion();
@@ -35,8 +36,10 @@ public strictfp class DecalPlacer {
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().getY());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i), decal.getRotation().getZ());
-                    Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i), symVectorRotation, scale, decal.getCutOffLOD());
+                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i),
+                                                            decal.getRotation().getZ());
+                    Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i), symVectorRotation, scale,
+                                               decal.getCutOffLOD());
                     map.addDecal(symDecal);
                 }
             });

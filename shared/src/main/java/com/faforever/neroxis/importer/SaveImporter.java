@@ -11,11 +11,6 @@ import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaString;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,6 +19,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaString;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 
 public strictfp class SaveImporter {
 
@@ -42,7 +41,9 @@ public strictfp class SaveImporter {
         LuaValue lua = LuaLoader.loadFile(savePath).get("Scenario");
         try {
             LuaTable areaTable = lua.get("Areas").get("AREA_1").get("rectangle").checktable();
-            map.setPlayableArea(new Vector4(areaTable.get(1).tofloat(), areaTable.get(2).tofloat(), areaTable.get(3).tofloat(), areaTable.get(4).tofloat()));
+            map.setPlayableArea(
+                    new Vector4(areaTable.get(1).tofloat(), areaTable.get(2).tofloat(), areaTable.get(3).tofloat(),
+                                areaTable.get(4).tofloat()));
         } catch (Exception ignored) {
         }
 
@@ -93,19 +94,22 @@ public strictfp class SaveImporter {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
+                map.addAirMarker(new AIMarker(id, location, new LinkedHashSet<>(
+                        neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
             }
             case "Amphibious Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
+                map.addAmphibiousMarker(new AIMarker(id, location, new LinkedHashSet<>(
+                        neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
             }
             case "Water Path Node" -> {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
+                map.addNavyMarker(new AIMarker(id, location, new LinkedHashSet<>(
+                        neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
             }
             case "Naval Area" -> {
                 locTable = marker.get("position").checktable();
@@ -126,7 +130,8 @@ public strictfp class SaveImporter {
                 locTable = marker.get("position").checktable();
                 neighbors = Arrays.asList(marker.get("adjacentTo").checkjstring().split(" "));
                 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
-                map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
+                map.addLandMarker(new AIMarker(id, location, new LinkedHashSet<>(
+                        neighbors.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()))));
             }
             case "Rally Point" -> {
                 locTable = marker.get("position").checktable();
@@ -167,7 +172,8 @@ public strictfp class SaveImporter {
                 String type = unitTable.get("type").checkjstring();
                 float rotation = unitTable.get("Orientation").checktable().get(2).tofloat();
                 LuaTable locTable = unitTable.get("Position").checktable();
-                Vector3 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(), locTable.get(3).tofloat());
+                Vector3 location = new Vector3(locTable.get(1).tofloat(), locTable.get(2).tofloat(),
+                                               locTable.get(3).tofloat());
                 group.addUnit(new Unit(id, type, location, rotation));
             } catch (LuaError e) {
                 System.out.printf("Could not read unit %s%n", id);

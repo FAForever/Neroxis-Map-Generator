@@ -71,13 +71,12 @@ import java.util.stream.Collectors;
  * respectively.
  */
 public class GraphView extends EventSource {
-    private static final PointDouble EMPTY_POINT = new PointDouble();
 
+    private static final PointDouble EMPTY_POINT = new PointDouble();
     /**
      * Reference to the enclosing graph.
      */
     protected Graph graph;
-
     /**
      * Cell that acts as the root of the displayed cell hierarchy.
      */
@@ -86,7 +85,6 @@ public class GraphView extends EventSource {
      * Caches the current bounds of the graph.
      */
     protected RectangleDouble graphBounds = new RectangleDouble();
-
     /**
      * Specifies the scale. Default is 1 (100%).
      */
@@ -96,7 +94,6 @@ public class GraphView extends EventSource {
      * point.
      */
     protected PointDouble translate = new PointDouble(0, 0);
-
     /**
      * Maps from cells to cell states.
      */
@@ -270,16 +267,6 @@ public class GraphView extends EventSource {
      *
      * @return Returns the bounding box for the given cells.
      */
-    public RectangleDouble getBoundingBox(List<ICell> cells) {
-        return getBounds(cells, true);
-    }
-
-    /**
-     * Returns the bounding box for an array of cells or null, if no cells are
-     * specified.
-     *
-     * @return Returns the bounding box for the given cells.
-     */
     public RectangleDouble getBounds(List<ICell> cells, boolean boundingBox) {
         RectangleDouble result = null;
         if (cells != null && !cells.isEmpty()) {
@@ -306,6 +293,135 @@ public class GraphView extends EventSource {
     }
 
     /**
+     * Returns the bounding box for an array of cells or null, if no cells are
+     * specified.
+     *
+     * @return Returns the bounding box for the given cells.
+     */
+    public RectangleDouble getBoundingBox(List<ICell> cells) {
+        return getBounds(cells, true);
+    }
+
+    /**
+     * First validates all bounds and then validates all points recursively on
+     * all visible cells.
+     */
+    public void validate() {
+        RectangleDouble graphBounds = getBoundingBox(
+                validateCellState(validateCell((currentRoot != null) ? currentRoot : graph.getModel().getRoot())));
+        setGraphBounds((graphBounds != null) ? graphBounds : new RectangleDouble());
+    }
+
+    /**
+     * Recursively creates the cell state for the given cell if visible is true
+     * and the given cell is visible. If the cell is not visible but the state
+     * exists then it is removed using removeState.
+     *
+     * @param cell    Cell whose cell state should be created.
+     * @param visible Boolean indicating if the cell should be visible.
+     */
+    public ICell validateCell(ICell cell, boolean visible) {
+        if (cell != null) {
+            visible = visible && graph.isCellVisible(cell);
+            CellState state = getState(cell, visible);
+
+            if (state != null && !visible) {
+                removeState(cell);
+            } else {
+                IGraphModel model = graph.getModel();
+                int childCount = model.getChildCount(cell);
+
+                for (int i = 0; i < childCount; i++) {
+                    validateCell(model.getChildAt(cell, i),
+                                 visible && (!graph.isCellCollapsed(cell) || cell == currentRoot));
+                }
+            }
+        }
+
+        return cell;
+    }
+
+    /**
+     * Updates the given cell state.
+     *
+     * @param state Cell state to be updated.
+     */
+    public void updateCellState(CellState state) {
+        state.getAbsoluteOffset().setX(0);
+        state.getAbsoluteOffset().setY(0);
+        state.getOrigin().setX(0);
+        state.getOrigin().setY(0);
+        state.setLength(0);
+
+        if (state.getCell() != currentRoot) {
+            IGraphModel model = graph.getModel();
+            CellState pState = getState(model.getParent(state.getCell()));
+
+            if (pState != null && pState.getCell() != currentRoot) {
+                state.getOrigin().setX(state.getOrigin().getX() + pState.getOrigin().getX());
+                state.getOrigin().setY(state.getOrigin().getY() + pState.getOrigin().getY());
+            }
+            PointDouble offset = graph.getChildOffsetForCell(state.getCell());
+
+            if (offset != null) {
+                state.getOrigin().setX(state.getOrigin().getX() + offset.getX());
+                state.getOrigin().setY(state.getOrigin().getY() + offset.getY());
+            }
+
+            Geometry geo = graph.getCellGeometry(state.getCell());
+
+            if (geo != null) {
+                if (!model.isEdge(state.getCell())) {
+                    PointDouble origin = state.getOrigin();
+                    offset = geo.getOffset();
+
+                    if (offset == null) {
+                        offset = EMPTY_POINT;
+                    }
+
+                    if (geo.isRelative() && pState != null) {
+                        if (model.isEdge(pState.getCell())) {
+                            PointDouble orig = getPoint(pState, geo);
+
+                            if (orig != null) {
+                                origin.setX(origin.getX() + (orig.getX() / scale)
+                                            - pState.getOrigin().getX()
+                                            - translate.getX());
+                                origin.setY(origin.getY() + (orig.getY() / scale)
+                                            - pState.getOrigin().getY()
+                                            - translate.getY());
+                            }
+                        } else {
+                            origin.setX(origin.getX() + geo.getX() * pState.getWidth() / scale + offset.getX());
+                            origin.setY(origin.getY() + geo.getY() * pState.getHeight() / scale + offset.getY());
+                        }
+                    } else {
+                        state.setAbsoluteOffset(new PointDouble(scale * offset.getX(), scale * offset.getY()));
+                        origin.setX(origin.getX() + geo.getX());
+                        origin.setY(origin.getY() + geo.getY());
+                    }
+                }
+
+                state.setX(scale * (translate.getX() + state.getOrigin().getX()));
+                state.setY(scale * (translate.getY() + state.getOrigin().getY()));
+                state.setWidth(scale * geo.getWidth());
+                state.setHeight(scale * geo.getHeight());
+
+                if (model.isVertex(state.getCell())) {
+                    updateVertexState(state, geo);
+                }
+
+                if (model.isEdge(state.getCell())) {
+                    updateEdgeState(state, geo);
+                }
+
+                // Updates the cached label
+                updateLabel(state);
+            }
+        }
+    }
+
+    /**
      * Removes all existing cell states and invokes validate.
      */
     public void reload() {
@@ -328,7 +444,6 @@ public class GraphView extends EventSource {
     /**
      * Removes the state of the given cell and all descendants if the given cell
      * is not the current root.
-     *
      */
     public void clear(ICell cell, boolean force, boolean recurse) {
         removeState(cell);
@@ -377,12 +492,14 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * First validates all bounds and then validates all points recursively on
-     * all visible cells.
+     * Returns the state for the given cell or null if no state is defined for
+     * the cell.
+     *
+     * @param cell Cell whose state should be returned.
+     * @return Returns the state for the given cell.
      */
-    public void validate() {
-        RectangleDouble graphBounds = getBoundingBox(validateCellState(validateCell((currentRoot != null) ? currentRoot : graph.getModel().getRoot())));
-        setGraphBounds((graphBounds != null) ? graphBounds : new RectangleDouble());
+    public CellState getState(ICell cell) {
+        return getState(cell, false);
     }
 
     /**
@@ -434,31 +551,22 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * Recursively creates the cell state for the given cell if visible is true
-     * and the given cell is visible. If the cell is not visible but the state
-     * exists then it is removed using removeState.
+     * Returns the cell state for the given cell. If create is true, then the
+     * state is created if it does not yet exist.
      *
-     * @param cell    Cell whose cell state should be created.
-     * @param visible Boolean indicating if the cell should be visible.
+     * @param cell   Cell for which a new state should be returned.
+     * @param create Boolean indicating if a new state should be created if it does
+     *               not yet exist.
+     * @return Returns the state for the given cell.
      */
-    public ICell validateCell(ICell cell, boolean visible) {
-        if (cell != null) {
-            visible = visible && graph.isCellVisible(cell);
-            CellState state = getState(cell, visible);
-
-            if (state != null && !visible) {
-                removeState(cell);
-            } else {
-                IGraphModel model = graph.getModel();
-                int childCount = model.getChildCount(cell);
-
-                for (int i = 0; i < childCount; i++) {
-                    validateCell(model.getChildAt(cell, i), visible && (!graph.isCellCollapsed(cell) || cell == currentRoot));
-                }
-            }
+    public CellState getState(ICell cell, boolean create) {
+        CellState state;
+        state = states.get(cell);
+        if (state == null && create && graph.isCellVisible(cell)) {
+            state = createState(cell);
+            states.put(cell, state);
         }
-
-        return cell;
+        return state;
     }
 
     /**
@@ -516,79 +624,15 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * Updates the given cell state.
+     * Creates and returns a cell state for the given cell.
      *
-     * @param state Cell state to be updated.
+     * @param cell Cell for which a new state should be created.
+     * @return Returns a new state for the given cell.
      */
-    public void updateCellState(CellState state) {
-        state.getAbsoluteOffset().setX(0);
-        state.getAbsoluteOffset().setY(0);
-        state.getOrigin().setX(0);
-        state.getOrigin().setY(0);
-        state.setLength(0);
-
-        if (state.getCell() != currentRoot) {
-            IGraphModel model = graph.getModel();
-            CellState pState = getState(model.getParent(state.getCell()));
-
-            if (pState != null && pState.getCell() != currentRoot) {
-                state.getOrigin().setX(state.getOrigin().getX() + pState.getOrigin().getX());
-                state.getOrigin().setY(state.getOrigin().getY() + pState.getOrigin().getY());
-            }
-            PointDouble offset = graph.getChildOffsetForCell(state.getCell());
-
-            if (offset != null) {
-                state.getOrigin().setX(state.getOrigin().getX() + offset.getX());
-                state.getOrigin().setY(state.getOrigin().getY() + offset.getY());
-            }
-
-            Geometry geo = graph.getCellGeometry(state.getCell());
-
-            if (geo != null) {
-                if (!model.isEdge(state.getCell())) {
-                    PointDouble origin = state.getOrigin();
-                    offset = geo.getOffset();
-
-                    if (offset == null) {
-                        offset = EMPTY_POINT;
-                    }
-
-                    if (geo.isRelative() && pState != null) {
-                        if (model.isEdge(pState.getCell())) {
-                            PointDouble orig = getPoint(pState, geo);
-
-                            if (orig != null) {
-                                origin.setX(origin.getX() + (orig.getX() / scale) - pState.getOrigin().getX() - translate.getX());
-                                origin.setY(origin.getY() + (orig.getY() / scale) - pState.getOrigin().getY() - translate.getY());
-                            }
-                        } else {
-                            origin.setX(origin.getX() + geo.getX() * pState.getWidth() / scale + offset.getX());
-                            origin.setY(origin.getY() + geo.getY() * pState.getHeight() / scale + offset.getY());
-                        }
-                    } else {
-                        state.setAbsoluteOffset(new PointDouble(scale * offset.getX(), scale * offset.getY()));
-                        origin.setX(origin.getX() + geo.getX());
-                        origin.setY(origin.getY() + geo.getY());
-                    }
-                }
-
-                state.setX(scale * (translate.getX() + state.getOrigin().getX()));
-                state.setY(scale * (translate.getY() + state.getOrigin().getY()));
-                state.setWidth(scale * geo.getWidth());
-                state.setHeight(scale * geo.getHeight());
-
-                if (model.isVertex(state.getCell())) {
-                    updateVertexState(state, geo);
-                }
-
-                if (model.isEdge(state.getCell())) {
-                    updateEdgeState(state, geo);
-                }
-
-                // Updates the cached label
-                updateLabel(state);
-            }
-        }
+    public CellState createState(ICell cell) {
+        CellState cellState = new CellState(this, cell, graph.getCellStyle(cell));
+        cellState.getStyle().addPropertyChangeListener(evt -> fireEvent(new CellStateEvent(cellState)));
+        return cellState;
     }
 
     /**
@@ -609,14 +653,21 @@ public class GraphView extends EventSource {
         // This will remove edges with no terminals and no terminal points
         // as such edges are invalid and produce NPEs in the edge styles.
         // Also removes connected edges that have no visible terminals.
-        if ((graph.getModel().getTerminal(state.getCell(), true) != null && source == null) || (source == null && geo.getTerminalPoint(true) == null) || (graph.getModel().getTerminal(state.getCell(), false) != null && target == null) || (target == null && geo.getTerminalPoint(false) == null)) {
+        if ((graph.getModel().getTerminal(state.getCell(), true) != null && source == null) || (source == null
+                                                                                                && geo.getTerminalPoint(
+                true) == null) || (graph.getModel().getTerminal(state.getCell(), false) != null && target == null) || (
+                    target == null
+                    && geo.getTerminalPoint(false) == null)) {
             clear(state.getCell(), true, true);
         } else {
             updateFixedTerminalPoints(state, source, target);
             updatePoints(state, geo.getPoints(), source, target);
             updateFloatingTerminalPoints(state, source, target);
 
-            if (state.getCell() != getCurrentRoot() && (state.getAbsolutePointCount() < 2 || state.getAbsolutePoint(0) == null || state.getAbsolutePoint(state.getAbsolutePointCount() - 1) == null)) {
+            if (state.getCell() != getCurrentRoot() && (state.getAbsolutePointCount() < 2
+                                                        || state.getAbsolutePoint(0) == null
+                                                        || state.getAbsolutePoint(state.getAbsolutePointCount() - 1)
+                                                           == null)) {
                 // This will remove edges with invalid points from the list of
                 // states in the view.
                 // Happens if the one of the terminals and the corresponding
@@ -658,7 +709,10 @@ public class GraphView extends EventSource {
         Style style = state.getStyle();
         // Applies word wrapping to labels and stores the result in the
         // state
-        if (label != null && label.length() > 0 && !graph.getModel().isEdge(state.getCell()) && style.getLabel().getWhiteSpace() == WhiteSpace.WRAP) {
+        if (label != null
+            && label.length() > 0
+            && !graph.getModel().isEdge(state.getCell())
+            && style.getLabel().getWhiteSpace() == WhiteSpace.WRAP) {
             double w = getWordWrapWidth(state);
             // The lines for wrapping within the given width are calculated for
             // no
@@ -672,7 +726,8 @@ public class GraphView extends EventSource {
             // the wrapped lines are constant overing scaling, at the expense
             // the
             // label bounds will vary.
-            String[] lines = Utils.wordWrap(label, Utils.getFontMetrics(Utils.getFont(state.getStyle())), w * Constants.LABEL_SCALE_BUFFER);
+            String[] lines = Utils.wordWrap(label, Utils.getFontMetrics(Utils.getFont(state.getStyle())),
+                                            w * Constants.LABEL_SCALE_BUFFER);
 
             if (lines.length > 0) {
                 StringBuilder buffer = new StringBuilder();
@@ -697,41 +752,75 @@ public class GraphView extends EventSource {
         double w = 0;
         // Computes the available width for the wrapped label
         if (horizontal) {
-            w = (state.getWidth() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getLeftSpacing() - style.getLabel().getRightSpacing();
+            w = (state.getWidth() / scale)
+                - 2 * Constants.LABEL_INSET
+                - style.getLabel().getLeftSpacing()
+                - style.getLabel().getRightSpacing();
         } else {
-            w = (state.getHeight() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getTopSpacing() + style.getLabel().getBottomSpacing();
+            w = (state.getHeight() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getTopSpacing()
+                + style.getLabel().getBottomSpacing();
         }
         return w;
     }
 
     /**
-     * Updates the label bounds in the given state.
+     * Returns the absolute point on the edge for the given relative geometry as
+     * a point. The edge is represented by the given cell state.
+     *
+     * @param state    Represents the state of the parent edge.
+     * @param geometry Optional geometry that represents the relative location.
+     * @return Returns the point that represents the absolute location of the
+     * given relative geometry.
      */
-    public void updateLabelBounds(CellState state) {
-        ICell cell = state.getCell();
-        Style style = state.getStyle();
-        Overflow overflow = style.getLabel().getOverflow();
-        if (overflow == Overflow.FILL) {
-            state.setLabelBounds(new RectangleDouble(state));
-        } else if (state.getLabel() != null) {
-            // For edges, the width of the geometry is used for wrapping HTML
-            // labels or no wrapping is applied if the width is set to 0
-            RectangleDouble vertexBounds = state;
-            if (graph.getModel().isEdge(cell)) {
-                Geometry geo = graph.getCellGeometry(cell);
-                if (geo != null && geo.getWidth() > 0) {
-                    vertexBounds = new RectangleDouble(0, 0, geo.getWidth() * this.getScale(), 0);
-                } else {
-                    vertexBounds = null;
-                }
+    public PointDouble getPoint(CellState state, Geometry geometry) {
+        double x = state.getCenterX();
+        double y = state.getCenterY();
+        if (state.getSegments() != null && (geometry == null || geometry.isRelative())) {
+            double gx = (geometry != null) ? geometry.getX() / 2 : 0;
+            int pointCount = state.getAbsolutePointCount();
+            double dist = (gx + 0.5) * state.getLength();
+            double[] segments = state.getSegments();
+            double segment = segments[0];
+            double length = 0;
+            int index = 1;
+            while (dist > length + segment && index < pointCount - 1) {
+                length += segment;
+                segment = segments[index++];
             }
-            state.setLabelBounds(Utils.getLabelPaintBounds(state.getLabel(), style, state.getAbsoluteOffset(), vertexBounds, scale, graph.getModel().isEdge(cell)));
+            double factor = (segment == 0) ? 0 : (dist - length) / segment;
+            PointDouble p0 = state.getAbsolutePoint(index - 1);
+            PointDouble pe = state.getAbsolutePoint(index);
+            if (p0 != null && pe != null) {
+                double gy = 0;
+                double offsetX = 0;
+                double offsetY = 0;
+                if (geometry != null) {
+                    gy = geometry.getY();
+                    PointDouble offset = geometry.getOffset();
 
-            if (overflow.equals("width")) {
-                state.getLabelBounds().setX(state.getX());
-                state.getLabelBounds().setWidth(state.getWidth());
+                    if (offset != null) {
+                        offsetX = offset.getX();
+                        offsetY = offset.getY();
+                    }
+                }
+
+                double dx = pe.getX() - p0.getX();
+                double dy = pe.getY() - p0.getY();
+                double nx = (segment == 0) ? 0 : dy / segment;
+                double ny = (segment == 0) ? 0 : dx / segment;
+
+                x = p0.getX() + dx * factor + (nx * gy + offsetX) * scale;
+                y = p0.getY() + dy * factor - (ny * gy - offsetY) * scale;
+            }
+        } else if (geometry != null) {
+            PointDouble offset = geometry.getOffset();
+
+            if (offset != null) {
+                x += offset.getX();
+                y += offset.getY();
             }
         }
+        return new PointDouble(x, y);
     }
 
     /**
@@ -826,28 +915,35 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * Sets the fixed source or target terminal point on the given edge.
-     *
-     * @param edge Cell state whose initial terminal points should be updated.
+     * Updates the label bounds in the given state.
      */
-    public void updateFixedTerminalPoint(CellState edge, CellState terminal, boolean source, ConnectionConstraint constraint) {
-        PointDouble pt = null;
+    public void updateLabelBounds(CellState state) {
+        ICell cell = state.getCell();
+        Style style = state.getStyle();
+        Overflow overflow = style.getLabel().getOverflow();
+        if (overflow == Overflow.FILL) {
+            state.setLabelBounds(new RectangleDouble(state));
+        } else if (state.getLabel() != null) {
+            // For edges, the width of the geometry is used for wrapping HTML
+            // labels or no wrapping is applied if the width is set to 0
+            RectangleDouble vertexBounds = state;
+            if (graph.getModel().isEdge(cell)) {
+                Geometry geo = graph.getCellGeometry(cell);
+                if (geo != null && geo.getWidth() > 0) {
+                    vertexBounds = new RectangleDouble(0, 0, geo.getWidth() * this.getScale(), 0);
+                } else {
+                    vertexBounds = null;
+                }
+            }
+            state.setLabelBounds(
+                    Utils.getLabelPaintBounds(state.getLabel(), style, state.getAbsoluteOffset(), vertexBounds, scale,
+                                              graph.getModel().isEdge(cell)));
 
-        if (constraint != null) {
-            pt = graph.getConnectionPoint(terminal, constraint);
-        }
-
-        if (pt == null && terminal == null) {
-            PointDouble orig = edge.getOrigin();
-            Geometry geo = graph.getCellGeometry(edge.getCell());
-            pt = geo.getTerminalPoint(source);
-
-            if (pt != null) {
-                pt = new PointDouble(scale * (translate.getX() + pt.getX() + orig.getX()), scale * (translate.getY() + pt.getY() + orig.getY()));
+            if (overflow.equals("width")) {
+                state.getLabelBounds().setX(state.getX());
+                state.getLabelBounds().setWidth(state.getWidth());
             }
         }
-
-        edge.setAbsoluteTerminalPoint(pt, source);
     }
 
     /**
@@ -879,11 +975,30 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * Transforms the given control point to an absolute point.
+     * Sets the fixed source or target terminal point on the given edge.
+     *
+     * @param edge Cell state whose initial terminal points should be updated.
      */
-    public PointDouble transformControlPoint(CellState state, PointDouble pt) {
-        PointDouble origin = state.getOrigin();
-        return new PointDouble(scale * (pt.getX() + translate.getX() + origin.getX()), scale * (pt.getY() + translate.getY() + origin.getY()));
+    public void updateFixedTerminalPoint(CellState edge, CellState terminal, boolean source,
+                                         ConnectionConstraint constraint) {
+        PointDouble pt = null;
+
+        if (constraint != null) {
+            pt = graph.getConnectionPoint(terminal, constraint);
+        }
+
+        if (pt == null && terminal == null) {
+            PointDouble orig = edge.getOrigin();
+            Geometry geo = graph.getCellGeometry(edge.getCell());
+            pt = geo.getTerminalPoint(source);
+
+            if (pt != null) {
+                pt = new PointDouble(scale * (translate.getX() + pt.getX() + orig.getX()),
+                                     scale * (translate.getY() + pt.getY() + orig.getY()));
+            }
+        }
+
+        edge.setAbsoluteTerminalPoint(pt, source);
     }
 
     /**
@@ -923,6 +1038,15 @@ public class GraphView extends EventSource {
     }
 
     /**
+     * Transforms the given control point to an absolute point.
+     */
+    public PointDouble transformControlPoint(CellState state, PointDouble pt) {
+        PointDouble origin = state.getOrigin();
+        return new PointDouble(scale * (pt.getX() + translate.getX() + origin.getX()),
+                               scale * (pt.getY() + translate.getY() + origin.getY()));
+    }
+
+    /**
      * Updates the absolute terminal point in the given state for the given
      * start and end state, where start is the source if source is true.
      *
@@ -935,21 +1059,11 @@ public class GraphView extends EventSource {
         start = getTerminalPort(edge, start, source);
         PointDouble next = getNextPoint(edge, end, source);
         double border = edge.getStyle().getPerimeter().getVertexSpacing();
-        border += source ? edge.getStyle().getPerimeter().getSourceSpacing() : edge.getStyle().getPerimeter().getTargetSpacing();
+        border += source ? edge.getStyle().getPerimeter().getSourceSpacing() : edge.getStyle()
+                                                                                   .getPerimeter()
+                                                                                   .getTargetSpacing();
         PointDouble pt = getPerimeterPoint(start, next, graph.isOrthogonal(edge), border);
         edge.setAbsoluteTerminalPoint(pt, source);
-    }
-
-    /**
-     * Returns a cell state that represents the source or target terminal or
-     * port for the given edge.
-     */
-    public CellState getTerminalPort(CellState state, CellState terminal, boolean source) {
-        ICell portCell = source ? state.getStyle().getEdge().getSourcePort() : state.getStyle().getEdge().getTargetPort();
-        if (portCell == null) {
-            return terminal;
-        }
-        return getState(portCell);
     }
 
     /**
@@ -994,6 +1108,44 @@ public class GraphView extends EventSource {
     }
 
     /**
+     * Returns a cell state that represents the source or target terminal or
+     * port for the given edge.
+     */
+    public CellState getTerminalPort(CellState state, CellState terminal, boolean source) {
+        ICell portCell = source ? state.getStyle().getEdge().getSourcePort() : state.getStyle()
+                                                                                    .getEdge()
+                                                                                    .getTargetPort();
+        if (portCell == null) {
+            return terminal;
+        }
+        return getState(portCell);
+    }
+
+    /**
+     * Returns the perimeter function for the given state.
+     */
+    public Perimeter getPerimeterFunction(CellState state) {
+        return state.getStyle().getPerimeter().getPerimeter();
+    }
+
+    /**
+     * Returns the perimeter bounds for the given terminal, edge pair.
+     */
+    public RectangleDouble getPerimeterBounds(CellState terminal, double border) {
+        if (terminal != null) {
+            border += terminal.getStyle().getPerimeter().getVertexSpacing();
+        }
+        return terminal.getPerimeterBounds(border * scale);
+    }
+
+    /**
+     * Returns the absolute center point along the given edge.
+     */
+    public PointDouble getPoint(CellState state) {
+        return getPoint(state, null);
+    }
+
+    /**
      * Returns the x-coordinate of the center point for automatic routing.
      *
      * @return Returns the x-coordinate of the routing center point.
@@ -1013,23 +1165,6 @@ public class GraphView extends EventSource {
         float f = (state.getStyle() != null) ? state.getStyle().getEdge().getRoutingCenterY() : 0;
 
         return state.getCenterY() + f * state.getHeight();
-    }
-
-    /**
-     * Returns the perimeter bounds for the given terminal, edge pair.
-     */
-    public RectangleDouble getPerimeterBounds(CellState terminal, double border) {
-        if (terminal != null) {
-            border += terminal.getStyle().getPerimeter().getVertexSpacing();
-        }
-        return terminal.getPerimeterBounds(border * scale);
-    }
-
-    /**
-     * Returns the perimeter function for the given state.
-     */
-    public Perimeter getPerimeterFunction(CellState state) {
-        return state.getStyle().getPerimeter().getPerimeter();
     }
 
     /**
@@ -1143,73 +1278,6 @@ public class GraphView extends EventSource {
     }
 
     /**
-     * Returns the absolute center point along the given edge.
-     */
-    public PointDouble getPoint(CellState state) {
-        return getPoint(state, null);
-    }
-
-    /**
-     * Returns the absolute point on the edge for the given relative geometry as
-     * a point. The edge is represented by the given cell state.
-     *
-     * @param state    Represents the state of the parent edge.
-     * @param geometry Optional geometry that represents the relative location.
-     * @return Returns the point that represents the absolute location of the
-     * given relative geometry.
-     */
-    public PointDouble getPoint(CellState state, Geometry geometry) {
-        double x = state.getCenterX();
-        double y = state.getCenterY();
-        if (state.getSegments() != null && (geometry == null || geometry.isRelative())) {
-            double gx = (geometry != null) ? geometry.getX() / 2 : 0;
-            int pointCount = state.getAbsolutePointCount();
-            double dist = (gx + 0.5) * state.getLength();
-            double[] segments = state.getSegments();
-            double segment = segments[0];
-            double length = 0;
-            int index = 1;
-            while (dist > length + segment && index < pointCount - 1) {
-                length += segment;
-                segment = segments[index++];
-            }
-            double factor = (segment == 0) ? 0 : (dist - length) / segment;
-            PointDouble p0 = state.getAbsolutePoint(index - 1);
-            PointDouble pe = state.getAbsolutePoint(index);
-            if (p0 != null && pe != null) {
-                double gy = 0;
-                double offsetX = 0;
-                double offsetY = 0;
-                if (geometry != null) {
-                    gy = geometry.getY();
-                    PointDouble offset = geometry.getOffset();
-
-                    if (offset != null) {
-                        offsetX = offset.getX();
-                        offsetY = offset.getY();
-                    }
-                }
-
-                double dx = pe.getX() - p0.getX();
-                double dy = pe.getY() - p0.getY();
-                double nx = (segment == 0) ? 0 : dy / segment;
-                double ny = (segment == 0) ? 0 : dx / segment;
-
-                x = p0.getX() + dx * factor + (nx * gy + offsetX) * scale;
-                y = p0.getY() + dy * factor - (ny * gy - offsetY) * scale;
-            }
-        } else if (geometry != null) {
-            PointDouble offset = geometry.getOffset();
-
-            if (offset != null) {
-                x += offset.getX();
-                y += offset.getY();
-            }
-        }
-        return new PointDouble(x, y);
-    }
-
-    /**
      * Gets the relative point that describes the given, absolute label position
      * for the given edge state.
      */
@@ -1288,7 +1356,8 @@ public class GraphView extends EventSource {
                 }
 
                 // Constructs the relative point for the label
-                return new PointDouble(Math.round(((totalLength / 2 - length - projlen) / totalLength) * -2), Math.round(yDistance / scale));
+                return new PointDouble(Math.round(((totalLength / 2 - length - projlen) / totalLength) * -2),
+                                       Math.round(yDistance / scale));
             }
         }
         return new PointDouble();
@@ -1301,36 +1370,6 @@ public class GraphView extends EventSource {
      */
     public List<CellState> getCellStates(List<ICell> cells) {
         return cells.stream().map(this::getState).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns the state for the given cell or null if no state is defined for
-     * the cell.
-     *
-     * @param cell Cell whose state should be returned.
-     * @return Returns the state for the given cell.
-     */
-    public CellState getState(ICell cell) {
-        return getState(cell, false);
-    }
-
-    /**
-     * Returns the cell state for the given cell. If create is true, then the
-     * state is created if it does not yet exist.
-     *
-     * @param cell   Cell for which a new state should be returned.
-     * @param create Boolean indicating if a new state should be created if it does
-     *               not yet exist.
-     * @return Returns the state for the given cell.
-     */
-    public CellState getState(ICell cell, boolean create) {
-        CellState state;
-        state = states.get(cell);
-        if (state == null && create && graph.isCellVisible(cell)) {
-            state = createState(cell);
-            states.put(cell, state);
-        }
-        return state;
     }
 
     /**
@@ -1350,21 +1389,18 @@ public class GraphView extends EventSource {
         }
     }
 
-    /**
-     * Creates and returns a cell state for the given cell.
-     *
-     * @param cell Cell for which a new state should be created.
-     * @return Returns a new state for the given cell.
-     */
-    public CellState createState(ICell cell) {
-        CellState cellState = new CellState(this, cell, graph.getCellStyle(cell));
-        cellState.getStyle().addPropertyChangeListener(evt -> fireEvent(new CellStateEvent(cellState)));
-        return cellState;
-    }
-
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [currentRoot=" + currentRoot + ", graphBounds=" + graphBounds + ", scale=" + scale + ", translate=" + translate + "]";
+        return getClass().getSimpleName()
+               + " [currentRoot="
+               + currentRoot
+               + ", graphBounds="
+               + graphBounds
+               + ", scale="
+               + scale
+               + ", translate="
+               + translate
+               + "]";
     }
 
     /**
@@ -1373,9 +1409,7 @@ public class GraphView extends EventSource {
     public static class CurrentRootChange implements UndoableChange {
 
         protected GraphView view;
-
         protected ICell root, previous;
-
         protected boolean up;
 
         /**
@@ -1433,6 +1467,7 @@ public class GraphView extends EventSource {
         /**
          * Changes the current root of the view.
          */
+        @Override
         public void execute() {
             ICell tmp = view.getCurrentRoot();
             view.currentRoot = previous;
@@ -1450,7 +1485,5 @@ public class GraphView extends EventSource {
                 view.fireEvent(new DownEvent(view.currentRoot, previous));
             }
         }
-
     }
-
 }

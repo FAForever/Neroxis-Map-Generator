@@ -26,18 +26,15 @@ public class Morphing extends Animation {
      * Reference to the enclosing graph instance.
      */
     protected GraphComponent graphComponent;
-
     /**
      * Specifies the maximum number of steps for the morphing. Default is
      * 6.
      */
     protected int steps;
-
     /**
      * Counts the current number of steps of the animation.
      */
     protected int step;
-
     /**
      * Ease-off for movement towards the given vector. Larger values are
      * slower and smoother. Default is 1.5.
@@ -47,13 +44,11 @@ public class Morphing extends Animation {
      * Maps from cells to origins.
      */
     protected Map<Object, PointDouble> origins = new HashMap<Object, PointDouble>();
-
     /**
      * Optional array of cells to limit the animation to.
      */
     protected List<ICell> cells;
     protected transient RectangleDouble dirty;
-
     protected transient CellStatePreview preview;
 
     /**
@@ -75,6 +70,12 @@ public class Morphing extends Animation {
         this.graphComponent = graphComponent;
         this.steps = steps;
         this.ease = ease;
+    }
+
+    public void paint(Graphics g) {
+        if (preview != null) {
+            preview.paint(g);
+        }
     }
 
     /**
@@ -117,6 +118,7 @@ public class Morphing extends Animation {
     /**
      * Animation step.
      */
+    @Override
     public void updateAnimation() {
         super.updateAnimation();
         preview = new CellStatePreview(graphComponent, false);
@@ -140,6 +142,7 @@ public class Morphing extends Animation {
         }
     }
 
+    @Override
     public void stopAnimation() {
         graphComponent.getGraph().getView().revalidate();
         super.stopAnimation();
@@ -219,7 +222,8 @@ public class Morphing extends Animation {
         PointDouble origin = getOriginForCell(state.getCell());
         PointDouble translate = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
-        PointDouble current = new PointDouble(state.getX() / scale - translate.getX(), state.getY() / scale - translate.getY());
+        PointDouble current = new PointDouble(state.getX() / scale - translate.getX(),
+                                              state.getY() / scale - translate.getY());
         return new PointDouble((origin.getX() - current.getX()) * scale, (origin.getY() - current.getY()) * scale);
     }
 
@@ -250,11 +254,4 @@ public class Morphing extends Animation {
 
         return result;
     }
-
-    public void paint(Graphics g) {
-        if (preview != null) {
-            preview.paint(g);
-        }
-    }
-
 }

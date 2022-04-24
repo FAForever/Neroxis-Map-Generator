@@ -19,6 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CellState extends RectangleDouble {
+
     @Serial
     private static final long serialVersionUID = 7588335615324083354L;
     /**
@@ -53,12 +54,10 @@ public class CellState extends RectangleDouble {
      * relative to the top, left corner of the vertex.
      */
     protected PointDouble absoluteOffset = new PointDouble();
-
     /**
      * Caches the distance between the end points and the length of an edge.
      */
     protected double terminalDistance, length;
-
     /**
      * Array of numbers that represent the cached length of each segment of the
      * edge.
@@ -72,12 +71,10 @@ public class CellState extends RectangleDouble {
      * Holds the largest rectangle which contains all rendering for this cell.
      */
     protected RectangleDouble boundingBox;
-
     /**
      * Specifies if the state is invalid. Default is true.
      */
     protected boolean invalid = true;
-
     /**
      * Caches the visible source and target terminal states.
      */
@@ -226,6 +223,7 @@ public class CellState extends RectangleDouble {
      * except the view and cell references, which are copied with no
      * cloning to the new instance.
      */
+    @Override
     public CellState clone() {
         CellState clone = (CellState) super.clone();
         clone.setView(view);
@@ -270,7 +268,19 @@ public class CellState extends RectangleDouble {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [cell=" + cell + ", label=" + label + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
+        return getClass().getSimpleName()
+               + " [cell="
+               + cell
+               + ", label="
+               + label
+               + ", x="
+               + x
+               + ", y="
+               + y
+               + ", width="
+               + width
+               + ", height="
+               + height
+               + "]";
     }
-
 }
