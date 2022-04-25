@@ -12,7 +12,7 @@ import java.util.Random;
 public class SymmetrySelector {
 
     public static SymmetrySettings getSymmetrySettingsFromTerrainSymmetry(Random random, Symmetry terrainSymmetry,
-                                                                          int numTeams) {
+                                                                          int spawnCount, int numTeams) {
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
         List<Symmetry> spawns;
@@ -33,11 +33,11 @@ public class SymmetrySelector {
             }
             case QUAD -> {
                 spawns = new ArrayList<>(Arrays.asList(POINT2, Symmetry.QUAD));
-                teams = new ArrayList<>(Arrays.asList(POINT2, Symmetry.X, Symmetry.Z, Symmetry.QUAD));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.X, Symmetry.Z, Symmetry.QUAD));
             }
             case DIAG -> {
                 spawns = new ArrayList<>(Arrays.asList(POINT2, Symmetry.DIAG));
-                teams = new ArrayList<>(Arrays.asList(POINT2, Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
+                teams = new ArrayList<>(Arrays.asList(Symmetry.XZ, Symmetry.ZX, Symmetry.DIAG));
             }
             default -> {
                 spawns = new ArrayList<>(List.of(terrainSymmetry));
@@ -45,7 +45,11 @@ public class SymmetrySelector {
             }
         }
         if (numTeams > 1) {
-            spawns.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
+            spawns.removeIf(symmetry -> {
+                int numSymPoints = symmetry.getNumSymPoints();
+                return (numSymPoints % numTeams != 0 || spawnCount % numSymPoints != 0)
+                       || (!symmetry.isPerfectSymmetry() && numSymPoints != numTeams);
+            });
             teams.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
         }
         spawnSymmetry = spawns.get(random.nextInt(spawns.size()));

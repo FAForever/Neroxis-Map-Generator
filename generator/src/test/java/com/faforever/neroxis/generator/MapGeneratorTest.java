@@ -159,6 +159,24 @@ public class MapGeneratorTest {
     }
 
     @Test
+    public void TestMultipleGenerationDeterminism() {
+        for (int i = 0; i < 3; i++) {
+            instance = new MapGenerator();
+            new CommandLine(instance).execute("--num-to-gen", "2", "--map-size", "256");
+            SCMap map1 = instance.getMap();
+            String[] hashArray1 = Pipeline.getHashArray().clone();
+
+            instance = new MapGenerator();
+            new CommandLine(instance).execute("--map-name", map1.getName());
+            SCMap map2 = instance.getMap();
+            String[] hashArray2 = Pipeline.getHashArray().clone();
+
+            assertArrayEquals(hashArray1, hashArray2);
+            assertSCMapEquality(map1, map2);
+        }
+    }
+
+    @Test
     public void TestEqualityMapNameKeyword() {
         new CommandLine(instance).execute(keywordArgs);
         SCMap map1 = instance.getMap();

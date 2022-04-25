@@ -97,6 +97,8 @@ public strictfp class MapGenerator implements Callable<Integer> {
     private Integer spawnCount;
     @CommandLine.Option(names = "--num-teams", order = 5, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private Integer numTeams;
+    @CommandLine.Option(names = "--num-to-generate", order = 6, defaultValue = "1", description = "Number of maps to create")
+    private Integer numToGenerate;
     private Integer mapSize;
     @CommandLine.ArgGroup(order = 2)
     private TuningOptions tuningOptions = new TuningOptions();
@@ -113,8 +115,6 @@ public strictfp class MapGenerator implements Callable<Integer> {
             commandLine.execute(args);
             Pipeline.shutdown();
         });
-
-        System.exit(0);
     }
 
     @CommandLine.Option(names = "--map-size", order = 3, defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
@@ -144,39 +144,49 @@ public strictfp class MapGenerator implements Callable<Integer> {
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
 
-        GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
-        if (mapName != null) {
-            parseMapName(mapName, generatorParametersBuilder);
-        } else {
-            checkParameters();
-            setGenerationTimeIfNecessary();
-            populateRequiredGeneratorParametersFromOptions(generatorParametersBuilder);
+        for (int i = 0; i < numToGenerate; i++) {
+            if (numToGenerate > 1) {
+                mapName = null;
+                seed = null;
+                tuningOptions = new TuningOptions();
+            }
 
-            randomizeOptions(generatorParametersBuilder);
-        }
+            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
+            if (mapName != null) {
+                parseMapName(mapName, generatorParametersBuilder);
+            } else {
+                checkParameters();
+                setGenerationTimeIfNecessary();
+                populateRequiredGeneratorParametersFromOptions(generatorParametersBuilder);
 
-        setStyleAndParameters(generatorParametersBuilder);
-        encodeMapName();
+                randomizeOptions(generatorParametersBuilder);
+            }
 
-        FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
-        System.out.println(mapName);
+            setStyleAndParameters(generatorParametersBuilder);
+            encodeMapName();
 
-        generate();
-        save();
+            FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
+            System.out.println(mapName);
 
-        System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
+            generate();
+            save();
 
-        Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
-                                        .map(VisibilityOptions::getVisibility)
-                                        .orElse(null);
-        if (visibility == null) {
-            System.out.printf("Seed: %d%n", seed);
-            System.out.println(styleGenerator.getGeneratorParameters().toString());
-            System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
-            System.out.println(styleGenerator.generatorsToString());
+            System.out.printf("Saving map to %s%n",
+                              outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
 
-            if (previewFolder != null) {
-                SCMapExporter.exportPreview(previewFolder, map);
+            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+                                            .map(VisibilityOptions::getVisibility)
+                                            .orElse(null);
+            if (visibility == null) {
+                System.out.printf("Seed: %d%n", seed);
+                System.out.println(styleGenerator.getGeneratorParameters().toString());
+                System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
+                System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
+                System.out.println(styleGenerator.generatorsToString());
+
+                if (previewFolder != null) {
+                    SCMapExporter.exportPreview(previewFolder, map);
+                }
             }
         }
 

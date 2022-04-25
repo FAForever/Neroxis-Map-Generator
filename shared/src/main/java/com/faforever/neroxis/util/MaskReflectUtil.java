@@ -10,6 +10,8 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector2Mask;
 import com.faforever.neroxis.mask.Vector3Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
+import com.github.therapi.runtimejavadoc.MethodJavadoc;
+import com.github.therapi.runtimejavadoc.RuntimeJavadoc;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -37,7 +39,7 @@ public class MaskReflectUtil {
     static {
         getAllMaskClasses().forEach(clazz -> {
             if (Mask.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
-                List<Method> maskMethods = Arrays.stream(clazz.getMethods())
+                List<Method> maskMethods = Arrays.stream(clazz.getMethods()).map(MaskReflectUtil::getBaseMethod)
                                                  .filter(method -> method.isAnnotationPresent(GraphMethod.class))
                                                  .filter(method -> !method.isBridge())
                                                  .sorted(Comparator.comparing(Method::getName))
@@ -71,6 +73,74 @@ public class MaskReflectUtil {
 
                   MASK_METHOD_MAP.get(executorClass).add(method);
               });
+    }
+
+    private static Method getBaseMethod(Method method) {
+        Class<?> clazz = method.getDeclaringClass();
+        while (!clazz.equals(Object.class)) {
+            clazz = clazz.getSuperclass();
+            if (clazz == null) {
+                break;
+            }
+
+            try {
+                method = clazz.getMethod(method.getName(), method.getParameterTypes());
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+
+        return method;
+    }
+
+    private static boolean isGraphMethod(Method method) {
+        Class<?> clazz = method.getDeclaringClass();
+        while (!clazz.equals(Object.class)) {
+            if (method.isAnnotationPresent(GraphMethod.class)) {
+                return true;
+            }
+
+            clazz = clazz.getSuperclass();
+            if (clazz == null) {
+                return false;
+            }
+
+            try {
+                method = clazz.getMethod(method.getName(), method.getParameterTypes());
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+
+        return false;
+    }
+
+    public static MethodJavadoc getJavadoc(Executable executable) {
+        if (executable instanceof Method) {
+            return getJavadoc((Method) executable);
+        } else {
+            return RuntimeJavadoc.getJavadoc((Constructor<?>) executable);
+        }
+    }
+
+    private static MethodJavadoc getJavadoc(Method method) {
+        Class<?> clazz = method.getDeclaringClass();
+        while (!clazz.equals(Object.class)) {
+            MethodJavadoc methodJavadoc = RuntimeJavadoc.getJavadoc(method);
+            if (!methodJavadoc.isEmpty()) {
+                return methodJavadoc;
+            }
+
+            clazz = clazz.getSuperclass();
+            if (clazz == null) {
+                return methodJavadoc;
+            }
+
+            try {
+                method = clazz.getMethod(method.getName(), method.getParameterTypes());
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+
+        return MethodJavadoc.createEmpty(method);
     }
 
     public static List<Method> getMaskMethods(Class<? extends Mask<?, ?>> maskClass) {

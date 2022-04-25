@@ -42,6 +42,7 @@ public strictfp class GraphContext {
         random = new Random(seed);
         this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                         generatorParameters.getTerrainSymmetry(),
+                                                                                        generatorParameters.getSpawnCount(),
                                                                                         generatorParameters.getNumTeams());
         this.generatorParameters = generatorParameters;
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();

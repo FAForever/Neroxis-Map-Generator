@@ -63,6 +63,7 @@ public class PipelineGraphComponent extends GraphComponent {
                             pipelineGraph.removeVertex(vertex);
                         }
                     });
+                    refresh();
                 } else if (e.getKeyCode() == KeyEvent.VK_LEFT && e.isControlDown()) {
                     ICell selectedCell = pipelineGraph.getSelectionCell();
                     if (selectedCell != null) {

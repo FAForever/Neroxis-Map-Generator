@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 
@@ -54,13 +55,7 @@ public strictfp class FileUtil {
             bufferedReader = new BufferedReader(new FileReader(Paths.get(filePath).toFile()));
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            stringBuilder.append(line).append("\n");
-        }
-
-        return stringBuilder.toString();
+        return bufferedReader.lines().collect(Collectors.joining("\n"));
     }
 
     public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {

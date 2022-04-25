@@ -14,7 +14,6 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.AIMarkerPlacer;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -42,7 +41,6 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected float spawnSeparation;
     protected int teamSeparation;
     private SpawnPlacer spawnPlacer;
-    private SymmetrySettings symmetrySettings;
 
     public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
@@ -82,6 +80,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                    generatorParameters.getTerrainSymmetry(),
+                                                                                   generatorParameters.getSpawnCount(),
                                                                                    generatorParameters.getNumTeams());
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         map.setUnexplored(generatorParameters.getVisibility() == Visibility.UNEXPLORED);

@@ -8,6 +8,8 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
+import com.faforever.neroxis.util.MaskReflectUtil;
+import com.github.therapi.runtimejavadoc.MethodJavadoc;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -403,10 +405,15 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         if (vertex == null) {
             return "";
         }
-        if (cell.getParent() != getDefaultParent()) {
-            return vertex.getIdentifier() + " -> " + vertex.getExecutableName() + " -> " + cell.getValue();
-        }
-        return vertex.getIdentifier() + " -> " + vertex.getExecutableName();
+
+        MethodJavadoc javadoc = MaskReflectUtil.getJavadoc(vertex.getExecutable());
+        String parametersJavadoc = javadoc.getParams()
+                                          .stream()
+                                          .map(paramJavadoc -> String.format("%s - %s", paramJavadoc.getName(),
+                                                                             paramJavadoc.getComment()))
+                                          .collect(Collectors.joining("<br>"));
+        return String.format("<html>%s -> %s<br>%s<br>%s</html>", vertex.getIdentifier(), javadoc.getName(),
+                             javadoc.getComment(), parametersJavadoc);
     }
 
     @Override
