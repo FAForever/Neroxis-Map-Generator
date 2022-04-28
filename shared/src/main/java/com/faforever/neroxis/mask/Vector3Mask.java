@@ -43,7 +43,7 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.get(0);
-            set(point -> source.get(point).copy());
+            set((x, y) -> source.get(x, y).copy());
         }, other);
     }
 
@@ -77,13 +77,13 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             Vector3Mask source = (Vector3Mask) dependencies.get(0);
-            set(point -> get(point).cross(source.get(point)));
+            set((x, y) -> get(x, y).cross(source.get(x, y)));
         }, other);
     }
 
     @GraphMethod
     public Vector3Mask cross(Vector3 vector) {
-        return set(point -> get(point).cross(vector));
+        return set((x, y) -> get(x, y).cross(vector));
     }
 
     @Override
@@ -94,11 +94,10 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         Vector3 maxComponents = getMaxComponents();
         Vector3 minComponents = getMinComponents();
         Vector3 rangeComponents = maxComponents.copy().subtract(minComponents);
-        loop(point -> imageRaster.setPixel(point.x, point.y, get(point).copy()
-                                                                       .subtract(minComponents)
-                                                                       .divide(rangeComponents)
-                                                                       .multiply(255f)
-                                                                       .toArray()));
+        loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).subtract(minComponents)
+                                                           .divide(rangeComponents)
+                                                           .multiply(255f)
+                                                           .toArray()));
         return image;
     }
 

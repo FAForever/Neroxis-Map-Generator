@@ -68,15 +68,11 @@ public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         WritableRaster imageRaster = image.getRaster();
         Vector2 maxComponents = getMaxComponents();
         Vector2 minComponents = getMinComponents();
-        Vector2 rangeComponents = maxComponents.copy().subtract(minComponents);
-        loop(point -> {
-            float[] maskArray = get(point).copy()
-                                          .subtract(minComponents)
-                                          .divide(rangeComponents)
-                                          .multiply(255f)
-                                          .toArray();
+        Vector2 rangeComponents = maxComponents.subtract(minComponents);
+        loop((x, y) -> {
+            float[] maskArray = get(x, y).subtract(minComponents).divide(rangeComponents).multiply(255f).toArray();
             float[] pixelArray = Arrays.copyOf(maskArray, 3);
-            imageRaster.setPixel(point.x, point.y, pixelArray);
+            imageRaster.setPixel(x, y, pixelArray);
         });
         return image;
     }

@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
-import java.awt.Point;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
@@ -15,24 +14,12 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         super(other, name);
     }
 
-    protected boolean valueAtEqualTo(Point point, T value) {
-        return valueAtEqualTo(point.x, point.y, value);
-    }
-
     protected boolean valueAtEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) == 0;
     }
 
-    protected boolean valueAtLessThanEqualTo(Point point, T value) {
-        return valueAtLessThanEqualTo(point.x, point.y, value);
-    }
-
     protected boolean valueAtLessThanEqualTo(int x, int y, T value) {
         return get(x, y).compareTo(value) <= 0;
-    }
-
-    protected boolean isLocalMax(Point point) {
-        return isLocalMax(point.x, point.y);
     }
 
     protected boolean isLocalMax(int x, int y) {
@@ -47,10 +34,6 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
                 && valueAtLessThanEqualTo(x + 1, y - 1, value)
                 && valueAtLessThanEqualTo(x - 1, y + 1, value)
                 && valueAtLessThanEqualTo(x + 1, y + 1, value));
-    }
-
-    protected boolean isLocal1DMax(Point point) {
-        return isLocal1DMax(point.x, point.y);
     }
 
     protected boolean isLocal1DMax(int x, int y) {
@@ -70,9 +53,9 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            set(point -> {
-                T thisVal = get(point);
-                T otherVal = source.get(point);
+            set((x, y) -> {
+                T thisVal = get(x, y);
+                T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) > 0 ? thisVal : otherVal;
             });
         }, other);
@@ -83,17 +66,17 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            set(point -> {
-                T thisVal = get(point);
-                return source.getPrimitive(point) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
+            set((x, y) -> {
+                T thisVal = get(x, y);
+                return source.getPrimitive(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
             });
         }, other);
     }
 
     @GraphMethod
     public U clampMax(T val) {
-        return set(point -> {
-            T thisVal = get(point);
+        return set((x, y) -> {
+            T thisVal = get(x, y);
             return thisVal.compareTo(val) < 0 ? thisVal : val;
         });
     }
@@ -103,9 +86,9 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
-            set(point -> {
-                T thisVal = get(point);
-                T otherVal = source.get(point);
+            set((x, y) -> {
+                T thisVal = get(x, y);
+                T otherVal = source.get(x, y);
                 return thisVal.compareTo(otherVal) < 0 ? thisVal : otherVal;
             });
         }, other);
@@ -116,45 +99,36 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            set(point -> {
-                T thisVal = get(point);
-                return source.getPrimitive(point) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
+            set((x, y) -> {
+                T thisVal = get(x, y);
+                return source.getPrimitive(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
             });
         }, other);
     }
 
     @GraphMethod
     public U clampMin(T val) {
-        return set(point -> {
-            T thisVal = get(point);
+        return set((x, y) -> {
+            T thisVal = get(x, y);
             return thisVal.compareTo(val) > 0 ? thisVal : val;
         });
     }
 
     @GraphMethod
     public U threshold(T val) {
-        return set(point -> {
-            T thisVal = get(point);
+        return set((x, y) -> {
+            T thisVal = get(x, y);
             return thisVal.compareTo(val) > 0 ? getZeroValue() : thisVal;
         });
     }
 
     @GraphMethod
     public U zeroOutsideRange(T min, T max) {
-        return set(
-                point -> valueAtLessThan(point, min) || valueAtGreaterThan(point, max) ? getZeroValue() : get(point));
-    }
-
-    protected boolean valueAtLessThan(Point point, T value) {
-        return valueAtLessThan(point.x, point.y, value);
+        return set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y));
     }
 
     protected boolean valueAtLessThan(int x, int y, T value) {
         return get(x, y).compareTo(value) < 0;
-    }
-
-    protected boolean valueAtGreaterThan(Point point, T value) {
-        return valueAtGreaterThan(point.x, point.y, value);
     }
 
     protected boolean valueAtGreaterThan(int x, int y, T value) {
@@ -163,12 +137,9 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
 
     @GraphMethod
     public U zeroInRange(T min, T max) {
-        return set(point -> valueAtGreaterThanEqualTo(point, min) && valueAtLessThan(point, max) ? getZeroValue() : get(
-                point));
-    }
-
-    protected boolean valueAtGreaterThanEqualTo(Point point, T value) {
-        return valueAtGreaterThanEqualTo(point.x, point.y, value);
+        return set(
+                (x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x,
+                                                                                                                    y));
     }
 
     protected boolean valueAtGreaterThanEqualTo(int x, int y, T value) {

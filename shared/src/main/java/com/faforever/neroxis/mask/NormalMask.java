@@ -46,7 +46,7 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            set(point -> source.calculateNormalAt(point, scale));
+            set((x, y) -> source.calculateNormalAt(x, y, scale));
         }, other);
     }
 
@@ -62,8 +62,8 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
                       boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         Raster imageRaster = sourceImage.getData();
-        set(point -> {
-            float[] components = imageRaster.getPixel(point.x, point.y, new float[4]);
+        set((x, y) -> {
+            float[] components = imageRaster.getPixel(x, y, new float[4]);
             return createValue(1f, components[3], components[0], components[1]);
         });
     }
@@ -78,12 +78,12 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
     public BufferedImage writeToImage(BufferedImage image) {
         assertSize(image.getHeight());
         WritableRaster imageRaster = image.getRaster();
-        loop(point -> {
-            Vector3 value = get(point);
+        loop((x, y) -> {
+            Vector3 value = get(x, y);
             int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
             int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);
             int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
-            imageRaster.setPixel(point.x, point.y, new int[]{xV, zV, yV});
+            imageRaster.setPixel(x, y, new int[]{xV, zV, yV});
         });
         return image;
     }
@@ -98,14 +98,14 @@ public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             Vector3Mask source = (Vector3Mask) dependencies.get(0);
-            set(point -> get(point).cross(source.get(point)));
+            set((x, y) -> get(x, y).cross(source.get(x, y)));
         }, other);
     }
 
     @GraphMethod
     public NormalMask cross(Vector3 vector) {
         Vector3 normalizedVector = vector.copy().normalize();
-        return set(point -> get(point).cross(normalizedVector));
+        return set((x, y) -> get(x, y).cross(normalizedVector));
     }
 
     @Override

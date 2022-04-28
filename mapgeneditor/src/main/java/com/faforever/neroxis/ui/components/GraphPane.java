@@ -237,18 +237,18 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         graphChangedAction.run();
     }
 
+    @Override
+    public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
+        updateIdentifiers(e.getEdgeTarget());
+        graphChangedAction.run();
+    }
+
     public void updateIdentifiers(MaskGraphVertex<?> vertex) {
         String identifier = vertex.getIdentifier();
         graph.getDirectRelationships(vertex).forEach(node -> {
             node.setIdentifier(identifier);
             graph.getCellForVertex(node).setValue(identifier);
         });
-    }
-
-    @Override
-    public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-        updateIdentifiers(e.getEdgeTarget());
-        graphChangedAction.run();
     }
 
     @Override

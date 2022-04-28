@@ -7,9 +7,11 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.functional.BiIntConsumer;
+import com.faforever.neroxis.util.functional.BiIntFunction;
+import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -19,9 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.Getter;
@@ -196,11 +196,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract T getZeroValue();
 
-    protected U set(Function<Point, T> valueFunction) {
-        return apply(point -> set(point, valueFunction.apply(point)));
+    protected U set(BiIntFunction<T> valueFunction) {
+        return apply((x, y) -> set(x, y, valueFunction.apply(x, y)));
     }
 
-    protected U apply(Consumer<Point> maskAction) {
+    protected U apply(BiIntConsumer maskAction) {
         return enqueue(() -> loop(maskAction));
     }
 
@@ -260,18 +260,16 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             initializeMask(source.getSize());
-            set(point -> source.getPrimitive(point) ? trueValue : falseValue);
+            set((x, y) -> source.getPrimitive(x, y) ? trueValue : falseValue);
         }, other);
     }
 
-    protected void loop(Consumer<Point> maskAction) {
+    protected void loop(BiIntConsumer maskAction) {
         assertNotPipelined();
         int size = getSize();
-        Point point = new Point();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                point.setLocation(x, y);
-                maskAction.accept(point);
+                maskAction.accept(x, y);
             }
         }
     }
@@ -280,10 +278,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (parallel && !Pipeline.isRunning()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
-    }
-
-    protected void set(Point point, T value) {
-        set(point.x, point.y, value);
     }
 
     private Vector2 getRotatedPoint(float x, float y, float angle) {
@@ -326,7 +320,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         assertCompatibleMask(area);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            set(point -> source.getPrimitive(point) ? value : get(point));
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    set(x, y, value);
+                }
+            });
         }, area);
     }
 
@@ -344,12 +342,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return enqueue(dependencies -> {
             BooleanMask placement = (BooleanMask) dependencies.get(0);
             U source = (U) dependencies.get(1);
-            set(point -> placement.getPrimitive(point) ? source.get(point) : get(point));
+            apply((x, y) -> {
+                if (placement.getPrimitive(x, y)) {
+                    set(x, y, source.get(x, y));
+                }
+            });
         }, area, value);
-    }
-
-    public boolean inBounds(Point point) {
-        return inBounds(point.x, point.y);
     }
 
     public boolean inBounds(int x, int y) {
@@ -380,8 +378,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return symmetryPoints;
     }
 
-    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector3 v, SymmetryType symmetryType) {
-        return getSymmetryPointsWithOutOfBounds(new Vector2(v), symmetryType);
+    public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector3 point, SymmetryType symmetryType) {
+        return getSymmetryPointsWithOutOfBounds(new Vector2(point), symmetryType);
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector2 point, SymmetryType symmetryType) {
@@ -626,17 +624,17 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     public U forceSymmetry(SymmetryType symmetryType, boolean reverse) {
         if (!reverse) {
-            return applyWithSymmetry(symmetryType, point -> {
-                T value = get(point);
-                applyAtSymmetryPoints(point, symmetryType, symPoint -> set(symPoint, value));
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                T value = get(x, y);
+                applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
             });
         } else {
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
                 throw new IllegalArgumentException("Symmetry has more than two symmetry points");
             }
-            return applyWithSymmetry(symmetryType, point -> {
-                List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
-                symPoints.forEach(symmetryPoint -> set(point, get(symmetryPoint)));
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+                symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.getX(), (int) symPoint.getY())));
             });
         }
     }
@@ -649,7 +647,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return inHalfNoBounds(new Vector2(pos), angle);
     }
 
-    protected U applyWithSymmetry(SymmetryType symmetryType, Consumer<Point> maskAction) {
+    protected U applyWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         return enqueue(() -> {
             loopWithSymmetry(symmetryType, maskAction);
             if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry()
@@ -663,16 +661,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         if (symmetrySettings.getSymmetry(SymmetryType.SPAWN) != Symmetry.POINT2) {
             throw new IllegalArgumentException("Spawn Symmetry must equal POINT2");
         }
-        return apply(point -> {
-            if (inHalf(point.x, point.y, angle)) {
-                T value = get(point);
-                applyAtSymmetryPoints(point, SymmetryType.SPAWN, symPoint -> set(symPoint, value));
+        return apply((x, y) -> {
+            if (inHalf(x, y, angle)) {
+                T value = get(x, y);
+                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> set(sx, sy, value));
             }
         });
-    }
-
-    protected T get(Point point) {
-        return get(point.x, point.y);
     }
 
     public boolean inHalf(int x, int y, float angle) {
@@ -709,38 +703,31 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return forceSymmetry(SymmetryType.SPAWN);
     }
 
-    protected U setWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return applyWithSymmetry(symmetryType, point -> {
-            T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, symPoint -> set(symPoint, value));
+    protected U setWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
         });
     }
 
     protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType,
-                                                     Consumer<Point> action) {
+                                                     BiIntConsumer action) {
         return applyAtSymmetryPointsWithOutOfBounds((int) location.getX(), (int) location.getY(), symmetryType, action);
     }
 
-    protected U applyAtSymmetryPoints(Vector2 location, SymmetryType symmetryType, Consumer<Point> action) {
+    protected U applyAtSymmetryPoints(Vector2 location, SymmetryType symmetryType, BiIntConsumer action) {
         return applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), symmetryType, action);
     }
 
-    protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, Consumer<Point> action) {
-        return applyAtSymmetryPoints(new Point(x, y), symmetryType, action);
-    }
-
-    protected U applyAtSymmetryPoints(Point point, SymmetryType symmetryType, Consumer<Point> action) {
+    protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiIntConsumer action) {
         return enqueue(() -> {
-            action.accept(point);
-            List<Vector2> symPoints = getSymmetryPoints(point.x, point.y, symmetryType);
-            symPoints.forEach(symPoint -> {
-                point.setLocation(symPoint.getX(), symPoint.getY());
-                action.accept(point);
-            });
+            action.accept(x, y);
+            List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+            symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
         });
     }
 
-    protected U applyWithOffset(U other, BiConsumer<Point, T> action, int xOffset, int yOffset, boolean center,
+    protected U applyWithOffset(U other, BiIntObjConsumer<T> action, int xOffset, int yOffset, boolean center,
                                 boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
@@ -753,26 +740,26 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                                                                                    otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
-                    other.apply(point -> {
-                        int shiftX = coordinateXMap.get(point.x);
-                        int shiftY = coordinateYMap.get(point.y);
+                    other.apply((x, y) -> {
+                        int shiftX = coordinateXMap.get(x);
+                        int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY)) {
-                            T value = other.get(point);
+                            T value = other.get(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
-                                                  symPoint -> action.accept(symPoint, value));
+                                                  (sx, sy) -> action.accept(sx, sy, value));
                         }
                     });
                 } else {
-                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, symPoint -> {
-                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(symPoint.x, center, wrapEdges,
-                                                                                       otherSize, size);
-                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(symPoint.y, center, wrapEdges,
-                                                                                       otherSize, size);
-                        other.apply(point -> {
-                            int shiftX = coordinateXMap.get(point.x);
-                            int shiftY = coordinateYMap.get(point.y);
+                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
+                                                                                       size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
+                                                                                       size);
+                        other.apply((x, y) -> {
+                            int shiftX = coordinateXMap.get(x);
+                            int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY)) {
-                                action.accept(new Point(shiftX, shiftY), other.get(point));
+                                action.accept(shiftX, shiftY, other.get(x, y));
                             }
                         });
                     });
@@ -782,30 +769,23 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                                                                                otherSize);
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
-                apply(point -> {
-                    int shiftX = coordinateXMap.get(point.x);
-                    int shiftY = coordinateYMap.get(point.y);
+                apply((x, y) -> {
+                    int shiftX = coordinateXMap.get(x);
+                    int shiftY = coordinateYMap.get(y);
                     if (other.inBounds(shiftX, shiftY)) {
                         T value = other.get(shiftX, shiftY);
-                        action.accept(point, value);
+                        action.accept(x, y, value);
                     }
                 });
             }
         });
     }
 
-    protected U applyAtSymmetryPointsWithOutOfBounds(int x, int y, SymmetryType symmetryType, Consumer<Point> action) {
-        return applyAtSymmetryPointsWithOutOfBounds(new Point(x, y), symmetryType, action);
-    }
-
-    protected U applyAtSymmetryPointsWithOutOfBounds(Point point, SymmetryType symmetryType, Consumer<Point> action) {
+    protected U applyAtSymmetryPointsWithOutOfBounds(int x, int y, SymmetryType symmetryType, BiIntConsumer action) {
         return enqueue(() -> {
-            action.accept(point);
-            List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(point.x, point.y, symmetryType);
-            symPoints.forEach(symPoint -> {
-                point.setLocation(symPoint.getX(), symPoint.getY());
-                action.accept(point);
-            });
+            action.accept(x, y);
+            List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
+            symPoints.forEach(point -> action.accept((int) point.getX(), (int) point.getY()));
         });
     }
 
@@ -841,17 +821,15 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                         .collect(Collectors.toMap(i -> i, i -> getShiftedValue(i, trueOffset, toSize, wrapEdges)));
     }
 
-    protected void loopWithSymmetry(SymmetryType symmetryType, Consumer<Point> maskAction) {
+    protected void loopWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         assertNotPipelined();
         int minX = getMinXBound(symmetryType);
         int maxX = getMaxXBound(symmetryType);
-        Point point = new Point();
         for (int x = minX; x < maxX; x++) {
             int minY = getMinYBound(x, symmetryType);
             int maxY = getMaxYBound(x, symmetryType);
             for (int y = minY; y < maxY; y++) {
-                point.setLocation(x, y);
-                maskAction.accept(point);
+                maskAction.accept(x, y);
             }
         }
     }
@@ -1122,7 +1100,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected U fillCoordinates(Collection<Vector2> coordinates, T value) {
         coordinates.forEach(
-                location -> applyAtSymmetryPoints(location, SymmetryType.SPAWN, point -> set(point, value)));
+                location -> applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.SPAWN,
+                                                  (x, y) -> set(x, y, value)));
         return (U) this;
     }
 }
