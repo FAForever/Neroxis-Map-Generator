@@ -85,7 +85,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
             BooleanMask source = (BooleanMask) dependencies.get(0);
             set(point -> {
                 T thisVal = get(point);
-                return source.get(point) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
+                return source.getPrimitive(point) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
             });
         }, other);
     }
@@ -118,7 +118,7 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
             BooleanMask source = (BooleanMask) dependencies.get(0);
             set(point -> {
                 T thisVal = get(point);
-                return source.get(point) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
+                return source.getPrimitive(point) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
             });
         }, other);
     }

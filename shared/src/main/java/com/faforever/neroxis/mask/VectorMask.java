@@ -120,14 +120,12 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     @Override
-    @GraphMethod
     public U blur(int radius) {
         T[][] innerCount = getInnerCount();
         return set(point -> calculateAreaAverage(radius, point, innerCount).round().divide(1000));
     }
 
     @Override
-    @GraphMethod
     public U blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {

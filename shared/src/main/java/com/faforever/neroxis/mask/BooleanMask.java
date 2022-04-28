@@ -7,6 +7,8 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
+import com.faforever.neroxis.util.functional.ObjBooleanConsumer;
+import com.faforever.neroxis.util.functional.ToBooleanFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -82,20 +84,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
-    protected void setPrimitive(Point point, boolean value) {
-        setPrimitive(point.x, point.y, value);
-    }
-
-    protected void setPrimitive(int x, int y, boolean value) {
-        setBit(x, y, value, getSize(), mask);
-    }
-
     private static void setBit(int x, int y, boolean value, int size, long[] mask) {
         setBit(bitIndex(x, y, size), value, mask);
-    }
-
-    private static int arrayIndex(int bitIndex) {
-        return (int) StrictMath.floor((float) bitIndex / BOOLEANS_PER_LONG);
     }
 
     private static void setBit(int bitIndex, boolean value, long[] mask) {
@@ -106,20 +96,59 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
+    private static int arrayIndex(int bitIndex) {
+        return (int) StrictMath.floor((float) bitIndex / BOOLEANS_PER_LONG);
+    }
+
     private static int bitIndex(int x, int y, int size) {
         return x * size + y;
     }
 
-    @Override
-    protected void initializeMask(int size) {
-        enqueue(() -> {
-            mask = new long[minimumArraySize(size)];
-            maskBooleanSize = size;
-        });
+    private static boolean getBit(int x, int y, int size, long[] mask) {
+        return getBit(bitIndex(x, y, size), mask);
+    }
+
+    private static boolean getBit(int bitIndex, long[] mask) {
+        return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
     }
 
     private static int bitIndex(Point point, int size) {
         return bitIndex(point.x, point.y, size);
+    }
+
+    private static int minimumArraySize(int size) {
+        return (int) StrictMath.ceil((double) size * size / BOOLEANS_PER_LONG);
+    }
+
+    private static void setBit(Point point, boolean value, int size, long[] mask) {
+        setBit(point.x, point.y, value, size, mask);
+    }
+
+    protected void setPrimitive(Point point, boolean value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    protected void setPrimitive(int x, int y, boolean value) {
+        setBit(x, y, value, getSize(), mask);
+    }
+
+    @Override
+    public BooleanMask blur(int radius) {
+        return blur(radius, .5f);
+    }
+
+    @Override
+    public BooleanMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        int[][] innerCount = getInnerCount();
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount), .5f));
+                }
+            });
+        }, other);
     }
 
     @Override
@@ -128,6 +157,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             fill(source.mask, source.maskBooleanSize);
         }, other);
+    }
+
+    @Override
+    protected void initializeMask(int size) {
+        enqueue(() -> {
+            mask = new long[minimumArraySize(size)];
+            maskBooleanSize = size;
+        });
     }
 
     @Override
@@ -163,27 +200,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             stringBuilder.append(String.format("%02x", datum));
         }
         return stringBuilder.toString();
-    }
-
-    @Override
-    @GraphMethod
-    public BooleanMask blur(int radius) {
-        return blur(radius, .5f);
-    }
-
-    @Override
-    @GraphMethod
-    public BooleanMask blur(int radius, BooleanMask other) {
-        assertCompatibleMask(other);
-        int[][] innerCount = getInnerCount();
-        return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            apply(point -> {
-                if (limiter.get(point)) {
-                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount), .5f));
-                }
-            });
-        }, other);
     }
 
     @Override
@@ -231,6 +247,22 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    public boolean getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    public boolean getPrimitive(int x, int y) {
+        return getBit(x, y, getSize(), mask);
+    }
+
+    protected BooleanMask fill(long[] arrayToFillFrom, int maskBooleanSize) {
+        int arraySize = arrayToFillFrom.length;
+        mask = new long[arraySize];
+        this.maskBooleanSize = maskBooleanSize;
+        System.arraycopy(arrayToFillFrom, 0, mask, 0, arraySize);
+        return this;
+    }
+
     @GraphMethod
     public BooleanMask blur(int radius, float density) {
         int[][] innerCount = getInnerCount();
@@ -251,32 +283,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return value >= threshold;
     }
 
-    public boolean getPrimitive(Point point) {
-        return getPrimitive(point.x, point.y);
-    }
-
-    public boolean getPrimitive(int x, int y) {
-        return getBit(x, y, getSize(), mask);
-    }
-
-    private static boolean getBit(int x, int y, int size, long[] mask) {
-        return getBit(bitIndex(x, y, size), mask);
-    }
-
-    private static boolean getBit(int bitIndex, long[] mask) {
-        return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
-    }
-
-    protected BooleanMask fill(long[] arrayToFillFrom, int maskBooleanSize) {
-        int arraySize = arrayToFillFrom.length;
-        mask = new long[arraySize];
-        this.maskBooleanSize = maskBooleanSize;
-        System.arraycopy(arrayToFillFrom, 0, mask, 0, arraySize);
-        return this;
+    @Override
+    public Boolean getSum() {
+        throw new UnsupportedOperationException("Sum not supported for BooleanMask");
     }
 
     @Override
-    @GraphMethod
     public BooleanMask add(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -288,13 +300,45 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public Boolean getSum() {
-        throw new UnsupportedOperationException("Sum not supported for BooleanMask");
+    protected void addValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value | getPrimitive(x, y));
     }
 
     @Override
-    protected void addValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, value | getPrimitive(x, y));
+    public BooleanMask add(BooleanMask other, Boolean value) {
+        assertCompatibleMask(other);
+        boolean val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    addPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public BooleanMask add(BooleanMask other, BooleanMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask val = (BooleanMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    addPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public BooleanMask addWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            applyWithOffset(source, (ObjBooleanConsumer<Point>) this::addPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
     }
 
     @Override
@@ -303,7 +347,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    @GraphMethod
+    public Boolean getAvg() {
+        assertNotPipelined();
+        float size = getSize();
+        return getCount() / size / size > .5f;
+    }
+
+    @Override
     public BooleanMask subtract(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -315,7 +365,44 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    @GraphMethod
+    public BooleanMask subtract(BooleanMask other, Boolean value) {
+        assertCompatibleMask(other);
+        boolean val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    subtractPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public BooleanMask subtract(BooleanMask other, BooleanMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask val = (BooleanMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    subtractPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public BooleanMask subtractWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
+                                          boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            applyWithOffset(source, (ObjBooleanConsumer<Point>) this::subtractPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    @Override
     public BooleanMask multiply(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -327,14 +414,49 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public Boolean getAvg() {
-        assertNotPipelined();
-        float size = getSize();
-        return getCount() / size / size > .5f;
+    protected void multiplyValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value & getPrimitive(x, y));
     }
 
     @Override
-    @GraphMethod
+    public BooleanMask multiply(BooleanMask other, Boolean value) {
+        assertCompatibleMask(other);
+        boolean val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    multiplyPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public BooleanMask multiply(BooleanMask other, BooleanMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask val = (BooleanMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    multiplyPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public BooleanMask multiplyWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
+                                          boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            applyWithOffset(source, (ObjBooleanConsumer<Point>) this::multiplyPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    @Override
     public BooleanMask divide(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -346,12 +468,103 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    protected void multiplyValueAt(int x, int y, Boolean value) {
-        setPrimitive(x, y, value & getPrimitive(x, y));
+    protected void divideValueAt(int x, int y, Boolean value) {
+        setPrimitive(x, y, value ^ getPrimitive(x, y));
     }
 
     @Override
-    protected void divideValueAt(int x, int y, Boolean value) {
+    public BooleanMask divide(BooleanMask other, Boolean value) {
+        assertCompatibleMask(other);
+        boolean val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    dividePrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public BooleanMask divide(BooleanMask other, BooleanMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask val = (BooleanMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    dividePrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public BooleanMask divideWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
+                                        boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            applyWithOffset(source, (ObjBooleanConsumer<Point>) this::dividePrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    public int getCount() {
+        assertNotPipelined();
+        int count = 0;
+        int size = getSize();
+        for (long l : mask) {
+            count += Long.bitCount(l);
+        }
+        return count;
+    }
+
+    protected BooleanMask add(ToBooleanFunction<Point> valueFunction) {
+        return apply(point -> addPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected BooleanMask subtract(ToBooleanFunction<Point> valueFunction) {
+        return apply(point -> subtractPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected BooleanMask multiply(ToBooleanFunction<Point> valueFunction) {
+        return apply(point -> multiplyPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected BooleanMask divide(ToBooleanFunction<Point> valueFunction) {
+        return apply(point -> dividePrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected void addPrimitiveAt(Point point, boolean value) {
+        addPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void addPrimitiveAt(int x, int y, boolean value) {
+        setPrimitive(x, y, value | getPrimitive(x, y));
+    }
+
+    protected void subtractPrimitiveAt(Point point, boolean value) {
+        subtractPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void subtractPrimitiveAt(int x, int y, boolean value) {
+        setPrimitive(x, y, !value & getPrimitive(x, y));
+    }
+
+    protected void multiplyPrimitiveAt(Point point, boolean value) {
+        multiplyPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void multiplyPrimitiveAt(int x, int y, boolean value) {
+        setPrimitive(x, y, value & getPrimitive(x, y));
+    }
+
+    protected void dividePrimitiveAt(Point point, boolean value) {
+        dividePrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void dividePrimitiveAt(int x, int y, boolean value) {
         setPrimitive(x, y, value ^ getPrimitive(x, y));
     }
 
@@ -371,16 +584,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     protected void setPrimitive(Vector2 location, boolean value) {
         setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
-    }
-
-    public int getCount() {
-        assertNotPipelined();
-        int count = 0;
-        int size = getSize();
-        for (long l : mask) {
-            count += Long.bitCount(l);
-        }
-        return count;
     }
 
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init(ComparableMask<T, U> other,
@@ -658,6 +861,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    private long[] getMaskCopy() {
+        assertNotPipelined();
+        int arraySize = mask.length;
+        long[] maskCopy = new long[arraySize];
+        System.arraycopy(mask, 0, maskCopy, 0, arraySize);
+        return maskCopy;
+    }
+
     private void markInRadius(float radius, long[] maskCopy, Point point, boolean value) {
         int x = point.x;
         int y = point.y;
@@ -709,14 +920,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return dilute(strength, 1);
     }
 
-    private long[] getMaskCopy() {
-        assertNotPipelined();
-        int arraySize = mask.length;
-        long[] maskCopy = new long[arraySize];
-        System.arraycopy(mask, 0, maskCopy, 0, arraySize);
-        return maskCopy;
-    }
-
     @GraphMethod
     public BooleanMask outline() {
         return enqueue(() -> {
@@ -725,14 +928,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             apply(point -> setBit(point, isEdge(point), size, maskCopy));
             mask = maskCopy;
         });
-    }
-
-    private static int minimumArraySize(int size) {
-        return (int) StrictMath.ceil((double) size * size / BOOLEANS_PER_LONG);
-    }
-
-    private static void setBit(Point point, boolean value, int size, long[] mask) {
-        setBit(point.x, point.y, value, size, mask);
     }
 
     public boolean isEdge(Point point) {
@@ -1002,6 +1197,27 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return spaceCoordinates(radius, coordinateList);
     }
 
+    public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
+        assertNotPipelined();
+        int size = getSize();
+        int numPossibleCoordinates;
+        int numTrue = getCount();
+        if (value) {
+            numPossibleCoordinates = numTrue;
+        } else {
+            numPossibleCoordinates = size * size - numTrue;
+        }
+        List<Vector2> coordinates = new ArrayList<>(numPossibleCoordinates / spacing);
+        for (int x = 0; x < size; x += spacing) {
+            for (int y = 0; y < size; y += spacing) {
+                if (getPrimitive(x, y) == value) {
+                    coordinates.add(new Vector2(x, y));
+                }
+            }
+        }
+        return coordinates;
+    }
+
     public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
         List<Vector2> coordinateList;
         if (symmetryType != null) {
@@ -1024,27 +1240,6 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             }
         });
         return chosenCoordinates;
-    }
-
-    public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
-        assertNotPipelined();
-        int size = getSize();
-        int numPossibleCoordinates;
-        int numTrue = getCount();
-        if (value) {
-            numPossibleCoordinates = numTrue;
-        } else {
-            numPossibleCoordinates = size * size - numTrue;
-        }
-        List<Vector2> coordinates = new ArrayList<>(numPossibleCoordinates / spacing);
-        for (int x = 0; x < size; x += spacing) {
-            for (int y = 0; y < size; y += spacing) {
-                if (getPrimitive(x, y) == value) {
-                    coordinates.add(new Vector2(x, y));
-                }
-            }
-        }
-        return coordinates;
     }
 
     public List<Vector2> getRandomCoordinates(float spacing) {
@@ -1078,5 +1273,89 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
         int cell = random.nextInt(coordinates.size());
         return coordinates.get(cell);
+    }
+
+    protected BooleanMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            boolean value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> addPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected BooleanMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType,
+                                                        ToBooleanFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            boolean value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> subtractPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected BooleanMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType,
+                                                        ToBooleanFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            boolean value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> multiplyPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected BooleanMask dividePrimitiveWithSymmetry(SymmetryType symmetryType,
+                                                      ToBooleanFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            boolean value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> dividePrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected BooleanMask applyWithOffset(BooleanMask other, ObjBooleanConsumer<Point> action, int xOffset, int yOffset,
+                                          boolean center, boolean wrapEdges) {
+        return enqueue(() -> {
+            int size = getSize();
+            int otherSize = other.getSize();
+            int smallerSize = StrictMath.min(size, otherSize);
+            int biggerSize = StrictMath.max(size, otherSize);
+            if (smallerSize == otherSize) {
+                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    other.apply(point -> {
+                        int shiftX = coordinateXMap.get(point.x);
+                        int shiftY = coordinateYMap.get(point.y);
+                        if (inBounds(shiftX, shiftY)) {
+                            boolean value = other.getPrimitive(point);
+                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
+                                                  symPoint -> action.accept(symPoint, value));
+                        }
+                    });
+                } else {
+                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, symPoint -> {
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(symPoint.x, center, wrapEdges,
+                                                                                       otherSize, size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(symPoint.y, center, wrapEdges,
+                                                                                       otherSize, size);
+                        other.apply(point -> {
+                            int shiftX = coordinateXMap.get(point.x);
+                            int shiftY = coordinateYMap.get(point.y);
+                            if (inBounds(shiftX, shiftY)) {
+                                action.accept(new Point(shiftX, shiftY), other.getPrimitive(point));
+                            }
+                        });
+                    });
+                }
+            } else {
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                apply(point -> {
+                    int shiftX = coordinateXMap.get(point.x);
+                    int shiftY = coordinateYMap.get(point.y);
+                    if (other.inBounds(shiftX, shiftY)) {
+                        action.accept(point, other.getPrimitive(shiftX, shiftY));
+                    }
+                });
+            }
+        });
     }
 }

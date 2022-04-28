@@ -22,6 +22,8 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -65,20 +67,8 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         enqueue(() -> initializeMask(size));
     }
 
-    @GraphMethod
-    public U init(U other) {
-        plannedSize = other.getSize();
-        return copyFrom(other);
-    }
-
-    protected abstract U copyFrom(U other);
-
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
         return wrapEdges ? (val + offset + size) % size : val + offset;
-    }
-
-    public boolean isMock() {
-        return (name != null && name.endsWith(MOCK_NAME)) || mock;
     }
 
     protected static Map<Integer, Integer> getSymmetricScalingCoordinateMap(int currentSize, int scaledSize) {
@@ -93,6 +83,39 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return map;
     }
 
+    public U init(U other) {
+        plannedSize = other.getSize();
+        return copyFrom(other);
+    }
+
+    /**
+     * Blurs the mask in place by using a square filter of twice
+     * the given radius centered on a pixel
+     *
+     * @param radius half size of the square filter
+     * @return the blurred mask
+     */
+    @GraphMethod
+    public abstract U blur(int radius);
+
+    /**
+     * Blurs the mask in place by using a square filter of twice
+     * the given radius centered on a pixel. Only applies the filter
+     * where {@code other} is true
+     *
+     * @param radius half size of the square filter
+     * @param other  boolean mask indicating where to apply the filter
+     * @return the blurred mask
+     */
+    @GraphMethod
+    public abstract U blur(int radius, BooleanMask other);
+
+    protected abstract U copyFrom(U other);
+
+    public boolean isMock() {
+        return (name != null && name.endsWith(MOCK_NAME)) || mock;
+    }
+
     public int getSize() {
         if (parallel && !Pipeline.isRunning()) {
             return plannedSize;
@@ -101,6 +124,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
+    /**
+     * Scales the mask to tne given size.
+     * Uses unfiltered sampling to scale the contents
+     *
+     * @param newSize size to scale the mask to
+     * @return the scaled mask
+     */
     @GraphMethod
     public U setSize(int newSize) {
         int size = getSize();
@@ -125,10 +155,6 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     public abstract BufferedImage toImage();
 
     public abstract String toHash() throws NoSuchAlgorithmException;
-
-    protected abstract U blur(int radius);
-
-    protected abstract U blur(int radius, BooleanMask other);
 
     public String getVisualName() {
         return visualName != null ? visualName : (name != null ? name : toString());
@@ -187,6 +213,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         mock = true;
     }
 
+    /**
+     * Set the mask to all zeros
+     *
+     * @return the cleared mask
+     */
     @GraphMethod
     public U clear() {
         return fill(getZeroValue());
@@ -224,13 +255,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract U setSizeInternal(int newSize);
 
-    @GraphMethod
     public U init(BooleanMask other, T falseValue, T trueValue) {
         plannedSize = other.getSize();
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             initializeMask(source.getSize());
-            set(point -> source.get(point) ? trueValue : falseValue);
+            set(point -> source.getPrimitive(point) ? trueValue : falseValue);
         }, other);
     }
 
@@ -284,24 +314,38 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         };
     }
 
+    /**
+     * Set the mask to the given value where the {@code area} is true
+     *
+     * @param area  boolean mask indicating where to set the value to true
+     * @param value value to set where area is true
+     * @return the modified mask
+     */
     @GraphMethod
     public U setToValue(BooleanMask area, T value) {
         assertCompatibleMask(area);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            set(point -> source.get(point) ? value : get(point));
+            set(point -> source.getPrimitive(point) ? value : get(point));
         }, area);
     }
 
+    /**
+     * Copy the mask pixels to where {@code area} is true
+     *
+     * @param area  boolean mask indicating where to set the value to true
+     * @param value mask representing the values to set where area is true
+     * @return the modified mask
+     */
     @GraphMethod
-    public U setToValues(BooleanMask area, U values) {
+    public U setToValue(BooleanMask area, U value) {
         assertCompatibleMask(area);
-        assertCompatibleMask(values);
+        assertCompatibleMask(value);
         return enqueue(dependencies -> {
             BooleanMask placement = (BooleanMask) dependencies.get(0);
             U source = (U) dependencies.get(1);
-            set(point -> placement.get(point) ? source.get(point) : get(point));
-        }, area, values);
+            set(point -> placement.getPrimitive(point) ? source.get(point) : get(point));
+        }, area, value);
     }
 
     public boolean inBounds(Point point) {
@@ -481,6 +525,13 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         };
     }
 
+    /**
+     * Scales the mask to tne given size.
+     * Filters the mask before/after scaling the content
+     *
+     * @param newSize size to scale the mask to
+     * @return the scaled mask
+     */
     @GraphMethod
     public U resample(int newSize) {
         int size = getSize();
@@ -648,6 +699,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return forceSymmetry(symmetryType, false);
     }
 
+    /**
+     * Force spawn symmetry on the map
+     *
+     * @return the symmetric mask
+     */
     @GraphMethod
     public U forceSymmetry() {
         return forceSymmetry(SymmetryType.SPAWN);
@@ -691,12 +747,12 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             int otherSize = other.getSize();
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
-            Map<Integer, Integer> coordinateXMap = new LinkedHashMap<>();
-            Map<Integer, Integer> coordinateYMap = new LinkedHashMap<>();
             if (smallerSize == otherSize) {
                 if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-                    generateCoordinateMaps(xOffset, yOffset, center, wrapEdges, otherSize, size, coordinateXMap,
-                                           coordinateYMap);
+                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
+                                                                                   otherSize, size);
                     other.apply(point -> {
                         int shiftX = coordinateXMap.get(point.x);
                         int shiftY = coordinateYMap.get(point.y);
@@ -708,8 +764,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     });
                 } else {
                     applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, symPoint -> {
-                        generateCoordinateMaps(symPoint.x, symPoint.y, center, wrapEdges, otherSize, size,
-                                               coordinateXMap, coordinateYMap);
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(symPoint.x, center, wrapEdges,
+                                                                                       otherSize, size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(symPoint.y, center, wrapEdges,
+                                                                                       otherSize, size);
                         other.apply(point -> {
                             int shiftX = coordinateXMap.get(point.x);
                             int shiftY = coordinateYMap.get(point.y);
@@ -720,8 +778,10 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
                     });
                 }
             } else {
-                generateCoordinateMaps(xOffset, yOffset, center, wrapEdges, size, otherSize, coordinateXMap,
-                                       coordinateYMap);
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
+                                                                               otherSize);
                 apply(point -> {
                     int shiftX = coordinateXMap.get(point.x);
                     int shiftY = coordinateYMap.get(point.y);
@@ -749,9 +809,9 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    private void generateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges,
-                                        int fromSize, int toSize, Map<Integer, Integer> coordinateXMap,
-                                        Map<Integer, Integer> coordinateYMap) {
+    protected void populateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges,
+                                          int fromSize, int toSize, Map<Integer, Integer> coordinateXMap,
+                                          Map<Integer, Integer> coordinateYMap) {
         int offsetX;
         int offsetY;
         if (center) {
@@ -765,6 +825,20 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
             coordinateXMap.put(i, getShiftedValue(i, offsetX, toSize, wrapEdges));
             coordinateYMap.put(i, getShiftedValue(i, offsetY, toSize, wrapEdges));
         }
+    }
+
+    protected Map<Integer, Integer> getShiftedCoordinateMap(int offset, boolean center, boolean wrapEdges, int fromSize,
+                                                            int toSize) {
+        int trueOffset;
+        if (center) {
+            trueOffset = offset - fromSize / 2;
+        } else {
+            trueOffset = offset;
+        }
+
+        return IntStream.range(0, fromSize)
+                        .boxed()
+                        .collect(Collectors.toMap(i -> i, i -> getShiftedValue(i, trueOffset, toSize, wrapEdges)));
     }
 
     protected void loopWithSymmetry(SymmetryType symmetryType, Consumer<Point> maskAction) {
@@ -820,7 +894,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         }
     }
 
-    @SneakyThrows
+    /**
+     * Copy the mask
+     *
+     * @return the copy of the mask
+     */
     @GraphMethod(returnsSelf = false)
     public U copy() {
         return copy(getName() + COPY_NAME);
@@ -858,11 +936,19 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         return (U) this;
     }
 
+    /**
+     * Fill the sides of the mask where the sides are defined by the team {@link Symmetry}
+     * in the mask {@link SymmetrySettings}
+     *
+     * @param extent how far to fill the sides in pixels
+     * @param value  value to fill the pixels with
+     * @return the modified mask
+     */
+    @GraphMethod
     public U fillSides(int extent, T value) {
-        return fillSides(extent, value, SymmetryType.TEAM);
+        return fillSides(extent, value, SymmetryType.SPAWN);
     }
 
-    @GraphMethod
     public U fillSides(int extent, T value, SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();
@@ -881,11 +967,18 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         });
     }
 
-    public U fillCenter(int extent, T value) {
-        return fillCenter(extent, value, SymmetryType.SPAWN);
+    /**
+     * Fill the center of the mask using the team {@link Symmetry} of the {@link SymmetrySettings}
+     *
+     * @param radius how many pixels to fill in the center
+     * @param value  value to fill in the center with
+     * @return the modified mask
+     */
+    @GraphMethod
+    public U fillCenter(int radius, T value) {
+        return fillCenter(radius, value, SymmetryType.TEAM);
     }
 
-    @GraphMethod
     public U fillCenter(int extent, T value, SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();

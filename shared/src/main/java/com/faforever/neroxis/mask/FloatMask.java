@@ -7,6 +7,8 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.MathUtil;
+import com.faforever.neroxis.util.functional.ObjFloatConsumer;
+import com.faforever.neroxis.util.functional.ToFloatFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -49,15 +51,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage, seed, symmetrySettings, 1f, null, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
-    }
-
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                     String name) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
-    }
-
     public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
                      String name, boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
@@ -66,12 +59,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         apply(point -> setPrimitive(point, imageBuffer.getElemFloat(point.x + point.y * size) * scaleFactor));
     }
 
-    protected void setPrimitive(Point point, float value) {
-        setPrimitive(point.x, point.y, value);
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    protected void setPrimitive(int x, int y, float value) {
-        mask[x][y] = value;
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name) {
+        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
     protected FloatMask(FloatMask other) {
@@ -139,6 +133,14 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    protected void setPrimitive(Point point, float value) {
+        setPrimitive(point.x, point.y, value);
+    }
+
+    protected void setPrimitive(int x, int y, float value) {
+        mask[x][y] = value;
+    }
+
     @GraphMethod
     public FloatMask addPerlinNoise(int resolution, float scale) {
         int size = getSize();
@@ -187,6 +189,22 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                              .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
+    @Override
+    public Float getMax() {
+        return (float) Arrays.stream(mask)
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .max()
+                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+    }
+
+    public float getPrimitive(Point point) {
+        return getPrimitive(point.x, point.y);
+    }
+
+    public float getPrimitive(int x, int y) {
+        return mask[x][y];
+    }
+
     protected void setPrimitive(Vector2 location, float value) {
         setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
     }
@@ -217,36 +235,20 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return new Vector3(xNormal, 1, yNormal).normalize();
     }
 
-    @Override
-    public Float getMax() {
-        return (float) Arrays.stream(mask)
-                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
-                             .max()
-                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
-    }
-
     @GraphMethod
     public FloatMask addGaussianNoise(float scale) {
-        return addWithSymmetry(SymmetryType.SPAWN, point -> (float) random.nextGaussian() * scale);
+        return addPrimitiveWithSymmetry(SymmetryType.SPAWN, point -> (float) random.nextGaussian() * scale);
     }
 
     @GraphMethod
     public FloatMask addWhiteNoise(float scale) {
-        return addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * scale);
+        return addPrimitiveWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * scale);
     }
 
     @GraphMethod
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
-        return addWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * range + minValue);
-    }
-
-    public float getPrimitive(Point point) {
-        return getPrimitive(point.x, point.y);
-    }
-
-    public float getPrimitive(int x, int y) {
-        return mask[x][y];
+        return addPrimitiveWithSymmetry(SymmetryType.SPAWN, point -> random.nextFloat() * range + minValue);
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
@@ -257,6 +259,48 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                       depositionRate, maxOffset, iterationScale);
         }
         return forceSymmetry(SymmetryType.SPAWN);
+    }
+
+    private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
+                           float depositionRate, float maxOffset, float iterationScale) {
+        float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
+        float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
+        float sediment = 0;
+        float xPrev = x;
+        float yPrev = y;
+        float xVelocity = 0;
+        float yVelocity = 0;
+
+        for (int i = 0; i < maxIterations; ++i) {
+            int sampleX = (int) (x + xOffset);
+            int sampleY = (int) (y + yOffset);
+            if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
+                return;
+            }
+            Vector3 surfaceNormal = calculateNormalAt(sampleX, sampleY, 1f);
+
+            // If the terrain is flat, stop simulating, the snowball cannot roll any further
+            if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
+                break;
+            }
+
+            // Calculate the deposition and erosion rate
+            float deposit = sediment * depositionRate * surfaceNormal.getY();
+            float erosion = erosionRate * (1 - surfaceNormal.getY()) * StrictMath.min(1, i * iterationScale);
+
+            float sedimentChange = deposit - erosion;
+
+            // Change the sediment on the place this snowball came from
+            addValueAt((int) xPrev, (int) yPrev, sedimentChange);
+            sediment -= sedimentChange;
+
+            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * gravity;
+            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * gravity;
+            xPrev = x;
+            yPrev = y;
+            x += xVelocity;
+            y += yVelocity;
+        }
     }
 
     @GraphMethod
@@ -271,19 +315,17 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @GraphMethod
+    public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
+        return subtract(copy().removeAreasOutsideRangeAndSize(minSize, maxSize, minIntensity, maxIntensity));
+    }
+
+    @GraphMethod
     public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
         FloatMask areasToRemove = copy().copyAsBooleanMask(minValue, maxValue)
                                         .removeAreasOutsideSizeRange(minSize, maxSize)
                                         .invert()
                                         .copyAsFloatMask(0f, 1f);
         return subtract(areasToRemove).clampMin(0f);
-    }
-
-    @Override
-    public Float getAvg() {
-        assertNotPipelined();
-        int size = getSize();
-        return getSum() / size / size;
     }
 
     @GraphMethod
@@ -401,55 +443,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }), this).inflate(1).deflate(1);
     }
 
-    private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
-                           float depositionRate, float maxOffset, float iterationScale) {
-        float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
-        float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
-        float sediment = 0;
-        float xPrev = x;
-        float yPrev = y;
-        float xVelocity = 0;
-        float yVelocity = 0;
-
-        for (int i = 0; i < maxIterations; ++i) {
-            int sampleX = (int) (x + xOffset);
-            int sampleY = (int) (y + yOffset);
-            if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
-                return;
-            }
-            Vector3 surfaceNormal = calculateNormalAt(sampleX, sampleY, 1f);
-
-            // If the terrain is flat, stop simulating, the snowball cannot roll any further
-            if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
-                break;
-            }
-
-            // Calculate the deposition and erosion rate
-            float deposit = sediment * depositionRate * surfaceNormal.getY();
-            float erosion = erosionRate * (1 - surfaceNormal.getY()) * StrictMath.min(1, i * iterationScale);
-
-            float sedimentChange = deposit - erosion;
-
-            // Change the sediment on the place this snowball came from
-            addValueAt((int) xPrev, (int) yPrev, sedimentChange);
-            sediment -= sedimentChange;
-
-            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * gravity;
-            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * gravity;
-            xPrev = x;
-            yPrev = y;
-            x += xVelocity;
-            y += yVelocity;
-        }
-    }
-
     public float getPrimitive(Vector2 location) {
         return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
-    }
-
-    @GraphMethod
-    public FloatMask removeAreasInIntensityAndSize(int minSize, int maxSize, float minIntensity, float maxIntensity) {
-        return subtract(copy().removeAreasOutsideRangeAndSize(minSize, maxSize, minIntensity, maxIntensity));
     }
 
     @GraphMethod(returnsSelf = false)
@@ -475,11 +470,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         loop(point -> imageBuffer.setElemFloat(point.x + point.y * size,
                                                (getPrimitive(point) - offsetFactor) * scaleFactor));
         return image;
-    }
-
-    @Override
-    protected void addValueAt(int x, int y, Float value) {
-        mask[x][y] += value;
     }
 
     @GraphMethod
@@ -568,6 +558,27 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    public FloatMask blur(int radius) {
+        int[][] innerCount = getInnerCount();
+        return apply(
+                point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+    }
+
+    @Override
+    public FloatMask blur(int radius, BooleanMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            int[][] innerCount = getInnerCount();
+            apply(point -> {
+                if (limiter.get(point)) {
+                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
+                }
+            });
+        }, other);
+    }
+
+    @Override
     protected FloatMask copyFrom(FloatMask other) {
         return enqueue(dependencies -> fill(((FloatMask) dependencies.get(0)).mask), other);
     }
@@ -583,36 +594,37 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    @GraphMethod
-    public FloatMask blur(int radius) {
-        int[][] innerCount = getInnerCount();
-        return apply(
-                point -> setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount))));
+    public BufferedImage writeToImage(BufferedImage image) {
+        return writeToImage(image, 1f, 0f);
     }
 
     @Override
-    @GraphMethod
-    public FloatMask blur(int radius, BooleanMask other) {
-        assertCompatibleMask(other);
-        return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
-            int[][] innerCount = getInnerCount();
-            apply(point -> {
-                if (limiter.get(point)) {
-                    setPrimitive(point, transformAverage(calculateAreaAverageAsInts(radius, point, innerCount)));
-                }
-            });
-        }, other);
+    public BufferedImage toImage() {
+        int size = getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+        float min = getMin();
+        float max = getMax();
+        float range = max - min;
+        writeToImage(image, 255 / range, min);
+        return image;
+    }
+
+    @Override
+    public String toHash() throws NoSuchAlgorithmException {
+        int size = getSize();
+        ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
+        loopWithSymmetry(SymmetryType.SPAWN, point -> bytes.putFloat(getPrimitive(point)));
+        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte datum : data) {
+            stringBuilder.append(String.format("%02x", datum));
+        }
+        return stringBuilder.toString();
     }
 
     @Override
     public Float get(int x, int y) {
         return getPrimitive(x, y);
-    }
-
-    @Override
-    protected void subtractValueAt(int x, int y, Float value) {
-        mask[x][y] -= value;
     }
 
     @Override
@@ -632,11 +644,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
             }
         });
-    }
-
-    @Override
-    protected void multiplyValueAt(int x, int y, Float value) {
-        mask[x][y] *= value;
     }
 
     @Override
@@ -661,9 +668,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    @Override
-    protected void divideValueAt(int x, int y, Float value) {
-        mask[x][y] /= value;
+    protected FloatMask fill(float[][] maskToFillFrom) {
+        int maskSize = maskToFillFrom.length;
+        mask = new float[maskSize][maskSize];
+        for (int r = 0; r < maskSize; ++r) {
+            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
+        }
+        return this;
     }
 
     private float transformAverage(float value) {
@@ -678,6 +689,54 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return innerCount;
     }
 
+    protected FloatMask add(ToFloatFunction<Point> valueFunction) {
+        return apply(point -> addPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected FloatMask subtract(ToFloatFunction<Point> valueFunction) {
+        return apply(point -> subtractPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected FloatMask multiply(ToFloatFunction<Point> valueFunction) {
+        return apply(point -> multiplyPrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected FloatMask divide(ToFloatFunction<Point> valueFunction) {
+        return apply(point -> dividePrimitiveAt(point, valueFunction.apply(point)));
+    }
+
+    protected void multiplyPrimitiveAt(Point point, float value) {
+        multiplyPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void addPrimitiveAt(Point point, float value) {
+        addPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void multiplyPrimitiveAt(int x, int y, float value) {
+        mask[x][y] *= value;
+    }
+
+    protected void addPrimitiveAt(int x, int y, float value) {
+        mask[x][y] += value;
+    }
+
+    protected void subtractPrimitiveAt(Point point, float value) {
+        subtractPrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void subtractPrimitiveAt(int x, int y, float value) {
+        mask[x][y] -= value;
+    }
+
+    protected void dividePrimitiveAt(Point point, float value) {
+        dividePrimitiveAt(point.x, point.y, value);
+    }
+
+    protected void dividePrimitiveAt(int x, int y, float value) {
+        mask[x][y] /= value;
+    }
+
     @Override
     public Float getSum() {
         return (float) Arrays.stream(mask)
@@ -685,17 +744,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                              .sum();
     }
 
-    protected FloatMask fill(float[][] maskToFillFrom) {
-        int maskSize = maskToFillFrom.length;
-        mask = new float[maskSize][maskSize];
-        for (int r = 0; r < maskSize; ++r) {
-            System.arraycopy(maskToFillFrom[r], 0, mask[r], 0, maskSize);
-        }
-        return this;
-    }
-
     @Override
-    @GraphMethod
     public FloatMask add(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -705,7 +754,60 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    @GraphMethod
+    protected void addValueAt(int x, int y, Float value) {
+        mask[x][y] += value;
+    }
+
+    @Override
+    public FloatMask add(BooleanMask other, Float value) {
+        assertCompatibleMask(other);
+        float val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    addPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public FloatMask add(BooleanMask other, FloatMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            FloatMask val = (FloatMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    addPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public FloatMask addWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (ObjFloatConsumer<Point>) this::addPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    @Override
+    protected void subtractValueAt(int x, int y, Float value) {
+        mask[x][y] -= value;
+    }
+
+    @Override
+    public Float getAvg() {
+        assertNotPipelined();
+        int size = getSize();
+        return getSum() / size / size;
+    }
+
+    @Override
     public FloatMask subtract(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -715,7 +817,43 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    @GraphMethod
+    public FloatMask subtract(BooleanMask other, Float value) {
+        assertCompatibleMask(other);
+        float val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    subtractPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public FloatMask subtract(BooleanMask other, FloatMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            FloatMask val = (FloatMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    subtractPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public FloatMask subtractWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (ObjFloatConsumer<Point>) this::subtractPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    @Override
     public FloatMask multiply(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -725,7 +863,48 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    @GraphMethod
+    protected void multiplyValueAt(int x, int y, Float value) {
+        mask[x][y] *= value;
+    }
+
+    @Override
+    public FloatMask multiply(BooleanMask other, Float value) {
+        assertCompatibleMask(other);
+        float val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    multiplyPrimitiveAt(point, val);
+                }
+            });
+        }, other);
+    }
+
+    @Override
+    public FloatMask multiply(BooleanMask other, FloatMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            FloatMask val = (FloatMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    multiplyPrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public FloatMask multiplyWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (ObjFloatConsumer<Point>) this::multiplyPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    @Override
     public FloatMask divide(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -735,31 +914,125 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public BufferedImage toImage() {
-        int size = getSize();
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
-        float min = getMin();
-        float max = getMax();
-        float range = max - min;
-        writeToImage(image, 255 / range, min);
-        return image;
+    protected void divideValueAt(int x, int y, Float value) {
+        mask[x][y] /= value;
     }
 
     @Override
-    public BufferedImage writeToImage(BufferedImage image) {
-        return writeToImage(image, 1f, 0f);
+    public FloatMask divide(BooleanMask other, Float value) {
+        assertCompatibleMask(other);
+        float val = value;
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    dividePrimitiveAt(point, val);
+                }
+            });
+        }, other);
     }
 
     @Override
-    public String toHash() throws NoSuchAlgorithmException {
-        int size = getSize();
-        ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
-        loopWithSymmetry(SymmetryType.SPAWN, point -> bytes.putFloat(getPrimitive(point)));
-        byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+    public FloatMask divide(BooleanMask other, FloatMask value) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            BooleanMask source = (BooleanMask) dependencies.get(0);
+            FloatMask val = (FloatMask) dependencies.get(1);
+            apply(point -> {
+                if (source.getPrimitive(point)) {
+                    dividePrimitiveAt(point, val.getPrimitive(point));
+                }
+            });
+        }, other, value);
+    }
+
+    @Override
+    public FloatMask divideWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (ObjFloatConsumer<Point>) this::dividePrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
+        }, other);
+    }
+
+    protected FloatMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            float value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> addPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            float value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> subtractPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected FloatMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            float value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> multiplyPrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected FloatMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatFunction<Point> valueFunction) {
+        return applyWithSymmetry(symmetryType, point -> {
+            float value = valueFunction.apply(point);
+            applyAtSymmetryPoints(point, symmetryType, symPoint -> dividePrimitiveAt(symPoint, value));
+        });
+    }
+
+    protected FloatMask applyWithOffset(FloatMask other, ObjFloatConsumer<Point> action, int xOffset, int yOffset,
+                                        boolean center, boolean wrapEdges) {
+        return enqueue(() -> {
+            int size = getSize();
+            int otherSize = other.getSize();
+            int smallerSize = StrictMath.min(size, otherSize);
+            int biggerSize = StrictMath.max(size, otherSize);
+            if (smallerSize == otherSize) {
+                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    other.apply(point -> {
+                        int shiftX = coordinateXMap.get(point.x);
+                        int shiftY = coordinateYMap.get(point.y);
+                        if (inBounds(shiftX, shiftY)) {
+                            float value = other.getPrimitive(point);
+                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
+                                                  symPoint -> action.accept(symPoint, value));
+                        }
+                    });
+                } else {
+                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, symPoint -> {
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(symPoint.x, center, wrapEdges,
+                                                                                       otherSize, size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(symPoint.y, center, wrapEdges,
+                                                                                       otherSize, size);
+                        other.apply(point -> {
+                            int shiftX = coordinateXMap.get(point.x);
+                            int shiftY = coordinateYMap.get(point.y);
+                            if (inBounds(shiftX, shiftY)) {
+                                action.accept(new Point(shiftX, shiftY), other.getPrimitive(point));
+                            }
+                        });
+                    });
+                }
+            } else {
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                apply(point -> {
+                    int shiftX = coordinateXMap.get(point.x);
+                    int shiftY = coordinateYMap.get(point.y);
+                    if (other.inBounds(shiftX, shiftY)) {
+                        action.accept(point, other.getPrimitive(shiftX, shiftY));
+                    }
+                });
+            }
+        });
     }
 }
