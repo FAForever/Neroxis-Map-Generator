@@ -1,7 +1,7 @@
 {
   "previewColors": [
     -12761565,
-    -13287907,
+    -13616359,
     -13616359,
     -13352934,
     -9940934,
@@ -24,9 +24,9 @@
   "name": "EarlyAutumn",
   "normalPaths": [
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
-    "/env/Evergreen/layers/grass000_normals.dds",
+    "/env/evergreen2/layers/eg_grass001_normal.dds",
     "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
-    "/env/Evergreen/layers/grass001_normals.dds",
+    "/env/evergreen2/layers/eg_grass001_normal.dds",
     "/env/Evergreen/layers/SandLight_normals.dds",
     "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
     "/env/Desert/Layers/Des_sandLight_normal.dds",
@@ -35,7 +35,7 @@
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvGrass008_albedo.dds",
-    "/env/Ancient-Earth/layers/EvGrass004_grass_blend_albedo.dds",
+    "/env/ancient-earth/layers/evgrass008_darker_albedo.dds",
     "/env/Ancient-Earth/layers/EvGrass008_darker_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass004_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
