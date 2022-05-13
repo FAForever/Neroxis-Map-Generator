@@ -11,7 +11,6 @@ import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class OneIslandStyleGenerator extends StyleGenerator {
-
     public OneIslandStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .75f)

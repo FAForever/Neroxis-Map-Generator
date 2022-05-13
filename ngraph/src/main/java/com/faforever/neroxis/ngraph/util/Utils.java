@@ -45,7 +45,6 @@ import org.w3c.dom.Element;
  * Contains various helper methods for use with Graph.
  */
 public class Utils {
-
     private static final Logger log = Logger.getLogger(Utils.class.getName());
     /**
      * True if the machine is a Mac.

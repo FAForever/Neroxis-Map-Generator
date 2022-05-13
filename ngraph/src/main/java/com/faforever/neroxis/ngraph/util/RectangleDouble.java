@@ -14,7 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RectangleDouble extends Rectangle2D.Double {
-
     @Serial
     private static final long serialVersionUID = -3793966043543578946L;
 

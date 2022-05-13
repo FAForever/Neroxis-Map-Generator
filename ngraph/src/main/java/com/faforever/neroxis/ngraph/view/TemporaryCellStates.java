@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TemporaryCellStates {
-
     protected GraphView view;
     protected HashMap<ICell, CellState> oldStates;
     protected RectangleDouble oldBounds;

@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ToggleCellsEvent extends EventObject {
-
     List<ICell> cells;
     boolean includeEdges;
     boolean show;

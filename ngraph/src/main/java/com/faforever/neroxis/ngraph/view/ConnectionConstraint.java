@@ -10,7 +10,6 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
  * side of an edge to its terminal.
  */
 public class ConnectionConstraint {
-
     /**
      * Point that specifies the fixed location of the connection point.
      */

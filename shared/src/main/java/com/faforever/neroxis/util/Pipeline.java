@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 public strictfp class Pipeline {
-
     private static final List<Entry> pipeline = new ArrayList<>();
     private static final ExecutorService executorService = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors());
@@ -201,7 +200,6 @@ public strictfp class Pipeline {
 
     @Getter
     public static strictfp class Entry {
-
         private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies = new HashSet<>();
         private final CompletableFuture<Void> future;

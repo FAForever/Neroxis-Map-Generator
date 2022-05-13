@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public strictfp class ScenarioExporter {
-
     public static void exportScenario(Path folderPath, SCMap map) throws IOException {
         String mapPrefix = map.getFilePrefix();
         File file = folderPath.resolve(mapPrefix + "_scenario.lua").toFile();

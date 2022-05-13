@@ -7,7 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ConnectCellEvent extends EventObject {
-
     ICell edge;
     ICell terminal;
     ICell previous;

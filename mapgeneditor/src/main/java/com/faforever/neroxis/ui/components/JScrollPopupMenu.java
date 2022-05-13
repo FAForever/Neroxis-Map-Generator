@@ -17,7 +17,6 @@ import javax.swing.JScrollBar;
  * @author rammar
  */
 public class JScrollPopupMenu extends JPopupMenu {
-
     protected int maximumVisibleRows = 10;
     private JScrollBar popupScrollBar;
 
@@ -132,7 +131,6 @@ public class JScrollPopupMenu extends JPopupMenu {
     }
 
     protected static class ScrollPopupMenuLayout implements LayoutManager {
-
         @Override
         public void addLayoutComponent(String name, Component comp) {
         }

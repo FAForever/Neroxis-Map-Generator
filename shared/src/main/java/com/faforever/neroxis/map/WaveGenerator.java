@@ -9,7 +9,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public strictfp class WaveGenerator extends PositionedObject {
-
     private final String textureName;
     private final String rampName;
     private final float rotation;

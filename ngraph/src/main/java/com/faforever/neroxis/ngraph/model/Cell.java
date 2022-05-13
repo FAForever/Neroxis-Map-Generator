@@ -38,7 +38,6 @@ import org.w3c.dom.Node;
 @Getter
 @Setter
 public class Cell implements ICell, Cloneable, Serializable {
-
     @Serial
     private static final long serialVersionUID = 910211337632342672L;
     /**
@@ -137,6 +136,11 @@ public class Cell implements ICell, Cloneable, Serializable {
         return clone;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [" + "id=" + id + ", value=" + value + ", geometry=" + geometry + "]";
+    }
+
     /**
      * Returns a clone of the user object. This implementation clones any XML
      * nodes or otherwise returns the same user object instance.
@@ -149,11 +153,6 @@ public class Cell implements ICell, Cloneable, Serializable {
         }
 
         return value;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + " [" + "id=" + id + ", value=" + value + ", geometry=" + geometry + "]";
     }
 
     @Override
@@ -175,13 +174,13 @@ public class Cell implements ICell, Cloneable, Serializable {
     }
 
     @Override
-    public List<ICell> getChildren() {
-        return List.copyOf(children);
+    public int getChildCount() {
+        return children.size();
     }
 
     @Override
-    public int getChildCount() {
-        return children.size();
+    public List<ICell> getChildren() {
+        return List.copyOf(children);
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.Set;
  * self-loop and groups parallels together under one edge object.
  */
 public class GraphHierarchyModel {
-
     /**
      * High value to start source layering scan rank value from
      */
@@ -598,7 +597,6 @@ public class GraphHierarchyModel {
      * strategies implemented by subclassers.
      */
     public interface CellVisitor {
-
         /**
          * The method within which the visitor will perform operations upon the
          * graph model

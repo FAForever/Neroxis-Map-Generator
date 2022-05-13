@@ -8,7 +8,6 @@ import lombok.Getter;
 
 @Getter
 public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
-
     public MapMaskMethodVertex(Method executable) {
         super(executable, (Class<? extends Mask<?, ?>>) executable.getReturnType());
 

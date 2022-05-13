@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TerminalChange extends AtomicGraphModelChange {
-
     protected ICell cell, terminal, previous;
     protected boolean source;
 

@@ -11,7 +11,6 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 public strictfp class TemplateNormalizer {
-
     public static void main(String[] args) throws IOException {
         Path templatePath = Paths.get(args[0]);
         if (templatePath.getFileName().toString().contains(".lua")) {

@@ -10,7 +10,6 @@ import lombok.Getter;
 
 @EqualsAndHashCode
 public strictfp class BezierCurve {
-
     private static final Map<Integer, Integer[]> COEFFICIENTS_MAP = new HashMap<>();
     protected final Vector2[] controlPoints;
     protected final Integer[] coefficients;

@@ -16,7 +16,6 @@ import javax.swing.table.TableCellEditor;
 import lombok.Setter;
 
 public class MaskGraphVertexEditPanel extends JPanel {
-
     private final GraphVertexParameterTableModel parameterTableModel = new GraphVertexParameterTableModel();
     private final JTable parametersTable = new JTable(parameterTableModel);
     private final JTextField identifierTextField = new JTextField();

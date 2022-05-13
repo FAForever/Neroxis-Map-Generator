@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
-
     protected BooleanMask baseMask;
     protected BooleanMask noBases;
 
@@ -38,12 +37,6 @@ public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    protected void generatePropExclusionMasks() {
-        super.generatePropExclusionMasks();
-        noProps.add(baseMask.getFinalMask());
-    }
-
-    @Override
     public void placeUnits() {
         if (generatorParameters.getVisibility() != Visibility.UNEXPLORED) {
             generateUnitExclusionMasks();
@@ -62,6 +55,12 @@ public strictfp class EnemyCivPropGenerator extends BasicPropGenerator {
                 }
             });
         }
+    }
+
+    @Override
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(baseMask.getFinalMask());
     }
 
     @Override

@@ -9,7 +9,6 @@ import lombok.Data;
 
 @Data
 public class Style implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private final LabelStyle label = new LabelStyle();
     private final EdgeStyle edge = new EdgeStyle();

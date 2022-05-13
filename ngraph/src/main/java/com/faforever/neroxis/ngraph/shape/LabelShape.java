@@ -12,15 +12,6 @@ import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
 
 public class LabelShape extends ImageShape {
-
-    @Override
-    public void paintShape(Graphics2DCanvas canvas, CellState state) {
-        super.paintShape(canvas, state);
-        if (state.getStyle().getCellProperties().isGlass()) {
-            drawGlassEffect(canvas, state);
-        }
-    }
-
     /**
      * Draws the glass effect
      */
@@ -40,6 +31,14 @@ public class LabelShape extends ImageShape {
         path.lineTo((float) (state.getX() + state.getWidth() + sw), (float) state.getY() - sw);
         path.closePath();
         canvas.getGraphics().fill(path);
+    }
+
+    @Override
+    public void paintShape(Graphics2DCanvas canvas, CellState state) {
+        super.paintShape(canvas, state);
+        if (state.getStyle().getCellProperties().isGlass()) {
+            drawGlassEffect(canvas, state);
+        }
     }
 
     @Override

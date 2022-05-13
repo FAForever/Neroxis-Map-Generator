@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
  * Contains various helper methods for use with Graph.
  */
 public class HtmlColor {
-
     protected static final Pattern rgbRegex = Pattern.compile("rgba?\\([^)]*\\)", Pattern.CASE_INSENSITIVE);
     private static final Logger log = Logger.getLogger(HtmlColor.class.getName());
     /**

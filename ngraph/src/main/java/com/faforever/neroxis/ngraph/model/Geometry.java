@@ -23,7 +23,6 @@ import java.util.List;
  * offset vector from the resulting point.
  */
 public class Geometry extends RectangleDouble {
-
     @Serial
     private static final long serialVersionUID = 2649828026610336589L;
     /**

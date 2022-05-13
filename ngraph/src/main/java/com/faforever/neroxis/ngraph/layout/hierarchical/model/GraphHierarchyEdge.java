@@ -18,7 +18,6 @@ import java.util.List;
  * An abstraction of a hierarchical edge for the hierarchy layout
  */
 public class GraphHierarchyEdge extends GraphAbstractHierarchyCell {
-
     /**
      * The graph edge(s) this object represents. Parallel edges are all grouped
      * together within one hierarchy edge.

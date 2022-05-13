@@ -7,7 +7,6 @@ import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 
 public class ActorShape extends BasicShape {
-
     @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();

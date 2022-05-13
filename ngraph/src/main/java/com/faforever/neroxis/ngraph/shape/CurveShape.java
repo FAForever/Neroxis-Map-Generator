@@ -14,7 +14,6 @@ import java.awt.RenderingHints;
 import java.util.List;
 
 public class CurveShape extends ConnectorShape {
-
     /**
      * Cache of the points between which drawing straight lines views as a
      * curve

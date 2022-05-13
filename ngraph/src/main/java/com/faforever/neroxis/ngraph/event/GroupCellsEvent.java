@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class GroupCellsEvent extends EventObject {
-
     List<ICell> cells;
     ICell group;
     double border;

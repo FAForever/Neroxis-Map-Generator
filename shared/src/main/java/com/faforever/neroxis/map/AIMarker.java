@@ -12,7 +12,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public strictfp class AIMarker extends Marker {
-
     private LinkedHashSet<String> neighbors;
 
     public AIMarker(String id, Vector2 position, LinkedHashSet<String> neighbors) {

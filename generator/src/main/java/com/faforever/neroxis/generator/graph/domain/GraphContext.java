@@ -15,7 +15,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 @Getter
 public strictfp class GraphContext {
-
     private final Random random;
     private final SymmetrySettings symmetrySettings;
     private final ExpressionParser parser;

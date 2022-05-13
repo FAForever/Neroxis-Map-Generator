@@ -14,7 +14,6 @@ import javax.swing.SwingConstants;
  * @author Administrator
  */
 public class LightweightLabel extends JLabel {
-
     private static final Logger log = Logger.getLogger(LightweightLabel.class.getName());
     @Serial
     private static final long serialVersionUID = -6771477489533614010L;

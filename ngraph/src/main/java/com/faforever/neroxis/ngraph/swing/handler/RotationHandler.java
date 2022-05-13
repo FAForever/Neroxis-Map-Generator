@@ -28,7 +28,6 @@ import javax.swing.SwingUtilities;
  * perimeter points etc. Feel free to contribute a fix!
  */
 public class RotationHandler extends MouseAdapter {
-
     private static final double PI4 = Math.PI / 4;
     public static ImageIcon ROTATE_ICON;
 
@@ -103,16 +102,6 @@ public class RotationHandler extends MouseAdapter {
         if (currentState != null && handle.getParent() != null && e.getSource() == handle /* mouse hits handle */) {
             start(e);
             e.consume();
-        }
-    }
-
-    public void start(MouseEvent e) {
-        initialAngle = currentState.getStyle().getShape().getRotation() * Constants.RAD_PER_DEG;
-        currentAngle = initialAngle;
-        first = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
-
-        if (!graphComponent.getGraph().isCellSelected(currentState.getCell())) {
-            graphComponent.selectCellForEvent(currentState.getCell(), e);
         }
     }
 
@@ -208,6 +197,16 @@ public class RotationHandler extends MouseAdapter {
                     }
                 }
             }
+        }
+    }
+
+    public void start(MouseEvent e) {
+        initialAngle = currentState.getStyle().getShape().getRotation() * Constants.RAD_PER_DEG;
+        currentAngle = initialAngle;
+        first = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), graphComponent.getGraphControl());
+
+        if (!graphComponent.getGraph().isCellSelected(currentState.getCell())) {
+            graphComponent.selectCellForEvent(currentState.getCell(), e);
         }
     }
 

@@ -20,7 +20,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FastOrganicLayout extends GraphLayout {
-
     /**
      * Specifies if the top left corner of the input cells should be the origin
      * of the layout result. Default is true.

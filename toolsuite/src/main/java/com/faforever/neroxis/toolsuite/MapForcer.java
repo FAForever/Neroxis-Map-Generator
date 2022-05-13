@@ -37,7 +37,6 @@ import static picocli.CommandLine.Option;
 
 @Command(name = "force", mixinStandardHelpOptions = true, description = "Force symmetry on a map", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapForcer implements Callable<Integer> {
-
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
     @Mixin

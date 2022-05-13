@@ -7,7 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ContinueEvent extends EventObject {
-
     Double x;
     Double y;
     Double dx;

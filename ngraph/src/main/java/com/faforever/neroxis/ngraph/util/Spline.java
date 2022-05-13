@@ -6,7 +6,6 @@ package com.faforever.neroxis.ngraph.util;
 import java.util.List;
 
 public class Spline {
-
     private Spline1D splineX;
     private Spline1D splineY;
     /**

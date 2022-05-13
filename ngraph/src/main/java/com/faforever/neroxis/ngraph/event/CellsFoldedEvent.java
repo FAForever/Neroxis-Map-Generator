@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class CellsFoldedEvent extends EventObject {
-
     List<ICell> cells;
     boolean collapse;
     boolean recurse;

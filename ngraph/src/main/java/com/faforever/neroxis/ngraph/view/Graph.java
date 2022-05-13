@@ -212,7 +212,6 @@ import org.w3c.dom.Element;
 @SuppressWarnings("unused")
 @Getter
 public class Graph extends EventSource {
-
     private static final Logger log = Logger.getLogger(Graph.class.getName());
     /**
      * Property change event handling.
@@ -505,6 +504,28 @@ public class Graph extends EventSource {
     }
 
     /**
+     * Constructs a new graph for the specified model. If no model is
+     * specified, then a new, empty {@link GraphModel} is
+     * used.
+     *
+     * @param model Model that contains the graph data
+     */
+    public Graph(IGraphModel model) {
+        this(model, null);
+    }
+
+    /**
+     * Constructs a new graph for the specified model. If no model is
+     * specified, then a new, empty {@link GraphModel} is
+     * used.
+     *
+     * @param stylesheet The stylesheet to use for the graph.
+     */
+    public Graph(Stylesheet stylesheet) {
+        this(null, stylesheet);
+    }
+
+    /**
      * Constructs a new selection model to be used in this graph.
      */
     protected GraphSelectionModel createSelectionModel() {
@@ -531,28 +552,6 @@ public class Graph extends EventSource {
         model.addListener(ChangeEvent.class, graphModelChangeHandler);
         changeSupport.firePropertyChange("model", oldModel, model);
         repaint();
-    }
-
-    /**
-     * Constructs a new graph for the specified model. If no model is
-     * specified, then a new, empty {@link GraphModel} is
-     * used.
-     *
-     * @param model Model that contains the graph data
-     */
-    public Graph(IGraphModel model) {
-        this(model, null);
-    }
-
-    /**
-     * Constructs a new graph for the specified model. If no model is
-     * specified, then a new, empty {@link GraphModel} is
-     * used.
-     *
-     * @param stylesheet The stylesheet to use for the graph.
-     */
-    public Graph(Stylesheet stylesheet) {
-        this(null, stylesheet);
     }
 
     /**
@@ -5832,7 +5831,6 @@ public class Graph extends EventSource {
     }
 
     public interface ICellVisitor {
-
         boolean visit(ICell vertex, ICell edge);
     }
 }

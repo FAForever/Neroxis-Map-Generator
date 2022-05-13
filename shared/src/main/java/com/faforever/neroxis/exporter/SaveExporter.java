@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public strictfp class SaveExporter {
-
     public static File file;
     private static DataOutputStream out;
 

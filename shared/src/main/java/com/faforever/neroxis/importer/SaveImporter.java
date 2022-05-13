@@ -25,7 +25,6 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 public strictfp class SaveImporter {
-
     public static void importSave(Path folderPath, SCMap map) throws IOException {
         File dir = folderPath.toFile();
 

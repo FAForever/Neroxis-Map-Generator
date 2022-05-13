@@ -9,7 +9,6 @@ import java.awt.Color;
 import java.util.Objects;
 
 public class SwimlaneShape extends BasicShape {
-
     /**
      * Returns the bounding box for the gradient box for this shape.
      */

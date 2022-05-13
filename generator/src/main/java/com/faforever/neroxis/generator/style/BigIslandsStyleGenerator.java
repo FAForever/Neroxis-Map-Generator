@@ -12,7 +12,6 @@ import com.faforever.neroxis.generator.terrain.BigIslandsTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class BigIslandsStyleGenerator extends StyleGenerator {
-
     public BigIslandsStyleGenerator() {
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()

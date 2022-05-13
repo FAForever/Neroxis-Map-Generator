@@ -8,7 +8,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
-
     public SmallIslandsTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .5f)

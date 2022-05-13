@@ -7,14 +7,14 @@ import com.faforever.neroxis.map.DecalType;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.map.WaveGenerator;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
-import com.faforever.neroxis.util.serial.LightingSettings;
-import com.faforever.neroxis.util.serial.WaterSettings;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
@@ -38,7 +38,6 @@ import java.nio.file.StandardOpenOption;
 import javax.imageio.ImageIO;
 
 public strictfp class SCMapExporter {
-
     public static File file;
     private static DataOutputStream out;
 

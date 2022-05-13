@@ -65,7 +65,6 @@ import static picocli.CommandLine.Spec;
 @Setter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)
 public strictfp class MapGenerator implements Callable<Integer> {
-
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
     private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(),

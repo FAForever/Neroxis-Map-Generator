@@ -13,7 +13,6 @@ import java.awt.event.MouseMotionListener;
  * Event handler that highlights cells. Inherits from CellMarker.
  */
 public class CellTracker extends CellMarker implements MouseListener, MouseMotionListener {
-
     private static final long serialVersionUID = 7372144804885125688L;
 
     /**

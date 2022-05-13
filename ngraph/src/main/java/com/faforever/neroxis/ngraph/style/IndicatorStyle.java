@@ -13,7 +13,6 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class IndicatorStyle implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private String image;
     private Color color;

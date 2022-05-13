@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import org.luaj.vm2.LuaValue;
 
 public strictfp class ScenarioImporter {
-
     public static void importScenario(Path folderPath, SCMap map) throws IOException {
         File dir = folderPath.toFile();
 

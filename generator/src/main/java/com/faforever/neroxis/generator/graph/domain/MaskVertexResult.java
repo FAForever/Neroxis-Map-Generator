@@ -5,7 +5,6 @@ import lombok.Value;
 
 @Value
 public strictfp class MaskVertexResult {
-
     String resultName;
     MaskGraphVertex<?> sourceVertex;
 

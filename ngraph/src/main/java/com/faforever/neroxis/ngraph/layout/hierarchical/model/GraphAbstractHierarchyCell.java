@@ -9,7 +9,6 @@ import java.util.List;
  * An abstraction of an internal hierarchy node or edge
  */
 public abstract class GraphAbstractHierarchyCell {
-
     /**
      * The maximum rank this cell occupies
      */

@@ -26,7 +26,6 @@
 package com.faforever.neroxis.util.jsquish;
 
 final strictfp class Vec {
-
     private float x;
     private float y;
     private float z;

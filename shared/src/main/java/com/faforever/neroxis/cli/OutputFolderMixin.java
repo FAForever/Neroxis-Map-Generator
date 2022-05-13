@@ -7,7 +7,6 @@ import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
 public class OutputFolderMixin {
-
     @Spec
     private CommandLine.Model.CommandSpec spec;
     @Getter

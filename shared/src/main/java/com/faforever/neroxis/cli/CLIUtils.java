@@ -9,7 +9,6 @@ import java.util.Arrays;
 import picocli.CommandLine;
 
 public class CLIUtils {
-
     public static float convertDensity(float percent, int numBins, CommandLine.Model.CommandSpec spec) {
         if (percent < 0 || percent > 1) {
             throw new CommandLine.ParameterException(spec.commandLine(),

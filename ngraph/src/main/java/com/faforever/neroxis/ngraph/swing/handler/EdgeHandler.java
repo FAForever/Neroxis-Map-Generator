@@ -33,7 +33,6 @@ import javax.swing.JPanel;
  *
  */
 public class EdgeHandler extends CellHandler {
-
     protected boolean cloneEnabled = true;
     protected java.awt.Point[] p;
     protected transient String error;
@@ -116,24 +115,6 @@ public class EdgeHandler extends CellHandler {
         return super.isHandleVisible(index) && (isSource(index) || isTarget(index) || isCellBendable());
     }
 
-    /**
-     * Returns true if the current index is 0.
-     */
-    public boolean isSource(int index) {
-        return index == 0;
-    }
-
-    /**
-     * Returns true if the current index is the last index.
-     */
-    public boolean isTarget(int index) {
-        return index == getHandleCount() - 2;
-    }
-
-    protected boolean isCellBendable() {
-        return graphComponent.getGraph().isCellBendable(state.getCell());
-    }
-
     @Override
     public void mousePressed(MouseEvent e) {
         super.mousePressed(e);
@@ -176,10 +157,6 @@ public class EdgeHandler extends CellHandler {
     @Override
     protected boolean isIgnoredEvent(MouseEvent e) {
         return !isFlipEvent(e) && super.isIgnoredEvent(e);
-    }
-
-    protected boolean isFlipEvent(MouseEvent e) {
-        return false;
     }
 
     @Override
@@ -369,46 +346,6 @@ public class EdgeHandler extends CellHandler {
         }
     }
 
-    /**
-     * @return Returns the bounds of the preview.
-     */
-    protected Rectangle getPreviewBounds() {
-        Rectangle bounds;
-
-        if (isLabel(index)) {
-            bounds = state.getLabelBounds().getRectangle();
-        } else {
-            bounds = new Rectangle(p[0]);
-            for (java.awt.Point point : p) {
-                bounds.add(point);
-            }
-            bounds.height += 1;
-            bounds.width += 1;
-        }
-
-        return bounds;
-    }
-
-    /**
-     * @return Returns the scaled, translated and grid-aligned point.
-     */
-    protected PointDouble convertPoint(PointDouble point, boolean gridEnabled) {
-        Graph graph = graphComponent.getGraph();
-        double scale = graph.getView().getScale();
-        PointDouble trans = graph.getView().getTranslate();
-        double x = point.getX() / scale - trans.getX();
-        double y = point.getY() / scale - trans.getY();
-        if (gridEnabled) {
-            x = graph.snap(x);
-            y = graph.snap(y);
-        }
-
-        point.setX(x - state.getOrigin().getX());
-        point.setY(y - state.getOrigin().getY());
-
-        return point;
-    }
-
     @Override
     public void mouseReleased(MouseEvent e) {
         Graph graph = graphComponent.getGraph();
@@ -523,6 +460,68 @@ public class EdgeHandler extends CellHandler {
         }
 
         return super.getHandleFillColor(index);
+    }
+
+    /**
+     * Returns true if the current index is 0.
+     */
+    public boolean isSource(int index) {
+        return index == 0;
+    }
+
+    /**
+     * Returns true if the current index is the last index.
+     */
+    public boolean isTarget(int index) {
+        return index == getHandleCount() - 2;
+    }
+
+    protected boolean isCellBendable() {
+        return graphComponent.getGraph().isCellBendable(state.getCell());
+    }
+
+    protected boolean isFlipEvent(MouseEvent e) {
+        return false;
+    }
+
+    /**
+     * @return Returns the bounds of the preview.
+     */
+    protected Rectangle getPreviewBounds() {
+        Rectangle bounds;
+
+        if (isLabel(index)) {
+            bounds = state.getLabelBounds().getRectangle();
+        } else {
+            bounds = new Rectangle(p[0]);
+            for (java.awt.Point point : p) {
+                bounds.add(point);
+            }
+            bounds.height += 1;
+            bounds.width += 1;
+        }
+
+        return bounds;
+    }
+
+    /**
+     * @return Returns the scaled, translated and grid-aligned point.
+     */
+    protected PointDouble convertPoint(PointDouble point, boolean gridEnabled) {
+        Graph graph = graphComponent.getGraph();
+        double scale = graph.getView().getScale();
+        PointDouble trans = graph.getView().getTranslate();
+        double x = point.getX() / scale - trans.getX();
+        double y = point.getY() / scale - trans.getY();
+        if (gridEnabled) {
+            x = graph.snap(x);
+            y = graph.snap(y);
+        }
+
+        point.setX(x - state.getOrigin().getX());
+        point.setY(y - state.getOrigin().getY());
+
+        return point;
     }
 
     /**

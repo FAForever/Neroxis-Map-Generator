@@ -30,9 +30,8 @@ import lombok.SneakyThrows;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class Mask<T, U extends Mask<T, U>> {
-
-    protected static final String MOCK_NAME = "Mock";
-    protected static final String COPY_NAME = "Copy";
+    private static final String MOCK_NAME = "Mock";
+    private static final String COPY_NAME = "Copy";
     protected final Random random;
     @Getter
     private final String name;
@@ -875,7 +874,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
     /**
      * Copy the mask
      *
-     * @return the copy of the mask
+     * @return a copy of the mask
      */
     @GraphMethod(returnsSelf = false)
     public U copy() {

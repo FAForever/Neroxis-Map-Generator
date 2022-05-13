@@ -10,7 +10,6 @@ import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 
 public abstract strictfp class ResourceGenerator extends ElementGenerator {
-
     protected MexPlacer mexPlacer;
     protected HydroPlacer hydroPlacer;
     protected BooleanMask unbuildable;

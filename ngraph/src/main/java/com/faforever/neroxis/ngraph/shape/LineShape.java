@@ -7,7 +7,6 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 
 public class LineShape extends BasicShape {
-
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (configureGraphics(canvas, state, false)) {

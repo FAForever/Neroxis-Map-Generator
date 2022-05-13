@@ -5,7 +5,6 @@ import org.apache.commons.codec.CodecPolicy;
 import org.apache.commons.codec.binary.Base32;
 
 public class GeneratedMapNameEncoder {
-
     private static final Base32 ENCODER = new Base32(0, null, false, ((byte) '='), CodecPolicy.LENIENT);
 
     public static String encode(byte[] bytes) {

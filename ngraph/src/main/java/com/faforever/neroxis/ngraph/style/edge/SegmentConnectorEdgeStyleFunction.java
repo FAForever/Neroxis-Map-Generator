@@ -10,7 +10,6 @@ import java.util.List;
  * as an interactive handler for this style.
  */
 public class SegmentConnectorEdgeStyleFunction implements EdgeStyleFunction {
-
     @Override
     public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
                       List<PointDouble> result) {

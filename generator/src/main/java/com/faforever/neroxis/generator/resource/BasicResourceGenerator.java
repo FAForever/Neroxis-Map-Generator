@@ -9,7 +9,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicResourceGenerator extends ResourceGenerator {
-
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
 

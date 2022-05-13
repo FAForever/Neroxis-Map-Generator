@@ -7,7 +7,6 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 public class OvalArrow implements Arrow {
-
     @Override
     public PointDouble paintArrow(Graphics2DCanvas canvas, CellState state, PointDouble pe, double nx, double ny,
                                   double size, boolean source) {

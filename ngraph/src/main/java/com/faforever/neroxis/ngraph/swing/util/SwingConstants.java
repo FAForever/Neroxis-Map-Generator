@@ -17,7 +17,6 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 public class SwingConstants {
-
     private static final Logger log = Logger.getLogger(SwingConstants.class.getName());
     /**
      * Contains an empty image of size 1, 1.

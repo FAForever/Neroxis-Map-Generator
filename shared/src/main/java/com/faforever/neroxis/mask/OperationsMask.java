@@ -8,7 +8,6 @@ import com.faforever.neroxis.util.vector.Vector2;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
-
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -21,7 +20,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     /**
      * Add mask {@code other} to this mask on a pixel by pixel basis.
-     * Masks must be the same size and concrete type
+     * Masks must be the same size and type
      *
      * @param other mask to add to this mask
      * @return the modified mask
@@ -43,7 +42,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     /**
      * Add {@code value} wherever the {@link BooleanMask} {@code other} is true
-     * Masks must be the same size and concrete type
+     * Masks must be the same size and type
      *
      * @param other the {@link BooleanMask} that determines where to add {@code value}
      * @param value the value to add to the mask
@@ -64,7 +63,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     /**
      * Add {@code values} on a pixel basis only where {@code other} is true.
-     * Masks must be the same size and concrete type
+     * Masks must be the same size and type
      *
      * @param other  the {@link BooleanMask} that determines which pixels to add
      * @param values the mask containing the values to add
@@ -138,7 +137,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     /**
      * Subtract the given mask {@code other}.
-     * Masks must be the same size and concrete type
+     * Masks must be the same size and type
      *
      * @param other mask to subtract
      * @return the modified mask
@@ -154,7 +153,7 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     /**
      * Subtract the given {@code value} where the {@link BooleanMask} other
-     * is true. Masks must be the same size and concrete type
+     * is true. Masks must be the same size and type
      *
      * @param other Mask determining which pixels to subtract
      * @param value Value to subtract
@@ -174,7 +173,12 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
     }
 
     /**
+     * Subtract {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
      *
+     * @param other  the {@link BooleanMask} that determines which pixels to subtract
+     * @param values the mask containing the values to subtract
+     * @return the modified mask
      */
     @GraphMethod
     public U subtract(BooleanMask other, U values) {
@@ -195,7 +199,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return subtractWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -203,6 +206,13 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Multiply {@code other} on a pixel basis.
+     * Masks must be the same size and type
+     *
+     * @param other the mask containing the values to multiply
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(U other) {
         assertCompatibleMask(other);
@@ -218,11 +228,25 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     protected abstract void multiplyValueAt(int x, int y, T value);
 
+    /**
+     * Multiply {@code val} on a pixel basis
+     *
+     * @param val the value to multiply
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(T val) {
         return multiply((x, y) -> val);
     }
 
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other the {@link BooleanMask} that determines which pixels to add
+     * @param value the value to multiply
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
@@ -236,6 +260,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to divide
+     * @param values the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -255,7 +287,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return multiplyWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -263,6 +294,13 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Divide {@code other} on a pixel basis.
+     * Masks must be the same size and type
+     *
+     * @param other the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(U other) {
         assertCompatibleMask(other);
@@ -278,11 +316,25 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
 
     protected abstract void divideValueAt(int x, int y, T value);
 
+    /**
+     * Divide {@code val} on a pixel basis
+     *
+     * @param val the value to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(T val) {
         return divide((x, y) -> val);
     }
 
+    /**
+     * Divide {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other the {@link BooleanMask} that determines which pixels to divide
+     * @param value the value to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
@@ -296,6 +348,14 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to divide
+     * @param values the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -315,7 +375,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return divideWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);

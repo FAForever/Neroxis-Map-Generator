@@ -17,13 +17,21 @@ import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-
     private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }
 
+    /**
+     * Create a new integer mask
+     *
+     * @param size             Size of the mask
+     * @param seed             Random seed of the mask
+     * @param symmetrySettings symmetrySettings to enforce on the mask
+     * @param name             name of the mask
+     * @param parallel         whether to parallelize mask operations
+     */
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -106,6 +114,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask blur(int radius) {
         int[][] innerCount = getInnerCount();
         return apply(
@@ -113,6 +122,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -137,7 +147,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public int getImmediateSize() {
+    protected int getImmediateSize() {
         return mask.length;
     }
 
@@ -191,7 +201,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public Integer getZeroValue() {
+    protected Integer getZeroValue() {
         return 0;
     }
 
@@ -279,6 +289,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask add(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -293,6 +304,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask add(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -307,7 +319,8 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public IntegerMask add(BooleanMask other, IntegerMask value) {
+    @GraphMethod
+    public IntegerMask add(BooleanMask other, IntegerMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -317,7 +330,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     addPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -341,6 +354,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask subtract(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -350,9 +364,10 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public IntegerMask subtract(BooleanMask other, Integer value) {
+    @GraphMethod
+    public IntegerMask subtract(BooleanMask other, Integer values) {
         assertCompatibleMask(other);
-        int val = value;
+        int val = values;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             apply((x, y) -> {
@@ -364,7 +379,8 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    public IntegerMask subtract(BooleanMask other, IntegerMask value) {
+    @GraphMethod
+    public IntegerMask subtract(BooleanMask other, IntegerMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -374,7 +390,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     subtractPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -387,6 +403,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask multiply(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -401,6 +418,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask multiply(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -415,6 +433,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask multiply(BooleanMask other, IntegerMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -438,6 +457,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask divide(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -452,6 +472,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask divide(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -466,6 +487,7 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
+    @GraphMethod
     public IntegerMask divide(BooleanMask other, IntegerMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {

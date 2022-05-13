@@ -31,7 +31,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HierarchicalLayout extends GraphLayout {
-
     /**
      * The root nodes of the layout
      */

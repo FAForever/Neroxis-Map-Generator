@@ -10,7 +10,6 @@ import com.faforever.neroxis.ngraph.view.Graph;
  * Contains all global constants.
  */
 public class Constants {
-
     /**
      * FONT_BOLD
      */

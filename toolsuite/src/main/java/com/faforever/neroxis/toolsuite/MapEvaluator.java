@@ -32,7 +32,6 @@ import static picocli.CommandLine.Spec;
 
 @Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapEvaluator implements Callable<Integer> {
-
     float terrainScore;
     float spawnScore;
     float propScore;
@@ -46,58 +45,6 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     private RequiredMapPathMixin requiredMapPathMixin;
     private SCMap map;
     private FloatMask heightMask;
-
-    @Option(names = "--debug", description = "Turn on debugging mode")
-    public void setDebugging(boolean debug) {
-        DebugUtil.DEBUG = debug;
-    }
-
-    @Override
-    public Integer call() {
-        System.out.printf("Evaluating map %s%n", requiredMapPathMixin.getMapPath());
-        importMap();
-        evaluate();
-        System.out.println("Done");
-        return 0;
-    }
-
-    private void importMap() {
-        try {
-            map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error while importing the map.");
-        }
-    }
-
-    private void evaluate() {
-        List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
-                                          .filter(symmetry -> symmetry.getNumSymPoints() == 2)
-                                          .collect(Collectors.toList());
-        for (Symmetry symmetry : symmetries) {
-            SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
-            heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
-                                       "heightMask");
-            evaluateTerrain();
-            evaluateSpawns();
-            evaluateMexes();
-            evaluateHydros();
-            evaluateProps();
-            evaluateUnits();
-            System.out.println();
-            System.out.printf("Spawns Odd vs Even for Symmetry %s: %s%n", symmetry, oddVsEven);
-            System.out.printf("Terrain Difference for Symmetry %s: %.8f%n", symmetry, terrainScore);
-            System.out.printf("Spawn Difference for Symmetry %s: %.2f%n", symmetry, spawnScore);
-            System.out.printf("Mex Difference for Symmetry %s: %.2f%n", symmetry, mexScore);
-            System.out.printf("Hydro Difference for Symmetry %s: %.2f%n", symmetry, hydroScore);
-            System.out.printf("Prop Difference for Symmetry %s: %.2f%n", symmetry, propScore);
-            System.out.printf("Unit Difference for Symmetry %s: %.2f%n", symmetry, unitScore);
-        }
-    }
-
-    private void evaluateTerrain() {
-        DebugUtil.timedRun("evaluateTerrain", () -> terrainScore = getMaskScore(heightMask));
-    }
 
     private static <T extends Mask<?, T>> float getMaskScore(T mask) {
         String visualName = "diff" + mask.getVisualName();
@@ -120,13 +67,6 @@ public strictfp class MapEvaluator implements Callable<Integer> {
             maskCopy.startVisualDebugger(visualName).show();
         }
         return totalError / mask.getSize() / mask.getSize();
-    }
-
-    private void evaluateSpawns() {
-        DebugUtil.timedRun("evaluateSpawns", () -> {
-            spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
-            oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
-        });
     }
 
     private static float getPositionedObjectScore(List<? extends PositionedObject> objects, Mask<?, ?> mask) {
@@ -189,6 +129,65 @@ public strictfp class MapEvaluator implements Callable<Integer> {
             }
         }
         return true;
+    }
+
+    @Option(names = "--debug", description = "Turn on debugging mode")
+    public void setDebugging(boolean debug) {
+        DebugUtil.DEBUG = debug;
+    }
+
+    @Override
+    public Integer call() {
+        System.out.printf("Evaluating map %s%n", requiredMapPathMixin.getMapPath());
+        importMap();
+        evaluate();
+        System.out.println("Done");
+        return 0;
+    }
+
+    private void importMap() {
+        try {
+            map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error while importing the map.");
+        }
+    }
+
+    private void evaluate() {
+        List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
+                                          .filter(symmetry -> symmetry.getNumSymPoints() == 2)
+                                          .collect(Collectors.toList());
+        for (Symmetry symmetry : symmetries) {
+            SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
+            heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
+                                       "heightMask");
+            evaluateTerrain();
+            evaluateSpawns();
+            evaluateMexes();
+            evaluateHydros();
+            evaluateProps();
+            evaluateUnits();
+            System.out.println();
+            System.out.printf("Spawns Odd vs Even for Symmetry %s: %s%n", symmetry, oddVsEven);
+            System.out.printf("Terrain Difference for Symmetry %s: %.8f%n", symmetry, terrainScore);
+            System.out.printf("Spawn Difference for Symmetry %s: %.2f%n", symmetry, spawnScore);
+            System.out.printf("Mex Difference for Symmetry %s: %.2f%n", symmetry, mexScore);
+            System.out.printf("Hydro Difference for Symmetry %s: %.2f%n", symmetry, hydroScore);
+            System.out.printf("Prop Difference for Symmetry %s: %.2f%n", symmetry, propScore);
+            System.out.printf("Unit Difference for Symmetry %s: %.2f%n", symmetry, unitScore);
+        }
+    }
+
+    private void evaluateTerrain() {
+        DebugUtil.timedRun("evaluateTerrain", () -> terrainScore = getMaskScore(heightMask));
+    }
+
+    private void evaluateSpawns() {
+        DebugUtil.timedRun("evaluateSpawns", () -> {
+            spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
+            oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
+        });
     }
 
     private void evaluateMexes() {

@@ -51,7 +51,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 public class GraphHandler extends MouseAdapter implements DropTargetListener {
-
     private static final long serialVersionUID = 3241109976696510225L;
     private static final Logger log = Logger.getLogger(GraphHandler.class.getName());
     /**
@@ -190,6 +189,27 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         });
 
         setVisible(false);
+    }
+
+    /**
+     * Helper method to return the component for a drop target event.
+     */
+    protected static JComponent getDropTarget(DropTargetEvent e) {
+        return (JComponent) e.getDropTargetContext().getComponent();
+    }
+
+    /**
+     * Helper method to return the component for a drop target event.
+     */
+    protected static GraphTransferHandler getGraphTransferHandler(DropTargetEvent e) {
+        JComponent component = getDropTarget(e);
+        TransferHandler transferHandler = component.getTransferHandler();
+
+        if (transferHandler instanceof GraphTransferHandler) {
+            return (GraphTransferHandler) transferHandler;
+        }
+
+        return null;
     }
 
     protected CellMarker createMarker() {
@@ -447,63 +467,6 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         }
     }
 
-    /**
-     * Helper method to return the component for a drop target event.
-     */
-    protected static JComponent getDropTarget(DropTargetEvent e) {
-        return (JComponent) e.getDropTargetContext().getComponent();
-    }
-
-    public void setPreviewBounds(java.awt.Rectangle bounds) {
-        if ((bounds == null && previewBounds != null) || (bounds != null && previewBounds == null) || (bounds != null
-                                                                                                       && previewBounds
-                                                                                                          != null
-                                                                                                       && !bounds.equals(
-                previewBounds))) {
-            java.awt.Rectangle dirty = null;
-
-            if (isVisible()) {
-                dirty = previewBounds;
-
-                if (dirty != null) {
-                    dirty.add(bounds);
-                } else {
-                    dirty = bounds;
-                }
-            }
-
-            previewBounds = bounds;
-
-            if (dirty != null) {
-                graphComponent.getGraphControl().repaint(dirty.x - 1, dirty.y - 1, dirty.width + 2, dirty.height + 2);
-            }
-        }
-    }
-
-    public boolean isLivePreview() {
-        return livePreview;
-    }
-
-    public void setLivePreview(boolean value) {
-        livePreview = value;
-    }
-
-    public void updateDragImage(List<ICell> cells) {
-        dragImage = null;
-
-        if (cells != null && !cells.isEmpty()) {
-            Image img = CellRenderer.createBufferedImage(graphComponent.getGraph(), cells,
-                                                         graphComponent.getGraph().getView().getScale(), null,
-                                                         graphComponent.isAntiAlias(), null,
-                                                         graphComponent.getCanvas());
-
-            if (img != null) {
-                dragImage = new ImageIcon(img);
-                previewBounds.setSize(dragImage.getIconWidth(), dragImage.getIconHeight());
-            }
-        }
-    }
-
     @Override
     public void dragOver(DropTargetDragEvent e) {
         if (canImport) {
@@ -568,18 +531,70 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         reset();
     }
 
-    /**
-     * Helper method to return the component for a drop target event.
-     */
-    protected static GraphTransferHandler getGraphTransferHandler(DropTargetEvent e) {
-        JComponent component = getDropTarget(e);
-        TransferHandler transferHandler = component.getTransferHandler();
+    @Override
+    public void drop(DropTargetDropEvent e) {
+        if (canImport) {
+            GraphTransferHandler handler = getGraphTransferHandler(e);
+            MouseEvent event = createEvent(e);
 
-        if (transferHandler instanceof GraphTransferHandler) {
-            return (GraphTransferHandler) transferHandler;
+            // Ignores the event in mouseReleased if it is
+            // handled by the transfer handler as a drop
+            if (handler != null && !handler.isLocalDrag()) {
+                event.consume();
+            }
+
+            mouseReleased(event);
         }
+    }
 
-        return null;
+    public void setPreviewBounds(java.awt.Rectangle bounds) {
+        if ((bounds == null && previewBounds != null) || (bounds != null && previewBounds == null) || (bounds != null
+                                                                                                       && previewBounds
+                                                                                                          != null
+                                                                                                       && !bounds.equals(
+                previewBounds))) {
+            java.awt.Rectangle dirty = null;
+
+            if (isVisible()) {
+                dirty = previewBounds;
+
+                if (dirty != null) {
+                    dirty.add(bounds);
+                } else {
+                    dirty = bounds;
+                }
+            }
+
+            previewBounds = bounds;
+
+            if (dirty != null) {
+                graphComponent.getGraphControl().repaint(dirty.x - 1, dirty.y - 1, dirty.width + 2, dirty.height + 2);
+            }
+        }
+    }
+
+    public boolean isLivePreview() {
+        return livePreview;
+    }
+
+    public void setLivePreview(boolean value) {
+        livePreview = value;
+    }
+
+    public void updateDragImage(List<ICell> cells) {
+        dragImage = null;
+
+        if (cells != null && !cells.isEmpty()) {
+            Image img = CellRenderer.createBufferedImage(graphComponent.getGraph(), cells,
+                                                         graphComponent.getGraph().getView().getScale(), null,
+                                                         graphComponent.isAntiAlias(), null,
+                                                         graphComponent.getCanvas());
+
+            if (img != null) {
+                dragImage = new ImageIcon(img);
+                previewBounds.setSize(dragImage.getIconWidth(), dragImage.getIconHeight());
+            }
+        }
     }
 
     public void reset() {
@@ -595,22 +610,6 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         cells = null;
         first = null;
         cell = null;
-    }
-
-    @Override
-    public void drop(DropTargetDropEvent e) {
-        if (canImport) {
-            GraphTransferHandler handler = getGraphTransferHandler(e);
-            MouseEvent event = createEvent(e);
-
-            // Ignores the event in mouseReleased if it is
-            // handled by the transfer handler as a drop
-            if (handler != null && !handler.isLocalDrag()) {
-                event.consume();
-            }
-
-            mouseReleased(event);
-        }
     }
 
     protected MouseEvent createEvent(DropTargetEvent e) {
@@ -674,37 +673,6 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
                 graphComponent.getGraph().clearSelection();
             }
         }
-    }
-
-    public void start(MouseEvent e) {
-        if (isLivePreview()) {
-            movePreview.start(e, graphComponent.getGraph().getView().getState(initialCell));
-        } else {
-            Graph graph = graphComponent.getGraph();
-
-            // Constructs an array with cells that are indeed movable
-            cells = getCells(initialCell);
-            cellBounds = graph.getView().getBounds(cells);
-
-            if (cellBounds != null) {
-                // Updates the size of the graph handler that is in
-                // charge of painting all other handlers
-                bbox = graph.getView().getBoundingBox(cells);
-
-                java.awt.Rectangle bounds = cellBounds.getRectangle();
-                bounds.width += 1;
-                bounds.height += 1;
-                setPreviewBounds(bounds);
-            }
-        }
-
-        first = e.getPoint();
-    }
-
-    public List<ICell> getCells(ICell initialCell) {
-        Graph graph = graphComponent.getGraph();
-
-        return graph.getMovableCells(graph.getSelectionCells());
     }
 
     @Override
@@ -830,80 +798,6 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
         reset();
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
-    }
-
-    public boolean isSelectEnabled() {
-        return selectEnabled;
-    }
-
-    public void setSelectEnabled(boolean value) {
-        selectEnabled = value;
-    }
-
-    public boolean isMoveEnabled() {
-        return moveEnabled;
-    }
-
-    public void setMoveEnabled(boolean value) {
-        moveEnabled = value;
-    }
-
-    protected void fold(ICell cell) {
-        boolean collapse = !graphComponent.getGraph().isCellCollapsed(cell);
-        graphComponent.getGraph().foldCells(collapse, false, List.of(cell));
-    }
-
-    public boolean isRemoveCellsFromParent() {
-        return removeCellsFromParent;
-    }
-
-    public void setRemoveCellsFromParent(boolean value) {
-        removeCellsFromParent = value;
-    }
-
-    /**
-     * Returns true if the given cells should be removed from the parent for the specified
-     * mousereleased event.
-     */
-    protected boolean shouldRemoveCellFromParent(ICell parent, List<ICell> cells, MouseEvent e) {
-        if (graphComponent.getGraph().getModel().isVertex(parent)) {
-            CellState pState = graphComponent.getGraph().getView().getState(parent);
-
-            return pState != null && !pState.contains(e.getX(), e.getY());
-        }
-
-        return false;
-    }
-
-    protected void moveCells(List<ICell> cells, double dx, double dy, ICell target, MouseEvent e) {
-        Graph graph = graphComponent.getGraph();
-        boolean clone = e.isControlDown() && isCloneEnabled();
-
-        if (clone) {
-            cells = graph.getCloneableCells(cells);
-        }
-
-        if (!cells.isEmpty()) {
-            // Removes cells from parent
-            if (target == null && isRemoveCellsFromParent() && shouldRemoveCellFromParent(
-                    graph.getModel().getParent(initialCell), cells, e)) {
-                target = graph.getDefaultParent();
-            }
-
-            List<ICell> tmp = graph.moveCells(cells, dx, dy, clone, target, e.getPoint());
-
-            if (isSelectEnabled() && clone && tmp != null && tmp.size() == cells.size()) {
-                graph.setSelectionCells(tmp);
-            }
-        }
-    }
-
     @Override
     public void mouseDragged(MouseEvent e) {
         // LATER: Check scrollborder, use scroll-increments, do not
@@ -982,6 +876,111 @@ public class GraphHandler extends MouseAdapter implements DropTargetListener {
                 e.consume();
             } else {
                 graphComponent.getGraphControl().setCursor(DEFAULT_CURSOR);
+            }
+        }
+    }
+
+    public void start(MouseEvent e) {
+        if (isLivePreview()) {
+            movePreview.start(e, graphComponent.getGraph().getView().getState(initialCell));
+        } else {
+            Graph graph = graphComponent.getGraph();
+
+            // Constructs an array with cells that are indeed movable
+            cells = getCells(initialCell);
+            cellBounds = graph.getView().getBounds(cells);
+
+            if (cellBounds != null) {
+                // Updates the size of the graph handler that is in
+                // charge of painting all other handlers
+                bbox = graph.getView().getBoundingBox(cells);
+
+                java.awt.Rectangle bounds = cellBounds.getRectangle();
+                bounds.width += 1;
+                bounds.height += 1;
+                setPreviewBounds(bounds);
+            }
+        }
+
+        first = e.getPoint();
+    }
+
+    public List<ICell> getCells(ICell initialCell) {
+        Graph graph = graphComponent.getGraph();
+
+        return graph.getMovableCells(graph.getSelectionCells());
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
+    }
+
+    public boolean isSelectEnabled() {
+        return selectEnabled;
+    }
+
+    public void setSelectEnabled(boolean value) {
+        selectEnabled = value;
+    }
+
+    public boolean isMoveEnabled() {
+        return moveEnabled;
+    }
+
+    public void setMoveEnabled(boolean value) {
+        moveEnabled = value;
+    }
+
+    protected void fold(ICell cell) {
+        boolean collapse = !graphComponent.getGraph().isCellCollapsed(cell);
+        graphComponent.getGraph().foldCells(collapse, false, List.of(cell));
+    }
+
+    public boolean isRemoveCellsFromParent() {
+        return removeCellsFromParent;
+    }
+
+    public void setRemoveCellsFromParent(boolean value) {
+        removeCellsFromParent = value;
+    }
+
+    /**
+     * Returns true if the given cells should be removed from the parent for the specified
+     * mousereleased event.
+     */
+    protected boolean shouldRemoveCellFromParent(ICell parent, List<ICell> cells, MouseEvent e) {
+        if (graphComponent.getGraph().getModel().isVertex(parent)) {
+            CellState pState = graphComponent.getGraph().getView().getState(parent);
+
+            return pState != null && !pState.contains(e.getX(), e.getY());
+        }
+
+        return false;
+    }
+
+    protected void moveCells(List<ICell> cells, double dx, double dy, ICell target, MouseEvent e) {
+        Graph graph = graphComponent.getGraph();
+        boolean clone = e.isControlDown() && isCloneEnabled();
+
+        if (clone) {
+            cells = graph.getCloneableCells(cells);
+        }
+
+        if (!cells.isEmpty()) {
+            // Removes cells from parent
+            if (target == null && isRemoveCellsFromParent() && shouldRemoveCellFromParent(
+                    graph.getModel().getParent(initialCell), cells, e)) {
+                target = graph.getDefaultParent();
+            }
+
+            List<ICell> tmp = graph.moveCells(cells, dx, dy, clone, target, e.getPoint());
+
+            if (isSelectEnabled() && clone && tmp != null && tmp.size() == cells.size()) {
+                graph.setSelectionCells(tmp);
             }
         }
     }

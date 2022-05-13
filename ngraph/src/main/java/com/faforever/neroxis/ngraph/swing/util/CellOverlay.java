@@ -10,7 +10,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 public class CellOverlay extends JComponent implements ICellOverlay {
-
     private static final long serialVersionUID = 921991820491141221L;
     protected ImageIcon imageIcon;
     /**

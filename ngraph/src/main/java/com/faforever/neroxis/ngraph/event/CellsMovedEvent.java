@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class CellsMovedEvent extends EventObject {
-
     List<ICell> cells;
     double dx;
     double dy;

@@ -33,7 +33,6 @@ import picocli.CommandLine;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
-
     String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaebsicfsuqek5cm";
     long seed = 1234;
     byte spawnCount = 2;

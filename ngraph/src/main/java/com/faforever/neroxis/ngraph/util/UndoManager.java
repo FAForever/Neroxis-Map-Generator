@@ -28,7 +28,6 @@ import java.util.List;
  * <code>edit</code> property contains the UndoableEdit that was added.
  */
 public class UndoManager extends EventSource {
-
     /**
      * Maximum command history size. 0 means unlimited history. Default is 100.
      */

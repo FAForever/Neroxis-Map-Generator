@@ -11,7 +11,6 @@ import java.util.List;
  * unspecified.
  */
 public class ElbowConnectorEdgeStyleFunction implements EdgeStyleFunction {
-
     private static final TopToBottomEdgeStyleFunction TOP_TO_BOTTOM_EDGE_STYLE = new TopToBottomEdgeStyleFunction();
     private static final SideToSideEdgeStyleFunction SIDE_TO_SIDE_EDGE_STYLE = new SideToSideEdgeStyleFunction();
 

@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
  * Implements a mechanism for temporary cell Ids.
  */
 public class CellPath {
-
     /**
      * Defines the separator between the path components. Default is
      * <code>.</code>.

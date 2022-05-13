@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ConnectEvent extends EventObject {
-
     ICell cell;
     MouseEvent event;
     ICell dropTarget;

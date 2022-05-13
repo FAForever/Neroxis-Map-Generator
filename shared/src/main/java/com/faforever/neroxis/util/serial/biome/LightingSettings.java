@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util.serial;
+package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -12,7 +12,6 @@ import lombok.Data;
 @Data
 @CompiledJson
 public strictfp class LightingSettings {
-
     private float LightingMultiplier;
     private Vector3 SunDirection;
     private Vector3 SunAmbience;

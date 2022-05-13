@@ -13,17 +13,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 public class PipelineGraphTransferHandler extends GraphTransferHandler {
-
     private final PipelineGraphComponent pipelineGraphComponent;
 
     public PipelineGraphTransferHandler(PipelineGraphComponent pipelineGraphComponent) {
         this.pipelineGraphComponent = pipelineGraphComponent;
-    }
-
-    @Override
-    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells,
-                                                     RectangleDouble bounds, ImageIcon icon) {
-        return new GraphTransferable(cells, bounds, icon);
     }
 
     @Override
@@ -39,5 +32,11 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
                                   .forEach(List::clear);
         }
         super.exportDone(c, data, action);
+    }
+
+    @Override
+    public GraphTransferable createGraphTransferable(GraphComponent graphComponent, List<ICell> cells,
+                                                     RectangleDouble bounds, ImageIcon icon) {
+        return new GraphTransferable(cells, bounds, icon);
     }
 }

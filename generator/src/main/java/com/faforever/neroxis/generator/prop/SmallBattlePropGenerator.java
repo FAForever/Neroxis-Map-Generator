@@ -15,7 +15,6 @@ import com.faforever.neroxis.util.Pipeline;
 import java.util.ArrayList;
 
 public strictfp class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
-
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
 

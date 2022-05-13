@@ -16,7 +16,6 @@ import javax.swing.Timer;
  * actual animation or listen to Event.EXECUTE.
  */
 public class Animation extends EventSource {
-
     /**
      * Specifies the default delay for animations in ms. Default is 20.
      */

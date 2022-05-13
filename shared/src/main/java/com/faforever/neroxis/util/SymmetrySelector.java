@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 public class SymmetrySelector {
-
     public static SymmetrySettings getSymmetrySettingsFromTerrainSymmetry(Random random, Symmetry terrainSymmetry,
                                                                           int spawnCount, int numTeams) {
         Symmetry spawnSymmetry;

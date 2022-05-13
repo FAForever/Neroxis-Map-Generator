@@ -13,7 +13,7 @@ import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
 import com.faforever.neroxis.ngraph.swing.handler.Rubberband;
 import com.faforever.neroxis.ngraph.view.Graph;
-import com.faforever.neroxis.util.MaskReflectUtil;
+import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -38,7 +38,6 @@ import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 
 public class PipelineGraphComponent extends GraphComponent {
-
     private PipelineGraph pipelineGraph;
 
     public PipelineGraphComponent(PipelineGraph graph) {
@@ -131,25 +130,25 @@ public class PipelineGraphComponent extends GraphComponent {
         final MaskGraphVertex<?> selected = pipelineGraph.getVertexForCell(selectedCell);
         JPopupMenu popup = new JPopupMenu();
         JMenu constructorMenu = new JMenu("Create New Mask");
-        MaskReflectUtil.getMaskClasses()
-                       .forEach(maskClass -> constructorMenu.add(new AbstractAction(maskClass.getSimpleName()) {
-                           @Override
-                           public void actionPerformed(ActionEvent e) {
-                               MaskConstructorVertex newVertex = new MaskConstructorVertex(
-                                       MaskReflectUtil.getMaskConstructor(maskClass));
-                               newVertex.setIdentifier(String.valueOf(newVertex.hashCode()));
-                               pipelineGraph.addVertex(newVertex);
-                               moveVertexToMouse(newVertex, mouseEvent);
-                               pipelineGraph.refresh();
-                               pipelineGraph.clearSelection();
-                               pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
-                           }
-                       }));
+        MaskGraphReflectUtil.getConcreteMaskClasses()
+                            .forEach(maskClass -> constructorMenu.add(new AbstractAction(maskClass.getSimpleName()) {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    MaskConstructorVertex newVertex = new MaskConstructorVertex(
+                                            MaskGraphReflectUtil.getMaskGraphConstructor(maskClass));
+                                    newVertex.setIdentifier(String.valueOf(newVertex.hashCode()));
+                                    pipelineGraph.addVertex(newVertex);
+                                    moveVertexToMouse(newVertex, mouseEvent);
+                                    pipelineGraph.refresh();
+                                    pipelineGraph.clearSelection();
+                                    pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
+                                }
+                            }));
         if (constructorMenu.getItemCount() > 0) {
             popup.add(constructorMenu);
         }
         JMenu methodMenu = new JMenu("Create New Method");
-        MaskReflectUtil.getMaskClasses().forEach(maskClass -> {
+        MaskGraphReflectUtil.getConcreteMaskClasses().forEach(maskClass -> {
             JMenu subMethodMenu = new JScrollMenu(maskClass.getSimpleName());
             subMethodMenu.addMenuKeyListener(new MenuKeyListener() {
                 @Override
@@ -171,19 +170,20 @@ public class PipelineGraphComponent extends GraphComponent {
                 public void menuKeyReleased(MenuKeyEvent e) {
                 }
             });
-            MaskReflectUtil.getMaskMethods(maskClass)
-                           .forEach(method -> subMethodMenu.add(
-                                   new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
-                                       @Override
-                                       public void actionPerformed(ActionEvent e) {
-                                           MaskMethodVertex newVertex = new MaskMethodVertex(method, maskClass);
-                                           pipelineGraph.addVertex(newVertex);
-                                           moveVertexToMouse(newVertex, mouseEvent);
-                                           pipelineGraph.refresh();
-                                           pipelineGraph.clearSelection();
-                                           pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
-                                       }
-                                   }));
+            MaskGraphReflectUtil.getMaskGraphMethods(maskClass)
+                                .forEach(method -> subMethodMenu.add(
+                                        new AbstractAction(MaskGraphReflectUtil.getExecutableString(method)) {
+                                            @Override
+                                            public void actionPerformed(ActionEvent e) {
+                                                MaskMethodVertex newVertex = new MaskMethodVertex(method, maskClass);
+                                                pipelineGraph.addVertex(newVertex);
+                                                moveVertexToMouse(newVertex, mouseEvent);
+                                                pipelineGraph.refresh();
+                                                pipelineGraph.clearSelection();
+                                                pipelineGraph.addSelectionCell(
+                                                        pipelineGraph.getCellForVertex(newVertex));
+                                            }
+                                        }));
             methodMenu.add(subMethodMenu);
         });
         if (methodMenu.getItemCount() > 0) {
@@ -238,9 +238,9 @@ public class PipelineGraphComponent extends GraphComponent {
     private JScrollMenu buildTransformationSubMenu(MouseEvent mouseEvent, MaskGraphVertex<?> selected,
                                                    String resultName, Class<? extends Mask<?, ?>> selectedResultClass) {
         JScrollMenu resultMenu = new JScrollMenu(resultName);
-        MaskReflectUtil.getMaskMethods(selectedResultClass).forEach(method -> {
+        MaskGraphReflectUtil.getMaskGraphMethods(selectedResultClass).forEach(method -> {
             if (method.getDeclaringClass().equals(MapMaskMethods.class)) {
-                resultMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
+                resultMenu.add(new AbstractAction(MaskGraphReflectUtil.getExecutableString(method)) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         MapMaskMethodVertex newVertex = new MapMaskMethodVertex(method);
@@ -254,7 +254,7 @@ public class PipelineGraphComponent extends GraphComponent {
                     }
                 });
             } else {
-                resultMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
+                resultMenu.add(new AbstractAction(MaskGraphReflectUtil.getExecutableString(method)) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         MaskMethodVertex newVertex = new MaskMethodVertex(method, selectedResultClass);
@@ -277,54 +277,64 @@ public class PipelineGraphComponent extends GraphComponent {
                                               Class<? extends Mask<?, ?>> selectedResultClass,
                                               MaskGraphVertex<?> target) {
         JScrollMenu resultMenu = new JScrollMenu(resultName);
-        MaskReflectUtil.getMaskMethods(selectedResultClass)
-                       .stream()
-                       .filter(method -> target.getExecutorClass()
-                                               .isAssignableFrom(MaskReflectUtil.getActualTypeClass(selectedResultClass,
+        MaskGraphReflectUtil.getMaskGraphMethods(selectedResultClass)
+                            .stream()
+                            .filter(method -> target.getExecutorClass()
+                                                    .isAssignableFrom(
+                                                            MaskGraphReflectUtil.getActualTypeClass(selectedResultClass,
                                                                                                     method.getGenericReturnType())))
-                       .forEach(method -> {
-                           if (method.getDeclaringClass().equals(MapMaskMethods.class)) {
-                               resultMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
-                                   @Override
-                                   public void actionPerformed(ActionEvent e) {
-                                       MapMaskMethodVertex newVertex = new MapMaskMethodVertex(method);
-                                       String targetIdentifier = target.getIdentifier();
-                                       newVertex.setIdentifier(targetIdentifier == null ? String.valueOf(
-                                               newVertex.hashCode()) : targetIdentifier);
-                                       pipelineGraph.addVertex(newVertex);
-                                       pipelineGraph.removeEdge(executorEdge);
-                                       pipelineGraph.addEdge(selected, newVertex,
-                                                             new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
-                                       pipelineGraph.addEdge(newVertex, target, new MaskMethodEdge(MaskGraphVertex.SELF,
-                                                                                                   MaskMethodVertex.EXECUTOR));
-                                       moveVertexToMouse(newVertex, mouseEvent);
-                                       pipelineGraph.refresh();
-                                       pipelineGraph.clearSelection();
-                                       pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
-                                   }
-                               });
-                           } else {
-                               resultMenu.add(new AbstractAction(MaskReflectUtil.getExecutableString(method)) {
-                                   @Override
-                                   public void actionPerformed(ActionEvent e) {
-                                       MaskMethodVertex newVertex = new MaskMethodVertex(method, selectedResultClass);
-                                       String targetIdentifier = target.getIdentifier();
-                                       newVertex.setIdentifier(targetIdentifier == null ? String.valueOf(
-                                               newVertex.hashCode()) : targetIdentifier);
-                                       pipelineGraph.addVertex(newVertex);
-                                       pipelineGraph.removeEdge(executorEdge);
-                                       pipelineGraph.addEdge(selected, newVertex,
-                                                             new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
-                                       pipelineGraph.addEdge(newVertex, target, new MaskMethodEdge(MaskGraphVertex.SELF,
-                                                                                                   MaskMethodVertex.EXECUTOR));
-                                       moveVertexToMouse(newVertex, mouseEvent);
-                                       pipelineGraph.refresh();
-                                       pipelineGraph.clearSelection();
-                                       pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
-                                   }
-                               });
-                           }
-                       });
+                            .forEach(method -> {
+                                if (method.getDeclaringClass().equals(MapMaskMethods.class)) {
+                                    resultMenu.add(
+                                            new AbstractAction(MaskGraphReflectUtil.getExecutableString(method)) {
+                                                @Override
+                                                public void actionPerformed(ActionEvent e) {
+                                                    MapMaskMethodVertex newVertex = new MapMaskMethodVertex(method);
+                                                    String targetIdentifier = target.getIdentifier();
+                                                    newVertex.setIdentifier(targetIdentifier == null ? String.valueOf(
+                                                            newVertex.hashCode()) : targetIdentifier);
+                                                    pipelineGraph.addVertex(newVertex);
+                                                    pipelineGraph.removeEdge(executorEdge);
+                                                    pipelineGraph.addEdge(selected, newVertex,
+                                                                          new MaskMethodEdge(resultName,
+                                                                                             MaskMethodVertex.EXECUTOR));
+                                                    pipelineGraph.addEdge(newVertex, target,
+                                                                          new MaskMethodEdge(MaskGraphVertex.SELF,
+                                                                                             MaskMethodVertex.EXECUTOR));
+                                                    moveVertexToMouse(newVertex, mouseEvent);
+                                                    pipelineGraph.refresh();
+                                                    pipelineGraph.clearSelection();
+                                                    pipelineGraph.addSelectionCell(
+                                                            pipelineGraph.getCellForVertex(newVertex));
+                                                }
+                                            });
+                                } else {
+                                    resultMenu.add(
+                                            new AbstractAction(MaskGraphReflectUtil.getExecutableString(method)) {
+                                                @Override
+                                                public void actionPerformed(ActionEvent e) {
+                                                    MaskMethodVertex newVertex = new MaskMethodVertex(method,
+                                                                                                      selectedResultClass);
+                                                    String targetIdentifier = target.getIdentifier();
+                                                    newVertex.setIdentifier(targetIdentifier == null ? String.valueOf(
+                                                            newVertex.hashCode()) : targetIdentifier);
+                                                    pipelineGraph.addVertex(newVertex);
+                                                    pipelineGraph.removeEdge(executorEdge);
+                                                    pipelineGraph.addEdge(selected, newVertex,
+                                                                          new MaskMethodEdge(resultName,
+                                                                                             MaskMethodVertex.EXECUTOR));
+                                                    pipelineGraph.addEdge(newVertex, target,
+                                                                          new MaskMethodEdge(MaskGraphVertex.SELF,
+                                                                                             MaskMethodVertex.EXECUTOR));
+                                                    moveVertexToMouse(newVertex, mouseEvent);
+                                                    pipelineGraph.refresh();
+                                                    pipelineGraph.clearSelection();
+                                                    pipelineGraph.addSelectionCell(
+                                                            pipelineGraph.getCellForVertex(newVertex));
+                                                }
+                                            });
+                                }
+                            });
         return resultMenu;
     }
 

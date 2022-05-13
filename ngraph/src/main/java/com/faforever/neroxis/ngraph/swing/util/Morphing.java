@@ -21,7 +21,6 @@ import java.util.Map;
  * Provides animation effects.
  */
 public class Morphing extends Animation {
-
     /**
      * Reference to the enclosing graph instance.
      */

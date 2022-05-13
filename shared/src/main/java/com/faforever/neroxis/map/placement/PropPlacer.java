@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 
 public strictfp class PropPlacer {
-
     private final SCMap map;
     private final Random random;
 

@@ -6,7 +6,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
 public class StringListCellRenderer<T> extends DefaultListCellRenderer {
-
     private final Function<T, String> stringConverter;
 
     public StringListCellRenderer(Function<T, String> stringConverter) {

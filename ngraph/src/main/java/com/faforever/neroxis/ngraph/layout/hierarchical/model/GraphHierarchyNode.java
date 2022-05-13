@@ -19,7 +19,6 @@ import java.util.List;
  * An abstraction of an internal node in the hierarchy layout
  */
 public class GraphHierarchyNode extends GraphAbstractHierarchyCell {
-
     /**
      * Shared empty connection map to return instead of null in applyMap.
      */

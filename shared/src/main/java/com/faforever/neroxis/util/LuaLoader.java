@@ -10,7 +10,6 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 public final class LuaLoader {
-
     private LuaLoader() {
         throw new AssertionError("Not instantiatable");
     }

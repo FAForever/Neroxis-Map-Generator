@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
-
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
@@ -103,7 +102,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     @Override
-    public int getImmediateSize() {
+    protected int getImmediateSize() {
         return mask.length;
     }
 

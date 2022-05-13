@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
-
     public FloodedTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .plateauDensity(0, .25f)

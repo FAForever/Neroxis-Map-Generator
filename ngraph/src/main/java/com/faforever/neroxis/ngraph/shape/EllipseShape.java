@@ -7,7 +7,6 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
 public class EllipseShape extends BasicShape {
-
     @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();

@@ -15,7 +15,6 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface StyleMapper {
-
     StyleMapper INSTANCE = Mappers.getMapper(StyleMapper.class);
 
     void copy(EdgeStyle source, @MappingTarget EdgeStyle target);

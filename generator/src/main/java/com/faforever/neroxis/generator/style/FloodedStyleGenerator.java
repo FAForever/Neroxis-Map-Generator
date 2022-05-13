@@ -9,7 +9,6 @@ import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class FloodedStyleGenerator extends StyleGenerator {
-
     public FloodedStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .plateauDensity(0, .25f)

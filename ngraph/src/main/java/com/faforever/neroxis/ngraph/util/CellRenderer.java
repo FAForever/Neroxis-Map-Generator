@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class CellRenderer {
-
     private CellRenderer() {
         // static class
     }
@@ -99,7 +98,6 @@ public class CellRenderer {
     }
 
     public static abstract class CanvasFactory {
-
         /**
          * Separates the creation of the canvas from its initialization, when the
          * size of the required graphics buffer / document / container is known.

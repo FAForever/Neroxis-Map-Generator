@@ -10,7 +10,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public strictfp class Unit extends Marker {
-
     private final String type;
     private float rotation;
 

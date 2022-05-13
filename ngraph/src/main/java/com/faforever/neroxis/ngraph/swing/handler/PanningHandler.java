@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
  *
  */
 public class PanningHandler extends MouseAdapter {
-
     private static final long serialVersionUID = 7969814728058376339L;
     protected GraphComponent graphComponent;
     protected boolean enabled = true;
@@ -31,14 +30,6 @@ public class PanningHandler extends MouseAdapter {
         if (isEnabled() && !e.isConsumed() && graphComponent.isPanningEvent(e) && !e.isPopupTrigger()) {
             start = e.getPoint();
         }
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
     }
 
     @Override
@@ -70,6 +61,14 @@ public class PanningHandler extends MouseAdapter {
 
             e.consume();
         }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
     }
 
     /**

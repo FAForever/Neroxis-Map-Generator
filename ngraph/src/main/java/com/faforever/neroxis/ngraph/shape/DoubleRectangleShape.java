@@ -5,7 +5,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Rectangle;
 
 public class DoubleRectangleShape extends RectangleShape {
-
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);

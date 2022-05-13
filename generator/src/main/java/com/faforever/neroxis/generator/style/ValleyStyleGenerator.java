@@ -13,7 +13,6 @@ import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class ValleyStyleGenerator extends StyleGenerator {
-
     public ValleyStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.75f, 1f)

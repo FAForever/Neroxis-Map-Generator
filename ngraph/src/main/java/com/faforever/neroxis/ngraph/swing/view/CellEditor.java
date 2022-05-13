@@ -39,7 +39,6 @@ import javax.swing.text.html.MinimalHTMLWriter;
  * enterStopsCellEditing and Graph.escapeEnabled.
  */
 public class CellEditor implements ICellEditor {
-
     private static final String CANCEL_EDITING = "cancel-editing";
     private static final String INSERT_BREAK = "insert-break";
     private static final String SUBMIT_TEXT = "submit-text";
@@ -188,6 +187,31 @@ public class CellEditor implements ICellEditor {
         }
     }
 
+    @Override
+    public void stopEditing(boolean cancel) {
+        if (editingCell != null) {
+            scrollPane.transferFocusUpCycle();
+            ICell cell = editingCell;
+            editingCell = null;
+
+            if (!cancel) {
+                EventObject trig = trigger;
+                trigger = null;
+                graphComponent.labelChanged(cell, getCurrentValue(), trig);
+            } else {
+                CellState state = graphComponent.getGraph().getView().getState(cell);
+                graphComponent.redraw(state);
+            }
+
+            if (scrollPane.getParent() != null) {
+                scrollPane.setVisible(false);
+                scrollPane.getParent().remove(scrollPane);
+            }
+
+            graphComponent.requestFocusInWindow();
+        }
+    }
+
     /**
      * Returns the bounds to be used for the editor.
      */
@@ -298,31 +322,6 @@ public class CellEditor implements ICellEditor {
         shiftEnterSubmitsText = value;
     }
 
-    @Override
-    public void stopEditing(boolean cancel) {
-        if (editingCell != null) {
-            scrollPane.transferFocusUpCycle();
-            ICell cell = editingCell;
-            editingCell = null;
-
-            if (!cancel) {
-                EventObject trig = trigger;
-                trigger = null;
-                graphComponent.labelChanged(cell, getCurrentValue(), trig);
-            } else {
-                CellState state = graphComponent.getGraph().getView().getState(cell);
-                graphComponent.redraw(state);
-            }
-
-            if (scrollPane.getParent() != null) {
-                scrollPane.setVisible(false);
-                scrollPane.getParent().remove(scrollPane);
-            }
-
-            graphComponent.requestFocusInWindow();
-        }
-    }
-
     /**
      * Returns the current editing value.
      */
@@ -416,7 +415,6 @@ public class CellEditor implements ICellEditor {
      * Workaround for inserted linefeeds when getting text from HTML editor.
      */
     class NoLinefeedHtmlEditorKit extends HTMLEditorKit {
-
         @Override
         public void write(Writer out, Document doc, int pos, int len) throws IOException, BadLocationException {
             if (doc instanceof HTMLDocument) {
@@ -442,7 +440,6 @@ public class CellEditor implements ICellEditor {
      * Subclassed to make setLineLength visible for the custom editor kit.
      */
     class NoLinefeedHtmlWriter extends HTMLWriter {
-
         public NoLinefeedHtmlWriter(Writer buf, HTMLDocument doc, int pos, int len) {
             super(buf, doc, pos, len);
         }

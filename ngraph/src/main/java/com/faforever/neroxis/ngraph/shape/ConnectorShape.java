@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConnectorShape extends BasicShape {
-
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         if (state.getAbsolutePointCount() > 1 && configureGraphics(canvas, state, false)) {

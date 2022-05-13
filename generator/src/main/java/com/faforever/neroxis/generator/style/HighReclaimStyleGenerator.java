@@ -10,7 +10,6 @@ import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class HighReclaimStyleGenerator extends StyleGenerator {
-
     public HighReclaimStyleGenerator() {
         weight = .25f;
         parameterConstraints = ParameterConstraints.builder()

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Curve {
-
     /**
      * Defines the key for the central curve index
      */

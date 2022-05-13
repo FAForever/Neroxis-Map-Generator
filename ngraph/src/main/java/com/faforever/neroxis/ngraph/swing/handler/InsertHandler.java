@@ -18,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class InsertHandler extends MouseAdapter {
-
     /**
      * Reference to the enclosing graph component.
      */
@@ -72,22 +71,6 @@ public class InsertHandler extends MouseAdapter {
         }
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
-    }
-
-    public boolean isStartEvent(MouseEvent e) {
-        return true;
-    }
-
-    public void start(MouseEvent e) {
-        first = e.getPoint();
-    }
-
     @Override
     public void mouseReleased(MouseEvent e) {
         if (graphComponent.isEnabled() && isEnabled() && !e.isConsumed() && current != null) {
@@ -123,6 +106,22 @@ public class InsertHandler extends MouseAdapter {
 
             e.consume();
         }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
+    }
+
+    public boolean isStartEvent(MouseEvent e) {
+        return true;
+    }
+
+    public void start(MouseEvent e) {
+        first = e.getPoint();
     }
 
     public ICell insertCell(RectangleDouble bounds) {

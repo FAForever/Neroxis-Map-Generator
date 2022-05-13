@@ -8,7 +8,6 @@ import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.importer.MapImporter;
-import com.faforever.neroxis.map.PropMaterials;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -23,6 +22,7 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
@@ -33,7 +33,6 @@ import picocli.CommandLine;
 
 @CommandLine.Command(name = "populate", mixinStandardHelpOptions = true, description = "Populate various map properties based on the heightmap", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapPopulator implements Callable<Integer> {
-
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
@@ -466,7 +465,6 @@ public strictfp class MapPopulator implements Callable<Integer> {
 
     @Getter
     private static class SymmetryRequiredSettings {
-
         @CommandLine.Option(names = "--terrain-symmetry", required = true, description = "symmetry of the terrain. Values: ${COMPLETION-CANDIDATES}")
         private Symmetry terrainSymmetry;
         @CommandLine.Option(names = "--team-symmetry", required = true, description = "symmetry of the teams. Values: ${COMPLETION-CANDIDATES}")

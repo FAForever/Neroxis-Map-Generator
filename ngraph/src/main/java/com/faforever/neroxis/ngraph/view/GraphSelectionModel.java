@@ -54,7 +54,6 @@ import java.util.Set;
  * </code>
  */
 public class GraphSelectionModel extends EventSource {
-
     /**
      * Reference to the enclosing graph.
      */
@@ -258,7 +257,6 @@ public class GraphSelectionModel extends EventSource {
     }
 
     public static class SelectionChange implements UndoableChange {
-
         protected GraphSelectionModel model;
         protected List<ICell> added, removed;
 

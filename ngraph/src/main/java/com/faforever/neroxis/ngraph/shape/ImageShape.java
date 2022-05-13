@@ -13,7 +13,6 @@ import java.awt.Rectangle;
  * creating a lookup table with images which can then be referenced by key.
  */
 public class ImageShape extends RectangleShape {
-
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         super.paintShape(canvas, state);

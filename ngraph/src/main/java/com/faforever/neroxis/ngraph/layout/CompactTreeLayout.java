@@ -20,7 +20,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CompactTreeLayout extends GraphLayout {
-
     /**
      * Specifies the orientation of the layout. Default is true.
      */
@@ -711,7 +710,6 @@ public class CompactTreeLayout extends GraphLayout {
     }
 
     protected static class TreeNode {
-
         protected ICell cell;
         protected double x, y, width, height, offsetX, offsetY;
         protected TreeNode child, next; // parent, sibling
@@ -723,12 +721,10 @@ public class CompactTreeLayout extends GraphLayout {
     }
 
     protected static class Polygon {
-
         protected Polyline lowerHead, lowerTail, upperHead, upperTail;
     }
 
     protected static class Polyline {
-
         protected double dx, dy;
         protected Polyline next;
 
@@ -745,7 +741,6 @@ public class CompactTreeLayout extends GraphLayout {
      * (x.equals(y))
      */
     protected static class WeightedCellSorter implements Comparable<Object> {
-
         /**
          * The weighted value of the cell stored
          */

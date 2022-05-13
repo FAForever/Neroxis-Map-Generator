@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class GeometryChange extends AtomicGraphModelChange {
-
     protected ICell cell;
     protected Geometry geometry, previous;
 

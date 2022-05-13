@@ -7,6 +7,5 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class RepaintEvent extends EventObject {
-
     RectangleDouble region;
 }

@@ -36,7 +36,6 @@ import javax.swing.JScrollBar;
  * An outline view for a specific graph component.
  */
 public class GraphOutline extends JComponent {
-
     private static final Logger log = Logger.getLogger(GraphOutline.class.getName());
     @Serial
     private static final long serialVersionUID = -2521103946905154267L;
@@ -197,6 +196,16 @@ public class GraphOutline extends JComponent {
         }
     }
 
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+
+        // Frees memory if the outline is hidden
+        if (!visible) {
+            destroyTripleBuffer();
+        }
+    }
+
     public boolean isDrawLabels() {
         return drawLabels;
     }
@@ -212,16 +221,6 @@ public class GraphOutline extends JComponent {
         repaintTripleBuffer(null);
 
         firePropertyChange("drawLabels", oldValue, drawLabels);
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-
-        // Frees memory if the outline is hidden
-        if (!visible) {
-            destroyTripleBuffer();
-        }
     }
 
     /**
@@ -435,6 +434,23 @@ public class GraphOutline extends JComponent {
     }
 
     /**
+     * Fires a property change event for <code>fitPage</code>.
+     *
+     * @param fitPage the fitPage to set
+     */
+    public void setFitPage(boolean fitPage) {
+        boolean oldValue = this.fitPage;
+        this.fitPage = fitPage;
+
+        if (updateScaleAndTranslate()) {
+            repaintBuffer = true;
+            updateFinder(false);
+        }
+
+        firePropertyChange("fitPage", oldValue, fitPage);
+    }
+
+    /**
      * Paints the background.
      */
     protected void paintBackground(Graphics g) {
@@ -502,25 +518,32 @@ public class GraphOutline extends JComponent {
         }
     }
 
-    /**
-     * Fires a property change event for <code>fitPage</code>.
-     *
-     * @param fitPage the fitPage to set
-     */
-    public void setFitPage(boolean fitPage) {
-        boolean oldValue = this.fitPage;
-        this.fitPage = fitPage;
+    public void updateFinder(boolean repaint) {
+        java.awt.Rectangle rect = graphComponent.getViewport().getViewRect();
 
-        if (updateScaleAndTranslate()) {
-            repaintBuffer = true;
-            updateFinder(false);
+        int x = (int) Math.round(rect.x * scale);
+        int y = (int) Math.round(rect.y * scale);
+        int w = (int) Math.round((rect.x + rect.width) * scale) - x;
+        int h = (int) Math.round((rect.y + rect.height) * scale) - y;
+
+        updateFinderBounds(new java.awt.Rectangle(x + translate.x, y + translate.y, w + 1, h + 1), repaint);
+    }
+
+    public void updateFinderBounds(java.awt.Rectangle bounds, boolean repaint) {
+        if (bounds != null && !bounds.equals(finderBounds)) {
+            java.awt.Rectangle old = new java.awt.Rectangle(finderBounds);
+            finderBounds = bounds;
+
+            // LATER: Fix repaint region to be smaller
+            if (repaint) {
+                old = old.union(finderBounds);
+                old.grow(3, 3);
+                repaint(old);
+            }
         }
-
-        firePropertyChange("fitPage", oldValue, fitPage);
     }
 
     public class MouseTracker implements MouseListener, MouseMotionListener {
-
         protected java.awt.Point start = null;
 
         @Override
@@ -640,31 +663,6 @@ public class GraphOutline extends JComponent {
         @Override
         public void mouseExited(MouseEvent e) {
             // ignore
-        }
-    }
-
-    public void updateFinder(boolean repaint) {
-        java.awt.Rectangle rect = graphComponent.getViewport().getViewRect();
-
-        int x = (int) Math.round(rect.x * scale);
-        int y = (int) Math.round(rect.y * scale);
-        int w = (int) Math.round((rect.x + rect.width) * scale) - x;
-        int h = (int) Math.round((rect.y + rect.height) * scale) - y;
-
-        updateFinderBounds(new java.awt.Rectangle(x + translate.x, y + translate.y, w + 1, h + 1), repaint);
-    }
-
-    public void updateFinderBounds(java.awt.Rectangle bounds, boolean repaint) {
-        if (bounds != null && !bounds.equals(finderBounds)) {
-            java.awt.Rectangle old = new java.awt.Rectangle(finderBounds);
-            finderBounds = bounds;
-
-            // LATER: Fix repaint region to be smaller
-            if (repaint) {
-                old = old.union(finderBounds);
-                old.grow(3, 3);
-                repaint(old);
-            }
         }
     }
 }

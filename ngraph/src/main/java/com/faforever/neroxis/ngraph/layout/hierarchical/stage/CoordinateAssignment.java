@@ -34,7 +34,6 @@ import javax.swing.SwingConstants;
  * far as possible.
  */
 public class CoordinateAssignment implements HierarchicalLayoutStage {
-
     private static final Logger log = Logger.getLogger(CoordinateAssignment.class.getName());
     /**
      * Reference to the enclosing layout algorithm
@@ -1408,7 +1407,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * (x.equals(y))
      */
     protected class WeightedCellSorter implements Comparable<Object> {
-
         /**
          * The weighted value of the cell stored
          */
@@ -1465,7 +1463,6 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
      * a certain area. This area includes the buffer lengths of cells.
      */
     protected class AreaSpatialCache extends Rectangle2D.Double {
-
         public Set<Object> cells = new HashSet<Object>();
     }
 }

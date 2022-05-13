@@ -13,7 +13,6 @@ import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class DropPlateauStyleGenerator extends StyleGenerator {
-
     public DropPlateauStyleGenerator() {
         weight = .5f;
         parameterConstraints = ParameterConstraints.builder()

@@ -8,7 +8,6 @@ import picocli.CommandLine;
 @Getter
 @Setter
 public class BasicOptions {
-
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
     @CommandLine.Option(names = "--seed", order = 1, description = "Seed for the generated map")

@@ -8,8 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public strictfp @interface GraphMethod {
-
-    String description() default "";
-
     boolean returnsSelf() default true;
 }

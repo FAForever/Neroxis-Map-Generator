@@ -19,7 +19,6 @@ import java.awt.Color;
  * - Encode result as image (PNG, JPG)
  */
 public interface ICanvas2D {
-
     /**
      * Saves the current state of the canvas.
      */

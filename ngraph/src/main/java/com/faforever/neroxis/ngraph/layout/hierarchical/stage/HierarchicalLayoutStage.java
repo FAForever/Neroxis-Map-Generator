@@ -16,7 +16,6 @@ package com.faforever.neroxis.ngraph.layout.hierarchical.stage;
  * that is shared between the layout stages.
  */
 public interface HierarchicalLayoutStage {
-
     /**
      * Takes the graph detail and configuration information within the facade
      * and creates the resulting laid out graph within that facade for further

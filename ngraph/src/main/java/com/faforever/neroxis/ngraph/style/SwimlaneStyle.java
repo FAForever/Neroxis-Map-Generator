@@ -12,7 +12,6 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class SwimlaneStyle implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     /**
      * Specifies whether the line between the title region of a swimlane should be visible.

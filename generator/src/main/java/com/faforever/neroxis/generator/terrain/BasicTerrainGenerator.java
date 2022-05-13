@@ -10,7 +10,6 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public strictfp class BasicTerrainGenerator extends TerrainGenerator {
-
     protected BooleanMask spawnLandMask;
     protected BooleanMask spawnPlateauMask;
     protected BooleanMask land;
@@ -50,19 +49,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected float valleyBrushIntensity;
     protected float hillBrushIntensity;
     protected float mountainBrushDensity;
-
-    @Override
-    protected void terrainSetup() {
-        spawnMaskSetup();
-        teamConnectionsSetup();
-        landSetup();
-        plateausSetup();
-        mountainSetup();
-        symmetrySetup();
-        spawnTerrainSetup();
-        enforceSymmetry();
-        setupHeightmapPipeline();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -112,6 +98,19 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         deepWaterBrushIntensity = 1f;
         deepWaterBrushSize = 64;
         deepWaterBrushDensity = .065f;
+    }
+
+    @Override
+    protected void terrainSetup() {
+        spawnMaskSetup();
+        teamConnectionsSetup();
+        landSetup();
+        plateausSetup();
+        mountainSetup();
+        symmetrySetup();
+        spawnTerrainSetup();
+        enforceSymmetry();
+        setupHeightmapPipeline();
     }
 
     protected void spawnMaskSetup() {

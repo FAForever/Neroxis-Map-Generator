@@ -10,11 +10,19 @@ import java.util.Arrays;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
-
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }
 
+    /**
+     * Create a new vector2 mask
+     *
+     * @param size             Size of the mask
+     * @param seed             Random seed of the mask
+     * @param symmetrySettings symmetrySettings to enforce on the mask
+     * @param name             name of the mask
+     * @param parallel         whether to parallelize mask operations
+     */
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")

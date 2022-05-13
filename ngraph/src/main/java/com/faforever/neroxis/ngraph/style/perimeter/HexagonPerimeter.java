@@ -11,7 +11,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * for a description of the parameters.
  */
 public class HexagonPerimeter implements Perimeter {
-
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         double x = bounds.getX();

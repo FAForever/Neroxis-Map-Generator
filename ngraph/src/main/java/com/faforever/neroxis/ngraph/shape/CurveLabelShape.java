@@ -32,7 +32,6 @@ import java.util.Locale;
  * the edge's path
  */
 public class CurveLabelShape implements ITextShape {
-
     /**
      * Buffer at both ends of the label
      */
@@ -515,7 +514,6 @@ public class CurveLabelShape implements ITextShape {
      * branch label. Each instance represents one glyph
      */
     public class LabelGlyphCache {
-
         /**
          * Cache of the bounds of the individual element of the label of this
          * edge. Note that these are the unrotated values used to determine the
@@ -550,7 +548,6 @@ public class CurveLabelShape implements ITextShape {
      * on the curve
      */
     public class LabelPosition {
-
         public double startBuffer = LABEL_BUFFER;
         public double endBuffer = LABEL_BUFFER;
         public double defaultInterGlyphSpace = 0;

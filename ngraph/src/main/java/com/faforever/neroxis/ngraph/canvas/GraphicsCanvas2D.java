@@ -47,7 +47,6 @@ import lombok.Setter;
  */
 @Setter
 public class GraphicsCanvas2D implements ICanvas2D {
-
     private static final Logger log = Logger.getLogger(GraphicsCanvas2D.class.getName());
     /**
      * Specifies the image scaling quality. Default is Image.SCALE_SMOOTH.
@@ -466,6 +465,76 @@ public class GraphicsCanvas2D implements ICanvas2D {
     }
 
     /**
+     * Draws the given text.
+     */
+    @Override
+    public void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap,
+                     String format, String overflow, boolean clip, double rotation, String textDirection) {
+        plainText(x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation);
+    }
+
+    @Override
+    public void begin() {
+        currentPath = new GeneralPath();
+    }
+
+    @Override
+    public void moveTo(double x, double y) {
+        if (currentPath != null) {
+            currentPath.moveTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
+        }
+    }
+
+    @Override
+    public void lineTo(double x, double y) {
+        if (currentPath != null) {
+            currentPath.lineTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
+        }
+    }
+
+    @Override
+    public void quadTo(double x1, double y1, double x2, double y2) {
+        if (currentPath != null) {
+            currentPath.quadTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
+                               (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale));
+        }
+    }
+
+    @Override
+    public void curveTo(double x1, double y1, double x2, double y2, double x3, double y3) {
+        if (currentPath != null) {
+            currentPath.curveTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
+                                (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale),
+                                (float) ((state.dx + x3) * state.scale), (float) ((state.dy + y3) * state.scale));
+        }
+    }
+
+    /**
+     * Closes the current path.
+     */
+    @Override
+    public void close() {
+        if (currentPath != null) {
+            currentPath.closePath();
+        }
+    }
+
+    @Override
+    public void stroke() {
+        paintCurrentPath(false, true);
+    }
+
+    @Override
+    public void fill() {
+        paintCurrentPath(true, false);
+    }
+
+    @Override
+    public void fillAndStroke() {
+        paintCurrentPath(true, true);
+    }
+
+    /**
      * Hook for image caching.
      */
     protected Image loadImage(String src) {
@@ -544,15 +613,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
             }
         }
         return g2;
-    }
-
-    /**
-     * Draws the given text.
-     */
-    @Override
-    public void text(double x, double y, double w, double h, String str, String align, String valign, boolean wrap,
-                     String format, String overflow, boolean clip, double rotation, String textDirection) {
-        plainText(x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation);
     }
 
     /**
@@ -708,67 +768,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
         return family;
     }
 
-    @Override
-    public void begin() {
-        currentPath = new GeneralPath();
-    }
-
-    @Override
-    public void moveTo(double x, double y) {
-        if (currentPath != null) {
-            currentPath.moveTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
-        }
-    }
-
-    @Override
-    public void lineTo(double x, double y) {
-        if (currentPath != null) {
-            currentPath.lineTo((float) ((state.dx + x) * state.scale), (float) ((state.dy + y) * state.scale));
-        }
-    }
-
-    @Override
-    public void quadTo(double x1, double y1, double x2, double y2) {
-        if (currentPath != null) {
-            currentPath.quadTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
-                               (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale));
-        }
-    }
-
-    @Override
-    public void curveTo(double x1, double y1, double x2, double y2, double x3, double y3) {
-        if (currentPath != null) {
-            currentPath.curveTo((float) ((state.dx + x1) * state.scale), (float) ((state.dy + y1) * state.scale),
-                                (float) ((state.dx + x2) * state.scale), (float) ((state.dy + y2) * state.scale),
-                                (float) ((state.dx + x3) * state.scale), (float) ((state.dy + y3) * state.scale));
-        }
-    }
-
-    /**
-     * Closes the current path.
-     */
-    @Override
-    public void close() {
-        if (currentPath != null) {
-            currentPath.closePath();
-        }
-    }
-
-    @Override
-    public void stroke() {
-        paintCurrentPath(false, true);
-    }
-
-    @Override
-    public void fill() {
-        paintCurrentPath(true, false);
-    }
-
-    @Override
-    public void fillAndStroke() {
-        paintCurrentPath(true, true);
-    }
-
     protected void paintCurrentPath(boolean filled, boolean stroked) {
         if (currentPath != null) {
             if (stroked) {
@@ -883,7 +882,6 @@ public class GraphicsCanvas2D implements ICanvas2D {
     }
 
     protected static class CanvasState implements Cloneable {
-
         protected double alpha = 1;
         protected double scale = 1;
         protected double dx = 0;

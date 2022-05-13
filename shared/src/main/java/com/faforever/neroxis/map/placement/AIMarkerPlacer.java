@@ -10,7 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public strictfp class AIMarkerPlacer {
-
     public static void placeAIMarkers(BooleanMask passable, List<AIMarker> markers, String nameFormat) {
         LinkedHashSet<Vector2> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
         coordinates.addAll(passable.copyAsDistanceField()

@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import org.w3c.dom.Element;
 
 public class Multiplicity {
-
     private static final Logger log = Logger.getLogger(Multiplicity.class.getName());
     /**
      * Defines the type of the source or target terminal. The type is a string

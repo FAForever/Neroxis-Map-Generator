@@ -12,7 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StackLayout extends GraphLayout {
-
     /**
      * Specifies the orientation of the layout. Default is true.
      */

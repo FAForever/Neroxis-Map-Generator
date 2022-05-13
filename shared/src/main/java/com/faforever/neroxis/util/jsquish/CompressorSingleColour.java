@@ -35,7 +35,6 @@ import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 import static java.lang.Math.round;
 
 final strictfp class CompressorSingleColour extends CompressorColourFit {
-
     private static final int[] indices = new int[16];
     private static final int[][][][] lookups = new int[3][][][];
     private static final int[][] sources = new int[3][];

@@ -18,7 +18,6 @@ import java.util.LinkedHashSet;
  * remove in constant time and contains in constant time
  */
 public class GraphHierarchyRank extends LinkedHashSet<GraphAbstractHierarchyCell> {
-
     @Serial
     private static final long serialVersionUID = -2781491210687143878L;
 }

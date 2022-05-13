@@ -5,7 +5,6 @@ import lombok.Value;
 
 @Value
 public strictfp class EntryEdge {
-
     EntryVertex from;
     EntryVertex to;
     Pipeline.Entry entry;

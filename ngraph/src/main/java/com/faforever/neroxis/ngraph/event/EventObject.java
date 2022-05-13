@@ -9,7 +9,6 @@ import lombok.Getter;
  * Base class for objects that dispatch named events.
  */
 public abstract class EventObject {
-
     /**
      * Holds the consumed state of the event. Default is false.
      */

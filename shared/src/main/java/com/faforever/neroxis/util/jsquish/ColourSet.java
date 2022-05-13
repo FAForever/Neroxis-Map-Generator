@@ -28,7 +28,6 @@ package com.faforever.neroxis.util.jsquish;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
 final strictfp class ColourSet {
-
     private final Vec[] points = new Vec[16];
     private final float[] weights = new float[16];
     private final int[] remap = new int[16];

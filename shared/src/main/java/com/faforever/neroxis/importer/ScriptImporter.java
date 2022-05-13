@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public strictfp class ScriptImporter {
-
     public static void importScript(Path folderPath, SCMap map) throws IOException {
         File dir = folderPath.toFile();
 

@@ -7,7 +7,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 
 public class CylinderShape extends BasicShape {
-
     /**
      * Draws a cylinder for the given parameters.
      */

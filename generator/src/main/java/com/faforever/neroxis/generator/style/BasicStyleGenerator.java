@@ -13,7 +13,6 @@ import lombok.Getter;
 
 @Getter
 public strictfp class BasicStyleGenerator extends StyleGenerator {
-
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);

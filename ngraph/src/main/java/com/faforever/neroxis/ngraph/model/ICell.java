@@ -9,7 +9,6 @@ import java.util.List;
  * Defines the requirements for a cell that can be used in an GraphModel.
  */
 public interface ICell {
-
     /**
      * Returns the Id of the cell as a string.
      *

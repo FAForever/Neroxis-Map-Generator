@@ -12,7 +12,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 public class Resources {
-
     private static final Logger log = Logger.getLogger(Resources.class.getName());
     /**
      * Ordered list of the inserted resource bundles.

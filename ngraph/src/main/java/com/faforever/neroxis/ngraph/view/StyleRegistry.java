@@ -24,7 +24,6 @@ import java.util.Map;
  * in a style. This is currently only used to perimeters and edge styles.
  */
 public class StyleRegistry {
-
     /**
      * Maps from strings to objects.
      */

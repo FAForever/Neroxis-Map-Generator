@@ -14,7 +14,6 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class ShapeStyle implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private IShape shape;
     private Direction direction = Direction.EAST;

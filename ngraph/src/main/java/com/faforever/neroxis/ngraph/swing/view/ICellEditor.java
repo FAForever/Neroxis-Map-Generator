@@ -10,7 +10,6 @@ import java.util.EventObject;
  *
  */
 public interface ICellEditor {
-
     /**
      * Returns the cell that is currently being edited.
      */

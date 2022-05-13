@@ -20,7 +20,6 @@ import javax.swing.JComponent;
  * @author Administrator
  */
 public class CellHandler {
-
     public static final int HANDLE_SIZE = 7;
     public static final int LABEL_HANDLE_SIZE = 4;
     /**

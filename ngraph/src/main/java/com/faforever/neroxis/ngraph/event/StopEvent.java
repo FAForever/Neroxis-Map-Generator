@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class StopEvent extends EventObject {
-
     ICell cell;
     boolean commit;
     MouseEvent event;

@@ -13,7 +13,6 @@ import javax.swing.WindowConstants;
 import lombok.Value;
 
 public strictfp class VisualDebugger {
-
     private static DefaultListModel<MaskListItem> listModel;
     private static JFrame frame;
     private static JList<MaskListItem> list;
@@ -112,7 +111,6 @@ public strictfp class VisualDebugger {
 
     @Value
     public static class MaskListItem {
-
         String maskName;
         Mask<?, ?> mask;
 

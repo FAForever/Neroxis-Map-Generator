@@ -6,7 +6,6 @@ import java.awt.Point;
 import java.util.LinkedHashSet;
 
 public strictfp class Vector2 extends Vector<Vector2> {
-
     public Vector2() {
         super(2);
     }
@@ -17,6 +16,20 @@ public strictfp class Vector2 extends Vector<Vector2> {
 
     public Vector2(float x, float y) {
         super(x, y);
+    }
+
+    public Vector2(Vector3 location) {
+        super(2);
+        setX(location.getX());
+        setY(location.getZ());
+    }
+
+    public Vector2(Dimension other) {
+        this((float) other.getWidth(), (float) other.getHeight());
+    }
+
+    public Vector2(Point other) {
+        this((float) other.getX(), (float) other.getY());
     }
 
     public float getX() {
@@ -33,20 +46,6 @@ public strictfp class Vector2 extends Vector<Vector2> {
 
     public void setY(float y) {
         components[Vector.Y] = y;
-    }
-
-    public Vector2(Vector3 location) {
-        super(2);
-        setX(location.getX());
-        setY(location.getZ());
-    }
-
-    public Vector2(Dimension other) {
-        this((float) other.getWidth(), (float) other.getHeight());
-    }
-
-    public Vector2(Point other) {
-        this((float) other.getX(), (float) other.getY());
     }
 
     public void set(Dimension other) {

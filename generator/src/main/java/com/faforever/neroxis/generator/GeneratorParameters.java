@@ -8,7 +8,6 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public strictfp class GeneratorParameters {
-
     int spawnCount;
     float landDensity;
     float plateauDensity;

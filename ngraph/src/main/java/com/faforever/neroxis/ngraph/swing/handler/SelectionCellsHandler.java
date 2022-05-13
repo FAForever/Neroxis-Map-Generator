@@ -33,7 +33,6 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 public class SelectionCellsHandler implements MouseListener, MouseMotionListener {
-
     private static final long serialVersionUID = -882368002120921842L;
     /**
      * Defines the default value for maxHandlers. Default is 100.
@@ -304,12 +303,6 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
         reset();
     }
 
-    public void reset() {
-        for (CellHandler cellHandler : handlers.values()) {
-            cellHandler.reset();
-        }
-    }
-
     @Override
     public void mouseEntered(MouseEvent arg0) {
         // empty
@@ -318,5 +311,11 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
     @Override
     public void mouseExited(MouseEvent arg0) {
         // empty
+    }
+
+    public void reset() {
+        for (CellHandler cellHandler : handlers.values()) {
+            cellHandler.reset();
+        }
     }
 }

@@ -9,7 +9,6 @@ import java.util.List;
  * Provides a vertical elbow edge.
  */
 public class TopToBottomEdgeStyleFunction implements EdgeStyleFunction {
-
     @Override
     public void apply(CellState state, CellState source, CellState target, List<PointDouble> points,
                       List<PointDouble> result) {

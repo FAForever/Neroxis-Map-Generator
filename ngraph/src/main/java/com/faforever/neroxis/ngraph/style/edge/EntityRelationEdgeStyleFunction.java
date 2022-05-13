@@ -15,7 +15,6 @@ import java.util.Set;
  * schema diagrams).
  */
 public class EntityRelationEdgeStyleFunction implements EdgeStyleFunction {
-
     public static final double ENTITY_SEGMENT = 30;
 
     @Override

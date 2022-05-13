@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CollapseChange extends AtomicGraphModelChange {
-
     protected ICell cell;
     protected boolean collapsed, previous;
 

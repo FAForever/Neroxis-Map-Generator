@@ -24,7 +24,6 @@ import java.util.List;
  * Implements a rubberband selection.
  */
 public class Rubberband implements MouseListener, MouseMotionListener {
-
     /**
      * Defines the border color for drawing the rubberband selection.
      * Default is Constants.RUBBERBAND_BORDERCOLOR.
@@ -197,6 +196,27 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         }
     }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        Rectangle rect = bounds;
+        reset();
+
+        if (!e.isConsumed() && rect != null && graphComponent.isSignificant(rect.width, rect.height)) {
+            select(rect, e);
+            e.consume();
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent arg0) {
+        // empty
+    }
+
+    @Override
+    public void mouseExited(MouseEvent arg0) {
+        // empty
+    }
+
     /**
      * Returns the enabled state.
      */
@@ -226,28 +246,7 @@ public class Rubberband implements MouseListener, MouseMotionListener {
         bounds = new Rectangle(first);
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        Rectangle rect = bounds;
-        reset();
-
-        if (!e.isConsumed() && rect != null && graphComponent.isSignificant(rect.width, rect.height)) {
-            select(rect, e);
-            e.consume();
-        }
-    }
-
     public List<ICell> select(Rectangle rect, MouseEvent e) {
         return graphComponent.selectRegion(rect, e);
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent arg0) {
-        // empty
-    }
-
-    @Override
-    public void mouseExited(MouseEvent arg0) {
-        // empty
     }
 }

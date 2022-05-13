@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
-
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
     private long[] mask;
@@ -36,6 +35,15 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(size, seed, symmetrySettings, null, false);
     }
 
+    /**
+     * Create a new boolean mask
+     *
+     * @param size             Size of the mask
+     * @param seed             Random seed of the mask
+     * @param symmetrySettings symmetrySettings to enforce on the mask
+     * @param name             name of the mask
+     * @param parallel         whether to parallelize mask operations
+     */
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -155,7 +163,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public int getImmediateSize() {
+    protected int getImmediateSize() {
         return maskBooleanSize;
     }
 
@@ -245,6 +253,14 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    /**
+     * Blur the mask setting the pixel to true when more than {@code density}
+     * pixels in the 2*radius square are true
+     *
+     * @param radius  half length of the square filter to use
+     * @param density percentage of pixels in the filter require to be true to set the pixel to try (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask blur(int radius, float density) {
         int[][] innerCount = getInnerCount();
@@ -300,7 +316,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public BooleanMask add(BooleanMask other, BooleanMask value) {
+    public BooleanMask add(BooleanMask other, BooleanMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -310,7 +326,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     addPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -359,7 +375,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public BooleanMask subtract(BooleanMask other, BooleanMask value) {
+    public BooleanMask subtract(BooleanMask other, BooleanMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -369,7 +385,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     subtractPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -413,7 +429,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    public BooleanMask multiply(BooleanMask other, BooleanMask value) {
+    public BooleanMask multiply(BooleanMask other, BooleanMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -423,7 +439,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     multiplyPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -485,7 +501,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                         boolean wrapEdges) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntBooleanConsumer) this::dividePrimitiveAt, xOffset, yOffset, center, wrapEdges);
+            applyWithOffset(source, (BiIntBooleanConsumer) this::dividePrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
         }, other);
     }
 
@@ -555,6 +572,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    /**
+     * Randomize the mask by setting each pixel to true with a probability of {@code density}
+     * Respects the terrain symmetry
+     *
+     * @param density probability that a given pixel will be true (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask randomize(float density) {
         return randomize(density, SymmetryType.TERRAIN);
@@ -564,6 +588,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return setWithSymmetry(symmetryType, (x, y) -> random.nextFloat() < density);
     }
 
+    /**
+     * Flips each pixel with a probability of {@code density}
+     * Respects the terrain symmetry
+     *
+     * @param density probability that a given pixel will be flipped (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask flipValues(float density) {
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getPrimitive(x, y) && random.nextFloat() < density);
@@ -575,6 +606,15 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    /**
+     * Starting from a random point simulate brownian motion by choosing a random neighbor to visit
+     * each neighbor visited is set to true. A maximum of {@code numSteps} neighbors are visited.
+     * The same pixel may be visited multipl times
+     *
+     * @param numWalkers number of times to simulate brownian motion
+     * @param numSteps   number of neighbors to visit
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
@@ -725,6 +765,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    /**
+     * Force the distance between and two true pixels to be in the range of {@code [minSpacing, maxSpacing]}
+     * This is done by setting all other pixels to false. Spaced pixels are chosen randomly
+     *
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask space(float minSpacing, float maxSpacing) {
         return enqueue(() -> {
@@ -734,6 +780,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Flip all pixels to the opposite value
+     */
     @GraphMethod
     public BooleanMask invert() {
         return enqueue(() -> {
@@ -743,6 +792,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Set all pixels within the circle defined by the {@code radius} around true pixel to true
+     */
     @GraphMethod
     public BooleanMask inflate(float radius) {
         return enqueue(() -> {
@@ -756,6 +808,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Set all pixels within the circle defined by the {@code radius} around false pixel to false
+     */
     @GraphMethod
     public BooleanMask deflate(float radius) {
         return enqueue(() -> {
@@ -769,6 +824,16 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Starting from a random point simulate weighted brownian motion by choosing a random neighbor to visit
+     * each neighbor visited is set to true. The first direction chosen will be more likely to be selected in future iterations
+     * A maximum of {@code numSteps} neighbors are visited.
+     * The same pixel may be visited multipl times
+     *
+     * @param numWalkers number of times to simulate brownian motion
+     * @param numSteps   number of neighbors to visit
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask progressiveWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
@@ -794,6 +859,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return this;
     }
 
+    /**
+     * Set all pixels on a "corner" to false
+     *
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask cutCorners() {
         return enqueue(() -> {
@@ -849,11 +919,24 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
+    /**
+     * Set true pixels with non-like neighbors to false
+     * with a probability of {@code strength}
+     *
+     * @param strength probability an edge pixel will be set to false (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask erode(float strength) {
         return erode(strength, 1);
     }
 
+    /**
+     * Create holes of false with radius {@code size} in true sections of the maske
+     *
+     * @param strength probability an edge pixel will be set to false (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask acid(float strength, float size) {
         BooleanMask holes = new BooleanMask(this, getName() + "holes");
@@ -864,6 +947,12 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, holes);
     }
 
+    /**
+     * Create holes of true with radius {@code size} in false sections of the maske
+     *
+     * @param strength probability an edge pixel will be set to false (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask splat(float strength, float size) {
         BooleanMask holes = new BooleanMask(this, getName() + "splat");
@@ -874,11 +963,23 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, holes);
     }
 
+    /**
+     * On the boundaries between true and false pixels randomly set each false pixel to true
+     * with a probability of {@code strength}
+     *
+     * @param strength probability an edge pixel will be set to true (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask dilute(float strength) {
         return dilute(strength, 1);
     }
 
+    /**
+     * Set only pixels with non-like neighbors to true
+     *
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask outline() {
         return enqueue(() -> {
@@ -902,6 +1003,13 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 || (y < size - 1 && getPrimitive(x, y + 1) != value));
     }
 
+    /**
+     * Set false pixels with non-like neighbors to true
+     * with a probability of {@code strength}
+     *
+     * @param strength probability an edge pixel will be set to true (Values: 0-1)
+     * @return the modified mask
+     */
     @GraphMethod
     public BooleanMask dilute(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
@@ -919,6 +1027,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Perform erode {@code count} times
+     */
     @GraphMethod
     public BooleanMask erode(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
@@ -962,6 +1073,18 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask initMinima(ComparableMask<T, U> other,
+                                                                                            T minValue, T maxValue) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                T value = source.get(x, y);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMin(x, y);
+            });
+        }, other);
+    }
+
     public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init1DMaxima(
             ComparableMask<T, U> other, T minValue, T maxValue) {
         assertCompatibleMask(other);
@@ -974,12 +1097,26 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
+    public <T extends Comparable<T>, U extends ComparableMask<T, U>> BooleanMask init1DMinima(
+            ComparableMask<T, U> other, T minValue, T maxValue) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                T value = source.get(x, y);
+                return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMin(x, y);
+            });
+        }, other);
+    }
+
+    /**
+     * Set all values outside the team symmetry region to false
+     */
     @GraphMethod
     public BooleanMask limitToSymmetryRegion() {
         return limitToSymmetryRegion(SymmetryType.TEAM);
     }
 
-    @GraphMethod
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
         int minXBound = getMinXBound(symmetryType);
         int maxXBound = getMaxXBound(symmetryType);
@@ -991,6 +1128,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Set all values outside the circle with radius {@code circleRadius} to false
+     */
     @GraphMethod
     public BooleanMask limitToCenteredCircle(float circleRadius) {
         int size = getSize();
@@ -1004,6 +1144,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return fillCoordinates(getShapeCoordinates(location), !getPrimitive(location));
     }
 
+    /**
+     * Set all values where the distance between pixels with non-like neighbors
+     * is less than {@code minDist} to the local majority
+     */
     @GraphMethod
     public BooleanMask fillGaps(int minDist) {
         BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
@@ -1011,6 +1155,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return add(filledGaps);
     }
 
+    /**
+     * Set all values where the distance between pixels with non-like neighbors
+     * is less than {@code minDist} to the local minority
+     */
     @GraphMethod
     public BooleanMask widenGaps(int minDist) {
         BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
@@ -1018,6 +1166,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return subtract(filledGaps);
     }
 
+    /**
+     * Flip all pixels in continguous areas with an area less than {@code minArea}
+     */
     @GraphMethod
     public BooleanMask removeAreasSmallerThan(int minArea) {
         int size = getSize();
@@ -1035,6 +1186,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
+    /**
+     * Convert to a new {@link FloatMask} where true pixels are set to {@code high}
+     * and false pixels are set to {@code low}
+     */
     @GraphMethod(returnsSelf = false)
     public FloatMask copyAsFloatMask(float low, float high) {
         return new FloatMask(this, low, high, getName() + "toFloat");
@@ -1044,6 +1199,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return new FloatMask(this, low, high, name);
     }
 
+    /**
+     * Convert to a new {@link IntegerMask} where true pixels are set to {@code high}
+     * and false pixels are set to {@code low}
+     */
     @GraphMethod(returnsSelf = false)
     public IntegerMask copyAsIntegerMask(int low, int high) {
         return copyAsIntegerMask(low, high, getName() + "toInteger");
@@ -1053,6 +1212,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return new IntegerMask(this, low, high, name);
     }
 
+    /**
+     * Flip all pixels in contiguous areas with an area greater than {@code maxArea}
+     */
     @GraphMethod
     public BooleanMask removeAreasBiggerThan(int maxArea) {
         return subtract(copy().removeAreasSmallerThan(maxArea));

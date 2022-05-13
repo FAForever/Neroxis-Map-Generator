@@ -18,7 +18,6 @@ import java.awt.image.BufferedImage;
  * <code>BufferedImage image = CellRenderer.createBufferedImage(graph, cells, 1, Color.white, true, null, canvas);</code>
  */
 public class ImageCanvas implements ICanvas {
-
     protected Graphics2DCanvas canvas;
     protected Graphics2D previousGraphics;
     protected BufferedImage image;

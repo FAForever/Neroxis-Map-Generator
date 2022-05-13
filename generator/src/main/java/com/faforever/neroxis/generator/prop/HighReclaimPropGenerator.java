@@ -6,7 +6,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
-
     public HighReclaimPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .mountainDensity(.5f, 1f)
@@ -16,6 +15,10 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
                                                    .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
                                                    .build();
         weight = .5f;
+    }
+
+    @Override
+    public void placeUnits() {
     }
 
     @Override
@@ -29,10 +32,6 @@ public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
                                   biome.getPropMaterials().getBoulders(), 30f);
         });
-    }
-
-    @Override
-    public void placeUnits() {
     }
 
     @Override

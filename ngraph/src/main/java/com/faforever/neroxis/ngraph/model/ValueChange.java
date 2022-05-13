@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ValueChange extends AtomicGraphModelChange {
-
     protected ICell cell;
     protected Object value;
     protected Object previous;

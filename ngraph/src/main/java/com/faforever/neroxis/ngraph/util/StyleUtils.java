@@ -12,7 +12,6 @@ import java.util.List;
  * Contains various style helper methods for use with Graph.
  */
 public class StyleUtils {
-
     /**
      * Returns the stylename in a style of the form stylename[;key=value] or an
      * empty string if the given style does not contain a stylename.

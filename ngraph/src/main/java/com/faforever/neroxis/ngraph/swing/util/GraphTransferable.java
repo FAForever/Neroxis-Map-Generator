@@ -25,7 +25,6 @@ import javax.swing.ImageIcon;
 import javax.swing.plaf.UIResource;
 
 public class GraphTransferable implements Transferable, UIResource, Serializable {
-
     @Serial
     private static final long serialVersionUID = 5123819419918087664L;
     private static final Logger log = Logger.getLogger(GraphTransferable.class.getName());
@@ -173,15 +172,6 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
     }
 
     /**
-     * Some subclasses will have flavors that are more descriptive than HTML or
-     * plain text. If this method returns a non-null value, it will be placed at
-     * the start of the array of supported flavors.
-     */
-    protected DataFlavor[] getRicherFlavors() {
-        return new DataFlavor[]{dataFlavor};
-    }
-
-    /**
      * Returns whether or not the specified data flavor is supported for this
      * object.
      *
@@ -258,6 +248,15 @@ public class GraphTransferable implements Transferable, UIResource, Serializable
         }
 
         throw new UnsupportedFlavorException(flavor);
+    }
+
+    /**
+     * Some subclasses will have flavors that are more descriptive than HTML or
+     * plain text. If this method returns a non-null value, it will be placed at
+     * the start of the array of supported flavors.
+     */
+    protected DataFlavor[] getRicherFlavors() {
+        return new DataFlavor[]{dataFlavor};
     }
 
     /**

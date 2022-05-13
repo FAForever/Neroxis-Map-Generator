@@ -7,7 +7,6 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 
 public class RhombusShape extends BasicShape {
-
     @Override
     public Shape createShape(Graphics2DCanvas canvas, CellState state) {
         Rectangle temp = state.getRectangle();

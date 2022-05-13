@@ -7,7 +7,6 @@ import lombok.Getter;
 
 @Getter
 public abstract strictfp class ElementGenerator {
-
     protected SCMap map;
     protected Random random;
     protected GeneratorParameters generatorParameters;

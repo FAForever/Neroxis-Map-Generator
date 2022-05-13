@@ -27,7 +27,6 @@ import java.util.Map;
  * Performs a vertex ordering within ranks as described by Gansner et al 1993
  */
 public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
-
     /**
      * Reference to the enclosing layout algorithm
      */
@@ -461,7 +460,6 @@ public class MedianHybridCrossingReduction implements HierarchicalLayoutStage {
      * values. Does not violate (x.compareTo(y)==0) == (x.equals(y))
      */
     protected static class MedianCellSorter implements Comparable<Object> {
-
         /**
          * The median value of the cell stored
          */

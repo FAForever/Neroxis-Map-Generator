@@ -13,7 +13,6 @@ import static picocli.CommandLine.Spec;
 @Getter
 @SuppressWarnings("unused")
 public strictfp class ParameterOptions {
-
     @Spec
     CommandLine.Model.CommandSpec spec;
     private Float landDensity;

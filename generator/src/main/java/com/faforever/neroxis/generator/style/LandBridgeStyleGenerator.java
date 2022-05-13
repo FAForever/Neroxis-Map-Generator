@@ -11,7 +11,6 @@ import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class LandBridgeStyleGenerator extends StyleGenerator {
-
     public LandBridgeStyleGenerator() {
         weight = 2;
         parameterConstraints = ParameterConstraints.builder()

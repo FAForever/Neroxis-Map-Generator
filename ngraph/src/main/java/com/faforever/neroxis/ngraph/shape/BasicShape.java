@@ -12,7 +12,6 @@ import java.awt.Paint;
 import java.awt.Shape;
 
 public class BasicShape implements IShape {
-
     @Override
     public void paintShape(Graphics2DCanvas canvas, CellState state) {
         Shape shape = createShape(canvas, state);

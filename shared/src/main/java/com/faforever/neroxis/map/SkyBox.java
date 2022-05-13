@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Data
 public strictfp class SkyBox {
-
     private float horizonHeight = -42.5f;
     private float scale = 1171.5814f;
     private float subHeight = 1.256637f;
@@ -31,7 +30,6 @@ public strictfp class SkyBox {
 
     @Data
     public static strictfp class Planet {
-
         private Vector3 position = new Vector3(2190.5806f, 570.7427f, -1020.0027f);
         private float rotation = -1.5847589f;
         private Vector2 scale = new Vector2(183.0f, 183.0f);
@@ -40,7 +38,6 @@ public strictfp class SkyBox {
 
     @Data
     public static strictfp class Cirrus {
-
         private Vector2 frequency = new Vector2(.0001f, .0001f);
         private float speed = 7.7999997f;
         private Vector2 direction = new Vector2(0.4320857f, -0.9018325f);

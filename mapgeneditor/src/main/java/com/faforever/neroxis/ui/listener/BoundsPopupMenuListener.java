@@ -24,7 +24,6 @@ import javax.swing.plaf.basic.BasicComboPopup;
  * Class will only work for a JComboBox that uses a BasicComboPop.
  */
 public class BoundsPopupMenuListener implements PopupMenuListener {
-
     private boolean scrollBarRequired = true;
     private boolean popupWider;
     private int maximumWidth = -1;
@@ -184,6 +183,19 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         }
     }
 
+    @Override
+    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        //  In its normal state the scrollpane does not have a scrollbar
+
+        if (scrollPane != null) {
+            scrollPane.setHorizontalScrollBar(null);
+        }
+    }
+
+    @Override
+    public void popupMenuCanceled(PopupMenuEvent e) {
+    }
+
     protected void customizePopup(BasicComboPopup popup) {
         scrollPane = getScrollPane(popup);
 
@@ -315,18 +327,5 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         int popupWidth = list.getPreferredSize().width + scrollBarWidth;
 
         return popupWidth > scrollPane.getPreferredSize().width;
-    }
-
-    @Override
-    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-        //  In its normal state the scrollpane does not have a scrollbar
-
-        if (scrollPane != null) {
-            scrollPane.setHorizontalScrollBar(null);
-        }
-    }
-
-    @Override
-    public void popupMenuCanceled(PopupMenuEvent e) {
     }
 }

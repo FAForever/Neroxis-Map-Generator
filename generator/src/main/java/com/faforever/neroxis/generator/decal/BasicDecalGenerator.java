@@ -9,7 +9,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicDecalGenerator extends DecalGenerator {
-
     protected BooleanMask fieldDecal;
     protected BooleanMask slopeDecal;
 

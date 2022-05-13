@@ -9,12 +9,21 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.MaskReflectUtil;
-import java.io.File;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.MaskGraphReflectUtil;
+import com.faforever.neroxis.util.serial.graph.JsonGraph;
+import com.faforever.neroxis.util.serial.graph.JsonGraphEdge;
+import com.faforever.neroxis.util.serial.graph.JsonGraphVertex;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import org.jgrapht.Graph;
 import org.jgrapht.nio.Attribute;
 import org.jgrapht.nio.AttributeType;
@@ -23,7 +32,6 @@ import org.jgrapht.nio.dot.DOTExporter;
 import org.jgrapht.nio.dot.DOTImporter;
 
 public class GraphSerializationUtil {
-
     private static final DOTImporter<MaskGraphVertex<?>, MaskMethodEdge> IMPORTER = new DOTImporter<>();
     private static final DOTExporter<MaskGraphVertex<?>, MaskMethodEdge> EXPORTER = new DOTExporter<>();
     private static final String PARAMETER_VALUE_PREFIX = "paramValue";
@@ -52,15 +60,16 @@ public class GraphSerializationUtil {
             }
         }
         try {
-            Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) getClassFromString(
+            Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) MaskGraphReflectUtil.getClassFromString(
                     attributeMap.get(VERTEX_CLASS_ATTRIBUTE).getValue());
-            Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) getClassFromString(
+            Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getClassFromString(
                     attributeMap.get(MASK_CLASS_ATTRIBUTE).getValue());
             int parameterCount = Integer.parseInt(attributeMap.get(PARAMETER_COUNT_ATTRIBUTE).getValue());
             Class<?>[] parameterTypes = new Class[parameterCount];
             String[] parameterValues = new String[parameterCount];
             for (int i = 0; i < parameterCount; ++i) {
-                parameterTypes[i] = getClassFromString(attributeMap.get(PARAMETER_CLASS_PREFIX + i).getValue());
+                parameterTypes[i] = MaskGraphReflectUtil.getClassFromString(
+                        attributeMap.get(PARAMETER_CLASS_PREFIX + i).getValue());
                 Attribute valueAttribute = attributeMap.get(PARAMETER_VALUE_PREFIX + i);
                 if (valueAttribute != null && valueAttribute.getType() != AttributeType.NULL) {
                     parameterValues[i] = valueAttribute.getValue();
@@ -95,17 +104,6 @@ public class GraphSerializationUtil {
         }
     }
 
-    private static Class<?> getClassFromString(String className) throws ClassNotFoundException {
-        return switch (className) {
-            case "int" -> int.class;
-            case "boolean" -> boolean.class;
-            case "long" -> long.class;
-            case "short" -> short.class;
-            case "float" -> float.class;
-            default -> Class.forName(className);
-        };
-    }
-
     private static MaskMethodEdge getMaskMethodEdgeFromAttributes(Map<String, Attribute> attributeMap) {
         if (attributeMap.isEmpty()) {
             return new MaskMethodEdge(null, null);
@@ -132,8 +130,8 @@ public class GraphSerializationUtil {
         Parameter[] parameters = vertex.getExecutable().getParameters();
         for (int i = 0; i < parameters.length; ++i) {
             Parameter parameter = parameters[i];
-            if (!Mask.class.isAssignableFrom(
-                    MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))) {
+            if (!Mask.class.isAssignableFrom(MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
+                                                                                     parameter.getParameterizedType()))) {
                 attributeMap.put(PARAMETER_VALUE_PREFIX + i,
                                  objectToAttribute(vertex.getParameterExpression(parameter)));
             }
@@ -166,12 +164,127 @@ public class GraphSerializationUtil {
         }
     }
 
-    public static void exportGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph,
-                                   File outputFile) throws IOException {
-        DebugUtil.timedRun("Graph Export", () -> EXPORTER.exportGraph(graph, outputFile));
+    public static void exportGraphDot(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph,
+                                      OutputStream outputStream) throws IOException {
+        DebugUtil.timedRun("Graph Export", () -> EXPORTER.exportGraph(graph, outputStream));
     }
 
-    public static void importGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, File inputFile) throws IOException {
-        DebugUtil.timedRun("Graph Import", () -> IMPORTER.importGraph(graph, inputFile));
+    public static void importGraphDot(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph,
+                                      InputStream inputStream) throws IOException {
+        DebugUtil.timedRun("Graph Import", () -> IMPORTER.importGraph(graph, inputStream));
+    }
+
+    public static void exportGraphJson(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, OutputStream outputStream) {
+        DebugUtil.timedRun("Json Export", () -> {
+            Map<MaskGraphVertex<?>, Integer> vertexIdMap = new HashMap<>();
+            Map<Integer, JsonGraphVertex> jsonVertexIdMap = new HashMap<>();
+            int id = 0;
+            for (MaskGraphVertex<?> vertex : graph.vertexSet()) {
+                int index = id++;
+                vertexIdMap.put(vertex, index);
+                jsonVertexIdMap.put(index, map(vertex));
+            }
+
+            Map<JsonGraphEdge, JsonGraph.SourceTarget> jsonEdgeMap = new HashMap<>();
+            for (MaskMethodEdge edge : graph.edgeSet()) {
+                JsonGraph.SourceTarget sourceTarget = new JsonGraph.SourceTarget(vertexIdMap.get(edge.getSource()),
+                                                                                 vertexIdMap.get(edge.getTarget()));
+                jsonEdgeMap.put(map(edge), sourceTarget);
+            }
+
+            try {
+                FileUtil.serialize(outputStream, new JsonGraph(jsonVertexIdMap, jsonEdgeMap));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static void importGraphJson(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph,
+                                       InputStream inputStream) throws IOException {
+        DebugUtil.timedRun("Json Import", () -> {
+            try {
+                JsonGraph jsonGraph = FileUtil.deserialize(inputStream, JsonGraph.class);
+                Collector<Map.Entry<Integer, JsonGraphVertex>, ?, Map<Integer, MaskGraphVertex<?>>> entryMapCollector = Collectors.toMap(
+                        Map.Entry::getKey, entry -> {
+                            try {
+                                return map(entry.getValue());
+                            } catch (ClassNotFoundException | NoSuchMethodException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                Map<Integer, MaskGraphVertex<?>> idVertexMap = jsonGraph.getVertices()
+                                                                        .entrySet()
+                                                                        .stream()
+                                                                        .collect(entryMapCollector);
+                idVertexMap.values().forEach(graph::addVertex);
+
+                jsonGraph.getEdges().forEach(((jsonGraphEdge, sourceTarget) -> {
+                    MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.getSource());
+                    MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.getTarget());
+                    graph.addEdge(source, target, map(jsonGraphEdge));
+                }));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static JsonGraphVertex map(MaskGraphVertex<?> vertex) {
+        List<Parameter> parameters = List.of(vertex.getExecutable().getParameters());
+        return new JsonGraphVertex(vertex.getIdentifier(), vertex.getClass().getName(),
+                                   vertex.getExecutorClass().getName(), parameters.stream()
+                                                                                  .map(Parameter::getType)
+                                                                                  .map(Class::getName)
+                                                                                  .collect(Collectors.toList()),
+                                   parameters.stream().map(vertex::getParameterExpression).collect(Collectors.toList()),
+                                   vertex.getExecutableName());
+    }
+
+    private static JsonGraphEdge map(MaskMethodEdge edge) {
+        return new JsonGraphEdge(edge.getResultName(), edge.getParameterName());
+    }
+
+    private static MaskGraphVertex<?> map(
+            JsonGraphVertex jsonGraphVertex) throws ClassNotFoundException, NoSuchMethodException {
+        Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) MaskGraphReflectUtil.getClassFromString(
+                jsonGraphVertex.getClazz());
+        Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getClassFromString(
+                jsonGraphVertex.getMaskClass());
+        int parameterCount = jsonGraphVertex.getParameterClasses().size();
+        Class<?>[] parameterTypes = new Class[parameterCount];
+        String[] parameterValues = new String[parameterCount];
+        for (int i = 0; i < parameterCount; ++i) {
+            parameterTypes[i] = MaskGraphReflectUtil.getClassFromString(jsonGraphVertex.getParameterClasses().get(i));
+            parameterValues[i] = jsonGraphVertex.getParameterValues().get(i);
+        }
+
+        MaskGraphVertex<?> vertex;
+        if (MaskConstructorVertex.class.equals(vertexClass)) {
+            vertex = new MaskConstructorVertex(maskClass.getConstructor(parameterTypes));
+        } else if (MaskMethodVertex.class.equals(vertexClass)) {
+            vertex = new MaskMethodVertex(maskClass.getMethod(jsonGraphVertex.getExecutable(), parameterTypes),
+                                          maskClass);
+        } else if (MapMaskMethodVertex.class.equals(vertexClass)) {
+            vertex = new MapMaskMethodVertex(
+                    MapMaskMethods.class.getMethod(jsonGraphVertex.getExecutable(), parameterTypes));
+        } else {
+            throw new IllegalArgumentException(String.format("Unrecognized vertex class: %s", vertexClass.getName()));
+        }
+
+        Parameter[] parameters = vertex.getExecutable().getParameters();
+        for (int i = 0; i < parameterCount; ++i) {
+            if (parameterValues[i] != null) {
+                vertex.setParameter(parameters[i].getName(), parameterValues[i]);
+            }
+        }
+
+        vertex.setIdentifier(jsonGraphVertex.getIdentifier());
+
+        return vertex;
+    }
+
+    private static MaskMethodEdge map(JsonGraphEdge edge) {
+        return new MaskMethodEdge(edge.getResultName(), edge.getParameterName());
     }
 }

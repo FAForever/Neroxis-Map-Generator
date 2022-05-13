@@ -1,4 +1,4 @@
-package com.faforever.neroxis.map;
+package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
 import lombok.Data;
@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 @CompiledJson
 public strictfp class TerrainMaterials {
-
     // engine limitations - must stay 9 and 10 always
     public static final int TERRAIN_TEXTURE_COUNT = 10;
     public static final int TERRAIN_NORMAL_COUNT = 9;

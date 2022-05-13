@@ -8,7 +8,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Defines the requirements for a perimeter function.
  */
 public interface Perimeter {
-
     /**
      * Implements a perimeter function.
      *

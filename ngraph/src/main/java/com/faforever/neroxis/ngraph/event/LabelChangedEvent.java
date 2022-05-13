@@ -7,7 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class LabelChangedEvent extends EventObject {
-
     ICell cell;
     Object value;
     java.util.EventObject event;

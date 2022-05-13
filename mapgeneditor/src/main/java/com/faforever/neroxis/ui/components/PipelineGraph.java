@@ -8,7 +8,7 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import com.faforever.neroxis.util.MaskReflectUtil;
+import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import com.github.therapi.runtimejavadoc.MethodJavadoc;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +29,6 @@ import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
 public class PipelineGraph extends Graph implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge>, Iterable<MaskGraphVertex<?>>, org.jgrapht.Graph<MaskGraphVertex<?>, MaskMethodEdge> {
-
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag = new DirectedAcyclicGraph<>(
             MaskMethodEdge.class);
     private final ListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> listenableGraph = new DefaultListenableGraph<>(
@@ -167,6 +166,11 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         addVisualVertexIfNecessary(e.getVertex());
     }
 
+    @Override
+    public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+        removeVisualVertex(e.getVertex());
+    }
+
     private void addVisualVertexIfNecessary(MaskGraphVertex<?> vertex) {
         ICell cell = getCellForVertex(vertex);
         if (cell == null) {
@@ -195,11 +199,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     private double getSubCellHeight(int numMaskParameters) {
         return (heightFactor - heightPadding) * baseSize / numMaskParameters;
-    }
-
-    @Override
-    public void vertexRemoved(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
-        removeVisualVertex(e.getVertex());
     }
 
     private void removeVisualVertex(MaskGraphVertex<?> vertex) {
@@ -240,9 +239,9 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     }
 
     @Override
-    public boolean isValidConnection(ICell source, ICell target) {
-        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(
-                target).isMaskParameterSet((String) source.getValue());
+    public boolean addEdge(MaskGraphVertex<?> sourceVertex, MaskGraphVertex<?> targetVertex,
+                           MaskMethodEdge maskMethodEdge) {
+        return listenableGraph.addEdge(sourceVertex, targetVertex, maskMethodEdge);
     }
 
     @Override
@@ -365,6 +364,12 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         listenableGraph.setEdgeWeight(maskMethodEdge, weight);
     }
 
+    @Override
+    public boolean isValidConnection(ICell source, ICell target) {
+        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(
+                target).isMaskParameterSet((String) source.getValue());
+    }
+
     /**
      * Returns true if the given cell is a valid source for new connections.
      * This implementation returns true for all non-null values and is
@@ -406,7 +411,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             return "";
         }
 
-        MethodJavadoc javadoc = MaskReflectUtil.getJavadoc(vertex.getExecutable());
+        MethodJavadoc javadoc = MaskGraphReflectUtil.getJavadoc(vertex.getExecutable());
         String parametersJavadoc = javadoc.getParams()
                                           .stream()
                                           .map(paramJavadoc -> String.format("%s - %s", paramJavadoc.getName(),
@@ -488,12 +493,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
                         .forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)),
                                                           vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
         return subGraph;
-    }
-
-    @Override
-    public boolean addEdge(MaskGraphVertex<?> sourceVertex, MaskGraphVertex<?> targetVertex,
-                           MaskMethodEdge maskMethodEdge) {
-        return listenableGraph.addEdge(sourceVertex, targetVertex, maskMethodEdge);
     }
 
     public void addGraph(PipelineGraph graph) {

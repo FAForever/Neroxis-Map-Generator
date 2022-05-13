@@ -13,7 +13,6 @@ import lombok.Data;
 
 @Data
 public strictfp class Brushes {
-
     public static final List<String> MOUNTAIN_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png", "mountain3.png",
                                                                       "mountain4.png", "mountain5.png", "mountain6.png",
                                                                       "mountain7.png", "mountain8.png", "mountain9.png",

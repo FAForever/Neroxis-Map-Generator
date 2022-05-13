@@ -28,7 +28,6 @@ package com.faforever.neroxis.util.jsquish;
 import lombok.Getter;
 
 public strictfp final class Squish {
-
     private static final ColourSet colours = new ColourSet();
 
     private Squish() {

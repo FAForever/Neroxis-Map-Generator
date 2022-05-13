@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UndoableEdit {
-
     /**
      * Holds the source of the undoable edit.
      */

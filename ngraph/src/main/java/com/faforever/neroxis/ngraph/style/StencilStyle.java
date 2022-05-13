@@ -11,7 +11,6 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class StencilStyle implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private boolean flipHorizontal;
     private boolean flipVertical;

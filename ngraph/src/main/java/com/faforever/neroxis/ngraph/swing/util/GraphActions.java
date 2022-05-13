@@ -14,7 +14,6 @@ import javax.swing.Action;
  *
  */
 public class GraphActions {
-
     static final Action deleteAction = new DeleteAction("delete");
     static final Action editAction = new EditAction("edit");
     static final Action groupAction = new GroupAction("group");
@@ -222,7 +221,6 @@ public class GraphActions {
     }
 
     public static class EditAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 4610112721356742702L;
 
@@ -239,7 +237,6 @@ public class GraphActions {
     }
 
     public static class DeleteAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = -8212339796803275529L;
 
@@ -258,7 +255,6 @@ public class GraphActions {
     }
 
     public static class GroupAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
@@ -281,7 +277,6 @@ public class GraphActions {
     }
 
     public static class UngroupAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 2247770767961318251L;
 
@@ -300,7 +295,6 @@ public class GraphActions {
     }
 
     public static class RemoveFromParentAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 7169443038859140811L;
 
@@ -319,7 +313,6 @@ public class GraphActions {
     }
 
     public static class UpdateGroupBoundsAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = -4718086600089409092L;
 
@@ -342,7 +335,6 @@ public class GraphActions {
     }
 
     public static class LayerAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 562519299806253741L;
 
@@ -362,7 +354,6 @@ public class GraphActions {
     }
 
     public static class FoldAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 4078517503905239901L;
 
@@ -382,7 +373,6 @@ public class GraphActions {
     }
 
     public static class DrillAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 5464382323663870291L;
 
@@ -409,7 +399,6 @@ public class GraphActions {
     }
 
     public static class ZoomAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = -7500195051313272384L;
 
@@ -437,7 +426,6 @@ public class GraphActions {
     }
 
     public static class SelectAction extends AbstractAction {
-
         @Serial
         private static final long serialVersionUID = 6501585024845668187L;
 

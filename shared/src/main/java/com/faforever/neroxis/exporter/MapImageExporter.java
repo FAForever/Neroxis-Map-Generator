@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Random;
 
 public strictfp class MapImageExporter {
-
     public static boolean DEBUG = false;
     private Path inMapPath;
     private SCMap map;

@@ -47,7 +47,6 @@ import java.util.Set;
  * cells that have been passed to layoutCells.
  */
 public class LayoutManager extends EventSource {
-
     /**
      * Defines the type of the source or target terminal. The type is a string
      * passed to Cell.is to check if the rule applies to a cell.

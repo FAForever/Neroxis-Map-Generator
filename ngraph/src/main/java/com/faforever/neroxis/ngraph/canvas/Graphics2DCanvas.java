@@ -52,7 +52,6 @@ import javax.swing.CellRendererPane;
  * An implementation of a canvas that uses Graphics2D for painting.
  */
 public class Graphics2DCanvas extends BasicCanvas {
-
     public static final double LINE_ARCSIZE = 10;
     public static final String TEXT_SHAPE_DEFAULT = "default";
     public static final String TEXT_SHAPE_HTML = "html";
@@ -175,6 +174,28 @@ public class Graphics2DCanvas extends BasicCanvas {
         return shape;
     }
 
+    @Override
+    public Object drawLabel(String text, CellState state) {
+        Style style = state.getStyle();
+        ITextShape shape = style.getLabel().getTextShape();
+        if (graphics2D != null && shape != null && drawLabels && text != null && text.length() > 0) {
+            // Creates a temporary graphics instance for drawing this shape
+            float opacity = style.getLabel().getTextOpacity();
+            Graphics2D previousGraphics = graphics2D;
+            graphics2D = createTemporaryGraphics(style, opacity, null);
+            // Draws the label background and border
+            Color bg = style.getLabel().getBackgroundColor();
+            Color border = style.getLabel().getBorderColor();
+            paintRectangle(state.getLabelBounds().getRectangle(), bg, border);
+            // Paints the label and restores the graphics object
+            shape.paintShape(this, text, state, style);
+            graphics2D.dispose();
+            graphics2D = previousGraphics;
+        }
+
+        return shape;
+    }
+
     public IShape getShape(Style style) {
         return style.getShape().getShape();
     }
@@ -197,28 +218,6 @@ public class Graphics2DCanvas extends BasicCanvas {
         }
 
         return temporaryGraphics;
-    }
-
-    @Override
-    public Object drawLabel(String text, CellState state) {
-        Style style = state.getStyle();
-        ITextShape shape = style.getLabel().getTextShape();
-        if (graphics2D != null && shape != null && drawLabels && text != null && text.length() > 0) {
-            // Creates a temporary graphics instance for drawing this shape
-            float opacity = style.getLabel().getTextOpacity();
-            Graphics2D previousGraphics = graphics2D;
-            graphics2D = createTemporaryGraphics(style, opacity, null);
-            // Draws the label background and border
-            Color bg = style.getLabel().getBackgroundColor();
-            Color border = style.getLabel().getBorderColor();
-            paintRectangle(state.getLabelBounds().getRectangle(), bg, border);
-            // Paints the label and restores the graphics object
-            shape.paintShape(this, text, state, style);
-            graphics2D.dispose();
-            graphics2D = previousGraphics;
-        }
-
-        return shape;
     }
 
     public void drawImage(java.awt.Rectangle bounds, String imageUrl) {

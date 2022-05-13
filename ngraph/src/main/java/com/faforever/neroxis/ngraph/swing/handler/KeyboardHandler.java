@@ -17,7 +17,6 @@ import javax.swing.UIManager;
  * @author Administrator
  */
 public class KeyboardHandler {
-
     /**
      *
      */

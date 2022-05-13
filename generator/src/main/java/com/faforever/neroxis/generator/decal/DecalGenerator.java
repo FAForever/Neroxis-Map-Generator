@@ -10,7 +10,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 
 public abstract strictfp class DecalGenerator extends ElementGenerator {
-
     protected DecalPlacer decalPlacer;
     protected FloatMask slope;
     protected BooleanMask passableLand;

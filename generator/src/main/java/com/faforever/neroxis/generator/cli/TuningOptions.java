@@ -6,7 +6,6 @@ import picocli.CommandLine;
 
 @Getter
 public class TuningOptions {
-
     @CommandLine.ArgGroup(order = 2, heading = "Options to set the generated map visibility%n")
     private VisibilityOptions visibilityOptions;
     @CommandLine.ArgGroup(order = 1, heading = "Options to manually tune map generation%n", exclusive = false)

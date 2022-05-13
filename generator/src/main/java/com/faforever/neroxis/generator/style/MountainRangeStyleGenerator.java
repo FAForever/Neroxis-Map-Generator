@@ -13,7 +13,6 @@ import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class MountainRangeStyleGenerator extends StyleGenerator {
-
     public MountainRangeStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.75f, 1f)

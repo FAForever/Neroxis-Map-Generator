@@ -16,7 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EdgeLabelLayout extends GraphLayout {
-
     /**
      * Constructs a new stack layout layout for the specified graph,
      * spacing, orientation and offset.

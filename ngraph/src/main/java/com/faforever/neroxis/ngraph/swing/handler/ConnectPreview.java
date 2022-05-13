@@ -28,7 +28,6 @@ import java.util.List;
  * icon, while the preview is used to draw the line.
  */
 public class ConnectPreview extends EventSource {
-
     protected GraphComponent graphComponent;
     protected CellState previewState;
     protected CellState sourceState;

@@ -9,7 +9,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class CellsResizedEvent extends EventObject {
-
     List<ICell> cells;
     RectangleDouble[] bounds;
 }

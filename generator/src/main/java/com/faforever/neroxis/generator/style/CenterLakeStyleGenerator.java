@@ -12,7 +12,6 @@ import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class CenterLakeStyleGenerator extends StyleGenerator {
-
     public CenterLakeStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .5f)

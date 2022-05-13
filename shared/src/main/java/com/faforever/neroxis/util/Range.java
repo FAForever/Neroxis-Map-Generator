@@ -5,7 +5,6 @@ import lombok.Value;
 
 @Value
 public strictfp class Range {
-
     float min;
     float max;
     float range;

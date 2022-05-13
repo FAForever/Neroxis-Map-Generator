@@ -20,7 +20,6 @@ import java.util.List;
  * bubbling is true.
  */
 public class SwimlaneManager extends EventSource {
-
     /**
      * Defines the type of the source or target terminal. The type is a string
      * passed to Cell.is to check if the rule applies to a cell.

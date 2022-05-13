@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LostFocusListener implements FocusListener {
-
     private final Runnable lostFocusRunnable;
 
     @Override

@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 public strictfp class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator {
-
     public MountainRangeTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.75f, 1f)

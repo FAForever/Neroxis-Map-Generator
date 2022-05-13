@@ -14,7 +14,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class UnitPlacerTest {
-
     @Test
     public void maxUnitsPlacedTest() {
         Group group = new Group("TestGroup", new ArrayList<>());

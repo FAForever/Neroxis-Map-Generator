@@ -73,7 +73,6 @@ import java.util.stream.Collectors;
  * <code>edit</code> property contains the current UndoableEdit.
  */
 public class GraphModel extends EventSource implements IGraphModel, Serializable {
-
     private static final Logger log = Logger.getLogger(GraphModel.class.getName());
     /**
      * Holds the root cell, which in turn contains the cells that represent the
@@ -1373,8 +1372,6 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
             endUpdate();
         }
     }
-
-
 
     /**
      * Initializes the currentEdit field if the model is deserialized.

@@ -34,7 +34,6 @@ import static java.lang.Math.sqrt;
 import java.util.Arrays;
 
 final strictfp class Matrix {
-
     private static final float FLT_EPSILON = 0.00001f;
     private static final float[] m = new float[6];
     private static final float[] u = new float[6];

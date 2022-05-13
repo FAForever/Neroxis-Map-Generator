@@ -7,7 +7,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class TranslateEvent extends EventObject {
-
     PointDouble translate;
     PointDouble previousTranslate;
 }

@@ -12,7 +12,6 @@ import java.util.List;
  * respects port constraints
  */
 public class OrthConnectorEdgeStyleFunction implements EdgeStyleFunction {
-
     private static final SegmentConnectorEdgeStyleFunction SEGMENT_CONNECTOR_EDGE_STYLE = new SegmentConnectorEdgeStyleFunction();
     private static final double ORTH_BUFFER = 10;
     private static final double[][] DIR_VECTORS = new double[][]{{-1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 0}};

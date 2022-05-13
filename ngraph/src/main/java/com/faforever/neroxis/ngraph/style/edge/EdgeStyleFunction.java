@@ -8,7 +8,6 @@ import java.util.List;
  * Defines the requirements for an edge style function.
  */
 public interface EdgeStyleFunction {
-
     /**
      * Implements an edge style function. At the time the function is called, the result
      * array contains a placeholder (null) for the first absolute point,

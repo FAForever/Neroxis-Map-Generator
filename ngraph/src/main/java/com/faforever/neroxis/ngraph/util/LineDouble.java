@@ -10,7 +10,6 @@ import java.io.Serial;
  * Implements a line with double precision coordinates.
  */
 public class LineDouble extends Line2D.Double {
-
     @Serial
     private static final long serialVersionUID = -4730972599169158546L;
 

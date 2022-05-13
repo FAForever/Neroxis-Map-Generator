@@ -13,7 +13,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class MapMaskMethods {
-
     private MapMaskMethods() {
     }
 

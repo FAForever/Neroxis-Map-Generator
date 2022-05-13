@@ -31,7 +31,6 @@ import picocli.CommandLine;
 
 @CommandLine.Command(name = "Editor", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Tool for creating generator pipelines")
 public strictfp class PipelineEditor implements Callable<Integer> {
-
     private final JFrame frame = new JFrame();
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
     private final EntryPanel entryPanel = new EntryPanel();

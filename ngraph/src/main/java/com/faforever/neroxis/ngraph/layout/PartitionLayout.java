@@ -13,7 +13,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PartitionLayout extends GraphLayout {
-
     /**
      * Boolean indicating the direction in which the space is partitioned.
      * Default is true.

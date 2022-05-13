@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
 @Repeatable(GraphParameter.GraphParameters.class)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public strictfp @interface GraphParameter {
-
     String name();
 
     String value() default "";
@@ -22,7 +21,6 @@ public strictfp @interface GraphParameter {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
     strictfp @interface GraphParameters {
-
         GraphParameter[] value();
     }
 }

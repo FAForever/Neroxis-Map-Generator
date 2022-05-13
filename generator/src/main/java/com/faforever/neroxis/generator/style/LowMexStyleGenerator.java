@@ -18,7 +18,6 @@ import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class LowMexStyleGenerator extends StyleGenerator {
-
     public LowMexStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .mexDensity(0f, .25f)

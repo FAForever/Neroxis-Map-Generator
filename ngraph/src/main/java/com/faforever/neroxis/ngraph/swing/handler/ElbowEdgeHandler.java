@@ -18,7 +18,6 @@ import java.util.List;
  * @author Administrator
  */
 public class ElbowEdgeHandler extends EdgeHandler {
-
     /**
      *
      */

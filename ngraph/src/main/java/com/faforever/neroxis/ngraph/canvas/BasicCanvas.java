@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class BasicCanvas implements ICanvas {
-
     /**
      * Specifies if image aspect should be preserved in drawImage. Default is true.
      */

@@ -11,7 +11,6 @@ import lombok.Value;
 @SuppressWarnings({"unused"})
 @Value
 public strictfp class ParameterConstraints {
-
     Range landDensityRange;
     Range mountainDensityRange;
     Range plateauDensityRange;
@@ -92,7 +91,6 @@ public strictfp class ParameterConstraints {
     }
 
     public static class ParameterConstraintsBuilder {
-
         Range landDensityRange = Range.of(0, 1);
         Range mountainDensityRange = Range.of(0, 1);
         Range plateauDensityRange = Range.of(0, 1);

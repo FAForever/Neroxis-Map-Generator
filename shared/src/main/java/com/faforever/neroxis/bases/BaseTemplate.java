@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.LuaLoader;
-import com.faforever.neroxis.util.serial.SCUnitSet;
+import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -18,14 +18,8 @@ import org.luaj.vm2.LuaValue;
 
 @Value
 public strictfp class BaseTemplate {
-
     Vector2 center;
     LinkedHashMap<String, LinkedHashSet<Vector2>> units;
-
-    public BaseTemplate(Vector2 center, String templateFile) throws IOException {
-        this.center = center;
-        this.units = BaseTemplate.loadUnits(templateFile);
-    }
 
     public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String file) throws IOException {
         if (file.endsWith(".lua")) {
@@ -54,11 +48,6 @@ public strictfp class BaseTemplate {
             }
         }
         return units;
-    }
-
-    public BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
-        this.center = center;
-        this.units = units;
     }
 
     private static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnitsFromSCUnits(

@@ -13,7 +13,6 @@ import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class LittleMountainStyleGenerator extends StyleGenerator {
-
     public LittleMountainStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.5f, 1f)

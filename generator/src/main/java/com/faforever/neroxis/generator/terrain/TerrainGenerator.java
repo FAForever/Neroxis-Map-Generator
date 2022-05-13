@@ -12,7 +12,6 @@ import lombok.Getter;
 
 @Getter
 public abstract strictfp class TerrainGenerator extends ElementGenerator {
-
     protected FloatMask heightmap;
     protected BooleanMask impassable;
     protected BooleanMask unbuildable;
@@ -38,6 +37,19 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         passableSetup();
     }
 
+    @Override
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
+        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
+        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
+        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", true);
+        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
+        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
+        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
+    }
+
     protected abstract void terrainSetup();
 
     protected void passableSetup() {
@@ -57,18 +69,5 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
         passable.fillEdge(8, false);
         passableLand.multiply(passable);
         passableWater.deflate(16).fillEdge(8, false);
-    }
-
-    @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
-        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
-        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
-        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", true);
-        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
-        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
-        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
     }
 }

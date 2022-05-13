@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public strictfp class BiomeExtractor {
-
     Path folderPath = Paths.get(".");
     Path mapPath;
     Path envPath;

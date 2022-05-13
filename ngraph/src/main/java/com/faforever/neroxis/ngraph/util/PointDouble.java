@@ -10,7 +10,6 @@ import java.io.Serial;
  * Extends awt point with double precision coordinates.
  */
 public class PointDouble extends Point2D.Double {
-
     @Serial
     private static final long serialVersionUID = 6554231393215892186L;
 

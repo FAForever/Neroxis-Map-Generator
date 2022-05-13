@@ -1,4 +1,4 @@
-package com.faforever.neroxis.util.serial;
+package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
 import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_COUNT;
@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @Data
 @CompiledJson
 public strictfp class WaterSettings {
-
     private boolean WaterPresent;
     private float Elevation;
     private float ElevationDeep;
@@ -56,7 +55,6 @@ public strictfp class WaterSettings {
     @AllArgsConstructor
     @NoArgsConstructor
     public static strictfp class WaveTexture {
-
         private String TexPath;
         private Vector2 NormalMovement;
         private float NormalRepeat;

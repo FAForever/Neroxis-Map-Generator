@@ -12,7 +12,6 @@ import lombok.Getter;
 
 @Getter
 public abstract strictfp class PropGenerator extends ElementGenerator {
-
     protected UnitPlacer unitPlacer;
     protected PropPlacer propPlacer;
     protected BooleanMask impassable;

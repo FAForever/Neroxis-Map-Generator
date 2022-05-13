@@ -7,6 +7,5 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class FlipEdgeEvent extends EventObject {
-
     ICell edge;
 }

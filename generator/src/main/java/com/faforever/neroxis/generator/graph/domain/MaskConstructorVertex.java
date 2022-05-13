@@ -9,7 +9,6 @@ import lombok.Getter;
 
 @Getter
 public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
-
     public MaskConstructorVertex(Constructor<? extends Mask<?, ?>> executable) {
         super(executable, executable.getDeclaringClass());
     }

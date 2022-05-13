@@ -6,7 +6,6 @@ import picocli.CommandLine;
 
 @Getter
 public class LocationOptions {
-
     private final Vector2 location = new Vector2();
 
     @CommandLine.Option(names = "--x", required = true, description = "x-coordinate")

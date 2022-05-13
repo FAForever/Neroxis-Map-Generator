@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
-
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {

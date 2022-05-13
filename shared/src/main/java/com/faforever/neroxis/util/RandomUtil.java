@@ -3,7 +3,6 @@ package com.faforever.neroxis.util;
 import java.util.Random;
 
 public strictfp class RandomUtil {
-
     public static boolean andRandomBoolean(Random random, int numToAnd) {
         for (int i = 0; i < numToAnd; i++) {
             if (!random.nextBoolean()) {

@@ -9,7 +9,6 @@ import com.faforever.neroxis.ngraph.model.ICell;
  * Defines the requirements for an object that implements a graph layout.
  */
 public interface IGraphLayout {
-
     /**
      * Executes the layout for the children of the specified parent.
      *

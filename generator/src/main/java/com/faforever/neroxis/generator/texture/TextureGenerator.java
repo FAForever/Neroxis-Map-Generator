@@ -12,7 +12,6 @@ import lombok.Getter;
 
 @Getter
 public abstract strictfp class TextureGenerator extends ElementGenerator {
-
     protected FloatMask heightmap;
     protected FloatMask slope;
     protected NormalMask normals;

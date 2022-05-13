@@ -22,7 +22,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class GraphLayout implements IGraphLayout {
-
     /**
      * Holds the enclosing graph.
      */

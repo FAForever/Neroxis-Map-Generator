@@ -6,7 +6,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class ScaleEvent extends EventObject {
-
     double scale;
     double previousScale;
 }

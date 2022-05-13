@@ -17,7 +17,6 @@ import java.awt.Shape;
 import java.awt.image.ImageObserver;
 
 public class InteractiveCanvas extends Graphics2DCanvas {
-
     protected ImageObserver imageObserver = null;
 
     public InteractiveCanvas() {

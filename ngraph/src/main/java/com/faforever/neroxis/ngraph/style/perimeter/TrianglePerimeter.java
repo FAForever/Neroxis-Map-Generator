@@ -10,7 +10,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * Describes a triangle perimeter.
  */
 public class TrianglePerimeter implements Perimeter {
-
     @Override
     public PointDouble apply(RectangleDouble bounds, CellState vertex, PointDouble next, boolean orthogonal) {
         Object direction = (vertex != null) ? vertex.getStyle().getShape().getDirection() : Constants.DIRECTION_EAST;

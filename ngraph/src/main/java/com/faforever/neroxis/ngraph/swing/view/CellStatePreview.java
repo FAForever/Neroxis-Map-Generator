@@ -27,7 +27,6 @@ import java.util.Map;
  * Represents the current state of a cell in a given graph view.
  */
 public class CellStatePreview {
-
     protected Map<CellState, PointDouble> deltas = new LinkedHashMap<CellState, PointDouble>();
     protected int count = 0;
     protected GraphComponent graphComponent;

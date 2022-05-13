@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
-
     protected BooleanMask civReclaimMask;
     protected BooleanMask noCivs;
 
@@ -26,12 +25,6 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
         civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
 
         noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings);
-    }
-
-    @Override
-    protected void generatePropExclusionMasks() {
-        super.generatePropExclusionMasks();
-        noProps.add(civReclaimMask.getFinalMask());
     }
 
     @Override
@@ -53,6 +46,12 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
                 }
             });
         }
+    }
+
+    @Override
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(civReclaimMask.getFinalMask());
     }
 
     @Override

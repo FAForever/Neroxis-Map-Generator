@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Random;
 
 public strictfp class ImageGenerator {
-
     public static boolean DEBUG = false;
     private String folderPath;
     private int size = 512;

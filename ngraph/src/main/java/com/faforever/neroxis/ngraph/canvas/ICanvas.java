@@ -11,7 +11,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
  * a graph.
  */
 public interface ICanvas {
-
     /**
      * Sets the translation for the following drawing requests.
      */

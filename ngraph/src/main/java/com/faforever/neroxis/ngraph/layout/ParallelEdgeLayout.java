@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ParallelEdgeLayout extends GraphLayout {
-
     /**
      * Specifies the spacing between the edges. Default is 20.
      */

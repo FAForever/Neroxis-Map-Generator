@@ -32,7 +32,6 @@ import static java.lang.Math.round;
 import java.util.Arrays;
 
 final strictfp class ColourBlock {
-
     private static final int[] remapped = new int[16];
     private static final int[] indices = new int[16];
     private static final int[] codes = new int[16];

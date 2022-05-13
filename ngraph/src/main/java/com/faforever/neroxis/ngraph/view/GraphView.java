@@ -71,7 +71,6 @@ import java.util.stream.Collectors;
  * respectively.
  */
 public class GraphView extends EventSource {
-
     private static final PointDouble EMPTY_POINT = new PointDouble();
     /**
      * Reference to the enclosing graph.
@@ -1407,7 +1406,6 @@ public class GraphView extends EventSource {
      * Action to change the current root in a view.
      */
     public static class CurrentRootChange implements UndoableChange {
-
         protected GraphView view;
         protected ICell root, previous;
         protected boolean up;

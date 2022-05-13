@@ -25,7 +25,6 @@ import java.util.List;
  * icon, while the preview is used to draw the line.
  */
 public class MovePreview extends EventSource {
-
     protected GraphComponent graphComponent;
     /**
      * Maximum number of cells to preview individually. Default is 200.

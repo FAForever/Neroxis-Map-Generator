@@ -10,7 +10,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicPropGenerator extends PropGenerator {
-
     protected BooleanMask treeMask;
     protected BooleanMask cliffRockMask;
     protected BooleanMask fieldStoneMask;
@@ -30,6 +29,10 @@ public strictfp class BasicPropGenerator extends PropGenerator {
     public void placeProps() {
         generatePropExclusionMasks();
         placePropsWithExclusion();
+    }
+
+    @Override
+    public void placeUnits() {
     }
 
     protected void generatePropExclusionMasks() {
@@ -54,10 +57,6 @@ public strictfp class BasicPropGenerator extends PropGenerator {
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
                                   biome.getPropMaterials().getBoulders(), 30f);
         });
-    }
-
-    @Override
-    public void placeUnits() {
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.faforever.neroxis.util.vector;
 import java.util.LinkedHashSet;
 
 public strictfp class Vector3 extends Vector<Vector3> {
-
     public Vector3() {
         super(3);
     }
@@ -14,6 +13,10 @@ public strictfp class Vector3 extends Vector<Vector3> {
 
     public Vector3(Vector2 other) {
         this(other.getX(), 0f, other.getY());
+    }
+
+    public Vector3(float x, float y, float z) {
+        super(x, y, z);
     }
 
     public float getX() {
@@ -38,10 +41,6 @@ public strictfp class Vector3 extends Vector<Vector3> {
 
     public void setZ(float z) {
         components[Vector.Z] = z;
-    }
-
-    public Vector3(float x, float y, float z) {
-        super(x, y, z);
     }
 
     public Vector3 cross(Vector3 other) {

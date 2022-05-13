@@ -26,7 +26,6 @@ import java.util.Map;
  * Constants.DEFAULT_FONTSIZE.
  */
 public class Stylesheet {
-
     /**
      * Maps from names to styles.
      */

@@ -6,7 +6,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class StringTableCellRenderer<T> extends DefaultTableCellRenderer {
-
     private final Function<T, String> stringConverter;
 
     public StringTableCellRenderer(Function<T, String> stringConverter) {

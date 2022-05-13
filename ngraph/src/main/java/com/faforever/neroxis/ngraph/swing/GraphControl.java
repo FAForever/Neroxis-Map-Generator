@@ -24,7 +24,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 public class GraphControl extends JComponent {
-
     @Serial
     private static final long serialVersionUID = -8916603170766739124L;
     private final GraphComponent graphComponent;

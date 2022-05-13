@@ -90,7 +90,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrganicLayout extends GraphLayout {
-
     /**
      * Whether or not the distance between edge and nodes will be calculated
      * as an energy cost function. This function is CPU intensive and is best
@@ -1075,7 +1074,6 @@ public class OrganicLayout extends GraphLayout {
     @Getter
     @Setter
     public static class CellWrapper {
-
         /**
          * The actual graph cell this wrapper represents
          */

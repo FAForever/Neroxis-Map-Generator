@@ -4,14 +4,14 @@ import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import static com.faforever.neroxis.util.ImageUtil.readImage;
 import static com.faforever.neroxis.util.ImageUtil.scaleImage;
-import com.faforever.neroxis.util.serial.LightingSettings;
-import com.faforever.neroxis.util.serial.WaterSettings;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.TexturePaint;
@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 
 public strictfp class PreviewGenerator {
-
     public static final int PREVIEW_SIZE = 256;
     public static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";

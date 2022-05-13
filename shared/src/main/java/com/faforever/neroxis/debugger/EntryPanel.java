@@ -21,7 +21,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.MouseInputAdapter;
 
 public class EntryPanel extends JPanel {
-
     private final JLabel titleLabel = new JLabel();
     private final JLabel valueLabel = new JLabel();
     private final ImagePanel imagePanel = new ImagePanel();
@@ -68,7 +67,6 @@ public class EntryPanel extends JPanel {
     }
 
     private class ImagePanel extends JPanel {
-
         private final Vector2 lastMousePosition = new Vector2();
         private final Vector2 fractionalImageOffset = new Vector2();
         private final Vector2 imageZoomFactor = new Vector2();
@@ -156,7 +154,6 @@ public class EntryPanel extends JPanel {
         }
 
         private class CanvasMouseListener extends MouseInputAdapter {
-
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (mask != null) {
@@ -170,10 +167,6 @@ public class EntryPanel extends JPanel {
                     boundOffset();
                     repaint();
                 }
-            }
-
-            private void boundOffset() {
-                fractionalImageOffset.min(0).max(1 / getUserScaleFactor() - 1);
             }
 
             @Override
@@ -194,6 +187,10 @@ public class EntryPanel extends JPanel {
             public void mouseMoved(MouseEvent e) {
                 lastMousePosition.set(e.getPoint());
                 setValueLabel();
+            }
+
+            private void boundOffset() {
+                fractionalImageOffset.min(0).max(1 / getUserScaleFactor() - 1);
             }
         }
     }

@@ -12,7 +12,6 @@ import java.awt.Rectangle;
 import java.util.Objects;
 
 public class RectangleShape extends BasicShape {
-
     public static final double RECTANGLE_ROUNDING_FACTOR = 0.15;
 
     @Override

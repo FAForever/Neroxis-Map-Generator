@@ -10,7 +10,6 @@ import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
 import java.util.Arrays;
 
 public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
-
     public SmallIslandsStyleGenerator() {
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()

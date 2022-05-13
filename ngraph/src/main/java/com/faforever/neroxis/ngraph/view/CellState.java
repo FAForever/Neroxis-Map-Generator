@@ -19,7 +19,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CellState extends RectangleDouble {
-
     @Serial
     private static final long serialVersionUID = 7588335615324083354L;
     /**

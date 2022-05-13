@@ -11,7 +11,6 @@ import java.util.List;
  * Defines the requirements for a graph model to be used with Graph.
  */
 public interface IGraphModel {
-
     /**
      * Returns the root of the model or the topmost parent of the given cell.
      *

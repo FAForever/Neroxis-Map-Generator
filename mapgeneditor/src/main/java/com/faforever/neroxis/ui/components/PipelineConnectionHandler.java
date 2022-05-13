@@ -10,7 +10,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 public class PipelineConnectionHandler extends ConnectionHandler {
-
     private final PipelineGraphComponent pipelineGraphComponent;
 
     public PipelineConnectionHandler(PipelineGraphComponent graphComponent) {

@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class RootChange extends AtomicGraphModelChange {
-
     /**
      * Holds the new and previous root cell.
      */

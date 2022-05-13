@@ -43,7 +43,6 @@ import javax.swing.JOptionPane;
  */
 @SuppressWarnings("unused")
 public class ConnectionHandler extends MouseAdapter {
-
     private static final long serialVersionUID = -2543899557644889853L;
     public static Cursor CONNECT_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     protected GraphComponent graphComponent;
@@ -326,19 +325,6 @@ public class ConnectionHandler extends MouseAdapter {
         }
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean value) {
-        enabled = value;
-    }
-
-    public void start(MouseEvent e, CellState state) {
-        first = e.getPoint();
-        connectPreview.start(e, state, "");
-    }
-
     @Override
     public void mouseReleased(MouseEvent e) {
         if (isActive()) {
@@ -469,6 +455,19 @@ public class ConnectionHandler extends MouseAdapter {
             graphComponent.getGraphControl().setCursor(CONNECT_CURSOR);
             e.consume();
         }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean value) {
+        enabled = value;
+    }
+
+    public void start(MouseEvent e, CellState state) {
+        first = e.getPoint();
+        connectPreview.start(e, state, "");
     }
 
     public boolean isActive() {

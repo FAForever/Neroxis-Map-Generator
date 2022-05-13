@@ -20,7 +20,6 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public class LabelStyle implements PropertyChangeListener {
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private WhiteSpace whiteSpace = WhiteSpace.NO_WRAP;
     private Overflow overflow = Overflow.VISIBLE;

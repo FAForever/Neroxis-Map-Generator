@@ -123,7 +123,6 @@ import javax.swing.TransferHandler;
  */
 @SuppressWarnings("unused")
 public class GraphComponent extends JScrollPane implements Printable {
-
     public static final int GRID_STYLE_DOT = 0;
     public static final int GRID_STYLE_CROSS = 1;
     public static final int GRID_STYLE_LINE = 2;
@@ -612,6 +611,41 @@ public class GraphComponent extends JScrollPane implements Printable {
         return graph;
     }
 
+    public void setGraph(Graph value) {
+        Graph oldValue = graph;
+        // Uninstalls listeners for existing graph
+        if (graph != null) {
+            graph.removeListener(repaintHandler);
+            graph.getModel().removeListener(updateHandler);
+            graph.getView().removeListener(updateHandler);
+            graph.removePropertyChangeListener(viewChangeHandler);
+            graph.getView().removeListener(scaleHandler);
+        }
+        graph = value;
+        // Updates the buffer if the model changes
+        graph.addListener(RepaintEvent.class, repaintHandler);
+        // Installs the update handler to sync the overlays and controls
+        graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) updateHandler);
+        // Repaint after the following events is handled via
+        // Graph.repaint-events
+        // The respective handlers are installed in Graph.setView
+        GraphView view = graph.getView();
+        view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
+        view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
+        view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
+        view.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
+        view.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
+        view.addListener(CellStateEvent.class, cellStateHandler);
+        graph.addPropertyChangeListener(viewChangeHandler);
+        // Resets the zoom policy if the scale changes
+        graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
+        graph.getView()
+             .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
+        // Invoke the update handler once for initial state
+        updateHandler.invoke(graph.getView(), null);
+        firePropertyChange("graph", oldValue, graph);
+    }
+
     public ImageIcon getBackgroundImage() {
         return backgroundImage;
     }
@@ -757,41 +791,6 @@ public class GraphComponent extends JScrollPane implements Printable {
             zoom(zoomPolicy == ZOOM_POLICY_PAGE, true);
         }
         firePropertyChange("zoomPolicy", oldValue, zoomPolicy);
-    }
-
-    public void setGraph(Graph value) {
-        Graph oldValue = graph;
-        // Uninstalls listeners for existing graph
-        if (graph != null) {
-            graph.removeListener(repaintHandler);
-            graph.getModel().removeListener(updateHandler);
-            graph.getView().removeListener(updateHandler);
-            graph.removePropertyChangeListener(viewChangeHandler);
-            graph.getView().removeListener(scaleHandler);
-        }
-        graph = value;
-        // Updates the buffer if the model changes
-        graph.addListener(RepaintEvent.class, repaintHandler);
-        // Installs the update handler to sync the overlays and controls
-        graph.getModel().addListener(ChangeEvent.class, (IEventListener<ChangeEvent>) updateHandler);
-        // Repaint after the following events is handled via
-        // Graph.repaint-events
-        // The respective handlers are installed in Graph.setView
-        GraphView view = graph.getView();
-        view.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
-        view.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
-        view.addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) updateHandler);
-        view.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
-        view.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
-        view.addListener(CellStateEvent.class, cellStateHandler);
-        graph.addPropertyChangeListener(viewChangeHandler);
-        // Resets the zoom policy if the scale changes
-        graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
-        graph.getView()
-             .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
-        // Invoke the update handler once for initial state
-        updateHandler.invoke(graph.getView(), null);
-        firePropertyChange("graph", oldValue, graph);
     }
 
     public boolean isEditEvent(MouseEvent e) {
@@ -1180,6 +1179,18 @@ public class GraphComponent extends JScrollPane implements Printable {
         return pageVisible;
     }
 
+    /**
+     * Fires a property change event for <code>pageVisible</code>. zoomAndCenter
+     * should be called if this is set to true.
+     *
+     * @param value the pageVisible to set
+     */
+    public void setPageVisible(boolean value) {
+        boolean oldValue = pageVisible;
+        pageVisible = value;
+        firePropertyChange("pageVisible", oldValue, pageVisible);
+    }
+
     public boolean isSwimlaneSelectionEnabled() {
         return swimlaneSelectionEnabled;
     }
@@ -1277,18 +1288,6 @@ public class GraphComponent extends JScrollPane implements Printable {
         } else if (!isSelected || graph.getSelectionCount() != 1) {
             graph.setSelectionCell(cell);
         }
-    }
-
-    /**
-     * Fires a property change event for <code>pageVisible</code>. zoomAndCenter
-     * should be called if this is set to true.
-     *
-     * @param value the pageVisible to set
-     */
-    public void setPageVisible(boolean value) {
-        boolean oldValue = pageVisible;
-        pageVisible = value;
-        firePropertyChange("pageVisible", oldValue, pageVisible);
     }
 
     /**
@@ -2736,7 +2735,6 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     public static class MouseRedirector implements MouseListener, MouseMotionListener {
-
         protected GraphComponent graphComponent;
 
         public MouseRedirector(GraphComponent graphComponent) {
@@ -2745,6 +2743,11 @@ public class GraphComponent extends JScrollPane implements Printable {
 
         @Override
         public void mouseDragged(MouseEvent e) {
+            mouseClicked(e);
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
             mouseClicked(e);
         }
 
@@ -2773,11 +2776,6 @@ public class GraphComponent extends JScrollPane implements Printable {
 
         @Override
         public void mouseExited(MouseEvent e) {
-            mouseClicked(e);
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
             mouseClicked(e);
         }
     }

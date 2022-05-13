@@ -10,7 +10,6 @@ import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class NormalMask extends VectorMask<Vector3, NormalMask> {
-
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }

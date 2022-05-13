@@ -8,7 +8,6 @@ import lombok.Value;
 @EqualsAndHashCode(callSuper = true)
 @Value
 public class SplitEdgeEvent extends EventObject {
-
     List<ICell> cells;
     double dx;
     double dy;

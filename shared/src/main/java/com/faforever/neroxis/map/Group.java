@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public strictfp class Group {
-
     private final String id;
     private final ArrayList<Unit> units;
 

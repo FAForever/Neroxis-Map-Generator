@@ -9,7 +9,6 @@ import java.util.Arrays;
  * One dimension of a spline curve
  */
 public class Spline1D {
-
     protected double[] len;
     protected double[] pos1D;
     protected double[] a;

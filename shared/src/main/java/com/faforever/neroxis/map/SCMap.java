@@ -27,7 +27,6 @@ import lombok.SneakyThrows;
 @SuppressWarnings("unused")
 @Data
 public strictfp class SCMap {
-
     public static final int SIGNATURE = 443572557;
     public static final int VERSION_MAJOR = 2;
     public static final int WAVE_NORMAL_COUNT = 4;
@@ -138,15 +137,31 @@ public strictfp class SCMap {
         terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
     }
 
+    private static void checkImageSize(BufferedImage image, int size) {
+        if (image.getWidth() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is "
+                                               + image.getWidth()
+                                               + " required size is "
+                                               + size);
+        }
+    }
+
+    private static void checkMaskSize(Mask<?, ?> mask, int size) {
+        if (mask.getSize() != size) {
+            throw new IllegalArgumentException("Image size does not match required size: Image size is "
+                                               + mask.getSize()
+                                               + " required size is "
+                                               + size);
+        }
+    }
+
     public void setPreview(BufferedImage preview) {
         checkImageSize(preview, 256);
         this.preview = preview;
     }
 
     public AIMarker getAmphibiousMarker(String id) {
-        return amphibiousAIMarkers.stream()
-                                  .filter(amphibiousMarker -> amphibiousMarker.getId().equals(id))
-                                  .findFirst()
+        return amphibiousAIMarkers.stream().filter(amphibiousMarker -> amphibiousMarker.getId().equals(id)).findFirst()
                                   .orElse(null);
     }
 
@@ -593,15 +608,6 @@ public strictfp class SCMap {
         this.waterFlatnessMap = waterFlatnessMap;
     }
 
-    private static void checkImageSize(BufferedImage image, int size) {
-        if (image.getWidth() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is "
-                                               + image.getWidth()
-                                               + " required size is "
-                                               + size);
-        }
-    }
-
     public void setWaterDepthBiasMap(BufferedImage waterDepthBiasMap) {
         checkImageSize(waterDepthBiasMap, size / 2);
         this.waterDepthBiasMap = waterDepthBiasMap;
@@ -622,15 +628,6 @@ public strictfp class SCMap {
                 int val3 = convertToRawTextureValue(mask3.getPrimitive(x, y));
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
-        }
-    }
-
-    private static void checkMaskSize(Mask<?, ?> mask, int size) {
-        if (mask.getSize() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is "
-                                               + mask.getSize()
-                                               + " required size is "
-                                               + size);
         }
     }
 

@@ -26,13 +26,21 @@ import java.util.stream.IntStream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
-
     private float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }
 
+    /**
+     * Create a new float mask
+     *
+     * @param size             Size of the mask
+     * @param seed             Random seed of the mask
+     * @param symmetrySettings symmetrySettings to enforce on the mask
+     * @param name             name of the mask
+     * @param parallel         whether to parallelize mask operations
+     */
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
@@ -537,6 +545,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask blur(int radius) {
         int[][] innerCount = getInnerCount();
         return apply(
@@ -544,6 +553,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -568,7 +578,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public int getImmediateSize() {
+    protected int getImmediateSize() {
         return mask.length;
     }
 
@@ -626,7 +636,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public Float getZeroValue() {
+    protected Float getZeroValue() {
         return 0f;
     }
 
@@ -708,6 +718,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask add(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -722,6 +733,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask add(BooleanMask other, Float value) {
         assertCompatibleMask(other);
         float val = value;
@@ -736,7 +748,8 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
-    public FloatMask add(BooleanMask other, FloatMask value) {
+    @GraphMethod
+    public FloatMask add(BooleanMask other, FloatMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -746,7 +759,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     addPrimitiveAt(x, y, val.getPrimitive(x, y));
                 }
             });
-        }, other, value);
+        }, other, values);
     }
 
     @Override
@@ -770,6 +783,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask subtract(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -779,6 +793,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask subtract(BooleanMask other, Float value) {
         assertCompatibleMask(other);
         float val = value;
@@ -793,6 +808,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask subtract(BooleanMask other, FloatMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -810,11 +826,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask subtractWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center, wrapEdges);
+            applyWithOffset(source, (BiIntFloatConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
         }, other);
     }
 
     @Override
+    @GraphMethod
     public FloatMask multiply(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -829,6 +847,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask multiply(BooleanMask other, Float value) {
         assertCompatibleMask(other);
         float val = value;
@@ -843,6 +862,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask multiply(BooleanMask other, FloatMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -860,11 +880,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask multiplyWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center, wrapEdges);
+            applyWithOffset(source, (BiIntFloatConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center,
+                            wrapEdges);
         }, other);
     }
 
     @Override
+    @GraphMethod
     public FloatMask divide(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -879,6 +901,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask divide(BooleanMask other, Float value) {
         assertCompatibleMask(other);
         float val = value;
@@ -893,6 +916,7 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     @Override
+    @GraphMethod
     public FloatMask divide(BooleanMask other, FloatMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {

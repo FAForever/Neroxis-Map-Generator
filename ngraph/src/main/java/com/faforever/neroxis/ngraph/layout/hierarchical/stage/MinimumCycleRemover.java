@@ -26,7 +26,6 @@ import java.util.Set;
  * longest path calculation of layer assignment
  */
 public class MinimumCycleRemover implements HierarchicalLayoutStage {
-
     /**
      * Reference to the enclosing layout algorithm
      */
@@ -42,6 +41,7 @@ public class MinimumCycleRemover implements HierarchicalLayoutStage {
     /**
      * Produces the layer assignmment using the graph information specified
      */
+    @Override
     public void execute(Object parent) {
         GraphHierarchyModel model = layout.getModel();
         final Set<GraphHierarchyNode> seenNodes = new HashSet<>();

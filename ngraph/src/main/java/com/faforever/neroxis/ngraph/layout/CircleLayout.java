@@ -12,7 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CircleLayout extends GraphLayout {
-
     /**
      * Integer specifying the size of the radius. Default is 100.
      */

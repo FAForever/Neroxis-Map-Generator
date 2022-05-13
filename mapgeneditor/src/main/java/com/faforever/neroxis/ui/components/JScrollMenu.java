@@ -66,17 +66,6 @@ public class JScrollMenu extends JMenu {
         return popupMenu.isVisible();
     }
 
-    /**
-     * Lazily creates the popup menu. This method will create the popup using the <code>JScrollPopupMenu</code> class.
-     */
-    protected void ensurePopupMenuCreated() {
-        if (popupMenu == null) {
-            this.popupMenu = new JScrollPopupMenu();
-            popupMenu.setInvoker(this);
-            popupListener = createWinListener(popupMenu);
-        }
-    }
-
     @Override
     public void setMenuLocation(int x, int y) {
         super.setMenuLocation(x, y);
@@ -233,6 +222,17 @@ public class JScrollMenu extends JMenu {
         super.setComponentOrientation(o);
         if (popupMenu != null) {
             popupMenu.setComponentOrientation(o);
+        }
+    }
+
+    /**
+     * Lazily creates the popup menu. This method will create the popup using the <code>JScrollPopupMenu</code> class.
+     */
+    protected void ensurePopupMenuCreated() {
+        if (popupMenu == null) {
+            this.popupMenu = new JScrollPopupMenu();
+            popupMenu.setInvoker(this);
+            popupListener = createWinListener(popupMenu);
         }
     }
 }

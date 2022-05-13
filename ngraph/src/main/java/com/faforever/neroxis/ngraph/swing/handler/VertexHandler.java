@@ -23,7 +23,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class VertexHandler extends CellHandler {
-
     public static Cursor[] CURSORS = new Cursor[]{new Cursor(Cursor.NW_RESIZE_CURSOR), new Cursor(
             Cursor.N_RESIZE_CURSOR), new Cursor(Cursor.NE_RESIZE_CURSOR), new Cursor(
             Cursor.W_RESIZE_CURSOR), new Cursor(Cursor.E_RESIZE_CURSOR), new Cursor(
@@ -162,6 +161,33 @@ public class VertexHandler extends CellHandler {
         super.mouseReleased(e);
     }
 
+    @Override
+    public void paint(Graphics g) {
+        Rectangle bounds = getState().getRectangle();
+
+        if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {
+            Graphics2D g2 = (Graphics2D) g;
+
+            Stroke stroke = g2.getStroke();
+            g2.setStroke(getSelectionStroke());
+            g.setColor(getSelectionColor());
+            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            g2.setStroke(stroke);
+        }
+
+        super.paint(g);
+    }
+
+    @Override
+    public Color getSelectionColor() {
+        return SwingConstants.VERTEX_SELECTION_COLOR;
+    }
+
+    @Override
+    public Stroke getSelectionStroke() {
+        return SwingConstants.VERTEX_SELECTION_STROKE;
+    }
+
     protected void moveLabel(MouseEvent e) {
         Graph graph = graphComponent.getGraph();
         Geometry geometry = graph.getModel().getGeometry(state.getCell());
@@ -237,33 +263,6 @@ public class VertexHandler extends CellHandler {
                 graph.resizeCell(cell, new RectangleDouble(rect));
             }
         }
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        Rectangle bounds = getState().getRectangle();
-
-        if (g.hitClip(bounds.x, bounds.y, bounds.width, bounds.height)) {
-            Graphics2D g2 = (Graphics2D) g;
-
-            Stroke stroke = g2.getStroke();
-            g2.setStroke(getSelectionStroke());
-            g.setColor(getSelectionColor());
-            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-            g2.setStroke(stroke);
-        }
-
-        super.paint(g);
-    }
-
-    @Override
-    public Color getSelectionColor() {
-        return SwingConstants.VERTEX_SELECTION_COLOR;
-    }
-
-    @Override
-    public Stroke getSelectionStroke() {
-        return SwingConstants.VERTEX_SELECTION_STROKE;
     }
 
     protected RectangleDouble union(RectangleDouble bounds, double dx, double dy, int index) {

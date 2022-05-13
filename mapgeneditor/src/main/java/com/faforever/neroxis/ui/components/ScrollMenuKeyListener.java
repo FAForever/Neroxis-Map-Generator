@@ -7,7 +7,6 @@ import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 
 public class ScrollMenuKeyListener implements MenuKeyListener {
-
     @Override
     public void menuKeyTyped(MenuKeyEvent e) {
     }

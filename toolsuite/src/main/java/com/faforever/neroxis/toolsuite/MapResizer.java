@@ -20,7 +20,6 @@ import static picocli.CommandLine.Spec;
 
 @Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapResizer implements Callable<Integer> {
-
     @Spec
     private CommandLine.Model.CommandSpec spec;
     @Mixin

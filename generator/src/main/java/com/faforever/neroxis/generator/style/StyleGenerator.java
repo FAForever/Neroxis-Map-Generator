@@ -27,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public abstract strictfp class StyleGenerator extends ElementGenerator {
-
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
     protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
@@ -41,6 +40,37 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
     protected float spawnSeparation;
     protected int teamSeparation;
     private SpawnPlacer spawnPlacer;
+
+    public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
+                                                                               GeneratorParameters generatorParameters,
+                                                                               T defaultGenerator) {
+        List<T> matchingGenerators = generators.stream()
+                                               .filter(generator -> generator.getParameterConstraints()
+                                                                             .matches(generatorParameters))
+                                               .collect(Collectors.toList());
+        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
+    }
+
+    private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
+                                                                                    T defaultGenerator) {
+        if (generators.size() > 0) {
+            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
+            List<Float> cumulativeWeights = new ArrayList<>();
+            float sum = 0;
+            for (float weight : weights) {
+                sum += weight;
+                cumulativeWeights.add(sum);
+            }
+            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
+            return cumulativeWeights.stream()
+                                    .filter(weight -> value <= weight)
+                                    .reduce((first, second) -> first)
+                                    .map(weight -> generators.get(cumulativeWeights.indexOf(weight)))
+                                    .orElse(defaultGenerator);
+        } else {
+            return defaultGenerator;
+        }
+    }
 
     public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
@@ -138,37 +168,6 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
         textureGenerator.setupPipeline();
         propGenerator.setupPipeline();
         decalGenerator.setupPipeline();
-    }
-
-    public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
-                                                                               GeneratorParameters generatorParameters,
-                                                                               T defaultGenerator) {
-        List<T> matchingGenerators = generators.stream()
-                                               .filter(generator -> generator.getParameterConstraints()
-                                                                             .matches(generatorParameters))
-                                               .collect(Collectors.toList());
-        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
-    }
-
-    private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
-                                                                                    T defaultGenerator) {
-        if (generators.size() > 0) {
-            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
-            List<Float> cumulativeWeights = new ArrayList<>();
-            float sum = 0;
-            for (float weight : weights) {
-                sum += weight;
-                cumulativeWeights.add(sum);
-            }
-            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
-            return cumulativeWeights.stream()
-                                    .filter(weight -> value <= weight)
-                                    .reduce((first, second) -> first)
-                                    .map(weight -> generators.get(cumulativeWeights.indexOf(weight)))
-                                    .orElse(defaultGenerator);
-        } else {
-            return defaultGenerator;
-        }
     }
 
     protected void generateAIMarkers(BooleanMask passable, BooleanMask passableLand, BooleanMask passableWater) {
