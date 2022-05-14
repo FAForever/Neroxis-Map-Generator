@@ -161,7 +161,9 @@ public strictfp class SCMap {
     }
 
     public AIMarker getAmphibiousMarker(String id) {
-        return amphibiousAIMarkers.stream().filter(amphibiousMarker -> amphibiousMarker.getId().equals(id)).findFirst()
+        return amphibiousAIMarkers.stream()
+                                  .filter(amphibiousMarker -> amphibiousMarker.getId().equals(id))
+                                  .findFirst()
                                   .orElse(null);
     }
 

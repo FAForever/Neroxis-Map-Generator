@@ -31,7 +31,8 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
                                                  + 1, value))
                 && valueAtLessThanEqualTo(x - 1, y - 1, value)
                 && valueAtLessThanEqualTo(x + 1, y - 1, value)
-                && valueAtLessThanEqualTo(x - 1, y + 1, value) && valueAtLessThanEqualTo(x + 1, y + 1, value));
+                && valueAtLessThanEqualTo(x - 1, y + 1, value)
+                && valueAtLessThanEqualTo(x + 1, y + 1, value));
     }
 
     protected boolean isLocal1DMax(int x, int y) {
