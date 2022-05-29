@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "Editor", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Tool for creating generator pipelines")
@@ -54,6 +55,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Graph Files", "json"));
         frame.setLayout(new GridBagLayout());
         setupGraphTabPane();
         setupVertexEditPanel();

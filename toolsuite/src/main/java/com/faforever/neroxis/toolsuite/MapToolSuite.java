@@ -4,7 +4,7 @@ import com.faforever.neroxis.cli.VersionProvider;
 import picocli.CommandLine;
 import static picocli.CommandLine.Command;
 
-@Command(name = "maptools", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, synopsisSubcommandLabel = "COMMAND", subcommands = {MapPopulator.class, MapResizer.class, MapForcer.class, MapEvaluator.class})
+@Command(name = "maptools", mixinStandardHelpOptions = true, description = "Tools to modify maps", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, synopsisSubcommandLabel = "COMMAND", subcommands = {MapPopulator.class, MapResizer.class, MapForcer.class, MapEvaluator.class})
 public class MapToolSuite {
     private MapToolSuite() {
     }

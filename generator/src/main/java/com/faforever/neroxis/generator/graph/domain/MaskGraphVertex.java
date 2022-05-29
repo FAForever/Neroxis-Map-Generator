@@ -103,8 +103,8 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         nonMaskParameters.put(parameterName, null);
     }
 
-    public boolean isMaskParameterSet(String parameter) {
-        return maskParameters.get(parameter) != null;
+    public boolean isMaskParameterNull(String parameter) {
+        return maskParameters.get(parameter) == null;
     }
 
     public String getParameterExpression(Parameter parameter) {
@@ -132,7 +132,7 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
                                                         .orElse(nonMaskParameters.get(parameter.getName()));
     }
 
-    private Optional<GraphParameter> getGraphAnnotationForParameter(Parameter parameter) {
+    public Optional<GraphParameter> getGraphAnnotationForParameter(Parameter parameter) {
         return Arrays.stream(annotatedParameters)
                      .filter(annotation -> parameter.getName().equals(annotation.name()))
                      .findFirst();

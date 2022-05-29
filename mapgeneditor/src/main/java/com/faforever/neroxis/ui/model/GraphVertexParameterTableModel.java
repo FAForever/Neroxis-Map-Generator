@@ -1,13 +1,11 @@
 package com.faforever.neroxis.ui.model;
 
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -98,10 +96,9 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
             Executable executable = vertex.getExecutable();
             if (executable != null) {
                 for (Parameter parameter : executable.getParameters()) {
-                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class))
-                              .noneMatch(annotation -> parameter.getName().equals(annotation.name())
-                                                       && (!annotation.value().isBlank()))
-                        && !(Mask.class.isAssignableFrom(
+                    if (vertex.getGraphAnnotationForParameter(parameter)
+                              .map(annotation -> annotation.value().isBlank())
+                              .orElse(true) && !(Mask.class.isAssignableFrom(
                             MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
                                                                     parameter.getParameterizedType())))) {
                         parameters.add(parameter);

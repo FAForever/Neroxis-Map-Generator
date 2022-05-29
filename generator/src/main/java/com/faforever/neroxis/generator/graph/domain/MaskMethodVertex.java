@@ -66,11 +66,11 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     @Override
-    public boolean isMaskParameterSet(String parameter) {
+    public boolean isMaskParameterNull(String parameter) {
         if (EXECUTOR.equals(parameter)) {
-            return executor != null;
+            return executor == null;
         }
-        return super.isMaskParameterSet(parameter);
+        return super.isMaskParameterNull(parameter);
     }
 
     @Override

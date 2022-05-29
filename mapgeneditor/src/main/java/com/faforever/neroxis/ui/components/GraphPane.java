@@ -22,8 +22,6 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -118,15 +116,9 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
     public void exportGraph(File file) {
         removeUnusedVertices();
         try {
-            if (file.getName().endsWith(".json")) {
-                GraphSerializationUtil.exportGraphJson(graph, new FileOutputStream(file));
-            } else if (file.getName().endsWith(".dot")) {
-                GraphSerializationUtil.exportGraphDot(graph, new FileOutputStream(file));
-            } else {
-                throw new UnsupportedOperationException("Unsupported file type");
-            }
+            GraphSerializationUtil.exportGraph(graph, file);
         } catch (IOException ex) {
-            throw new IllegalArgumentException("Could not write graph");
+            throw new IllegalArgumentException("Could not write graph", ex);
         }
     }
 
@@ -143,15 +135,9 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
 
     public void importGraph(File file) {
         try {
-            if (file.getName().endsWith(".json")) {
-                GraphSerializationUtil.importGraphJson(graph, new FileInputStream(file));
-            } else if (file.getName().endsWith(".dot")) {
-                GraphSerializationUtil.importGraphDot(graph, new FileInputStream(file));
-            } else {
-                throw new UnsupportedOperationException("Unsupported file type");
-            }
+            GraphSerializationUtil.importGraph(graph, file);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new IllegalArgumentException("Could not read graph", ex);
         }
         layoutGraph();
     }
@@ -238,7 +224,7 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
     public void exportSelectedCells(File file) {
         PipelineGraph subGraph = graph.getSubGraphFromSelectedCells();
         try {
-            GraphSerializationUtil.exportGraphDot(subGraph, new FileOutputStream(file));
+            GraphSerializationUtil.exportGraph(subGraph, file);
         } catch (IOException ex) {
             throw new IllegalArgumentException("Could not write graph");
         }

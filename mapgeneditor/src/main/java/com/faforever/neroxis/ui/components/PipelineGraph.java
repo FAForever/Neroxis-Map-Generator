@@ -366,8 +366,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     @Override
     public boolean isValidConnection(ICell source, ICell target) {
-        return isValidSource(source) && isValidTarget(target) && source != target && !getVertexForCell(
-                target).isMaskParameterSet((String) source.getValue());
+        return isValidSource(source) && isValidTarget(target) && source != target && getVertexForCell(
+                target).isMaskParameterNull((String) source.getValue());
     }
 
     /**
@@ -428,7 +428,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
                && cell.getParent() != getDefaultParent()
                && vertex.getMaskParameters()
                         .contains((String) cell.getValue())
-               && !vertex.isMaskParameterSet((String) cell.getValue());
+               && vertex.isMaskParameterNull((String) cell.getValue());
     }
 
     public MaskGraphVertex<?> getVertexForCell(ICell cell) {

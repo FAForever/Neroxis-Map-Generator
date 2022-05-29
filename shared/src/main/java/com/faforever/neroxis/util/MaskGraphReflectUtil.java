@@ -135,7 +135,7 @@ public class MaskGraphReflectUtil {
     }
 
     public static List<Method> getMaskGraphMethods(Class<? extends Mask<?, ?>> maskClass) {
-        return MASK_GRAPH_METHOD_MAP.get(maskClass);
+        return MASK_GRAPH_METHOD_MAP.getOrDefault(maskClass, List.of());
     }
 
     public static Constructor<? extends Mask<?, ?>> getMaskGraphConstructor(Class<? extends Mask<?, ?>> maskClass) {
