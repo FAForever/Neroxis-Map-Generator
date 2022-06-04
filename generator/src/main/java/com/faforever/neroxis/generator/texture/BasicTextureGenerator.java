@@ -37,7 +37,9 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
 
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
-        shadows.add(shadowsInWater, 1f).blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512))).clampMax(1f);
+        shadows.add(shadowsInWater, 1f)
+               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
+               .clampMax(1f);
         int textureSize = generatorParameters.getMapSize() + 1;
         int mapSize = generatorParameters.getMapSize();
         accentGroundTexture.setSize(textureSize)
@@ -46,8 +48,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
                            .clampMax(1f)
                            .setToValue(realWater, 0f)
                            .blur(2);
-        accentPlateauTexture.setSize(textureSize)
-                            .addPerlinNoise(mapSize / 16, 1f)
+        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f)
                             .addGaussianNoise(.05f)
                             .clampMax(1f)
                             .setToValue(realPlateaus.copy().invert(), 0f)
