@@ -48,7 +48,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
                            .clampMax(1f)
                            .setToValue(realWater, 0f)
                            .blur(2);
-        accentPlateauTexture.setSize(textureSize).addPerlinNoise(mapSize / 16, 1f)
+        accentPlateauTexture.setSize(textureSize)
+                            .addPerlinNoise(mapSize / 16, 1f)
                             .addGaussianNoise(.05f)
                             .clampMax(1f)
                             .setToValue(realPlateaus.copy().invert(), 0f)
