@@ -3,6 +3,7 @@ package com.faforever.neroxis.map;
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
 import static com.faforever.neroxis.util.ImageUtil.scaleImage;
@@ -628,6 +629,21 @@ public strictfp class SCMap {
                 int val1 = convertToRawTextureValue(mask1.getPrimitive(x, y));
                 int val2 = convertToRawTextureValue(mask2.getPrimitive(x, y));
                 int val3 = convertToRawTextureValue(mask3.getPrimitive(x, y));
+                textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
+            }
+        }
+    }
+
+    public void setTextureMasksScaled(BufferedImage textureMasks, Vector4Mask mask) {
+        int textureMasksWidth = textureMasks.getWidth();
+        checkMaskSize(mask, textureMasksWidth);
+        for (int x = 0; x < textureMasksWidth; x++) {
+            for (int y = 0; y < textureMasksWidth; y++) {
+                Vector4 vector = mask.get(x, y);
+                int val0 = convertToRawTextureValue(vector.get(0));
+                int val1 = convertToRawTextureValue(vector.get(1));
+                int val2 = convertToRawTextureValue(vector.get(2));
+                int val3 = convertToRawTextureValue(vector.get(3));
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }

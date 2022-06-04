@@ -1,23 +1,25 @@
 package com.faforever.neroxis.utilities;
 
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.io.GraphSerializationUtil;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import java.io.IOException;
-import java.nio.file.Path;
-import org.jgrapht.graph.DirectedAcyclicGraph;
+import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class TestingGround {
     public static void main(String[] args) throws Exception {
         DebugUtil.DEBUG = true;
 
-        DebugUtil.timedRun(() -> {
-            try {
-                GraphSerializationUtil.importGraph(new DirectedAcyclicGraph<>(MaskMethodEdge.class),
-                                                   Path.of("C:\\Users\\corey\\Documents\\basicTerrain.json").toFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        BooleanMask mask0 = new BooleanMask(64, 0L, new SymmetrySettings(Symmetry.NONE), "1", true);
+        BooleanMask mask1 = new BooleanMask(64, 0L, new SymmetrySettings(Symmetry.NONE), "1", true);
+
+        mask0.randomize(.5f);
+        mask1.randomize(.5f);
+
+        mask1.add(mask0);
+
+        Pipeline.start();
+        Pipeline.join();
+        Pipeline.shutdown();
     }
 }

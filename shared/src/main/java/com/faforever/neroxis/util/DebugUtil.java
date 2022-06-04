@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 public strictfp class DebugUtil {
     public static boolean VERBOSE = false;
@@ -46,6 +47,16 @@ public strictfp class DebugUtil {
         timedRun(className.substring(0, className.lastIndexOf(".")), description, runnable);
     }
 
+    public static <T> T timedRun(Callable<T> callable) {
+        String packageName = getStackTraceParentClass();
+        return timedRun(packageName.substring(0, packageName.lastIndexOf(".")), null, callable);
+    }
+
+    public static <T> T timedRun(String description, Callable<T> callable) {
+        String className = getStackTraceParentClass();
+        return timedRun(className.substring(0, className.lastIndexOf(".")), description, callable);
+    }
+
     private static String getStackTraceParentClass() {
         return StackWalker.getInstance()
                           .walk(stackFrameStream -> stackFrameStream.skip(3)
@@ -64,6 +75,24 @@ public strictfp class DebugUtil {
             System.out.printf("Done %s: %4d ms, %s\n", description, System.currentTimeMillis() - sTime,
                               DebugUtil.getStackTraceLineInPackage(packageName));
         }
+    }
+
+    public static <T> T timedRun(String packageName, String description, Callable<T> callable) {
+        long sTime = System.currentTimeMillis();
+        if (VERBOSE && DEBUG) {
+            System.out.printf("Started %s: %s\n", description, DebugUtil.getStackTraceLineInPackage(packageName));
+        }
+        T result;
+        try {
+            result = callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (DEBUG) {
+            System.out.printf("Done %s: %4d ms, %s\n", description, System.currentTimeMillis() - sTime,
+                              DebugUtil.getStackTraceLineInPackage(packageName));
+        }
+        return result;
     }
 
     public static String getStackTraceLineInPackage(String packageName, String... excludedMethodNames) {

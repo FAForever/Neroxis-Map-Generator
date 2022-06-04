@@ -216,8 +216,15 @@ public strictfp class Pipeline {
             this.dependencies.addAll(dependencies);
             this.methodName = method;
             this.line = line;
-            this.future = future.thenRunAsync(
-                    () -> immutableResult = executingMask.isMock() ? executingMask : executingMask.mock());
+            this.future = future.thenRunAsync(() -> {
+                if (!executingMask.isMock() && dependants.stream()
+                                                         .allMatch(entry -> entry.getExecutingMask()
+                                                                                 .equals(executingMask))) {
+                    immutableResult = executingMask.immutableCopy();
+                } else {
+                    immutableResult = executingMask;
+                }
+            });
         }
 
         public Mask<?, ?> getResult() {

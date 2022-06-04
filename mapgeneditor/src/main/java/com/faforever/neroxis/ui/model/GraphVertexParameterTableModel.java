@@ -1,6 +1,6 @@
 package com.faforever.neroxis.ui.model;
 
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.lang.reflect.Executable;
@@ -28,8 +28,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
         Parameter parameter = parameters.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> parameter.getName();
-            case 1 -> vertex == null ? null : MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
-                                                                                      parameter.getParameterizedType());
+            case 1 -> vertex == null ? null : getParameterClass(parameter);
             case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
             default -> null;
         };
@@ -62,8 +61,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        return !Mask.class.isAssignableFrom(
-                MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()));
+        return !Mask.class.isAssignableFrom(getParameterClass(parameter));
     }
 
     @Override
@@ -74,14 +72,25 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        if (MaskGraphReflectUtil.classIsNumeric(
-                MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))
+        if (MaskGraphReflectUtil.classIsNumeric(getParameterClass(parameter))
             && String.class.equals(aValue.getClass())
             && ((String) aValue).startsWith(".")) {
             aValue = "0" + aValue;
         }
 
         vertex.setParameter(parameter.getName(), aValue);
+    }
+
+    private Class<?> getParameterClass(Parameter parameter) {
+        Class<?> parameterClass;
+        if (Mask.class.isAssignableFrom(vertex.getExecutable().getDeclaringClass())) {
+            parameterClass = MaskGraphReflectUtil.getActualTypeClass(
+                    (Class<? extends Mask<?, ?>>) vertex.getExecutable().getDeclaringClass(),
+                    parameter.getParameterizedType());
+        } else {
+            parameterClass = parameter.getType();
+        }
+        return parameterClass;
     }
 
     public void setVertex(MaskGraphVertex<?> vertex) {
@@ -98,9 +107,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
                 for (Parameter parameter : executable.getParameters()) {
                     if (vertex.getGraphAnnotationForParameter(parameter)
                               .map(annotation -> annotation.value().isBlank())
-                              .orElse(true) && !(Mask.class.isAssignableFrom(
-                            MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
-                                                                    parameter.getParameterizedType())))) {
+                              .orElse(true) && !(Mask.class.isAssignableFrom(getParameterClass(parameter)))) {
                         parameters.add(parameter);
                     }
                 }

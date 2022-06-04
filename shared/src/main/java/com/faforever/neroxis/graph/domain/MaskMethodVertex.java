@@ -1,6 +1,7 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.annotations.GraphMethod;
+import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.lang.reflect.InvocationTargetException;
@@ -32,10 +33,6 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
                               (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getActualTypeClass(executorClass,
                                                                                                     executable.getGenericReturnType()));
         }
-    }
-
-    public String toString() {
-        return identifier == null ? "" : identifier;
     }
 
     @Override
@@ -87,8 +84,8 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
     }
 
     @Override
-    public boolean isDefined() {
-        return executor != null && super.isDefined();
+    public boolean isDefined(GraphContext graphContext) {
+        return executor != null && super.isDefined(graphContext);
     }
 
     @Override

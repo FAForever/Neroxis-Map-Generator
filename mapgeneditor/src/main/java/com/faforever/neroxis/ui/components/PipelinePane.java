@@ -1,11 +1,15 @@
 package com.faforever.neroxis.ui.components;
 
+import com.faforever.neroxis.generator.GeneratorGraphContext;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.graph.domain.GraphContext;
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.io.GraphSerializationUtil;
+import com.faforever.neroxis.generator.graph.GeneratorPipeline;
+import com.faforever.neroxis.generator.serial.GeneratorGraphSerializationUtil;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskInputVertex;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskOutputVertex;
+import com.faforever.neroxis.graph.io.GraphSerializationUtil;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.ngraph.event.ChangeEvent;
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
@@ -25,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -41,24 +44,34 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 
-public strictfp class GraphPane extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
+public strictfp class PipelinePane extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
     @Getter
-    private final PipelineGraph graph = new PipelineGraph();
+    private final PipelineGraph graph;
     @Getter
-    private final PipelineGraphComponent graphComponent = new PipelineGraphComponent(graph);
-    private final HierarchicalLayout layout = new HierarchicalLayout(graph);
+    private final GeneratorPipeline pipeline;
+    @Getter
+    private final PipelineGraphComponent graphComponent;
+    private final HierarchicalLayout layout;
     @Setter
     private Consumer<MaskGraphVertex<?>> maskVertexSelectionAction = mask -> {};
     @Setter
     private Runnable graphChangedAction = () -> {};
 
-    public GraphPane() {
+    public PipelinePane(GeneratorPipeline pipeline) {
+        this.pipeline = pipeline;
+        graph = new PipelineGraph(pipeline.getGraph());
+        graphComponent = new PipelineGraphComponent(graph);
+        layout = new HierarchicalLayout(graph);
         setLayout(new BorderLayout());
         setFocusable(true);
         setupGraph();
     }
 
     private void setupGraph() {
+        Style undefinedStyle = graph.getStylesheet().getDefaultVertexStyle().spawnChild();
+        undefinedStyle.getShape().setFillColor(new Color(255, 128, 128));
+        graph.getStylesheet().putCellStyle("undefined", undefinedStyle);
+
         graph.addGraphListener(this);
         graphComponent.setTolerance(1);
         graphComponent.setViewportBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -91,15 +104,13 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
                 }
             }
         });
-        Style undefinedStyle = graph.getStylesheet().getDefaultVertexStyle().spawnChild();
-        undefinedStyle.getShape().setFillColor(new Color(255, 128, 128));
-        graph.getStylesheet().putCellStyle("undefined", undefinedStyle);
         layout.setTraverseAncestors(false);
         layout.setOrientation(SwingConstants.WEST);
         layout.setInterRankCellSpacing(100);
         layout.setInterHierarchySpacing(50);
         layout.setIntraCellSpacing(50);
         layout.setParallelEdgeSpacing(10);
+        layoutGraph();
     }
 
     private void vertexSelected(MaskGraphVertex<?> vertex) {
@@ -109,14 +120,17 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
     }
 
     public void clearGraph() {
-        Set<MaskGraphVertex<?>> vertices = new HashSet<>(graph.vertexSet());
-        graph.removeAllVertices(vertices);
+        Set<MaskGraphVertex<?>> removableVertices = graph.vertexSet()
+                                                         .stream()
+                                                         .filter(vertex -> !(vertex instanceof MaskOutputVertex
+                                                                             || vertex instanceof MaskInputVertex))
+                                                         .collect(Collectors.toSet());
+        graph.removeAllVertices(removableVertices);
     }
 
-    public void exportGraph(File file) {
-        removeUnusedVertices();
+    public void exportPipeline(File file) {
         try {
-            GraphSerializationUtil.exportGraph(graph, file);
+            GeneratorGraphSerializationUtil.exportPipeline(pipeline, file);
         } catch (IOException ex) {
             throw new IllegalArgumentException("Could not write graph", ex);
         }
@@ -133,7 +147,7 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         graph.removeAllVertices(verticesToRemove);
     }
 
-    public void importGraph(File file) {
+    public void importSubGraph(File file) {
         try {
             GraphSerializationUtil.importGraph(graph, file);
         } catch (IOException ex) {
@@ -142,10 +156,10 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
         layoutGraph();
     }
 
-    public void runGraph(int numTeams, int mapSize, int spawnCount, Symmetry terrainSymmetry) {
+    public void runGraph(Long seed, int numTeams, int mapSize, int spawnCount, Symmetry terrainSymmetry) {
         Pipeline.reset();
         layoutGraph();
-        Random random = new Random();
+        Random random = seed == null ? new Random() : new Random(seed);
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
         GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random,
                                                                                            GeneratorParameters.builder()
@@ -158,16 +172,14 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
                                                                                                               .terrainSymmetry(
                                                                                                                       terrainSymmetry)
                                                                                                               .build());
-        GraphContext graphContext = new GraphContext(random.nextLong(), generatorParameters, parameterConstraints);
+        GeneratorGraphContext graphContext = new GeneratorGraphContext(random.nextLong(), generatorParameters,
+                                                                       parameterConstraints);
         DebugUtil.timedRun("Reset results", () -> graph.forEach(MaskGraphVertex::resetResult));
-        DebugUtil.timedRun("Place Spawns", () -> graphContext.placeSpawns());
+        DebugUtil.timedRun("Place Spawns", graphContext::placeSpawns);
         DebugUtil.timedRun("Setup pipeline", () -> graph.forEach(vertex -> {
-            graphComponent.getGraph().updateVertexDefinedStyle(vertex);
-            if (!vertex.isDefined()) {
-                return;
-            }
+            graphComponent.getGraph().setVertexDefined(vertex, vertex.isDefined(graphContext));
             try {
-                vertex.prepareResults(graphContext);
+                vertex.prepareResults(graphContext, false);
             } catch (InvocationTargetException | IllegalAccessException | InstantiationException ex) {
                 throw new RuntimeException(ex);
             }
@@ -214,9 +226,11 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
                  edge.setTarget(target);
                  edge.setSource(source);
              })));
+        graph.vertexSet().forEach(this::updateVertexDefined);
+        graphComponent.refresh();
     }
 
-    public void importGraph(PipelineGraph subGraph) {
+    public void importSubGraph(PipelineGraph subGraph) {
         graph.addGraph(subGraph);
         layoutGraph();
     }
@@ -232,14 +246,30 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
 
     @Override
     public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
+        MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
+        updateVertexDefined(edgeTarget);
         updateIdentifiers(e.getEdgeSource());
         graphChangedAction.run();
     }
 
     @Override
     public void edgeRemoved(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
-        updateIdentifiers(e.getEdgeTarget());
+        MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
+        updateVertexDefined(edgeTarget);
+        updateIdentifiers(edgeTarget);
         graphChangedAction.run();
+    }
+
+    private void updateVertexDefined(MaskGraphVertex<?> vertex) {
+        ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
+        GeneratorParameters generatorParameters = GeneratorParameters.builder()
+                                                                     .terrainSymmetry(Symmetry.POINT2)
+                                                                     .mapSize(512)
+                                                                     .numTeams(2)
+                                                                     .spawnCount(2)
+                                                                     .build();
+        GeneratorGraphContext graphContext = new GeneratorGraphContext(0L, generatorParameters, parameterConstraints);
+        graph.setVertexDefined(vertex, vertex.isDefined(graphContext));
     }
 
     public void updateIdentifiers(MaskGraphVertex<?> vertex) {
@@ -248,10 +278,12 @@ public strictfp class GraphPane extends JPanel implements GraphListener<MaskGrap
             node.setIdentifier(identifier);
             graph.getCellForVertex(node).setValue(identifier);
         });
+        graphComponent.refresh();
     }
 
     @Override
     public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
+        updateVertexDefined(e.getVertex());
         graphChangedAction.run();
     }
 

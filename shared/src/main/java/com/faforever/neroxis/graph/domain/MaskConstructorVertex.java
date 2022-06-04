@@ -1,6 +1,6 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.graph.domain;
 
-import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -11,12 +11,6 @@ import lombok.Getter;
 public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
     public MaskConstructorVertex(Constructor<? extends Mask<?, ?>> executable) {
         super(executable, executable.getDeclaringClass());
-    }
-
-    public static MaskConstructorVertex ofClass(Class<? extends Mask<?, ?>> clazz) throws NoSuchMethodException {
-        return new MaskConstructorVertex(
-                clazz.getDeclaredConstructor(int.class, Long.class, SymmetrySettings.class, String.class,
-                                             boolean.class));
     }
 
     @Override
@@ -39,9 +33,5 @@ public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<
         newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
-    }
-
-    public String toString() {
-        return identifier == null ? "" : identifier;
     }
 }

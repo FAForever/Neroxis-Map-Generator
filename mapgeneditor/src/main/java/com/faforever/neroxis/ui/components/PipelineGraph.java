@@ -1,9 +1,9 @@
 package com.faforever.neroxis.ui.components;
 
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskVertexResult;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.view.CellState;
@@ -29,10 +29,8 @@ import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
 public class PipelineGraph extends Graph implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge>, Iterable<MaskGraphVertex<?>>, org.jgrapht.Graph<MaskGraphVertex<?>, MaskMethodEdge> {
-    private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag = new DirectedAcyclicGraph<>(
-            MaskMethodEdge.class);
-    private final ListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> listenableGraph = new DefaultListenableGraph<>(
-            dag);
+    private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag;
+    private final ListenableGraph<MaskGraphVertex<?>, MaskMethodEdge> listenableGraph;
     private final Map<MaskGraphVertex<?>, ICell> vertexToCell = new HashMap<>();
     private final Map<MaskMethodEdge, ICell> edgeToCell = new HashMap<>();
     private final Map<ICell, MaskGraphVertex<?>> cellToVertex = new HashMap<>();
@@ -44,7 +42,17 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     private final float heightPadding = .1f;
 
     public PipelineGraph() {
+        dag = new DirectedAcyclicGraph<>(MaskMethodEdge.class);
+        listenableGraph = new DefaultListenableGraph<>(dag);
         listenableGraph.addGraphListener(this);
+    }
+
+    public PipelineGraph(DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag) {
+        this.dag = dag;
+        listenableGraph = new DefaultListenableGraph<>(dag);
+        listenableGraph.addGraphListener(this);
+        vertexSet().forEach(this::addVisualVertexIfNecessary);
+        edgeSet().forEach(this::addVisualEdgeIfNecessary);
     }
 
     public void addGraphListener(GraphListener<MaskGraphVertex<?>, MaskMethodEdge> l) {
@@ -55,11 +63,11 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     public void edgeAdded(GraphEdgeChangeEvent<MaskGraphVertex<?>, MaskMethodEdge> e) {
         MaskMethodEdge edge = e.getEdge();
         String parameterName = edge.getParameterName();
-        MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
-        MaskGraphVertex<?> edgeSource = e.getEdgeSource();
-        edgeTarget.setParameter(parameterName, new MaskVertexResult(edge.getResultName(), edgeSource));
-        addVisualEdgeIfNecessary(edgeSource, edgeTarget);
-        updateVertexDefinedStyle(edgeTarget);
+        MaskGraphVertex<?> edgeTarget = edge.getTarget();
+        MaskGraphVertex<?> edgeSource = edge.getSource();
+        edgeTarget.setParameter(parameterName,
+                                new MaskVertexResult(edge.getParameterName(), edge.getResultName(), edgeSource));
+        addVisualEdgeIfNecessary(edge);
     }
 
     @Override
@@ -68,7 +76,6 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         MaskGraphVertex<?> edgeTarget = e.getEdgeTarget();
         edgeTarget.clearParameter(edge.getParameterName());
         removeVisualEdges(edge, e.getEdgeSource(), edgeTarget);
-        updateVertexDefinedStyle(edgeTarget);
     }
 
     private void removeVisualEdges(MaskMethodEdge edge, MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
@@ -100,16 +107,15 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
                          .orElse(null);
     }
 
-    public void updateVertexDefinedStyle(MaskGraphVertex<?> vertex) {
+    public void setVertexDefined(MaskGraphVertex<?> vertex, boolean defined) {
         ICell vertexCell = getCellForVertex(vertex);
         if (vertexCell == null) {
             return;
         }
         Set<ICell> cells = new HashSet<>(vertexCell.getChildren());
         cells.add(vertexCell);
-        boolean vertexDefined = vertex.isDefined();
         cells.forEach(cell -> {
-            if (!vertexDefined) {
+            if (!defined) {
                 model.setStyle(cell, "undefined");
             } else {
                 model.setStyle(cell, null);
@@ -121,8 +127,9 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         return getCellForVertex(vertex, null);
     }
 
-    private void addVisualEdgeIfNecessary(MaskGraphVertex<?> edgeSource, MaskGraphVertex<?> edgeTarget) {
-        MaskMethodEdge edge = getEdge(edgeSource, edgeTarget);
+    private void addVisualEdgeIfNecessary(MaskMethodEdge edge) {
+        MaskGraphVertex<?> edgeSource = edge.getSource();
+        MaskGraphVertex<?> edgeTarget = edge.getTarget();
         ICell parentSourceCell = getCellForVertex(edgeSource);
         ICell parentTargetCell = getCellForVertex(edgeTarget);
         if (parentSourceCell == null) {
@@ -189,8 +196,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             }
             vertexToCell.put(vertex, cell);
             cellToVertex.put(cell, vertex);
+            setVertexDefined(vertex, false);
         }
-        updateVertexDefinedStyle(vertex);
     }
 
     private double getSubCellYPadding(int numMaskParameters, double i) {

@@ -1,6 +1,10 @@
 package com.faforever.neroxis.ui.components;
 
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.generator.GeneratorGraphContext;
+import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.ui.listener.LostFocusListener;
 import com.faforever.neroxis.ui.model.GraphVertexParameterTableModel;
 import com.faforever.neroxis.ui.renderer.StringTableCellRenderer;
@@ -21,7 +25,7 @@ public class MaskGraphVertexEditPanel extends JPanel {
     private final JTextField identifierTextField = new JTextField();
     private MaskGraphVertex<?> vertex;
     @Setter
-    private GraphPane graphPane;
+    private PipelinePane pipelinePane;
 
     public MaskGraphVertexEditPanel() {
         setLayout(new GridBagLayout());
@@ -56,9 +60,9 @@ public class MaskGraphVertexEditPanel extends JPanel {
     }
 
     private void updateIdentifiers() {
-        if (vertex != null && graphPane != null) {
+        if (vertex != null && pipelinePane != null) {
             vertex.setIdentifier(identifierTextField.getText());
-            graphPane.updateIdentifiers(vertex);
+            pipelinePane.updateIdentifiers(vertex);
         }
     }
 
@@ -78,8 +82,24 @@ public class MaskGraphVertexEditPanel extends JPanel {
         constraints.gridy = 1;
         constraints.weighty = 1;
         add(parametersTable, constraints);
-        parameterTableModel.addTableModelListener(e -> graphPane.getGraph().updateVertexDefinedStyle(vertex));
-        parametersTable.addPropertyChangeListener(evt -> graphPane.getGraph().updateVertexDefinedStyle(vertex));
+        parameterTableModel.addTableModelListener(e -> updateVertexDefined(vertex));
+        parametersTable.addPropertyChangeListener(evt -> updateVertexDefined(vertex));
+    }
+
+    private void updateVertexDefined(MaskGraphVertex<?> vertex) {
+        if (vertex == null) {
+            return;
+        }
+
+        ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
+        GeneratorParameters generatorParameters = GeneratorParameters.builder()
+                                                                     .terrainSymmetry(Symmetry.POINT2)
+                                                                     .mapSize(512)
+                                                                     .numTeams(2)
+                                                                     .spawnCount(2)
+                                                                     .build();
+        GeneratorGraphContext graphContext = new GeneratorGraphContext(0L, generatorParameters, parameterConstraints);
+        pipelinePane.getGraph().setVertexDefined(vertex, vertex.isDefined(graphContext));
     }
 
     public void setVertex(MaskGraphVertex<?> vertex) {

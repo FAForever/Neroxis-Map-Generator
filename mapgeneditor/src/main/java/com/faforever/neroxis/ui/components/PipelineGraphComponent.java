@@ -1,10 +1,12 @@
 package com.faforever.neroxis.ui.components;
 
-import com.faforever.neroxis.generator.graph.domain.MapMaskMethodVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskConstructorVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MapMaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskConstructorVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskInputVertex;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskOutputVertex;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.ngraph.model.Geometry;
@@ -59,6 +61,10 @@ public class PipelineGraphComponent extends GraphComponent {
                                  .forEach(pipelineGraph::removeEdge);
                         } else if (selectedCell.isVertex()) {
                             MaskGraphVertex<?> vertex = pipelineGraph.getVertexForCell(selectedCell);
+                            if (vertex instanceof MaskInputVertex || vertex instanceof MaskOutputVertex) {
+                                return;
+                            }
+
                             pipelineGraph.removeVertex(vertex);
                         }
                     });

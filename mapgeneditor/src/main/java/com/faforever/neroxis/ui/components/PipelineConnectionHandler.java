@@ -1,8 +1,8 @@
 package com.faforever.neroxis.ui.components;
 
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodEdge;
-import com.faforever.neroxis.generator.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
 import java.awt.event.MouseEvent;
@@ -31,8 +31,8 @@ public class PipelineConnectionHandler extends ConnectionHandler {
         PipelineGraph graph = pipelineGraphComponent.getGraph();
         MaskGraphVertex<?> sourceVertex = graph.getVertexForCell(source);
         MaskGraphVertex<?> targetVertex = graph.getVertexForCell(target);
-        if (!sourceVertex.getResultClass((String) source.getValue())
-                         .equals(targetVertex.getMaskParameterClass((String) target.getValue()))) {
+        if (!targetVertex.getMaskParameterClass((String) target.getValue())
+                         .isAssignableFrom(sourceVertex.getResultClass((String) source.getValue()))) {
             return "";
         }
         if (MaskMethodVertex.EXECUTOR.equals(target.getValue()) && graph.outgoingEdgesOf(sourceVertex)

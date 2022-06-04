@@ -1,4 +1,4 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.graph.domain;
 
 public class GraphComputationException extends RuntimeException {
     public GraphComputationException(String message) {

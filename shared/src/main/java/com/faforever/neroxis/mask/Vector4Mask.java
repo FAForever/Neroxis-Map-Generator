@@ -68,6 +68,23 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
         return new Vector4[size][size];
     }
 
+    @GraphMethod
+    public Vector4Mask setComponents(FloatMask comp0, FloatMask comp1, FloatMask comp2, FloatMask comp3) {
+        assertCompatibleComponents(comp0, comp1, comp2, comp3);
+        return enqueue(dependencies -> {
+            FloatMask source1 = (FloatMask) dependencies.get(0);
+            FloatMask source2 = (FloatMask) dependencies.get(1);
+            FloatMask source3 = (FloatMask) dependencies.get(2);
+            FloatMask source4 = (FloatMask) dependencies.get(3);
+            apply((x, y) -> {
+                setComponentAt(x, y, source1.get(x, y), 0);
+                setComponentAt(x, y, source2.get(x, y), 1);
+                setComponentAt(x, y, source3.get(x, y), 2);
+                setComponentAt(x, y, source4.get(x, y), 3);
+            });
+        }, comp0, comp1, comp2, comp3);
+    }
+
     @Override
     public BufferedImage toImage() {
         int size = getSize();

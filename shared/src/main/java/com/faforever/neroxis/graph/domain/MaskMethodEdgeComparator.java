@@ -1,4 +1,4 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.graph.domain;
 
 import java.util.Comparator;
 import java.util.Objects;

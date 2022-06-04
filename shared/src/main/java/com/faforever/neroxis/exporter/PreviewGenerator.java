@@ -35,18 +35,13 @@ public strictfp class PreviewGenerator {
         FloatMask sunReflectance = heightmap.copyAsNormalMask()
                                             .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection());
         List<FloatMask> textureMasks = new ArrayList<>();
-        textureMasks.addAll(
-                List.of(new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1).splitComponentMasks()));
-        textureMasks.addAll(
-                List.of(new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1).splitComponentMasks()));
-        generatePreview(heightmap, sunReflectance, map, textureMasks.toArray(new FloatMask[0]));
+        Vector4Mask textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1);
+        Vector4Mask textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1);
+        generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);
     }
 
     public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map,
-                                       FloatMask... textureMasks) throws IOException {
-        if (textureMasks.length != 8) {
-            throw new IllegalArgumentException("Wrong number of textureMasks");
-        }
+                                       Vector4Mask textureMasksLow, Vector4Mask textureMasksHigh) throws IOException {
         if (!map.isGeneratePreview()) {
             generateBlankPreview(map);
             return;
@@ -54,9 +49,11 @@ public strictfp class PreviewGenerator {
         BufferedImage previewImage = map.getPreview();
         Graphics2D graphics = previewImage.createGraphics();
         TerrainMaterials materials = map.getBiome().getTerrainMaterials();
-        List<FloatMask> scaledTextures = new ArrayList<>(Arrays.asList(textureMasks));
+        List<FloatMask> scaledTextures = new ArrayList<>();
         FloatMask baseLayer = new FloatMask(PREVIEW_SIZE, null, new SymmetrySettings(Symmetry.NONE)).add(1f);
         scaledTextures.add(0, baseLayer);
+        scaledTextures.addAll(Arrays.asList(textureMasksLow.splitComponentMasks()));
+        scaledTextures.addAll(Arrays.asList(textureMasksHigh.splitComponentMasks()));
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
                 BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);

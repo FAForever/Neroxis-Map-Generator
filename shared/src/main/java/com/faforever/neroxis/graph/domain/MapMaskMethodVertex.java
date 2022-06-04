@@ -1,5 +1,6 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.graph.domain;
 
+import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,9 +37,5 @@ public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
         newVertex.setIdentifier(identifier);
         nonMaskParameters.forEach(newVertex::setParameter);
         return newVertex;
-    }
-
-    public String toString() {
-        return identifier == null ? "" : identifier;
     }
 }

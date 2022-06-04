@@ -1,7 +1,6 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
@@ -14,7 +13,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 @Getter
-public strictfp class GraphContext {
+public strictfp class GeneratorGraphContext implements GraphContext {
     private final Random random;
     private final SymmetrySettings symmetrySettings;
     private final ExpressionParser parser;
@@ -37,7 +36,8 @@ public strictfp class GraphContext {
     private final int numSymPoints;
     private String identifier;
 
-    public GraphContext(long seed, GeneratorParameters generatorParameters, ParameterConstraints parameterConstraints) {
+    public GeneratorGraphContext(long seed, GeneratorParameters generatorParameters,
+                                 ParameterConstraints parameterConstraints) {
         random = new Random(seed);
         this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                         generatorParameters.getTerrainSymmetry(),
@@ -86,6 +86,7 @@ public strictfp class GraphContext {
                                                             teamSeparation, symmetrySettings);
     }
 
+    @Override
     public <T> T getValue(String expression, String identifier, Class<T> clazz) {
         this.identifier = identifier;
         return parser.parseExpression(expression).getValue(evalContext, clazz);

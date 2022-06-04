@@ -647,12 +647,23 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     }
 
     public FloatMask[] splitComponentMasks() {
-        int dimesion = getZeroValue().getDimension();
+        int dimension = getZeroValue().getDimension();
         String name = getName();
-        FloatMask[] components = new FloatMask[dimesion];
-        for (int i = 0; i < dimesion; ++i) {
-            components[i] = new FloatMask(this, i, name + "Component" + i);
+        FloatMask[] components = new FloatMask[dimension];
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i,
+                                          isParallel());
         }
+
+        enqueue(dependencies -> {
+            FloatMask[] sources = dependencies.subList(0, dimension).toArray(FloatMask[]::new);
+            apply((x, y) -> {
+                for (int i = 0; i < dimension; ++i) {
+                    sources[i].setPrimitive(x, y, get(x, y).get(i));
+                }
+            });
+        }, components);
+
         return components;
     }
 }

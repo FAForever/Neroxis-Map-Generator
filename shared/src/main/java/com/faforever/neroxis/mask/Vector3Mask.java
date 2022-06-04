@@ -81,6 +81,21 @@ public strictfp class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     @GraphMethod
+    public Vector3Mask setComponents(FloatMask comp0, FloatMask comp1, FloatMask comp2) {
+        assertCompatibleComponents(comp0, comp1, comp2);
+        return enqueue(dependencies -> {
+            FloatMask source1 = (FloatMask) dependencies.get(0);
+            FloatMask source2 = (FloatMask) dependencies.get(1);
+            FloatMask source3 = (FloatMask) dependencies.get(2);
+            apply((x, y) -> {
+                setComponentAt(x, y, source1.get(x, y), 0);
+                setComponentAt(x, y, source2.get(x, y), 1);
+                setComponentAt(x, y, source3.get(x, y), 2);
+            });
+        }, comp0, comp1, comp2);
+    }
+
+    @GraphMethod
     public Vector3Mask cross(Vector3Mask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {

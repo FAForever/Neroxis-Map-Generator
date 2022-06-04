@@ -1,5 +1,6 @@
-package com.faforever.neroxis.generator.graph.domain;
+package com.faforever.neroxis.graph.domain;
 
+import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -7,21 +8,25 @@ import java.util.Arrays;
 import lombok.Getter;
 
 @Getter
-public strictfp class MaskEndpointVertex<T extends Mask<T, ?>> extends MaskGraphVertex<Method> {
+public strictfp class MaskOutputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {
     private final String name;
+    private T result;
 
-    public MaskEndpointVertex(String name, Class<T> returnClass) throws NoSuchMethodException {
-        super(MaskEndpointVertex.class.getDeclaredMethod("setResult", returnClass), returnClass);
+    public MaskOutputVertex(String name, Class<T> returnClass) throws NoSuchMethodException {
+        super(MaskOutputVertex.class.getDeclaredMethod("setResult", Mask.class), returnClass);
         this.name = name;
-
-        if (!Mask.class.isAssignableFrom(executable.getReturnType())) {
-            throw new IllegalArgumentException("Method does not return a subclass of Mask");
-        }
+        results.clear();
+        resultClasses.clear();
     }
 
     @Override
     public String getExecutableName() {
-        return name;
+        return name + " Output";
+    }
+
+    @Override
+    public boolean isComputed() {
+        return result != null;
     }
 
     @Override
@@ -33,10 +38,10 @@ public strictfp class MaskEndpointVertex<T extends Mask<T, ?>> extends MaskGraph
     }
 
     @Override
-    public MaskEndpointVertex<T> copy() {
-        MaskEndpointVertex<T> newVertex;
+    public MaskOutputVertex<T> copy() {
+        MaskOutputVertex<T> newVertex;
         try {
-            newVertex = new MaskEndpointVertex<T>(name, (Class<T>) resultClasses.get(SELF));
+            newVertex = new MaskOutputVertex<T>(name, (Class<T>) resultClasses.get(SELF));
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -45,15 +50,11 @@ public strictfp class MaskEndpointVertex<T extends Mask<T, ?>> extends MaskGraph
         return newVertex;
     }
 
-    public String toString() {
-        return identifier == null ? "" : identifier;
-    }
-
     public T getResult() {
-        return (T) getResult(SELF);
+        return result.copy();
     }
 
-    protected void setResult(T mask) {
-        results.put(SELF, mask);
+    protected void setResult(T exec) {
+        result = exec;
     }
 }

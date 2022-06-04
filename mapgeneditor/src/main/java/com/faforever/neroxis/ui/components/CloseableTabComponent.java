@@ -34,7 +34,7 @@ public class CloseableTabComponent extends JPanel {
     private void close() {
         if (shouldCloseSupplier.get()) {
             int index = tabbedPane.indexOfTabComponent(this);
-            tabbedPane.setSelectedIndex(Math.max(0, index - 1));
+            tabbedPane.setSelectedIndex(Math.max(-1, index - 1));
             tabbedPane.removeTabAt(index);
             Arrays.stream(closeButton.getActionListeners()).forEach(closeButton::removeActionListener);
         }
