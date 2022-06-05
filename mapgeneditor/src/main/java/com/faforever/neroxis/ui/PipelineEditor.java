@@ -2,7 +2,6 @@ package com.faforever.neroxis.ui;
 
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.VersionProvider;
-import com.faforever.neroxis.debugger.EntryPanel;
 import com.faforever.neroxis.generator.graph.GeneratorPipeline;
 import com.faforever.neroxis.generator.serial.GeneratorGraphSerializationUtil;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
@@ -11,6 +10,7 @@ import com.faforever.neroxis.ui.components.CloseableTabComponent;
 import com.faforever.neroxis.ui.components.MaskGraphVertexEditPanel;
 import com.faforever.neroxis.ui.components.PipelineGraph;
 import com.faforever.neroxis.ui.components.PipelinePane;
+import com.faforever.neroxis.visualization.EntryPanel;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,8 +19,6 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -85,6 +83,18 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         tabbedPane.addChangeListener(e -> {
             int plusTabIndex = tabbedPane.indexOfTab(NEW_TAB_TITLE);
             if (tabbedPane.getSelectedIndex() == plusTabIndex && plusTabIndex != -1) {
+                JPopupMenu typePopupMenu = new JPopupMenu();
+                GeneratorPipeline.getPipelineTypes().forEach(pipelineClass -> {
+                    AbstractAction action = new AbstractAction(pipelineClass.getSimpleName().replace("Pipeline", "")) {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            addNewGraphTab(GeneratorPipeline.createNew(pipelineClass));
+                        }
+                    };
+                    typePopupMenu.add(action);
+                });
+                Point location = tabbedPane.getMousePosition();
+                typePopupMenu.show(tabbedPane, location.x, location.y);
                 tabbedPane.setSelectedIndex(-1);
             } else {
                 PipelinePane pipelinePane = (PipelinePane) tabbedPane.getSelectedComponent();
@@ -139,26 +149,6 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             tabbedPane.removeTabAt(plusTabIndex);
         }
         tabbedPane.addTab(NEW_TAB_TITLE, null);
-        JPanel newLabel = new JPanel();
-        newLabel.add(new JLabel(NEW_TAB_TITLE));
-        newLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JPopupMenu typePopupMenu = new JPopupMenu();
-                GeneratorPipeline.getPipelineTypes().forEach(pipelineClass -> {
-                    AbstractAction action = new AbstractAction(pipelineClass.getSimpleName().replace("Pipeline", "")) {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            addNewGraphTab(GeneratorPipeline.createNew(pipelineClass));
-                        }
-                    };
-                    typePopupMenu.add(action);
-                });
-                Point location = e.getPoint();
-                typePopupMenu.show(e.getComponent(), location.x, location.y);
-            }
-        });
-        tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, newLabel);
         tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 2);
     }
 
@@ -300,7 +290,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             try {
                 GeneratorPipeline pipeline = GeneratorGraphSerializationUtil.importPipeline(file);
                 addNewGraphTab(pipeline);
-                ((CloseableTabComponent) tabbedPane.getSelectedComponent()).setTitle(
+                ((CloseableTabComponent) tabbedPane.getTabComponentAt(tabbedPane.getSelectedIndex())).setTitle(
                         String.format("%s (%s)", file.getName(),
                                       pipeline.getClass().getSimpleName().replace("Pipeline", "")));
             } catch (IOException e) {

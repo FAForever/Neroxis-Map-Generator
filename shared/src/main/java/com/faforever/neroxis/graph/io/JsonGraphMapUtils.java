@@ -3,6 +3,7 @@ package com.faforever.neroxis.graph.io;
 import com.faforever.neroxis.graph.domain.MapMaskMethodVertex;
 import com.faforever.neroxis.graph.domain.MaskConstructorVertex;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskInputVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.graph.domain.MaskOutputVertex;
@@ -56,6 +57,8 @@ public class JsonGraphMapUtils {
                     MapMaskMethods.class.getMethod(jsonGraphVertex.getExecutable(), parameterTypes));
         } else if (MaskOutputVertex.class.equals(vertexClass)) {
             vertex = new MaskOutputVertex(jsonGraphVertex.getExecutable(), maskClass);
+        } else if (MaskInputVertex.class.equals(vertexClass)) {
+            vertex = new MaskInputVertex(jsonGraphVertex.getExecutable(), maskClass);
         } else {
             throw new IllegalArgumentException(String.format("Unrecognized vertex class: %s", vertexClass.getName()));
         }

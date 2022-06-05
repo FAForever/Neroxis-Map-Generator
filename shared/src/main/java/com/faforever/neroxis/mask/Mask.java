@@ -1,7 +1,6 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.debugger.VisualDebugger;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -12,6 +11,7 @@ import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.visualization.VisualDebugger;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;

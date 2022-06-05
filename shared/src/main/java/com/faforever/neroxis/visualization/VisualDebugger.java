@@ -1,4 +1,4 @@
-package com.faforever.neroxis.debugger;
+package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
 import java.awt.Dimension;

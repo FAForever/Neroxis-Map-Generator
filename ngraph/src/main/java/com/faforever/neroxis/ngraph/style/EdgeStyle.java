@@ -74,7 +74,7 @@ public class EdgeStyle implements PropertyChangeListener {
      */
     private boolean exitPerimeter = true;
     /**
-     * Defines the horizontsl relative coordinate connection point
+     * Defines the horizontal relative coordinate connection point
      * of an edge with its source terminal.
      */
     private Float exitX;

@@ -55,6 +55,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -163,8 +165,8 @@ public class GraphComponent extends JScrollPane implements Printable {
     protected SelectionCellsHandler selectionCellsHandler;
     protected GraphHandler graphHandler;
     /**
-     * The transparency of previewed cells from 0.0. to 0.1. 0.0 indicates
-     * transparent, 1.0 indicates opaque. Default is 1.
+     * The transparency of previewed cells from 0.0. to 1.0. 0.0 indicates
+     * transparent, 1.0 indicates opaque. Default is .5.
      */
     protected float previewAlpha = 0.5f;
     /**
@@ -354,7 +356,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     };
     protected IEventListener<RepaintEvent> repaintHandler = (sender, evt) -> {
         RectangleDouble dirty = evt.getRegion();
-        java.awt.Rectangle rect = (dirty != null) ? dirty.getRectangle() : null;
+        Rectangle rect = (dirty != null) ? dirty.getRectangle() : null;
         if (rect != null) {
             rect.grow(1, 1);
         }
@@ -598,9 +600,9 @@ public class GraphComponent extends JScrollPane implements Printable {
     public RectangleDouble getLayoutAreaSize() {
         if (pageVisible) {
             Dimension d = getPreferredSizeForPage();
-            return new RectangleDouble(new java.awt.Rectangle(d));
+            return new RectangleDouble(new Rectangle(d));
         } else {
-            return new RectangleDouble(new java.awt.Rectangle(graphControl.getSize()));
+            return new RectangleDouble(new Rectangle(graphControl.getSize()));
         }
     }
 
@@ -912,7 +914,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * and returns the inserted cells. This shortcut is used if cells are
      * inserted via data transfer.
      */
-    public List<ICell> importCells(List<ICell> cells, double dx, double dy, ICell target, java.awt.Point location) {
+    public List<ICell> importCells(List<ICell> cells, double dx, double dy, ICell target, Point location) {
         return graph.moveCells(cells, dx, dy, true, target, location);
     }
 
@@ -939,7 +941,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     public PointDouble getPointForEvent(MouseEvent e, boolean addOffset) {
         double s = graph.getView().getScale();
         PointDouble tr = graph.getView().getTranslate();
-        double off = (addOffset) ? graph.getGridSize() / 2 : 0;
+        double off = (addOffset) ? graph.getGridSize() / 2f : 0;
         double x = graph.snap(e.getX() / s - tr.getX() - off);
         double y = graph.snap(e.getY() / s - tr.getY() - off);
         return new PointDouble(x, y);
@@ -1108,25 +1110,22 @@ public class GraphComponent extends JScrollPane implements Printable {
         graph.getView().scaleAndTranslate(1, translate.getX(), translate.getY());
         if (isPageVisible()) {
             // Causes two repaints, see zoomTo for more details
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    Dimension pageSize = getPreferredSizeForPage();
-                    if (getViewport().getWidth() > pageSize.getWidth()) {
-                        scrollToCenter(true);
-                    } else {
-                        JScrollBar scrollBar = getHorizontalScrollBar();
-                        if (scrollBar != null) {
-                            scrollBar.setValue((scrollBar.getMaximum() / 3) - 4);
-                        }
+            SwingUtilities.invokeLater(() -> {
+                Dimension pageSize = getPreferredSizeForPage();
+                if (getViewport().getWidth() > pageSize.getWidth()) {
+                    scrollToCenter(true);
+                } else {
+                    JScrollBar scrollBar = getHorizontalScrollBar();
+                    if (scrollBar != null) {
+                        scrollBar.setValue((scrollBar.getMaximum() / 3) - 4);
                     }
-                    if (getViewport().getHeight() > pageSize.getHeight()) {
-                        scrollToCenter(false);
-                    } else {
-                        JScrollBar scrollBar = getVerticalScrollBar();
-                        if (scrollBar != null) {
-                            scrollBar.setValue((scrollBar.getMaximum() / 4) - 4);
-                        }
+                }
+                if (getViewport().getHeight() > pageSize.getHeight()) {
+                    scrollToCenter(false);
+                } else {
+                    JScrollBar scrollBar = getVerticalScrollBar();
+                    if (scrollBar != null) {
+                        scrollBar.setValue((scrollBar.getMaximum() / 4) - 4);
                     }
                 }
             });
@@ -1149,9 +1148,9 @@ public class GraphComponent extends JScrollPane implements Printable {
             RectangleDouble bounds = state;
             if (center) {
                 bounds = bounds.clone();
-                bounds.setX(bounds.getCenterX() - getWidth() / 2);
+                bounds.setX(bounds.getCenterX() - getWidth() / 2f);
                 bounds.setWidth(getWidth());
-                bounds.setY(bounds.getCenterY() - getHeight() / 2);
+                bounds.setY(bounds.getCenterY() - getHeight() / 2f);
                 bounds.setHeight(getHeight());
             }
             getGraphControl().scrollRectToVisible(bounds.getRectangle());
@@ -1201,7 +1200,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         firePropertyChange("swimlaneSelectionEnabled", oldValue, swimlaneSelectionEnabled);
     }
 
-    public List<ICell> selectRegion(java.awt.Rectangle rect, MouseEvent e) {
+    public List<ICell> selectRegion(Rectangle rect, MouseEvent e) {
         List<ICell> cells = getCells(rect);
         if (!cells.isEmpty()) {
             selectCellsForEvent(cells, e);
@@ -1216,7 +1215,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      *
      * @return Returns the cells inside the given rectangle.
      */
-    public List<ICell> getCells(java.awt.Rectangle rect) {
+    public List<ICell> getCells(Rectangle rect) {
         return getCells(rect, null);
     }
 
@@ -1228,7 +1227,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      *
      * @return Returns the children inside the given rectangle.
      */
-    public List<ICell> getCells(java.awt.Rectangle rect, ICell parent) {
+    public List<ICell> getCells(Rectangle rect, ICell parent) {
         List<ICell> result = new ArrayList<>();
         if (rect.width > 0 || rect.height > 0) {
             if (parent == null) {
@@ -1320,7 +1319,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 canvas.setTranslate(0, 0);
                 IGraphModel model = graph.getModel();
                 GraphView view = graph.getView();
-                java.awt.Rectangle hit = new java.awt.Rectangle(x, y, 1, 1);
+                Rectangle hit = new Rectangle(x, y, 1, 1);
                 int childCount = model.getChildCount(parent);
                 for (int i = childCount - 1; i >= 0; i--) {
                     ICell cell = model.getChildAt(parent, i);
@@ -1407,7 +1406,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         firePropertyChange("foldingEnabled", oldValue, foldingEnabled);
     }
 
-    public java.awt.Rectangle getFoldingIconBounds(CellState state, ImageIcon icon) {
+    public Rectangle getFoldingIconBounds(CellState state, ImageIcon icon) {
         IGraphModel model = graph.getModel();
         boolean isEdge = model.isEdge(state.getCell());
         double scale = getGraph().getView().getScale();
@@ -1420,7 +1419,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             x = (int) pt.getX() - w / 2;
             y = (int) pt.getY() - h / 2;
         }
-        return new java.awt.Rectangle(x, y, w, h);
+        return new Rectangle(x, y, w, h);
     }
 
     /**
@@ -2265,8 +2264,8 @@ public class GraphComponent extends JScrollPane implements Printable {
     }
 
     protected void paintBackground(Graphics g) {
-        java.awt.Rectangle clip = g.getClipBounds();
-        java.awt.Rectangle rect = paintBackgroundPage(g);
+        Rectangle clip = g.getClipBounds();
+        Rectangle rect = paintBackgroundPage(g);
         if (isPageVisible()) {
             g.clipRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
         }
@@ -2277,7 +2276,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         g.setClip(clip);
     }
 
-    protected java.awt.Rectangle paintBackgroundPage(Graphics g) {
+    protected Rectangle paintBackgroundPage(Graphics g) {
         PointDouble translate = graph.getView().getTranslate();
         double scale = graph.getView().getScale();
         int x0 = (int) Math.round(translate.getX() * scale) - 1;
@@ -2331,7 +2330,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             // Restores the graphics
             g2.setStroke(previousStroke);
         }
-        return new java.awt.Rectangle(x0, y0, w, h);
+        return new Rectangle(x0, y0, w, h);
     }
 
     /**
@@ -2400,7 +2399,7 @@ public class GraphComponent extends JScrollPane implements Printable {
     protected void paintGrid(Graphics g) {
         if (isGridVisible()) {
             g.setColor(getGridColor());
-            java.awt.Rectangle clip = g.getClipBounds();
+            Rectangle clip = g.getClipBounds();
             if (clip == null) {
                 clip = getGraphControl().getBounds();
             }
@@ -2432,7 +2431,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             double ys = Math.floor((top - ty) / stepping) * stepping + ty;
             double ye = Math.ceil(bottom / stepping) * stepping;
             switch (style) {
-                case GRID_STYLE_CROSS: {
+                case GRID_STYLE_CROSS -> {
                     // Sets the dot size
                     int cs = (stepping > 16.0) ? 2 : 1;
                     for (double x = xs; x <= xe; x += stepping) {
@@ -2450,9 +2449,8 @@ public class GraphComponent extends JScrollPane implements Printable {
                             g.drawLine(ix, iy - cs, ix, iy + cs);
                         }
                     }
-                    break;
                 }
-                case GRID_STYLE_LINE: {
+                case GRID_STYLE_LINE -> {
                     xe += (int) Math.ceil(stepping);
                     ye += (int) Math.ceil(stepping);
                     int ixs = (int) Math.round(xs);
@@ -2479,9 +2477,8 @@ public class GraphComponent extends JScrollPane implements Printable {
                         int iy = (int) Math.round(y);
                         g.drawLine(ixs, iy, ixe, iy);
                     }
-                    break;
                 }
-                case GRID_STYLE_DASHED: {
+                case GRID_STYLE_DASHED -> {
                     Graphics2D g2 = (Graphics2D) g;
                     Stroke stroke = g2.getStroke();
                     xe += (int) Math.ceil(stepping);
@@ -2541,25 +2538,24 @@ public class GraphComponent extends JScrollPane implements Printable {
                         g.drawLine(ixs, iy, ixe, iy);
                     }
                     g2.setStroke(stroke);
-                    break;
                 }
-                default: // DOT_GRID_MODE
-                {
-                    for (double x = xs; x <= xe; x += stepping) {
-                        for (double y = ys; y <= ye; y += stepping) {
-                            // FIXME: Workaround for rounding errors when adding
-                            // stepping to
-                            // xs or ys multiple times (leads to double grid lines
-                            // when zoom
-                            // is set to eg. 121%)
-                            x = Math.round((x - tx) / stepping) * stepping + tx;
-                            y = Math.round((y - ty) / stepping) * stepping + ty;
-                            int ix = (int) Math.round(x);
-                            int iy = (int) Math.round(y);
-                            g.drawLine(ix, iy, ix, iy);
+                default -> // DOT_GRID_MODE
+                        {
+                            for (double x = xs; x <= xe; x += stepping) {
+                                for (double y = ys; y <= ye; y += stepping) {
+                                    // FIXME: Workaround for rounding errors when adding
+                                    // stepping to
+                                    // xs or ys multiple times (leads to double grid lines
+                                    // when zoom
+                                    // is set to eg. 121%)
+                                    x = Math.round((x - tx) / stepping) * stepping + tx;
+                                    y = Math.round((y - ty) / stepping) * stepping + ty;
+                                    int ix = (int) Math.round(x);
+                                    int iy = (int) Math.round(y);
+                                    g.drawLine(ix, iy, ix, iy);
+                                }
+                            }
                         }
-                    }
-                }
             }
         }
     }
@@ -2628,8 +2624,8 @@ public class GraphComponent extends JScrollPane implements Printable {
         if (state != null) {
             RectangleDouble boundingBox = state.getBoundingBox();
             if (boundingBox != null) {
-                java.awt.Rectangle dirty = boundingBox.getRectangle();
-                repaintTripleBuffer(new java.awt.Rectangle(dirty));
+                Rectangle dirty = boundingBox.getRectangle();
+                repaintTripleBuffer(new Rectangle(dirty));
                 dirty = SwingUtilities.convertRectangle(graphControl, dirty, this);
                 repaint(dirty);
             }
@@ -2640,10 +2636,10 @@ public class GraphComponent extends JScrollPane implements Printable {
      * Clears and repaints the triple buffer at the given rectangle or repaints
      * the complete buffer if no rectangle is specified.
      */
-    public void repaintTripleBuffer(java.awt.Rectangle dirty) {
+    public void repaintTripleBuffer(Rectangle dirty) {
         if (tripleBuffered && tripleBufferGraphics != null) {
             if (dirty == null) {
-                dirty = new java.awt.Rectangle(tripleBuffer.getWidth(), tripleBuffer.getHeight());
+                dirty = new Rectangle(tripleBuffer.getWidth(), tripleBuffer.getHeight());
             }
             // Clears and repaints the dirty rectangle using the
             // graphics canvas as a renderer

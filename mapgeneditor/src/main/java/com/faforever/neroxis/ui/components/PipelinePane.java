@@ -194,40 +194,43 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
 
     public void layoutGraph() {
         layout.execute(graph.getDefaultParent());
-        graph.getDefaultParent()
-             .getChildren()
-             .forEach(cell -> cell.getChildren().forEach(child -> graph.getOutgoingEdges(child).forEach(edge -> {
-                 ICell target = edge.getTarget();
-                 ICell source = edge.getSource();
-                 ICell parentEdge = graph.getEdgesBetween(cell, target.getParent())
-                                         .stream()
-                                         .findFirst()
-                                         .orElseThrow(() -> new IllegalStateException("No parent"));
-                 RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(source.getParent(), false, true);
-                 RectangleDouble targetParentBoundingBox = graph.getBoundingBox(target.getParent(), false, true);
-                 targetParentBoundingBox.grow(20);
-                 List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
-                     PointDouble transformedPoint = graph.getView()
-                                                         .transformControlPoint(graph.getView().getState(edge), point);
-                     return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY())
-                            && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
-                 }).collect(Collectors.toList());
-                 Geometry targetGeometry = target.getGeometry();
-                 Geometry targetParentGeometry = target.getParent().getGeometry();
-                 RectangleDouble targetRectangle = new RectangleDouble(
-                         targetParentGeometry.getX() + targetGeometry.getX() * targetParentGeometry.getWidth(),
-                         targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(),
-                         targetGeometry.getWidth(), targetGeometry.getHeight());
-                 PointDouble endPoint = new PointDouble(
-                         targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10,
-                         targetRectangle.getCenterY());
-                 points.add(endPoint);
-                 edge.getGeometry().setPoints(points);
-                 edge.setTarget(target);
-                 edge.setSource(source);
-             })));
+        graph.getDefaultParent().getChildren().forEach(this::addEdgeConnectionOffsets);
         graph.vertexSet().forEach(this::updateVertexDefined);
         graphComponent.refresh();
+    }
+
+    private void addEdgeConnectionOffsets(ICell cell) {
+        cell.getChildren().forEach(child -> graph.getOutgoingEdges(child).forEach(edge -> {
+            ICell target = edge.getTarget();
+            ICell source = edge.getSource();
+            ICell sourceParent = source.getParent();
+            ICell targetParent = target.getParent();
+            ICell parentEdge = graph.getEdgesBetween(cell, targetParent)
+                                    .stream()
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalStateException("No parent"));
+            RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(sourceParent, false, true);
+            RectangleDouble targetParentBoundingBox = graph.getBoundingBox(targetParent, false, true);
+            targetParentBoundingBox.grow(20);
+            List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
+                PointDouble transformedPoint = graph.getView()
+                                                    .transformControlPoint(graph.getView().getState(edge), point);
+                return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY())
+                       && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
+            }).collect(Collectors.toList());
+            Geometry targetGeometry = target.getGeometry();
+            Geometry targetParentGeometry = targetParent.getGeometry();
+            RectangleDouble targetRectangle = new RectangleDouble(
+                    targetParentGeometry.getX() + targetGeometry.getX() * targetParentGeometry.getWidth(),
+                    targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(),
+                    targetGeometry.getWidth(), targetGeometry.getHeight());
+            PointDouble endPoint = new PointDouble(targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10,
+                                                   targetRectangle.getCenterY());
+            points.add(endPoint);
+            edge.getGeometry().setPoints(points);
+            edge.setTarget(target);
+            edge.setSource(source);
+        }));
     }
 
     public void importSubGraph(PipelineGraph subGraph) {

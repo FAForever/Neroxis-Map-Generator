@@ -1,7 +1,7 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.debugger.VisualDebugger;
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.visualization.VisualDebugger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

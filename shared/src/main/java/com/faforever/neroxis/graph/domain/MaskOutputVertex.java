@@ -21,7 +21,7 @@ public strictfp class MaskOutputVertex<T extends Mask<?, T>> extends MaskGraphVe
 
     @Override
     public String getExecutableName() {
-        return name + " Output";
+        return name.endsWith("Output") ? name : name + " Output";
     }
 
     @Override

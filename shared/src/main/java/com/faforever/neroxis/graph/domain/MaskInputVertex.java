@@ -17,7 +17,7 @@ public strictfp class MaskInputVertex<T extends Mask<?, T>> extends MaskGraphVer
 
     @Override
     public String getExecutableName() {
-        return name + " Input";
+        return name.endsWith("Input") ? name : name + " Input";
     }
 
     @Override

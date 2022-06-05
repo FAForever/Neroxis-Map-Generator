@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.serial;
 import com.faforever.neroxis.generator.graph.GeneratorPipeline;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskVertexResult;
 import com.faforever.neroxis.graph.io.JsonGraphMapUtils;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
@@ -104,7 +105,10 @@ public class GeneratorGraphSerializationUtil {
                 jsonPipeline.getEdges().forEach(((jsonGraphEdge, sourceTarget) -> {
                     MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.getSource());
                     MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.getTarget());
-                    graph.addEdge(source, target, JsonGraphMapUtils.map(jsonGraphEdge));
+                    MaskMethodEdge edge = JsonGraphMapUtils.map(jsonGraphEdge);
+                    graph.addEdge(source, target, edge);
+                    target.setParameter(edge.getParameterName(),
+                                        new MaskVertexResult(edge.getParameterName(), edge.getResultName(), source));
                 }));
 
                 Class<? extends GeneratorPipeline> pipelineClass = (Class<? extends GeneratorPipeline>) MaskGraphReflectUtil.getClassFromString(

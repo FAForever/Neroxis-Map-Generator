@@ -16,6 +16,7 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,7 +33,7 @@ public class GraphControl extends JComponent {
      * mouse drags and must be reset after any interactive repaints. Default
      * is (0,0). This should not be null.
      */
-    protected java.awt.Point translate = new java.awt.Point(0, 0);
+    protected Point translate = new Point(0, 0);
 
     public GraphControl(GraphComponent graphComponent) {
         this.graphComponent = graphComponent;
@@ -40,7 +41,7 @@ public class GraphControl extends JComponent {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (translate.x != 0 || translate.y != 0) {
-                    translate = new java.awt.Point(0, 0);
+                    translate = new Point(0, 0);
                     repaint();
                 }
             }
@@ -50,18 +51,18 @@ public class GraphControl extends JComponent {
     /**
      * Returns the translate.
      */
-    public java.awt.Point getTranslate() {
+    public Point getTranslate() {
         return translate;
     }
 
     /**
      * Sets the translate.
      */
-    public void setTranslate(java.awt.Point value) {
+    public void setTranslate(Point value) {
         translate = value;
     }
 
-    public GraphComponent getGraphContainer() {
+    public GraphComponent getGraphComponent() {
         return graphComponent;
     }
 
