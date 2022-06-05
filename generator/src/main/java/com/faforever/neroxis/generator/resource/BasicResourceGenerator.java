@@ -1,13 +1,9 @@
 package com.faforever.neroxis.generator.resource;
 
-import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicResourceGenerator extends ResourceGenerator {
-    protected BooleanMask resourceMask;
-    protected BooleanMask waterResourceMask;
-
     @Override
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
