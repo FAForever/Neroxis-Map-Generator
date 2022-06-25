@@ -10,7 +10,9 @@ import com.faforever.neroxis.graph.domain.MaskInputVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.graph.domain.MaskOutputVertex;
 import com.faforever.neroxis.graph.io.GraphSerializationUtil;
+import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.ngraph.event.ChangeEvent;
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.model.Geometry;
@@ -22,13 +24,11 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -75,7 +75,6 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         graph.addGraphListener(this);
         graphComponent.setTolerance(1);
         graphComponent.setViewportBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        graphComponent.setPreferredSize(new Dimension(800, 800));
         add(graphComponent);
 
         graph.getSelectionModel().addListener(ChangeEvent.class, (sender, event) -> {
@@ -109,7 +108,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         layout.setInterRankCellSpacing(100);
         layout.setInterHierarchySpacing(50);
         layout.setIntraCellSpacing(50);
-        layout.setParallelEdgeSpacing(10);
+        layout.setParallelEdgeSpacing(50);
         layoutGraph();
     }
 
@@ -134,17 +133,6 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         } catch (IOException ex) {
             throw new IllegalArgumentException("Could not write graph", ex);
         }
-    }
-
-    private void removeUnusedVertices() {
-        List<MaskGraphVertex<?>> verticesToRemove = new ArrayList<>();
-        graph.forEach(maskGraphVertex -> {
-            maskGraphVertex.resetResult();
-            if (graph.outgoingEdgesOf(maskGraphVertex).isEmpty() && graph.incomingEdgesOf(maskGraphVertex).isEmpty()) {
-                verticesToRemove.add(maskGraphVertex);
-            }
-        });
-        graph.removeAllVertices(verticesToRemove);
     }
 
     public void importSubGraph(File file) {
@@ -174,8 +162,10 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
                                                                                                               .build());
         GeneratorGraphContext graphContext = new GeneratorGraphContext(random.nextLong(), generatorParameters,
                                                                        parameterConstraints);
+
+        placeSpawns(random, generatorParameters, graphContext);
         DebugUtil.timedRun("Reset results", () -> graph.forEach(MaskGraphVertex::resetResult));
-        DebugUtil.timedRun("Place Spawns", graphContext::placeSpawns);
+
         DebugUtil.timedRun("Setup pipeline", () -> graph.forEach(vertex -> {
             graphComponent.getGraph().setVertexDefined(vertex, vertex.isDefined(graphContext));
             try {
@@ -192,10 +182,39 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         }
     }
 
+    private void placeSpawns(Random random, GeneratorParameters generatorParameters,
+                             GeneratorGraphContext graphContext) {
+        float spawnSeparation;
+        int teamSeparation;
+        SCMap map = graphContext.getMap();
+        if (generatorParameters.getNumTeams() < 2) {
+            spawnSeparation = (float) generatorParameters.getMapSize() / generatorParameters.getSpawnCount() * 1.5f;
+            teamSeparation = 0;
+        } else if (generatorParameters.getNumTeams() == 2) {
+            spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
+            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
+        } else {
+            if (generatorParameters.getNumTeams() < 8) {
+                spawnSeparation = random.nextInt(
+                        map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
+                                  + map.getSize() / 16f;
+            } else {
+                spawnSeparation = 0;
+            }
+            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
+        }
+        DebugUtil.timedRun("Place Spawns", () -> new SpawnPlacer(map, random.nextLong()).placeSpawns(
+                generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation,
+                graphContext.getSymmetrySettings()));
+    }
+
     public void layoutGraph() {
         layout.execute(graph.getDefaultParent());
         graph.getDefaultParent().getChildren().forEach(this::addEdgeConnectionOffsets);
         graph.vertexSet().forEach(this::updateVertexDefined);
+        RectangleDouble minSize = new RectangleDouble(graph.getGraphBounds());
+        minSize.grow(100);
+        graph.setMinimumGraphSize(minSize);
         graphComponent.refresh();
     }
 

@@ -84,9 +84,8 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
     private Class<?> getParameterClass(Parameter parameter) {
         Class<?> parameterClass;
         if (Mask.class.isAssignableFrom(vertex.getExecutable().getDeclaringClass())) {
-            parameterClass = MaskGraphReflectUtil.getActualTypeClass(
-                    (Class<? extends Mask<?, ?>>) vertex.getExecutable().getDeclaringClass(),
-                    parameter.getParameterizedType());
+            parameterClass = MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
+                                                                     parameter.getParameterizedType());
         } else {
             parameterClass = parameter.getType();
         }

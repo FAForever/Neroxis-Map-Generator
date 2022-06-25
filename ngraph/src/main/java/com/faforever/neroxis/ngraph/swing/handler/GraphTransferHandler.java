@@ -15,6 +15,7 @@ import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.Serial;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -136,13 +137,7 @@ public class GraphTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(JComponent comp, DataFlavor[] flavors) {
-        for (DataFlavor flavor : flavors) {
-            if (flavor != null && flavor.equals(GraphTransferable.dataFlavor)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Arrays.stream(flavors).anyMatch(flavor -> flavor != null && flavor.equals(GraphTransferable.dataFlavor));
     }
 
     @Override

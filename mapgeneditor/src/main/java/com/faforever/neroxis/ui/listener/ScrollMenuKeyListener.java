@@ -1,5 +1,6 @@
-package com.faforever.neroxis.ui.components;
+package com.faforever.neroxis.ui.listener;
 
+import com.faforever.neroxis.ui.components.JScrollMenu;
 import java.util.Arrays;
 import javax.swing.Action;
 import javax.swing.JMenuItem;

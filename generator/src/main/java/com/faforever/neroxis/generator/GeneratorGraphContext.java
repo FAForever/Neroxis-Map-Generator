@@ -1,9 +1,10 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.util.SymmetrySelector;
 import java.util.Random;
 import lombok.Getter;
@@ -19,71 +20,44 @@ public strictfp class GeneratorGraphContext implements GraphContext {
     private final ExpressionParser parser;
     private final EvaluationContext evalContext;
     private final SCMap map;
-    private final GeneratorParameters generatorParameters;
+    private final Biome biome;
     private final float landDensity;
     private final float plateauDensity;
     private final float mountainDensity;
     private final float rampDensity;
     private final float reclaimDensity;
     private final float mexDensity;
-    private final float normalizedLandDensity;
-    private final float normalizedPlateauDensity;
-    private final float normalizedMountainDensity;
-    private final float normalizedRampDensity;
-    private final float normalizedReclaimDensity;
-    private final float normalizedMexDensity;
     private final int mapSize;
     private final int numSymPoints;
+    private final String mountainBrush;
+    private final String plateauBrush;
+    private final String hillBrush;
     private String identifier;
 
     public GeneratorGraphContext(long seed, GeneratorParameters generatorParameters,
                                  ParameterConstraints parameterConstraints) {
         random = new Random(seed);
-        this.symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                                                                                        generatorParameters.getTerrainSymmetry(),
-                                                                                        generatorParameters.getSpawnCount(),
-                                                                                        generatorParameters.getNumTeams());
-        this.generatorParameters = generatorParameters;
+        mountainBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
+        plateauBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
+        hillBrush = Brushes.HILL_BRUSHES.get(random.nextInt(Brushes.HILL_BRUSHES.size()));
+        symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
+                                                                                   generatorParameters.getTerrainSymmetry(),
+                                                                                   generatorParameters.getSpawnCount(),
+                                                                                   generatorParameters.getNumTeams());
+        biome = generatorParameters.getBiome();
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-        landDensity = generatorParameters.getLandDensity();
-        plateauDensity = generatorParameters.getPlateauDensity();
-        mountainDensity = generatorParameters.getMountainDensity();
-        rampDensity = generatorParameters.getRampDensity();
-        reclaimDensity = generatorParameters.getMexDensity();
-        mexDensity = generatorParameters.getMexDensity();
-        normalizedLandDensity = parameterConstraints.getLandDensityRange().normalize(landDensity);
-        normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange().normalize(plateauDensity);
-        normalizedMountainDensity = parameterConstraints.getMountainDensityRange().normalize(mountainDensity);
-        normalizedRampDensity = parameterConstraints.getRampDensityRange().normalize(rampDensity);
-        normalizedMexDensity = parameterConstraints.getMexDensityRange().normalize(mexDensity);
-        normalizedReclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(reclaimDensity);
+        landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
+        plateauDensity = parameterConstraints.getPlateauDensityRange()
+                                             .normalize(generatorParameters.getPlateauDensity());
+        mountainDensity = parameterConstraints.getMountainDensityRange()
+                                              .normalize(generatorParameters.getMountainDensity());
+        rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.getRampDensity());
+        mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.getMexDensity());
+        reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.getMexDensity());
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         mapSize = generatorParameters.getMapSize();
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
-    }
-
-    public void placeSpawns() {
-        float spawnSeparation;
-        int teamSeparation;
-        if (generatorParameters.getNumTeams() < 2) {
-            spawnSeparation = (float) generatorParameters.getMapSize() / generatorParameters.getSpawnCount() * 1.5f;
-            teamSeparation = 0;
-        } else if (generatorParameters.getNumTeams() == 2) {
-            spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
-        } else {
-            if (generatorParameters.getNumTeams() < 8) {
-                spawnSeparation = random.nextInt(
-                        map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
-                                  + map.getSize() / 16f;
-            } else {
-                spawnSeparation = 0;
-            }
-            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
-        }
-        new SpawnPlacer(map, random.nextLong()).placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation,
-                                                            teamSeparation, symmetrySettings);
     }
 
     @Override

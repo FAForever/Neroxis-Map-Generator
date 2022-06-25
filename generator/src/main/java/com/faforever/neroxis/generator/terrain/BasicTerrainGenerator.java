@@ -261,7 +261,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         int mapSize = map.getSize();
         int numBrushes = Brushes.GENERATOR_BRUSHES.size();
 
-        String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
 
         setupMountainHeightmapPipeline();
         setupPlateauHeightmapPipeline();
@@ -278,10 +278,9 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
         heightmapOcean.addDistance(land, -.45f)
                       .clampMin(oceanFloor)
-                      .useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush5,
-                                                     shallowWaterBrushSize, shallowWaterBrushDensity,
-                                                     shallowWaterBrushIntensity, false)
-                      .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity,
+                      .useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush, shallowWaterBrushSize,
+                                                     shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
+                      .useBrushWithinAreaWithDensity(deepWater, brush, deepWaterBrushSize, deepWaterBrushDensity,
                                                      deepWaterBrushIntensity, false)
                       .clampMax(0f)
                       .blur(4, deepWater)

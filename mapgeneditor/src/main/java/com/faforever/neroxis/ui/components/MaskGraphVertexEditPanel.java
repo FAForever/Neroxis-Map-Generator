@@ -13,6 +13,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import static javax.swing.SwingConstants.CENTER;
@@ -68,12 +69,8 @@ public class MaskGraphVertexEditPanel extends JPanel {
 
     private void setupParametersTable() {
         parametersTable.setDefaultRenderer(Class.class, new StringTableCellRenderer<Class<?>>(Class::getSimpleName));
-        parametersTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-        parametersTable.getColumnModel().getColumn(1).setPreferredWidth(100);
-        parametersTable.getColumnModel().getColumn(2).setPreferredWidth(150);
         parametersTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
-        parametersTable.setPreferredSize(new Dimension(300, -1));
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
@@ -81,7 +78,9 @@ public class MaskGraphVertexEditPanel extends JPanel {
         constraints.gridwidth = 2;
         constraints.gridy = 1;
         constraints.weighty = 1;
-        add(parametersTable, constraints);
+        JScrollPane parametersPane = new JScrollPane(parametersTable);
+        parametersPane.setPreferredSize(new Dimension(0, 150));
+        add(parametersPane, constraints);
         parameterTableModel.addTableModelListener(e -> updateVertexDefined(vertex));
         parametersTable.addPropertyChangeListener(evt -> updateVertexDefined(vertex));
     }

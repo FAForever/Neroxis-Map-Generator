@@ -104,7 +104,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     private static int arrayIndex(int bitIndex) {
-        return (int) StrictMath.floor((float) bitIndex / BOOLEANS_PER_LONG);
+        return bitIndex / BOOLEANS_PER_LONG;
     }
 
     private static int bitIndex(int x, int y, int size) {
@@ -120,7 +120,7 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     private static int minimumArraySize(int size) {
-        return (int) StrictMath.ceil((double) size * size / BOOLEANS_PER_LONG);
+        return (size * size / BOOLEANS_PER_LONG) + 1;
     }
 
     protected void setPrimitive(int x, int y, boolean value) {
@@ -617,26 +617,27 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     @GraphMethod
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
-        for (int i = 0; i < numWalkers; i++) {
-            int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
-            int minXBound = getMinXBound(SymmetryType.TERRAIN);
-            int x = random.nextInt(maxXBound - minXBound) + minXBound;
-            int maxYBound = getMaxYBound(x, SymmetryType.TERRAIN);
-            int minYBound = getMinYBound(x, SymmetryType.TERRAIN);
-            int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
-            for (int j = 0; j < numSteps; j++) {
-                if (inBounds(x, y)) {
-                    applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> setPrimitive(sx, sy, true));
-                }
-                switch (random.nextInt(4)) {
-                    case 0 -> x++;
-                    case 1 -> x--;
-                    case 2 -> y++;
-                    case 3 -> y--;
+        return enqueue(() -> {
+            for (int i = 0; i < numWalkers; i++) {
+                int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
+                int minXBound = getMinXBound(SymmetryType.TERRAIN);
+                int x = random.nextInt(maxXBound - minXBound) + minXBound;
+                int maxYBound = getMaxYBound(x, SymmetryType.TERRAIN);
+                int minYBound = getMinYBound(x, SymmetryType.TERRAIN);
+                int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
+                for (int j = 0; j < numSteps; j++) {
+                    if (inBounds(x, y)) {
+                        applyAtSymmetryPoints(x, y, SymmetryType.TERRAIN, (sx, sy) -> setPrimitive(sx, sy, true));
+                    }
+                    switch (random.nextInt(4)) {
+                        case 0 -> x++;
+                        case 1 -> x--;
+                        case 2 -> y++;
+                        case 3 -> y--;
+                    }
                 }
             }
-        }
-        return this;
+        });
     }
 
     public BooleanMask guidedWalkWithBrush(Vector2 start, Vector2 target, String brushName, int size, int numberOfUses,
@@ -710,59 +711,63 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask connect(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints,
                                float midPointMaxDistance, float midPointMinDistance, float maxAngleError,
                                SymmetryType symmetryType) {
-        path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError,
-             symmetryType);
-        if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
-            List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
-            path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance,
-                 maxAngleError, symmetryType);
-        }
-        return this;
+        return enqueue(() -> {
+            path(start, end, maxStepSize, numMiddlePoints, midPointMaxDistance, midPointMinDistance, maxAngleError,
+                 symmetryType);
+            if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
+                List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
+                path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance,
+                     midPointMinDistance, maxAngleError, symmetryType);
+            }
+        });
     }
 
     public BooleanMask path(Vector2 start, Vector2 end, float maxStepSize, int numMiddlePoints,
                             float midPointMaxDistance, float midPointMinDistance, float maxAngleError,
                             SymmetryType symmetryType) {
-        int size = getSize();
-        List<Vector2> checkPoints = new ArrayList<>();
-        checkPoints.add(new Vector2(start));
-        for (int i = 0; i < numMiddlePoints; i++) {
-            Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
-            float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
-            if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4
-                && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
-                angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f;
-            }
-            float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
-            Vector2 nextLoc = new Vector2(previousLoc).addPolar(angle, magnitude);
-            checkPoints.add(nextLoc);
-        }
-        checkPoints.add(new Vector2(end));
-        checkPoints.forEach(point -> point.round().clampMin(0f).clampMax(size - 1));
-        int numSteps = 0;
-        for (int i = 0; i < checkPoints.size() - 1; i++) {
-            Vector2 location = checkPoints.get(i);
-            Vector2 nextLoc = checkPoints.get(i + 1);
-            float oldAngle = location.angleTo(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
-            while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
-                List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
-                    applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN,
-                                          (sx, sy) -> setPrimitive(sx, sy, true));
+        return enqueue(() -> {
+            int size = getSize();
+            List<Vector2> checkPoints = new ArrayList<>();
+            checkPoints.add(new Vector2(start));
+            for (int i = 0; i < numMiddlePoints; i++) {
+                Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
+                float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
+                if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4
+                    && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
+                    angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI
+                             / 4f;
                 }
-                float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-                float angle = oldAngle * .5f
-                              + location.angleTo(nextLoc) * .5f
-                              + (random.nextFloat() - .5f) * 2f * maxAngleError;
-                location.addPolar(angle, magnitude).round();
-                oldAngle = angle;
-                numSteps++;
+                float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance)
+                                  + midPointMinDistance;
+                Vector2 nextLoc = new Vector2(previousLoc).addPolar(angle, magnitude);
+                checkPoints.add(nextLoc);
             }
-            if (numSteps >= size * size) {
-                break;
+            checkPoints.add(new Vector2(end));
+            checkPoints.forEach(point -> point.round().clampMin(0f).clampMax(size - 1));
+            int numSteps = 0;
+            for (int i = 0; i < checkPoints.size() - 1; i++) {
+                Vector2 location = checkPoints.get(i);
+                Vector2 nextLoc = checkPoints.get(i + 1);
+                float oldAngle = location.angleTo(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
+                while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
+                    List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                    if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
+                        applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.TERRAIN,
+                                              (sx, sy) -> setPrimitive(sx, sy, true));
+                    }
+                    float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
+                    float angle = oldAngle * .5f
+                                  + location.angleTo(nextLoc) * .5f
+                                  + (random.nextFloat() - .5f) * 2f * maxAngleError;
+                    location.addPolar(angle, magnitude).round();
+                    oldAngle = angle;
+                    numSteps++;
+                }
+                if (numSteps >= size * size) {
+                    break;
+                }
             }
-        }
-        return this;
+        });
     }
 
     /**
@@ -793,7 +798,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     /**
-     * Set all pixels within the circle defined by the {@code radius} around true pixel to true
+     * Set all pixels within the circle defined by the {@code radius} around true pixels to true
+     *
+     * @param radius radius around true pixels to set to true
      */
     @GraphMethod
     public BooleanMask inflate(float radius) {
@@ -810,6 +817,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Set all pixels within the circle defined by the {@code radius} around false pixel to false
+     *
+     * @param radius radius around true pixels to set pixels to false
      */
     @GraphMethod
     public BooleanMask deflate(float radius) {
@@ -1005,9 +1014,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Set false pixels with non-like neighbors to true
-     * with a probability of {@code strength}
+     * with a probability of {@code strength} {@code count} times
      *
      * @param strength probability an edge pixel will be set to true (Values: 0-1)
+     * @param count    number of times to dilute
      * @return the modified mask
      */
     @GraphMethod
@@ -1029,6 +1039,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Perform erode {@code count} times
+     *
+     * @param strength probability an edge pixel is set to false (Values 0-1)
+     * @param count    number of times to perform erosion
      */
     @GraphMethod
     public BooleanMask erode(float strength, int count) {
@@ -1130,6 +1143,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Set all values outside the circle with radius {@code circleRadius} to false
+     *
+     * @param circleRadius radius of the circle
      */
     @GraphMethod
     public BooleanMask limitToCenteredCircle(float circleRadius) {
@@ -1147,6 +1162,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Set all values where the distance between pixels with non-like neighbors
      * is less than {@code minDist} to the local majority
+     *
+     * @param minDist threshold distance between pixels
      */
     @GraphMethod
     public BooleanMask fillGaps(int minDist) {
@@ -1158,6 +1175,8 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Set all values where the distance between pixels with non-like neighbors
      * is less than {@code minDist} to the local minority
+     *
+     * @param minDist threshold distance between pixels
      */
     @GraphMethod
     public BooleanMask widenGaps(int minDist) {
@@ -1168,18 +1187,20 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Flip all pixels in continguous areas with an area less than {@code minArea}
+     *
+     * @param maxArea maximum number of pixels in a contiguous area to qualify for flipping
      */
     @GraphMethod
-    public BooleanMask removeAreasSmallerThan(int minArea) {
+    public BooleanMask removeAreasSmallerThan(int maxArea) {
         int size = getSize();
         Set<Vector2> seen = new HashSet<>(size * size, 1f);
         return applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
             Vector2 location = new Vector2(x, y);
             if (!seen.contains(location)) {
                 boolean value = getPrimitive(location);
-                Set<Vector2> coordinates = getShapeCoordinates(location, minArea);
+                Set<Vector2> coordinates = getShapeCoordinates(location, maxArea);
                 seen.addAll(coordinates);
-                if (coordinates.size() < minArea) {
+                if (coordinates.size() < maxArea) {
                     fillCoordinates(coordinates, !value);
                 }
             }
@@ -1189,6 +1210,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Convert to a new {@link FloatMask} where true pixels are set to {@code high}
      * and false pixels are set to {@code low}
+     *
+     * @param high value for true pixels
+     * @param low  value for false pixels
      */
     @GraphMethod(returnsSelf = false)
     public FloatMask copyAsFloatMask(float low, float high) {
@@ -1202,6 +1226,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Convert to a new {@link IntegerMask} where true pixels are set to {@code high}
      * and false pixels are set to {@code low}
+     *
+     * @param high value for true pixels
+     * @param low  value for false pixels
      */
     @GraphMethod(returnsSelf = false)
     public IntegerMask copyAsIntegerMask(int low, int high) {
@@ -1214,20 +1241,34 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     /**
      * Flip all pixels in contiguous areas with an area greater than {@code maxArea}
+     *
+     * @param minArea minimum number of contiguous pixels to qualify for flipping
      */
     @GraphMethod
-    public BooleanMask removeAreasBiggerThan(int maxArea) {
-        return subtract(copy().removeAreasSmallerThan(maxArea));
+    public BooleanMask removeAreasBiggerThan(int minArea) {
+        return subtract(copy().removeAreasSmallerThan(minArea));
     }
 
+    /**
+     * Remove all areas with contiguous areas outside the given values
+     *
+     * @param minArea minimum number of contiguous pixels to remove an area
+     * @param maxArea maximum number of contiguous pixels to remove an area
+     */
     @GraphMethod
-    public BooleanMask removeAreasOutsideSizeRange(int minSize, int maxSize) {
-        return removeAreasSmallerThan(minSize).removeAreasBiggerThan(maxSize);
+    public BooleanMask removeAreasOutsideSizeRange(int minArea, int maxArea) {
+        return removeAreasSmallerThan(minArea).removeAreasBiggerThan(maxArea);
     }
 
+    /**
+     * Remove all areas with contiguous areas between the given values
+     *
+     * @param minArea minimum number of contiguous pixels to remove an area
+     * @param maxArea maximum number of contiguous pixels to remove an area
+     */
     @GraphMethod
-    public BooleanMask removeAreasInSizeRange(int minSize, int maxSize) {
-        return subtract(copy().removeAreasOutsideSizeRange(minSize, maxSize));
+    public BooleanMask removeAreasInSizeRange(int minArea, int maxArea) {
+        return subtract(copy().removeAreasOutsideSizeRange(minArea, maxArea));
     }
 
     public LinkedHashSet<Vector2> getShapeCoordinates(Vector2 location) {
@@ -1268,6 +1309,9 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return areaHash;
     }
 
+    /**
+     * Return a {@link FloatMask} which represents any pixels distance from the nearest true pixel
+     */
     @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDistanceField() {
         return copyAsDistanceField(getName() + "DistanceField");

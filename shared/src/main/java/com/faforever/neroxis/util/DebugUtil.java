@@ -23,20 +23,6 @@ public strictfp class DebugUtil {
                                                                     .orElse("not found"));
     }
 
-    public static String getStackTraceTopMethodInPackage(String packageName, String... excludedClasses) {
-        return StackWalker.getInstance()
-                          .walk(stackFrameStream -> stackFrameStream.filter(
-                                                                            stackTraceElement -> stackTraceElement.getClassName().contains(packageName)
-                                                                                                 && Arrays.stream(excludedClasses)
-                                                                                                          .noneMatch(
-                                                                                                                  excludedClass -> stackTraceElement.getClassName()
-                                                                                                                                                    .contains(
-                                                                                                                                                            excludedClass)))
-                                                                    .reduce((first, second) -> second)
-                                                                    .map(StackWalker.StackFrame::getMethodName)
-                                                                    .orElse("not found"));
-    }
-
     public static void timedRun(Runnable runnable) {
         String packageName = getStackTraceParentClass();
         timedRun(packageName.substring(0, packageName.lastIndexOf(".")), null, runnable);

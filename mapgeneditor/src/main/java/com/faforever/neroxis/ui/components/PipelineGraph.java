@@ -515,4 +515,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
                    .forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)),
                                             vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
     }
+
+    public void selectVertex(MaskGraphVertex<?> vertex) {
+        setSelectionCell(getCellForVertex(vertex));
+    }
 }

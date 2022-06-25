@@ -45,7 +45,8 @@ public strictfp class Pipeline {
         String callingLine = null;
 
         if (DebugUtil.DEBUG) {
-            callingMethod = DebugUtil.getStackTraceTopMethodInPackage("com.faforever.neroxis.mask", "TestingGround");
+            callingMethod = DebugUtil.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply",
+                                                                   "applyWithSymmetry");
             callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.generator");
         }
 
@@ -218,12 +219,16 @@ public strictfp class Pipeline {
             this.line = line;
             this.future = future.thenRunAsync(() -> {
                 if (!executingMask.isMock() && dependants.stream()
-                                                         .allMatch(entry -> entry.getExecutingMask()
-                                                                                 .equals(executingMask))) {
+                                                         .anyMatch(entry -> !entry.getExecutingMask()
+                                                                                  .equals(executingMask))) {
                     immutableResult = executingMask.immutableCopy();
                 } else {
                     immutableResult = executingMask;
                 }
+            }).exceptionally(throwable -> {
+                throwable.printStackTrace();
+                shutdown();
+                return null;
             });
         }
 

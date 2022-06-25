@@ -63,7 +63,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
         this.parallel = parallel;
         random = seed != null ? new Random(seed) : null;
         visible = true;
-        enqueue(() -> initializeMask(size));
+        initializeMask(size);
     }
 
     protected static int getShiftedValue(int val, int offset, int size, boolean wrapEdges) {
@@ -186,6 +186,7 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     @SneakyThrows
     public U immutableCopy() {
+        System.out.println("IMMUTABLE");
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
         return copy.enqueue(copy::makeImmutable);
     }

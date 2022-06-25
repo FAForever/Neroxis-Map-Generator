@@ -118,10 +118,7 @@ public class TexturePipeline extends GeneratorPipeline {
         reflectance = heightmap.copy()
                                .copyAsNormalMask(8f)
                                .resample(PreviewGenerator.PREVIEW_SIZE)
-                               .copyAsDotProduct(graphContext.getGeneratorParameters()
-                                                             .getBiome()
-                                                             .getLightingSettings()
-                                                             .getSunDirection())
+                               .copyAsDotProduct(graphContext.getBiome().getLightingSettings().getSunDirection())
                                .add(1f)
                                .divide(2f);
     }

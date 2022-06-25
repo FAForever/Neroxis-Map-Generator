@@ -144,6 +144,13 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         mask[x][y] = value;
     }
 
+    /**
+     * Add perlin noise to the mask with the given resolution and noise scale
+     *
+     * @param resolution The effective resolution of the noise which is relative to the size of the mask. E.g. 1 is
+     *                   the same size and 2 is half the size...
+     * @param scale      Multiplicative factor to scale the noise by
+     */
     @GraphMethod
     public FloatMask addPerlinNoise(int resolution, float scale) {
         int size = getSize();
@@ -227,16 +234,32 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return new Vector3(xNormal, 1, yNormal).normalize();
     }
 
+    /**
+     * Add gaussian noise to the mask with the given noise scale
+     *
+     * @param scale Multiplicative factor fo rthe noise
+     */
     @GraphMethod
     public FloatMask addGaussianNoise(float scale) {
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
     }
 
+    /**
+     * Add white/uniform noise to the mask with the given noise scale
+     *
+     * @param scale Multiplicative factor for the noise
+     */
     @GraphMethod
     public FloatMask addWhiteNoise(float scale) {
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
     }
 
+    /**
+     * Add white/uniform noise to the mask between the given values
+     *
+     * @param minValue minimum value for the noise
+     * @param maxValue maximum value for the noise
+     */
     @GraphMethod
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
@@ -320,7 +343,6 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return subtract(areasToRemove).clampMin(0f);
     }
 
-    @GraphMethod
     public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
         return enqueue(() -> {
             FloatMask brush = loadBrush(brushName, null);
@@ -329,6 +351,12 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    /**
+     * Add the distances from the nearest true pixel in the given {@link BooleanMask} to this one.
+     *
+     * @param other boolean mask to compute distances from
+     * @param scale multiplicative factor to apply before adding distances
+     */
     @GraphMethod
     public FloatMask addDistance(BooleanMask other, float scale) {
         assertCompatibleMask(other);
@@ -339,6 +367,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    /**
+     * Convert each pixel to the 2D gradient/slope of the mask at that location
+     */
     @GraphMethod
     public FloatMask gradient() {
         return enqueue(() -> {
@@ -357,6 +388,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    /**
+     * Convert each pixel to the 2D gradient/slope of the mask at that location using the gradient equation found in SCFA
+     */
     @GraphMethod
     public FloatMask supcomGradient() {
         return enqueue(() -> {
@@ -435,11 +469,24 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
+    /**
+     * Return a normal mask whose values are the normal vector of this mask at each pixel
+     * (Note the returned normal mask will have a {@link Symmetry#NONE} symmetry
+     *
+     * @return a new normal mask
+     */
     @GraphMethod(returnsSelf = false)
     public NormalMask copyAsNormalMask() {
         return copyAsNormalMask(1f);
     }
 
+    /**
+     * Return a normal mask whose values are the normal vector of this mask at each pixel
+     * (Note the returned normal mask will have a {@link Symmetry#NONE} symmetry
+     *
+     * @param scale multiplicative factor for each normal vector
+     * @return a new normal mask
+     */
     @GraphMethod(returnsSelf = false)
     public NormalMask copyAsNormalMask(float scale) {
         NormalMask normalMask = new NormalMask(this, scale, getName() + "Normals");
@@ -539,6 +586,9 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }
     }
 
+    /**
+     * Take the square root at every pixel
+     */
     @GraphMethod
     public FloatMask sqrt() {
         return apply((x, y) -> setPrimitive(x, y, (float) StrictMath.sqrt(getPrimitive(x, y))));

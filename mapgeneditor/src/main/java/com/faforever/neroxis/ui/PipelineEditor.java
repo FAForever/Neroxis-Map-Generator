@@ -5,11 +5,12 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.generator.graph.GeneratorPipeline;
 import com.faforever.neroxis.generator.serial.GeneratorGraphSerializationUtil;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.ui.components.CloseableTabComponent;
 import com.faforever.neroxis.ui.components.MaskGraphVertexEditPanel;
+import com.faforever.neroxis.ui.components.MethodListPanel;
 import com.faforever.neroxis.ui.components.PipelineGraph;
 import com.faforever.neroxis.ui.components.PipelinePane;
+import com.faforever.neroxis.ui.components.PipelineSettingsPanel;
 import com.faforever.neroxis.visualization.EntryPanel;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -21,19 +22,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
-import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import picocli.CommandLine;
@@ -43,14 +39,11 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     public static final String NEW_TAB_TITLE = "+";
     private final JFrame frame = new JFrame();
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
+    private final PipelineSettingsPanel pipelineSettingsPanel = new PipelineSettingsPanel();
     private final EntryPanel entryPanel = new EntryPanel();
     private final JFileChooser fileChooser = new JFileChooser();
-    private final JTextField seedTextField = new JTextField();
-    private final JComboBox<Integer> mapSizeComboBox = new JComboBox<>();
-    private final JComboBox<Integer> spawnCountComboBox = new JComboBox<>();
-    private final JComboBox<Integer> numTeamsComboBox = new JComboBox<>();
-    private final JComboBox<Symmetry> terrainSymmetryComboBox = new JComboBox<>();
     private final JTabbedPane tabbedPane = new JTabbedPane();
+    private final MethodListPanel methodListPanel = new MethodListPanel();
     private PipelineGraph savedGraph;
     @CommandLine.Mixin
     private DebugMixin debugMixin;
@@ -66,11 +59,13 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     @Override
     public Integer call() {
         frame.setLayout(new GridBagLayout());
+        frame.setPreferredSize(new Dimension(1600, 800));
         setupGraphTabPane();
         setupVertexEditPanel();
         setupEntryPanel();
         setupMapOptions();
         setupButtons();
+        setupMethodSelection();
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -79,7 +74,6 @@ public strictfp class PipelineEditor implements Callable<Integer> {
 
     private void setupGraphTabPane() {
         addNewPaneTabButtonToEnd();
-        tabbedPane.setPreferredSize(new Dimension(800, 800));
         tabbedPane.addChangeListener(e -> {
             int plusTabIndex = tabbedPane.indexOfTab(NEW_TAB_TITLE);
             if (tabbedPane.getSelectedIndex() == plusTabIndex && plusTabIndex != -1) {
@@ -104,7 +98,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 1;
-        constraints.weightx = 4;
+        constraints.weightx = 10;
         constraints.gridy = 0;
         constraints.weighty = 1;
         constraints.gridheight = 5;
@@ -133,6 +127,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             if (vertex != null && vertex.isComputed()) {
                 entryPanel.setMask(vertex.getImmutableResult(MaskGraphVertex.SELF));
             }
+            methodListPanel.setVertex(vertex);
         });
         CloseableTabComponent closeableTabComponent = new CloseableTabComponent(tabbedPane);
         tabbedPane.addTab("", pipelinePane);
@@ -153,83 +148,34 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     }
 
     private void setupVertexEditPanel() {
-        vertexEditPanel.setPreferredSize(new Dimension(400, 300));
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
-        constraints.weightx = 1;
+        constraints.weightx = 0;
         constraints.gridy = 0;
         constraints.weighty = 1;
         frame.add(vertexEditPanel, constraints);
     }
 
     private void setupEntryPanel() {
-        entryPanel.setPreferredSize(new Dimension(400, 400));
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
-        constraints.weightx = 1;
+        constraints.weightx = 0;
         constraints.gridy = 1;
-        constraints.weighty = 1;
+        constraints.weighty = 4;
         frame.add(entryPanel, constraints);
     }
 
     private void setupMapOptions() {
-        JPanel optionsPanel = new JPanel();
-        optionsPanel.setLayout(new GridLayout(0, 2));
-
-        optionsPanel.add(new JLabel("Seed"));
-        optionsPanel.add(seedTextField);
-
-        optionsPanel.add(new JLabel("Map Size"));
-        optionsPanel.add(mapSizeComboBox);
-
-        IntStream.range(4, 17).forEach(i -> mapSizeComboBox.addItem(i * 64));
-        optionsPanel.add(new JLabel("Spawn Count"));
-
-        optionsPanel.add(spawnCountComboBox);
-        IntStream.range(2, 17).forEach(spawnCountComboBox::addItem);
-
-        spawnCountComboBox.addActionListener(e -> {
-            Object selected = numTeamsComboBox.getSelectedItem();
-            numTeamsComboBox.removeAllItems();
-            IntStream.range(1, 9)
-                     .filter(i -> ((int) spawnCountComboBox.getSelectedItem() % i) == 0)
-                     .forEach(numTeamsComboBox::addItem);
-            if (selected != null) {
-                numTeamsComboBox.setSelectedItem(selected);
-            }
-        });
-
-        optionsPanel.add(new JLabel("Num Teams"));
-        optionsPanel.add(numTeamsComboBox);
-
-        numTeamsComboBox.addActionListener(e -> {
-            Object selected = terrainSymmetryComboBox.getSelectedItem();
-            terrainSymmetryComboBox.removeAllItems();
-            if (numTeamsComboBox.getSelectedItem() != null) {
-                Arrays.stream(Symmetry.values())
-                      .filter(symmetry -> (symmetry.getNumSymPoints() % (int) numTeamsComboBox.getSelectedItem()) == 0)
-                      .forEach(terrainSymmetryComboBox::addItem);
-                if (selected != null) {
-                    terrainSymmetryComboBox.setSelectedItem(selected);
-                }
-            }
-        });
-
-        spawnCountComboBox.setSelectedIndex(0);
-
-        optionsPanel.add(new JLabel("Terrain Symmetry"));
-        optionsPanel.add(terrainSymmetryComboBox);
-
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
-        constraints.weightx = 1;
+        constraints.weightx = 0;
         constraints.gridy = 2;
         constraints.weighty = 0;
 
-        frame.add(optionsPanel, constraints);
+        frame.add(pipelineSettingsPanel, constraints);
     }
 
     private void setupButtons() {
@@ -273,13 +219,25 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         frame.add(buttonPanel, constraints);
     }
 
+    private void setupMethodSelection() {
+        methodListPanel.setMinimumSize(new Dimension(250, 0));
+        methodListPanel.setPreferredSize(new Dimension(250, 0));
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 2;
+        constraints.weightx = 0;
+        constraints.gridy = 0;
+        constraints.gridheight = 4;
+        constraints.weighty = 1;
+        frame.add(methodListPanel, constraints);
+    }
+
     private void runGraph() {
-        String seedString = seedTextField.getText();
-        Long seed = seedString == null || seedString.isBlank() ? null : Long.parseLong(seedString);
-        ((PipelinePane) tabbedPane.getSelectedComponent()).runGraph(seed, (Integer) numTeamsComboBox.getSelectedItem(),
-                                                                    (Integer) mapSizeComboBox.getSelectedItem(),
-                                                                    (Integer) spawnCountComboBox.getSelectedItem(),
-                                                                    (Symmetry) terrainSymmetryComboBox.getSelectedItem());
+        ((PipelinePane) tabbedPane.getSelectedComponent()).runGraph(pipelineSettingsPanel.getSeed(),
+                                                                    pipelineSettingsPanel.getNumTeams(),
+                                                                    pipelineSettingsPanel.getMapSize(),
+                                                                    pipelineSettingsPanel.getSpawnCount(),
+                                                                    pipelineSettingsPanel.getSymmetry());
     }
 
     private void importPipeline() {

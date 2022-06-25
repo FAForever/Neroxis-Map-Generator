@@ -15,6 +15,7 @@ import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
 import com.faforever.neroxis.ngraph.swing.handler.Rubberband;
 import com.faforever.neroxis.ngraph.view.Graph;
+import com.faforever.neroxis.ui.transfer.PipelineGraphTransferHandler;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.awt.Component;
 import java.awt.Point;
@@ -144,7 +145,7 @@ public class PipelineGraphComponent extends GraphComponent {
                                             MaskGraphReflectUtil.getMaskGraphConstructor(maskClass));
                                     newVertex.setIdentifier(String.valueOf(newVertex.hashCode()));
                                     pipelineGraph.addVertex(newVertex);
-                                    moveVertexToMouse(newVertex, mouseEvent);
+                                    moveVertexToPoint(newVertex, mouseEvent.getPoint());
                                     pipelineGraph.refresh();
                                     pipelineGraph.clearSelection();
                                     pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
@@ -183,7 +184,7 @@ public class PipelineGraphComponent extends GraphComponent {
                                             public void actionPerformed(ActionEvent e) {
                                                 MaskMethodVertex newVertex = new MaskMethodVertex(method, maskClass);
                                                 pipelineGraph.addVertex(newVertex);
-                                                moveVertexToMouse(newVertex, mouseEvent);
+                                                moveVertexToPoint(newVertex, mouseEvent.getPoint());
                                                 pipelineGraph.refresh();
                                                 pipelineGraph.clearSelection();
                                                 pipelineGraph.addSelectionCell(
@@ -235,10 +236,11 @@ public class PipelineGraphComponent extends GraphComponent {
         }
     }
 
-    private void moveVertexToMouse(MaskGraphVertex<?> newVertex, MouseEvent mouseEvent) {
+    public void moveVertexToPoint(MaskGraphVertex<?> newVertex, Point point) {
         Geometry geometry = pipelineGraph.getCellForVertex(newVertex).getGeometry();
-        geometry.setX(mouseEvent.getX());
-        geometry.setY(mouseEvent.getY());
+        geometry.setX(point.getX());
+        geometry.setY(point.getY());
+        refresh();
     }
 
     private JScrollMenu buildTransformationSubMenu(MouseEvent mouseEvent, MaskGraphVertex<?> selected,
@@ -253,7 +255,7 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addVertex(newVertex);
                         pipelineGraph.addEdge(selected, newVertex,
                                               new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
-                        moveVertexToMouse(newVertex, mouseEvent);
+                        moveVertexToPoint(newVertex, mouseEvent.getPoint());
                         pipelineGraph.refresh();
                         pipelineGraph.clearSelection();
                         pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
@@ -267,7 +269,7 @@ public class PipelineGraphComponent extends GraphComponent {
                         pipelineGraph.addVertex(newVertex);
                         pipelineGraph.addEdge(selected, newVertex,
                                               new MaskMethodEdge(resultName, MaskMethodVertex.EXECUTOR));
-                        moveVertexToMouse(newVertex, mouseEvent);
+                        moveVertexToPoint(newVertex, mouseEvent.getPoint());
                         pipelineGraph.refresh();
                         pipelineGraph.clearSelection();
                         pipelineGraph.addSelectionCell(pipelineGraph.getCellForVertex(newVertex));
@@ -307,7 +309,7 @@ public class PipelineGraphComponent extends GraphComponent {
                                                     pipelineGraph.addEdge(newVertex, target,
                                                                           new MaskMethodEdge(MaskGraphVertex.SELF,
                                                                                              MaskMethodVertex.EXECUTOR));
-                                                    moveVertexToMouse(newVertex, mouseEvent);
+                                                    moveVertexToPoint(newVertex, mouseEvent.getPoint());
                                                     pipelineGraph.refresh();
                                                     pipelineGraph.clearSelection();
                                                     pipelineGraph.addSelectionCell(
@@ -332,7 +334,7 @@ public class PipelineGraphComponent extends GraphComponent {
                                                     pipelineGraph.addEdge(newVertex, target,
                                                                           new MaskMethodEdge(MaskGraphVertex.SELF,
                                                                                              MaskMethodVertex.EXECUTOR));
-                                                    moveVertexToMouse(newVertex, mouseEvent);
+                                                    moveVertexToPoint(newVertex, mouseEvent.getPoint());
                                                     pipelineGraph.refresh();
                                                     pipelineGraph.clearSelection();
                                                     pipelineGraph.addSelectionCell(

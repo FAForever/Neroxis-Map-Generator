@@ -138,7 +138,7 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
         if (!isComputed()) {
             throw new IllegalStateException("Cannot get result, not yet computed");
         }
-        if (!immutableResults.containsKey(resultName)) {
+        if (!results.containsKey(resultName)) {
             throw new IllegalArgumentException("Result name not recognized");
         }
         return results.get(resultName);
@@ -223,9 +223,9 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     public void prepareResults(GraphContext graphContext,
-                               boolean failOUndefined) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+                               boolean failOnUndefined) throws InvocationTargetException, IllegalAccessException, InstantiationException {
         if (!isDefined(graphContext)) {
-            if (!failOUndefined) {
+            if (!failOnUndefined) {
                 return;
             }
 
@@ -284,7 +284,7 @@ public abstract strictfp class MaskGraphVertex<T extends Executable> {
     }
 
     public String toString() {
-        return (identifier == null ? "" : identifier) + getExecutableName();
+        return (identifier == null ? "" : identifier) + " " + getExecutableName();
     }
 
     public abstract MaskGraphVertex<T> copy();
