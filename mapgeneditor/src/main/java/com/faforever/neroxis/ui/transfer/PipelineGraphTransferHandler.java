@@ -10,14 +10,15 @@ import com.faforever.neroxis.ngraph.swing.util.GraphTransferable;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ui.components.PipelineGraphComponent;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 public class PipelineGraphTransferHandler extends GraphTransferHandler {
     private final PipelineGraphComponent pipelineGraphComponent;
@@ -64,8 +65,9 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
                         MaskMethodVertex vertex = new MaskMethodVertex(method, clazz);
 
                         pipelineGraphComponent.getGraph().addVertex(vertex);
-                        pipelineGraphComponent.moveVertexToPoint(vertex, pipelineGraphComponent.getMousePosition());
-                        pipelineGraphComponent.getGraph().selectVertex(vertex);
+                        Point mousePosition = SwingUtilities.convertPoint(c, c.getMousePosition(), graphComponent.getGraphControl());
+                        pipelineGraphComponent.moveVertexToMousePosition(vertex, mousePosition);
+                        pipelineGraphComponent.getGraph().selectVertexIfExists(vertex);
                     }
                 }
             } catch (Exception ex) {
@@ -90,13 +92,13 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
     public void exportDone(JComponent c, Transferable data, int action) {
         if (c instanceof GraphComponent && data instanceof GraphTransferable) {
             pipelineGraphComponent.getGraph()
-                                  .getAllEdges(((GraphTransferable) data).getCells())
-                                  .stream()
-                                  .map(ICell::getGeometry)
-                                  .filter(Objects::nonNull)
-                                  .map(Geometry::getPoints)
-                                  .filter(Objects::nonNull)
-                                  .forEach(List::clear);
+                    .getAllEdges(((GraphTransferable) data).getCells())
+                    .stream()
+                    .map(ICell::getGeometry)
+                    .filter(Objects::nonNull)
+                    .map(Geometry::getPoints)
+                    .filter(Objects::nonNull)
+                    .forEach(List::clear);
         }
         super.exportDone(c, data, action);
     }

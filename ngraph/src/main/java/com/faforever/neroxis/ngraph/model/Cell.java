@@ -3,13 +3,14 @@
  */
 package com.faforever.neroxis.ngraph.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.w3c.dom.Node;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
-import org.w3c.dom.Node;
 
 /**
  * Cells are the elements of the graph model. They represent the state

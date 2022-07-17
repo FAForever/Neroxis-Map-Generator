@@ -8,21 +8,15 @@
  */
 package com.faforever.neroxis.ngraph.swing.handler;
 
-import com.faforever.neroxis.ngraph.event.ChangeEvent;
-import com.faforever.neroxis.ngraph.event.DownEvent;
+import com.faforever.neroxis.ngraph.event.*;
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
-import com.faforever.neroxis.ngraph.event.PaintEvent;
-import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
-import com.faforever.neroxis.ngraph.event.ScaleEvent;
-import com.faforever.neroxis.ngraph.event.TranslateEvent;
-import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -30,7 +24,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import javax.swing.SwingUtilities;
 
 public class SelectionCellsHandler implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = -882368002120921842L;
@@ -105,7 +98,7 @@ public class SelectionCellsHandler implements MouseListener, MouseMotionListener
             graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) refreshHandler);
             graph.getView().addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) refreshHandler);
             graph.getView()
-                 .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) refreshHandler);
+                    .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) refreshHandler);
             graph.getView().addListener(DownEvent.class, (IEventListener<DownEvent>) refreshHandler);
             graph.getView().addListener(UpEvent.class, (IEventListener<UpEvent>) refreshHandler);
             // Refreshes the handles if moveVertexLabels or moveEdgeLabels changes

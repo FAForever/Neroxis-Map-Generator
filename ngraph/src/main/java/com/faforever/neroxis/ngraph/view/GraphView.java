@@ -3,14 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
-import com.faforever.neroxis.ngraph.event.CellStateEvent;
-import com.faforever.neroxis.ngraph.event.DownEvent;
-import com.faforever.neroxis.ngraph.event.EventSource;
-import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
-import com.faforever.neroxis.ngraph.event.ScaleEvent;
-import com.faforever.neroxis.ngraph.event.TranslateEvent;
-import com.faforever.neroxis.ngraph.event.UndoEvent;
-import com.faforever.neroxis.ngraph.event.UpEvent;
+import com.faforever.neroxis.ngraph.event.*;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
@@ -24,11 +17,8 @@ import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.util.Overflow;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.style.util.WhiteSpace;
-import com.faforever.neroxis.ngraph.util.Constants;
-import com.faforever.neroxis.ngraph.util.PointDouble;
-import com.faforever.neroxis.ngraph.util.RectangleDouble;
-import com.faforever.neroxis.ngraph.util.UndoableEdit;
-import com.faforever.neroxis.ngraph.util.Utils;
+import com.faforever.neroxis.ngraph.util.*;
+
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +65,7 @@ public class GraphView extends EventSource {
     /**
      * Reference to the enclosing graph.
      */
-    protected Graph graph;
+    protected final Graph graph;
     /**
      * Cell that acts as the root of the displayed cell hierarchy.
      */
@@ -332,7 +322,7 @@ public class GraphView extends EventSource {
 
                 for (int i = 0; i < childCount; i++) {
                     validateCell(model.getChildAt(cell, i),
-                                 visible && (!graph.isCellCollapsed(cell) || cell == currentRoot));
+                            visible && (!graph.isCellCollapsed(cell) || cell == currentRoot));
                 }
             }
         }
@@ -384,11 +374,11 @@ public class GraphView extends EventSource {
 
                             if (orig != null) {
                                 origin.setX(origin.getX() + (orig.getX() / scale)
-                                            - pState.getOrigin().getX()
-                                            - translate.getX());
+                                        - pState.getOrigin().getX()
+                                        - translate.getX());
                                 origin.setY(origin.getY() + (orig.getY() / scale)
-                                            - pState.getOrigin().getY()
-                                            - translate.getY());
+                                        - pState.getOrigin().getY()
+                                        - translate.getY());
                             }
                         } else {
                             origin.setX(origin.getX() + geo.getX() * pState.getWidth() / scale + offset.getX());
@@ -653,10 +643,10 @@ public class GraphView extends EventSource {
         // as such edges are invalid and produce NPEs in the edge styles.
         // Also removes connected edges that have no visible terminals.
         if ((graph.getModel().getTerminal(state.getCell(), true) != null && source == null) || (source == null
-                                                                                                && geo.getTerminalPoint(
+                && geo.getTerminalPoint(
                 true) == null) || (graph.getModel().getTerminal(state.getCell(), false) != null && target == null) || (
-                    target == null
-                    && geo.getTerminalPoint(false) == null)) {
+                target == null
+                        && geo.getTerminalPoint(false) == null)) {
             clear(state.getCell(), true, true);
         } else {
             updateFixedTerminalPoints(state, source, target);
@@ -664,9 +654,9 @@ public class GraphView extends EventSource {
             updateFloatingTerminalPoints(state, source, target);
 
             if (state.getCell() != getCurrentRoot() && (state.getAbsolutePointCount() < 2
-                                                        || state.getAbsolutePoint(0) == null
-                                                        || state.getAbsolutePoint(state.getAbsolutePointCount() - 1)
-                                                           == null)) {
+                    || state.getAbsolutePoint(0) == null
+                    || state.getAbsolutePoint(state.getAbsolutePointCount() - 1)
+                    == null)) {
                 // This will remove edges with invalid points from the list of
                 // states in the view.
                 // Happens if the one of the terminals and the corresponding
@@ -709,9 +699,9 @@ public class GraphView extends EventSource {
         // Applies word wrapping to labels and stores the result in the
         // state
         if (label != null
-            && label.length() > 0
-            && !graph.getModel().isEdge(state.getCell())
-            && style.getLabel().getWhiteSpace() == WhiteSpace.WRAP) {
+                && label.length() > 0
+                && !graph.getModel().isEdge(state.getCell())
+                && style.getLabel().getWhiteSpace() == WhiteSpace.WRAP) {
             double w = getWordWrapWidth(state);
             // The lines for wrapping within the given width are calculated for
             // no
@@ -726,7 +716,7 @@ public class GraphView extends EventSource {
             // the
             // label bounds will vary.
             String[] lines = Utils.wordWrap(label, Utils.getFontMetrics(Utils.getFont(state.getStyle())),
-                                            w * Constants.LABEL_SCALE_BUFFER);
+                    w * Constants.LABEL_SCALE_BUFFER);
 
             if (lines.length > 0) {
                 StringBuilder buffer = new StringBuilder();
@@ -752,12 +742,12 @@ public class GraphView extends EventSource {
         // Computes the available width for the wrapped label
         if (horizontal) {
             w = (state.getWidth() / scale)
-                - 2 * Constants.LABEL_INSET
-                - style.getLabel().getLeftSpacing()
-                - style.getLabel().getRightSpacing();
+                    - 2 * Constants.LABEL_INSET
+                    - style.getLabel().getLeftSpacing()
+                    - style.getLabel().getRightSpacing();
         } else {
             w = (state.getHeight() / scale) - 2 * Constants.LABEL_INSET - style.getLabel().getTopSpacing()
-                + style.getLabel().getBottomSpacing();
+                    + style.getLabel().getBottomSpacing();
         }
         return w;
     }
@@ -936,7 +926,7 @@ public class GraphView extends EventSource {
             }
             state.setLabelBounds(
                     Utils.getLabelPaintBounds(state.getLabel(), style, state.getAbsoluteOffset(), vertexBounds, scale,
-                                              graph.getModel().isEdge(cell)));
+                            graph.getModel().isEdge(cell)));
 
             if (overflow.equals("width")) {
                 state.getLabelBounds().setX(state.getX());
@@ -993,7 +983,7 @@ public class GraphView extends EventSource {
 
             if (pt != null) {
                 pt = new PointDouble(scale * (translate.getX() + pt.getX() + orig.getX()),
-                                     scale * (translate.getY() + pt.getY() + orig.getY()));
+                        scale * (translate.getY() + pt.getY() + orig.getY()));
             }
         }
 
@@ -1042,7 +1032,7 @@ public class GraphView extends EventSource {
     public PointDouble transformControlPoint(CellState state, PointDouble pt) {
         PointDouble origin = state.getOrigin();
         return new PointDouble(scale * (pt.getX() + translate.getX() + origin.getX()),
-                               scale * (pt.getY() + translate.getY() + origin.getY()));
+                scale * (pt.getY() + translate.getY() + origin.getY()));
     }
 
     /**
@@ -1059,8 +1049,8 @@ public class GraphView extends EventSource {
         PointDouble next = getNextPoint(edge, end, source);
         double border = edge.getStyle().getPerimeter().getVertexSpacing();
         border += source ? edge.getStyle().getPerimeter().getSourceSpacing() : edge.getStyle()
-                                                                                   .getPerimeter()
-                                                                                   .getTargetSpacing();
+                .getPerimeter()
+                .getTargetSpacing();
         PointDouble pt = getPerimeterPoint(start, next, graph.isOrthogonal(edge), border);
         edge.setAbsoluteTerminalPoint(pt, source);
     }
@@ -1112,8 +1102,8 @@ public class GraphView extends EventSource {
      */
     public CellState getTerminalPort(CellState state, CellState terminal, boolean source) {
         ICell portCell = source ? state.getStyle().getEdge().getSourcePort() : state.getStyle()
-                                                                                    .getEdge()
-                                                                                    .getTargetPort();
+                .getEdge()
+                .getTargetPort();
         if (portCell == null) {
             return terminal;
         }
@@ -1356,7 +1346,7 @@ public class GraphView extends EventSource {
 
                 // Constructs the relative point for the label
                 return new PointDouble(Math.round(((totalLength / 2 - length - projlen) / totalLength) * -2),
-                                       Math.round(yDistance / scale));
+                        Math.round(yDistance / scale));
             }
         }
         return new PointDouble();
@@ -1391,15 +1381,15 @@ public class GraphView extends EventSource {
     @Override
     public String toString() {
         return getClass().getSimpleName()
-               + " [currentRoot="
-               + currentRoot
-               + ", graphBounds="
-               + graphBounds
-               + ", scale="
-               + scale
-               + ", translate="
-               + translate
-               + "]";
+                + " [currentRoot="
+                + currentRoot
+                + ", graphBounds="
+                + graphBounds
+                + ", scale="
+                + scale
+                + ", translate="
+                + translate
+                + "]";
     }
 
     /**

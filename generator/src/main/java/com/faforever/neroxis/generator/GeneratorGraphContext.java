@@ -6,12 +6,13 @@ import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.SymmetrySelector;
-import java.util.Random;
 import lombok.Getter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import java.util.Random;
 
 @Getter
 public strictfp class GeneratorGraphContext implements GraphContext {
@@ -27,11 +28,14 @@ public strictfp class GeneratorGraphContext implements GraphContext {
     private final float rampDensity;
     private final float reclaimDensity;
     private final float mexDensity;
+    private final float plateauHeight;
+    private final float landHeight;
+    private final float waterHeight;
     private final int mapSize;
     private final int numSymPoints;
     private final String mountainBrush;
     private final String plateauBrush;
-    private final String hillBrush;
+    private final String oceanBrush;
     private String identifier;
 
     public GeneratorGraphContext(long seed, GeneratorParameters generatorParameters,
@@ -39,21 +43,24 @@ public strictfp class GeneratorGraphContext implements GraphContext {
         random = new Random(seed);
         mountainBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
         plateauBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
-        hillBrush = Brushes.HILL_BRUSHES.get(random.nextInt(Brushes.HILL_BRUSHES.size()));
+        oceanBrush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                                                                                   generatorParameters.getTerrainSymmetry(),
-                                                                                   generatorParameters.getSpawnCount(),
-                                                                                   generatorParameters.getNumTeams());
+                generatorParameters.getTerrainSymmetry(),
+                generatorParameters.getSpawnCount(),
+                generatorParameters.getNumTeams());
         biome = generatorParameters.getBiome();
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         plateauDensity = parameterConstraints.getPlateauDensityRange()
-                                             .normalize(generatorParameters.getPlateauDensity());
+                .normalize(generatorParameters.getPlateauDensity());
         mountainDensity = parameterConstraints.getMountainDensityRange()
-                                              .normalize(generatorParameters.getMountainDensity());
+                .normalize(generatorParameters.getMountainDensity());
         rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.getRampDensity());
         mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.getMexDensity());
         reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.getMexDensity());
+        plateauHeight = 6f;
+        landHeight = .25f;
+        waterHeight = biome.getWaterSettings().getElevation();
         map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
         mapSize = generatorParameters.getMapSize();
         parser = new SpelExpressionParser();

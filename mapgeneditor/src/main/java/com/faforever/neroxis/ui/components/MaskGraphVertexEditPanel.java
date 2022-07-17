@@ -1,5 +1,6 @@
 package com.faforever.neroxis.ui.components;
 
+import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.generator.GeneratorGraphContext;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
@@ -8,17 +9,13 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.ui.listener.LostFocusListener;
 import com.faforever.neroxis.ui.model.GraphVertexParameterTableModel;
 import com.faforever.neroxis.ui.renderer.StringTableCellRenderer;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import static javax.swing.SwingConstants.CENTER;
-import javax.swing.table.TableCellEditor;
 import lombok.Setter;
+
+import javax.swing.*;
+import javax.swing.table.TableCellEditor;
+import java.awt.*;
+
+import static javax.swing.SwingConstants.CENTER;
 
 public class MaskGraphVertexEditPanel extends JPanel {
     private final GraphVertexParameterTableModel parameterTableModel = new GraphVertexParameterTableModel();
@@ -92,11 +89,12 @@ public class MaskGraphVertexEditPanel extends JPanel {
 
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
         GeneratorParameters generatorParameters = GeneratorParameters.builder()
-                                                                     .terrainSymmetry(Symmetry.POINT2)
-                                                                     .mapSize(512)
-                                                                     .numTeams(2)
-                                                                     .spawnCount(2)
-                                                                     .build();
+                .terrainSymmetry(Symmetry.POINT2)
+                .mapSize(512)
+                .numTeams(2)
+                .spawnCount(2)
+                .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
+                .build();
         GeneratorGraphContext graphContext = new GeneratorGraphContext(0L, generatorParameters, parameterConstraints);
         pipelinePane.getGraph().setVertexDefined(vertex, vertex.isDefined(graphContext));
     }

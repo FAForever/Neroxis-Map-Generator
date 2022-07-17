@@ -1,12 +1,13 @@
 package com.faforever.neroxis.map;
 
-import java.util.ArrayList;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public strictfp class Group {
     private final String id;
-    private final ArrayList<Unit> units;
+    private final List<Unit> units;
 
     public Unit getUnit(String id) {
         return units.stream().filter(unit -> unit.getId().equals(id)).findFirst().orElse(null);

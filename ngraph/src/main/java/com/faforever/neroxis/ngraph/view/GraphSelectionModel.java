@@ -14,11 +14,8 @@ import com.faforever.neroxis.ngraph.event.UndoEvent;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * Implements the selection model for a graph.
@@ -207,7 +204,7 @@ public class GraphSelectionModel extends EventSource {
      *
      * @return Returns true if the given cell is selected.
      */
-    public boolean isSelected(Object cell) {
+    public boolean isSelected(ICell cell) {
         return cell != null && cells.contains(cell);
     }
 

@@ -3,12 +3,7 @@ package com.faforever.neroxis.toolsuite;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.importer.MapImporter;
-import com.faforever.neroxis.map.PositionedObject;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
-import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
@@ -16,19 +11,14 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import picocli.CommandLine;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import picocli.CommandLine;
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Mixin;
-import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Spec;
+
+import static picocli.CommandLine.*;
 
 @Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapEvaluator implements Callable<Integer> {
@@ -79,7 +69,7 @@ public strictfp class MapEvaluator implements Callable<Integer> {
         Set<Vector3> locationsSet = new HashSet<>(locations);
         while (locationsSet.size() > 0) {
             Vector3 location = locations.remove(0);
-            Vector2 symmetryPoint = mask.getSymmetryPoints(location, SymmetryType.SPAWN).get(0);
+            Vector2 symmetryPoint = mask.getSymmetryPointsWithOutOfBounds(location, SymmetryType.SPAWN).get(0);
             Vector3 closestLoc = null;
             float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
             for (Vector3 other : locations) {
@@ -156,12 +146,12 @@ public strictfp class MapEvaluator implements Callable<Integer> {
 
     private void evaluate() {
         List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
-                                          .filter(symmetry -> symmetry.getNumSymPoints() == 2)
-                                          .collect(Collectors.toList());
+                .filter(symmetry -> symmetry.getNumSymPoints() == 2)
+                .collect(Collectors.toList());
         for (Symmetry symmetry : symmetries) {
             SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
             heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
-                                       "heightMask");
+                    "heightMask");
             evaluateTerrain();
             evaluateSpawns();
             evaluateMexes();
@@ -199,19 +189,16 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     }
 
     private void evaluateProps() {
-        DebugUtil.timedRun("evaluateProps", () -> propScore = getPositionedObjectScore(map.getProps(), heightMask));
+        DebugUtil.timedRun("evaluateProps", () -> propScore = (float) map.getProps().stream().collect(Collectors.groupingBy(Prop::getPath))
+                .values().stream().mapToDouble(props -> getPositionedObjectScore(props, heightMask))
+                .sum());
     }
 
     private void evaluateUnits() {
-        DebugUtil.timedRun("evaluateUnits", () -> unitScore = getPositionedObjectScore(map.getArmies()
-                                                                                          .stream()
-                                                                                          .flatMap(
-                                                                                                  army -> army.getGroups()
-                                                                                                              .stream()
-                                                                                                              .flatMap(
-                                                                                                                      group -> group.getUnits()
-                                                                                                                                    .stream()))
-                                                                                          .collect(Collectors.toList()),
-                                                                                       heightMask));
+        DebugUtil.timedRun("evaluateUnits", () -> unitScore = (float) map.getArmies().stream()
+                .flatMap(army -> army.getGroups().stream().flatMap(group -> group.getUnits().stream()
+                        .collect(Collectors.groupingBy(Unit::getType)).values().stream()))
+                .mapToDouble(units -> getPositionedObjectScore(units, heightMask))
+                .sum());
     }
 }

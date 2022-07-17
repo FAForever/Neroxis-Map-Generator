@@ -10,16 +10,6 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import com.github.therapi.runtimejavadoc.MethodJavadoc;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.jgrapht.GraphType;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -27,6 +17,10 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.graph.DefaultListenableGraph;
 import org.jgrapht.graph.DirectedAcyclicGraph;
+
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class PipelineGraph extends Graph implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge>, Iterable<MaskGraphVertex<?>>, org.jgrapht.Graph<MaskGraphVertex<?>, MaskMethodEdge> {
     private final DirectedAcyclicGraph<MaskGraphVertex<?>, MaskMethodEdge> dag;
@@ -51,8 +45,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         this.dag = dag;
         listenableGraph = new DefaultListenableGraph<>(dag);
         listenableGraph.addGraphListener(this);
-        vertexSet().forEach(this::addVisualVertexIfNecessary);
-        edgeSet().forEach(this::addVisualEdgeIfNecessary);
+        vertexSet().forEach(this::addVisualVertexOnly);
+        edgeSet().forEach(this::addVisualEdgeOnly);
     }
 
     public void addGraphListener(GraphListener<MaskGraphVertex<?>, MaskMethodEdge> l) {
@@ -66,8 +60,8 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         MaskGraphVertex<?> edgeTarget = edge.getTarget();
         MaskGraphVertex<?> edgeSource = edge.getSource();
         edgeTarget.setParameter(parameterName,
-                                new MaskVertexResult(edge.getParameterName(), edge.getResultName(), edgeSource));
-        addVisualEdgeIfNecessary(edge);
+                new MaskVertexResult(edge.getParameterName(), edge.getResultName(), edgeSource));
+        addVisualEdgeOnly(edge);
     }
 
     @Override
@@ -101,10 +95,10 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             return parentCell;
         }
         return parentCell.getChildren()
-                         .stream()
-                         .filter(child -> subName.equals(child.getValue()))
-                         .findFirst()
-                         .orElse(null);
+                .stream()
+                .filter(child -> subName.equals(child.getValue()))
+                .findFirst()
+                .orElse(null);
     }
 
     public void setVertexDefined(MaskGraphVertex<?> vertex, boolean defined) {
@@ -127,7 +121,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         return getCellForVertex(vertex, null);
     }
 
-    private void addVisualEdgeIfNecessary(MaskMethodEdge edge) {
+    public void addVisualEdgeOnly(MaskMethodEdge edge) {
         MaskGraphVertex<?> edgeSource = edge.getSource();
         MaskGraphVertex<?> edgeTarget = edge.getTarget();
         ICell parentSourceCell = getCellForVertex(edgeSource);
@@ -155,12 +149,12 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         if (resultCell == null) {
             throw new IllegalStateException(
                     String.format("Cell does not exist for vertex `%s` `%s`", edgeSource.getIdentifier(),
-                                  edge.getResultName()));
+                            edge.getResultName()));
         }
         if (parameterCell == null) {
             throw new IllegalStateException(
                     String.format("Cell does not exist for vertex `%s` `%s`", edgeTarget.getIdentifier(),
-                                  edge.getParameterName()));
+                            edge.getParameterName()));
         }
         List<ICell> knownSubEdges = getEdgesBetween(resultCell, parameterCell);
         if (knownSubEdges.isEmpty()) {
@@ -170,7 +164,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     @Override
     public void vertexAdded(GraphVertexChangeEvent<MaskGraphVertex<?>> e) {
-        addVisualVertexIfNecessary(e.getVertex());
+        addVisualVertexOnly(e.getVertex());
     }
 
     @Override
@@ -178,21 +172,21 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
         removeVisualVertex(e.getVertex());
     }
 
-    private void addVisualVertexIfNecessary(MaskGraphVertex<?> vertex) {
+    public void addVisualVertexOnly(MaskGraphVertex<?> vertex) {
         ICell cell = getCellForVertex(vertex);
         if (cell == null) {
             cell = insertVertex(getDefaultParent(), null, vertex.getIdentifier(), 0, 0, baseSize, baseSize);
             int numMaskParameters = vertex.getMaskParameters().size();
             for (int i = 0; i < numMaskParameters; ++i) {
                 insertVertex(cell, null, vertex.getMaskParameters().get(i), widthPadding,
-                             getSubCellYPadding(numMaskParameters, i), baseSize * widthFactor,
-                             getSubCellHeight(numMaskParameters), null, true);
+                        getSubCellYPadding(numMaskParameters, i), baseSize * widthFactor,
+                        getSubCellHeight(numMaskParameters), null, true);
             }
             int numResults = vertex.getResultNames().size();
             for (int i = 0; i < numResults; ++i) {
                 insertVertex(cell, null, vertex.getResultNames().get(i), 1 - widthFactor - widthPadding,
-                             getSubCellYPadding(numResults, i), baseSize * widthFactor, getSubCellHeight(numResults),
-                             null, true);
+                        getSubCellYPadding(numResults, i), baseSize * widthFactor, getSubCellHeight(numResults),
+                        null, true);
             }
             vertexToCell.put(vertex, cell);
             cellToVertex.put(cell, vertex);
@@ -389,7 +383,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
     public boolean isValidSource(ICell cell) {
         MaskGraphVertex<?> vertex = getVertexForCell(cell);
         return vertex != null && cell.getParent() != getDefaultParent() && vertex.getResultNames()
-                                                                                 .contains((String) cell.getValue());
+                .contains((String) cell.getValue());
     }
 
     @Override
@@ -402,7 +396,7 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
                 if (cell.isVertex() && getDefaultParent().equals(cell.getParent()) && getVertexForCell(cell) != null) {
                     MaskGraphVertex<?> vertex = getVertexForCell(cell);
                     result = String.format("%s\n%s\n%s", convertValueToString(cell), vertex.getExecutableName(),
-                                           vertex.getExecutorClass().getSimpleName());
+                            vertex.getExecutorClass().getSimpleName());
                 } else {
                     result = convertValueToString(cell);
                 }
@@ -420,22 +414,23 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
         MethodJavadoc javadoc = MaskGraphReflectUtil.getJavadoc(vertex.getExecutable());
         String parametersJavadoc = javadoc.getParams()
-                                          .stream()
-                                          .map(paramJavadoc -> String.format("%s - %s", paramJavadoc.getName(),
-                                                                             paramJavadoc.getComment()))
-                                          .collect(Collectors.joining("<br>"));
+                .stream()
+                .map(paramJavadoc -> String.format("%s - %s", paramJavadoc.getName(),
+                        paramJavadoc.getComment()))
+                .collect(Collectors.joining("<br>"));
+
         return String.format("<html>%s -> %s<br>%s<br>%s</html>", vertex.getIdentifier(), javadoc.getName(),
-                             javadoc.getComment(), parametersJavadoc);
+                javadoc.getComment(), parametersJavadoc);
     }
 
     @Override
     public boolean isValidTarget(ICell cell) {
         MaskGraphVertex<?> vertex = getVertexForCell(cell);
         return vertex != null
-               && cell.getParent() != getDefaultParent()
-               && vertex.getMaskParameters()
-                        .contains((String) cell.getValue())
-               && vertex.isMaskParameterNull((String) cell.getValue());
+                && cell.getParent() != getDefaultParent()
+                && vertex.getMaskParameters()
+                .contains((String) cell.getValue())
+                && vertex.isMaskParameterNull((String) cell.getValue());
     }
 
     public MaskGraphVertex<?> getVertexForCell(ICell cell) {
@@ -451,11 +446,11 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     public MaskGraphVertex<?> getDirectDescendant(MaskGraphVertex<?> vertex) {
         return outgoingEdgesOf(vertex).stream()
-                                      .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
-                                                      && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
-                                      .map(this::getEdgeTarget)
-                                      .findFirst()
-                                      .orElse(null);
+                .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
+                        && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
+                .map(this::getEdgeTarget)
+                .findFirst()
+                .orElse(null);
     }
 
     public Set<MaskGraphVertex<?>> getDirectRelationships(MaskGraphVertex<?> vertex) {
@@ -475,30 +470,30 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
 
     public MaskGraphVertex<?> getDirectAncestor(MaskGraphVertex<?> vertex) {
         return incomingEdgesOf(vertex).stream()
-                                      .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
-                                                      && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
-                                      .map(this::getEdgeSource)
-                                      .findFirst()
-                                      .orElse(null);
+                .filter(edge -> MaskGraphVertex.SELF.equals(edge.getResultName())
+                        && MaskMethodVertex.EXECUTOR.equals(edge.getParameterName()))
+                .map(this::getEdgeSource)
+                .findFirst()
+                .orElse(null);
     }
 
     public PipelineGraph getSubGraphFromSelectedCells() {
         PipelineGraph subGraph = new PipelineGraph();
         Map<MaskGraphVertex<?>, MaskGraphVertex<?>> vertexCopyMap = new HashMap<>();
         Set<MaskGraphVertex<?>> selectedVertices = getSelectionCells().stream()
-                                                                      .map(this::getVertexForCell)
-                                                                      .filter(Objects::nonNull)
-                                                                      .collect(Collectors.toSet());
+                .map(this::getVertexForCell)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         selectedVertices.forEach(vertex -> {
             MaskGraphVertex<?> vertexCopy = vertex.copy();
             subGraph.addVertex(vertexCopy);
             vertexCopyMap.put(vertex, vertexCopy);
         });
         selectedVertices.stream()
-                        .flatMap(vertex -> outgoingEdgesOf(vertex).stream())
-                        .filter(edge -> selectedVertices.contains(getEdgeTarget(edge)))
-                        .forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)),
-                                                          vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
+                .flatMap(vertex -> outgoingEdgesOf(vertex).stream())
+                .filter(edge -> selectedVertices.contains(getEdgeTarget(edge)))
+                .forEach(edge -> subGraph.addEdge(vertexCopyMap.get(getEdgeSource(edge)),
+                        vertexCopyMap.get(getEdgeTarget(edge)), edge.copy()));
         return subGraph;
     }
 
@@ -511,12 +506,29 @@ public class PipelineGraph extends Graph implements GraphListener<MaskGraphVerte
             vertexCopyMap.put(vertex, vertexCopy);
         });
         newVertices.stream()
-                   .flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream())
-                   .forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)),
-                                            vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
+                .flatMap(vertex -> graph.outgoingEdgesOf(vertex).stream())
+                .forEach(edge -> addEdge(vertexCopyMap.get(graph.getEdgeSource(edge)),
+                        vertexCopyMap.get(graph.getEdgeTarget(edge)), edge.copy()));
     }
 
-    public void selectVertex(MaskGraphVertex<?> vertex) {
-        setSelectionCell(getCellForVertex(vertex));
+    public boolean isVertexSelected(MaskGraphVertex<?> vertex) {
+        return isCellSelected(getCellForVertex(vertex));
+    }
+
+    public void selectVertexIfExists(MaskGraphVertex<?> vertex) {
+        ICell cell = getCellForVertex(vertex);
+        if (cell != null) {
+            setSelectionCell(cell);
+        }
+    }
+
+    public void clear() {
+        removeAllVertices(vertexSet());
+        removeAllEdges(edgeSet());
+        removeCells(getDefaultParent().getChildren());
+        vertexToCell.clear();
+        cellToVertex.clear();
+        edgeToCell.clear();
+        cellToEdge.clear();
     }
 }

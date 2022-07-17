@@ -5,34 +5,23 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.generator.graph.GeneratorPipeline;
 import com.faforever.neroxis.generator.serial.GeneratorGraphSerializationUtil;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
-import com.faforever.neroxis.ui.components.CloseableTabComponent;
-import com.faforever.neroxis.ui.components.MaskGraphVertexEditPanel;
-import com.faforever.neroxis.ui.components.MethodListPanel;
-import com.faforever.neroxis.ui.components.PipelineGraph;
-import com.faforever.neroxis.ui.components.PipelinePane;
-import com.faforever.neroxis.ui.components.PipelineSettingsPanel;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.ngraph.model.ICell;
+import com.faforever.neroxis.ui.components.*;
 import com.faforever.neroxis.visualization.EntryPanel;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Point;
+import picocli.CommandLine;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JTabbedPane;
-import javax.swing.WindowConstants;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import picocli.CommandLine;
+import java.util.stream.Stream;
 
 @CommandLine.Command(name = "Editor", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Tool for creating generator pipelines")
 public strictfp class PipelineEditor implements Callable<Integer> {
@@ -41,6 +30,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
     private final PipelineSettingsPanel pipelineSettingsPanel = new PipelineSettingsPanel();
     private final EntryPanel entryPanel = new EntryPanel();
+    private final PipelinePane neighborPane = new PipelinePane();
     private final JFileChooser fileChooser = new JFileChooser();
     private final JTabbedPane tabbedPane = new JTabbedPane();
     private final MethodListPanel methodListPanel = new MethodListPanel();
@@ -59,9 +49,10 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     @Override
     public Integer call() {
         frame.setLayout(new GridBagLayout());
-        frame.setPreferredSize(new Dimension(1600, 800));
+        frame.setPreferredSize(new Dimension(1600, 1000));
         setupGraphTabPane();
         setupVertexEditPanel();
+        setupNeighborPanel();
         setupEntryPanel();
         setupMapOptions();
         setupButtons();
@@ -74,35 +65,35 @@ public strictfp class PipelineEditor implements Callable<Integer> {
 
     private void setupGraphTabPane() {
         addNewPaneTabButtonToEnd();
-        tabbedPane.addChangeListener(e -> {
-            int plusTabIndex = tabbedPane.indexOfTab(NEW_TAB_TITLE);
-            if (tabbedPane.getSelectedIndex() == plusTabIndex && plusTabIndex != -1) {
-                JPopupMenu typePopupMenu = new JPopupMenu();
-                GeneratorPipeline.getPipelineTypes().forEach(pipelineClass -> {
-                    AbstractAction action = new AbstractAction(pipelineClass.getSimpleName().replace("Pipeline", "")) {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            addNewGraphTab(GeneratorPipeline.createNew(pipelineClass));
-                        }
-                    };
-                    typePopupMenu.add(action);
-                });
-                Point location = tabbedPane.getMousePosition();
-                typePopupMenu.show(tabbedPane, location.x, location.y);
-                tabbedPane.setSelectedIndex(-1);
-            } else {
-                PipelinePane pipelinePane = (PipelinePane) tabbedPane.getSelectedComponent();
-                vertexEditPanel.setPipelinePane(pipelinePane);
-            }
-        });
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
+        tabbedPane.addChangeListener(e -> addOrSelectNewTab());
+        GridBagConstraints constraints = defaultConstraints();
         constraints.gridx = 1;
         constraints.weightx = 10;
-        constraints.gridy = 0;
         constraints.weighty = 1;
-        constraints.gridheight = 5;
+        constraints.gridheight = 6;
         frame.add(tabbedPane, constraints);
+    }
+
+    private void addOrSelectNewTab() {
+        int plusTabIndex = tabbedPane.indexOfTab(NEW_TAB_TITLE);
+        if (tabbedPane.getSelectedIndex() == plusTabIndex && plusTabIndex != -1) {
+            JPopupMenu typePopupMenu = new JPopupMenu();
+            GeneratorPipeline.getPipelineTypes().forEach(pipelineClass -> {
+                AbstractAction action = new AbstractAction(pipelineClass.getSimpleName().replace("Pipeline", "")) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        addNewGraphTab(GeneratorPipeline.createNew(pipelineClass));
+                    }
+                };
+                typePopupMenu.add(action);
+            });
+            Point location = tabbedPane.getMousePosition();
+            typePopupMenu.show(tabbedPane, location.x, location.y);
+            tabbedPane.setSelectedIndex(-1);
+        } else {
+            PipelinePane pipelinePane = getSelectedPipelinePane();
+            vertexEditPanel.setPipelinePane(pipelinePane);
+        }
     }
 
     private void addNewGraphTab(GeneratorPipeline pipeline) {
@@ -111,7 +102,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             @Override
             public void keyPressed(KeyEvent e) {
                 boolean controlDown = e.isControlDown();
-                PipelinePane pipelinePane = (PipelinePane) tabbedPane.getSelectedComponent();
+                PipelinePane pipelinePane = getSelectedPipelinePane();
                 if (controlDown && pipelinePane != null) {
                     if (e.getKeyCode() == KeyEvent.VK_C) {
                         savedGraph = pipelinePane.getGraph().getSubGraphFromSelectedCells();
@@ -122,13 +113,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             }
         });
         pipelinePane.setGraphChangedAction(vertexEditPanel::updatePanel);
-        pipelinePane.setMaskVertexSelectionAction(vertex -> {
-            vertexEditPanel.setVertex(vertex);
-            if (vertex != null && vertex.isComputed()) {
-                entryPanel.setMask(vertex.getImmutableResult(MaskGraphVertex.SELF));
-            }
-            methodListPanel.setVertex(vertex);
-        });
+        pipelinePane.setMaskVertexSelectionAction(this::onVertexSelected);
         CloseableTabComponent closeableTabComponent = new CloseableTabComponent(tabbedPane);
         tabbedPane.addTab("", pipelinePane);
         tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, closeableTabComponent);
@@ -136,6 +121,51 @@ public strictfp class PipelineEditor implements Callable<Integer> {
                 String.format("New (%s)", pipeline.getClass().getSimpleName().replace("Pipeline", "")));
         addNewPaneTabButtonToEnd();
         vertexEditPanel.setPipelinePane(pipelinePane);
+    }
+
+    private void onVertexSelected(PipelinePane pipelinePane, MaskGraphVertex<?> vertex) {
+        if (pipelinePane == neighborPane) {
+            PipelineGraph selectedGraph = getSelectedPipelinePane().getGraph();
+
+            if (!selectedGraph.isVertexSelected(vertex)) {
+                selectedGraph.selectVertexIfExists(vertex);
+            }
+
+            return;
+        }
+
+        vertexEditPanel.setVertex(vertex);
+        if (vertex != null && vertex.isComputed()) {
+            entryPanel.setMask(vertex.getImmutableResult(MaskGraphVertex.SELF));
+        }
+        methodListPanel.setVertex(vertex);
+        PipelineGraph selectedGraph = pipelinePane.getGraph();
+        PipelineGraph neighborGraph = neighborPane.getGraph();
+        neighborGraph.clear();
+        HashSet<MaskMethodEdge> edges = new HashSet<>();
+        edges.addAll(selectedGraph.outgoingEdgesOf(vertex));
+        edges.addAll(selectedGraph.incomingEdgesOf(vertex));
+
+        selectedGraph.getCellForVertex(vertex);
+
+        edges.stream()
+                .flatMap(edge -> Stream.of(edge.getSource(), edge.getTarget()))
+                .peek(neighborGraph::addVisualVertexOnly)
+                .forEach(vert -> {
+                    ICell selectedCell = selectedGraph.getCellForVertex(vert);
+                    ICell neighborCell = neighborGraph.getCellForVertex(vert);
+
+                    String selectedCellStyle = selectedCell.getStyle();
+                    neighborCell.setStyle(selectedCellStyle);
+                    neighborCell.getChildren().forEach(child -> child.setStyle(selectedCellStyle));
+                });
+        edges.forEach(neighborGraph::addVisualEdgeOnly);
+
+        if (!neighborGraph.isVertexSelected(vertex)) {
+            neighborGraph.selectVertexIfExists(vertex);
+        }
+
+        neighborPane.layoutGraph();
     }
 
     private void addNewPaneTabButtonToEnd() {
@@ -148,32 +178,29 @@ public strictfp class PipelineEditor implements Callable<Integer> {
     }
 
     private void setupVertexEditPanel() {
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 0;
-        constraints.gridy = 0;
+        GridBagConstraints constraints = defaultConstraints();
         constraints.weighty = 1;
         frame.add(vertexEditPanel, constraints);
     }
 
-    private void setupEntryPanel() {
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 0;
+    private void setupNeighborPanel() {
+        neighborPane.setMaskVertexSelectionAction(this::onVertexSelected);
+        GridBagConstraints constraints = defaultConstraints();
         constraints.gridy = 1;
+        constraints.weighty = 4;
+        frame.add(neighborPane, constraints);
+    }
+
+    private void setupEntryPanel() {
+        GridBagConstraints constraints = defaultConstraints();
+        constraints.gridy = 2;
         constraints.weighty = 4;
         frame.add(entryPanel, constraints);
     }
 
     private void setupMapOptions() {
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 0;
-        constraints.gridy = 2;
-        constraints.weighty = 0;
+        GridBagConstraints constraints = defaultConstraints();
+        constraints.gridy = 3;
 
         frame.add(pipelineSettingsPanel, constraints);
     }
@@ -183,7 +210,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         buttonPanel.setLayout(new GridLayout(0, 2));
 
         JButton layoutButton = new JButton("Layout Graph");
-        layoutButton.addActionListener(e -> ((PipelinePane) tabbedPane.getSelectedComponent()).layoutGraph());
+        layoutButton.addActionListener(e -> getSelectedPipelinePane().layoutGraph());
         buttonPanel.add(layoutButton);
 
         JButton runButton = new JButton("Test Run");
@@ -199,7 +226,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         buttonPanel.add(saveButton);
 
         JButton clearButton = new JButton("Clear Graph");
-        clearButton.addActionListener(e -> ((PipelinePane) tabbedPane.getSelectedComponent()).clearGraph());
+        clearButton.addActionListener(e -> getSelectedPipelinePane().clearGraph());
         buttonPanel.add(clearButton);
 
         JButton exportButton = new JButton("Export Selected Nodes");
@@ -210,34 +237,35 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         importButton.addActionListener(e -> importSubGraph());
         buttonPanel.add(importButton);
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 0;
-        constraints.gridy = 3;
-        constraints.weighty = 0;
+        GridBagConstraints constraints = defaultConstraints();
+        constraints.gridy = 4;
         frame.add(buttonPanel, constraints);
     }
 
     private void setupMethodSelection() {
         methodListPanel.setMinimumSize(new Dimension(250, 0));
         methodListPanel.setPreferredSize(new Dimension(250, 0));
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
+        GridBagConstraints constraints = defaultConstraints();
         constraints.gridx = 2;
-        constraints.weightx = 0;
-        constraints.gridy = 0;
-        constraints.gridheight = 4;
+        constraints.gridheight = 5;
         constraints.weighty = 1;
         frame.add(methodListPanel, constraints);
     }
 
+    private GridBagConstraints defaultConstraints() {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.weightx = 0;
+        constraints.gridy = 0;
+        constraints.weighty = 0;
+        return constraints;
+    }
+
     private void runGraph() {
-        ((PipelinePane) tabbedPane.getSelectedComponent()).runGraph(pipelineSettingsPanel.getSeed(),
-                                                                    pipelineSettingsPanel.getNumTeams(),
-                                                                    pipelineSettingsPanel.getMapSize(),
-                                                                    pipelineSettingsPanel.getSpawnCount(),
-                                                                    pipelineSettingsPanel.getSymmetry());
+        getSelectedPipelinePane().runGraph(pipelineSettingsPanel.getSeed(), pipelineSettingsPanel.getNumTeams(),
+                pipelineSettingsPanel.getMapSize(), pipelineSettingsPanel.getSpawnCount(),
+                pipelineSettingsPanel.getSymmetry());
     }
 
     private void importPipeline() {
@@ -250,7 +278,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
                 addNewGraphTab(pipeline);
                 ((CloseableTabComponent) tabbedPane.getTabComponentAt(tabbedPane.getSelectedIndex())).setTitle(
                         String.format("%s (%s)", file.getName(),
-                                      pipeline.getClass().getSimpleName().replace("Pipeline", "")));
+                                pipeline.getClass().getSimpleName().replace("Pipeline", "")));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -263,11 +291,11 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             int index = tabbedPane.getSelectedIndex();
-            PipelinePane pipelinePane = (PipelinePane) tabbedPane.getComponentAt(index);
+            PipelinePane pipelinePane = getSelectedPipelinePane();
             pipelinePane.exportPipeline(file);
             ((CloseableTabComponent) tabbedPane.getTabComponentAt(index)).setTitle(
                     String.format("%s (%s)", file.getName(),
-                                  pipelinePane.getPipeline().getClass().getSimpleName().replace("Pipeline", "")));
+                            pipelinePane.getPipeline().getClass().getSimpleName().replace("Pipeline", "")));
         }
     }
 
@@ -276,7 +304,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         int returnValue = fileChooser.showOpenDialog(frame);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            ((PipelinePane) tabbedPane.getSelectedComponent()).exportSelectedCells(file);
+            getSelectedPipelinePane().exportSelectedCells(file);
         }
     }
 
@@ -285,7 +313,11 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         int returnValue = fileChooser.showOpenDialog(frame);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            ((PipelinePane) tabbedPane.getSelectedComponent()).importSubGraph(file);
+            getSelectedPipelinePane().importSubGraph(file);
         }
+    }
+
+    private PipelinePane getSelectedPipelinePane() {
+        return (PipelinePane) tabbedPane.getSelectedComponent();
     }
 }

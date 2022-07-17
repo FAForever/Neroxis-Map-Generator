@@ -4,21 +4,9 @@
 package com.faforever.neroxis.ngraph.swing;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
-import com.faforever.neroxis.ngraph.event.AddOverlayEvent;
-import com.faforever.neroxis.ngraph.event.CellStateEvent;
-import com.faforever.neroxis.ngraph.event.ChangeEvent;
-import com.faforever.neroxis.ngraph.event.DownEvent;
 import com.faforever.neroxis.ngraph.event.EventObject;
-import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.*;
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
-import com.faforever.neroxis.ngraph.event.LabelChangedEvent;
-import com.faforever.neroxis.ngraph.event.RemoveOverlayEvent;
-import com.faforever.neroxis.ngraph.event.RepaintEvent;
-import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
-import com.faforever.neroxis.ngraph.event.ScaleEvent;
-import com.faforever.neroxis.ngraph.event.StartEditingEvent;
-import com.faforever.neroxis.ngraph.event.TranslateEvent;
-import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
@@ -26,15 +14,7 @@ import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
-import com.faforever.neroxis.ngraph.swing.handler.CellHandler;
-import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
-import com.faforever.neroxis.ngraph.swing.handler.EdgeHandler;
-import com.faforever.neroxis.ngraph.swing.handler.ElbowEdgeHandler;
-import com.faforever.neroxis.ngraph.swing.handler.GraphHandler;
-import com.faforever.neroxis.ngraph.swing.handler.GraphTransferHandler;
-import com.faforever.neroxis.ngraph.swing.handler.PanningHandler;
-import com.faforever.neroxis.ngraph.swing.handler.SelectionCellsHandler;
-import com.faforever.neroxis.ngraph.swing.handler.VertexHandler;
+import com.faforever.neroxis.ngraph.swing.handler.*;
 import com.faforever.neroxis.ngraph.swing.util.CellOverlay;
 import com.faforever.neroxis.ngraph.swing.util.ICellOverlay;
 import com.faforever.neroxis.ngraph.swing.view.CellEditor;
@@ -48,46 +28,19 @@ import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Stroke;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.beans.PropertyChangeListener;
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.BoundedRangeModel;
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
-import javax.swing.TransferHandler;
 
 /**
  * For setting the preferred size of the viewport for scrolling, use
@@ -139,9 +92,9 @@ public class GraphComponent extends JScrollPane implements Printable {
     private static final Logger log = Logger.getLogger(GraphComponent.class.getName());
     @Serial
     private static final long serialVersionUID = -30203858391633447L;
-    public static ImageIcon DEFAULT_EXPANDED_ICON = null;
-    public static ImageIcon DEFAULT_COLLAPSED_ICON = null;
-    public static ImageIcon DEFAULT_WARNING_ICON = null;
+    public static ImageIcon DEFAULT_EXPANDED_ICON;
+    public static ImageIcon DEFAULT_COLLAPSED_ICON;
+    public static ImageIcon DEFAULT_WARNING_ICON;
 
     /*
      * Loads the collapse and expand icons.
@@ -292,7 +245,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected int zoomPolicy = ZOOM_POLICY_PAGE;
     /**
-     * Specifies the factor used for zoomIn and zoomOut. Default is 1.2 (120%).
+     * Specifies the factor used for zoomIn and zoomOut
      */
     protected double zoomFactor = 1.2;
     /**
@@ -338,7 +291,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 newView.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
                 newView.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
                 newView.addListener(ScaleAndTranslateEvent.class,
-                                    (IEventListener<ScaleAndTranslateEvent>) updateHandler);
+                        (IEventListener<ScaleAndTranslateEvent>) updateHandler);
                 newView.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
                 newView.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
                 newView.addListener(CellStateEvent.class, cellStateHandler);
@@ -642,7 +595,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // Resets the zoom policy if the scale changes
         graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
         graph.getView()
-             .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
+                .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
         // Invoke the update handler once for initial state
         updateHandler.invoke(graph.getView(), null);
         firePropertyChange("graph", oldValue, graph);
@@ -848,7 +801,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected Dimension getPreferredSizeForPage() {
         return new Dimension((int) Math.round(pageFormat.getWidth() * pageScale * horizontalPageCount),
-                             (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
+                (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
     }
 
     /**
@@ -1088,7 +1041,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         RectangleDouble bounds = graph.getGraphBounds();
         int border = graph.getBorder();
         return new Dimension((int) Math.round(bounds.getX() + bounds.getWidth()) + border + 1,
-                             (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
+                (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
     }
 
     /**
@@ -1329,9 +1282,9 @@ public class GraphComponent extends JScrollPane implements Printable {
                     } else if (graph.isCellVisible(cell)) {
                         CellState state = view.getState(cell);
                         if (state != null && canvas.intersects(this, hit, state) && (!graph.isSwimlane(cell)
-                                                                                     || hitSwimlaneContent
-                                                                                     || (transparentSwimlaneContent
-                                                                                         && !canvas.hitSwimlaneContent(
+                                || hitSwimlaneContent
+                                || (transparentSwimlaneContent
+                                && !canvas.hitSwimlaneContent(
                                 this, state, x, y)))) {
                             return cell;
                         }
@@ -1369,7 +1322,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // but toggle for right mouse buttons requires CTRL to be pressed.
         return event != null && ((Utils.IS_MAC) ? ((SwingUtilities.isLeftMouseButton(event) && event.isMetaDown()) || (
                 SwingUtilities.isRightMouseButton(event)
-                && event.isControlDown())) : event.isControlDown());
+                        && event.isControlDown())) : event.isControlDown());
     }
 
     public boolean hitFoldingIcon(ICell cell, int x, int y) {
@@ -1692,7 +1645,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             view.revalidate();
             RectangleDouble graphBounds = graph.getGraphBounds();
             Dimension pSize = new Dimension((int) Math.ceil(graphBounds.getX() + graphBounds.getWidth()) + 1,
-                                            (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
+                    (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
             int w = (int) (printFormat.getImageableWidth());
             int h = (int) (printFormat.getImageableHeight());
             int cols = (int) Math.max(Math.ceil((double) (pSize.width - 5) / (double) w), 1);
@@ -1821,9 +1774,9 @@ public class GraphComponent extends JScrollPane implements Printable {
         } else if (graph.getModel().isEdge(state.getCell())) {
             EdgeStyleFunction style = graph.getView().getEdgeStyle(state, null, null, null);
             if (graph.isLoop(state)
-                || style instanceof ElbowConnectorEdgeStyleFunction
-                || style instanceof SideToSideEdgeStyleFunction
-                || style instanceof TopToBottomEdgeStyleFunction) {
+                    || style instanceof ElbowConnectorEdgeStyleFunction
+                    || style instanceof SideToSideEdgeStyleFunction
+                    || style instanceof TopToBottomEdgeStyleFunction) {
                 return new ElbowEdgeHandler(this, state);
             }
             return new EdgeHandler(this, state);
@@ -1870,7 +1823,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // Checks edges and cells using the defined multiplicities
         if (model.isEdge(cell)) {
             String tmp = graph.getEdgeValidationError(cell, model.getTerminal(cell, true),
-                                                      model.getTerminal(cell, false));
+                    model.getTerminal(cell, false));
             if (tmp != null) {
                 warning.append(tmp);
             }
@@ -2388,8 +2341,8 @@ public class GraphComponent extends JScrollPane implements Printable {
             PointDouble translate = graph.getView().getTranslate();
             double scale = graph.getView().getScale();
             g.drawImage(backgroundImage.getImage(), (int) (translate.getX() * scale), (int) (translate.getY() * scale),
-                        (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale),
-                        this);
+                    (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale),
+                    this);
         }
     }
 
@@ -2490,15 +2443,15 @@ public class GraphComponent extends JScrollPane implements Printable {
                     // Creates a set of strokes with individual dash offsets
                     // for each direction
                     Stroke[] strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
-                                                                    new float[]{3, 1},
-                                                                    Math.max(0, iys) % 4), new BasicStroke(1,
-                                                                                                           BasicStroke.CAP_BUTT,
-                                                                                                           BasicStroke.JOIN_MITER,
-                                                                                                           1,
-                                                                                                           new float[]{2, 2},
-                                                                                                           Math.max(0,
-                                                                                                                    iys)
-                                                                                                           % 4), new BasicStroke(
+                            new float[]{3, 1},
+                            Math.max(0, iys) % 4), new BasicStroke(1,
+                            BasicStroke.CAP_BUTT,
+                            BasicStroke.JOIN_MITER,
+                            1,
+                            new float[]{2, 2},
+                            Math.max(0,
+                                    iys)
+                                    % 4), new BasicStroke(
                             1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
                             1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
                             Math.max(0, iys) % 4)};
@@ -2514,15 +2467,15 @@ public class GraphComponent extends JScrollPane implements Printable {
                         g.drawLine(ix, iys, ix, iye);
                     }
                     strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
-                                                           new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1,
-                                                                                                                     BasicStroke.CAP_BUTT,
-                                                                                                                     BasicStroke.JOIN_MITER,
-                                                                                                                     1,
-                                                                                                                     new float[]{2, 2},
-                                                                                                                     Math.max(
-                                                                                                                             0,
-                                                                                                                             ixs)
-                                                                                                                     % 4), new BasicStroke(
+                            new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1,
+                            BasicStroke.CAP_BUTT,
+                            BasicStroke.JOIN_MITER,
+                            1,
+                            new float[]{2, 2},
+                            Math.max(
+                                    0,
+                                    ixs)
+                                    % 4), new BasicStroke(
                             1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
                             1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
                             Math.max(0, ixs) % 4)};
@@ -2540,22 +2493,22 @@ public class GraphComponent extends JScrollPane implements Printable {
                     g2.setStroke(stroke);
                 }
                 default -> // DOT_GRID_MODE
-                        {
-                            for (double x = xs; x <= xe; x += stepping) {
-                                for (double y = ys; y <= ye; y += stepping) {
-                                    // FIXME: Workaround for rounding errors when adding
-                                    // stepping to
-                                    // xs or ys multiple times (leads to double grid lines
-                                    // when zoom
-                                    // is set to eg. 121%)
-                                    x = Math.round((x - tx) / stepping) * stepping + tx;
-                                    y = Math.round((y - ty) / stepping) * stepping + ty;
-                                    int ix = (int) Math.round(x);
-                                    int iy = (int) Math.round(y);
-                                    g.drawLine(ix, iy, ix, iy);
-                                }
-                            }
+                {
+                    for (double x = xs; x <= xe; x += stepping) {
+                        for (double y = ys; y <= ye; y += stepping) {
+                            // FIXME: Workaround for rounding errors when adding
+                            // stepping to
+                            // xs or ys multiple times (leads to double grid lines
+                            // when zoom
+                            // is set to eg. 121%)
+                            x = Math.round((x - tx) / stepping) * stepping + tx;
+                            y = Math.round((y - ty) / stepping) * stepping + ty;
+                            int ix = (int) Math.round(x);
+                            int iy = (int) Math.round(y);
+                            g.drawLine(ix, iy, ix, iy);
                         }
+                    }
+                }
             }
         }
     }
@@ -2750,8 +2703,8 @@ public class GraphComponent extends JScrollPane implements Printable {
         @Override
         public void mouseClicked(MouseEvent e) {
             graphComponent.getGraphControl()
-                          .dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e,
-                                                                          graphComponent.getGraphControl()));
+                    .dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e,
+                            graphComponent.getGraphControl()));
         }
 
         @Override

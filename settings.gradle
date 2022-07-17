@@ -5,4 +5,5 @@ include 'toolsuite'
 include 'mapgeneditor'
 include 'utilities'
 include 'ngraph'
+include 'benchmark'
 
