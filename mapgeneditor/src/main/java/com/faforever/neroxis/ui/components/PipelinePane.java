@@ -124,10 +124,10 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
 
     public void clearGraph() {
         Set<MaskGraphVertex<?>> removableVertices = graph.vertexSet()
-                .stream()
-                .filter(vertex -> !(vertex instanceof MaskOutputVertex
-                        || vertex instanceof MaskInputVertex))
-                .collect(Collectors.toSet());
+                                                         .stream()
+                                                         .filter(vertex -> !(vertex instanceof MaskOutputVertex
+                                                                 || vertex instanceof MaskInputVertex))
+                                                         .collect(Collectors.toSet());
         graph.removeAllVertices(removableVertices);
     }
 
@@ -157,16 +157,16 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
         GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random,
                 GeneratorParameters.builder()
-                        .mapSize(
-                                mapSize)
-                        .numTeams(
-                                numTeams)
-                        .spawnCount(
-                                spawnCount)
-                        .terrainSymmetry(
-                                terrainSymmetry)
-                        .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
-                        .build());
+                                   .mapSize(
+                                           mapSize)
+                                   .numTeams(
+                                           numTeams)
+                                   .spawnCount(
+                                           spawnCount)
+                                   .terrainSymmetry(
+                                           terrainSymmetry)
+                                   .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
+                                   .build());
         GeneratorGraphContext graphContext = new GeneratorGraphContext(random.nextLong(), generatorParameters,
                 parameterConstraints);
 
@@ -229,9 +229,9 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
             ICell sourceParent = source.getParent();
             ICell targetParent = target.getParent();
             ICell parentEdge = graph.getEdgesBetween(cell, targetParent)
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No parent"));
+                                    .stream()
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalStateException("No parent"));
             RectangleDouble sourceParentBoundingBox = graph.getBoundingBox(sourceParent, false, true);
             RectangleDouble targetParentBoundingBox = graph.getBoundingBox(targetParent, false, true);
             if (targetParentBoundingBox == null || sourceParentBoundingBox == null) {
@@ -241,7 +241,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
             targetParentBoundingBox.grow(20);
             List<PointDouble> points = parentEdge.getGeometry().getPoints().stream().filter(point -> {
                 PointDouble transformedPoint = graph.getView()
-                        .transformControlPoint(graph.getView().getState(edge), point);
+                                                    .transformControlPoint(graph.getView().getState(edge), point);
                 return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY())
                         && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
             }).collect(Collectors.toList());
