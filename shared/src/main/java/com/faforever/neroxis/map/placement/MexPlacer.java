@@ -1,10 +1,6 @@
 package com.faforever.neroxis.map.placement;
 
-import com.faforever.neroxis.map.AIMarker;
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
-import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -80,17 +76,21 @@ public strictfp class MexPlacer {
                 .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
     }
 
-    public void placeBaseMexes(BooleanMask spawnMask) {
+    private void placeBaseMexes(BooleanMask spawnMask) {
         int numBaseMexes = (random.nextInt(3) + 3);
-        for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
+        for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings()
+                                                               .getSpawnSymmetry()
+                                                               .getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
             BooleanMask baseMexes = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-            baseMexes.fillCircle(spawn.getPosition(), 15, true).fillCircle(spawn.getPosition(), 5, false).multiply(spawnMask);
+            baseMexes.fillCircle(spawn.getPosition(), 15, true)
+                     .fillCircle(spawn.getPosition(), 5, false)
+                     .multiply(spawnMask);
             placeIndividualMexes(baseMexes, numBaseMexes, 10);
         }
     }
 
-    public void placeMexExpansions(BooleanMask spawnMask, int possibleExpMexCount, int mexSpacing) {
+    private void placeMexExpansions(BooleanMask spawnMask, int possibleExpMexCount, int mexSpacing) {
         Vector2 expLocation;
         int expMexCount;
         int expMexCountLeft = possibleExpMexCount;
@@ -149,7 +149,7 @@ public strictfp class MexPlacer {
         }
     }
 
-    public void placeIndividualMexes(BooleanMask spawnMask, int numMexes, int mexSpacing) {
+    private void placeIndividualMexes(BooleanMask spawnMask, int numMexes, int mexSpacing) {
         if (numMexes > 0) {
             List<Vector2> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
             mexLocations.stream().limit(numMexes).forEachOrdered(location -> {

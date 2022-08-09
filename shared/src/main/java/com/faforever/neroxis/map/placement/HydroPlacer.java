@@ -44,27 +44,33 @@ public strictfp class HydroPlacer {
         placeIndividualHydros(spawnMask, numHydrosLeft, hydroSpacing);
     }
 
-    public void placeBaseHydros(BooleanMask spawnMask) {
+    private void placeBaseHydros(BooleanMask spawnMask) {
         boolean spawnHydro = random.nextBoolean();
         if (spawnHydro) {
-            for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints()) {
+            for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings()
+                                                                   .getSpawnSymmetry()
+                                                                   .getNumSymPoints()) {
                 Spawn spawn = map.getSpawn(i);
                 BooleanMask baseHydro = new BooleanMask(spawnMask.getSize(), random.nextLong(), spawnMask.getSymmetrySettings());
-                baseHydro.fillCircle(spawn.getPosition(), 30f, true).fillCircle(spawn.getPosition(), 10f, false).multiply(spawnMask);
+                baseHydro.fillCircle(spawn.getPosition(), 30f, true)
+                         .fillCircle(spawn.getPosition(), 10f, false)
+                         .multiply(spawnMask);
                 map.getSpawns().stream().filter(otherSpawn -> spawnMask.inTeam(otherSpawn.getPosition(), false))
-                        .forEach(otherSpawn -> baseHydro.fillCircle(otherSpawn.getPosition(), 16, false));
+                   .forEach(otherSpawn -> baseHydro.fillCircle(otherSpawn.getPosition(), 16, false));
                 map.getHydros().stream().filter(hydro -> spawnMask.inTeam(hydro.getPosition(), false))
-                        .forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
+                   .forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
                 placeIndividualHydros(baseHydro, 1, hydroSpacing);
             }
         }
     }
 
-    public void placeIndividualHydros(BooleanMask spawnMask, int numHydros, int hydroSpacing) {
+    private void placeIndividualHydros(BooleanMask spawnMask, int numHydros, int hydroSpacing) {
         if (numHydros > 0) {
             List<Vector2> hydroLocations = spawnMask.getRandomCoordinates(hydroSpacing);
             hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
-                int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+                int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings()
+                                                             .getSpawnSymmetry()
+                                                             .getNumSymPoints();
                 Marker hydro = new Marker(String.format("Hydro %d", hydroId), new Vector3(location.roundToNearestHalfPoint()));
                 map.addHydro(hydro);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(hydro.getPosition(), SymmetryType.SPAWN);
