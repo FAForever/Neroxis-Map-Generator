@@ -2,10 +2,11 @@ package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
+import lombok.Getter;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import lombok.Getter;
 
 @Getter
 public strictfp class MaskOutputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {

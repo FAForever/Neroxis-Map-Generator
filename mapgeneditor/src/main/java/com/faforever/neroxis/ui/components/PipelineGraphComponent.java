@@ -130,7 +130,6 @@ public class PipelineGraphComponent extends GraphComponent {
                     public void actionPerformed(ActionEvent e) {
                         MaskConstructorVertex newVertex = new MaskConstructorVertex(
                                 MaskGraphReflectUtil.getMaskGraphConstructor(maskClass));
-                        newVertex.setIdentifier(String.valueOf(newVertex.hashCode()));
                         pipelineGraph.addVertex(newVertex);
                         moveVertexToMousePosition(newVertex, mouseEvent.getPoint());
                         pipelineGraph.refresh();

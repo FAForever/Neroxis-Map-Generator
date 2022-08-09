@@ -59,8 +59,8 @@ public class MaskGraphVertexEditPanel extends JPanel {
 
     private void updateIdentifiers() {
         if (vertex != null && pipelinePane != null) {
-            vertex.setIdentifier(identifierTextField.getText());
-            pipelinePane.updateIdentifiers(vertex);
+            String newIdentifier = identifierTextField.getText();
+            pipelinePane.updateIdentifiers(vertex, newIdentifier);
         }
     }
 

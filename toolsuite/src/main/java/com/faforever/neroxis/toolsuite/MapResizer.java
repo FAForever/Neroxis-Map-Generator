@@ -1,22 +1,16 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.CLIUtils;
-import com.faforever.neroxis.cli.DebugMixin;
-import com.faforever.neroxis.cli.OutputFolderMixin;
-import com.faforever.neroxis.cli.RequiredMapPathMixin;
-import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.cli.*;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.toolsuite.cli.LocationOptions;
 import com.faforever.neroxis.util.vector.Vector2;
-import java.util.concurrent.Callable;
 import picocli.CommandLine;
-import static picocli.CommandLine.ArgGroup;
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Mixin;
-import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Spec;
+
+import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapResizer implements Callable<Integer> {
@@ -52,8 +46,7 @@ public strictfp class MapResizer implements Callable<Integer> {
     }
 
     private void resizeMap(SCMap map) {
-        Vector2 location = locationOptions.getLocation();
-        location = location == null ? new Vector2(newMapSize / 2f, newMapSize / 2f) : location;
+        Vector2 location = locationOptions == null ? new Vector2(newMapSize / 2f, newMapSize / 2f) : locationOptions.getLocation();
         map.changeMapSize(scaledSize, newMapSize, location);
     }
 }

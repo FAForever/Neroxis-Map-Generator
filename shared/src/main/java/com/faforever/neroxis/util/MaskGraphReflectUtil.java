@@ -2,32 +2,12 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
-import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.IntegerMask;
-import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.mask.NormalMask;
-import com.faforever.neroxis.mask.Vector2Mask;
-import com.faforever.neroxis.mask.Vector3Mask;
-import com.faforever.neroxis.mask.Vector4Mask;
+import com.faforever.neroxis.mask.*;
 import com.github.therapi.runtimejavadoc.MethodJavadoc;
 import com.github.therapi.runtimejavadoc.RuntimeJavadoc;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MaskGraphReflectUtil {
@@ -83,7 +63,7 @@ public class MaskGraphReflectUtil {
                       .filter(constructor -> constructor.isAnnotationPresent(GraphMethod.class))
                       .findFirst()
                       .ifPresent(constructor -> graphConstructorsMap.put(clazz,
-                                                                         (Constructor<? extends Mask<?, ?>>) constructor));
+                              (Constructor<? extends Mask<?, ?>>) constructor));
             }
         });
     }
@@ -115,8 +95,7 @@ public class MaskGraphReflectUtil {
 
     public static MethodJavadoc getJavadoc(Executable executable) {
         if (executable instanceof Method) {
-            MethodJavadoc javadoc = RuntimeJavadoc.getJavadoc((Method) executable);
-            return javadoc.isEmpty() ? RuntimeJavadoc.getJavadoc(getOverriddenMethod((Method) executable)) : javadoc;
+            return RuntimeJavadoc.getJavadoc((Method) executable);
         } else {
             return RuntimeJavadoc.getJavadoc((Constructor<?>) executable);
         }
@@ -144,7 +123,7 @@ public class MaskGraphReflectUtil {
 
     public static List<Class<? extends Mask<?, ?>>> getConcreteMaskClasses() {
         return List.of(BooleanMask.class, FloatMask.class, NormalMask.class, IntegerMask.class, Vector2Mask.class,
-                       Vector3Mask.class, Vector4Mask.class);
+                Vector3Mask.class, Vector4Mask.class);
     }
 
     public static Class<?> getActualTypeClass(Class<? extends Mask<?, ?>> maskClass, Type type) {
@@ -167,7 +146,7 @@ public class MaskGraphReflectUtil {
         String parametersEllipsis = executable.getParameters().length > 4 ? "..." : "";
         if (executable instanceof Constructor) {
             return String.format("%s(%s%s)", executable.getDeclaringClass().getSimpleName(), parametersString,
-                                 parametersEllipsis);
+                    parametersEllipsis);
         } else {
             return String.format("%s(%s%s)", executable.getName(), parametersString, parametersEllipsis);
         }
@@ -175,11 +154,11 @@ public class MaskGraphReflectUtil {
 
     public static boolean classIsNumeric(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
-               || int.class.equals(clazz)
-               || float.class.equals(clazz)
-               || double.class.equals(clazz)
-               || byte.class.equals(clazz)
-               || short.class.equals(clazz);
+                || int.class.equals(clazz)
+                || float.class.equals(clazz)
+                || double.class.equals(clazz)
+                || byte.class.equals(clazz)
+                || short.class.equals(clazz);
     }
 
     public static Class<?> getClassFromString(String className) throws ClassNotFoundException {

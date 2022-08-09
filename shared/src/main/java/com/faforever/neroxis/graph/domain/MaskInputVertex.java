@@ -2,8 +2,9 @@ package com.faforever.neroxis.graph.domain;
 
 import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
-import java.lang.reflect.Method;
 import lombok.Getter;
+
+import java.lang.reflect.Method;
 
 @Getter
 public strictfp class MaskInputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {

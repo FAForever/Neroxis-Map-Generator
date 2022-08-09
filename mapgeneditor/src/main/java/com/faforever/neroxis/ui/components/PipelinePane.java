@@ -58,7 +58,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
 
     public PipelinePane(GeneratorPipeline pipeline) {
         this.pipeline = pipeline;
-        graph = new PipelineGraph(pipeline.getGraph());
+        graph = pipeline == null ? new PipelineGraph() : new PipelineGraph(pipeline.getGraph());
         graphComponent = new PipelineGraphComponent(graph);
         layout = new HierarchicalLayout(graph);
         setLayout(new BorderLayout());
@@ -67,13 +67,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
     }
 
     public PipelinePane() {
-        pipeline = null;
-        graph = new PipelineGraph();
-        graphComponent = new PipelineGraphComponent(graph);
-        layout = new HierarchicalLayout(graph);
-        setLayout(new BorderLayout());
-        setFocusable(true);
-        setupGraph();
+        this(null);
     }
 
     private void setupGraph() {
@@ -299,22 +293,37 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
     private void updateVertexDefined(MaskGraphVertex<?> vertex) {
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
         GeneratorParameters generatorParameters = GeneratorParameters.builder()
-                .terrainSymmetry(Symmetry.POINT2)
-                .mapSize(512)
-                .numTeams(2)
-                .spawnCount(2)
-                .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
-                .build();
+                                                                     .terrainSymmetry(Symmetry.POINT2)
+                                                                     .mapSize(512)
+                                                                     .numTeams(2)
+                                                                     .spawnCount(2)
+                                                                     .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
+                                                                     .build();
         GeneratorGraphContext graphContext = new GeneratorGraphContext(0L, generatorParameters, parameterConstraints);
         graph.setVertexDefined(vertex, vertex.isDefined(graphContext));
     }
 
     public void updateIdentifiers(MaskGraphVertex<?> vertex) {
-        String identifier = vertex.getIdentifier();
-        graph.getDirectRelationships(vertex).forEach(node -> {
-            node.setIdentifier(identifier);
-            graph.getCellForVertex(node).setValue(identifier);
-        });
+        updateIdentifiers(vertex, vertex.getIdentifier());
+    }
+
+    public void updateIdentifiers(MaskGraphVertex<?> vertex, String newIdentifier) {
+        String oldIdentifier = vertex.getIdentifier();
+        vertex.setIdentifier(newIdentifier);
+        graph.getCellForVertex(vertex).setValue(newIdentifier);
+
+        MaskGraphVertex<?> next = graph.getDirectDescendant(vertex);
+        while (next != null) {
+            if (!(next.getIdentifier() == null || next.getIdentifier()
+                                                      .isEmpty()) && !oldIdentifier.equals(next.getIdentifier())) {
+                break;
+            }
+
+            next.setIdentifier(newIdentifier);
+            graph.getCellForVertex(next).setValue(newIdentifier);
+            next = graph.getDirectDescendant(next);
+        }
+
         graphComponent.refresh();
     }
 

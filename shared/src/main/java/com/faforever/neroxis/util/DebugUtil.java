@@ -52,19 +52,19 @@ public strictfp class DebugUtil {
     }
 
     public static void timedRun(String packageName, String description, Runnable runnable) {
-        long sTime = System.currentTimeMillis();
+        long sTime = System.nanoTime();
         if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n", description, DebugUtil.getStackTraceLineInPackage(packageName));
         }
         runnable.run();
         if (DEBUG) {
-            System.out.printf("Done %s: %4d ms, %s\n", description, System.currentTimeMillis() - sTime,
-                              DebugUtil.getStackTraceLineInPackage(packageName));
+            System.out.printf("Done %s: %4.2f ms, %s\n", description, (System.nanoTime() - sTime) / 1e6,
+                    DebugUtil.getStackTraceLineInPackage(packageName));
         }
     }
 
     public static <T> T timedRun(String packageName, String description, Callable<T> callable) {
-        long sTime = System.currentTimeMillis();
+        long sTime = System.nanoTime();
         if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n", description, DebugUtil.getStackTraceLineInPackage(packageName));
         }
@@ -75,8 +75,8 @@ public strictfp class DebugUtil {
             throw new RuntimeException(e);
         }
         if (DEBUG) {
-            System.out.printf("Done %s: %4d ms, %s\n", description, System.currentTimeMillis() - sTime,
-                              DebugUtil.getStackTraceLineInPackage(packageName));
+            System.out.printf("Done %s: %4.2f ms, %s\n", description, (System.nanoTime() - sTime) / 1e6,
+                    DebugUtil.getStackTraceLineInPackage(packageName));
         }
         return result;
     }
@@ -93,8 +93,8 @@ public strictfp class DebugUtil {
                                                                                                                                                           excludedMethod)))
                                                                     .findFirst()
                                                                     .map(stackFrame -> stackFrame.getFileName()
-                                                                                       + ":"
-                                                                                       + stackFrame.getLineNumber())
+                                                                            + ":"
+                                                                            + stackFrame.getLineNumber())
                                                                     .orElse("not found"));
     }
 }

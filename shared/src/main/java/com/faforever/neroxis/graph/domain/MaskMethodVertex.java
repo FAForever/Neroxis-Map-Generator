@@ -4,10 +4,11 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
+import lombok.Getter;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import lombok.Getter;
 
 @Getter
 public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
@@ -30,8 +31,8 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         if (!returnsSelf) {
             results.put(NEW_MASK, null);
             resultClasses.put(NEW_MASK,
-                              (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getActualTypeClass(executorClass,
-                                                                                                    executable.getGenericReturnType()));
+                    (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getActualTypeClass(executorClass,
+                            executable.getGenericReturnType()));
         }
     }
 

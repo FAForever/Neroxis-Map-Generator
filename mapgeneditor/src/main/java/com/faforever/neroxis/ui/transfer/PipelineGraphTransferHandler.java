@@ -1,6 +1,9 @@
 package com.faforever.neroxis.ui.transfer;
 
+import com.faforever.neroxis.graph.domain.MapMaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
@@ -62,7 +65,15 @@ public class PipelineGraphTransferHandler extends GraphTransferHandler {
                                     methodTransferable.getParamClassNames().get(i));
                         }
                         Method method = methodClazz.getMethod(methodTransferable.getMethodName(), paramTypes);
-                        MaskMethodVertex vertex = new MaskMethodVertex(method, clazz);
+
+                        MaskGraphVertex<?> vertex;
+                        if (Mask.class.isAssignableFrom(methodClazz)) {
+                            vertex = new MaskMethodVertex(method, clazz);
+                        } else if (MapMaskMethods.class.isAssignableFrom(methodClazz)) {
+                            vertex = new MapMaskMethodVertex(method);
+                        } else {
+                            throw new UnsupportedOperationException("Unknown class %s".formatted(clazz.getSimpleName()));
+                        }
 
                         pipelineGraphComponent.getGraph().addVertex(vertex);
                         Point mousePosition = SwingUtilities.convertPoint(c, c.getMousePosition(), graphComponent.getGraphControl());

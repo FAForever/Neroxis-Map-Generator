@@ -4,18 +4,21 @@
 package com.faforever.neroxis.ngraph.util;
 
 import com.faforever.neroxis.ngraph.model.UndoableChange;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class UndoableEdit {
     /**
      * Holds the source of the undoable edit.
      */
-    protected Object source;
+    protected final Object source;
     /**
      * Holds the list of changes that make up this undoable edit.
      */
-    protected List<UndoableChange> changes = new ArrayList<>();
+    protected final List<UndoableChange> changes = new ArrayList<>();
     /**
      * Specifies this undoable edit is significant. Default is true.
      */
@@ -49,42 +52,7 @@ public class UndoableEdit {
     }
 
     /**
-     * @return the source
-     */
-    public Object getSource() {
-        return source;
-    }
-
-    /**
-     * @return the changes
-     */
-    public List<UndoableChange> getChanges() {
-        return changes;
-    }
-
-    /**
-     * @return the significant
-     */
-    public boolean isSignificant() {
-        return significant;
-    }
-
-    /**
-     * @return the undone
-     */
-    public boolean isUndone() {
-        return undone;
-    }
-
-    /**
-     * @return the redone
-     */
-    public boolean isRedone() {
-        return redone;
-    }
-
-    /**
-     * Returns true if the this edit contains no changes.
+     * Returns true if this edit contains no changes.
      */
     public boolean isEmpty() {
         return changes.isEmpty();
