@@ -32,12 +32,12 @@ public strictfp class HydroPlacer {
         spawnMask.fillCenter(64, false).limitToSymmetryRegion();
 
         map.getMexes().stream().filter(mex -> spawnMask.inTeam(mex.getPosition(), false))
-                .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
+           .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), 10, false));
 
         placeBaseHydros(spawnMask);
 
         map.getSpawns().stream().filter(spawn -> spawnMask.inTeam(spawn.getPosition(), false))
-                .forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 30f, false));
+           .forEach(spawn -> spawnMask.fillCircle(spawn.getPosition(), 30f, false));
 
         int numHydrosLeft = (hydroCount - map.getHydroCount()) / numSymPoints;
 
