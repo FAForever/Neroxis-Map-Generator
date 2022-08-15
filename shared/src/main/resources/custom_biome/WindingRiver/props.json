@@ -5,7 +5,7 @@
     "/env/evergreen/props/trees/Oak01_s1_prop.bp",
     "/env/evergreen/props/trees/Oak01_s2_prop.bp",
     "/env/evergreen/props/trees/Oak01_s3_prop.bp",
-	"/env/ancient-earth/props/trees/oak1_s4_prop.bp"
+    "/env/ancient-earth/props/trees/oak1_s4_prop.bp"
   ],
   "rocks": [
     "/env/evergreen/props/rocks/Rock01_prop.bp",

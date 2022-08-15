@@ -13,14 +13,18 @@ public abstract strictfp class DecalGenerator extends ElementGenerator {
     protected DecalPlacer decalPlacer;
     protected FloatMask slope;
     protected BooleanMask passableLand;
+    protected BooleanMask fieldDecal;
+    protected BooleanMask slopeDecal;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         this.slope = terrainGenerator.getSlope();
         this.passableLand = terrainGenerator.getPassableLand();
+        fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal", true);
+        slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal", true);
         decalPlacer = new DecalPlacer(map, random.nextLong());
     }
 
     public abstract void placeDecals();
-
 }

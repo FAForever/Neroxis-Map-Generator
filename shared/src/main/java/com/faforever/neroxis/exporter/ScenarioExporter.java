@@ -2,7 +2,6 @@ package com.faforever.neroxis.exporter;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
-
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public strictfp class ScenarioExporter {
-
     public static void exportScenario(Path folderPath, SCMap map) throws IOException {
         String mapPrefix = map.getFilePrefix();
         File file = folderPath.resolve(mapPrefix + "_scenario.lua").toFile();
@@ -46,8 +44,9 @@ public strictfp class ScenarioExporter {
         out.writeBytes("          armies = {");
         for (Spawn spawn : map.getSpawns()) {
             out.writeBytes("'" + spawn.getId() + "'");
-            if (map.getSpawns().indexOf(spawn) < map.getSpawns().size() - 1)
+            if (map.getSpawns().indexOf(spawn) < map.getSpawns().size() - 1) {
                 out.writeBytes(",");
+            }
         }
         out.writeBytes("},\n");
         out.writeBytes("        },\n");

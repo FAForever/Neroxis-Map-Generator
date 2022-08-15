@@ -14,11 +14,16 @@ public abstract strictfp class ResourceGenerator extends ElementGenerator {
     protected HydroPlacer hydroPlacer;
     protected BooleanMask unbuildable;
     protected BooleanMask passableLand;
+    protected BooleanMask resourceMask;
+    protected BooleanMask waterResourceMask;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         this.unbuildable = terrainGenerator.getUnbuildable();
         this.passableLand = terrainGenerator.getPassableLand();
+        resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", true);
+        waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
         mexPlacer = new MexPlacer(map, random.nextLong());
         hydroPlacer = new HydroPlacer(map, random.nextLong());
     }
@@ -26,5 +31,4 @@ public abstract strictfp class ResourceGenerator extends ElementGenerator {
     public abstract void placeResources();
 
     protected abstract int getMexCount();
-
 }

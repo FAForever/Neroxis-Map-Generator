@@ -45,6 +45,5 @@ public strictfp class Decal extends PositionedObject {
         this.scale = scale;
         this.cutOffLOD = cutOffLOD;
     }
-
 }
 

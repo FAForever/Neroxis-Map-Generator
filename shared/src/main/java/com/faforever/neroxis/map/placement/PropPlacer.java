@@ -5,13 +5,11 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public strictfp class PropPlacer {
-
     private final SCMap map;
     private final Random random;
 
@@ -30,7 +28,8 @@ public strictfp class PropPlacer {
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 location.roundToNearestHalfPoint();
-                Prop prop = new Prop(paths[random.nextInt(paths.length)], location, random.nextFloat() * (float) StrictMath.PI);
+                Prop prop = new Prop(paths[random.nextInt(paths.length)], location,
+                                     random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
@@ -42,5 +41,4 @@ public strictfp class PropPlacer {
             });
         }
     }
-
 }

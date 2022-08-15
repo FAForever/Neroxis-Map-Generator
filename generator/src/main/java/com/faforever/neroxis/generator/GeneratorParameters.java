@@ -23,21 +23,30 @@ public strictfp class GeneratorParameters {
 
     public String toString() {
         if (visibility == null) {
-            return "Spawns: " + spawnCount +
-                    "\nMap Size: " + mapSize +
-                    "\nNum Teams: " + numTeams +
-                    "\nBiome: " + biome.getName() +
-                    "\nLand Density: " + landDensity +
-                    "\nPlateau Density: " + plateauDensity +
-                    "\nMountain Density: " + mountainDensity +
-                    "\nRamp Density: " + rampDensity +
-                    "\nReclaim Density: " + reclaimDensity +
-                    "\nMex Density: " + mexDensity +
-                    "\nTerrain Symmetry: " + terrainSymmetry;
+            return "Spawns: "
+                   + spawnCount
+                   + "\nMap Size: "
+                   + mapSize
+                   + "\nNum Teams: "
+                   + numTeams
+                   + "\nBiome: "
+                   + biome.getName()
+                   + "\nLand Density: "
+                   + landDensity
+                   + "\nPlateau Density: "
+                   + plateauDensity
+                   + "\nMountain Density: "
+                   + mountainDensity
+                   + "\nRamp Density: "
+                   + rampDensity
+                   + "\nReclaim Density: "
+                   + reclaimDensity
+                   + "\nMex Density: "
+                   + mexDensity
+                   + "\nTerrain Symmetry: "
+                   + terrainSymmetry;
         } else {
-            return "Spawns: " + spawnCount +
-                    "\nMap Size: " + mapSize +
-                    "\nNum Teams: " + numTeams;
+            return "Spawns: " + spawnCount + "\nMap Size: " + mapSize + "\nNum Teams: " + numTeams;
         }
     }
 }

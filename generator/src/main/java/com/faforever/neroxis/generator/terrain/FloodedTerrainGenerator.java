@@ -6,17 +6,17 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
-
     public FloodedTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .plateauDensity(0, .25f)
-                .landDensity(0, .5f)
-                .mapSizes(384, 1024)
-                .build();
+                                                   .plateauDensity(0, .25f)
+                                                   .landDensity(0, .5f)
+                                                   .mapSizes(384, 1024)
+                                                   .build();
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         this.generatorParameters.getBiome().getWaterSettings().setElevation(waterHeight + plateauHeight - 1f);
     }
@@ -26,7 +26,8 @@ public strictfp class FloodedTerrainGenerator extends BasicTerrainGenerator {
         float plateauDensityMax = .7f;
         float plateauDensityMin = .65f;
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
-        float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange().normalize(generatorParameters.getPlateauDensity());
+        float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange()
+                                                             .normalize(generatorParameters.getPlateauDensity());
         float scaledPlateauDensity = normalizedPlateauDensity * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 

@@ -2,12 +2,11 @@ package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -35,6 +34,5 @@ public strictfp class AIMarker extends Marker {
     public void addNeighbors(Collection<? extends String> ids) {
         neighbors.addAll(ids);
     }
-
 }
 

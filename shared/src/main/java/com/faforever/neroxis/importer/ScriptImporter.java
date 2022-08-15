@@ -2,13 +2,11 @@ package com.faforever.neroxis.importer;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.FileUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
 public strictfp class ScriptImporter {
-
     public static void importScript(Path folderPath, SCMap map) throws IOException {
         File dir = folderPath.toFile();
 

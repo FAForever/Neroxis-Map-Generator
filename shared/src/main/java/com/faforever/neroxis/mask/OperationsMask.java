@@ -3,14 +3,11 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
-
-import java.awt.*;
-import java.util.function.Function;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
-
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -19,34 +16,15 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         super(other, name);
     }
 
-    public abstract T getAvg();
-
-    protected void addValueAt(Point point, T value) {
-        addValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void addValueAt(int x, int y, T value);
-
-    protected void subtractValueAt(Point point, T value) {
-        subtractValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void subtractValueAt(int x, int y, T value);
-
-    protected void multiplyValueAt(Point point, T value) {
-        multiplyValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void multiplyValueAt(int x, int y, T value);
-
-    protected void divideValueAt(Point point, T value) {
-        divideValueAt(point.x, point.y, value);
-    }
-
-    protected abstract void divideValueAt(int x, int y, T value);
-
     public abstract T getSum();
 
+    /**
+     * Add mask {@code other} to this mask on a pixel by pixel basis.
+     * Masks must be the same size and type
+     *
+     * @param other mask to add to this mask
+     * @return the modified mask
+     */
     @GraphMethod
     public U add(U other) {
         assertCompatibleMask(other);
@@ -56,15 +34,41 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    protected U add(BiIntFunction<T> valueFunction) {
+        return apply((x, y) -> addValueAt(x, y, valueFunction.apply(x, y)));
+    }
+
+    protected abstract void addValueAt(int x, int y, T value);
+
+    /**
+     * Add {@code value} wherever the {@link BooleanMask} {@code other} is true
+     * Masks must be the same size and type
+     *
+     * @param other the {@link BooleanMask} that determines where to add {@code value}
+     * @param value the value to add to the mask
+     * @return the modified mask
+     */
     @GraphMethod
     public U add(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            add(point -> source.get(point) ? value : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    addValueAt(x, y, value);
+                }
+            });
         }, other);
     }
 
+    /**
+     * Add {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to add
+     * @param values the mask containing the values to add
+     * @return the modified mask
+     */
     @GraphMethod
     public U add(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -72,20 +76,29 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            add(point -> source.get(point) ? vals.get(point) : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    addValueAt(x, y, vals.get(x, y));
+                }
+            });
         }, other, values);
     }
 
+    /**
+     * Add {@code val} to every pixel
+     *
+     * @param val the value to add
+     * @return the modified mask
+     */
     @GraphMethod
     public U add(T val) {
-        return add(point -> val);
+        return add((x, y) -> val);
     }
 
     public U addWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
         return addWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U addWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -93,16 +106,42 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Subtract the average of the mask
+     *
+     * @return the modified mask
+     */
     @GraphMethod
     public U subtractAvg() {
         return enqueue(() -> subtract(getAvg()));
     }
 
+    /**
+     * Subtract the given value from the mask
+     *
+     * @param val value to subtract
+     * @return the modified mask
+     */
     @GraphMethod
     public U subtract(T val) {
-        return subtract(point -> val);
+        return subtract((x, y) -> val);
     }
 
+    protected U subtract(BiIntFunction<T> valueFunction) {
+        return apply((x, y) -> subtractValueAt(x, y, valueFunction.apply(x, y)));
+    }
+
+    protected abstract void subtractValueAt(int x, int y, T value);
+
+    public abstract T getAvg();
+
+    /**
+     * Subtract the given mask {@code other}.
+     * Masks must be the same size and type
+     *
+     * @param other mask to subtract
+     * @return the modified mask
+     */
     @GraphMethod
     public U subtract(U other) {
         assertCompatibleMask(other);
@@ -112,15 +151,35 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Subtract the given {@code value} where the {@link BooleanMask} other
+     * is true. Masks must be the same size and type
+     *
+     * @param other Mask determining which pixels to subtract
+     * @param value Value to subtract
+     * @return the modified mask
+     */
     @GraphMethod
     public U subtract(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            subtract(point -> source.get(point) ? value : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, value);
+                }
+            });
         }, other);
     }
 
+    /**
+     * Subtract {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to subtract
+     * @param values the mask containing the values to subtract
+     * @return the modified mask
+     */
     @GraphMethod
     public U subtract(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -128,7 +187,11 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            subtract(point -> source.get(point) ? vals.get(point) : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, vals.get(x, y));
+                }
+            });
         }, other, values);
     }
 
@@ -136,7 +199,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return subtractWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -144,6 +206,13 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Multiply {@code other} on a pixel basis.
+     * Masks must be the same size and type
+     *
+     * @param other the mask containing the values to multiply
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(U other) {
         assertCompatibleMask(other);
@@ -153,20 +222,52 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    @GraphMethod
-    public U multiply(T val) {
-        return multiply(point -> val);
+    protected U multiply(BiIntFunction<T> valueFunction) {
+        return apply((x, y) -> multiplyValueAt(x, y, valueFunction.apply(x, y)));
     }
 
+    protected abstract void multiplyValueAt(int x, int y, T value);
+
+    /**
+     * Multiply {@code val} on a pixel basis
+     *
+     * @param val the value to multiply
+     * @return the modified mask
+     */
+    @GraphMethod
+    public U multiply(T val) {
+        return multiply((x, y) -> val);
+    }
+
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other the {@link BooleanMask} that determines which pixels to add
+     * @param value the value to multiply
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            multiply(point -> source.get(point) ? value : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, value);
+                }
+            });
         }, other);
     }
 
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to divide
+     * @param values the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U multiply(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -174,7 +275,11 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            multiply(point -> source.get(point) ? vals.get(point) : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, vals.get(x, y));
+                }
+            });
         }, other, values);
     }
 
@@ -182,7 +287,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return multiplyWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -190,6 +294,13 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
+    /**
+     * Divide {@code other} on a pixel basis.
+     * Masks must be the same size and type
+     *
+     * @param other the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(U other) {
         assertCompatibleMask(other);
@@ -199,20 +310,52 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    @GraphMethod
-    public U divide(T val) {
-        return divide(point -> val);
+    protected U divide(BiIntFunction<T> valueFunction) {
+        return apply((x, y) -> divideValueAt(x, y, valueFunction.apply(x, y)));
     }
 
+    protected abstract void divideValueAt(int x, int y, T value);
+
+    /**
+     * Divide {@code val} on a pixel basis
+     *
+     * @param val the value to divide
+     * @return the modified mask
+     */
+    @GraphMethod
+    public U divide(T val) {
+        return divide((x, y) -> val);
+    }
+
+    /**
+     * Divide {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other the {@link BooleanMask} that determines which pixels to divide
+     * @param value the value to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
-            divide(point -> source.get(point) ? value : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, value);
+                }
+            });
         }, other);
     }
 
+    /**
+     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Masks must be the same size and type
+     *
+     * @param other  the {@link BooleanMask} that determines which pixels to divide
+     * @param values the mask containing the values to divide
+     * @return the modified mask
+     */
     @GraphMethod
     public U divide(BooleanMask other, U values) {
         assertCompatibleMask(other);
@@ -220,7 +363,11 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             U vals = (U) dependencies.get(1);
-            divide(point -> source.get(point) ? vals.get(point) : getZeroValue());
+            apply((x, y) -> {
+                if (source.getPrimitive(x, y)) {
+                    subtractValueAt(x, y, vals.get(x, y));
+                }
+            });
         }, other, values);
     }
 
@@ -228,7 +375,6 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         return divideWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
     }
 
-    @GraphMethod
     public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             U source = (U) dependencies.get(0);
@@ -236,47 +382,31 @@ public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>>
         }, other);
     }
 
-    protected U add(Function<Point, T> valueFunction) {
-        return apply(point -> addValueAt(point, valueFunction.apply(point)));
-    }
-
-    protected U addWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return applyWithSymmetry(symmetryType, point -> {
-            T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> addValueAt(spoint, value));
+    protected U addWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addValueAt(sx, sy, value));
         });
     }
 
-    protected U subtract(Function<Point, T> valueFunction) {
-        return apply(point -> subtractValueAt(point, valueFunction.apply(point)));
-    }
-
-    protected U subtractWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return applyWithSymmetry(symmetryType, point -> {
-            T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> subtractValueAt(spoint, value));
+    protected U subtractWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractValueAt(sx, sy, value));
         });
     }
 
-    protected U multiply(Function<Point, T> valueFunction) {
-        return apply(point -> multiplyValueAt(point, valueFunction.apply(point)));
-    }
-
-    protected U multiplyWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return applyWithSymmetry(symmetryType, point -> {
-            T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> multiplyValueAt(spoint, value));
+    protected U multiplyWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyValueAt(sx, sy, value));
         });
     }
 
-    protected U divide(Function<Point, T> valueFunction) {
-        return apply(point -> divideValueAt(point, valueFunction.apply(point)));
-    }
-
-    protected U divideWithSymmetry(SymmetryType symmetryType, Function<Point, T> valueFunction) {
-        return applyWithSymmetry(symmetryType, point -> {
-            T value = valueFunction.apply(point);
-            applyAtSymmetryPoints(point, symmetryType, spoint -> divideValueAt(spoint, value));
+    protected U divideWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
+        return applyWithSymmetry(symmetryType, (x, y) -> {
+            T value = valueFunction.apply(x, y);
+            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideValueAt(sx, sy, value));
         });
     }
 

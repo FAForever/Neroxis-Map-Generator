@@ -3,13 +3,12 @@ package com.faforever.neroxis.generator.resource;
 import com.faforever.neroxis.generator.ParameterConstraints;
 
 public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
-
     public LowMexResourceGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .mexDensity(0f, .25f)
-                .mapSizes(384, 768)
-                .spawnCount(0, 4)
-                .build();
+                                                   .mexDensity(0f, .25f)
+                                                   .mapSizes(384, 768)
+                                                   .spawnCount(0, 4)
+                                                   .build();
     }
 
     @Override

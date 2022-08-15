@@ -12,26 +12,39 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
-
 import java.util.ArrayList;
 
 public strictfp class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
-
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
 
     public SmallBattlePropGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                .landDensity(.25f, 1f)
-                .reclaimDensity(.5f, 1f)
-                .build();
+        parameterConstraints = ParameterConstraints.builder().landDensity(.25f, 1f).reclaimDensity(.5f, 1f).build();
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
+    }
+
+    @Override
+    public void placeUnits() {
+        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+            generateUnitExclusionMasks();
+            Pipeline.await(landWreckMask);
+            DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeUnits", () -> {
+                Army army17 = new Army("ARMY_17", new ArrayList<>());
+                Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
+                army17.addGroup(army17Wreckage);
+                map.addArmy(army17);
+                BooleanMask placementMask = landWreckMask.getFinalMask().subtract(noWrecks);
+                unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 3f, 4f);
+                unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 5f, 8f);
+            });
+        }
     }
 
     @Override
@@ -52,22 +65,5 @@ public strictfp class SmallBattlePropGenerator extends ReducedNaturalPropGenerat
     protected void generateUnitExclusionMasks() {
         noWrecks.init(unbuildable.getFinalMask());
         generateExclusionZones(noWrecks, 128, 8, 32);
-    }
-
-    @Override
-    public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
-            generateUnitExclusionMasks();
-            Pipeline.await(landWreckMask);
-            DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeUnits", () -> {
-                Army army17 = new Army("ARMY_17", new ArrayList<>());
-                Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
-                army17.addGroup(army17Wreckage);
-                map.addArmy(army17);
-                BooleanMask placementMask = landWreckMask.getFinalMask().subtract(noWrecks);
-                unitPlacer.placeUnits(placementMask, UnitPlacer.T1_Land, army17, army17Wreckage, 3f, 4f);
-                unitPlacer.placeUnits(placementMask, UnitPlacer.T2_Land, army17, army17Wreckage, 5f, 8f);
-            });
-        }
     }
 }

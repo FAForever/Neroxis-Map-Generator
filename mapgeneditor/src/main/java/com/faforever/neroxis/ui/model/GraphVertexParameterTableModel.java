@@ -1,19 +1,15 @@
 package com.faforever.neroxis.ui.model;
 
-import com.faforever.neroxis.annotations.GraphParameter;
-import com.faforever.neroxis.generator.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.util.MaskReflectUtil;
-
-import javax.swing.table.AbstractTableModel;
+import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import javax.swing.table.AbstractTableModel;
 
 public class GraphVertexParameterTableModel extends AbstractTableModel {
-
     private final List<Parameter> parameters = new ArrayList<>();
     private MaskGraphVertex<?> vertex;
 
@@ -28,11 +24,13 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Parameter parameter = parameters.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> String.class;
-            case 1 -> Class.class;
-            default -> Object.class;
+            case 0 -> parameter.getName();
+            case 1 -> vertex == null ? null : getParameterClass(parameter);
+            case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
+            default -> null;
         };
     }
 
@@ -47,6 +45,15 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
     }
 
     @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return switch (columnIndex) {
+            case 0 -> String.class;
+            case 1 -> Class.class;
+            default -> Object.class;
+        };
+    }
+
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         if (columnIndex != 2) {
             return false;
@@ -54,7 +61,7 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        return !Mask.class.isAssignableFrom(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()));
+        return !Mask.class.isAssignableFrom(getParameterClass(parameter));
     }
 
     @Override
@@ -65,24 +72,24 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
 
         Parameter parameter = parameters.get(rowIndex);
 
-        if (MaskReflectUtil.classIsNumeric(MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType()))
-                && String.class.equals(aValue.getClass())
-                && ((String) aValue).startsWith(".")) {
+        if (MaskGraphReflectUtil.classIsNumeric(getParameterClass(parameter))
+            && String.class.equals(aValue.getClass())
+            && ((String) aValue).startsWith(".")) {
             aValue = "0" + aValue;
         }
 
         vertex.setParameter(parameter.getName(), aValue);
     }
 
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Parameter parameter = parameters.get(rowIndex);
-        return switch (columnIndex) {
-            case 0 -> parameter.getName();
-            case 1 -> vertex == null ? null : MaskReflectUtil.getActualTypeClass(vertex.getExecutorClass(), parameter.getParameterizedType());
-            case 2 -> vertex == null ? null : vertex.getParameterExpression(parameter);
-            default -> null;
-        };
+    private Class<?> getParameterClass(Parameter parameter) {
+        Class<?> parameterClass;
+        if (Mask.class.isAssignableFrom(vertex.getExecutable().getDeclaringClass())) {
+            parameterClass = MaskGraphReflectUtil.getActualTypeClass(vertex.getExecutorClass(),
+                                                                     parameter.getParameterizedType());
+        } else {
+            parameterClass = parameter.getType();
+        }
+        return parameterClass;
     }
 
     public void setVertex(MaskGraphVertex<?> vertex) {
@@ -97,8 +104,9 @@ public class GraphVertexParameterTableModel extends AbstractTableModel {
             Executable executable = vertex.getExecutable();
             if (executable != null) {
                 for (Parameter parameter : executable.getParameters()) {
-                    if (Arrays.stream(executable.getAnnotationsByType(GraphParameter.class)).noneMatch(annotation -> parameter.getName().equals(annotation.name())
-                            && (!annotation.value().equals("")))) {
+                    if (vertex.getGraphAnnotationForParameter(parameter)
+                              .map(annotation -> annotation.value().isBlank())
+                              .orElse(true) && !(Mask.class.isAssignableFrom(getParameterClass(parameter)))) {
                         parameters.add(parameter);
                     }
                 }

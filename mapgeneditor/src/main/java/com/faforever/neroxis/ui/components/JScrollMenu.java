@@ -1,9 +1,16 @@
 package com.faforever.neroxis.ui.components;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.MenuElement;
+import javax.swing.UIManager;
 import javax.swing.plaf.MenuItemUI;
 import javax.swing.plaf.PopupMenuUI;
-import java.awt.*;
 
 /**
  * Scrollable JMenu.
@@ -18,6 +25,15 @@ public class JScrollMenu extends JMenu {
      */
     private JPopupMenu popupMenu;
 
+    /**
+     * Constructs a menu whose properties are taken from the <code>Action</code> supplied.
+     *
+     * @param a an <code>Action</code>
+     */
+    public JScrollMenu(Action a) {
+        this();
+        setAction(a);
+    }
 
     /**
      * Constructs a new <code>JMenu</code> with no text.
@@ -35,28 +51,6 @@ public class JScrollMenu extends JMenu {
         super(s);
     }
 
-    /**
-     * Constructs a menu whose properties are taken from the <code>Action</code> supplied.
-     *
-     * @param a an <code>Action</code>
-     */
-    public JScrollMenu(Action a) {
-        this();
-        setAction(a);
-    }
-
-
-    /**
-     * Lazily creates the popup menu. This method will create the popup using the <code>JScrollPopupMenu</code> class.
-     */
-    protected void ensurePopupMenuCreated() {
-        if (popupMenu == null) {
-            this.popupMenu = new JScrollPopupMenu();
-            popupMenu.setInvoker(this);
-            popupListener = createWinListener(popupMenu);
-        }
-    }
-
     @Override
     public void updateUI() {
         setUI((MenuItemUI) UIManager.getUI(this));
@@ -66,13 +60,11 @@ public class JScrollMenu extends JMenu {
         }
     }
 
-
     @Override
     public boolean isPopupMenuVisible() {
         ensurePopupMenuCreated();
         return popupMenu.isVisible();
     }
-
 
     @Override
     public void setMenuLocation(int x, int y) {
@@ -101,7 +93,6 @@ public class JScrollMenu extends JMenu {
         popupMenu.add(c, index);
         return c;
     }
-
 
     @Override
     public void addSeparator() {
@@ -152,7 +143,6 @@ public class JScrollMenu extends JMenu {
         ensurePopupMenuCreated();
         popupMenu.insert(new JPopupMenu.Separator(), index);
     }
-
 
     @Override
     public void remove(JMenuItem item) {
@@ -214,7 +204,6 @@ public class JScrollMenu extends JMenu {
         return popupMenu == null ? new MenuElement[0] : new MenuElement[]{popupMenu};
     }
 
-
     @Override
     public void applyComponentOrientation(ComponentOrientation o) {
         super.applyComponentOrientation(o);
@@ -233,6 +222,17 @@ public class JScrollMenu extends JMenu {
         super.setComponentOrientation(o);
         if (popupMenu != null) {
             popupMenu.setComponentOrientation(o);
+        }
+    }
+
+    /**
+     * Lazily creates the popup menu. This method will create the popup using the <code>JScrollPopupMenu</code> class.
+     */
+    protected void ensurePopupMenuCreated() {
+        if (popupMenu == null) {
+            this.popupMenu = new JScrollPopupMenu();
+            popupMenu.setInvoker(this);
+            popupListener = createWinListener(popupMenu);
         }
     }
 }

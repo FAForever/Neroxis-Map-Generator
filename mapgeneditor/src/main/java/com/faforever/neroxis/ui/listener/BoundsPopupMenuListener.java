@@ -1,10 +1,18 @@
 package com.faforever.neroxis.ui.listener;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Point;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboPopup;
-import java.awt.*;
 
 /**
  * This class will change the bounds of the JComboBox popup menu to support
@@ -31,6 +39,24 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
     }
 
     /**
+     * General purpose constructor to set all popup properties at once.
+     *
+     * @param scrollBarRequired display a horizontal scrollbar when the
+     *                          preferred width of popup is greater than width of scrollPane.
+     * @param popupWider        display the popup at its preferred with
+     * @param maximumWidth      limit the popup width to the value specified
+     *                          (minimum size will be the width of the combo box)
+     * @param popupAbove        display the popup above the combo box
+     */
+    public BoundsPopupMenuListener(boolean scrollBarRequired, boolean popupWider, int maximumWidth,
+                                   boolean popupAbove) {
+        setScrollBarRequired(scrollBarRequired);
+        setPopupWider(popupWider);
+        setMaximumWidth(maximumWidth);
+        setPopupAbove(popupAbove);
+    }
+
+    /**
      * Convenience constructor that allows you to display the popup
      * wider and/or above the combo box.
      *
@@ -51,24 +77,6 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
      */
     public BoundsPopupMenuListener(int maximumWidth) {
         this(true, true, maximumWidth, false);
-    }
-
-    /**
-     * General purpose constructor to set all popup properties at once.
-     *
-     * @param scrollBarRequired display a horizontal scrollbar when the
-     *                          preferred width of popup is greater than width of scrollPane.
-     * @param popupWider        display the popup at its preferred with
-     * @param maximumWidth      limit the popup width to the value specified
-     *                          (minimum size will be the width of the combo box)
-     * @param popupAbove        display the popup above the combo box
-     */
-    public BoundsPopupMenuListener(
-            boolean scrollBarRequired, boolean popupWider, int maximumWidth, boolean popupAbove) {
-        setScrollBarRequired(scrollBarRequired);
-        setPopupWider(popupWider);
-        setMaximumWidth(maximumWidth);
-        setPopupAbove(popupAbove);
     }
 
     /**
@@ -159,12 +167,15 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
     public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
         JComboBox comboBox = (JComboBox) e.getSource();
 
-        if (comboBox.getItemCount() == 0) return;
+        if (comboBox.getItemCount() == 0) {
+            return;
+        }
 
         final Object child = comboBox.getAccessibleContext().getAccessibleChild(0);
 
         if (child instanceof BasicComboPopup) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     customizePopup((BasicComboPopup) child);
                 }
@@ -172,11 +183,25 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         }
     }
 
+    @Override
+    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        //  In its normal state the scrollpane does not have a scrollbar
+
+        if (scrollPane != null) {
+            scrollPane.setHorizontalScrollBar(null);
+        }
+    }
+
+    @Override
+    public void popupMenuCanceled(PopupMenuEvent e) {
+    }
+
     protected void customizePopup(BasicComboPopup popup) {
         scrollPane = getScrollPane(popup);
 
-        if (popupWider)
+        if (popupWider) {
             popupWider(popup);
+        }
 
         checkHorizontalScrollBar(popup);
 
@@ -198,6 +223,16 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
     }
 
     /*
+     *  Get the scroll pane used by the popup so its bounds can be adjusted
+     */
+    protected JScrollPane getScrollPane(BasicComboPopup popup) {
+        JList list = popup.getList();
+        Container c = SwingUtilities.getAncestorOfClass(JScrollPane.class, list);
+
+        return (JScrollPane) c;
+    }
+
+    /*
      *  Adjust the width of the scrollpane used by the popup
      */
     protected void popupWider(BasicComboPopup popup) {
@@ -208,9 +243,8 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         //  b) limit width to the maximum if specified
         //  c) ensure width is not less than the scroll pane width
 
-        int popupWidth = list.getPreferredSize().width
-                + 5  // make sure horizontal scrollbar doesn't appear
-                + getScrollBarWidth(popup, scrollPane);
+        int popupWidth = list.getPreferredSize().width + 5  // make sure horizontal scrollbar doesn't appear
+                         + getScrollBarWidth(popup, scrollPane);
 
         if (maximumWidth != -1) {
             popupWidth = Math.min(popupWidth, maximumWidth);
@@ -224,6 +258,22 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         scrollPaneSize.width = popupWidth;
         scrollPane.setPreferredSize(scrollPaneSize);
         scrollPane.setMaximumSize(scrollPaneSize);
+    }
+
+    /*
+     *  I can't find any property on the scrollBar to determine if it will be
+     *  displayed or not so use brute force to determine this.
+     */
+    protected int getScrollBarWidth(BasicComboPopup popup, JScrollPane scrollPane) {
+        int scrollBarWidth = 0;
+        JComboBox comboBox = (JComboBox) popup.getInvoker();
+
+        if (comboBox.getItemCount() > comboBox.getMaximumRowCount()) {
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            scrollBarWidth = vertical.getPreferredSize().width;
+        }
+
+        return scrollBarWidth;
     }
 
     /*
@@ -268,32 +318,6 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
     }
 
     /*
-     *  Get the scroll pane used by the popup so its bounds can be adjusted
-     */
-    protected JScrollPane getScrollPane(BasicComboPopup popup) {
-        JList list = popup.getList();
-        Container c = SwingUtilities.getAncestorOfClass(JScrollPane.class, list);
-
-        return (JScrollPane) c;
-    }
-
-    /*
-     *  I can't find any property on the scrollBar to determine if it will be
-     *  displayed or not so use brute force to determine this.
-     */
-    protected int getScrollBarWidth(BasicComboPopup popup, JScrollPane scrollPane) {
-        int scrollBarWidth = 0;
-        JComboBox comboBox = (JComboBox) popup.getInvoker();
-
-        if (comboBox.getItemCount() > comboBox.getMaximumRowCount()) {
-            JScrollBar vertical = scrollPane.getVerticalScrollBar();
-            scrollBarWidth = vertical.getPreferredSize().width;
-        }
-
-        return scrollBarWidth;
-    }
-
-    /*
      *  I can't find any property on the scrollBar to determine if it will be
      *  displayed or not so use brute force to determine this.
      */
@@ -303,18 +327,5 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
         int popupWidth = list.getPreferredSize().width + scrollBarWidth;
 
         return popupWidth > scrollPane.getPreferredSize().width;
-    }
-
-    @Override
-    public void popupMenuCanceled(PopupMenuEvent e) {
-    }
-
-    @Override
-    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-        //  In its normal state the scrollpane does not have a scrollbar
-
-        if (scrollPane != null) {
-            scrollPane.setHorizontalScrollBar(null);
-        }
     }
 }

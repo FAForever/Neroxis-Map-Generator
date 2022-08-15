@@ -4,7 +4,6 @@ import com.faforever.neroxis.exporter.BiomeExporter;
 import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.ArgumentParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public strictfp class BiomeExtractor {
-
     Path folderPath = Paths.get(".");
     Path mapPath;
     Path envPath;
@@ -40,13 +38,13 @@ public strictfp class BiomeExtractor {
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
             System.out.println("""
-                    map-gen usage:
-                    --help                 produce help message
-                    --biome-name arg       required, set the name for the generated biome
-                    --map-path arg         required, set the map path to generate biome from
-                    --env-path arg         required, set the env path to load textures from
-                    --folder-path arg      optional, set the target folder for the generated biome
-                    """);
+                               map-gen usage:
+                               --help                 produce help message
+                               --biome-name arg       required, set the name for the generated biome
+                               --map-path arg         required, set the map path to generate biome from
+                               --env-path arg         required, set the env path to load textures from
+                               --folder-path arg      optional, set the target folder for the generated biome
+                               """);
             return;
         }
 

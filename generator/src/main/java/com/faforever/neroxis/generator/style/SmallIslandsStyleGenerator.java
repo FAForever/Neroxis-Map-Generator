@@ -7,27 +7,26 @@ import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
-
 import java.util.Arrays;
 
 public strictfp class SmallIslandsStyleGenerator extends StyleGenerator {
-
     public SmallIslandsStyleGenerator() {
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()
-                .landDensity(0f, .5f)
-                .plateauDensity(0, .5f)
-                .mexDensity(.25f, .75f)
-                .mapSizes(768, 1024)
-                .build();
+                                                   .landDensity(0f, .5f)
+                                                   .plateauDensity(0, .5f)
+                                                   .mexDensity(.25f, .75f)
+                                                   .mapSizes(768, 1024)
+                                                   .build();
     }
 
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
         terrainGenerator = new SmallIslandsTerrainGenerator();
-        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(),
-                new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
+        propGenerators.addAll(
+                Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(), new RockFieldPropGenerator(),
+                              new SmallBattlePropGenerator()));
     }
 }
 

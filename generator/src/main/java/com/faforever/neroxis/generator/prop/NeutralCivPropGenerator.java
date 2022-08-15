@@ -11,21 +11,47 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
 public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
-
     protected BooleanMask civReclaimMask;
     protected BooleanMask noCivs;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
 
         noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings);
+    }
+
+    @Override
+    public void placeUnits() {
+        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+            generateUnitExclusionMasks();
+            Pipeline.await(civReclaimMask);
+            DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
+                Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
+                Group civilianInitial = new Group("INITIAL", new ArrayList<>());
+                civilian.addGroup(civilianInitial);
+                map.addArmy(civilian);
+                try {
+                    unitPlacer.placeBases(civReclaimMask.getFinalMask().subtract(noCivs), UnitPlacer.MEDIUM_RECLAIM,
+                                          civilian, civilianInitial, 256f);
+                } catch (IOException e) {
+                    System.out.println("Could not generate bases due to lua parsing error");
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(civReclaimMask.getFinalMask());
     }
 
     @Override
@@ -40,41 +66,17 @@ public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
 
         if (!map.isUnexplored()) {
             civReclaimMask.randomize(.005f).setSize(mapSize + 1);
-            civReclaimMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24)).fillCenter(32, false).fillEdge(64, false);
+            civReclaimMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24))
+                          .fillCenter(32, false)
+                          .fillEdge(64, false);
         } else {
             civReclaimMask.setSize(mapSize + 1);
         }
-    }
-
-    @Override
-    protected void generatePropExclusionMasks() {
-        super.generatePropExclusionMasks();
-        noProps.add(civReclaimMask.getFinalMask());
     }
 
     protected void generateUnitExclusionMasks() {
         noCivs.init(unbuildable.getFinalMask());
         noCivs.inflate(12);
         generateExclusionZones(noCivs, 96, 32, 32);
-    }
-
-    @Override
-    public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
-            generateUnitExclusionMasks();
-            Pipeline.await(civReclaimMask);
-            DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
-                Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
-                Group civilianInitial = new Group("INITIAL", new ArrayList<>());
-                civilian.addGroup(civilianInitial);
-                map.addArmy(civilian);
-                try {
-                    unitPlacer.placeBases(civReclaimMask.getFinalMask().subtract(noCivs), UnitPlacer.MEDIUM_RECLAIM, civilian, civilianInitial, 256f);
-                } catch (IOException e) {
-                    System.out.println("Could not generate bases due to lua parsing error");
-                    e.printStackTrace();
-                }
-            });
-        }
     }
 }

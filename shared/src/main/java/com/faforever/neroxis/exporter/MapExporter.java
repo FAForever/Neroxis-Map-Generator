@@ -1,13 +1,11 @@
 package com.faforever.neroxis.exporter;
 
 import com.faforever.neroxis.map.SCMap;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public strictfp class MapExporter {
-
     public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportDecals) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
@@ -34,5 +32,4 @@ public strictfp class MapExporter {
             e.printStackTrace();
         }
     }
-
 }

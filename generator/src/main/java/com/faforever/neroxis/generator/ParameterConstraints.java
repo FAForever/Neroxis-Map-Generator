@@ -1,14 +1,12 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.Range;
-import lombok.Value;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import lombok.Value;
 
 @SuppressWarnings({"unused"})
 @Value
@@ -30,84 +28,66 @@ public strictfp class ParameterConstraints {
 
     public boolean matches(GeneratorParameters generatorParameters) {
         return landDensityRange.contains(generatorParameters.getLandDensity())
-                && mountainDensityRange.contains(generatorParameters.getMountainDensity())
-                && plateauDensityRange.contains(generatorParameters.getPlateauDensity())
-                && rampDensityRange.contains(generatorParameters.getRampDensity())
-                && reclaimDensityRange.contains(generatorParameters.getReclaimDensity())
-                && mexDensityRange.contains(generatorParameters.getMexDensity())
-                && numTeamsRange.contains(generatorParameters.getNumTeams())
-                && spawnCountRange.contains(generatorParameters.getSpawnCount())
-                && mapSizeRange.contains(generatorParameters.getMapSize())
-                && biomes.contains(generatorParameters.getBiome().getName());
+               && mountainDensityRange.contains(generatorParameters.getMountainDensity())
+               && plateauDensityRange.contains(generatorParameters.getPlateauDensity())
+               && rampDensityRange.contains(generatorParameters.getRampDensity())
+               && reclaimDensityRange.contains(generatorParameters.getReclaimDensity())
+               && mexDensityRange.contains(generatorParameters.getMexDensity())
+               && numTeamsRange.contains(generatorParameters.getNumTeams())
+               && spawnCountRange.contains(generatorParameters.getSpawnCount())
+               && mapSizeRange.contains(generatorParameters.getMapSize())
+               && biomes.contains(generatorParameters.getBiome().getName());
     }
 
     public boolean matches(int mapSize, int numTeams, int spawnCount) {
-        return mapSizeRange.contains(mapSize)
-                && numTeamsRange.contains(numTeams)
-                && spawnCountRange.contains(spawnCount);
+        return mapSizeRange.contains(mapSize) && numTeamsRange.contains(numTeams) && spawnCountRange.contains(
+                spawnCount);
     }
 
     public GeneratorParameters randomizeParameters(Random random, GeneratorParameters generatorParameters) {
         return GeneratorParameters.builder()
-                .spawnCount(generatorParameters.getSpawnCount())
-                .landDensity(landDensityRange.getRandomFloat(random))
-                .plateauDensity(plateauDensityRange.getRandomFloat(random))
-                .mountainDensity(mountainDensityRange.getRandomFloat(random))
-                .rampDensity(rampDensityRange.getRandomFloat(random))
-                .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
-                .mexDensity(mexDensityRange.getRandomFloat(random))
-                .mapSize(generatorParameters.getMapSize())
-                .numTeams(generatorParameters.getNumTeams())
-                .visibility(generatorParameters.getVisibility())
-                .terrainSymmetry(generatorParameters.getTerrainSymmetry())
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
+                                  .spawnCount(generatorParameters.getSpawnCount())
+                                  .landDensity(landDensityRange.getRandomFloat(random))
+                                  .plateauDensity(plateauDensityRange.getRandomFloat(random))
+                                  .mountainDensity(mountainDensityRange.getRandomFloat(random))
+                                  .rampDensity(rampDensityRange.getRandomFloat(random))
+                                  .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
+                                  .mexDensity(mexDensityRange.getRandomFloat(random))
+                                  .mapSize(generatorParameters.getMapSize())
+                                  .numTeams(generatorParameters.getNumTeams())
+                                  .visibility(generatorParameters.getVisibility())
+                                  .terrainSymmetry(generatorParameters.getTerrainSymmetry())
+                                  .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                                  .build();
     }
 
     public GeneratorParameters mapToLevel(float level, GeneratorParameters generatorParameters, Random random) {
         return GeneratorParameters.builder()
-                .spawnCount(generatorParameters.getSpawnCount())
-                .landDensity(landDensityRange.map(level))
-                .plateauDensity(plateauDensityRange.map(level))
-                .mountainDensity(mountainDensityRange.map(level))
-                .rampDensity(rampDensityRange.map(level))
-                .reclaimDensity(reclaimDensityRange.map(level))
-                .mexDensity(mexDensityRange.map(level))
-                .mapSize(generatorParameters.getMapSize())
-                .numTeams(generatorParameters.getNumTeams())
-                .visibility(generatorParameters.getVisibility())
-                .terrainSymmetry(generatorParameters.getTerrainSymmetry())
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
+                                  .spawnCount(generatorParameters.getSpawnCount())
+                                  .landDensity(landDensityRange.map(level))
+                                  .plateauDensity(plateauDensityRange.map(level))
+                                  .mountainDensity(mountainDensityRange.map(level))
+                                  .rampDensity(rampDensityRange.map(level))
+                                  .reclaimDensity(reclaimDensityRange.map(level))
+                                  .mexDensity(mexDensityRange.map(level))
+                                  .mapSize(generatorParameters.getMapSize())
+                                  .numTeams(generatorParameters.getNumTeams())
+                                  .visibility(generatorParameters.getVisibility())
+                                  .terrainSymmetry(generatorParameters.getTerrainSymmetry())
+                                  .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                                  .build();
     }
 
-    public GeneratorParameters initParameters(Random random, int spawnCount, int mapSize, int numTeams, Visibility visibility, Symmetry terrainSymmetry) {
-        return GeneratorParameters.builder()
-                .spawnCount(spawnCount)
-                .landDensity(landDensityRange.getRandomFloat(random))
-                .plateauDensity(plateauDensityRange.getRandomFloat(random))
-                .mountainDensity(mountainDensityRange.getRandomFloat(random))
-                .rampDensity(rampDensityRange.getRandomFloat(random))
-                .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
-                .mexDensity(mexDensityRange.getRandomFloat(random))
-                .mapSize(mapSize)
-                .numTeams(numTeams)
-                .visibility(visibility)
-                .terrainSymmetry(terrainSymmetry)
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
-    }
-
-    public GeneratorParameters initParameters(Random random, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        return generatorParametersBuilder
-                .landDensity(landDensityRange.getRandomFloat(random))
-                .plateauDensity(plateauDensityRange.getRandomFloat(random))
-                .mountainDensity(mountainDensityRange.getRandomFloat(random))
-                .rampDensity(rampDensityRange.getRandomFloat(random))
-                .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
-                .mexDensity(mexDensityRange.getRandomFloat(random))
-                .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                .build();
+    public GeneratorParameters initParameters(Random random,
+                                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        return generatorParametersBuilder.landDensity(landDensityRange.getRandomFloat(random))
+                                         .plateauDensity(plateauDensityRange.getRandomFloat(random))
+                                         .mountainDensity(mountainDensityRange.getRandomFloat(random))
+                                         .rampDensity(rampDensityRange.getRandomFloat(random))
+                                         .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
+                                         .mexDensity(mexDensityRange.getRandomFloat(random))
+                                         .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                                         .build();
     }
 
     public static class ParameterConstraintsBuilder {
@@ -125,8 +105,8 @@ public strictfp class ParameterConstraints {
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
-                    rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange, mapSizeRange,
-                    numTeamsRange, biomes);
+                                            rampDensityRange, reclaimDensityRange, mexDensityRange, spawnCountRange,
+                                            mapSizeRange, numTeamsRange, biomes);
         }
 
         public ParameterConstraintsBuilder landDensity(float min, float max) {

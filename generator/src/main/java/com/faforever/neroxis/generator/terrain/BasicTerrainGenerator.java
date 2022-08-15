@@ -26,7 +26,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected FloatMask heightmapLand;
     protected FloatMask heightmapOcean;
     protected FloatMask heightMapNoise;
-
     protected int spawnSize;
     protected float waterHeight;
     protected float plateauHeight;
@@ -52,10 +51,12 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
     protected float mountainBrushDensity;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         spawnLandMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask", true);
-        spawnPlateauMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask", true);
+        spawnPlateauMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask",
+                true);
         land = new BooleanMask(1, random.nextLong(), symmetrySettings, "land", true);
         mountains = new BooleanMask(1, random.nextLong(), symmetrySettings, "mountains", true);
         plateaus = new BooleanMask(1, random.nextLong(), symmetrySettings, "plateaus", true);
@@ -112,16 +113,6 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         setupHeightmapPipeline();
     }
 
-    protected void symmetrySetup() {
-        if (!symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-            float halfSize = map.getSize() / 2f;
-            int forceRadius = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-            land.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
-            plateaus.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
-            mountains.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
-        }
-    }
-
     protected void spawnMaskSetup() {
         map.getSpawns().forEach(spawn -> {
             Vector3 location = spawn.getPosition();
@@ -140,12 +131,16 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((generatorParameters.getRampDensity() + generatorParameters.getPlateauDensity() + generatorParameters.getMountainDensity()) / 3 * 2 + 1);
+        int numTeamConnections = (int) ((generatorParameters.getRampDensity()
+                + generatorParameters.getPlateauDensity()
+                + generatorParameters.getMountainDensity()) / 3 * 2 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints, numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections, maxStepSize);
+        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints,
+                numTeamConnections, maxStepSize, 32);
+        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections,
+                maxStepSize);
     }
 
     protected void landSetup() {
@@ -185,12 +180,28 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         mountains.setSize(map.getSize() / 4);
 
         if (random.nextBoolean()) {
-            mountains.progressiveWalk((int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
+            mountains.progressiveWalk(
+                    (int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                            .getNumSymPoints()),
+                    map.getSize() / 64);
         } else {
-            mountains.randomWalk((int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()), map.getSize() / 64);
+            mountains.randomWalk(
+                    (int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                            .getNumSymPoints()),
+                    map.getSize() / 64);
         }
         mountains.dilute(.5f, 4);
         mountains.setSize(map.getSize() + 1);
+    }
+
+    protected void symmetrySetup() {
+        if (!symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+            float halfSize = map.getSize() / 2f;
+            int forceRadius = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+            land.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
+            plateaus.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
+            mountains.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
+        }
     }
 
     protected void spawnTerrainSetup() {
@@ -208,8 +219,12 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         land.add(spawnLandMask).add(spawnPlateauMask);
         if (map.getSize() > 512 && symmetrySettings.getSpawnSymmetry().getNumSymPoints() <= 4) {
             land.add(spawnLandMask).add(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
-            land.erode(.5f, 10).add(spawnLandMask.copy().setSize(map.getSize() / 8)).add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
-                    .blur(4, .75f).dilute(.5f, 5).setSize(map.getSize() + 1);
+            land.erode(.5f, 10)
+                    .add(spawnLandMask.copy().setSize(map.getSize() / 8))
+                    .add(spawnPlateauMask.copy().setSize(map.getSize() / 8))
+                    .blur(4, .75f)
+                    .dilute(.5f, 5)
+                    .setSize(map.getSize() + 1);
             land.blur(8, .75f);
         } else {
             land.dilute(.25f, 16).blur(2);
@@ -230,7 +245,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void enforceSymmetry() {
         SymmetrySettings symmetrySettings = heightmap.getSymmetrySettings();
-        if (!symmetrySettings.getTerrainSymmetry().isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+        if (!symmetrySettings.getTerrainSymmetry().isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry()
+                .isPerfectSymmetry()) {
             land.forceSymmetry();
             mountains.forceSymmetry();
             plateaus.forceSymmetry();
@@ -245,7 +261,7 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         int mapSize = map.getSize();
         int numBrushes = Brushes.GENERATOR_BRUSHES.size();
 
-        String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
 
         setupMountainHeightmapPipeline();
         setupPlateauHeightmapPipeline();
@@ -260,12 +276,26 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         heightmapOcean.setSize(mapSize + 1);
         heightMapNoise.setSize(mapSize / 128);
 
-        heightmapOcean.addDistance(land, -.45f).clampMin(oceanFloor).useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush5, shallowWaterBrushSize, shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
-                .useBrushWithinAreaWithDensity(deepWater, brush5, deepWaterBrushSize, deepWaterBrushDensity, deepWaterBrushIntensity, false).clampMax(0f).blur(4, deepWater).blur(1);
+        heightmapOcean.addDistance(land, -.45f)
+                .clampMin(oceanFloor)
+                .useBrushWithinAreaWithDensity(water.deflate(8).subtract(deepWater), brush, shallowWaterBrushSize,
+                        shallowWaterBrushDensity, shallowWaterBrushIntensity, false)
+                .useBrushWithinAreaWithDensity(deepWater, brush, deepWaterBrushSize, deepWaterBrushDensity,
+                        deepWaterBrushIntensity, false)
+                .clampMax(0f)
+                .blur(4, deepWater)
+                .blur(1);
 
-        heightmapLand.add(heightmapHills).add(heightmapValleys).add(heightmapMountains).add(landHeight)
-                .add(heightmapPlateaus).setToValue(spawnLandMask, landHeight).setToValue(spawnPlateauMask, plateauHeight + landHeight)
-                .blur(1, spawnLandMask.copy().inflate(4)).blur(1, spawnPlateauMask.copy().inflate(4)).add(heightmapOcean);
+        heightmapLand.add(heightmapHills)
+                .add(heightmapValleys)
+                .add(heightmapMountains)
+                .add(landHeight)
+                .add(heightmapPlateaus)
+                .setToValue(spawnLandMask, landHeight)
+                .setToValue(spawnPlateauMask, plateauHeight + landHeight)
+                .blur(1, spawnLandMask.copy().inflate(4))
+                .blur(1, spawnPlateauMask.copy().inflate(4))
+                .add(heightmapOcean);
 
         heightmap.add(heightmapLand).add(waterHeight);
 
@@ -273,53 +303,24 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
             heightMapNoise.addWhiteNoise(1)
-                    .subtractAvg().clampMin(0f).setToValue(land.copy().invert().inflate(16), 0f)
+                    .subtractAvg()
+                    .clampMin(0f)
+                    .setToValue(land.copy().invert().inflate(16), 0f)
                     .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
-                    .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8)).blur(mapSize / 16);
+                    .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8))
+                    .blur(mapSize / 16);
             heightmap.add(heightMapNoise);
         }
 
         blurRamps();
     }
 
-    private void blurRamps() {
-        BooleanMask NoRamps = plateaus.copy().outline().subtract(ramps).add(mountains);
-        BooleanMask inflatedRamps = ramps.copy();
-        heightmap.blur(48, inflatedRamps)
-                .blur(32, inflatedRamps.inflate(8).subtract(NoRamps.inflate(4)))
-                .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(24, inflatedRamps.inflate(8).subtract(NoRamps.inflate(4)))
-                .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(16, inflatedRamps.inflate(16).subtract(NoRamps.inflate(4)))
-                .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .blur(8, inflatedRamps.inflate(16).subtract(NoRamps.inflate(4)))
-                .blur(4, inflatedRamps.copy().outline().inflate(4))
-                .clampMin(0f).clampMax(255f);
-    }
-
-    protected void initRamps() {
-        float maxStepSize = map.getSize() / 128f;
-        int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
-        int bound = map.getSize() / 4;
-        ramps.setSize(map.getSize() + 1);
-
-        if (map.getSize() >= 512) {
-            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
-        } else {
-            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
-        }
-
-        ramps.subtract(connections.copy().inflate(64)).inflate(maxStepSize / 2f)
-                .add(connections.copy().inflate(maxStepSize / 2f)).multiply(plateaus.copy().outline())
-                .subtract(mountains).inflate(10);
-    }
-
     protected void setupMountainHeightmapPipeline() {
         String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 
         heightmapMountains.setSize(map.getSize() + 1);
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity, mountainBrushIntensity, false);
+        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity,
+                mountainBrushIntensity, false);
 
         BooleanMask paintedMountains = heightmapMountains.copyAsBooleanMask(plateauHeight / 2);
 
@@ -333,7 +334,8 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 
         heightmapPlateaus.setSize(map.getSize() + 1);
-        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity, plateauBrushIntensity, false).clampMax(plateauHeight);
+        heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity,
+                plateauBrushIntensity, false).clampMax(plateauHeight);
 
         BooleanMask paintedPlateaus = heightmapPlateaus.copyAsBooleanMask(plateauHeight - 3);
 
@@ -359,16 +361,60 @@ public strictfp class BasicTerrainGenerator extends TerrainGenerator {
         hills.setSize(map.getSize() / 4);
         valleys.setSize(map.getSize() / 4);
 
-        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, 2)
+        hills.randomWalk(random.nextInt(4) + 1, random.nextInt(map.getSize() / 4) / numSymPoints)
+                .dilute(.5f, 2)
                 .setSize(map.getSize() + 1);
         hills.multiply(land.copy().deflate(8)).subtract(plateaus.copy().outline().inflate(8)).subtract(spawnLandMask);
-        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 4) / numSymPoints).dilute(.5f, 4)
+        valleys.randomWalk(random.nextInt(4), random.nextInt(map.getSize() / 4) / numSymPoints)
+                .dilute(.5f, 4)
                 .setSize(map.getSize() + 1);
         valleys.multiply(plateaus.copy().deflate(8)).subtract(spawnPlateauMask);
 
         valleyBrushIntensity = -0.35f;
-        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brushValley, smallFeatureBrushSize, valleyBrushDensity, valleyBrushIntensity, false)
-                .clampMin(valleyFloor);
-        heightmapHills.useBrushWithinAreaWithDensity(hills.add(mountains.copy().outline().inflate(4).acid(.01f, 4)), brushHill, smallFeatureBrushSize, hillBrushDensity, hillBrushIntensity, false);
+        heightmapValleys.useBrushWithinAreaWithDensity(valleys, brushValley, smallFeatureBrushSize, valleyBrushDensity,
+                valleyBrushIntensity, false).clampMin(valleyFloor);
+        heightmapHills.useBrushWithinAreaWithDensity(hills.add(mountains.copy().outline().inflate(4).acid(.01f, 4)),
+                brushHill, smallFeatureBrushSize, hillBrushDensity,
+                hillBrushIntensity, false);
+    }
+
+    protected void initRamps() {
+        float maxStepSize = map.getSize() / 128f;
+        int maxMiddlePoints = 2;
+        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry()
+                .getNumSymPoints();
+        int bound = map.getSize() / 4;
+        ramps.setSize(map.getSize() + 1);
+
+        if (map.getSize() >= 512) {
+            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
+                    (float) (StrictMath.PI / 2));
+        } else {
+            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound,
+                    (float) (StrictMath.PI / 2));
+        }
+
+        ramps.subtract(connections.copy().inflate(64))
+                .inflate(maxStepSize / 2f)
+                .add(connections.copy().inflate(maxStepSize / 2f))
+                .multiply(plateaus.copy().outline())
+                .subtract(mountains)
+                .inflate(10);
+    }
+
+    private void blurRamps() {
+        BooleanMask noRamps = plateaus.copy().outline().subtract(ramps).add(mountains);
+        BooleanMask inflatedRamps = ramps.copy();
+        heightmap.blur(48, inflatedRamps)
+                .blur(32, inflatedRamps.inflate(8).subtract(noRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(24, inflatedRamps.inflate(8).subtract(noRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(16, inflatedRamps.inflate(16).subtract(noRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .blur(8, inflatedRamps.inflate(16).subtract(noRamps.inflate(4)))
+                .blur(4, inflatedRamps.copy().outline().inflate(4))
+                .clampMin(0f)
+                .clampMax(255f);
     }
 }

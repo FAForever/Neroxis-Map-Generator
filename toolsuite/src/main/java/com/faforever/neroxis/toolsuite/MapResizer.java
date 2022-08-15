@@ -1,10 +1,6 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.CLIUtils;
-import com.faforever.neroxis.cli.DebugMixin;
-import com.faforever.neroxis.cli.OutputFolderMixin;
-import com.faforever.neroxis.cli.RequiredMapPathMixin;
-import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.cli.*;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
@@ -14,23 +10,12 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-import static picocli.CommandLine.ArgGroup;
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Mixin;
-import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Spec;
+import static picocli.CommandLine.*;
 
-@Command(
-        name = "resize",
-        mixinStandardHelpOptions = true,
-        description = "Change the map size",
-        versionProvider = VersionProvider.class,
-        usageHelpAutoWidth = true)
+@Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public strictfp class MapResizer implements Callable<Integer> {
-
     @Spec
     private CommandLine.Model.CommandSpec spec;
-
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
     @Mixin
@@ -39,7 +24,6 @@ public strictfp class MapResizer implements Callable<Integer> {
     private DebugMixin debugMixin;
     @ArgGroup(exclusive = false, heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n")
     private LocationOptions locationOptions;
-
     private int newMapSize;
     private int scaledSize;
 
@@ -62,8 +46,7 @@ public strictfp class MapResizer implements Callable<Integer> {
     }
 
     private void resizeMap(SCMap map) {
-        Vector2 location = locationOptions.getLocation();
-        location = location == null ? new Vector2(newMapSize / 2f, newMapSize / 2f) : location;
+        Vector2 location = locationOptions == null ? new Vector2(newMapSize / 2f, newMapSize / 2f) : locationOptions.getLocation();
         map.changeMapSize(scaledSize, newMapSize, location);
     }
 }

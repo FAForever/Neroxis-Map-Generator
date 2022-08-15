@@ -25,30 +25,27 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import java.util.Arrays;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
+import java.util.Arrays;
 
 final strictfp class Matrix {
-
     private static final float FLT_EPSILON = 0.00001f;
-
     private static final float[] m = new float[6];
     private static final float[] u = new float[6];
-
     private final float[] values = new float[6];
 
     Matrix() {
     }
 
     Matrix(float a) {
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 6; ++i) {
             values[i] = a;
+        }
     }
 
     static Matrix computeWeightedCovariance(final ColourSet m_colours, Matrix covariance) {
@@ -69,10 +66,11 @@ final strictfp class Matrix {
         centroid.div(total);
 
         // accumulate the covariance matrix
-        if (covariance == null)
+        if (covariance == null) {
             covariance = new Matrix();
-        else
+        } else {
             Arrays.fill(covariance.values, 0.0f);
+        }
 
         final float[] values = covariance.values;
 
@@ -90,6 +88,72 @@ final strictfp class Matrix {
 
         // return it
         return covariance;
+    }
+
+    static Vec computePrincipleComponent(final Matrix matrix) {
+        final float[] m = matrix.values;
+
+        // compute the cubic coefficients
+        final float c0 = m[0] * m[3] * m[5] + 2.0f * m[1] * m[2] * m[4]
+                         - m[0] * m[4] * m[4]
+                         - m[3] * m[2] * m[2]
+                         - m[5] * m[1] * m[1];
+        final float c1 = m[0] * m[3] + m[0] * m[5] + m[3] * m[5] - m[1] * m[1] - m[2] * m[2] - m[4] * m[4];
+        final float c2 = m[0] + m[3] + m[5];
+
+        // compute the quadratic coefficients
+        final float a = c1 - (1.0f / 3.0f) * c2 * c2;
+        final float b = (-2.0f / 27.0f) * c2 * c2 * c2 + (1.0f / 3.0f) * c1 * c2 - c0;
+
+        // compute the root count check
+        final float Q = 0.25f * b * b + (1.0f / 27.0f) * a * a * a;
+
+        // test the multiplicity
+        if (FLT_EPSILON < Q) {
+            // only one root, which implies we have a multiple of the identity
+            return new Vec(1.0f);
+        } else if (Q < -FLT_EPSILON) {
+            // three distinct roots
+            final float theta = (float) atan2(sqrt(-Q), -0.5f * b);
+            final float rho = (float) sqrt(0.25f * b * b - Q);
+
+            final float rt = (float) pow(rho, 1.0f / 3.0f);
+            final float ct = (float) cos(theta / 3.0f);
+            final float st = (float) sin(theta / 3.0f);
+
+            float l1 = (1.0f / 3.0f) * c2 + 2.0f * rt * ct;
+            final float l2 = (1.0f / 3.0f) * c2 - rt * (ct + (float) sqrt(3.0f) * st);
+            final float l3 = (1.0f / 3.0f) * c2 - rt * (ct - (float) sqrt(3.0f) * st);
+
+            // pick the larger
+            if (abs(l2) > abs(l1)) {
+                l1 = l2;
+            }
+            if (abs(l3) > abs(l1)) {
+                l1 = l3;
+            }
+
+            // get the eigenvector
+            return getMultiplicity1Evector(matrix, l1);
+        } else { // if( -FLT_EPSILON <= Q && Q <= FLT_EPSILON )
+            // two roots
+            final float rt;
+            if (b < 0.0f) {
+                rt = (float) -pow(-0.5f * b, 1.0f / 3.0f);
+            } else {
+                rt = (float) pow(0.5f * b, 1.0f / 3.0f);
+            }
+
+            final float l1 = (1.0f / 3.0f) * c2 + rt;        // repeated
+            final float l2 = (1.0f / 3.0f) * c2 - 2.0f * rt;
+
+            // get the eigenvector
+            if (abs(l1) > abs(l2)) {
+                return getMultiplicity2Evector(matrix, l1);
+            } else {
+                return getMultiplicity1Evector(matrix, l2);
+            }
+        }
     }
 
     private static Vec getMultiplicity1Evector(final Matrix matrix, final float evalue) {
@@ -164,72 +228,7 @@ final strictfp class Matrix {
         };
     }
 
-    static Vec computePrincipleComponent(final Matrix matrix) {
-        final float[] m = matrix.values;
-
-        // compute the cubic coefficients
-        final float c0 = m[0] * m[3] * m[5]
-                + 2.0f * m[1] * m[2] * m[4]
-                - m[0] * m[4] * m[4]
-                - m[3] * m[2] * m[2]
-                - m[5] * m[1] * m[1];
-        final float c1 = m[0] * m[3] + m[0] * m[5] + m[3] * m[5]
-                - m[1] * m[1] - m[2] * m[2] - m[4] * m[4];
-        final float c2 = m[0] + m[3] + m[5];
-
-        // compute the quadratic coefficients
-        final float a = c1 - (1.0f / 3.0f) * c2 * c2;
-        final float b = (-2.0f / 27.0f) * c2 * c2 * c2 + (1.0f / 3.0f) * c1 * c2 - c0;
-
-        // compute the root count check
-        final float Q = 0.25f * b * b + (1.0f / 27.0f) * a * a * a;
-
-        // test the multiplicity
-        if (FLT_EPSILON < Q) {
-            // only one root, which implies we have a multiple of the identity
-            return new Vec(1.0f);
-        } else if (Q < -FLT_EPSILON) {
-            // three distinct roots
-            final float theta = (float) atan2(sqrt(-Q), -0.5f * b);
-            final float rho = (float) sqrt(0.25f * b * b - Q);
-
-            final float rt = (float) pow(rho, 1.0f / 3.0f);
-            final float ct = (float) cos(theta / 3.0f);
-            final float st = (float) sin(theta / 3.0f);
-
-            float l1 = (1.0f / 3.0f) * c2 + 2.0f * rt * ct;
-            final float l2 = (1.0f / 3.0f) * c2 - rt * (ct + (float) sqrt(3.0f) * st);
-            final float l3 = (1.0f / 3.0f) * c2 - rt * (ct - (float) sqrt(3.0f) * st);
-
-            // pick the larger
-            if (abs(l2) > abs(l1))
-                l1 = l2;
-            if (abs(l3) > abs(l1))
-                l1 = l3;
-
-            // get the eigenvector
-            return getMultiplicity1Evector(matrix, l1);
-        } else { // if( -FLT_EPSILON <= Q && Q <= FLT_EPSILON )
-            // two roots
-            final float rt;
-            if (b < 0.0f)
-                rt = (float) -pow(-0.5f * b, 1.0f / 3.0f);
-            else
-                rt = (float) pow(0.5f * b, 1.0f / 3.0f);
-
-            final float l1 = (1.0f / 3.0f) * c2 + rt;        // repeated
-            final float l2 = (1.0f / 3.0f) * c2 - 2.0f * rt;
-
-            // get the eigenvector
-            if (abs(l1) > abs(l2))
-                return getMultiplicity2Evector(matrix, l1);
-            else
-                return getMultiplicity1Evector(matrix, l2);
-        }
-    }
-
     float get(final int index) {
         return values[index];
     }
-
 }

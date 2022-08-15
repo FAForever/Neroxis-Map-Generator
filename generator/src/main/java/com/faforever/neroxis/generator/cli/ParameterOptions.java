@@ -7,7 +7,6 @@ import com.faforever.neroxis.generator.MapGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import lombok.Getter;
 import picocli.CommandLine;
-
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
@@ -16,7 +15,6 @@ import static picocli.CommandLine.Spec;
 public strictfp class ParameterOptions {
     @Spec
     CommandLine.Model.CommandSpec spec;
-
     private Float landDensity;
     private Float plateauDensity;
     private Float mountainDensity;

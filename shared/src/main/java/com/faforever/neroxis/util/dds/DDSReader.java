@@ -1,7 +1,6 @@
 package com.faforever.neroxis.util.dds;
 
 public final strictfp class DDSReader {
-
     public static final Order ARGB = new Order(16, 8, 0, 24);
     public static final Order ABGR = new Order(0, 8, 16, 24);
     // Image Type
@@ -70,14 +69,6 @@ public final strictfp class DDSReader {
         return (buffer[96] & 0xFF) | (buffer[97] & 0xFF) << 8 | (buffer[98] & 0xFF) << 16 | (buffer[99] & 0xFF) << 24;
     }
 
-    public static int getBlueMask(byte[] buffer) {
-        return (buffer[100] & 0xFF) | (buffer[101] & 0xFF) << 8 | (buffer[102] & 0xFF) << 16 | (buffer[103] & 0xFF) << 24;
-    }
-
-    public static int getAlphaMask(byte[] buffer) {
-        return (buffer[104] & 0xFF) | (buffer[105] & 0xFF) << 8 | (buffer[106] & 0xFF) << 16 | (buffer[107] & 0xFF) << 24;
-    }
-
     public static int[] read(byte[] buffer, Order order, int mipmapLevel) {
 
         // header
@@ -87,7 +78,9 @@ public final strictfp class DDSReader {
 
         // type
         int type = getType(buffer);
-        if (type == 0) return null;
+        if (type == 0) {
+            return null;
+        }
 
         // offset
         int offset = 128; // header size
@@ -96,13 +89,20 @@ public final strictfp class DDSReader {
                 switch (type) {
                     case DXT1 -> offset += 8 * ((width + 3) / 4) * ((height + 3) / 4);
                     case DXT2, DXT3, DXT4, DXT5 -> offset += 16 * ((width + 3) / 4) * ((height + 3) / 4);
-                    case A1R5G5B5, X1R5G5B5, A4R4G4B4, X4R4G4B4, R5G6B5, R8G8B8, A8B8G8R8, X8B8G8R8, A8R8G8B8, X8R8G8B8 -> offset += (type & 0xFF) * width * height;
+                    case A1R5G5B5, X1R5G5B5, A4R4G4B4, X4R4G4B4, R5G6B5, R8G8B8, A8B8G8R8, X8B8G8R8, A8R8G8B8, X8R8G8B8 -> offset +=
+                            (type & 0xFF)
+                            * width
+                            * height;
                 }
                 width /= 2;
                 height /= 2;
             }
-            if (width <= 0) width = 1;
-            if (height <= 0) height = 1;
+            if (width <= 0) {
+                width = 1;
+            }
+            if (height <= 0) {
+                height = 1;
+            }
         }
 
         return switch (type) {
@@ -142,42 +142,72 @@ public final strictfp class DDSReader {
             int blueMask = getBlueMask(buffer);
             int alphaMask = ((flags & 0x01) != 0) ? getAlphaMask(buffer) : 0; // 0x01 alpha
             if (bitCount == 16) {
-                if (redMask == A1R5G5B5_MASKS[0] && greenMask == A1R5G5B5_MASKS[1] && blueMask == A1R5G5B5_MASKS[2] && alphaMask == A1R5G5B5_MASKS[3]) {
+                if (redMask == A1R5G5B5_MASKS[0]
+                    && greenMask == A1R5G5B5_MASKS[1]
+                    && blueMask == A1R5G5B5_MASKS[2]
+                    && alphaMask == A1R5G5B5_MASKS[3]) {
                     // A1R5G5B5
                     type = A1R5G5B5;
-                } else if (redMask == X1R5G5B5_MASKS[0] && greenMask == X1R5G5B5_MASKS[1] && blueMask == X1R5G5B5_MASKS[2] && alphaMask == X1R5G5B5_MASKS[3]) {
+                } else if (redMask == X1R5G5B5_MASKS[0]
+                           && greenMask == X1R5G5B5_MASKS[1]
+                           && blueMask == X1R5G5B5_MASKS[2]
+                           && alphaMask == X1R5G5B5_MASKS[3]) {
                     // X1R5G5B5
                     type = X1R5G5B5;
-                } else if (redMask == A4R4G4B4_MASKS[0] && greenMask == A4R4G4B4_MASKS[1] && blueMask == A4R4G4B4_MASKS[2] && alphaMask == A4R4G4B4_MASKS[3]) {
+                } else if (redMask == A4R4G4B4_MASKS[0]
+                           && greenMask == A4R4G4B4_MASKS[1]
+                           && blueMask == A4R4G4B4_MASKS[2]
+                           && alphaMask == A4R4G4B4_MASKS[3]) {
                     // A4R4G4B4
                     type = A4R4G4B4;
-                } else if (redMask == X4R4G4B4_MASKS[0] && greenMask == X4R4G4B4_MASKS[1] && blueMask == X4R4G4B4_MASKS[2] && alphaMask == X4R4G4B4_MASKS[3]) {
+                } else if (redMask == X4R4G4B4_MASKS[0]
+                           && greenMask == X4R4G4B4_MASKS[1]
+                           && blueMask == X4R4G4B4_MASKS[2]
+                           && alphaMask == X4R4G4B4_MASKS[3]) {
                     // X4R4G4B4
                     type = X4R4G4B4;
-                } else if (redMask == R5G6B5_MASKS[0] && greenMask == R5G6B5_MASKS[1] && blueMask == R5G6B5_MASKS[2] && alphaMask == R5G6B5_MASKS[3]) {
+                } else if (redMask == R5G6B5_MASKS[0]
+                           && greenMask == R5G6B5_MASKS[1]
+                           && blueMask == R5G6B5_MASKS[2]
+                           && alphaMask == R5G6B5_MASKS[3]) {
                     // R5G6B5
                     type = R5G6B5;
                 } else {
                     // Unsupported 16bit RGB image
                 }
             } else if (bitCount == 24) {
-                if (redMask == R8G8B8_MASKS[0] && greenMask == R8G8B8_MASKS[1] && blueMask == R8G8B8_MASKS[2] && alphaMask == R8G8B8_MASKS[3]) {
+                if (redMask == R8G8B8_MASKS[0]
+                    && greenMask == R8G8B8_MASKS[1]
+                    && blueMask == R8G8B8_MASKS[2]
+                    && alphaMask == R8G8B8_MASKS[3]) {
                     // R8G8B8
                     type = R8G8B8;
                 } else {
                     // Unsupported 24bit RGB image
                 }
             } else if (bitCount == 32) {
-                if (redMask == A8B8G8R8_MASKS[0] && greenMask == A8B8G8R8_MASKS[1] && blueMask == A8B8G8R8_MASKS[2] && alphaMask == A8B8G8R8_MASKS[3]) {
+                if (redMask == A8B8G8R8_MASKS[0]
+                    && greenMask == A8B8G8R8_MASKS[1]
+                    && blueMask == A8B8G8R8_MASKS[2]
+                    && alphaMask == A8B8G8R8_MASKS[3]) {
                     // A8B8G8R8
                     type = A8B8G8R8;
-                } else if (redMask == X8B8G8R8_MASKS[0] && greenMask == X8B8G8R8_MASKS[1] && blueMask == X8B8G8R8_MASKS[2] && alphaMask == X8B8G8R8_MASKS[3]) {
+                } else if (redMask == X8B8G8R8_MASKS[0]
+                           && greenMask == X8B8G8R8_MASKS[1]
+                           && blueMask == X8B8G8R8_MASKS[2]
+                           && alphaMask == X8B8G8R8_MASKS[3]) {
                     // X8B8G8R8
                     type = X8B8G8R8;
-                } else if (redMask == A8R8G8B8_MASKS[0] && greenMask == A8R8G8B8_MASKS[1] && blueMask == A8R8G8B8_MASKS[2] && alphaMask == A8R8G8B8_MASKS[3]) {
+                } else if (redMask == A8R8G8B8_MASKS[0]
+                           && greenMask == A8R8G8B8_MASKS[1]
+                           && blueMask == A8R8G8B8_MASKS[2]
+                           && alphaMask == A8R8G8B8_MASKS[3]) {
                     // A8R8G8B8
                     type = A8R8G8B8;
-                } else if (redMask == X8R8G8B8_MASKS[0] && greenMask == X8R8G8B8_MASKS[1] && blueMask == X8R8G8B8_MASKS[2] && alphaMask == X8R8G8B8_MASKS[3]) {
+                } else if (redMask == X8R8G8B8_MASKS[0]
+                           && greenMask == X8R8G8B8_MASKS[1]
+                           && blueMask == X8R8G8B8_MASKS[2]
+                           && alphaMask == X8R8G8B8_MASKS[3]) {
                     // X8R8G8B8
                     type = X8R8G8B8;
                 } else {
@@ -189,7 +219,20 @@ public final strictfp class DDSReader {
         }
 
         return type;
+    }
 
+    public static int getBlueMask(byte[] buffer) {
+        return (buffer[100] & 0xFF)
+               | (buffer[101] & 0xFF) << 8
+               | (buffer[102] & 0xFF) << 16
+               | (buffer[103] & 0xFF) << 24;
+    }
+
+    public static int getAlphaMask(byte[] buffer) {
+        return (buffer[104] & 0xFF)
+               | (buffer[105] & 0xFF) << 8
+               | (buffer[106] & 0xFF) << 16
+               | (buffer[107] & 0xFF) << 24;
     }
 
     private static int[] decodeDXT1(int width, int height, int offset, byte[] buffer, Order order) {
@@ -204,17 +247,25 @@ public final strictfp class DDSReader {
                 int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
                 index += 2;
                 for (int k = 0; k < 4; k++) {
-                    if (4 * i + k >= height) break;
+                    if (4 * i + k >= height) {
+                        break;
+                    }
                     int t0 = (buffer[index] & 0x03);
                     int t1 = (buffer[index] & 0x0C) >> 2;
                     int t2 = (buffer[index] & 0x30) >> 4;
                     int t3 = (buffer[index++] & 0xC0) >> 6;
                     pixels[4 * width * i + 4 * j + width * k] = getDXTColor(c0, c1, 0xFF, t0, order);
-                    if (4 * j + 1 >= width) continue;
+                    if (4 * j + 1 >= width) {
+                        continue;
+                    }
                     pixels[4 * width * i + 4 * j + width * k + 1] = getDXTColor(c0, c1, 0xFF, t1, order);
-                    if (4 * j + 2 >= width) continue;
+                    if (4 * j + 2 >= width) {
+                        continue;
+                    }
                     pixels[4 * width * i + 4 * j + width * k + 2] = getDXTColor(c0, c1, 0xFF, t2, order);
-                    if (4 * j + 3 >= width) continue;
+                    if (4 * j + 3 >= width) {
+                        continue;
+                    }
                     pixels[4 * width * i + 4 * j + width * k + 3] = getDXTColor(c0, c1, 0xFF, t3, order);
                 }
             }
@@ -249,18 +300,29 @@ public final strictfp class DDSReader {
                 int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
                 index += 2;
                 for (int k = 0; k < 4; k++) {
-                    if (4 * i + k >= height) break;
+                    if (4 * i + k >= height) {
+                        break;
+                    }
                     int t0 = (buffer[index] & 0x03);
                     int t1 = (buffer[index] & 0x0C) >> 2;
                     int t2 = (buffer[index] & 0x30) >> 4;
                     int t3 = (buffer[index++] & 0xC0) >> 6;
                     pixels[4 * width * i + 4 * j + width * k] = getDXTColor(c0, c1, alphaTable[4 * k], t0, order);
-                    if (4 * j + 1 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 1] = getDXTColor(c0, c1, alphaTable[4 * k + 1], t1, order);
-                    if (4 * j + 2 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 2] = getDXTColor(c0, c1, alphaTable[4 * k + 2], t2, order);
-                    if (4 * j + 3 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 3] = getDXTColor(c0, c1, alphaTable[4 * k + 3], t3, order);
+                    if (4 * j + 1 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 1] = getDXTColor(c0, c1, alphaTable[4 * k + 1], t1,
+                                                                                order);
+                    if (4 * j + 2 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 2] = getDXTColor(c0, c1, alphaTable[4 * k + 2], t2,
+                                                                                order);
+                    if (4 * j + 3 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 3] = getDXTColor(c0, c1, alphaTable[4 * k + 3], t3,
+                                                                                order);
                 }
             }
         }
@@ -307,22 +369,66 @@ public final strictfp class DDSReader {
                 int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
                 index += 2;
                 for (int k = 0; k < 4; k++) {
-                    if (4 * i + k >= height) break;
+                    if (4 * i + k >= height) {
+                        break;
+                    }
                     int t0 = (buffer[index] & 0x03);
                     int t1 = (buffer[index] & 0x0C) >> 2;
                     int t2 = (buffer[index] & 0x30) >> 4;
                     int t3 = (buffer[index++] & 0xC0) >> 6;
-                    pixels[4 * width * i + 4 * j + width * k] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[4 * k]), t0, order);
-                    if (4 * j + 1 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 1] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[4 * k + 1]), t1, order);
-                    if (4 * j + 2 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 2] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[4 * k + 2]), t2, order);
-                    if (4 * j + 3 >= width) continue;
-                    pixels[4 * width * i + 4 * j + width * k + 3] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[4 * k + 3]), t3, order);
+                    pixels[4 * width * i + 4 * j + width * k] = getDXTColor(c0, c1,
+                                                                            getDXT5Alpha(a0, a1, alphaTable[4 * k]), t0,
+                                                                            order);
+                    if (4 * j + 1 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 1] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[
+                            4 * k
+                            + 1]), t1, order);
+                    if (4 * j + 2 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 2] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[
+                            4 * k
+                            + 2]), t2, order);
+                    if (4 * j + 3 >= width) {
+                        continue;
+                    }
+                    pixels[4 * width * i + 4 * j + width * k + 3] = getDXTColor(c0, c1, getDXT5Alpha(a0, a1, alphaTable[
+                            4 * k
+                            + 3]), t3, order);
                 }
             }
         }
         return pixels;
+    }
+
+    private static int getDXT5Alpha(int a0, int a1, int t) {
+        if (a0 > a1) {
+            return switch (t) {
+                case 0 -> a0;
+                case 1 -> a1;
+                case 2 -> (6 * a0 + a1) / 7;
+                case 3 -> (5 * a0 + 2 * a1) / 7;
+                case 4 -> (4 * a0 + 3 * a1) / 7;
+                case 5 -> (3 * a0 + 4 * a1) / 7;
+                case 6 -> (2 * a0 + 5 * a1) / 7;
+                case 7 -> (a0 + 6 * a1) / 7;
+                default -> 0;
+            };
+        } else {
+            return switch (t) {
+                case 0 -> a0;
+                case 1 -> a1;
+                case 2 -> (4 * a0 + a1) / 5;
+                case 3 -> (3 * a0 + 2 * a1) / 5;
+                case 4 -> (2 * a0 + 3 * a1) / 5;
+                case 5 -> (a0 + 4 * a1) / 5;
+                case 6 -> 0;
+                case 7 -> 255;
+                default -> 0;
+            };
+        }
     }
 
     private static int[] readA1R5G5B5(int width, int height, int offset, byte[] buffer, Order order) {
@@ -335,7 +441,8 @@ public final strictfp class DDSReader {
             int g = BIT5[(rgba & A1R5G5B5_MASKS[1]) >> 5];
             int b = BIT5[(rgba & A1R5G5B5_MASKS[2])];
             int a = 255 * ((rgba & A1R5G5B5_MASKS[3]) >> 15);
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -350,7 +457,8 @@ public final strictfp class DDSReader {
             int g = BIT5[(rgba & X1R5G5B5_MASKS[1]) >> 5];
             int b = BIT5[(rgba & X1R5G5B5_MASKS[2])];
             int a = 255;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -365,7 +473,8 @@ public final strictfp class DDSReader {
             int g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
             int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
             int a = 17 * ((rgba & A4R4G4B4_MASKS[3]) >> 12);
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -380,7 +489,8 @@ public final strictfp class DDSReader {
             int g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
             int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
             int a = 255;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -395,7 +505,8 @@ public final strictfp class DDSReader {
             int g = BIT6[((rgba & R5G6B5_MASKS[1]) >> 5)];
             int b = BIT5[((rgba & R5G6B5_MASKS[2]))];
             int a = 255;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -408,7 +519,8 @@ public final strictfp class DDSReader {
             int g = buffer[index++] & 0xFF;
             int r = buffer[index++] & 0xFF;
             int a = 255;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -421,7 +533,8 @@ public final strictfp class DDSReader {
             int g = buffer[index++] & 0xFF;
             int b = buffer[index++] & 0xFF;
             int a = buffer[index++] & 0xFF;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -435,7 +548,8 @@ public final strictfp class DDSReader {
             int b = buffer[index++] & 0xFF;
             int a = 255;
             index++;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -448,21 +562,8 @@ public final strictfp class DDSReader {
             int g = buffer[index++] & 0xFF;
             int r = buffer[index++] & 0xFF;
             int a = buffer[index++] & 0xFF;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
-        }
-        return pixels;
-    }
-
-    private static int[] readX8R8G8B8(int width, int height, int offset, byte[] buffer, Order order) {
-        int index = offset;
-        int[] pixels = new int[width * height];
-        for (int i = 0; i < height * width; i++) {
-            int b = buffer[index++] & 0xFF;
-            int g = buffer[index++] & 0xFF;
-            int r = buffer[index++] & 0xFF;
-            int a = 255;
-            index++;
-            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
         }
         return pixels;
     }
@@ -500,29 +601,19 @@ public final strictfp class DDSReader {
         return (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b << order.blueShift);
     }
 
-    private static int getDXT5Alpha(int a0, int a1, int t) {
-        if (a0 > a1) return switch (t) {
-            case 0 -> a0;
-            case 1 -> a1;
-            case 2 -> (6 * a0 + a1) / 7;
-            case 3 -> (5 * a0 + 2 * a1) / 7;
-            case 4 -> (4 * a0 + 3 * a1) / 7;
-            case 5 -> (3 * a0 + 4 * a1) / 7;
-            case 6 -> (2 * a0 + 5 * a1) / 7;
-            case 7 -> (a0 + 6 * a1) / 7;
-            default -> 0;
-        };
-        else return switch (t) {
-            case 0 -> a0;
-            case 1 -> a1;
-            case 2 -> (4 * a0 + a1) / 5;
-            case 3 -> (3 * a0 + 2 * a1) / 5;
-            case 4 -> (2 * a0 + 3 * a1) / 5;
-            case 5 -> (a0 + 4 * a1) / 5;
-            case 6 -> 0;
-            case 7 -> 255;
-            default -> 0;
-        };
+    private static int[] readX8R8G8B8(int width, int height, int offset, byte[] buffer, Order order) {
+        int index = offset;
+        int[] pixels = new int[width * height];
+        for (int i = 0; i < height * width; i++) {
+            int b = buffer[index++] & 0xFF;
+            int g = buffer[index++] & 0xFF;
+            int r = buffer[index++] & 0xFF;
+            int a = 255;
+            index++;
+            pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
+                                                                                                     << order.blueShift);
+        }
+        return pixels;
     }
 
     private static final class Order {
@@ -538,6 +629,5 @@ public final strictfp class DDSReader {
             this.alphaShift = alphaShift;
         }
     }
-
 }
 

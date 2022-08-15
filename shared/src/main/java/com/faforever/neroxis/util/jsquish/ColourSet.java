@@ -28,7 +28,6 @@ package com.faforever.neroxis.util.jsquish;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
 final strictfp class ColourSet {
-
     private final Vec[] points = new Vec[16];
     private final float[] weights = new float[16];
     private final int[] remap = new int[16];
@@ -36,8 +35,9 @@ final strictfp class ColourSet {
     private boolean transparent;
 
     ColourSet() {
-        for (int i = 0; i < points.length; i++)
+        for (int i = 0; i < points.length; i++) {
             points[i] = new Vec();
+        }
     }
 
     void init(final byte[] rgba, final int mask, final CompressionType type, final boolean weightAlpha) {
@@ -83,10 +83,12 @@ final strictfp class ColourSet {
                 // check for a match
                 final int oldBit = 1 << j;
                 final boolean match = (mask & oldBit) != 0
-                        && rgba[4 * i] == rgba[4 * j]
-                        && rgba[4 * i + 1] == rgba[4 * j + 1]
-                        && rgba[4 * i + 2] == rgba[4 * j + 2]
-                        && !isDXT1;
+                                      && rgba[4 * i] == rgba[4 * j]
+                                      && rgba[4 * i + 1] == rgba[4
+                                                                 * j
+                                                                 + 1]
+                                      && rgba[4 * i + 2] == rgba[4 * j + 2]
+                                      && !isDXT1;
 
                 if (match) {
                     // get the index of the match
@@ -121,11 +123,11 @@ final strictfp class ColourSet {
     void remapIndices(final int[] source, final int[] target) {
         for (int i = 0; i < 16; ++i) {
             int j = remap[i];
-            if (j == -1)
+            if (j == -1) {
                 target[i] = 3;
-            else
+            } else {
                 target[i] = source[j];
+            }
         }
     }
-
 }

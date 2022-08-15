@@ -1,17 +1,16 @@
 package com.faforever.neroxis.util.vector;
 
 public strictfp class Vector4 extends Vector<Vector4> {
-
     public Vector4() {
         super(4);
     }
 
-    public Vector4(float x, float y, float z, float w) {
-        super(x, y, z, w);
-    }
-
     public Vector4(Vector4 other) {
         this(other.getX(), other.getY(), other.getW(), other.getZ());
+    }
+
+    public Vector4(float x, float y, float z, float w) {
+        super(x, y, z, w);
     }
 
     public float getX() {
@@ -30,20 +29,20 @@ public strictfp class Vector4 extends Vector<Vector4> {
         components[1] = y;
     }
 
-    public float getZ() {
-        return components[Vector.Z];
-    }
-
-    public void setZ(float z) {
-        components[2] = z;
-    }
-
     public float getW() {
         return components[Vector.W];
     }
 
     public void setW(float w) {
         components[3] = w;
+    }
+
+    public float getZ() {
+        return components[Vector.Z];
+    }
+
+    public void setZ(float z) {
+        components[2] = z;
     }
 
     @Override

@@ -3,13 +3,8 @@ package com.faforever.neroxis.util.vector;
 import java.util.LinkedHashSet;
 
 public strictfp class Vector3 extends Vector<Vector3> {
-
     public Vector3() {
         super(3);
-    }
-
-    public Vector3(float x, float y, float z) {
-        super(x, y, z);
     }
 
     public Vector3(Vector3 other) {
@@ -18,6 +13,10 @@ public strictfp class Vector3 extends Vector<Vector3> {
 
     public Vector3(Vector2 other) {
         this(other.getX(), 0f, other.getY());
+    }
+
+    public Vector3(float x, float y, float z) {
+        super(x, y, z);
     }
 
     public float getX() {
@@ -75,7 +74,8 @@ public strictfp class Vector3 extends Vector<Vector3> {
         while (currentPoint.getDistance(targetPoint) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.angleTo(location);
-            currentPoint = new Vector2(StrictMath.round(currentPoint.getX() + StrictMath.cos(angle)), StrictMath.round(currentPoint.getY() + StrictMath.sin(angle)));
+            currentPoint = new Vector2(StrictMath.round(currentPoint.getX() + StrictMath.cos(angle)),
+                                       StrictMath.round(currentPoint.getY() + StrictMath.sin(angle)));
         }
         return line;
     }

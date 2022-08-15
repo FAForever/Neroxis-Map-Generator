@@ -8,18 +8,18 @@ import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import lombok.Getter;
-
 import java.util.Arrays;
+import lombok.Getter;
 
 @Getter
 public strictfp class BasicStyleGenerator extends StyleGenerator {
-
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
-        propGenerators.addAll(Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
-                new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(), new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
+        propGenerators.addAll(
+                Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
+                              new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(),
+                              new RockFieldPropGenerator(), new SmallBattlePropGenerator()));
     }
 }
 

@@ -2,11 +2,8 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
-import java.awt.*;
-
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
-
     public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -17,16 +14,8 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
 
     protected abstract int[][] getInnerCount();
 
-    protected void calculateInnerValue(int[][] innerCount, Point point, int val) {
-        calculateInnerValue(innerCount, point.x, point.y, val);
-    }
-
     protected void calculateInnerValue(int[][] innerCount, int x, int y, int val) {
         calculateScalarInnerValue(innerCount, x, y, val);
-    }
-
-    protected float calculateAreaAverageAsInts(int radius, Point point, int[][] innerCount) {
-        return calculateAreaAverageAsInts(radius, point.x, point.y, innerCount);
     }
 
     protected float calculateAreaAverageAsInts(int radius, int x, int y, int[][] innerCount) {
@@ -43,5 +32,4 @@ public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends 
         int area = (xRight - xLeft + 1) * (yDown - yUp + 1);
         return (float) count / area;
     }
-
 }

@@ -5,13 +5,13 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serial.LightingSettings;
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -29,11 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-
-import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
+import javax.imageio.ImageIO;
 
 public strictfp class ImageUtil {
-
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
         if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {
             return false;
@@ -69,7 +67,8 @@ public strictfp class ImageUtil {
         return imageScaled;
     }
 
-    public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height, Vector2 locToInsertTopLeft) {
+    public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height,
+                                                              Vector2 locToInsertTopLeft) {
         BufferedImage newImage = new BufferedImage(width, height, image.getType());
         WritableRaster newImageRaster = newImage.getRaster();
         Raster imageRaster = image.getData();
@@ -78,41 +77,16 @@ public strictfp class ImageUtil {
                 int newX = x + (int) locToInsertTopLeft.getX();
                 int newY = y + (int) locToInsertTopLeft.getY();
                 if (inImageBounds(newX, newY, newImage)) {
-                    newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
+                    newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel()
+                                                                                                .getNumComponents()]));
                 }
             }
         }
         return newImage;
     }
 
-    public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, float scaleMultiplier, Path path) throws IOException {
-        int size = redMask.getSize();
-        if (size != greenMask.getSize() || size != blueMask.getSize()) {
-            throw new IllegalArgumentException("Masks not the same size: redMask is " + redMask.getSize() +
-                    ", greenMask is " + greenMask.getSize() + " and blueMask is " + blueMask.getSize());
-        }
-        int length = size * size * 3;
-        int index = 0;
-        final byte[] byteArray = new byte[length];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                byte redByte = (byte) ((Float) (redMask.get(x, y) * scaleMultiplier)).intValue();
-                byte greenByte = (byte) ((Float) (greenMask.get(x, y) * scaleMultiplier)).intValue();
-                byte blueByte = (byte) ((Float) (blueMask.get(x, y) * scaleMultiplier)).intValue();
-                byteArray[index] = redByte;
-                index += 1;
-                byteArray[index] = greenByte;
-                index += 1;
-                byteArray[index] = blueByte;
-                index += 1;
-            }
-        }
-        DataBuffer buffer = new DataBufferByte(byteArray, byteArray.length);
-        WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2}, new Point(0, 0));
-        ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-        BufferedImage image = new BufferedImage(colorModel, raster, true, null);
-        ImageIO.write(image, "png", path.toFile());
-        System.out.println("PNG created at " + path);
+    public static boolean inImageBounds(int x, int y, BufferedImage image) {
+        return x >= 0 && x < image.getWidth() && y >= 0 && y < image.getHeight();
     }
 
     public static void writeNormalDDS(NormalMask imageMask, Path path) throws IOException {
@@ -135,7 +109,8 @@ public strictfp class ImageUtil {
         ddsHeader.setWidth(imageMask.getSize());
         ddsHeader.setHeight(imageMask.getSize());
         ddsHeader.setFourCC("DXT5");
-        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
+                                              Squish.CompressionType.DXT5);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
@@ -157,7 +132,8 @@ public strictfp class ImageUtil {
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
         ddsHeader.setFourCC("DXT5");
-        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
+                                              Squish.CompressionType.DXT5);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
@@ -176,6 +152,31 @@ public strictfp class ImageUtil {
                 imageByteBuffer.put((byte) zV);
                 imageByteBuffer.put((byte) 0);
                 imageByteBuffer.put((byte) xV);
+            }
+        }
+        return getCompressedBytes(size, imageByteBuffer);
+    }
+
+    public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        Vector3 shadowFillColor = lightingSettings.getShadowFillColor()
+                                                  .copy()
+                                                  .add(lightingSettings.getSunAmbience())
+                                                  .divide(4);
+        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                float value = mask.get(x, y);
+                int r = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getX() * 128, 0), 255);
+                int g = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getY() * 128, 0), 255);
+                int b = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getZ() * 128, 0), 255);
+                int a = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
+                imageByteBuffer.put((byte) r);
+                imageByteBuffer.put((byte) g);
+                imageByteBuffer.put((byte) b);
+                imageByteBuffer.put((byte) a);
             }
         }
         return getCompressedBytes(size, imageByteBuffer);
@@ -217,28 +218,6 @@ public strictfp class ImageUtil {
         return getCompressedBytes(size, imageByteBuffer);
     }
 
-    public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
-        int size = mask.getSize();
-        int length = size * size * 4;
-        Vector3 shadowFillColor = lightingSettings.getShadowFillColor().copy().add(lightingSettings.getSunAmbience()).divide(4);
-        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
-        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                float value = mask.get(x, y);
-                int r = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getX() * 128, 0), 255);
-                int g = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getY() * 128, 0), 255);
-                int b = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getZ() * 128, 0), 255);
-                int a = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
-                imageByteBuffer.put((byte) r);
-                imageByteBuffer.put((byte) g);
-                imageByteBuffer.put((byte) b);
-                imageByteBuffer.put((byte) a);
-            }
-        }
-        return getCompressedBytes(size, imageByteBuffer);
-    }
-
     private static byte[] getCompressedBytes(int size, ByteBuffer imageByteBuffer) {
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
@@ -246,7 +225,8 @@ public strictfp class ImageUtil {
         ddsHeader.setFourCC("DXT5");
         ddsHeader.toBytes();
         byte[] headerBytes = ddsHeader.toBytes();
-        byte[] imageBytes = compressImage(imageByteBuffer.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5, Squish.CompressionMethod.RANGE_FIT);
+        byte[] imageBytes = compressImage(imageByteBuffer.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
+                                          Squish.CompressionType.DXT5, Squish.CompressionMethod.RANGE_FIT);
         int headerLength = headerBytes.length;
         int imageLength = imageBytes.length;
         byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
@@ -254,9 +234,48 @@ public strictfp class ImageUtil {
         return allBytes;
     }
 
-    public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask, Path path) throws IOException {
-        float scaleMultiplier = 255 / StrictMath.max(StrictMath.max(redMask.getMax(), greenMask.getMax()), blueMask.getMax());
+    public static void writeAutoScaledPNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask,
+                                                   Path path) throws IOException {
+        float scaleMultiplier = 255 / StrictMath.max(StrictMath.max(redMask.getMax(), greenMask.getMax()),
+                                                     blueMask.getMax());
         writePNGFromMasks(redMask, greenMask, blueMask, scaleMultiplier, path);
+    }
+
+    public static void writePNGFromMasks(FloatMask redMask, FloatMask greenMask, FloatMask blueMask,
+                                         float scaleMultiplier, Path path) throws IOException {
+        int size = redMask.getSize();
+        if (size != greenMask.getSize() || size != blueMask.getSize()) {
+            throw new IllegalArgumentException("Masks not the same size: redMask is "
+                                               + redMask.getSize()
+                                               + ", greenMask is "
+                                               + greenMask.getSize()
+                                               + " and blueMask is "
+                                               + blueMask.getSize());
+        }
+        int length = size * size * 3;
+        int index = 0;
+        final byte[] byteArray = new byte[length];
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                byte redByte = (byte) ((Float) (redMask.get(x, y) * scaleMultiplier)).intValue();
+                byte greenByte = (byte) ((Float) (greenMask.get(x, y) * scaleMultiplier)).intValue();
+                byte blueByte = (byte) ((Float) (blueMask.get(x, y) * scaleMultiplier)).intValue();
+                byteArray[index] = redByte;
+                index += 1;
+                byteArray[index] = greenByte;
+                index += 1;
+                byteArray[index] = blueByte;
+                index += 1;
+            }
+        }
+        DataBuffer buffer = new DataBufferByte(byteArray, byteArray.length);
+        WritableRaster raster = Raster.createInterleavedRaster(buffer, size, size, 3 * size, 3, new int[]{0, 1, 2},
+                                                               new Point(0, 0));
+        ColorModel colorModel = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true,
+                                                        Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+        BufferedImage image = new BufferedImage(colorModel, raster, true, null);
+        ImageIO.write(image, "png", path.toFile());
+        System.out.println("PNG created at " + path);
     }
 
     public static void writePNGFromMask(FloatMask mask, float scaleMultiplier, Path path) throws IOException {
@@ -271,9 +290,4 @@ public strictfp class ImageUtil {
     public static boolean inImageBounds(Vector2 position, BufferedImage image) {
         return inImageBounds((int) position.getX(), (int) position.getY(), image);
     }
-
-    public static boolean inImageBounds(int x, int y, BufferedImage image) {
-        return x >= 0 && x < image.getWidth() && y >= 0 && y < image.getHeight();
-    }
-
 }

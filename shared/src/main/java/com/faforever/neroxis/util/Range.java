@@ -1,8 +1,7 @@
 package com.faforever.neroxis.util;
 
-import lombok.Value;
-
 import java.util.Random;
+import lombok.Value;
 
 @Value
 public strictfp class Range {

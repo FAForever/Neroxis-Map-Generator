@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator.texture;
 
+import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
@@ -8,6 +9,11 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
+import com.faforever.neroxis.mask.Vector4Mask;
+import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.Pipeline;
+import java.io.IOException;
 import lombok.Getter;
 
 @Getter
@@ -17,20 +23,80 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
     protected NormalMask normals;
     protected FloatMask shadows;
     protected BooleanMask shadowsMask;
+    protected Vector4Mask texturesLowMask;
+    protected Vector4Mask texturesHighMask;
+    protected Vector4Mask texturesLowPreviewMask;
+    protected Vector4Mask texturesHighPreviewMask;
+    protected FloatMask heightmapPreview;
+    protected FloatMask reflectance;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    protected abstract void setupTexturePipeline();
+
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        normals = heightmap.copy().resample(512).addPerlinNoise(64, 12f)
-                .addGaussianNoise(.025f).blur(1).copyAsNormalMask(2f);
-        shadowsMask = heightmap.copy().resample(512).copyAsShadowMask(generatorParameters.getBiome().getLightingSettings().getSunDirection());
+        normals = heightmap.copy()
+                           .resample(512)
+                           .addPerlinNoise(64, 12f)
+                           .addGaussianNoise(.025f)
+                           .blur(1)
+                           .copyAsNormalMask(2f);
+        shadowsMask = heightmap.copy()
+                               .resample(512)
+                               .copyAsShadowMask(
+                                       generatorParameters.getBiome().getLightingSettings().getSunDirection());
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(2);
+        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
+        texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
+                                           true);
     }
 
-    public abstract void setTextures();
+    public void setTextures() {
+        Pipeline.await(texturesLowMask, texturesHighMask);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
+            map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
+            map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
+        });
+    }
 
-    public abstract void setCompressedDecals();
+    public void setCompressedDecals() {
+        Pipeline.await(normals, shadows);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
+                                                              generatorParameters.getBiome().getLightingSettings()));
+            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
+        });
+    }
 
-    public abstract void generatePreview();
+    public void generatePreview() {
+        Pipeline.await(texturesLowMask, texturesHighMask, reflectance, heightmapPreview);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
+            try {
+                PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
+                                                 texturesLowMask.getFinalMask(), texturesHighMask.getFinalMask());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    protected void setupPreviewPipeline() {
+        texturesLowPreviewMask = texturesLowMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
+        reflectance = heightmap.copy()
+                               .copyAsNormalMask(8f)
+                               .resample(PreviewGenerator.PREVIEW_SIZE)
+                               .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection())
+                               .add(1f)
+                               .divide(2f);
+    }
+
+    @Override
+    public void setupPipeline() {
+        setupTexturePipeline();
+        setupPreviewPipeline();
+    }
 }

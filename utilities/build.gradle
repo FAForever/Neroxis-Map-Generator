@@ -3,5 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation project(':shared')
+    implementation project(":shared")
+    implementation project(":generator")
+    implementation("org.jgrapht:jgrapht-core:${jgraph_version}")
 }

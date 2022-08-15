@@ -22,5 +22,4 @@ public strictfp class Unit extends Marker {
         this.type = type;
         this.rotation = rotation;
     }
-
 }

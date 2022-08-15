@@ -3,24 +3,25 @@ package com.faforever.neroxis.util;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.PrettifyOutputStream;
 import com.dslplatform.json.runtime.Settings;
-import lombok.SneakyThrows;
-
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 
 public strictfp class FileUtil {
-
-    private static final DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
+    private static final DslJson<Object> DSL_JSON = new DslJson<>(Settings.basicSetup());
 
     @SneakyThrows
     public static void deleteRecursiveIfExists(Path path) {
@@ -55,13 +56,11 @@ public strictfp class FileUtil {
             bufferedReader = new BufferedReader(new FileReader(Paths.get(filePath).toFile()));
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            stringBuilder.append(line).append("\n");
-        }
+        return bufferedReader.lines().collect(Collectors.joining("\n"));
+    }
 
-        return stringBuilder.toString();
+    public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {
+        return deserialize(path.toString(), clazz);
     }
 
     /**
@@ -76,21 +75,25 @@ public strictfp class FileUtil {
         if ((inputStream = FileUtil.class.getResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
         } else if ((resource = FileUtil.class.getResource(path)) != null) {
-            return dslJson.deserialize(clazz, resource.openStream());
+            return DSL_JSON.deserialize(clazz, resource.openStream());
         } else {
-            return dslJson.deserialize(clazz, new FileInputStream(path));
+            return DSL_JSON.deserialize(clazz, new FileInputStream(path));
         }
     }
 
-    public static <T> T deserialize(Path path, Class<T> clazz) throws IOException {
-        return deserialize(path.toString(), clazz);
-    }
-
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
-        return dslJson.deserialize(clazz, inputStream);
+        return DSL_JSON.deserialize(clazz, inputStream);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {
-        dslJson.serialize(obj, new PrettifyOutputStream(new FileOutputStream(filename)));
+        serialize(new FileOutputStream(filename), obj);
+    }
+
+    public static <T> void serialize(File file, T obj) throws IOException {
+        serialize(new FileOutputStream(file), obj);
+    }
+
+    public static <T> void serialize(OutputStream outputStream, T obj) throws IOException {
+        DSL_JSON.serialize(obj, new PrettifyOutputStream(outputStream));
     }
 }

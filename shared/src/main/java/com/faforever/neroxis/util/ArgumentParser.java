@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public strictfp class ArgumentParser {
-
     /**
      * Parses command line arguments
      * Supports keys without value

@@ -6,27 +6,10 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
-
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
-    }
-
-    @Override
-    protected void initRamps() {
-        int mapSize = map.getSize();
-        float maxStepSize = mapSize / 128f;
-        int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry().getNumSymPoints();
-        int bound = mapSize / 4;
-        ramps.setSize(mapSize + 1);
-
-        MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
-        MapMaskMethods.pathInCenterBounds(random.nextLong(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound, (float) (StrictMath.PI / 2));
-
-        ramps.subtract(connections.copy().inflate(32)).inflate(maxStepSize / 2f).multiply(plateaus.copy().outline())
-                .add(connections.copy().inflate(maxStepSize / 2f).multiply(plateaus.copy().outline()))
-                .subtract(mountains).inflate(8);
     }
 
     @Override
@@ -48,6 +31,29 @@ public strictfp abstract class PathedTerrainGenerator extends BasicTerrainGenera
         ensureSpawnTerrain();
 
         mountains.multiply(land.copy().deflate(24));
+    }
+
+    @Override
+    protected void initRamps() {
+        int mapSize = map.getSize();
+        float maxStepSize = mapSize / 128f;
+        int maxMiddlePoints = 2;
+        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry()
+                                                                                           .getNumSymPoints();
+        int bound = mapSize / 4;
+        ramps.setSize(mapSize + 1);
+
+        MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
+                                        (float) (StrictMath.PI / 2));
+        MapMaskMethods.pathInCenterBounds(random.nextLong(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound,
+                                          (float) (StrictMath.PI / 2));
+
+        ramps.subtract(connections.copy().inflate(32))
+             .inflate(maxStepSize / 2f)
+             .multiply(plateaus.copy().outline())
+             .add(connections.copy().inflate(maxStepSize / 2f).multiply(plateaus.copy().outline()))
+             .subtract(mountains)
+             .inflate(8);
     }
 }
 

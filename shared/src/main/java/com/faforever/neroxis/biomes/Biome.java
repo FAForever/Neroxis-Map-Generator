@@ -1,10 +1,10 @@
 package com.faforever.neroxis.biomes;
 
-import com.faforever.neroxis.map.DecalMaterials;
-import com.faforever.neroxis.map.PropMaterials;
-import com.faforever.neroxis.map.TerrainMaterials;
-import com.faforever.neroxis.util.serial.LightingSettings;
-import com.faforever.neroxis.util.serial.WaterSettings;
+import com.faforever.neroxis.util.serial.biome.DecalMaterials;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.PropMaterials;
+import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import lombok.Data;
 
 @Data

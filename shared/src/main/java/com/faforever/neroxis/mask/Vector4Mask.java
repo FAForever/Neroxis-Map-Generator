@@ -4,28 +4,35 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector4;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
-
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }
 
-    public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
-    }
-
+    /**
+     * Create a new vector4 mask
+     *
+     * @param size             Size of the mask
+     * @param seed             Random seed of the mask
+     * @param symmetrySettings symmetrySettings to enforce on the mask
+     * @param name             name of the mask
+     * @param parallel         whether to parallelize mask operations
+     */
     @GraphMethod
-    @GraphParameter(name = "name", nullable = true)
+    @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
     @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
+    }
+
+    public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(size, seed, symmetrySettings, name, false);
     }
 
     public Vector4Mask(Vector4Mask other) {
@@ -40,17 +47,14 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+    public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
-    public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+    public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name, boolean parallel) {
         super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
-    }
-
-    @Override
-    protected Vector4[][] getNullMask(int size) {
-        return new Vector4[size][size];
     }
 
     @Override
@@ -60,8 +64,25 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     }
 
     @Override
-    protected Vector4 getZeroValue() {
-        return new Vector4(0f, 0f, 0f, 0f);
+    protected Vector4[][] getNullMask(int size) {
+        return new Vector4[size][size];
+    }
+
+    @GraphMethod
+    public Vector4Mask setComponents(FloatMask comp0, FloatMask comp1, FloatMask comp2, FloatMask comp3) {
+        assertCompatibleComponents(comp0, comp1, comp2, comp3);
+        return enqueue(dependencies -> {
+            FloatMask source1 = (FloatMask) dependencies.get(0);
+            FloatMask source2 = (FloatMask) dependencies.get(1);
+            FloatMask source3 = (FloatMask) dependencies.get(2);
+            FloatMask source4 = (FloatMask) dependencies.get(3);
+            apply((x, y) -> {
+                setComponentAt(x, y, source1.get(x, y), 0);
+                setComponentAt(x, y, source2.get(x, y), 1);
+                setComponentAt(x, y, source3.get(x, y), 2);
+                setComponentAt(x, y, source4.get(x, y), 3);
+            });
+        }, comp0, comp1, comp2, comp3);
     }
 
     @Override
@@ -72,8 +93,17 @@ public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
         Vector4 maxComponents = getMaxComponents();
         Vector4 minComponents = getMinComponents();
         Vector4 rangeComponents = maxComponents.copy().subtract(minComponents);
-        loop(point -> imageRaster.setPixel(point.x, point.y, get(point).copy().subtract(minComponents).divide(rangeComponents)
-                .multiply(255f, 255f, 255f, 255f - 64f).add(0f, 0f, 0f, 64f).toArray()));
+        loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).copy()
+                                                           .subtract(minComponents)
+                                                           .divide(rangeComponents)
+                                                           .multiply(255f, 255f, 255f, 255f - 64f)
+                                                           .add(0f, 0f, 0f, 64f)
+                                                           .toArray()));
         return image;
+    }
+
+    @Override
+    protected Vector4 getZeroValue() {
+        return new Vector4(0f, 0f, 0f, 0f);
     }
 }

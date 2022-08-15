@@ -29,22 +29,19 @@ import com.faforever.neroxis.util.jsquish.Squish.CompressionMetric;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
 final strictfp class CompressorRange extends CompressorColourFit {
-
     private static final int[] closest = new int[16];
-
     private static final int[] indices = new int[16];
-
     private static final Vec[] codes = new Vec[4];
 
     static {
-        for (int i = 0; i < codes.length; i++)
+        for (int i = 0; i < codes.length; i++) {
             codes[i] = new Vec();
+        }
     }
 
     private final CompressionMetric metric;
     private final Vec start = new Vec();
     private final Vec end = new Vec();
-
     private float bestError;
 
     CompressorRange(final ColourSet colours, final CompressionType type, final CompressionMetric metric) {
@@ -112,6 +109,7 @@ final strictfp class CompressorRange extends CompressorColourFit {
         }
     }
 
+    @Override
     void compress3(final byte[] block, final int offset) {
         // cache some values
         final int count = colours.getCount();
@@ -136,11 +134,7 @@ final strictfp class CompressorRange extends CompressorColourFit {
             int index = 0;
             for (int j = 0; j < 3; ++j) {
                 final Vec c = codes[j];
-                v.set(
-                        (p.x() - c.x()) * metric.r,
-                        (p.y() - c.y()) * metric.g,
-                        (p.z() - c.z()) * metric.b
-                );
+                v.set((p.x() - c.x()) * metric.r, (p.y() - c.y()) * metric.g, (p.z() - c.z()) * metric.b);
                 final float d = v.lengthSQ();
                 if (d < dist) {
                     dist = d;
@@ -168,6 +162,7 @@ final strictfp class CompressorRange extends CompressorColourFit {
         }
     }
 
+    @Override
     void compress4(final byte[] block, final int offset) {
         // cache some values
         final int count = colours.getCount();
@@ -193,11 +188,7 @@ final strictfp class CompressorRange extends CompressorColourFit {
             int index = 0;
             for (int j = 0; j < 4; ++j) {
                 final Vec c = codes[j];
-                v.set(
-                        (p.x() - c.x()) * metric.r,
-                        (p.y() - c.y()) * metric.g,
-                        (p.z() - c.z()) * metric.b
-                );
+                v.set((p.x() - c.x()) * metric.r, (p.y() - c.y()) * metric.g, (p.z() - c.z()) * metric.b);
                 final float d = v.lengthSQ();
                 if (d < dist) {
                     dist = d;
@@ -224,5 +215,4 @@ final strictfp class CompressorRange extends CompressorColourFit {
             bestError = error;
         }
     }
-
 }

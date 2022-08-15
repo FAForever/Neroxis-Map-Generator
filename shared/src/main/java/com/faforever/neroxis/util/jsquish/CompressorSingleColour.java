@@ -25,31 +25,23 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
-
 import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock3;
 import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock4;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_5_3;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_6_3;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_5_4;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_6_4;
+import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 import static java.lang.Math.round;
 
 final strictfp class CompressorSingleColour extends CompressorColourFit {
-
-	private static final int[] indices = new int[16];
-
-	private static final int[][][][] lookups = new int[3][][][];
-
-	private static final int[][] sources = new int[3][];
-
-	private static final Vec start = new Vec();
-	private static final Vec end = new Vec();
-
+    private static final int[] indices = new int[16];
+    private static final int[][][][] lookups = new int[3][][][];
+    private static final int[][] sources = new int[3][];
+    private static final Vec start = new Vec();
+    private static final Vec end = new Vec();
     private static final int[] index = new int[1];
-
     private static int bestError;
-
     private final int[] colour = new int[3];
 
     CompressorSingleColour(final ColourSet colours, final CompressionType type) {
@@ -65,6 +57,7 @@ final strictfp class CompressorSingleColour extends CompressorColourFit {
         bestError = Integer.MAX_VALUE;
     }
 
+    @Override
     void compress3(final byte[] block, final int offset) {
         // build the table of lookups
         lookups[0] = LOOKUP_5_3;
@@ -87,6 +80,7 @@ final strictfp class CompressorSingleColour extends CompressorColourFit {
         }
     }
 
+    @Override
     void compress4(final byte[] block, final int offset) {
         // build the table of lookups
         lookups[0] = LOOKUP_5_4;
@@ -133,13 +127,9 @@ final strictfp class CompressorSingleColour extends CompressorColourFit {
 
             // keep it if the error is lower
             if (error < bestError) {
-                start.set(sources[0][0] * GRID_X_RCP,
-                        sources[1][0] * GRID_Y_RCP,
-                        sources[2][0] * GRID_Z_RCP);
+                start.set(sources[0][0] * GRID_X_RCP, sources[1][0] * GRID_Y_RCP, sources[2][0] * GRID_Z_RCP);
 
-                end.set(sources[0][1] * GRID_X_RCP,
-                        sources[1][1] * GRID_Y_RCP,
-                        sources[2][1] * GRID_Z_RCP);
+                end.set(sources[0][1] * GRID_X_RCP, sources[1][1] * GRID_Y_RCP, sources[2][1] * GRID_Z_RCP);
 
                 CompressorSingleColour.index[0] = index;
                 bestError = error;
@@ -148,5 +138,4 @@ final strictfp class CompressorSingleColour extends CompressorColourFit {
 
         return bestError;
     }
-
 }

@@ -3,9 +3,8 @@ package com.faforever.neroxis.map;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import java.awt.Color;
 import lombok.Data;
-
-import java.awt.*;
 
 @Data
 public strictfp class SkyBox {

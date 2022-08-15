@@ -9,7 +9,6 @@ import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -19,7 +18,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public strictfp class SaveExporter {
-
     public static File file;
     private static DataOutputStream out;
 
@@ -33,8 +31,8 @@ public strictfp class SaveExporter {
         out.writeBytes("  Props = {},\n");
         out.writeBytes("  Areas = {\n");
         out.writeBytes("    ['AREA_1'] = {\n");
-        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( %d, %d, %d, %d ),\n",
-                (int) playableArea.getX(), (int) playableArea.getY(), (int) playableArea.getZ(), (int) playableArea.getW()));
+        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( %d, %d, %d, %d ),\n", (int) playableArea.getX(),
+                                     (int) playableArea.getY(), (int) playableArea.getZ(), (int) playableArea.getW()));
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
         out.writeBytes("  MasterChain = {\n");
@@ -92,8 +90,10 @@ public strictfp class SaveExporter {
         savePathMarkers(map.getLandAIMarkers(), "Land Path Node", "ff00ff00", "DefaultLand");
         savePathMarkers(map.getAmphibiousAIMarkers(), "Amphibious Path Node", "ff00ffff", "DefaultAmphibious");
         savePathMarkers(map.getNavyAIMarkers(), "Water Path Node", "ff0000ff", "DefaultWater");
-        saveAIMarkers(map.getLargeExpansionAIMarkers(), "Large Expansion Area", "ffff0080", "/env/common/props/markers/M_Expansion_prop.bp");
-        saveAIMarkers(map.getLargeExpansionAIMarkers(), "Expansion Area", "ff008080", "/env/common/props/markers/M_Expansion_prop.bp");
+        saveAIMarkers(map.getLargeExpansionAIMarkers(), "Large Expansion Area", "ffff0080",
+                      "/env/common/props/markers/M_Expansion_prop.bp");
+        saveAIMarkers(map.getLargeExpansionAIMarkers(), "Expansion Area", "ff008080",
+                      "/env/common/props/markers/M_Expansion_prop.bp");
         out.writeBytes("      },\n");
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
@@ -116,7 +116,8 @@ public strictfp class SaveExporter {
         out.close();
     }
 
-    private static void savePathMarkers(List<AIMarker> aiMarkers, String type, String color, String graph) throws IOException {
+    private static void savePathMarkers(List<AIMarker> aiMarkers, String type, String color,
+                                        String graph) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             if (aiMarker.getNeighborCount() > 0) {
                 out.writeBytes(String.format("        ['%s'] = {\n", aiMarker.getId()));
@@ -142,7 +143,8 @@ public strictfp class SaveExporter {
         }
     }
 
-    private static void saveAIMarkers(List<AIMarker> aiMarkers, String type, String color, String prop) throws IOException {
+    private static void saveAIMarkers(List<AIMarker> aiMarkers, String type, String color,
+                                      String prop) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             out.writeBytes("        ['" + aiMarker.getId() + "'] = {\n");
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");

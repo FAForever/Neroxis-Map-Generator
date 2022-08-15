@@ -18,7 +18,8 @@ public abstract strictfp class PropGenerator extends ElementGenerator {
     protected BooleanMask unbuildable;
     protected BooleanMask passableLand;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         this.impassable = terrainGenerator.getImpassable();
         this.unbuildable = terrainGenerator.getUnbuildable();

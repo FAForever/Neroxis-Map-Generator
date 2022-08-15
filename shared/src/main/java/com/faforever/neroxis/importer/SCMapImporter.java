@@ -4,23 +4,24 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.DecalMaterials;
 import com.faforever.neroxis.map.DecalType;
 import com.faforever.neroxis.map.Prop;
-import com.faforever.neroxis.map.PropMaterials;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.map.WaveGenerator;
+import static com.faforever.neroxis.util.EndianSwapper.swap;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serial.LightingSettings;
-import com.faforever.neroxis.util.serial.WaterSettings;
+import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
+import com.faforever.neroxis.util.serial.biome.DecalMaterials;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.PropMaterials;
+import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.BufferedInputStream;
@@ -32,13 +33,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import static com.faforever.neroxis.util.EndianSwapper.swap;
-import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
-
 public strictfp class SCMapImporter {
-
     public static File file;
-
     private static DataInputStream in;
 
     public static SCMap importSCMAP(Path folderPath) throws IOException {
@@ -195,7 +191,9 @@ public strictfp class SCMapImporter {
 
         in.close();
 
-        SCMap map = new SCMap(widthInt, new Biome("loaded", mapTerrainMaterials, new PropMaterials(), new DecalMaterials(), mapWaterSettings, mapLightingSettings));
+        SCMap map = new SCMap(widthInt,
+                              new Biome("loaded", mapTerrainMaterials, new PropMaterials(), new DecalMaterials(),
+                                        mapWaterSettings, mapLightingSettings));
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);
@@ -222,11 +220,14 @@ public strictfp class SCMapImporter {
 
         map.setWaterMap(getBufferedImageFromRawData(BufferedImage.TYPE_INT_ARGB, waterMapData));
 
-        map.setWaterFoamMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
+        map.setWaterFoamMap(
+                getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
 
-        map.setWaterFlatnessMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
+        map.setWaterFlatnessMap(
+                getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
 
-        map.setWaterDepthBiasMap(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterDepthBiasMaskData)));
+        map.setWaterDepthBiasMap(
+                getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterDepthBiasMaskData)));
 
         map.setTerrainType(getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(terrainTypeData)));
 
@@ -436,7 +437,8 @@ public strictfp class SCMapImporter {
         int byteCount = readInt() - 128;
         int[] data = new int[byteCount / 4];
         DDSHeader ddsHeader = DDSHeader.parseHeader(readBytes(128));
-        ByteBuffer.wrap(decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount), Squish.CompressionType.DXT5)).asIntBuffer().get(data);
+        ByteBuffer.wrap(decompressImage(null, ddsHeader.getWidth(), ddsHeader.getHeight(), readBytes(byteCount),
+                                        Squish.CompressionType.DXT5)).asIntBuffer().get(data);
         return data;
     }
 

@@ -1,34 +1,9 @@
 package com.faforever.neroxis.generator.resource;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicResourceGenerator extends ResourceGenerator {
-    protected BooleanMask resourceMask;
-    protected BooleanMask waterResourceMask;
-
-    @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", true);
-        waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
-    }
-
-    @Override
-    public void setupPipeline() {
-        resourceMask.init(passableLand);
-        waterResourceMask.init(passableLand).invert();
-
-        resourceMask.subtract(unbuildable).deflate(4);
-        resourceMask.fillEdge(16, false).fillCenter(24, false);
-        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
-    }
-
     @Override
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
@@ -72,5 +47,15 @@ public strictfp class BasicResourceGenerator extends ResourceGenerator {
         mexCount *= mexMultiplier;
         mexCount = StrictMath.max(mexCount, 9);
         return mexCount * spawnCount;
+    }
+
+    @Override
+    public void setupPipeline() {
+        resourceMask.init(passableLand);
+        waterResourceMask.init(passableLand).invert();
+
+        resourceMask.subtract(unbuildable).deflate(4);
+        resourceMask.fillEdge(16, false).fillCenter(24, false);
+        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
     }
 }

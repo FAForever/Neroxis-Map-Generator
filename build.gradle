@@ -1,9 +1,13 @@
+buildscript {
+    ext {
+        jgraph_version = '1.5.1'
+    }
+}
+
 allprojects {
     apply plugin: 'java'
     group 'com.faforever.neroxis'
 
-    compileJava.options.compilerArgs.add '-parameters'
-    compileTestJava.options.compilerArgs.add '-parameters'
 
     sourceCompatibility = JavaVersion.VERSION_15
     targetCompatibility = JavaVersion.VERSION_15
@@ -14,14 +18,15 @@ allprojects {
 
     dependencies {
         implementation('info.picocli:picocli:4.6.3')
-
+        implementation('com.github.therapi:therapi-runtime-javadoc:0.15.0')
         compileOnly('org.projectlombok:lombok:1.18.24')
 
-        annotationProcessor('org.projectlombok:lombok:1.18.22')
+        annotationProcessor('org.projectlombok:lombok:1.18.24')
         annotationProcessor('info.picocli:picocli-codegen:4.6.3')
+        annotationProcessor('com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0')
 
-        testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
-        testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
+        testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
+        testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
     }
 
     test {
@@ -29,6 +34,12 @@ allprojects {
         systemProperties = [
                 'junit.jupiter.execution.parallel.enabled': true
         ]
+    }
+
+    tasks.withType(JavaCompile) {
+        configure(options) {
+            options.compilerArgs << '-parameters'
+        }
     }
 
     // source: https://github.com/mendhak/Gradle-Travis-Colored-Output/blob/master/ColoredOutput.gradle

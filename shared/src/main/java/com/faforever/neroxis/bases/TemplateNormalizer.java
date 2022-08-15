@@ -1,18 +1,16 @@
 package com.faforever.neroxis.bases;
 
 import com.faforever.neroxis.util.LuaLoader;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 
 public strictfp class TemplateNormalizer {
-
     public static void main(String[] args) throws IOException {
         Path templatePath = Paths.get(args[0]);
         if (templatePath.getFileName().toString().contains(".lua")) {
@@ -51,7 +49,8 @@ public strictfp class TemplateNormalizer {
             out.writeBytes(String.format("\t\ttype = '%s',\n", unit.get("type")));
             out.writeBytes("\t\torders = '',\n");
             out.writeBytes("\t\tplatoon = '',\n");
-            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", posTable.get(1).tofloat() - centerX, posTable.get(3).tofloat() - centerY));
+            out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", posTable.get(1).tofloat() - centerX,
+                                         posTable.get(3).tofloat() - centerY));
             out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
             out.writeBytes("\t},\n");
             count++;

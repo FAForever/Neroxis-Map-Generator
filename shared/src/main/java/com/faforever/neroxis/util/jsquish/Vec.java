@@ -26,7 +26,6 @@
 package com.faforever.neroxis.util.jsquish;
 
 final strictfp class Vec {
-
     private float x;
     private float y;
     private float z;
@@ -38,14 +37,14 @@ final strictfp class Vec {
         this(a, a, a);
     }
 
-    Vec(final Vec v) {
-        this(v.x, v.y, v.z);
-    }
-
     Vec(final float a, final float b, final float c) {
         x = a;
         y = b;
         z = c;
+    }
+
+    Vec(final Vec v) {
+        this(v.x, v.y, v.z);
     }
 
     float x() {
@@ -141,5 +140,4 @@ final strictfp class Vec {
     float dot(final Vec v) {
         return x * v.x + y * v.y + z * v.z;
     }
-
 }

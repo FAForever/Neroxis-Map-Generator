@@ -9,7 +9,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
-
+import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,12 +19,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
-
 public strictfp class MapImageExporter {
-
     public static boolean DEBUG = false;
-
     private Path inMapPath;
     private SCMap map;
     private boolean writeOnlySelectImages;
@@ -39,7 +35,6 @@ public strictfp class MapImageExporter {
     private boolean writeLayer7;
     private boolean writeLayer8;
     private boolean writeLayerh;
-
     private SymmetrySettings symmetrySettings;
 
     public static void main(String[] args) throws IOException {
@@ -61,13 +56,13 @@ public strictfp class MapImageExporter {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("map-image-writer usage:\n" +
-                    "--help                 produce help message\n" +
-                    "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n" +
-                    "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n" +
-                    " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n" +
-                    " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap" +
-                    "--debug                optional, turn on debugging options\n");
+            System.out.println("map-image-writer usage:\n"
+                               + "--help                 produce help message\n"
+                               + "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n"
+                               + "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n"
+                               + " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n"
+                               + " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap"
+                               + "--debug                optional, turn on debugging options\n");
             System.exit(0);
         }
 
@@ -132,12 +127,21 @@ public strictfp class MapImageExporter {
     public void writeMapImages() throws IOException {
 
         Random random = new Random();
-        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings, map.getHeightMapScale(), "heightmapBase");
+        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,
+                                                map.getHeightMapScale(), "heightmapBase");
 
-        FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.nextLong(), symmetrySettings, 1f, "TextureMasksLow")
-                .subtractScalar(128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
-        FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(), symmetrySettings, 1f, "TextureMasksHigh")
-                .subtractScalar(128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
+        FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.nextLong(), symmetrySettings, 1f,
+                                                      "TextureMasksLow").subtractScalar(128f)
+                                                                        .divideScalar(127f)
+                                                                        .clampComponentMin(0f)
+                                                                        .clampComponentMax(1f)
+                                                                        .splitComponentMasks();
+        FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(), symmetrySettings,
+                                                       1f, "TextureMasksHigh").subtractScalar(128f)
+                                                                              .divideScalar(127f)
+                                                                              .clampComponentMin(0f)
+                                                                              .clampComponentMax(1f)
+                                                                              .splitComponentMasks();
         if (writeLayerh) {
             writePNGFromMask(heightmapBase, 1, Paths.get(writeImagesPath).resolve("Heightmap.png"));
         }
@@ -159,16 +163,18 @@ public strictfp class MapImageExporter {
         if (writeLayer6) {
             writePNGFromMask(textureMasksHigh[1], 255, Paths.get(writeImagesPath).resolve("Layer 6.png"));
         }
-        if(writeLayer7) {
+        if (writeLayer7) {
             writePNGFromMask(textureMasksHigh[2], 255, Paths.get(writeImagesPath).resolve("Layer 7.png"));
         }
-        if(writeLayer8) {
+        if (writeLayer8) {
             writePNGFromMask(textureMasksHigh[3], 255, Paths.get(writeImagesPath).resolve("Layer 8.png"));
         }
-        if(writeLayer0) {
+        if (writeLayer0) {
             int mapImageSize = textureMasksLow[0].getSize();
             FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0");
-            oldLayer0.init(new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(), 0f, 1f);
+            oldLayer0.init(
+                    new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(),
+                    0f, 1f);
             Arrays.stream(textureMasksHigh).forEach(oldLayer0::subtract);
             Arrays.stream(textureMasksLow).forEach(oldLayer0::subtract);
             oldLayer0.clampMin(0f);

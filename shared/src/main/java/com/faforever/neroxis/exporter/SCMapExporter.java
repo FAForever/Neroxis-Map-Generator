@@ -7,18 +7,18 @@ import com.faforever.neroxis.map.DecalType;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.TerrainMaterials;
 import com.faforever.neroxis.map.WaveGenerator;
+import static com.faforever.neroxis.util.EndianSwapper.swap;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serial.LightingSettings;
-import com.faforever.neroxis.util.serial.WaterSettings;
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
@@ -35,14 +35,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-
-import static com.faforever.neroxis.util.EndianSwapper.swap;
-import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
+import javax.imageio.ImageIO;
 
 public strictfp class SCMapExporter {
-
     public static File file;
-
     private static DataOutputStream out;
 
     public static void exportSCMAP(Path folderPath, SCMap map) throws IOException {
@@ -218,7 +214,8 @@ public strictfp class SCMapExporter {
         final String fileFormat = "png";
         File previewFile = folderPath.resolve(map.getFilePrefix() + "_preview." + fileFormat).toFile();
         BufferedImage mapPreview = map.getPreview();
-        BufferedImage previewCopy = new BufferedImage(mapPreview.getWidth(), mapPreview.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage previewCopy = new BufferedImage(mapPreview.getWidth(), mapPreview.getHeight(),
+                                                      BufferedImage.TYPE_INT_ARGB);
         Graphics previewCopyGraphics = previewCopy.getGraphics();
         previewCopyGraphics.drawImage(mapPreview, 0, 0, null);
         previewCopyGraphics.dispose();
@@ -240,8 +237,9 @@ public strictfp class SCMapExporter {
         Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
-        map.getDecals().add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
-                topLeftOffset, new Vector3(), size, 1000));
+        map.getDecals()
+           .add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset, new Vector3(),
+                          size, 1000));
         try {
             Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
         } catch (IOException e) {
@@ -259,8 +257,8 @@ public strictfp class SCMapExporter {
         Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
-        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'),
-                topLeftOffset, new Vector3(), size, 1000);
+        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
+                                      new Vector3(), size, 1000);
         shadowDecal.setType(DecalType.WATER_ALBEDO);
         map.getDecals().add(shadowDecal);
         try {
@@ -337,9 +335,11 @@ public strictfp class SCMapExporter {
     private static void writeProp(Prop prop) throws IOException {
         writeStringNull(prop.getPath());
         writeVector3f(prop.getPosition());
-        writeVector3f(new Vector3((float) StrictMath.cos(prop.getRotation()), 0f, (float) StrictMath.sin(prop.getRotation())));
+        writeVector3f(new Vector3((float) StrictMath.cos(prop.getRotation()), 0f,
+                                  (float) StrictMath.sin(prop.getRotation())));
         writeVector3f(new Vector3(0f, 1f, 0f));
-        writeVector3f(new Vector3((float) -StrictMath.sin(prop.getRotation()), 0f, (float) StrictMath.cos(prop.getRotation())));
+        writeVector3f(new Vector3((float) -StrictMath.sin(prop.getRotation()), 0f,
+                                  (float) StrictMath.cos(prop.getRotation())));
         writeVector3f(new Vector3(1f, 1f, 1f)); //scale
     }
 
@@ -484,7 +484,8 @@ public strictfp class SCMapExporter {
         byte[] headerBytes = ddsHeader.toBytes();
         ByteBuffer imageBytes = ByteBuffer.allocate(imageData.length * 4).order(ByteOrder.LITTLE_ENDIAN);
         imageBytes.asIntBuffer().put(imageData);
-        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null, Squish.CompressionType.DXT5);
+        byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
+                                              Squish.CompressionType.DXT5);
 
         writeInt(headerBytes.length + compressedData.length); // image byte count
         writeBytes(headerBytes);
