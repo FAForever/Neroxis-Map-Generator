@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -63,7 +64,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         if (numImageComponents != dimension) {
             throw new IllegalArgumentException(
                     String.format("Image does not have matching number of components: image %d this %d",
-                                  numImageComponents, dimension));
+                            numImageComponents, dimension));
         }
     }
 
@@ -97,8 +98,10 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
 
     @Override
     protected void initializeMask(int size) {
-        enqueue(() -> mask = getNullMask(size));
-        fill(getZeroValue());
+        enqueue(() -> {
+            mask = getNullMask(size);
+            fill(getZeroValue());
+        });
     }
 
     @Override
@@ -302,7 +305,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
     protected int[][] getComponentInnerCount(int component) {
         int[][] innerCount = new int[getSize()][getSize()];
         apply((x, y) -> calculateComponentInnerValue(innerCount, x, y,
-                                                     StrictMath.round(get(x, y).get(component) * 1000)));
+                StrictMath.round(get(x, y).get(component) * 1000)));
         return innerCount;
     }
 
@@ -652,7 +655,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         FloatMask[] components = new FloatMask[dimension];
         for (int i = 0; i < dimension; ++i) {
             components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i,
-                                          isParallel());
+                    isParallel());
         }
 
         enqueue(dependencies -> {

@@ -10,6 +10,7 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
+
 import java.io.IOException;
 
 public strictfp class BasicTextureGenerator extends TextureGenerator {
@@ -23,8 +24,6 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask steepHillsTexture;
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
-    protected FloatMask heightmapPreview;
-    protected FloatMask reflectance;
 
     @Override
     protected void setupTexturePipeline() {
@@ -110,7 +109,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.getBiome().getLightingSettings()));
+                    generatorParameters.getBiome().getLightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
@@ -121,7 +120,7 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
-                                                 texturesLowMask.getFinalMask(), texturesHighMask.getFinalMask());
+                        texturesLowMask.getFinalMask(), texturesHighMask.getFinalMask());
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -2,25 +2,20 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.visualization.VisualDebugger;
+import lombok.Getter;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import lombok.Getter;
 
 public strictfp class Pipeline {
     private static final List<Entry> pipeline = new ArrayList<>();
@@ -46,7 +41,7 @@ public strictfp class Pipeline {
 
         if (DebugUtil.DEBUG) {
             callingMethod = DebugUtil.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply",
-                                                                   "applyWithSymmetry");
+                    "applyWithSymmetry");
             callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.generator");
         }
 
@@ -64,10 +59,10 @@ public strictfp class Pipeline {
                                                         if (HASH_MASK) {
                                                             try {
                                                                 hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
-                                                                                                 executingMask.toHash(),
-                                                                                                 finalCallingLine,
-                                                                                                 executingMask.getName(),
-                                                                                                 finalCallingMethod);
+                                                                        executingMask.toHash(),
+                                                                        finalCallingLine,
+                                                                        executingMask.getName(),
+                                                                        finalCallingMethod);
                                                             } catch (NoSuchAlgorithmException e) {
                                                                 System.err.println("Cannot hash mask");
                                                             }
@@ -81,10 +76,10 @@ public strictfp class Pipeline {
                                                         }
                                                         executingMask.setVisualDebug(visualDebug);
                                                         if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
-                                                                                                 && !executingMask.isMock())) {
+                                                                && !executingMask.isMock())) {
                                                             VisualDebugger.visualizeMask(executingMask,
-                                                                                         finalCallingMethod,
-                                                                                         finalCallingLine);
+                                                                    finalCallingMethod,
+                                                                    finalCallingLine);
                                                         }
                                                     }, executorService);
 
@@ -197,6 +192,10 @@ public strictfp class Pipeline {
 
     public static void shutdown() {
         executorService.shutdown();
+    }
+
+    private static void abort() {
+        executorService.shutdownNow();
     }
 
     @Getter

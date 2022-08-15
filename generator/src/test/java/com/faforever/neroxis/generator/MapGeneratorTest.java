@@ -7,29 +7,22 @@ import com.faforever.neroxis.generator.cli.ParameterOptions;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.FileUtil;
-import com.faforever.neroxis.util.ImageUtil;
-import static com.faforever.neroxis.util.ImageUtil.compareImages;
-import com.faforever.neroxis.util.MathUtil;
-import com.faforever.neroxis.util.Pipeline;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.faforever.neroxis.util.*;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import picocli.CommandLine;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static com.faforever.neroxis.util.ImageUtil.compareImages;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
@@ -161,7 +154,7 @@ public class MapGeneratorTest {
     public void TestMultipleGenerationDeterminism() {
         for (int i = 0; i < 3; i++) {
             instance = new MapGenerator();
-            new CommandLine(instance).execute("--num-to-gen", "2", "--map-size", "256");
+            new CommandLine(instance).execute("--num-to-generate", "2", "--map-size", "256");
             SCMap map1 = instance.getMap();
             String[] hashArray1 = Pipeline.getHashArray().clone();
 
@@ -375,36 +368,36 @@ public class MapGeneratorTest {
         BufferedImage mapPreview = map.getPreview();
 
         assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
-                          mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
+                mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
     @Test
     public void TestMultiVisibilityOptionsFail() {
         instance = new MapGenerator();
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
+                () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
+                () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
+                () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
+                () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE",
-                                                               "--tournament-style"));
+                () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE",
+                        "--tournament-style"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
+                () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
     }
 
     @Test
     public void TestMultiTuningOptionsFail() {
         instance = new MapGenerator();
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
+                () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
+                () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
+                () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
     }
 
     @AfterEach
