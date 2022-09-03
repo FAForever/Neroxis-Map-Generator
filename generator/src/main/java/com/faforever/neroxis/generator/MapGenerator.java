@@ -47,16 +47,7 @@ import static picocli.CommandLine.*;
 public strictfp class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
-    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(),
-                                                           new CenterLakeStyleGenerator(), new BasicStyleGenerator(),
-                                                           new DropPlateauStyleGenerator(),
-                                                           new LandBridgeStyleGenerator(),
-                                                           new LittleMountainStyleGenerator(),
-                                                           new MountainRangeStyleGenerator(),
-                                                           new OneIslandStyleGenerator(),
-                                                           new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
-                                                           new HighReclaimStyleGenerator(), new LowMexStyleGenerator(),
-                                                           new FloodedStyleGenerator(), new TestStyleGenerator());
+    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
     private final List<StyleGenerator> productionStyles = mapStyles.stream()
                                                                    .filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator))
                                                                    .collect(Collectors.toList());
@@ -111,7 +102,8 @@ public strictfp class MapGenerator implements Callable<Integer> {
         this.previewFolder = previewFolder;
     }
 
-    @Command(name = "styles", aliases = {"--styles"}, description = "Prints the styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    @Command(name = "styles", aliases = {
+            "--styles"}, description = "Prints the styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printStyles() {
         System.out.println(Arrays.stream(MapStyle.values())
                                  .filter(MapStyle::isProduction)
@@ -150,8 +142,9 @@ public strictfp class MapGenerator implements Callable<Integer> {
             generate();
             save();
 
-            System.out.printf("Saving map to %s%n",
-                              outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
+            System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath()
+                                                                     .resolve(mapName)
+                                                                     .toAbsolutePath());
 
             Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
                                             .map(VisibilityOptions::getVisibility)
@@ -172,8 +165,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         return 0;
     }
 
-    private void setStyleAndParameters(
-            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         if (tuningOptions.getMapStyle() == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
@@ -183,17 +175,16 @@ public strictfp class MapGenerator implements Callable<Integer> {
                                                           .map(clazz -> {
                                                               try {
                                                                   return clazz.getConstructor().newInstance();
-                                                              } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                                              } catch (InstantiationException | IllegalAccessException |
+                                                                       InvocationTargetException |
+                                                                       NoSuchMethodException e) {
                                                                   throw new RuntimeException(e);
                                                               }
                                                           })
                                                           .collect(Collectors.toList());
             Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
-                                                                            .collect(Collectors.toMap(
-                                                                                    MapStyle::getGeneratorClass,
-                                                                                    style -> style));
-            styleGenerator = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters,
-                                                                          new BasicStyleGenerator());
+                                                                            .collect(Collectors.toMap(MapStyle::getGeneratorClass, style -> style));
+            styleGenerator = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
             tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
             styleGenerator = tuningOptions.getMapStyle().getGeneratorClass().getConstructor().newInstance();
@@ -202,8 +193,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void populateRequiredGeneratorParametersFromOptions(
-            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void populateRequiredGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
                                         .map(VisibilityOptions::getVisibility)
                                         .orElse(null);
@@ -217,8 +207,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.visibility(visibility);
     }
 
-    private void overwriteOptionalGeneratorParametersFromOptions(
-            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
         if (parameterOptions != null) {
             if (parameterOptions.getBiome() != null) {
@@ -256,35 +245,31 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private void checkParameters() {
         if (spawnCount % numTeams != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
-                                                                   spawnCount, numTeams));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Spawn Count `%d` not a multiple of Num Teams `%d`", spawnCount, numTeams));
         }
 
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
 
-        if (parameterOptions != null
-            && parameterOptions.getTerrainSymmetry() != null
-            && numTeams % parameterOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
-                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(),
-                    numTeams));
+        if (parameterOptions != null &&
+            parameterOptions.getTerrainSymmetry() != null &&
+            numTeams % parameterOptions.getTerrainSymmetry()
+                                       .getNumSymPoints() != 0) {
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(), numTeams));
         }
     }
 
     private Symmetry getValidTerrainSymmetry() {
         List<Symmetry> terrainSymmetries = switch (spawnCount) {
-            case 2, 4, 8 -> new ArrayList<>(
-                    Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
-                            Symmetry.DIAG));
+            case 2, 4, 8 ->
+                    new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
             default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
         };
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
         if (numTeams > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
-            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0
-                                                   || symmetry.getNumSymPoints() > spawnCount * 4);
+            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 ||
+                                                   symmetry.getNumSymPoints() > spawnCount * 4);
         } else {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
@@ -295,8 +280,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
     }
 
-    private void parseMapName(String mapName,
-                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void parseMapName(String mapName, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         this.mapName = mapName;
 
         String[] nameArgs = verifyMapName(mapName);
@@ -326,32 +310,26 @@ public strictfp class MapGenerator implements Callable<Integer> {
 
     private void verifyNameArgs(String mapName, String[] nameArgs) {
         if (nameArgs.length < 4) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Map name `%s` does not specify a version",
-                                                                   mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` does not specify a version", mapName));
         }
 
         String version = nameArgs[3];
         if (!VERSION.equals(version)) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
-                    "Version for `%s` does not match this generator version", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Version for `%s` does not match this generator version", mapName));
         }
 
         if (nameArgs.length < 5) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Map name `%s` does not specify a seed", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` does not specify a seed", mapName));
         }
     }
 
     private void verifyMapNamePrefix(String mapName) {
         if (!mapName.startsWith("neroxis_map_generator")) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Map name `%s` is not a generated map", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` is not a generated map", mapName));
         }
     }
 
-    private void parseOptions(byte[] optionBytes,
-                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (optionBytes.length > 0) {
             spawnCount = (int) optionBytes[0];
             if (spawnCount <= 16) {
@@ -398,8 +376,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.rampDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.biome(
-                Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
+        generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
@@ -414,31 +391,40 @@ public strictfp class MapGenerator implements Callable<Integer> {
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
             if (tuningOptions.getParameterOptions() != null) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(), (byte) (generatorParameters.getMapSize()
-                                                                                             / 64), (byte) generatorParameters.getNumTeams(), (byte) Biomes.BIOMES_LIST.indexOf(
-                        generatorParameters.getBiome().getName()), (byte) MathUtil.binPercentage(
-                        generatorParameters.getLandDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        generatorParameters.getPlateauDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        generatorParameters.getMountainDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        generatorParameters.getRampDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        generatorParameters.getReclaimDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        generatorParameters.getMexDensity(), NUM_BINS), (byte) generatorParameters.getTerrainSymmetry()
-                                                                                                  .ordinal()};
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                                         (byte) (generatorParameters.getMapSize() /
+                                                 64), (byte) generatorParameters.getNumTeams(),
+                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome()
+                                                                                              .getName()),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getLandDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getPlateauDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getMountainDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getRampDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getReclaimDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.getMexDensity(), NUM_BINS),
+                                         (byte) generatorParameters.getTerrainSymmetry()
+                                                                   .ordinal()};
             } else if (tuningOptions.getVisibilityOptions() != null) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(), (byte) (generatorParameters.getMapSize()
-                                                                                             / 64), (byte) generatorParameters.getNumTeams(), (byte) visibility.ordinal()};
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                                         (byte) (generatorParameters.getMapSize() /
+                                                 64), (byte) generatorParameters.getNumTeams(),
+                                         (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(), (byte) (generatorParameters.getMapSize()
-                                                                                             / 64), (byte) generatorParameters.getNumTeams(), (byte) tuningOptions.getMapStyle()
-                                                                                                                                                                  .ordinal()};
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                                         (byte) (generatorParameters.getMapSize() /
+                                                 64), (byte) generatorParameters.getNumTeams(),
+                                         (byte) tuningOptions.getMapStyle()
+                                                             .ordinal()};
             } else {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(), (byte) (generatorParameters.getMapSize()
-                                                                                             / 64), (byte) generatorParameters.getNumTeams()};
+                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
+                                         (byte) (generatorParameters.getMapSize() /
+                                                 64), (byte) generatorParameters.getNumTeams()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
-                String timeString = GeneratedMapNameEncoder.encode(
-                        ByteBuffer.allocate(8).putLong(generationTime).array());
+                String timeString = GeneratedMapNameEncoder.encode(ByteBuffer.allocate(8)
+                                                                             .putLong(generationTime)
+                                                                             .array());
                 optionString += "_" + timeString;
             }
             mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
@@ -485,10 +471,9 @@ public strictfp class MapGenerator implements Callable<Integer> {
             descriptionBuilder.append("Style: ").append(tuningOptions.getMapStyle()).append("\n");
             descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
         } else {
-            descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
-                                                    DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
-                                                                     .format(Instant.ofEpochSecond(generationTime)
-                                                                                    .atZone(ZoneOffset.UTC))));
+            descriptionBuilder.append(String.format("Map originally generated at %s UTC\n", DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
+                                                                                                             .format(Instant.ofEpochSecond(generationTime)
+                                                                                                                            .atZone(ZoneOffset.UTC))));
         }
 
         if (Visibility.UNEXPLORED == visibility) {
