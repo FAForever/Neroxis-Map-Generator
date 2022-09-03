@@ -13,8 +13,9 @@ import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
-import java.io.IOException;
 import lombok.Getter;
+
+import java.io.IOException;
 
 @Getter
 public abstract strictfp class TextureGenerator extends ElementGenerator {
@@ -71,11 +72,11 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
     }
 
     public void generatePreview() {
-        Pipeline.await(texturesLowMask, texturesHighMask, reflectance, heightmapPreview);
+        Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, reflectance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
-                                                 texturesLowMask.getFinalMask(), texturesHighMask.getFinalMask());
+                                                 texturesLowPreviewMask.getFinalMask(), texturesHighPreviewMask.getFinalMask());
             } catch (IOException e) {
                 e.printStackTrace();
             }

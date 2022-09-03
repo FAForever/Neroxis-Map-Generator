@@ -7,14 +7,11 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
-import static com.faforever.neroxis.util.ImageUtil.readImage;
-import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.TexturePaint;
+
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -22,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import static com.faforever.neroxis.util.ImageUtil.readImage;
+import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 public strictfp class PreviewGenerator {
     public static final int PREVIEW_SIZE = 256;
@@ -34,7 +34,6 @@ public strictfp class PreviewGenerator {
         FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);
         FloatMask sunReflectance = heightmap.copyAsNormalMask()
                                             .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection());
-        List<FloatMask> textureMasks = new ArrayList<>();
         Vector4Mask textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1);
         Vector4Mask textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1);
         generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);

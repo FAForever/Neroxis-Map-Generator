@@ -1,6 +1,5 @@
 package com.faforever.neroxis.generator.texture;
 
-import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
@@ -10,8 +9,6 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
-
-import java.io.IOException;
 
 public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -109,21 +106,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                    generatorParameters.getBiome().getLightingSettings()));
+                                                              generatorParameters.getBiome().getLightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
-        });
-    }
-
-    @Override
-    public void generatePreview() {
-        Pipeline.await(texturesLowMask, texturesHighMask, reflectance, heightmapPreview);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
-            try {
-                PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
-                        texturesLowMask.getFinalMask(), texturesHighMask.getFinalMask());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         });
     }
 
