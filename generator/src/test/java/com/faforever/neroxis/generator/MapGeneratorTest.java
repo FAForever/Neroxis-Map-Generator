@@ -1,9 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
-import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.PreviewGenerator;
-import com.faforever.neroxis.generator.cli.ParameterOptions;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -17,9 +15,10 @@ import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.compareImages;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,12 +47,13 @@ public class MapGeneratorTest {
 
     @BeforeEach
     public void setup() {
-        keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(
-                spawnCount), "--land-density", Float.toString(landDensity), "--plateau-density", Float.toString(
-                plateauDensity), "--mountain-density", Float.toString(
-                mountainDensity), "--ramp-density", Float.toString(rampDensity), "--reclaim-density", Float.toString(
-                reclaimDensity), "--mex-density", Float.toString(mexDensity), "--map-size", Integer.toString(
-                mapSize), "--num-teams", Integer.toString(numTeams)};
+        keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
+                                   "--land-density", Float.toString(landDensity), "--plateau-density",
+                                   Float.toString(plateauDensity), "--mountain-density",
+                                   Float.toString(mountainDensity), "--ramp-density", Float.toString(rampDensity),
+                                   "--reclaim-density", Float.toString(reclaimDensity), "--mex-density",
+                                   Float.toString(mexDensity), "--map-size", Integer.toString(mapSize), "--num-teams",
+                                   Integer.toString(numTeams)};
 
         instance = new MapGenerator();
     }
@@ -64,39 +64,56 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(instance.getGeneratorParameters().getLandDensity(), roundedLandDensity);
-        assertEquals(instance.getGeneratorParameters().getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(instance.getGeneratorParameters().getMountainDensity(), roundedMountainDensity);
-        assertEquals(instance.getGeneratorParameters().getRampDensity(), roundedRampDensity);
-        assertEquals(instance.getGeneratorParameters().getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(instance.getGeneratorParameters().getMexDensity(), roundedMexDensity);
-        assertEquals(instance.getGeneratorParameters().getMapSize(), mapSize);
+        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        assertEquals(generatorParameters.getLandDensity(), roundedLandDensity);
+        assertEquals(generatorParameters.getPlateauDensity(), roundedPlateauDensity);
+        assertEquals(generatorParameters.getMountainDensity(), roundedMountainDensity);
+        assertEquals(generatorParameters.getRampDensity(), roundedRampDensity);
+        assertEquals(generatorParameters.getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(generatorParameters.getMexDensity(), roundedMexDensity);
+        assertEquals(generatorParameters.getMapSize(), mapSize);
+    }
+
+    @Test
+    public void TestParseLadderMapName() {
+        new CommandLine(instance).parseArgs("--map-name", "neroxis_map_generator_snapshot_b4zeogjzndhtk_aiea");
+        instance.populateGeneratorParametersAndName();
+
+        assertEquals(instance.getSeed(), ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
+        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
+        assertEquals(instance.getGeneratorParameters().getMapSize(), 512);
+        assertEquals(instance.getGeneratorParameters().getSpawnCount(), 2);
+        assertEquals(instance.getGeneratorParameters().getNumTeams(), 2);
     }
 
     @Test
     public void TestParseKeywordArgs() {
-        new CommandLine(instance).execute(keywordArgs);
+        new CommandLine(instance).parseArgs(keywordArgs);
+        instance.populateGeneratorParametersAndName();
+        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
 
-        ParameterOptions parameterOptions = instance.getTuningOptions().getParameterOptions();
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(parameterOptions.getLandDensity(), roundedLandDensity);
-        assertEquals(parameterOptions.getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(parameterOptions.getMountainDensity(), roundedMountainDensity);
-        assertEquals(parameterOptions.getRampDensity(), roundedRampDensity);
-        assertEquals(parameterOptions.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(parameterOptions.getMexDensity(), roundedMexDensity);
-        assertEquals(instance.getNumTeams(), numTeams);
-        assertEquals(instance.getMapSize(), mapSize);
+        assertEquals(generatorParameters.getLandDensity(), roundedLandDensity);
+        assertEquals(generatorParameters.getPlateauDensity(), roundedPlateauDensity);
+        assertEquals(generatorParameters.getMountainDensity(), roundedMountainDensity);
+        assertEquals(generatorParameters.getRampDensity(), roundedRampDensity);
+        assertEquals(generatorParameters.getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(generatorParameters.getMexDensity(), roundedMexDensity);
+        assertEquals(generatorParameters.getNumTeams(), numTeams);
+        assertEquals(generatorParameters.getMapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);
     }
 
     @Test
     public void TestParseMapSizes() {
         for (int i = 0; i < 2048; i += 64) {
-            new CommandLine(instance).parseArgs("--map-size", String.valueOf(i));
+            MapGenerator command = new MapGenerator();
+            new CommandLine(command).parseArgs("--map-size", String.valueOf(i));
+            command.populateGeneratorParametersAndName();
+            GeneratorParameters generatorParameters = command.getGeneratorParameters();
 
-            assertEquals(StrictMath.round(i / 64f) * 64, instance.getMapSize());
+            assertEquals(StrictMath.round(i / 64f) * 64, generatorParameters.getMapSize());
         }
     }
 
@@ -106,14 +123,14 @@ public class MapGeneratorTest {
 
         SCMap map = instance.getMap();
 
-        MapExporter.exportMap(Paths.get("."), map, false, false);
-
         assertEquals(512, map.getSize());
     }
 
     @Test
     public void TestDeterminism() {
         new CommandLine(instance).execute(keywordArgs);
+        assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
+
         SCMap map1 = instance.getMap();
         String[] hashArray1 = Pipeline.getHashArray().clone();
 
@@ -121,6 +138,8 @@ public class MapGeneratorTest {
             instance = new MapGenerator();
 
             new CommandLine(instance).execute(keywordArgs);
+            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
+
             SCMap map2 = instance.getMap();
             String[] hashArray2 = Pipeline.getHashArray().clone();
 
@@ -155,11 +174,13 @@ public class MapGeneratorTest {
         for (int i = 0; i < 3; i++) {
             instance = new MapGenerator();
             new CommandLine(instance).execute("--num-to-generate", "2", "--map-size", "256");
+            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
             SCMap map1 = instance.getMap();
             String[] hashArray1 = Pipeline.getHashArray().clone();
 
             instance = new MapGenerator();
             new CommandLine(instance).execute("--map-name", map1.getName());
+            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
             SCMap map2 = instance.getMap();
             String[] hashArray2 = Pipeline.getHashArray().clone();
 
@@ -367,45 +388,35 @@ public class MapGeneratorTest {
         BufferedImage blankPreview = ImageUtil.readImage(PreviewGenerator.BLANK_PREVIEW);
         BufferedImage mapPreview = map.getPreview();
 
-        assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256),
-                mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
+        assertArrayEquals(blankPreview.getRGB(0, 0, 256, 256, null, 0, 256), mapPreview.getRGB(0, 0, 256, 256, null, 0, 256));
     }
 
     @Test
     public void TestMultiVisibilityOptionsFail() {
         instance = new MapGenerator();
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE",
-                        "--tournament-style"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--tournament-style", "--blind"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--tournament-style"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "BLIND", "--blind"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "TOURNAMENT_STYLE", "--tournament-style"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--visibility", "UNEXPLORED", "--unexplored"));
     }
 
     @Test
     public void TestMultiTuningOptionsFail() {
         instance = new MapGenerator();
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
-        assertThrows(CommandLine.ParameterException.class,
-                () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
+        assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
     }
 
     @AfterEach
     public void cleanup() throws IOException {
         DebugUtil.DEBUG = false;
-        Files.list(Path.of("."))
-             .filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
-             .forEach(FileUtil::deleteRecursiveIfExists);
+        try (Stream<Path> list = Files.list(Path.of("."))) {
+            list.filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
+                .forEach(FileUtil::deleteRecursiveIfExists);
+        }
     }
 }
 

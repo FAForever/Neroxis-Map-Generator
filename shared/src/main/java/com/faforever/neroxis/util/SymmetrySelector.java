@@ -43,9 +43,13 @@ public class SymmetrySelector {
                        (!symmetry.isPerfectSymmetry() && numSymPoints != numTeams);
             });
             teams.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
+            spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
+            teamSymmetry = teams.get(random.nextInt(teams.size()));
+        } else {
+            spawnSymmetry = Symmetry.NONE;
+            teamSymmetry = Symmetry.NONE;
         }
-        spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
-        teamSymmetry = teams.get(random.nextInt(teams.size()));
+
         return new SymmetrySettings(terrainSymmetry, teamSymmetry, spawnSymmetry);
     }
 }

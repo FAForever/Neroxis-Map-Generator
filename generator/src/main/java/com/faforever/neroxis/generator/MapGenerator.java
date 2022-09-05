@@ -22,7 +22,6 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
-import lombok.Setter;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 import static picocli.CommandLine.*;
 
 @Getter
-@Setter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)
 public strictfp class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
@@ -62,7 +60,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
     @CommandLine.Option(names = "--map-name", order = 1, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored")
     private String mapName;
     @CommandLine.Option(names = "--seed", order = 2, description = "Seed for the generated map")
-    private Long seed;
+    private long seed = new Random().nextLong();
     @CommandLine.Option(names = "--spawn-count", order = 4, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private Integer spawnCount;
     @CommandLine.Option(names = "--num-teams", order = 5, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
@@ -118,23 +116,11 @@ public strictfp class MapGenerator implements Callable<Integer> {
         for (int i = 0; i < numToGenerate; i++) {
             if (numToGenerate > 1) {
                 mapName = null;
-                seed = null;
+                seed = new Random().nextLong();
                 tuningOptions = new TuningOptions();
             }
 
-            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
-            if (mapName != null) {
-                parseMapName(mapName, generatorParametersBuilder);
-            } else {
-                checkParameters();
-                setGenerationTimeIfNecessary();
-                populateRequiredGeneratorParametersFromOptions(generatorParametersBuilder);
-
-                randomizeOptions(generatorParametersBuilder);
-            }
-
-            setStyleAndParameters(generatorParametersBuilder);
-            encodeMapName();
+            populateGeneratorParametersAndName();
 
             FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
             System.out.println(mapName);
@@ -165,7 +151,23 @@ public strictfp class MapGenerator implements Callable<Integer> {
         return 0;
     }
 
-    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    void populateGeneratorParametersAndName() {
+        GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
+        if (mapName != null) {
+            parseMapName(mapName, generatorParametersBuilder);
+        } else {
+            checkParameters();
+            setVisibility(generatorParametersBuilder);
+            populateRequiredGeneratorParameters(generatorParametersBuilder);
+
+            randomizeOptions(generatorParametersBuilder);
+        }
+
+        setStyleAndParameters(generatorParametersBuilder);
+        encodeMapName();
+    }
+
+    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (tuningOptions.getMapStyle() == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
@@ -187,24 +189,21 @@ public strictfp class MapGenerator implements Callable<Integer> {
             styleGenerator = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
             tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
-            styleGenerator = tuningOptions.getMapStyle().getGeneratorClass().getConstructor().newInstance();
-            generatorParameters = styleGenerator.getParameterConstraints()
-                                                .initParameters(random, generatorParametersBuilder);
+            try {
+                styleGenerator = tuningOptions.getMapStyle().getGeneratorClass().getConstructor().newInstance();
+                generatorParameters = styleGenerator.getParameterConstraints()
+                                                    .initParameters(random, generatorParametersBuilder);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private void populateRequiredGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
-                                        .map(VisibilityOptions::getVisibility)
-                                        .orElse(null);
-        if (seed == null || visibility != null) {
-            seed = new Random().nextLong();
-        }
-
+    private void populateRequiredGeneratorParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         generatorParametersBuilder.mapSize(mapSize);
         generatorParametersBuilder.numTeams(numTeams);
         generatorParametersBuilder.spawnCount(spawnCount);
-        generatorParametersBuilder.visibility(visibility);
     }
 
     private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
@@ -237,14 +236,21 @@ public strictfp class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void setGenerationTimeIfNecessary() {
+    private void setVisibility(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (tuningOptions.getVisibilityOptions() != null) {
             generationTime = Instant.now().getEpochSecond();
+            seed = new Random().nextLong();
+
+            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+                                            .map(VisibilityOptions::getVisibility)
+                                            .orElse(null);
+
+            generatorParametersBuilder.visibility(visibility);
         }
     }
 
     private void checkParameters() {
-        if (spawnCount % numTeams != 0) {
+        if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(), String.format("Spawn Count `%d` not a multiple of Num Teams `%d`", spawnCount, numTeams));
         }
 
@@ -286,9 +292,7 @@ public strictfp class MapGenerator implements Callable<Integer> {
         String[] nameArgs = verifyMapName(mapName);
 
         String seedString = nameArgs[4];
-        byte[] seedBytes = GeneratedMapNameEncoder.decode(seedString);
-        ByteBuffer seedWrapper = ByteBuffer.wrap(seedBytes);
-        seed = seedWrapper.getLong();
+        seed = ByteBuffer.wrap(GeneratedMapNameEncoder.decode(seedString)).getLong();
 
         if (nameArgs.length >= 7) {
             String timeString = nameArgs[6];
@@ -299,6 +303,8 @@ public strictfp class MapGenerator implements Callable<Integer> {
             String optionString = nameArgs[5];
             parseOptions(GeneratedMapNameEncoder.decode(optionString), generatorParametersBuilder);
         }
+
+        populateRequiredGeneratorParameters(generatorParametersBuilder);
     }
 
     private String[] verifyMapName(String mapName) {
@@ -392,10 +398,9 @@ public strictfp class MapGenerator implements Callable<Integer> {
             byte[] optionArray;
             if (tuningOptions.getParameterOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() /
-                                                 64), (byte) generatorParameters.getNumTeams(),
-                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome()
-                                                                                              .getName()),
+                                         (byte) (generatorParameters.getMapSize() / 64),
+                                         (byte) generatorParameters.getNumTeams(),
+                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome().getName()),
                                          (byte) MathUtil.binPercentage(generatorParameters.getLandDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.getPlateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.getMountainDensity(), NUM_BINS),
@@ -406,19 +411,18 @@ public strictfp class MapGenerator implements Callable<Integer> {
                                                                    .ordinal()};
             } else if (tuningOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() /
-                                                 64), (byte) generatorParameters.getNumTeams(),
+                                         (byte) (generatorParameters.getMapSize() / 64),
+                                         (byte) generatorParameters.getNumTeams(),
                                          (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() /
-                                                 64), (byte) generatorParameters.getNumTeams(),
-                                         (byte) tuningOptions.getMapStyle()
-                                                             .ordinal()};
+                                         (byte) (generatorParameters.getMapSize() / 64),
+                                         (byte) generatorParameters.getNumTeams(),
+                                         (byte) tuningOptions.getMapStyle().ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() /
-                                                 64), (byte) generatorParameters.getNumTeams()};
+                                         (byte) (generatorParameters.getMapSize() / 64),
+                                         (byte) generatorParameters.getNumTeams()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
