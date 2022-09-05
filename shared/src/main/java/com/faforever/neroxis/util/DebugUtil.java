@@ -23,6 +23,15 @@ public strictfp class DebugUtil {
                                                                     .orElse("not found"));
     }
 
+    public static String getLastStackTraceMethodInPackage(String packageName) {
+        return StackWalker.getInstance()
+                          .walk(stackFrameStream -> stackFrameStream.filter(stackFrame -> stackFrame.getClassName()
+                                                                                                    .startsWith(packageName))
+                                                                    .reduce(((stackFrame1, stackFrame2) -> stackFrame2))
+                                                                    .map(StackWalker.StackFrame::getMethodName)
+                                                                    .orElse("not found"));
+    }
+
     public static void timedRun(Runnable runnable) {
         String packageName = getStackTraceParentClass();
         timedRun(packageName.substring(0, packageName.lastIndexOf(".")), null, runnable);
@@ -59,7 +68,7 @@ public strictfp class DebugUtil {
         runnable.run();
         if (DEBUG) {
             System.out.printf("Done %s: %4.2f ms, %s\n", description, (System.nanoTime() - sTime) / 1e6,
-                    DebugUtil.getStackTraceLineInPackage(packageName));
+                              DebugUtil.getStackTraceLineInPackage(packageName));
         }
     }
 
@@ -76,9 +85,23 @@ public strictfp class DebugUtil {
         }
         if (DEBUG) {
             System.out.printf("Done %s: %4.2f ms, %s\n", description, (System.nanoTime() - sTime) / 1e6,
-                    DebugUtil.getStackTraceLineInPackage(packageName));
+                              DebugUtil.getStackTraceLineInPackage(packageName));
         }
         return result;
+    }
+
+    public static String getLastStackTraceLineAfterPackage(String packageName) {
+        return StackWalker.getInstance()
+                          .walk(stackFrameStream -> stackFrameStream.reduce((stackFrame1, stackFrame2) -> stackFrame1.getClassName()
+                                                                                                                     .startsWith(packageName) ||
+                                                                                                          stackFrame2.getClassName()
+                                                                                                                     .startsWith(packageName) ?
+                                                                                                          stackFrame2 :
+                                                                                                          stackFrame1)
+                                                                    .map(stackFrame -> stackFrame.getFileName()
+                                                                                       + ":"
+                                                                                       + stackFrame.getLineNumber())
+                                                                    .orElse("not found"));
     }
 
     public static String getStackTraceLineInPackage(String packageName, String... excludedMethodNames) {
@@ -93,8 +116,8 @@ public strictfp class DebugUtil {
                                                                                                                                                           excludedMethod)))
                                                                     .findFirst()
                                                                     .map(stackFrame -> stackFrame.getFileName()
-                                                                            + ":"
-                                                                            + stackFrame.getLineNumber())
+                                                                                       + ":"
+                                                                                       + stackFrame.getLineNumber())
                                                                     .orElse("not found"));
     }
 }

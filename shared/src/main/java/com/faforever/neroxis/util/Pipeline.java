@@ -40,9 +40,8 @@ public strictfp class Pipeline {
         String callingLine = null;
 
         if (DebugUtil.DEBUG) {
-            callingMethod = DebugUtil.getStackTraceMethodInPackage("com.faforever.neroxis.mask", "enqueue", "apply",
-                    "applyWithSymmetry");
-            callingLine = DebugUtil.getStackTraceLineInPackage("com.faforever.neroxis.generator");
+            callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
+            callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
@@ -59,10 +58,10 @@ public strictfp class Pipeline {
                                                         if (HASH_MASK) {
                                                             try {
                                                                 hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
-                                                                        executingMask.toHash(),
-                                                                        finalCallingLine,
-                                                                        executingMask.getName(),
-                                                                        finalCallingMethod);
+                                                                                                 executingMask.toHash(),
+                                                                                                 finalCallingLine,
+                                                                                                 executingMask.getName(),
+                                                                                                 finalCallingMethod);
                                                             } catch (NoSuchAlgorithmException e) {
                                                                 System.err.println("Cannot hash mask");
                                                             }
@@ -76,16 +75,17 @@ public strictfp class Pipeline {
                                                         }
                                                         executingMask.setVisualDebug(visualDebug);
                                                         if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
-                                                                && !executingMask.isMock())) {
+                                                                                                 &&
+                                                                                                 !executingMask.isMock())) {
                                                             VisualDebugger.visualizeMask(executingMask,
-                                                                    finalCallingMethod,
-                                                                    finalCallingLine);
+                                                                                         finalCallingMethod,
+                                                                                         finalCallingLine);
                                                         }
                                                     }, executorService);
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
 
-        entry.dependencies.forEach(d -> d.dependants.add(entry));
+        entry.dependencies.forEach(dependency -> dependency.dependants.add(entry));
         pipeline.add(entry);
     }
 

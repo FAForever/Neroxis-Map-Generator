@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
-import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -12,17 +11,16 @@ import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
+
+import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
@@ -542,18 +540,22 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY()
                                                                                           + vertex.getX()
                                                                                             * vertex.getX())) / (2
-                                                                                                                 * current.getX()
+                                                                                                                 *
+                                                                                                                 current.getX()
                                                                                                                  - 2
-                                                                                                                   * vertex.getX());
+                                                                                                                   *
+                                                                                                                   vertex.getX());
                 while (xIntersect <= intersections.get(index).getX()) {
                     index -= 1;
                     vertex = vertices.get(index);
                     xIntersect = ((current.getY() + current.getX() * current.getX()) - (vertex.getY()
                                                                                         + vertex.getX()
                                                                                           * vertex.getX())) / (2
-                                                                                                               * current.getX()
+                                                                                                               *
+                                                                                                               current.getX()
                                                                                                                - 2
-                                                                                                                 * vertex.getX());
+                                                                                                                 *
+                                                                                                                 vertex.getX());
                 }
                 index += 1;
                 if (index < vertices.size()) {
