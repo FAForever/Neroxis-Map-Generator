@@ -704,7 +704,10 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                apply((x, y) -> setPrimitive(x, y, oldMask[coordinateMap.get(x)][coordinateMap.get(y)]));
+                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    float value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
+                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+                });
             }
         });
     }

@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
 import com.faforever.neroxis.util.functional.TriIntConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
@@ -217,7 +218,10 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 int[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                apply((x, y) -> setPrimitive(x, y, oldMask[coordinateMap.get(x)][coordinateMap.get(y)]));
+                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    int value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
+                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+                });
             }
         });
     }

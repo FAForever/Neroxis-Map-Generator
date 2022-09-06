@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
-import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -10,19 +9,16 @@ import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.functional.BiIntBooleanConsumer;
 import com.faforever.neroxis.util.functional.ToBooleanBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
@@ -235,8 +231,10 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 long[] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                apply((x, y) -> setPrimitive(x, y,
-                                             getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask)));
+                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    boolean value = getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask);
+                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+                });
             }
         });
     }

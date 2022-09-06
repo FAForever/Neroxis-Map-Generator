@@ -164,7 +164,7 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)].copy());
             }
         });
     }
