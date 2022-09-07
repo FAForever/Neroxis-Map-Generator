@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id "me.champeau.jmh" version "0.6.7"
 }
 
 dependencies {
@@ -9,4 +10,10 @@ dependencies {
     implementation("org.jgrapht:jgrapht-core:${jgraph_version}")
 
     annotationProcessor("com.dslplatform:dsl-json-java8:1.9.9")
+}
+
+jmh {
+    warmupIterations = 2
+    iterations = 5
+    fork = 1
 }

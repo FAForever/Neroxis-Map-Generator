@@ -482,36 +482,36 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return setComponent((x, y) -> calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f, component);
     }
 
-    protected U multiplyComponent(ToFloatBiIntFunction valueFunction, int component) {
+    public U multiplyComponent(ToFloatBiIntFunction valueFunction, int component) {
         return apply((x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected U divideComponent(ToFloatBiIntFunction valueFunction, int component) {
+    public U divideComponent(ToFloatBiIntFunction valueFunction, int component) {
         return apply((x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    protected U addScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public U addScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addScalarAt(sx, sy, value));
         });
     }
 
-    protected U subtractScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public U subtractScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractScalarAt(sx, sy, value));
         });
     }
 
-    protected U multiplyScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public U multiplyScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyScalarAt(sx, sy, value));
         });
     }
 
-    protected U divideScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public U divideScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideScalarAt(sx, sy, value));
@@ -523,14 +523,14 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return addComponent((x, y) -> value, component);
     }
 
-    protected U setComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
+    public U setComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setComponentAt(sx, sy, value, component));
         });
     }
 
-    protected U addComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
+    public U addComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addComponentAt(sx, sy, value, component));
@@ -558,16 +558,16 @@ public abstract strictfp class VectorMask<T extends Vector<T>, U extends VectorM
         return subtractComponent((x, y) -> value, component);
     }
 
-    protected U subtractComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
-                                              int component) {
+    public U subtractComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
+                                           int component) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractComponentAt(sx, sy, value, component));
         });
     }
 
-    protected U multiplyComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
-                                              int component) {
+    public U multiplyComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
+                                           int component) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyComponentAt(sx, sy, value, component));

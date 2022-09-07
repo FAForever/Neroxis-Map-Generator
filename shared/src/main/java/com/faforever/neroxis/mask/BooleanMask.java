@@ -24,7 +24,7 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
-    private long[] mask;
+    protected long[] mask;
     private int maskBooleanSize;
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -87,11 +87,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
-    private static void setBit(int x, int y, boolean value, int size, long[] mask) {
+    protected static void setBit(int x, int y, boolean value, int size, long[] mask) {
         setBit(bitIndex(x, y, size), value, mask);
     }
 
-    private static void setBit(int bitIndex, boolean value, long[] mask) {
+    protected static void setBit(int bitIndex, boolean value, long[] mask) {
         if (value) {
             mask[arrayIndex(bitIndex)] |= SINGLE_BIT_VALUE << bitIndex;
         } else {
@@ -107,11 +107,11 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return x * size + y;
     }
 
-    private static boolean getBit(int x, int y, int size, long[] mask) {
+    protected static boolean getBit(int x, int y, int size, long[] mask) {
         return getBit(bitIndex(x, y, size), mask);
     }
 
-    private static boolean getBit(int bitIndex, long[] mask) {
+    protected static boolean getBit(int bitIndex, long[] mask) {
         return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
     }
 
@@ -1432,30 +1432,30 @@ public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return coordinates.get(cell);
     }
 
-    protected BooleanMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected BooleanMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType,
-                                                        ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType,
+                                                     ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected BooleanMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType,
-                                                        ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType,
+                                                     ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected BooleanMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> dividePrimitiveAt(sx, sy, value));

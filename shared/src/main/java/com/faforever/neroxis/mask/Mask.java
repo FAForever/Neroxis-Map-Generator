@@ -189,11 +189,11 @@ public strictfp abstract class Mask<T, U extends Mask<T, U>> {
 
     protected abstract T getZeroValue();
 
-    protected U set(BiIntFunction<T> valueFunction) {
+    public U set(BiIntFunction<T> valueFunction) {
         return apply((x, y) -> set(x, y, valueFunction.apply(x, y)));
     }
 
-    protected U apply(BiIntConsumer maskAction) {
+    public U apply(BiIntConsumer maskAction) {
         return enqueue(() -> loop(maskAction));
     }
 

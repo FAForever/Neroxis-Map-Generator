@@ -8,7 +8,6 @@ allprojects {
     apply plugin: 'java'
     group 'com.faforever.neroxis'
 
-
     sourceCompatibility = JavaVersion.VERSION_15
     targetCompatibility = JavaVersion.VERSION_15
 

@@ -24,7 +24,7 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
-    private float[][] mask;
+    protected float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -993,28 +993,28 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    protected FloatMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public FloatMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected FloatMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public FloatMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected FloatMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+    public FloatMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> dividePrimitiveAt(sx, sy, value));

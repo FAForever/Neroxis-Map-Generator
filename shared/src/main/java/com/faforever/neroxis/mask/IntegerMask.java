@@ -18,7 +18,7 @@ import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-    private int[][] mask;
+    protected int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -514,36 +514,36 @@ public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         }, other);
     }
 
-    protected IntegerMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
+    public IntegerMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             int value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected IntegerMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
+    public IntegerMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             int value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected IntegerMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
+    public IntegerMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             int value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyPrimitiveAt(sx, sy, value));
         });
     }
 
-    protected IntegerMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
+    public IntegerMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToIntBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             int value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> dividePrimitiveAt(sx, sy, value));
         });
     }
 
-    protected IntegerMask applyWithOffset(IntegerMask other, TriIntConsumer action, int xOffset, int yOffset,
-                                          boolean center, boolean wrapEdges) {
+    public IntegerMask applyWithOffset(IntegerMask other, TriIntConsumer action, int xOffset, int yOffset,
+                                       boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();
