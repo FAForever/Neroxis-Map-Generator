@@ -6,7 +6,7 @@ plugins {
 dependencies {
     api("com.dslplatform:dsl-json-java8:1.9.9")
     implementation("org.luaj:luaj-jse:3.0.1")
-    implementation("org.springframework:spring-expression:5.3.22")
+    implementation("org.springframework:spring-expression:5.3.23")
     implementation("org.jgrapht:jgrapht-core:${jgraph_version}")
 
     annotationProcessor("com.dslplatform:dsl-json-java8:1.9.9")
