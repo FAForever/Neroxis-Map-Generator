@@ -5,6 +5,7 @@ buildscript {
 }
 
 
+
 allprojects {
     apply plugin: 'java'
     group 'com.faforever.neroxis'
