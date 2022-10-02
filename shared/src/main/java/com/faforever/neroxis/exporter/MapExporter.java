@@ -1,6 +1,7 @@
 package com.faforever.neroxis.exporter;
 
 import com.faforever.neroxis.map.SCMap;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,14 +12,6 @@ public strictfp class MapExporter {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
 
-            if (exportDecals) {
-                if (map.getCompressedNormal() != null) {
-                    SCMapExporter.exportNormals(mapPath, map);
-                }
-                if (map.getCompressedShadows() != null) {
-                    SCMapExporter.exportShadows(mapPath, map);
-                }
-            }
             if (exportPreview) {
                 SCMapExporter.exportPreview(mapPath, map);
             }

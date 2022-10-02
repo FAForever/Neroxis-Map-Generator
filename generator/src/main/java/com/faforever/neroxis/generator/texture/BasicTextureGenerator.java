@@ -6,9 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.ImageUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public strictfp class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -30,12 +27,8 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
         BooleanMask rock = slope.copyAsBooleanMask(.75f);
         BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
-
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
-        shadows.add(shadowsInWater, 1f)
-               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
-               .clampMax(1f);
+
         int textureSize = generatorParameters.getMapSize() + 1;
         int mapSize = generatorParameters.getMapSize();
         accentGroundTexture.setSize(textureSize)
@@ -90,25 +83,6 @@ public strictfp class BasicTextureGenerator extends TextureGenerator {
         steepHillsTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
-    }
-
-    @Override
-    public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
-            map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
-            map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-        });
-    }
-
-    @Override
-    public void setCompressedDecals() {
-        Pipeline.await(normals, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.getBiome().getLightingSettings()));
-            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
-        });
     }
 
     @Override

@@ -5,12 +5,15 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
-import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
-import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import java.awt.Color;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
+import lombok.SneakyThrows;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -20,10 +23,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
-import lombok.SneakyThrows;
+
+import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
+import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 @SuppressWarnings("unused")
 @Data
@@ -35,7 +37,9 @@ public strictfp class SCMap {
     public static final Vector2[] WAVE_NORMAL_MOVEMENTS = {new Vector2(0.5f, -0.95f), new Vector2(0.05f,
                                                                                                   -0.095f), new Vector2(
             0.01f, 0.03f), new Vector2(0.0005f, 0.0009f)};
-    public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
+    public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds",
+                                                       "/textures/engine/waves.dds",
+                                                       "/textures/engine/waves.dds"}; // always same?
     private final List<Spawn> spawns;
     private final List<Marker> mexes;
     private final List<Marker> hydros;
@@ -55,8 +59,11 @@ public strictfp class SCMap {
     private final List<AIMarker> navalAreaAIMarkers;
     private final List<AIMarker> navalRallyMarkers;
     private final List<CubeMap> cubeMaps;
+    @Deprecated
     private byte[] compressedNormal;
+    @Deprecated
     private byte[] compressedShadows;
+    private byte[] compressedPBRTexture;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)
@@ -64,7 +71,7 @@ public strictfp class SCMap {
     private Vector4 playableArea;
     private int minorVersion = 56;
     private String description = "";
-    private String terrainShaderPath = "TTerrainXP";
+    private String terrainShaderPath = "TTerrainBa";
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private boolean generatePreview;
     private boolean isUnexplored;
@@ -650,7 +657,7 @@ public strictfp class SCMap {
     }
 
     private int convertToRawTextureValue(float value) {
-        return value > 0f ? StrictMath.round(StrictMath.min(1f, value) * 127 + 128) : 0;
+        return StrictMath.round(StrictMath.max(StrictMath.min(value, 1f), 0f) * 255);
     }
 
     @SneakyThrows

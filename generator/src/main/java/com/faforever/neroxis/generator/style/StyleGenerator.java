@@ -20,6 +20,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -86,7 +87,6 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
                 () -> generateAIMarkers(terrainGenerator.getPassable(), terrainGenerator.getPassableLand(),
                                         terrainGenerator.getPassableWater()));
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
@@ -95,8 +95,7 @@ public abstract strictfp class StyleGenerator extends ElementGenerator {
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, aiMarkerFuture,
                                                                           textureFuture, previewFuture, resourcesFuture,
-                                                                          decalsFuture, propsFuture, unitsFuture,
-                                                                          normalFuture)
+                                                                          decalsFuture, propsFuture, unitsFuture)
                                                                    .thenAccept(aVoid -> setHeights());
 
         placementFuture.join();

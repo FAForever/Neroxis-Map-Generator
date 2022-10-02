@@ -1,47 +1,36 @@
 package com.faforever.neroxis.exporter;
 
-import com.faforever.neroxis.map.CubeMap;
-import com.faforever.neroxis.map.Decal;
-import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.DecalType;
-import com.faforever.neroxis.map.Prop;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.WaveGenerator;
-import static com.faforever.neroxis.util.EndianSwapper.swap;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.RenderedImage;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.*;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import javax.imageio.ImageIO;
+
+import static com.faforever.neroxis.util.EndianSwapper.swap;
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public strictfp class SCMapExporter {
     public static File file;
     private static DataOutputStream out;
 
     public static void exportSCMAP(Path folderPath, SCMap map) throws IOException {
+        exportPBR(folderPath, map);
+
         file = folderPath.resolve(map.getFilePrefix() + ".scmap").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
@@ -111,10 +100,16 @@ public strictfp class SCMapExporter {
         if (map.getMinorVersion() > 56) {
             writeFloat(0);
         }
-        for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
+        for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT - 1; i++) {
             writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
             writeFloat(mapTerrainMaterials.getTextureScales()[i]);
         }
+
+        writeStringNull(Path.of("/maps", map.getFolderName(), "env", "texture", "map_pbr.dds")
+                            .toString()
+                            .replace("\\", "/"));
+        writeFloat(0);
+
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
             writeFloat(mapTerrainMaterials.getNormalScales()[i]);
@@ -227,44 +222,16 @@ public strictfp class SCMapExporter {
         }
     }
 
-    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedNormal = map.getCompressedNormal();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
+    public static void exportPBR(Path folderPath, SCMap map) throws IOException {
+        byte[] compressedPBR = map.getCompressedPBRTexture();
+        Path decalsPath = Paths.get("env", "texture");
+        Path decalPath = decalsPath.resolve("map_pbr.dds");
         Path writingPath = folderPath.resolve(decalPath);
         Files.createDirectories(writingPath.getParent());
-        map.getDecals()
-           .add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset, new Vector3(),
-                          size, 1000));
         try {
-            Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
+            Files.write(writingPath, compressedPBR, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            System.out.print("Could not write the normal map image\n" + e);
-        }
-    }
-
-    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedShadows = map.getCompressedShadows();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
-        Path writingPath = folderPath.resolve(decalPath);
-        Files.createDirectories(writingPath.getParent());
-        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
-                                      new Vector3(), size, 1000);
-        shadowDecal.setType(DecalType.WATER_ALBEDO);
-        map.getDecals().add(shadowDecal);
-        try {
-            Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            System.out.print("Could not write the shadow map image\n" + e);
+            System.out.print("Could not write the pbr map texture\n" + e);
         }
     }
 

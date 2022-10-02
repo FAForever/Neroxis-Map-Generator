@@ -5,22 +5,15 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import java.awt.Point;
-import java.awt.Transparency;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -29,7 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import javax.imageio.ImageIO;
+
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public strictfp class ImageUtil {
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
@@ -196,6 +190,29 @@ public strictfp class ImageUtil {
             }
         }
         return image;
+    }
+
+    public static byte[] compressPBRTexture(FloatMask shadowMask, FloatMask ambientMask, NormalMask normalMask) {
+        if (shadowMask.getSize() != ambientMask.getSize() || ambientMask.getSize() != normalMask.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match");
+        }
+        int size = shadowMask.getSize();
+        int length = size * size * 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector3 normalValue = normalMask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(ambientMask.get(x, y) * 255, 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                imageByteBuffer.put((byte) xV);
+                imageByteBuffer.put((byte) yV);
+                imageByteBuffer.put((byte) zV);
+                imageByteBuffer.put((byte) wV);
+            }
+        }
+        return getCompressedBytes(size, imageByteBuffer);
     }
 
     public static byte[] compressVector4(Vector4Mask mask) {

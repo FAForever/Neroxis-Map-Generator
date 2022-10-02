@@ -23,6 +23,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected NormalMask normals;
     protected FloatMask shadows;
+    protected FloatMask ambient;
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
@@ -30,6 +31,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
     protected Vector4Mask texturesHighPreviewMask;
     protected FloatMask heightmapPreview;
     protected FloatMask reflectance;
+    protected Vector4Mask temp;
 
     protected abstract void setupTexturePipeline();
 
@@ -40,34 +42,29 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         slope = terrainGenerator.getSlope();
         normals = heightmap.copy()
                            .resample(512)
-                           .addPerlinNoise(64, 12f)
-                           .addGaussianNoise(.025f)
-                           .blur(1)
                            .copyAsNormalMask(2f);
         shadowsMask = heightmap.copy()
                                .resample(512)
                                .copyAsShadowMask(
                                        generatorParameters.getBiome().getLightingSettings().getSunDirection());
-        shadows = shadowsMask.copyAsFloatMask(0, 1).blur(2);
+        shadows = shadowsMask.copyAsFloatMask(0, 1);
+        ambient = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "ambient", true).add(1f);
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
                                            true);
+        FloatMask mask = new FloatMask(map.getNormalMap()
+                                          .getHeight(), random.nextLong(), symmetrySettings, "temp", true).addPerlinNoise(16, 1);
+        temp = new Vector4Mask(mask.getSize(), random.nextLong(), symmetrySettings, "temp", true);
+        temp.setComponents(mask, mask, mask, mask).startVisualDebugger();
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-        });
-    }
-
-    public void setCompressedDecals() {
-        Pipeline.await(normals, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.getBiome().getLightingSettings()));
-            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
+            map.setCompressedPBRTexture(ImageUtil.compressPBRTexture(shadows.getFinalMask(), ambient.getFinalMask(), normals.getFinalMask()));
+            map.setNormalMap(temp.toImage());
         });
     }
 
