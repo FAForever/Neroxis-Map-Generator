@@ -233,6 +233,19 @@ public strictfp class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     /**
+     * Scale the values in the mask from 0 to 1
+     */
+    @GraphMethod
+    public FloatMask normalize() {
+        return enqueue(() -> {
+            float min = getMin();
+            float max = getMax();
+            subtract(min);
+            divide(max - min);
+        });
+    }
+
+    /**
      * Add gaussian noise to the mask with the given noise scale
      *
      * @param scale Multiplicative factor fo rthe noise
