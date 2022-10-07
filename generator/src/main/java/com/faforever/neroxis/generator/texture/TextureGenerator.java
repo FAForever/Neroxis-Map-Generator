@@ -64,7 +64,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
                .subtract(heightDiff.copy().blur(32).subtract(heightDiff).clampMin(0f))
                .subtract(heightDiff.copy().blur(64).subtract(heightDiff).clampMin(0f).multiply(.5f))
                .subtract(heightDiff.copy().blur(128).subtract(heightDiff).clampMin(0f).multiply(.5f))
-               .blur(1)
+               .blur(2)
                .clampMin(0f);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
