@@ -1202,7 +1202,9 @@ public class Utils {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                            (antiAlias) ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                           (textAntiAlias) ? RenderingHints.VALUE_TEXT_ANTIALIAS_ON : RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+                           (textAntiAlias) ?
+                           RenderingHints.VALUE_TEXT_ANTIALIAS_ON :
+                           RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 
     /**
@@ -1211,7 +1213,9 @@ public class Utils {
      */
     public static BufferedImage createBufferedImage(int w, int h, Color background) {
         return Utils.createBufferedImage(w, h, background, (background
-                                                            != null) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
+                                                            != null) ?
+                                                           BufferedImage.TYPE_INT_RGB :
+                                                           BufferedImage.TYPE_INT_ARGB);
     }
 
     /**

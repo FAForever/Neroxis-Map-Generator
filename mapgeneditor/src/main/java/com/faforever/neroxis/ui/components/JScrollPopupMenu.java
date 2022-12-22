@@ -27,8 +27,8 @@ public class JScrollPopupMenu extends JPopupMenu {
             JScrollBar scrollBar = getScrollBar();
             int amount = (event.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) ? event.getUnitsToScroll()
                                                                                         * scrollBar.getUnitIncrement() :
-                    (event.getWheelRotation() < 0 ? -1 : 1)
-                    * scrollBar.getBlockIncrement();
+                         (event.getWheelRotation() < 0 ? -1 : 1)
+                         * scrollBar.getBlockIncrement();
 
             scrollBar.setValue(scrollBar.getValue() + amount);
             event.consume();

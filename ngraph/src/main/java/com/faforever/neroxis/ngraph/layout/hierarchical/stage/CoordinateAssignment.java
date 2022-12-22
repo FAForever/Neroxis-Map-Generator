@@ -1209,7 +1209,9 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 // First jetty of edge
                 if (jettys != null) {
                     int arrayOffset = reversed ? 2 : 0;
-                    double y = reversed ? (layoutReversed ? this.rankBottomY[minRank] : this.rankTopY[minRank]) : (layoutReversed ? this.rankTopY[maxRank] : this.rankBottomY[maxRank]);
+                    double y = reversed ?
+                               (layoutReversed ? this.rankBottomY[minRank] : this.rankTopY[minRank]) :
+                               (layoutReversed ? this.rankTopY[maxRank] : this.rankBottomY[maxRank]);
                     double jetty = jettys[parallelEdgeCount * 4 + 1 + arrayOffset];
 
                     // If the edge is reversed invert the y position within the channel,
@@ -1279,7 +1281,9 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 // Second jetty of edge
                 if (jettys != null) {
                     int arrayOffset = reversed ? 2 : 0;
-                    double rankY = reversed ? (layoutReversed ? this.rankTopY[maxRank] : this.rankBottomY[maxRank]) : (layoutReversed ? this.rankBottomY[minRank] : this.rankTopY[minRank]);
+                    double rankY = reversed ?
+                                   (layoutReversed ? this.rankTopY[maxRank] : this.rankBottomY[maxRank]) :
+                                   (layoutReversed ? this.rankBottomY[minRank] : this.rankTopY[minRank]);
                     double jetty = jettys[parallelEdgeCount * 4 + 3 - arrayOffset];
 
                     if (reversed != layoutReversed) {

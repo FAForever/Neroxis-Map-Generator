@@ -209,7 +209,8 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
 
             if ((includeLoops && source == target) || ((source != target) && ((incoming && target == cell) || (outgoing
                                                                                                                && source
-                                                                                                                  == cell)))) {
+                                                                                                                  ==
+                                                                                                                  cell)))) {
                 result.add(edge);
             }
         }

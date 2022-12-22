@@ -91,11 +91,9 @@ import java.util.stream.Collectors;
 /**
  * Implements a graph object that allows to create diagrams from a graph model
  * and stylesheet.
- *
  * <h3>Images</h3>
  * To create an image from a graph, use the following code for a given
  * XML document (doc) and File (file):
- *
  * <code>
  * Image img = CellRenderer.createBufferedImage(
  * graph, null, 1, Color.WHITE, false, null);
@@ -1544,7 +1542,6 @@ public class Graph extends EventSource {
     /**
      * Clones all cells in the given array. To clone all children in a cell and
      * add them to another graph:
-     *
      * <code>
      * graph2.addCells(graph.cloneCells(new Object[] { parent }));
      * </code>
@@ -1552,7 +1549,6 @@ public class Graph extends EventSource {
      * To clone all children in a graph layer if graph g1 and put them into the
      * default parent (typically default layer) of another graph g2, the
      * following code is used:
-     *
      * <code>
      * g2.addCells(g1.cloneCells(g1.cloneCells(g1.getChildCells(g1.getDefaultParent()));
      * </code>
@@ -3131,7 +3127,6 @@ public class Graph extends EventSource {
      * This implementation always returns false.
      * <p>
      * A typical implementation of this method looks as follows:
-     *
      * <code>
      * public boolean isPort(ICell cell)
      * {
@@ -5361,9 +5356,13 @@ public class Graph extends EventSource {
 
             if ((includeLoops && source == target) || ((source != target) && ((incoming && target == cell && (parent
                                                                                                               == null
-                                                                                                              || isValidAncestor(
-                    source, parent, recurse))) || (outgoing && source == cell && (parent == null || isValidAncestor(
-                    target, parent, recurse)))))) {
+                                                                                                              ||
+                                                                                                              isValidAncestor(
+                                                                                                                      source, parent, recurse))) ||
+                                                                              (outgoing &&
+                                                                               source == cell &&
+                                                                               (parent == null || isValidAncestor(
+                                                                                       target, parent, recurse)))))) {
                 result.add(edge);
             }
         }

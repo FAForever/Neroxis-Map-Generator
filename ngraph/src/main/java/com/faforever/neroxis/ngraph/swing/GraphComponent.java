@@ -78,7 +78,6 @@ import java.util.logging.Logger;
  * inner GraphControl. The control contains the actual graph display.
  * <p>
  * To set the background color of the graph, use the following code:
- *
  * <pre>
  * graphComponent.getViewport().setOpaque(true);
  * graphComponent.getViewport().setBackground(newColor);
@@ -321,7 +320,7 @@ public class GraphComponent extends JScrollPane implements Printable {
                 newView.addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) updateHandler);
                 newView.addListener(TranslateEvent.class, (IEventListener<TranslateEvent>) updateHandler);
                 newView.addListener(ScaleAndTranslateEvent.class,
-                        (IEventListener<ScaleAndTranslateEvent>) updateHandler);
+                                    (IEventListener<ScaleAndTranslateEvent>) updateHandler);
                 newView.addListener(UpEvent.class, (IEventListener<UpEvent>) updateHandler);
                 newView.addListener(DownEvent.class, (IEventListener<DownEvent>) updateHandler);
                 newView.addListener(CellStateEvent.class, cellStateHandler);
@@ -625,7 +624,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // Resets the zoom policy if the scale changes
         graph.getView().addListener(ScaleEvent.class, (IEventListener<ScaleEvent>) scaleHandler);
         graph.getView()
-                .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
+             .addListener(ScaleAndTranslateEvent.class, (IEventListener<ScaleAndTranslateEvent>) scaleHandler);
         // Invoke the update handler once for initial state
         updateHandler.invoke(graph.getView(), null);
         firePropertyChange("graph", oldValue, graph);
@@ -831,7 +830,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      */
     protected Dimension getPreferredSizeForPage() {
         return new Dimension((int) Math.round(pageFormat.getWidth() * pageScale * horizontalPageCount),
-                (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
+                             (int) Math.round(pageFormat.getHeight() * pageScale * verticalPageCount));
     }
 
     /**
@@ -1071,7 +1070,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         RectangleDouble bounds = graph.getGraphBounds();
         int border = graph.getBorder();
         return new Dimension((int) Math.round(bounds.getX() + bounds.getWidth()) + border + 1,
-                (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
+                             (int) Math.round(bounds.getY() + bounds.getHeight()) + border + 1);
     }
 
     /**
@@ -1312,9 +1311,9 @@ public class GraphComponent extends JScrollPane implements Printable {
                     } else if (graph.isCellVisible(cell)) {
                         CellState state = view.getState(cell);
                         if (state != null && canvas.intersects(this, hit, state) && (!graph.isSwimlane(cell)
-                                || hitSwimlaneContent
-                                || (transparentSwimlaneContent
-                                && !canvas.hitSwimlaneContent(
+                                                                                     || hitSwimlaneContent
+                                                                                     || (transparentSwimlaneContent
+                                                                                         && !canvas.hitSwimlaneContent(
                                 this, state, x, y)))) {
                             return cell;
                         }
@@ -1352,7 +1351,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // but toggle for right mouse buttons requires CTRL to be pressed.
         return event != null && ((Utils.IS_MAC) ? ((SwingUtilities.isLeftMouseButton(event) && event.isMetaDown()) || (
                 SwingUtilities.isRightMouseButton(event)
-                        && event.isControlDown())) : event.isControlDown());
+                && event.isControlDown())) : event.isControlDown());
     }
 
     public boolean hitFoldingIcon(ICell cell, int x, int y) {
@@ -1675,7 +1674,7 @@ public class GraphComponent extends JScrollPane implements Printable {
             view.revalidate();
             RectangleDouble graphBounds = graph.getGraphBounds();
             Dimension pSize = new Dimension((int) Math.ceil(graphBounds.getX() + graphBounds.getWidth()) + 1,
-                    (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
+                                            (int) Math.ceil(graphBounds.getY() + graphBounds.getHeight()) + 1);
             int w = (int) (printFormat.getImageableWidth());
             int h = (int) (printFormat.getImageableHeight());
             int cols = (int) Math.max(Math.ceil((double) (pSize.width - 5) / (double) w), 1);
@@ -1804,9 +1803,9 @@ public class GraphComponent extends JScrollPane implements Printable {
         } else if (graph.getModel().isEdge(state.getCell())) {
             EdgeStyleFunction style = graph.getView().getEdgeStyle(state, null, null, null);
             if (graph.isLoop(state)
-                    || style instanceof ElbowConnectorEdgeStyleFunction
-                    || style instanceof SideToSideEdgeStyleFunction
-                    || style instanceof TopToBottomEdgeStyleFunction) {
+                || style instanceof ElbowConnectorEdgeStyleFunction
+                || style instanceof SideToSideEdgeStyleFunction
+                || style instanceof TopToBottomEdgeStyleFunction) {
                 return new ElbowEdgeHandler(this, state);
             }
             return new EdgeHandler(this, state);
@@ -1853,7 +1852,7 @@ public class GraphComponent extends JScrollPane implements Printable {
         // Checks edges and cells using the defined multiplicities
         if (model.isEdge(cell)) {
             String tmp = graph.getEdgeValidationError(cell, model.getTerminal(cell, true),
-                    model.getTerminal(cell, false));
+                                                      model.getTerminal(cell, false));
             if (tmp != null) {
                 warning.append(tmp);
             }
@@ -2369,8 +2368,8 @@ public class GraphComponent extends JScrollPane implements Printable {
             PointDouble translate = graph.getView().getTranslate();
             double scale = graph.getView().getScale();
             g.drawImage(backgroundImage.getImage(), (int) (translate.getX() * scale), (int) (translate.getY() * scale),
-                    (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale),
-                    this);
+                        (int) (backgroundImage.getIconWidth() * scale), (int) (backgroundImage.getIconHeight() * scale),
+                        this);
         }
     }
 
@@ -2471,16 +2470,20 @@ public class GraphComponent extends JScrollPane implements Printable {
                     // Creates a set of strokes with individual dash offsets
                     // for each direction
                     Stroke[] strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
-                            new float[]{3, 1},
-                            Math.max(0, iys) % 4), new BasicStroke(1,
-                            BasicStroke.CAP_BUTT,
-                            BasicStroke.JOIN_MITER,
-                            1,
-                            new float[]{2, 2},
-                            Math.max(0,
-                                    iys)
-                                    % 4), new BasicStroke(
-                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
+                                                                    new float[]{3, 1},
+                                                                    Math.max(0, iys) % 4), new BasicStroke(1,
+                                                                                                           BasicStroke.CAP_BUTT,
+                                                                                                           BasicStroke.JOIN_MITER,
+                                                                                                           1,
+                                                                                                           new float[]{
+                                                                                                                   2,
+                                                                                                                   2},
+                                                                                                           Math.max(0,
+                                                                                                                    iys)
+                                                                                                           % 4),
+                                                    new BasicStroke(
+                                                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{
+                                                            1, 1}, 0), new BasicStroke(
                             1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
                             Math.max(0, iys) % 4)};
                     for (double x = xs; x <= xe; x += stepping) {
@@ -2495,18 +2498,25 @@ public class GraphComponent extends JScrollPane implements Printable {
                         g.drawLine(ix, iys, ix, iye);
                     }
                     strokes = new Stroke[]{new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
-                            new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1,
-                            BasicStroke.CAP_BUTT,
-                            BasicStroke.JOIN_MITER,
-                            1,
-                            new float[]{2, 2},
-                            Math.max(
-                                    0,
-                                    ixs)
-                                    % 4), new BasicStroke(
-                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1, 1}, 0), new BasicStroke(
-                            1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2, 2},
-                            Math.max(0, ixs) % 4)};
+                                                           new float[]{3, 1}, Math.max(0, ixs) % 4), new BasicStroke(1,
+                                                                                                                     BasicStroke.CAP_BUTT,
+                                                                                                                     BasicStroke.JOIN_MITER,
+                                                                                                                     1,
+                                                                                                                     new float[]{
+                                                                                                                             2,
+                                                                                                                             2},
+                                                                                                                     Math.max(
+                                                                                                                             0,
+                                                                                                                             ixs)
+                                                                                                                     %
+                                                                                                                     4),
+                                           new BasicStroke(
+                                                   1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{1,
+                                                                                                                   1}, 0),
+                                           new BasicStroke(
+                                                   1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{2,
+                                                                                                                   2},
+                                                   Math.max(0, ixs) % 4)};
                     for (double y = ys; y <= ye; y += stepping) {
                         g2.setStroke(strokes[((int) (y / stepping)) % strokes.length]);
                         // FIXME: Workaround for rounding errors when adding
@@ -2731,8 +2741,8 @@ public class GraphComponent extends JScrollPane implements Printable {
         @Override
         public void mouseClicked(MouseEvent e) {
             graphComponent.getGraphControl()
-                    .dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e,
-                            graphComponent.getGraphControl()));
+                          .dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e,
+                                                                          graphComponent.getGraphControl()));
         }
 
         @Override

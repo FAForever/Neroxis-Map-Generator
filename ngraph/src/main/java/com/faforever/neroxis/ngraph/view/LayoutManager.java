@@ -25,7 +25,6 @@ import java.util.Set;
 /**
  * Implements a layout manager that updates the layout for a given transaction.
  * The following example installs an automatic tree layout in a graph:
- *
  * <code>
  * new LayoutManager(graph) {
  * <p>
@@ -186,7 +185,9 @@ public class LayoutManager extends EventSource {
                 result.add(cc.getPrevious());
             }
         } else if (change instanceof TerminalChange || change instanceof GeometryChange) {
-            ICell cell = (change instanceof TerminalChange) ? ((TerminalChange) change).getCell() : ((GeometryChange) change).getCell();
+            ICell cell = (change instanceof TerminalChange) ?
+                         ((TerminalChange) change).getCell() :
+                         ((GeometryChange) change).getCell();
 
             if (cell != null) {
                 result.add(cell);
