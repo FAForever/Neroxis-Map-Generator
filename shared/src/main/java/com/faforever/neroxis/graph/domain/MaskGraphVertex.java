@@ -5,23 +5,18 @@ import com.faforever.neroxis.graph.GraphContext;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
-import java.lang.reflect.Executable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 
-public abstract strictfp class MaskGraphVertex<T extends Executable> {
+import java.lang.reflect.Executable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public abstract class MaskGraphVertex<T extends Executable> {
     public static final String SELF = "self";
     protected final Map<String, String> nonMaskParameters = new LinkedHashMap<>();
     protected final Map<String, MaskVertexResult> maskParameters = new LinkedHashMap<>();

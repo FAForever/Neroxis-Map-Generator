@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 @Getter
-public strictfp class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
+public class MaskConstructorVertex extends MaskGraphVertex<Constructor<? extends Mask<?, ?>>> {
     public MaskConstructorVertex(Constructor<? extends Mask<?, ?>> executable) {
         super(executable, executable.getDeclaringClass());
     }

@@ -6,7 +6,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public strictfp class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
+public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
     public DropPlateauTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.5f, 1f)

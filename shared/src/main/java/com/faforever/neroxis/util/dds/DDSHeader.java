@@ -1,11 +1,12 @@
 package com.faforever.neroxis.util.dds;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import lombok.Data;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 @Data
-public strictfp class DDSHeader {
+public class DDSHeader {
     final public static int CAPS_FLAG = 0x1;
     final public static int HEIGHT_FLAG = 0x2;
     final public static int WIDTH_FLAG = 0x4;

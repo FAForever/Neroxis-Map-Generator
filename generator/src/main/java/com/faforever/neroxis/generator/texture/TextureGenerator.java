@@ -18,7 +18,7 @@ import lombok.Getter;
 import java.io.IOException;
 
 @Getter
-public abstract strictfp class TextureGenerator extends ElementGenerator {
+public abstract class TextureGenerator extends ElementGenerator {
     protected FloatMask heightmap;
     protected FloatMask slope;
     protected NormalMask normals;

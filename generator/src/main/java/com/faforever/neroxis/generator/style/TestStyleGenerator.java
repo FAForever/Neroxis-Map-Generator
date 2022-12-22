@@ -4,7 +4,7 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import lombok.Getter;
 
 @Getter
-public strictfp class TestStyleGenerator extends StyleGenerator {
+public class TestStyleGenerator extends StyleGenerator {
     public TestStyleGenerator() {
         weight = 0;
     }

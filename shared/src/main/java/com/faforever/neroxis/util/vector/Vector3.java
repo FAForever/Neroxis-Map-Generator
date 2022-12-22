@@ -2,7 +2,7 @@ package com.faforever.neroxis.util.vector;
 
 import java.util.LinkedHashSet;
 
-public strictfp class Vector3 extends Vector<Vector3> {
+public class Vector3 extends Vector<Vector3> {
     public Vector3() {
         super(3);
     }

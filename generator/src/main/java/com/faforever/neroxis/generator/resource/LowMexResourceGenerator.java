@@ -2,7 +2,7 @@ package com.faforever.neroxis.generator.resource;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
 
-public strictfp class LowMexResourceGenerator extends BasicResourceGenerator {
+public class LowMexResourceGenerator extends BasicResourceGenerator {
     public LowMexResourceGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .mexDensity(0f, .25f)

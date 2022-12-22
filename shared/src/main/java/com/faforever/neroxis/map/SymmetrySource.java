@@ -1,5 +1,5 @@
 package com.faforever.neroxis.map;
 
-public strictfp enum SymmetrySource {
+public enum SymmetrySource {
     TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, ALL
 }

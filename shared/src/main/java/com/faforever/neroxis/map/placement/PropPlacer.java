@@ -5,11 +5,12 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public strictfp class PropPlacer {
+public class PropPlacer {
     private final SCMap map;
     private final Random random;
 

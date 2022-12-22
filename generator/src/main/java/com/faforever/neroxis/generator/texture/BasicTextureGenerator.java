@@ -10,7 +10,7 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public strictfp class BasicTextureGenerator extends TextureGenerator {
+public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
     protected FloatMask accentGroundTexture;

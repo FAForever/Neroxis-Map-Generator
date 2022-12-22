@@ -15,7 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.Random;
 
 @Getter
-public strictfp class GeneratorGraphContext implements GraphContext {
+public class GeneratorGraphContext implements GraphContext {
     private final Random random;
     private final SymmetrySettings symmetrySettings;
     private final ExpressionParser parser;
@@ -45,16 +45,16 @@ public strictfp class GeneratorGraphContext implements GraphContext {
         plateauBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
         oceanBrush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                generatorParameters.getTerrainSymmetry(),
-                generatorParameters.getSpawnCount(),
-                generatorParameters.getNumTeams());
+                                                                                   generatorParameters.getTerrainSymmetry(),
+                                                                                   generatorParameters.getSpawnCount(),
+                                                                                   generatorParameters.getNumTeams());
         biome = generatorParameters.getBiome();
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
         plateauDensity = parameterConstraints.getPlateauDensityRange()
-                .normalize(generatorParameters.getPlateauDensity());
+                                             .normalize(generatorParameters.getPlateauDensity());
         mountainDensity = parameterConstraints.getMountainDensityRange()
-                .normalize(generatorParameters.getMountainDensity());
+                                              .normalize(generatorParameters.getMountainDensity());
         rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.getRampDensity());
         mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.getMexDensity());
         reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.getMexDensity());

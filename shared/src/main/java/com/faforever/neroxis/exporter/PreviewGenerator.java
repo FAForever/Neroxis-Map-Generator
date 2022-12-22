@@ -23,7 +23,7 @@ import java.util.List;
 import static com.faforever.neroxis.util.ImageUtil.readImage;
 import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
-public strictfp class PreviewGenerator {
+public class PreviewGenerator {
     public static final int PREVIEW_SIZE = 256;
     public static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
     private static final String MASS_IMAGE = "/images/map_markers/mass.png";

@@ -5,22 +5,15 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import java.awt.Point;
-import java.awt.Transparency;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -29,9 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import javax.imageio.ImageIO;
 
-public strictfp class ImageUtil {
+import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
+
+public class ImageUtil {
     public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
         if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {
             return false;

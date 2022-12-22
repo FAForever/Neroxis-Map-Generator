@@ -28,7 +28,7 @@ package com.faforever.neroxis.util.jsquish;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionMetric;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
-final strictfp class CompressorCluster extends CompressorColourFit {
+final class CompressorCluster extends CompressorColourFit {
     private static final int MAX_ITERATIONS = 8;
     private static final float TWO_THIRDS = 2.0f / 3.0f;
     private static final float ONE_THIRD = 1.0f / 3.0f;

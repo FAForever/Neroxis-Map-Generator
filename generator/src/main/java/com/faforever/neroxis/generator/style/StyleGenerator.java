@@ -20,13 +20,14 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public abstract strictfp class StyleGenerator extends ElementGenerator {
+public abstract class StyleGenerator extends ElementGenerator {
     protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
     protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();

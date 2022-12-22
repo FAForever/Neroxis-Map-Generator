@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @CompiledJson
-public strictfp class LightingSettings {
+public class LightingSettings {
     private float LightingMultiplier;
     private Vector3 SunDirection;
     private Vector3 SunAmbience;

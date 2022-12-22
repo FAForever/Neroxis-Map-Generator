@@ -4,6 +4,7 @@ import com.faforever.neroxis.exporter.BiomeExporter;
 import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.ArgumentParser;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -11,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 
-public strictfp class BiomeExtractor {
+public class BiomeExtractor {
     Path folderPath = Paths.get(".");
     Path mapPath;
     Path envPath;

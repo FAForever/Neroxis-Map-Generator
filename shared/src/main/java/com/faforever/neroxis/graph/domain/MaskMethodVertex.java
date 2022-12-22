@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Getter
-public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
+public class MaskMethodVertex extends MaskGraphVertex<Method> {
     public static final String NEW_MASK = "new";
     public static final String EXECUTOR = "exec";
     private final boolean returnsSelf;
@@ -31,8 +31,8 @@ public strictfp class MaskMethodVertex extends MaskGraphVertex<Method> {
         if (!returnsSelf) {
             results.put(NEW_MASK, null);
             resultClasses.put(NEW_MASK,
-                    (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getActualTypeClass(executorClass,
-                            executable.getGenericReturnType()));
+                              (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getActualTypeClass(executorClass,
+                                                                                                    executable.getGenericReturnType()));
         }
     }
 

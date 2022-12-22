@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public strictfp class Group {
+public class Group {
     private final String id;
     private final List<Unit> units;
 

@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public strictfp class PipelinePane extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
+public class PipelinePane extends JPanel implements GraphListener<MaskGraphVertex<?>, MaskMethodEdge> {
     @Getter
     private final PipelineGraph graph;
     @Getter
@@ -126,7 +126,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         Set<MaskGraphVertex<?>> removableVertices = graph.vertexSet()
                                                          .stream()
                                                          .filter(vertex -> !(vertex instanceof MaskOutputVertex
-                                                                 || vertex instanceof MaskInputVertex))
+                                                                             || vertex instanceof MaskInputVertex))
                                                          .collect(Collectors.toSet());
         graph.removeAllVertices(removableVertices);
     }
@@ -156,19 +156,19 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
         Random random = seed == null ? new Random() : new Random(seed);
         ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
         GeneratorParameters generatorParameters = parameterConstraints.randomizeParameters(random,
-                GeneratorParameters.builder()
-                                   .mapSize(
-                                           mapSize)
-                                   .numTeams(
-                                           numTeams)
-                                   .spawnCount(
-                                           spawnCount)
-                                   .terrainSymmetry(
-                                           terrainSymmetry)
-                                   .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
-                                   .build());
+                                                                                           GeneratorParameters.builder()
+                                                                                                              .mapSize(
+                                                                                                                      mapSize)
+                                                                                                              .numTeams(
+                                                                                                                      numTeams)
+                                                                                                              .spawnCount(
+                                                                                                                      spawnCount)
+                                                                                                              .terrainSymmetry(
+                                                                                                                      terrainSymmetry)
+                                                                                                              .biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(0)))
+                                                                                                              .build());
         GeneratorGraphContext graphContext = new GeneratorGraphContext(random.nextLong(), generatorParameters,
-                parameterConstraints);
+                                                                       parameterConstraints);
 
         placeSpawns(random, generatorParameters, graphContext);
         DebugUtil.timedRun("Reset results", () -> graph.forEach(MaskGraphVertex::resetResult));
@@ -201,7 +201,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
             if (generatorParameters.getNumTeams() < 8) {
                 spawnSeparation = random.nextInt(
                         map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
-                        + map.getSize() / 16f;
+                                  + map.getSize() / 16f;
             } else {
                 spawnSeparation = 0;
             }
@@ -243,7 +243,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
                 PointDouble transformedPoint = graph.getView()
                                                     .transformControlPoint(graph.getView().getState(edge), point);
                 return !sourceParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY())
-                        && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
+                       && !targetParentBoundingBox.contains(transformedPoint.getX(), transformedPoint.getY());
             }).collect(Collectors.toList());
             Geometry targetGeometry = target.getGeometry();
             Geometry targetParentGeometry = targetParent.getGeometry();
@@ -252,7 +252,7 @@ public strictfp class PipelinePane extends JPanel implements GraphListener<MaskG
                     targetParentGeometry.getY() + targetGeometry.getY() * targetParentGeometry.getHeight(),
                     targetGeometry.getWidth(), targetGeometry.getHeight());
             PointDouble endPoint = new PointDouble(targetRectangle.getCenterX() - targetRectangle.getWidth() / 2 - 10,
-                    targetRectangle.getCenterY());
+                                                   targetRectangle.getCenterY());
             points.add(endPoint);
             edge.getGeometry().setPoints(points);
             edge.setTarget(target);

@@ -27,7 +27,7 @@ package com.faforever.neroxis.util.jsquish;
 
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
-abstract strictfp class CompressorColourFit {
+abstract class CompressorColourFit {
     protected static final Vec ONE_V = new Vec(1.0f);
     protected static final Vec ZERO_V = new Vec(0.0f);
     protected static final float GRID_X = 31.0f;

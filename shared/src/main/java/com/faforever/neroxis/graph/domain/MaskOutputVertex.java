@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Getter
-public strictfp class MaskOutputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {
+public class MaskOutputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {
     private final String name;
     private T result;
 

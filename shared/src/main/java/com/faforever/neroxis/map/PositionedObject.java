@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public strictfp abstract class PositionedObject {
+public abstract class PositionedObject {
     protected Vector3 position;
 
     protected PositionedObject(Vector2 position) {

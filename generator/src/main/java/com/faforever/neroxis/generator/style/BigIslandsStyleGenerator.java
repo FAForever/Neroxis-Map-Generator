@@ -2,16 +2,12 @@ package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.prop.BasicPropGenerator;
-import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
-import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
-import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
-import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
-import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
+import com.faforever.neroxis.generator.prop.*;
 import com.faforever.neroxis.generator.terrain.BigIslandsTerrainGenerator;
+
 import java.util.Arrays;
 
-public strictfp class BigIslandsStyleGenerator extends StyleGenerator {
+public class BigIslandsStyleGenerator extends StyleGenerator {
     public BigIslandsStyleGenerator() {
         weight = 4;
         parameterConstraints = ParameterConstraints.builder()

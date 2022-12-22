@@ -4,7 +4,7 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public strictfp class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
+public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
     public BigIslandsTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .75f)

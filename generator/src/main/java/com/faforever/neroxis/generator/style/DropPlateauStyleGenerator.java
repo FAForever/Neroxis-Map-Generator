@@ -2,17 +2,12 @@ package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.prop.BasicPropGenerator;
-import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
-import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
-import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
-import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
-import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
-import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
+import com.faforever.neroxis.generator.prop.*;
 import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
+
 import java.util.Arrays;
 
-public strictfp class DropPlateauStyleGenerator extends StyleGenerator {
+public class DropPlateauStyleGenerator extends StyleGenerator {
     public DropPlateauStyleGenerator() {
         weight = .5f;
         parameterConstraints = ParameterConstraints.builder()

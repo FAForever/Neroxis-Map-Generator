@@ -12,9 +12,10 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
+
 import java.util.ArrayList;
 
-public strictfp class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
+public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;
     protected BooleanMask noWrecks;

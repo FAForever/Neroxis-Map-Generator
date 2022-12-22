@@ -1,6 +1,6 @@
 package com.faforever.neroxis.util.dds;
 
-public final strictfp class DDSReader {
+public final class DDSReader {
     public static final Order ARGB = new Order(16, 8, 0, 24);
     public static final Order ABGR = new Order(0, 8, 16, 24);
     // Image Type
@@ -31,8 +31,12 @@ public final strictfp class DDSReader {
     private static final int[] A8R8G8B8_MASKS = {0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000};
     private static final int[] X8R8G8B8_MASKS = {0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000};
     // BIT4 = 17 * index;
-    private static final int[] BIT5 = {0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255};
-    private static final int[] BIT6 = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255};
+    private static final int[] BIT5 = {0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148,
+                                       156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255};
+    private static final int[] BIT6 = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81,
+                                       85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150,
+                                       154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215,
+                                       219, 223, 227, 231, 235, 239, 243, 247, 251, 255};
 
     private DDSReader() {
     }
@@ -89,10 +93,11 @@ public final strictfp class DDSReader {
                 switch (type) {
                     case DXT1 -> offset += 8 * ((width + 3) / 4) * ((height + 3) / 4);
                     case DXT2, DXT3, DXT4, DXT5 -> offset += 16 * ((width + 3) / 4) * ((height + 3) / 4);
-                    case A1R5G5B5, X1R5G5B5, A4R4G4B4, X4R4G4B4, R5G6B5, R8G8B8, A8B8G8R8, X8B8G8R8, A8R8G8B8, X8R8G8B8 -> offset +=
-                            (type & 0xFF)
-                            * width
-                            * height;
+                    case A1R5G5B5, X1R5G5B5, A4R4G4B4, X4R4G4B4, R5G6B5, R8G8B8, A8B8G8R8, X8B8G8R8, A8R8G8B8, X8R8G8B8 ->
+                            offset +=
+                                    (type & 0xFF)
+                                    * width
+                                    * height;
                 }
                 width /= 2;
                 height /= 2;
@@ -442,7 +447,8 @@ public final strictfp class DDSReader {
             int b = BIT5[(rgba & A1R5G5B5_MASKS[2])];
             int a = 255 * ((rgba & A1R5G5B5_MASKS[3]) >> 15);
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -458,7 +464,8 @@ public final strictfp class DDSReader {
             int b = BIT5[(rgba & X1R5G5B5_MASKS[2])];
             int a = 255;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -474,7 +481,8 @@ public final strictfp class DDSReader {
             int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
             int a = 17 * ((rgba & A4R4G4B4_MASKS[3]) >> 12);
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -490,7 +498,8 @@ public final strictfp class DDSReader {
             int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
             int a = 255;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -506,7 +515,8 @@ public final strictfp class DDSReader {
             int b = BIT5[((rgba & R5G6B5_MASKS[2]))];
             int a = 255;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -520,7 +530,8 @@ public final strictfp class DDSReader {
             int r = buffer[index++] & 0xFF;
             int a = 255;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -534,7 +545,8 @@ public final strictfp class DDSReader {
             int b = buffer[index++] & 0xFF;
             int a = buffer[index++] & 0xFF;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -549,7 +561,8 @@ public final strictfp class DDSReader {
             int a = 255;
             index++;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -563,7 +576,8 @@ public final strictfp class DDSReader {
             int r = buffer[index++] & 0xFF;
             int a = buffer[index++] & 0xFF;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }
@@ -611,7 +625,8 @@ public final strictfp class DDSReader {
             int a = 255;
             index++;
             pixels[i] = (a << order.alphaShift) | (r << order.redShift) | (g << order.greenShift) | (b
-                                                                                                     << order.blueShift);
+                                                                                                     <<
+                                                                                                     order.blueShift);
         }
         return pixels;
     }

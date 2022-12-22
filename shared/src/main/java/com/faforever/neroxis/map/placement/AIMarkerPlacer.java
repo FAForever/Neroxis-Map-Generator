@@ -5,11 +5,12 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public strictfp class AIMarkerPlacer {
+public class AIMarkerPlacer {
     public static void placeAIMarkers(BooleanMask passable, List<AIMarker> markers, String nameFormat) {
         LinkedHashSet<Vector2> coordinates = new LinkedHashSet<>(passable.getSpacedCoordinatesEqualTo(true, 32, 8));
         coordinates.addAll(passable.copyAsDistanceField()

@@ -2,11 +2,12 @@ package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import java.util.Random;
 import lombok.Getter;
 
+import java.util.Random;
+
 @Getter
-public abstract strictfp class ElementGenerator {
+public abstract class ElementGenerator {
     protected SCMap map;
     protected Random random;
     protected GeneratorParameters generatorParameters;

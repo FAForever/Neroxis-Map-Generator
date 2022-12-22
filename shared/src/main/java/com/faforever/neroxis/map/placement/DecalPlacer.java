@@ -6,11 +6,12 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public strictfp class DecalPlacer {
+public class DecalPlacer {
     private final SCMap map;
     private final Random random;
 

@@ -6,9 +6,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ArgumentParser;
-import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMask;
-import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMasks;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
@@ -16,7 +15,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-public strictfp class ImageGenerator {
+import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMask;
+import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMasks;
+
+public class ImageGenerator {
     public static boolean DEBUG = false;
     private String folderPath;
     private int size = 512;

@@ -3,7 +3,7 @@ package com.faforever.neroxis.generator.decal;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public strictfp class BasicDecalGenerator extends DecalGenerator {
+public class BasicDecalGenerator extends DecalGenerator {
     @Override
     public void placeDecals() {
         Pipeline.await(fieldDecal, slopeDecal);

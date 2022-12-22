@@ -25,13 +25,12 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_X;
-import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Y;
-import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Z;
-import static java.lang.Math.round;
 import java.util.Arrays;
 
-final strictfp class ColourBlock {
+import static com.faforever.neroxis.util.jsquish.CompressorColourFit.*;
+import static java.lang.Math.round;
+
+final class ColourBlock {
     private static final int[] remapped = new int[16];
     private static final int[] indices = new int[16];
     private static final int[] codes = new int[16];

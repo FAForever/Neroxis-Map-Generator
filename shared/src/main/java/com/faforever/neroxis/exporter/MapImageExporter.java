@@ -9,7 +9,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
-import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,7 +19,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-public strictfp class MapImageExporter {
+import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
+
+public class MapImageExporter {
     public static boolean DEBUG = false;
     private Path inMapPath;
     private SCMap map;
@@ -57,12 +59,18 @@ public strictfp class MapImageExporter {
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
             System.out.println("map-image-writer usage:\n"
-                               + "--help                 produce help message\n"
-                               + "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n"
-                               + "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n"
-                               + " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n"
-                               + " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap"
-                               + "--debug                optional, turn on debugging options\n");
+                               +
+                               "--help                 produce help message\n"
+                               +
+                               "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n"
+                               +
+                               "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n"
+                               +
+                               " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n"
+                               +
+                               " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap"
+                               +
+                               "--debug                optional, turn on debugging options\n");
             System.exit(0);
         }
 

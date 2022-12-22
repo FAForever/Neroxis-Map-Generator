@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public strictfp class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
+public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
     protected long[] mask;

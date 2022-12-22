@@ -6,37 +6,20 @@ import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.importer.MapImporter;
-import com.faforever.neroxis.map.AIMarker;
-import com.faforever.neroxis.map.Army;
-import com.faforever.neroxis.map.Decal;
-import com.faforever.neroxis.map.Group;
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.Prop;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
-import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetrySource;
-import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.map.WaveGenerator;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.toolsuite.cli.SourceCompletionCandidates;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
+
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Mixin;
-import static picocli.CommandLine.Option;
+
+import static picocli.CommandLine.*;
 
 @Command(name = "force", mixinStandardHelpOptions = true, description = "Force symmetry on a map", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-public strictfp class MapForcer implements Callable<Integer> {
+public class MapForcer implements Callable<Integer> {
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
     @Mixin

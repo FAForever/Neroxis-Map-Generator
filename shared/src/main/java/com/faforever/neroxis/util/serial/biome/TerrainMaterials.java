@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @CompiledJson
-public strictfp class TerrainMaterials {
+public class TerrainMaterials {
     // engine limitations - must stay 9 and 10 always
     public static final int TERRAIN_TEXTURE_COUNT = 10;
     public static final int TERRAIN_NORMAL_COUNT = 9;

@@ -7,10 +7,11 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
 import java.util.List;
 import java.util.Random;
 
-public strictfp class HydroPlacer {
+public class HydroPlacer {
     private final SCMap map;
     private final Random random;
     private final int hydroSpacing;
@@ -53,8 +54,8 @@ public strictfp class HydroPlacer {
             for (int i = 0;
                  i < map.getSpawnCount();
                  i += spawnMask.getSymmetrySettings()
-                                                                   .getSpawnSymmetry()
-                                                                   .getNumSymPoints()) {
+                               .getSpawnSymmetry()
+                               .getNumSymPoints()) {
                 Spawn spawn = map.getSpawn(i);
                 BooleanMask baseHydro = new BooleanMask(spawnMask.getSize(), random.nextLong(),
                                                         spawnMask.getSymmetrySettings());

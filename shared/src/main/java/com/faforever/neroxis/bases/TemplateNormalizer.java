@@ -1,16 +1,17 @@
 package com.faforever.neroxis.bases;
 
 import com.faforever.neroxis.util.LuaLoader;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
+
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
 
-public strictfp class TemplateNormalizer {
+public class TemplateNormalizer {
     public static void main(String[] args) throws IOException {
         Path templatePath = Paths.get(args[0]);
         if (templatePath.getFileName().toString().contains(".lua")) {

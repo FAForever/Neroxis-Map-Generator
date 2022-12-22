@@ -1,11 +1,11 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
-import java.awt.Dimension;
-import java.awt.Point;
+
+import java.awt.*;
 import java.util.LinkedHashSet;
 
-public strictfp class Vector2 extends Vector<Vector2> {
+public class Vector2 extends Vector<Vector2> {
     public Vector2() {
         super(2);
     }

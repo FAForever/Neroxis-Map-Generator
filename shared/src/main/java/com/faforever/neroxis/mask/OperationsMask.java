@@ -7,7 +7,7 @@ import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public strictfp abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
+public abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }

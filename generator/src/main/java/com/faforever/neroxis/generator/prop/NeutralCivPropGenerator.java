@@ -11,10 +11,11 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
-public strictfp class NeutralCivPropGenerator extends BasicPropGenerator {
+public class NeutralCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask civReclaimMask;
     protected BooleanMask noCivs;
 

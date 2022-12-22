@@ -3,7 +3,7 @@ package com.faforever.neroxis.util;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
-public strictfp class DebugUtil {
+public class DebugUtil {
     public static boolean VERBOSE = false;
     public static boolean DEBUG = false;
     public static boolean VISUALIZE = false;

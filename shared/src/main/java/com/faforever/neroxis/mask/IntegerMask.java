@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public strictfp class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
+public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     protected int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {

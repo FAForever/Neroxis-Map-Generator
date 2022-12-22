@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import static picocli.CommandLine.*;
 
 @Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-public strictfp class MapEvaluator implements Callable<Integer> {
+public class MapEvaluator implements Callable<Integer> {
     float terrainScore;
     float spawnScore;
     float propScore;
@@ -146,12 +146,12 @@ public strictfp class MapEvaluator implements Callable<Integer> {
 
     private void evaluate() {
         List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
-                .filter(symmetry -> symmetry.getNumSymPoints() == 2)
-                .collect(Collectors.toList());
+                                          .filter(symmetry -> symmetry.getNumSymPoints() == 2)
+                                          .collect(Collectors.toList());
         for (Symmetry symmetry : symmetries) {
             SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
             heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
-                    "heightMask");
+                                       "heightMask");
             evaluateTerrain();
             evaluateSpawns();
             evaluateMexes();
@@ -189,16 +189,25 @@ public strictfp class MapEvaluator implements Callable<Integer> {
     }
 
     private void evaluateProps() {
-        DebugUtil.timedRun("evaluateProps", () -> propScore = (float) map.getProps().stream().collect(Collectors.groupingBy(Prop::getPath))
-                .values().stream().mapToDouble(props -> getPositionedObjectScore(props, heightMask))
-                .sum());
+        DebugUtil.timedRun("evaluateProps", () -> propScore = (float) map.getProps()
+                                                                         .stream()
+                                                                         .collect(Collectors.groupingBy(Prop::getPath))
+                                                                         .values()
+                                                                         .stream()
+                                                                         .mapToDouble(props -> getPositionedObjectScore(props, heightMask))
+                                                                         .sum());
     }
 
     private void evaluateUnits() {
         DebugUtil.timedRun("evaluateUnits", () -> unitScore = (float) map.getArmies().stream()
-                .flatMap(army -> army.getGroups().stream().flatMap(group -> group.getUnits().stream()
-                        .collect(Collectors.groupingBy(Unit::getType)).values().stream()))
-                .mapToDouble(units -> getPositionedObjectScore(units, heightMask))
-                .sum());
+                                                                         .flatMap(army -> army.getGroups()
+                                                                                              .stream()
+                                                                                              .flatMap(group -> group.getUnits()
+                                                                                                                     .stream()
+                                                                                                                     .collect(Collectors.groupingBy(Unit::getType))
+                                                                                                                     .values()
+                                                                                                                     .stream()))
+                                                                         .mapToDouble(units -> getPositionedObjectScore(units, heightMask))
+                                                                         .sum());
     }
 }

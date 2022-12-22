@@ -1,10 +1,11 @@
 package com.faforever.neroxis.map;
 
-import java.util.List;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public strictfp class Army {
+public class Army {
     private final String id;
     private final List<Group> groups;
 

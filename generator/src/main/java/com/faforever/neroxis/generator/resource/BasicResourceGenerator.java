@@ -3,7 +3,7 @@ package com.faforever.neroxis.generator.resource;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public strictfp class BasicResourceGenerator extends ResourceGenerator {
+public class BasicResourceGenerator extends ResourceGenerator {
     @Override
     public void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);

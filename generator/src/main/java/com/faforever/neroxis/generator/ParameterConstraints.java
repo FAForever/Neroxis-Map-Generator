@@ -2,15 +2,16 @@ package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.util.Range;
+import lombok.Value;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import lombok.Value;
 
 @SuppressWarnings({"unused"})
 @Value
-public strictfp class ParameterConstraints {
+public class ParameterConstraints {
     Range landDensityRange;
     Range mountainDensityRange;
     Range plateauDensityRange;

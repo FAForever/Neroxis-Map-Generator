@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.lang.reflect.Method;
 
 @Getter
-public strictfp class MaskInputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {
+public class MaskInputVertex<T extends Mask<?, T>> extends MaskGraphVertex<Method> {
     private final String name;
     private T result;
 

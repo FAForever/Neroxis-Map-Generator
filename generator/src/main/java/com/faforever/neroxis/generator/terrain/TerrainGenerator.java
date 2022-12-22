@@ -11,7 +11,7 @@ import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 @Getter
-public abstract strictfp class TerrainGenerator extends ElementGenerator {
+public abstract class TerrainGenerator extends ElementGenerator {
     protected FloatMask heightmap;
     protected BooleanMask impassable;
     protected BooleanMask unbuildable;
@@ -26,7 +26,8 @@ public abstract strictfp class TerrainGenerator extends ElementGenerator {
                                                                                                  .writeToImage(
                                                                                                          map.getHeightmap(),
                                                                                                          1
-                                                                                                         / map.getHeightMapScale()));
+                                                                                                         /
+                                                                                                         map.getHeightMapScale()));
     }
 
     @Override

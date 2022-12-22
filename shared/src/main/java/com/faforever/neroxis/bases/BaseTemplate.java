@@ -8,16 +8,17 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import lombok.Value;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+
 @Value
-public strictfp class BaseTemplate {
+public class BaseTemplate {
     Vector2 center;
     LinkedHashMap<String, LinkedHashSet<Vector2>> units;
 

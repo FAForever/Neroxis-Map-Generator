@@ -25,16 +25,17 @@
 
 package com.faforever.neroxis.util.jsquish;
 
+import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
+
 import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock3;
 import static com.faforever.neroxis.util.jsquish.ColourBlock.writeColourBlock4;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_5_3;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup3.LOOKUP_6_3;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_5_4;
 import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_6_4;
-import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 import static java.lang.Math.round;
 
-final strictfp class CompressorSingleColour extends CompressorColourFit {
+final class CompressorSingleColour extends CompressorColourFit {
     private static final int[] indices = new int[16];
     private static final int[][][][] lookups = new int[3][][][];
     private static final int[][] sources = new int[3][];

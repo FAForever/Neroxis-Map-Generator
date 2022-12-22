@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
 @CommandLine.Command(name = "Editor", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Tool for creating generator pipelines")
-public strictfp class PipelineEditor implements Callable<Integer> {
+public class PipelineEditor implements Callable<Integer> {
     public static final String NEW_TAB_TITLE = "+";
     private final JFrame frame = new JFrame();
     private final MaskGraphVertexEditPanel vertexEditPanel = new MaskGraphVertexEditPanel();
@@ -149,16 +149,16 @@ public strictfp class PipelineEditor implements Callable<Integer> {
         selectedGraph.getCellForVertex(vertex);
 
         edges.stream()
-                .flatMap(edge -> Stream.of(edge.getSource(), edge.getTarget()))
-                .peek(neighborGraph::addVisualVertexOnly)
-                .forEach(vert -> {
-                    ICell selectedCell = selectedGraph.getCellForVertex(vert);
-                    ICell neighborCell = neighborGraph.getCellForVertex(vert);
+             .flatMap(edge -> Stream.of(edge.getSource(), edge.getTarget()))
+             .peek(neighborGraph::addVisualVertexOnly)
+             .forEach(vert -> {
+                 ICell selectedCell = selectedGraph.getCellForVertex(vert);
+                 ICell neighborCell = neighborGraph.getCellForVertex(vert);
 
-                    String selectedCellStyle = selectedCell.getStyle();
-                    neighborCell.setStyle(selectedCellStyle);
-                    neighborCell.getChildren().forEach(child -> child.setStyle(selectedCellStyle));
-                });
+                 String selectedCellStyle = selectedCell.getStyle();
+                 neighborCell.setStyle(selectedCellStyle);
+                 neighborCell.getChildren().forEach(child -> child.setStyle(selectedCellStyle));
+             });
         edges.forEach(neighborGraph::addVisualEdgeOnly);
 
         if (!neighborGraph.isVertexSelected(vertex)) {
@@ -264,8 +264,8 @@ public strictfp class PipelineEditor implements Callable<Integer> {
 
     private void runGraph() {
         getSelectedPipelinePane().runGraph(pipelineSettingsPanel.getSeed(), pipelineSettingsPanel.getNumTeams(),
-                pipelineSettingsPanel.getMapSize(), pipelineSettingsPanel.getSpawnCount(),
-                pipelineSettingsPanel.getSymmetry());
+                                           pipelineSettingsPanel.getMapSize(), pipelineSettingsPanel.getSpawnCount(),
+                                           pipelineSettingsPanel.getSymmetry());
     }
 
     private void importPipeline() {
@@ -278,7 +278,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
                 addNewGraphTab(pipeline);
                 ((CloseableTabComponent) tabbedPane.getTabComponentAt(tabbedPane.getSelectedIndex())).setTitle(
                         String.format("%s (%s)", file.getName(),
-                                pipeline.getClass().getSimpleName().replace("Pipeline", "")));
+                                      pipeline.getClass().getSimpleName().replace("Pipeline", "")));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -295,7 +295,7 @@ public strictfp class PipelineEditor implements Callable<Integer> {
             pipelinePane.exportPipeline(file);
             ((CloseableTabComponent) tabbedPane.getTabComponentAt(index)).setTitle(
                     String.format("%s (%s)", file.getName(),
-                            pipelinePane.getPipeline().getClass().getSimpleName().replace("Pipeline", "")));
+                                  pipelinePane.getPipeline().getClass().getSimpleName().replace("Pipeline", "")));
         }
     }
 

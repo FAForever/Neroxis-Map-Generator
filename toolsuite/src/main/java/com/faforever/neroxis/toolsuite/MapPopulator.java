@@ -12,27 +12,24 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.placement.AIMarkerPlacer;
-import com.faforever.neroxis.map.placement.HydroPlacer;
-import com.faforever.neroxis.map.placement.MexPlacer;
-import com.faforever.neroxis.map.placement.PropPlacer;
-import com.faforever.neroxis.map.placement.SpawnPlacer;
+import com.faforever.neroxis.map.placement.*;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
+import lombok.Getter;
+import picocli.CommandLine;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import lombok.Getter;
-import picocli.CommandLine;
 
 @CommandLine.Command(name = "populate", mixinStandardHelpOptions = true, description = "Populate various map properties based on the heightmap", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-public strictfp class MapPopulator implements Callable<Integer> {
+public class MapPopulator implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin

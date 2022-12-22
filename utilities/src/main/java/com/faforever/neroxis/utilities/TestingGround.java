@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
-public strictfp class TestingGround {
+public class TestingGround {
     public static void main(String[] args) throws Exception {
         DebugUtil.DEBUG = true;
         DebugUtil.VISUALIZE = true;

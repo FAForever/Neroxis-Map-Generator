@@ -8,18 +8,15 @@ import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public strictfp class UnitPlacer {
+public class UnitPlacer {
     public static final String[] T1_Land = {"UEL0201", "URL0107", "UAL0201", "XSL0201"};
-    public static final String[] T2_Land = {"DRL0204", "URL0202", "DEL0204", "UEL0202", "UAL0202", "XAL0203", "XSL0203", "XSL0202"};
+    public static final String[] T2_Land = {"DRL0204", "URL0202", "DEL0204", "UEL0202", "UAL0202", "XAL0203", "XSL0203",
+                                            "XSL0202"};
     public static final String[] T3_Land = {"XEL0305", "UEL0303", "URL0303", "XRL0305", "UAL0303", "XSL0303"};
     public static final String[] T2_Navy = {
             //"UES0201", does not display in game for some reason
@@ -29,7 +26,8 @@ public strictfp class UnitPlacer {
     };
     public static final String[] Navy_Factory = {"ZAB9503", "ZEB9503", "ZRB9503", "ZSB9503"};
     public static final String[] MEDIUM_ENEMY = {"/base_template/UEFMedium.lua", "/base_template/AeonMedium.lua"};
-    public static final String[] MEDIUM_RECLAIM = {"/base_template/CybranMediumReclaim.lua", "/base_template/UEFMediumReclaim.lua"};
+    public static final String[] MEDIUM_RECLAIM = {"/base_template/CybranMediumReclaim.lua",
+                                                   "/base_template/UEFMediumReclaim.lua"};
     public static final int MAX_UNIT_COUNT = 800;
     private final Random random;
 

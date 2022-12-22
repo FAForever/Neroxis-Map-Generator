@@ -1,20 +1,17 @@
 package com.faforever.neroxis.biomes;
 
 import com.faforever.neroxis.util.FileUtil;
-import com.faforever.neroxis.util.serial.biome.DecalMaterials;
-import com.faforever.neroxis.util.serial.biome.LightingSettings;
-import com.faforever.neroxis.util.serial.biome.PropMaterials;
-import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
-import com.faforever.neroxis.util.serial.biome.WaterSettings;
+import com.faforever.neroxis.util.serial.biome.*;
+import lombok.Data;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import lombok.Data;
 
 @Data
-public strictfp class Biomes {
+public class Biomes {
     // ├ Biome
     // ├-- materials.json <required>
     // ├-- props.json <required>
@@ -26,7 +23,7 @@ public strictfp class Biomes {
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(String folderPath) {
-        if (Biomes.class.getResourceAsStream(CUSTOM_BIOMES_DIR + folderPath) != null) {
+        if (Biomes.class.getResource(CUSTOM_BIOMES_DIR + folderPath) != null) {
             folderPath = CUSTOM_BIOMES_DIR + folderPath;
             if (!folderPath.endsWith("/")) {
                 folderPath += "/";

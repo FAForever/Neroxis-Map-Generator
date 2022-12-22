@@ -28,7 +28,7 @@ package com.faforever.neroxis.util.jsquish;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-final strictfp class AlphaBlock {
+final class AlphaBlock {
     private static final int[] swapped = new int[16];
     private static final int[] CODES_5 = new int[8];
     private static final int[] CODES_7 = new int[8];

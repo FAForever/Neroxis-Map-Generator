@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Data
-public strictfp class Brushes {
+public class Brushes {
     public static final List<String> MOUNTAIN_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png", "mountain3.png",
                                                                       "mountain4.png", "mountain5.png", "mountain6.png",
                                                                       "mountain7.png", "mountain8.png", "mountain9.png",
@@ -36,7 +36,7 @@ public strictfp class Brushes {
                 image = ImageIO.read(Paths.get(brushPath).toFile());
             }
             return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), 1f,
-                    brushPath);
+                                 brushPath);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(String.format("Could not load brush: %s", brushPath));

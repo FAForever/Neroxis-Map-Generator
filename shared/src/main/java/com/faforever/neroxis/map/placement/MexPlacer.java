@@ -4,10 +4,11 @@ import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
 import java.util.List;
 import java.util.Random;
 
-public strictfp class MexPlacer {
+public class MexPlacer {
     private final SCMap map;
     private final Random random;
 

@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 @Getter
-public strictfp class MapMaskMethodVertex extends MaskGraphVertex<Method> {
+public class MapMaskMethodVertex extends MaskGraphVertex<Method> {
     public MapMaskMethodVertex(Method executable) {
         super(executable, (Class<? extends Mask<?, ?>>) executable.getReturnType());
 

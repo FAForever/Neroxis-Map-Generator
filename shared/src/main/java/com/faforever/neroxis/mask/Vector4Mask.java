@@ -4,11 +4,12 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector4;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public strictfp class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
+public class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }

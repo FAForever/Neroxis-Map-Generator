@@ -8,7 +8,7 @@ import org.jgrapht.graph.DefaultEdge;
 @Getter
 @AllArgsConstructor
 @ToString
-public strictfp class MaskMethodEdge extends DefaultEdge {
+public class MaskMethodEdge extends DefaultEdge {
     private final String resultName;
     private final String parameterName;
 

@@ -5,7 +5,7 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public strictfp class HighReclaimPropGenerator extends BasicPropGenerator {
+public class HighReclaimPropGenerator extends BasicPropGenerator {
     public HighReclaimPropGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .mountainDensity(.5f, 1f)

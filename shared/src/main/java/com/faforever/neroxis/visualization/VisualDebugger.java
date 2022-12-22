@@ -1,18 +1,12 @@
 package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.WindowConstants;
 import lombok.Value;
 
-public strictfp class VisualDebugger {
+import javax.swing.*;
+import java.awt.*;
+
+public class VisualDebugger {
     private static DefaultListModel<MaskListItem> listModel;
     private static JFrame frame;
     private static JList<MaskListItem> list;

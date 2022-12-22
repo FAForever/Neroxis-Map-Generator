@@ -3,12 +3,13 @@ package com.faforever.neroxis.importer;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.luaj.vm2.LuaValue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import org.luaj.vm2.LuaValue;
 
-public strictfp class ScenarioImporter {
+public class ScenarioImporter {
     public static void importScenario(Path folderPath, SCMap map) throws IOException {
         File dir = folderPath.toFile();
 

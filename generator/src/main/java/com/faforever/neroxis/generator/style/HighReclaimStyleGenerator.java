@@ -7,9 +7,10 @@ import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
+
 import java.util.Arrays;
 
-public strictfp class HighReclaimStyleGenerator extends StyleGenerator {
+public class HighReclaimStyleGenerator extends StyleGenerator {
     public HighReclaimStyleGenerator() {
         weight = .25f;
         parameterConstraints = ParameterConstraints.builder()

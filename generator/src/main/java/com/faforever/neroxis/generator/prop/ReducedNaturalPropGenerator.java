@@ -4,7 +4,7 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public abstract strictfp class ReducedNaturalPropGenerator extends BasicPropGenerator {
+public abstract class ReducedNaturalPropGenerator extends BasicPropGenerator {
     @Override
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);

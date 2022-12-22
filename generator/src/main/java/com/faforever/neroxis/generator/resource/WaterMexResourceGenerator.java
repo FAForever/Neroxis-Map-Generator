@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator.resource;
 
-public strictfp class WaterMexResourceGenerator extends BasicResourceGenerator {
+public class WaterMexResourceGenerator extends BasicResourceGenerator {
     @Override
     public void setupPipeline() {
         resourceMask.setSize(passableLand.getSize()).invert();

@@ -1,12 +1,13 @@
 package com.faforever.neroxis.util.vector;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.Arrays;
 import java.util.Random;
-import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 @SuppressWarnings("unchecked")
-public abstract strictfp class Vector<T extends Vector<T>> {
+public abstract class Vector<T extends Vector<T>> {
     public static final int X = 0;
     public static final int Y = 1;
     public static final int Z = 2;

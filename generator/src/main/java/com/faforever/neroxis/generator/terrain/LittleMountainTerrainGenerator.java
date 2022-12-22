@@ -5,7 +5,7 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
-public strictfp class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerator {
+public class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerator {
     public LittleMountainTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.5f, 1f)

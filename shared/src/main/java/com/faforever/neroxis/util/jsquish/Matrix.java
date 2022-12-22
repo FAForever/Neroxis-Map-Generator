@@ -25,15 +25,11 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.pow;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
 import java.util.Arrays;
 
-final strictfp class Matrix {
+import static java.lang.Math.*;
+
+final class Matrix {
     private static final float FLT_EPSILON = 0.00001f;
     private static final float[] m = new float[6];
     private static final float[] u = new float[6];

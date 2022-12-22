@@ -6,9 +6,10 @@ import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.resource.WaterMexResourceGenerator;
 import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
+
 import java.util.Arrays;
 
-public strictfp class FloodedStyleGenerator extends StyleGenerator {
+public class FloodedStyleGenerator extends StyleGenerator {
     public FloodedStyleGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .plateauDensity(0, .25f)

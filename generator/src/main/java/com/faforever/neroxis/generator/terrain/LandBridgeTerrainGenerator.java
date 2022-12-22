@@ -3,7 +3,7 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public strictfp class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
+public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
     public LandBridgeTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.25f, .75f)

@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.util.vector.Vector3;
 
-public strictfp class ScriptGenerator {
+public class ScriptGenerator {
     public static void generateScript(SCMap map) {
         if (map.isUnexplored()) {
             map.setScript(generateUnexploredScript(map));

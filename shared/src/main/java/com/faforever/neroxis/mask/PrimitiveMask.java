@@ -3,7 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public strictfp abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
+public abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> {
     public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }

@@ -42,7 +42,7 @@ import static picocli.CommandLine.*;
 
 @Getter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)
-public strictfp class MapGenerator implements Callable<Integer> {
+public class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
     private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());

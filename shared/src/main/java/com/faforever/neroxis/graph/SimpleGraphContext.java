@@ -2,15 +2,16 @@ package com.faforever.neroxis.graph;
 
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import java.util.Random;
 import lombok.Getter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.util.Random;
+
 @Getter
-public strictfp class SimpleGraphContext implements GraphContext {
+public class SimpleGraphContext implements GraphContext {
     private final Random random;
     private final SymmetrySettings symmetrySettings;
     private final ExpressionParser parser;

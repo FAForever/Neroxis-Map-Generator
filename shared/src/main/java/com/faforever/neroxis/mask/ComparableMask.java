@@ -4,7 +4,7 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
+public abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
     protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -61,9 +61,19 @@ public strictfp abstract class ComparableMask<T extends Comparable<T>, U extends
         return (((x > 0 && valueAtGreaterThanEqualTo(x - 1, y, value)) && (x < getSize() - 1
                                                                            && valueAtGreaterThanEqualTo(x + 1, y,
                                                                                                         value))) || ((y
-                                                                                                                      > 0
-                                                                                                                      && valueAtGreaterThanEqualTo(
-                x, y - 1, value)) && (y < getSize() - 1 && valueAtGreaterThanEqualTo(x, y + 1, value))));
+                                                                                                                      >
+                                                                                                                      0
+                                                                                                                      &&
+                                                                                                                      valueAtGreaterThanEqualTo(
+                                                                                                                              x,
+                                                                                                                              y -
+                                                                                                                              1, value)) &&
+                                                                                                                     (y <
+                                                                                                                      getSize() -
+                                                                                                                      1 &&
+                                                                                                                      valueAtGreaterThanEqualTo(x,
+                                                                                                                                                y +
+                                                                                                                                                1, value))));
     }
 
     public abstract T getMin();

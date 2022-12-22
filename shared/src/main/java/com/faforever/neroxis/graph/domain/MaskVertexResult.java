@@ -4,7 +4,7 @@ import com.faforever.neroxis.mask.Mask;
 import lombok.Value;
 
 @Value
-public strictfp class MaskVertexResult {
+public class MaskVertexResult {
     String parameterName;
     String resultName;
     MaskGraphVertex<?> sourceVertex;

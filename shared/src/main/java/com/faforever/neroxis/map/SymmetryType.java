@@ -1,5 +1,5 @@
 package com.faforever.neroxis.map;
 
-public strictfp enum SymmetryType {
+public enum SymmetryType {
     TERRAIN, SPAWN, TEAM
 }

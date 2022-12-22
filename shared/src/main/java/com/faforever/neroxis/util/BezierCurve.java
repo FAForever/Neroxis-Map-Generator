@@ -1,15 +1,16 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.util.vector.Vector2;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 @EqualsAndHashCode
-public strictfp class BezierCurve {
+public class BezierCurve {
     private static final Map<Integer, Integer[]> COEFFICIENTS_MAP = new HashMap<>();
     protected final Vector2[] controlPoints;
     protected final Integer[] coefficients;

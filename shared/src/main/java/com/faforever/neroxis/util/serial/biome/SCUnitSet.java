@@ -11,12 +11,12 @@ import lombok.Value;
  */
 @Data
 @CompiledJson
-public strictfp class SCUnitSet {
+public class SCUnitSet {
     public SCUnit[] Units;
     public Vector3 Center;
 
     @Value
-    public static strictfp class SCUnit {
+    public static class SCUnit {
         String ID;
         Vector3 pos;
         Vector4 rot;

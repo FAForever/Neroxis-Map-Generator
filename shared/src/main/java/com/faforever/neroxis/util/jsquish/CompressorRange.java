@@ -28,7 +28,7 @@ package com.faforever.neroxis.util.jsquish;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionMetric;
 import com.faforever.neroxis.util.jsquish.Squish.CompressionType;
 
-final strictfp class CompressorRange extends CompressorColourFit {
+final class CompressorRange extends CompressorColourFit {
     private static final int[] closest = new int[16];
     private static final int[] indices = new int[16];
     private static final Vec[] codes = new Vec[4];

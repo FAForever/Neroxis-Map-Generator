@@ -1,17 +1,16 @@
 package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
-import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_COUNT;
-import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_MOVEMENTS;
-import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_REPEATS;
-import static com.faforever.neroxis.map.SCMap.WAVE_TEXTURE_PATHS;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.faforever.neroxis.map.SCMap.*;
 
 /**
  * Used in disk operations to be converted into a material later
@@ -19,7 +18,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @CompiledJson
-public strictfp class WaterSettings {
+public class WaterSettings {
     private boolean WaterPresent;
     private float Elevation;
     private float ElevationDeep;
@@ -54,7 +53,7 @@ public strictfp class WaterSettings {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static strictfp class WaveTexture {
+    public static class WaveTexture {
         private String TexPath;
         private Vector2 NormalMovement;
         private float NormalRepeat;

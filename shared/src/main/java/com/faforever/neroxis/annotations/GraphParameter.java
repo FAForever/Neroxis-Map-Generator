@@ -1,15 +1,11 @@
 package com.faforever.neroxis.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(GraphParameter.GraphParameters.class)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
-public strictfp @interface GraphParameter {
+public @interface GraphParameter {
     String name();
 
     String value() default "";
@@ -20,7 +16,7 @@ public strictfp @interface GraphParameter {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
-    strictfp @interface GraphParameters {
+    @interface GraphParameters {
         GraphParameter[] value();
     }
 }

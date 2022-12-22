@@ -1,10 +1,11 @@
 package com.faforever.neroxis.util;
 
-import java.util.Random;
 import lombok.Value;
 
+import java.util.Random;
+
 @Value
-public strictfp class Range {
+public class Range {
     float min;
     float max;
     float range;

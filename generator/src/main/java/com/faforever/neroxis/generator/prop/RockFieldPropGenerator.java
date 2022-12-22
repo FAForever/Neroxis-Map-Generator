@@ -10,7 +10,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-public strictfp class RockFieldPropGenerator extends BasicPropGenerator {
+public class RockFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask largeRockFieldMask;
 
     public RockFieldPropGenerator() {
