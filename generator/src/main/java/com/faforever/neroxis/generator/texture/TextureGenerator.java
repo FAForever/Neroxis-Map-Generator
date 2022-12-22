@@ -52,8 +52,7 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
                                                                        .getLightingSettings()
                                                                        .getSunDirection());
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(2);
-        ambient = new FloatMask(512, random.nextLong(), symmetrySettings, "ambient", true).add(1f)
-                                                                                          .startVisualDebugger();
+        ambient = new FloatMask(512, random.nextLong(), symmetrySettings, "ambient", true).add(1f);
 
         ambient.subtract(heightDiff.copy().multiply(-1f).add(1f).multiply(.05f))
                .subtract(heightDiff.copy().blur(1).subtract(heightDiff).clampMin(0f).multiply(4f))

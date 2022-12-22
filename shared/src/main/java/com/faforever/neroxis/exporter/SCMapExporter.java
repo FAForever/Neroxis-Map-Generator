@@ -100,15 +100,22 @@ public strictfp class SCMapExporter {
         if (map.getMinorVersion() > 56) {
             writeFloat(0);
         }
-        for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT - 1; i++) {
-            writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
-            writeFloat(mapTerrainMaterials.getTextureScales()[i]);
-        }
 
-        writeStringNull(Path.of("/maps", map.getFolderName(), "env", "texture", "map_pbr.dds")
-                            .toString()
-                            .replace("\\", "/"));
-        writeFloat(0);
+        if (map.getCompressedPBRTexture() != null) {
+            for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT - 1; i++) {
+                writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
+                writeFloat(mapTerrainMaterials.getTextureScales()[i]);
+            }
+            writeStringNull(Path.of("/maps", map.getFolderName(), "env", "texture", "map_pbr.dds")
+                                .toString()
+                                .replace("\\", "/"));
+            writeFloat(0);
+        } else {
+            for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
+                writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
+                writeFloat(mapTerrainMaterials.getTextureScales()[i]);
+            }
+        }
 
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
@@ -224,6 +231,10 @@ public strictfp class SCMapExporter {
 
     public static void exportPBR(Path folderPath, SCMap map) throws IOException {
         byte[] compressedPBR = map.getCompressedPBRTexture();
+        if (compressedPBR == null) {
+            return;
+        }
+
         Path decalsPath = Paths.get("env", "texture");
         Path decalPath = decalsPath.resolve("map_pbr.dds");
         Path writingPath = folderPath.resolve(decalPath);
