@@ -5,6 +5,7 @@ package com.faforever.neroxis.ngraph.model;
 
 import com.faforever.neroxis.ngraph.event.EventObject;
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+
 import java.util.List;
 
 /**

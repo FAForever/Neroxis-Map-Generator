@@ -5,6 +5,7 @@ package com.faforever.neroxis.ngraph.model;
 
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
+
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class Geometry extends RectangleDouble {
     /**
      * Global switch to translate the points in translate. Default is true.
      */
-    public static transient boolean TRANSLATE_CONTROL_POINTS = true;
+    public static boolean TRANSLATE_CONTROL_POINTS = true;
     /**
      * Stores alternate values for x, y, width and height in a rectangle.
      * Default is null.

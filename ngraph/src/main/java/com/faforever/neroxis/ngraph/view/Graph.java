@@ -72,8 +72,10 @@ import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.StyleUtils;
 import com.faforever.neroxis.ngraph.util.Utils;
-import java.awt.Graphics;
-import java.awt.Shape;
+import lombok.Getter;
+import org.w3c.dom.Element;
+
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -85,8 +87,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import org.w3c.dom.Element;
 
 /**
  * Implements a graph object that allows to create diagrams from a graph model
@@ -661,8 +661,7 @@ public class Graph extends EventSource {
                 addTopmostVerticesAndEdges(((GeometryChange) change).getCell(), cells);
             } else if (change instanceof CollapseChange) {
                 addTopmostVerticesAndEdges(((CollapseChange) change).getCell(), cells);
-            } else if (change instanceof VisibleChange) {
-                VisibleChange vc = (VisibleChange) change;
+            } else if (change instanceof VisibleChange vc) {
 
                 if (vc.isVisible()) {
                     addTopmostVerticesAndEdges(((VisibleChange) change).getCell(), cells);
@@ -801,8 +800,7 @@ public class Graph extends EventSource {
                 }
             }
             fireEvent(new RootEvent());
-        } else if (change instanceof ChildChange) {
-            ChildChange cc = (ChildChange) change;
+        } else if (change instanceof ChildChange cc) {
 
             // Repaints the parent area if it is a rendered cell (vertex or
             // edge) otherwise only the child area is repainted, same holds

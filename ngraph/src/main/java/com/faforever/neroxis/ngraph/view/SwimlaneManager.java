@@ -11,6 +11,7 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
+
 import java.util.List;
 
 /**

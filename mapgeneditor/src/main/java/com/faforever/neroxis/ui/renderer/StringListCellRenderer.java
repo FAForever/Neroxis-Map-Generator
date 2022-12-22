@@ -1,9 +1,8 @@
 package com.faforever.neroxis.ui.renderer;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.util.function.Function;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
 
 public class StringListCellRenderer<T> extends DefaultListCellRenderer {
     private final Function<T, String> stringConverter;

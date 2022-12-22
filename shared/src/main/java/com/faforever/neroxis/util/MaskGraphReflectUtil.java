@@ -2,12 +2,33 @@ package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
-import com.faforever.neroxis.mask.*;
+import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.IntegerMask;
+import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.mask.NormalMask;
+import com.faforever.neroxis.mask.Vector2Mask;
+import com.faforever.neroxis.mask.Vector3Mask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.github.therapi.runtimejavadoc.MethodJavadoc;
 import com.github.therapi.runtimejavadoc.RuntimeJavadoc;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MaskGraphReflectUtil {

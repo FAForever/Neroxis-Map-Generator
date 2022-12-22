@@ -7,10 +7,11 @@ import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.graph.domain.MaskOutputVertex;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.jgrapht.graph.DirectedAcyclicGraph;
+
+import java.util.Map;
 
 @Getter
 public class DecalPipeline extends GeneratorPipeline {

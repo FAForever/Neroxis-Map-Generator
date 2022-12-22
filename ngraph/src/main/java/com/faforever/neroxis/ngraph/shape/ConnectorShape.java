@@ -10,7 +10,8 @@ import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.LineDouble;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Color;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -15,7 +15,8 @@ import com.faforever.neroxis.ngraph.swing.view.CellStatePreview;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Graphics;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;

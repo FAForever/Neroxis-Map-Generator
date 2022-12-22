@@ -6,10 +6,11 @@ import com.faforever.neroxis.graph.domain.MaskInputVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.graph.domain.MaskOutputVertex;
 import com.faforever.neroxis.mask.BooleanMask;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.jgrapht.graph.DirectedAcyclicGraph;
+
+import java.util.Map;
 
 @Getter
 public class CivilianPipeline extends GeneratorPipeline {

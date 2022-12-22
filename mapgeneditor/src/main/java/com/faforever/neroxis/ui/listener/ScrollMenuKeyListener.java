@@ -1,11 +1,11 @@
 package com.faforever.neroxis.ui.listener;
 
 import com.faforever.neroxis.ui.components.JScrollMenu;
-import java.util.Arrays;
-import javax.swing.Action;
-import javax.swing.JMenuItem;
+
+import javax.swing.*;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
+import java.util.Arrays;
 
 public class ScrollMenuKeyListener implements MenuKeyListener {
     @Override
@@ -14,8 +14,7 @@ public class ScrollMenuKeyListener implements MenuKeyListener {
 
     @Override
     public void menuKeyPressed(MenuKeyEvent e) {
-        if (e.getComponent() instanceof JScrollMenu) {
-            JScrollMenu jScrollMenu = (JScrollMenu) e.getComponent();
+        if (e.getComponent() instanceof JScrollMenu jScrollMenu) {
             Arrays.stream(jScrollMenu.getMenuComponents())
                   .filter(component -> component instanceof JMenuItem)
                   .map(component -> (JMenuItem) component)

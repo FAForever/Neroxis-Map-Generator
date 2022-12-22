@@ -8,13 +8,10 @@ import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Stroke;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import javax.swing.JComponent;
 
 /**
  * @author Administrator

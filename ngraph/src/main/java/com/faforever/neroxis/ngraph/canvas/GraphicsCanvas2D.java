@@ -3,19 +3,10 @@ package com.faforever.neroxis.ngraph.canvas;
 import com.faforever.neroxis.ngraph.style.util.Direction;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+import lombok.Setter;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -27,8 +18,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.CellRendererPane;
-import lombok.Setter;
 
 /**
  * Used for exporting images. To render to an image from a given XML string,

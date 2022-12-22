@@ -4,9 +4,21 @@
 package com.faforever.neroxis.ngraph.swing;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
+import com.faforever.neroxis.ngraph.event.AddOverlayEvent;
+import com.faforever.neroxis.ngraph.event.CellStateEvent;
+import com.faforever.neroxis.ngraph.event.ChangeEvent;
+import com.faforever.neroxis.ngraph.event.DownEvent;
 import com.faforever.neroxis.ngraph.event.EventObject;
-import com.faforever.neroxis.ngraph.event.*;
+import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.event.EventSource.IEventListener;
+import com.faforever.neroxis.ngraph.event.LabelChangedEvent;
+import com.faforever.neroxis.ngraph.event.RemoveOverlayEvent;
+import com.faforever.neroxis.ngraph.event.RepaintEvent;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.StartEditingEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
+import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.GraphModel;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
@@ -14,7 +26,15 @@ import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.ElbowConnectorEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.SideToSideEdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.edge.TopToBottomEdgeStyleFunction;
-import com.faforever.neroxis.ngraph.swing.handler.*;
+import com.faforever.neroxis.ngraph.swing.handler.CellHandler;
+import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
+import com.faforever.neroxis.ngraph.swing.handler.EdgeHandler;
+import com.faforever.neroxis.ngraph.swing.handler.ElbowEdgeHandler;
+import com.faforever.neroxis.ngraph.swing.handler.GraphHandler;
+import com.faforever.neroxis.ngraph.swing.handler.GraphTransferHandler;
+import com.faforever.neroxis.ngraph.swing.handler.PanningHandler;
+import com.faforever.neroxis.ngraph.swing.handler.SelectionCellsHandler;
+import com.faforever.neroxis.ngraph.swing.handler.VertexHandler;
 import com.faforever.neroxis.ngraph.swing.util.CellOverlay;
 import com.faforever.neroxis.ngraph.swing.util.ICellOverlay;
 import com.faforever.neroxis.ngraph.swing.view.CellEditor;
@@ -31,14 +51,24 @@ import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.beans.PropertyChangeListener;
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -2052,8 +2082,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * component inside a component hierarchy.
      */
     protected void removeCellOverlayComponent(ICellOverlay overlay, ICell cell) {
-        if (overlay instanceof Component) {
-            Component comp = (Component) overlay;
+        if (overlay instanceof Component comp) {
             if (comp.getParent() != null) {
                 comp.setVisible(false);
                 comp.getParent().remove(comp);
@@ -2160,8 +2189,7 @@ public class GraphComponent extends JScrollPane implements Printable {
      * component inside a component hierarchy.
      */
     protected void updateCellOverlayComponent(CellState state, ICellOverlay overlay) {
-        if (overlay instanceof Component) {
-            Component comp = (Component) overlay;
+        if (overlay instanceof Component comp) {
             if (comp.getParent() == null) {
                 getGraphControl().add(comp, 0);
             }

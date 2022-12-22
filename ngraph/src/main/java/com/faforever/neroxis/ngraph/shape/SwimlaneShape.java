@@ -5,7 +5,8 @@ import com.faforever.neroxis.ngraph.canvas.GraphicsCanvas2D;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Color;
+
+import java.awt.*;
 import java.util.Objects;
 
 public class SwimlaneShape extends BasicShape {

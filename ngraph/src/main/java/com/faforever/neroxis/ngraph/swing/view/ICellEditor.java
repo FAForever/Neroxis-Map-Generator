@@ -4,6 +4,7 @@
 package com.faforever.neroxis.ngraph.swing.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
+
 import java.util.EventObject;
 
 /**

@@ -2,14 +2,15 @@ package com.faforever.neroxis.ngraph.style;
 
 import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
-import java.awt.Color;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldNameConstants;
 
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)

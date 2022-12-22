@@ -7,9 +7,8 @@ import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.Shape;
+
+import java.awt.*;
 
 public class BasicShape implements IShape {
     @Override

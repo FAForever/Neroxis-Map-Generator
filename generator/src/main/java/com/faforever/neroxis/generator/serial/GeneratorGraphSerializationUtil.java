@@ -11,6 +11,9 @@ import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import com.faforever.neroxis.util.serial.graph.JsonGraph;
 import com.faforever.neroxis.util.serial.graph.JsonGraphEdge;
 import com.faforever.neroxis.util.serial.graph.JsonGraphVertex;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DirectedAcyclicGraph;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,8 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DirectedAcyclicGraph;
 
 public class GeneratorGraphSerializationUtil {
     public static GeneratorPipeline importPipeline(File file) throws IOException {

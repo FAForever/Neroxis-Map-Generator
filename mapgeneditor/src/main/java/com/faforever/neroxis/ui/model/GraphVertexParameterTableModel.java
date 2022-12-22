@@ -3,11 +3,12 @@ package com.faforever.neroxis.ui.model;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
+
+import javax.swing.table.AbstractTableModel;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.table.AbstractTableModel;
 
 public class GraphVertexParameterTableModel extends AbstractTableModel {
     private final List<Parameter> parameters = new ArrayList<>();

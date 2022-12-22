@@ -13,16 +13,12 @@ import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serial;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 public class GraphControl extends JComponent {
     @Serial
@@ -314,9 +310,8 @@ public class GraphControl extends JComponent {
     }
 
     protected void cellDrawn(ICanvas canvas, CellState state) {
-        if (graphComponent.isFoldingEnabled() && canvas instanceof Graphics2DCanvas) {
+        if (graphComponent.isFoldingEnabled() && canvas instanceof Graphics2DCanvas g2c) {
             IGraphModel model = graphComponent.graph.getModel();
-            Graphics2DCanvas g2c = (Graphics2DCanvas) canvas;
             Graphics2D g2 = g2c.getGraphics();
             // Draws the collapse/expand icons
             boolean isEdge = model.isEdge(state.getCell());

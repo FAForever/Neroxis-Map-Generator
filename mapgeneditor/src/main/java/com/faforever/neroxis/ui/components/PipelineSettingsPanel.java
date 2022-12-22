@@ -1,14 +1,12 @@
 package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.map.Symmetry;
-import java.awt.GridLayout;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class PipelineSettingsPanel extends JPanel {
     private final JTextField seedTextField = new JTextField();

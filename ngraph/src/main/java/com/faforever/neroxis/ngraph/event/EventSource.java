@@ -3,12 +3,13 @@
  */
 package com.faforever.neroxis.ngraph.event;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Base class for objects that dispatch named events.

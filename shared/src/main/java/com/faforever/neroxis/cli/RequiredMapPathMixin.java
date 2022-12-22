@@ -1,8 +1,10 @@
 package com.faforever.neroxis.cli;
 
-import java.nio.file.Path;
 import lombok.Getter;
 import picocli.CommandLine;
+
+import java.nio.file.Path;
+
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 

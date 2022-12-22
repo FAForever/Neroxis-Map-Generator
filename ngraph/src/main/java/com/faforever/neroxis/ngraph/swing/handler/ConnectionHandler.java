@@ -23,15 +23,13 @@ import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serial;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 /**
  * Connection handler creates new connections between cells. This control is used to display the connector

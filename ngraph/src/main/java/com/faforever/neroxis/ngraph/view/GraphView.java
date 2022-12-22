@@ -3,7 +3,14 @@
  */
 package com.faforever.neroxis.ngraph.view;
 
-import com.faforever.neroxis.ngraph.event.*;
+import com.faforever.neroxis.ngraph.event.CellStateEvent;
+import com.faforever.neroxis.ngraph.event.DownEvent;
+import com.faforever.neroxis.ngraph.event.EventSource;
+import com.faforever.neroxis.ngraph.event.ScaleAndTranslateEvent;
+import com.faforever.neroxis.ngraph.event.ScaleEvent;
+import com.faforever.neroxis.ngraph.event.TranslateEvent;
+import com.faforever.neroxis.ngraph.event.UndoEvent;
+import com.faforever.neroxis.ngraph.event.UpEvent;
 import com.faforever.neroxis.ngraph.model.Geometry;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
@@ -17,7 +24,11 @@ import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.util.Overflow;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.style.util.WhiteSpace;
-import com.faforever.neroxis.ngraph.util.*;
+import com.faforever.neroxis.ngraph.util.Constants;
+import com.faforever.neroxis.ngraph.util.PointDouble;
+import com.faforever.neroxis.ngraph.util.RectangleDouble;
+import com.faforever.neroxis.ngraph.util.UndoableEdit;
+import com.faforever.neroxis.ngraph.util.Utils;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;

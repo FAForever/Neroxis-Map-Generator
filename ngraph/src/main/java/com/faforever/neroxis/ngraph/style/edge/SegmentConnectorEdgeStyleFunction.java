@@ -3,6 +3,7 @@ package com.faforever.neroxis.ngraph.style.edge;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
+
 import java.util.List;
 
 /**

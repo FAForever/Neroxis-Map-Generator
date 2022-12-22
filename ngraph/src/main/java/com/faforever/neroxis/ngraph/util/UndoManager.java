@@ -8,6 +8,7 @@ import com.faforever.neroxis.ngraph.event.ClearEvent;
 import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.event.RedoEvent;
 import com.faforever.neroxis.ngraph.event.UndoEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 

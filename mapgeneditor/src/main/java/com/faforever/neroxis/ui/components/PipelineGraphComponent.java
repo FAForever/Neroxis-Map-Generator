@@ -1,6 +1,12 @@
 package com.faforever.neroxis.ui.components;
 
-import com.faforever.neroxis.graph.domain.*;
+import com.faforever.neroxis.graph.domain.MapMaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskConstructorVertex;
+import com.faforever.neroxis.graph.domain.MaskGraphVertex;
+import com.faforever.neroxis.graph.domain.MaskInputVertex;
+import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import com.faforever.neroxis.graph.domain.MaskMethodVertex;
+import com.faforever.neroxis.graph.domain.MaskOutputVertex;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.ngraph.model.Geometry;
@@ -16,7 +22,12 @@ import javax.swing.*;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

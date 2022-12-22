@@ -1,11 +1,12 @@
 package com.faforever.neroxis.util.serial.graph;
 
 import com.dslplatform.json.CompiledJson;
-import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
+
+import java.util.Map;
 
 @Getter
 @Setter

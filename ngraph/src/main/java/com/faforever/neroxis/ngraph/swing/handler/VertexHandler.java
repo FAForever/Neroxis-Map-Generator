@@ -12,15 +12,10 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 public class VertexHandler extends CellHandler {
     public static Cursor[] CURSORS = new Cursor[]{new Cursor(Cursor.NW_RESIZE_CURSOR), new Cursor(

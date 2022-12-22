@@ -3,12 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import java.awt.Font;
+import javax.swing.*;
+import java.awt.*;
 import java.io.Serial;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
 /**
  * @author Administrator

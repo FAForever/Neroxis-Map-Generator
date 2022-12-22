@@ -7,6 +7,8 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.serial.graph.JsonGraph;
 import com.faforever.neroxis.util.serial.graph.JsonGraphEdge;
 import com.faforever.neroxis.util.serial.graph.JsonGraphVertex;
+import org.jgrapht.Graph;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.jgrapht.Graph;
 
 public class GraphSerializationUtil {
     public static void importGraph(Graph<MaskGraphVertex<?>, MaskMethodEdge> graph, File file) throws IOException {

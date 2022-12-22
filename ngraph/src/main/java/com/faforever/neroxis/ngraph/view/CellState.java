@@ -7,11 +7,12 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Represents the current state of a cell in a given graph view.

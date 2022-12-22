@@ -13,13 +13,10 @@ import com.faforever.neroxis.ngraph.style.util.FontModifier;
 import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import org.w3c.dom.Element;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Line2D;
@@ -38,8 +35,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import org.w3c.dom.Element;
 
 /**
  * Contains various helper methods for use with Graph.
@@ -57,7 +52,7 @@ public class Utils {
     /**
      * Static Graphics used for Font Metrics.
      */
-    protected static transient Graphics fontGraphics;
+    protected static Graphics fontGraphics;
 
     // Creates a renderer for HTML markup (only possible in
     // non-headless environment)
@@ -1189,8 +1184,7 @@ public class Utils {
      * @return Returns true if the value matches the given conditions.
      */
     public static boolean isNode(Object value, String nodeName, String attributeName, String attributeValue) {
-        if (value instanceof Element) {
-            Element element = (Element) value;
+        if (value instanceof Element element) {
 
             if (nodeName == null || element.getNodeName().equalsIgnoreCase(nodeName)) {
                 String tmp = (attributeName != null) ? element.getAttribute(attributeName) : null;

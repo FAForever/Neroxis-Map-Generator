@@ -10,7 +10,8 @@ import com.faforever.neroxis.ngraph.util.Curve;
 import com.faforever.neroxis.ngraph.util.LineDouble;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.RenderingHints;
+
+import java.awt.*;
 import java.util.List;
 
 public class CurveShape extends ConnectorShape {

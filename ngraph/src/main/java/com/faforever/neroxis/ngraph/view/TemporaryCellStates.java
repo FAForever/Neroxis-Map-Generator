@@ -2,6 +2,7 @@ package com.faforever.neroxis.ngraph.view;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
+
 import java.util.HashMap;
 import java.util.List;
 

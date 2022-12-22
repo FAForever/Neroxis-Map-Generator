@@ -12,7 +12,8 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Graphics;
+
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

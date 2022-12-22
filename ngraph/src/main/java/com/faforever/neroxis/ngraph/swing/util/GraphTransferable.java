@@ -5,6 +5,10 @@ package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.plaf.UIResource;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -20,9 +24,6 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.plaf.UIResource;
 
 public class GraphTransferable implements Transferable, UIResource, Serializable {
     @Serial

@@ -10,7 +10,8 @@ import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.style.arrow.ClassicArrow;
 import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
-import java.awt.Color;
+
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 

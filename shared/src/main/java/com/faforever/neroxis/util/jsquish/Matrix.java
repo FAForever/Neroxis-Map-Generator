@@ -27,7 +27,12 @@ package com.faforever.neroxis.util.jsquish;
 
 import java.util.Arrays;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.pow;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 
 final class Matrix {
     private static final float FLT_EPSILON = 0.00001f;

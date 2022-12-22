@@ -2,8 +2,8 @@ package com.faforever.neroxis.ngraph.shape;
 
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Rectangle;
-import java.awt.Shape;
+
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 
 public class ActorShape extends BasicShape {

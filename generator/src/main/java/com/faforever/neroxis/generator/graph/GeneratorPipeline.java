@@ -3,14 +3,15 @@ package com.faforever.neroxis.generator.graph;
 import com.faforever.neroxis.generator.GeneratorGraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.jgrapht.graph.DirectedAcyclicGraph;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.jgrapht.graph.DirectedAcyclicGraph;
 
 @RequiredArgsConstructor
 @Getter

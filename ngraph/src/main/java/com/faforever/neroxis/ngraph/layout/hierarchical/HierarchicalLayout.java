@@ -15,14 +15,15 @@ import com.faforever.neroxis.ngraph.model.IGraphModel;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.swing.SwingConstants;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The top level compound layout of the hierarchical layout. The individual

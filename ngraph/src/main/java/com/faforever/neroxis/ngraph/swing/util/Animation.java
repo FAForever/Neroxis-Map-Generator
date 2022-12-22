@@ -6,9 +6,10 @@ package com.faforever.neroxis.ngraph.swing.util;
 import com.faforever.neroxis.ngraph.event.DoneEvent;
 import com.faforever.neroxis.ngraph.event.EventSource;
 import com.faforever.neroxis.ngraph.event.ExecuteEvent;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.Timer;
 
 /**
  * Baseclass for all timer-based animations. Fires Event.DONE when the

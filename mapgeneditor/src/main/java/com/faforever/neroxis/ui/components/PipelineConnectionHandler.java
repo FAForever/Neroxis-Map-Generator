@@ -6,9 +6,10 @@ import com.faforever.neroxis.graph.domain.MaskMethodVertex;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.swing.handler.ConnectionHandler;
+
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 public class PipelineConnectionHandler extends ConnectionHandler {
     private final PipelineGraphComponent pipelineGraphComponent;

@@ -6,7 +6,11 @@ import com.faforever.neroxis.util.dds.DDSReader;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 
 import java.awt.*;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

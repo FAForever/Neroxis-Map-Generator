@@ -1,16 +1,14 @@
 package com.faforever.neroxis.ui.transfer;
 
 import com.faforever.neroxis.mask.Mask;
+import lombok.AllArgsConstructor;
+
+import javax.swing.*;
 import java.awt.datatransfer.Transferable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JList;
-import javax.swing.TransferHandler;
-import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class GraphMethodListTransferHandler extends TransferHandler {

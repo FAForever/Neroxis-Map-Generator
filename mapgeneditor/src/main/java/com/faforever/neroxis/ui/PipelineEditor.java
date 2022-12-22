@@ -7,7 +7,12 @@ import com.faforever.neroxis.generator.serial.GeneratorGraphSerializationUtil;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
 import com.faforever.neroxis.ngraph.model.ICell;
-import com.faforever.neroxis.ui.components.*;
+import com.faforever.neroxis.ui.components.CloseableTabComponent;
+import com.faforever.neroxis.ui.components.MaskGraphVertexEditPanel;
+import com.faforever.neroxis.ui.components.MethodListPanel;
+import com.faforever.neroxis.ui.components.PipelineGraph;
+import com.faforever.neroxis.ui.components.PipelinePane;
+import com.faforever.neroxis.ui.components.PipelineSettingsPanel;
 import com.faforever.neroxis.visualization.EntryPanel;
 import picocli.CommandLine;
 

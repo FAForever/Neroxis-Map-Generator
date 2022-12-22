@@ -1,8 +1,9 @@
 package com.faforever.neroxis.ngraph.event;
 
-import java.awt.Graphics;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+
+import java.awt.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Value

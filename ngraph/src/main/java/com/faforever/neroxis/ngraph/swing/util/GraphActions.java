@@ -5,10 +5,10 @@ package com.faforever.neroxis.ngraph.swing.util;
 
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.view.Graph;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.Serial;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 
 /**
  *
@@ -410,9 +410,8 @@ public class GraphActions {
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
 
-            if (source instanceof GraphComponent) {
+            if (source instanceof GraphComponent graphComponent) {
                 String name = getValue(Action.NAME).toString();
-                GraphComponent graphComponent = (GraphComponent) source;
 
                 if (name.equalsIgnoreCase("zoomIn")) {
                     graphComponent.zoomIn();

@@ -1,12 +1,13 @@
 package com.faforever.neroxis.cli;
 
 import com.faforever.neroxis.util.MathUtil;
+import picocli.CommandLine;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import picocli.CommandLine;
 
 public class CLIUtils {
     public static float convertDensity(float percent, int numBins, CommandLine.Model.CommandSpec spec) {

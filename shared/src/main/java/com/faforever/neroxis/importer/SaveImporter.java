@@ -1,6 +1,12 @@
 package com.faforever.neroxis.importer;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.AIMarker;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.LuaLoader;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;

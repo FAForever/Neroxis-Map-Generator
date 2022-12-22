@@ -1,6 +1,10 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.*;
+import com.faforever.neroxis.cli.CLIUtils;
+import com.faforever.neroxis.cli.DebugMixin;
+import com.faforever.neroxis.cli.OutputFolderMixin;
+import com.faforever.neroxis.cli.RequiredMapPathMixin;
+import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
@@ -10,7 +14,11 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-import static picocli.CommandLine.*;
+import static picocli.CommandLine.ArgGroup;
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Mixin;
+import static picocli.CommandLine.Option;
+import static picocli.CommandLine.Spec;
 
 @Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public class MapResizer implements Callable<Integer> {

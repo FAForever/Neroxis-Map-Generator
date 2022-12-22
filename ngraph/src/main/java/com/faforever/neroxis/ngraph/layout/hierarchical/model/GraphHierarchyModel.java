@@ -6,6 +6,7 @@ package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

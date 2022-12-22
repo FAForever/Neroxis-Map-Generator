@@ -1,7 +1,6 @@
 package com.faforever.neroxis.ui.components;
 
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
-import static com.faforever.neroxis.graph.domain.MaskMethodVertex.EXECUTOR;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.ui.renderer.StringListCellRenderer;
@@ -9,8 +8,9 @@ import com.faforever.neroxis.ui.transfer.GraphMethodListTransferHandler;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import com.github.therapi.runtimejavadoc.MethodJavadoc;
 import com.github.therapi.runtimejavadoc.ParamJavadoc;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
+import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -18,13 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
+
+import static com.faforever.neroxis.graph.domain.MaskMethodVertex.EXECUTOR;
 
 public class MethodListPanel extends JPanel {
     private final JComboBox<Class<? extends Mask<?, ?>>> classComboBox = new JComboBox<>();

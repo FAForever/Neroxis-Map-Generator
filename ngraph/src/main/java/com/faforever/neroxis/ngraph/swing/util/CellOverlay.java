@@ -4,10 +4,9 @@ import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class CellOverlay extends JComponent implements ICellOverlay {
     private static final long serialVersionUID = 921991820491141221L;

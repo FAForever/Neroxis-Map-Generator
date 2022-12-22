@@ -10,8 +10,9 @@ import com.faforever.neroxis.ngraph.util.CellRenderer;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.Graph;
-import java.awt.Color;
-import java.awt.Image;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.Serial;
@@ -19,9 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.TransferHandler;
 
 @SuppressWarnings("unused")
 public class GraphTransferHandler extends TransferHandler {
@@ -116,8 +114,7 @@ public class GraphTransferHandler extends TransferHandler {
             try {
                 updateImportCount(t);
 
-                if (c instanceof GraphComponent) {
-                    GraphComponent graphComponent = (GraphComponent) c;
+                if (c instanceof GraphComponent graphComponent) {
 
                     if (graphComponent.isEnabled() && t.isDataFlavorSupported(GraphTransferable.dataFlavor)) {
                         GraphTransferable gt = (GraphTransferable) t.getTransferData(GraphTransferable.dataFlavor);
@@ -152,8 +149,7 @@ public class GraphTransferHandler extends TransferHandler {
      */
     @Override
     public Transferable createTransferable(JComponent c) {
-        if (c instanceof GraphComponent) {
-            GraphComponent graphComponent = (GraphComponent) c;
+        if (c instanceof GraphComponent graphComponent) {
             Graph graph = graphComponent.getGraph();
 
             if (!graph.isSelectionEmpty()) {

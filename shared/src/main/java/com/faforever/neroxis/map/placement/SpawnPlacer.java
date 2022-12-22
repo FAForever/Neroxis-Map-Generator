@@ -1,6 +1,12 @@
 package com.faforever.neroxis.map.placement;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.Army;
+import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 

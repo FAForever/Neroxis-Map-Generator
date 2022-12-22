@@ -16,6 +16,7 @@ import com.faforever.neroxis.ngraph.style.perimeter.RectanglePerimeter;
 import com.faforever.neroxis.ngraph.style.perimeter.RhombusPerimeter;
 import com.faforever.neroxis.ngraph.style.perimeter.TrianglePerimeter;
 import com.faforever.neroxis.ngraph.util.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -3,7 +3,11 @@ package com.faforever.neroxis.exporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class ScenarioExporter {

@@ -15,6 +15,7 @@ import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyMode
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyNode;
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;

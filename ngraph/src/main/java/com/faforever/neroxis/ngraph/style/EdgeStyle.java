@@ -5,14 +5,15 @@ import com.faforever.neroxis.ngraph.style.arrow.Arrow;
 import com.faforever.neroxis.ngraph.style.edge.EdgeStyleFunction;
 import com.faforever.neroxis.ngraph.style.util.Direction;
 import com.faforever.neroxis.ngraph.style.util.Elbow;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Objects;
 import java.util.Set;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldNameConstants;
 
 @Data
 @FieldNameConstants(level = AccessLevel.PRIVATE)

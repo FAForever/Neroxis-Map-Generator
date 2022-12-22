@@ -1,6 +1,13 @@
 package com.faforever.neroxis.exporter;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.CubeMap;
+import com.faforever.neroxis.map.Decal;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.DecalType;
+import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SkyBox;
+import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
@@ -12,8 +19,16 @@ import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.RenderedImage;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;

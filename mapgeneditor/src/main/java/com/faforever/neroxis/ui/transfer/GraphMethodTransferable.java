@@ -3,6 +3,10 @@
  */
 package com.faforever.neroxis.ui.transfer;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import javax.swing.plaf.UIResource;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -13,9 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.plaf.UIResource;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @Getter
 @AllArgsConstructor

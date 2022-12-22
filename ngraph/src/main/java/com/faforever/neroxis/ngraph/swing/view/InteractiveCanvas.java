@@ -10,10 +10,8 @@ import com.faforever.neroxis.ngraph.shape.IShape;
 import com.faforever.neroxis.ngraph.swing.GraphComponent;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Shape;
+
+import java.awt.*;
 import java.awt.image.ImageObserver;
 
 public class InteractiveCanvas extends Graphics2DCanvas {

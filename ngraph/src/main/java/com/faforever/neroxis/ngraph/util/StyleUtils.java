@@ -5,6 +5,7 @@ package com.faforever.neroxis.ngraph.util;
 
 import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.IGraphModel;
+
 import java.util.ArrayList;
 import java.util.List;
 

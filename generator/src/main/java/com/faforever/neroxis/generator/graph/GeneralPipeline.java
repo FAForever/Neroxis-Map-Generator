@@ -3,9 +3,10 @@ package com.faforever.neroxis.generator.graph;
 import com.faforever.neroxis.generator.GeneratorGraphContext;
 import com.faforever.neroxis.graph.domain.MaskGraphVertex;
 import com.faforever.neroxis.graph.domain.MaskMethodEdge;
-import java.util.Map;
 import lombok.Getter;
 import org.jgrapht.graph.DirectedAcyclicGraph;
+
+import java.util.Map;
 
 @Getter
 public class GeneralPipeline extends GeneratorPipeline {

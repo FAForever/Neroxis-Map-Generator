@@ -14,6 +14,8 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.Graph;
+
+import javax.swing.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.swing.SwingConstants;
 
 /**
  * Sets the horizontal locations of node and edge dummy nodes on each layer.
@@ -354,7 +355,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                 rankWidths[rankValue] = localX;
             }
 
-            if (boundsWarning == true) {
+            if (boundsWarning) {
                 log.warning("At least one cell has no bounds");
             }
 
@@ -550,7 +551,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                     WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
 
                     if (connectedCellWrapper != null) {
-                        if (connectedCellWrapper.visited == false) {
+                        if (!connectedCellWrapper.visited) {
                             connectedCellWrapper.visited = true;
                             nodeList.add(connectedCellWrapper);
                         }
@@ -563,7 +564,7 @@ public class CoordinateAssignment implements HierarchicalLayoutStage {
                     WeightedCellSorter connectedCellWrapper = map.get(connectedCell);
 
                     if (connectedCellWrapper != null) {
-                        if (connectedCellWrapper.visited == false) {
+                        if (!connectedCellWrapper.visited) {
                             connectedCellWrapper.visited = true;
                             nodeList.add(connectedCellWrapper);
                         }

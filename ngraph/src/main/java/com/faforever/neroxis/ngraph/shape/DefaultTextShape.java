@@ -10,11 +10,8 @@ import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.util.Utils;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+
+import java.awt.*;
 
 public class DefaultTextShape implements ITextShape {
     @Override

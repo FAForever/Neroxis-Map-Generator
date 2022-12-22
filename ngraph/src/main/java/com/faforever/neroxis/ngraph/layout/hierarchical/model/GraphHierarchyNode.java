@@ -11,6 +11,7 @@
 package com.faforever.neroxis.ngraph.layout.hierarchical.model;
 
 import com.faforever.neroxis.ngraph.model.ICell;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

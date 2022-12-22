@@ -12,6 +12,7 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MaskGraphReflectUtil;
 import com.faforever.neroxis.util.serial.graph.JsonGraphEdge;
 import com.faforever.neroxis.util.serial.graph.JsonGraphVertex;
+
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -10,7 +10,8 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.view.Graph;
 import com.faforever.neroxis.ngraph.view.GraphView;
 import com.faforever.neroxis.ngraph.view.TemporaryCellStates;
-import java.awt.Color;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 

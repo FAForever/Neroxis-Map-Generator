@@ -15,7 +15,11 @@ import com.faforever.neroxis.ngraph.model.ICell;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implements the selection model for a graph.

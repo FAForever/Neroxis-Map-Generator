@@ -1,14 +1,8 @@
 package com.faforever.neroxis.ui.components;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.LayoutManager;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseWheelEvent;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 
 /**
  * Scrollable JPopupMenu.
@@ -145,8 +139,7 @@ public class JScrollPopupMenu extends JPopupMenu {
             Dimension dim = new Dimension();
             for (Component comp : parent.getComponents()) {
                 if (comp.isVisible()) {
-                    if (comp instanceof JScrollBar) {
-                        JScrollBar scrollBar = (JScrollBar) comp;
+                    if (comp instanceof JScrollBar scrollBar) {
                         visibleAmount = scrollBar.getVisibleAmount();
                     } else {
                         Dimension pref = comp.getPreferredSize();
@@ -168,8 +161,7 @@ public class JScrollPopupMenu extends JPopupMenu {
             Dimension dim = new Dimension();
             for (Component comp : parent.getComponents()) {
                 if (comp.isVisible()) {
-                    if (comp instanceof JScrollBar) {
-                        JScrollBar scrollBar = (JScrollBar) comp;
+                    if (comp instanceof JScrollBar scrollBar) {
                         visibleAmount = scrollBar.getVisibleAmount();
                     } else {
                         Dimension min = comp.getMinimumSize();
@@ -197,8 +189,7 @@ public class JScrollPopupMenu extends JPopupMenu {
             int position = 0;
 
             for (Component comp : parent.getComponents()) {
-                if ((comp instanceof JScrollBar) && comp.isVisible()) {
-                    JScrollBar scrollBar = (JScrollBar) comp;
+                if ((comp instanceof JScrollBar scrollBar) && comp.isVisible()) {
                     Dimension dim = scrollBar.getPreferredSize();
                     scrollBar.setBounds(x + width - dim.width, y, dim.width, height);
                     width -= dim.width;

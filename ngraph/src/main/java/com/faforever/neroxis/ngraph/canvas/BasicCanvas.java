@@ -3,10 +3,11 @@ package com.faforever.neroxis.ngraph.canvas;
 import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Utils;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 @Getter
 @Setter

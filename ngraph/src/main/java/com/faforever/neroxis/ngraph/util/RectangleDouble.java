@@ -3,10 +3,11 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import java.awt.geom.Rectangle2D;
-import java.io.Serial;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 
 /**
  * Implements a 2-dimensional rectangle with double precision coordinates.
@@ -194,8 +195,7 @@ public class RectangleDouble extends Rectangle2D.Double {
      * Returns true if the given object equals this rectangle.
      */
     public boolean equals(Object obj) {
-        if (obj instanceof RectangleDouble) {
-            RectangleDouble rect = (RectangleDouble) obj;
+        if (obj instanceof RectangleDouble rect) {
             return rect.getX() == getX()
                    && rect.getY() == getY()
                    && rect.getWidth() == getWidth()

@@ -10,10 +10,11 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.jgrapht.graph.DirectedAcyclicGraph;
+
+import java.util.Map;
 
 @Getter
 public class TexturePipeline extends GeneratorPipeline {

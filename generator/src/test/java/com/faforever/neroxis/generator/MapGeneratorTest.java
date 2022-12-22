@@ -5,7 +5,11 @@ import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.util.*;
+import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.MathUtil;
+import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +25,12 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.compareImages;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {

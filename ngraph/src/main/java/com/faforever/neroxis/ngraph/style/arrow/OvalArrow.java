@@ -3,7 +3,8 @@ package com.faforever.neroxis.ngraph.style.arrow;
 import com.faforever.neroxis.ngraph.canvas.Graphics2DCanvas;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Shape;
+
+import java.awt.*;
 import java.awt.geom.Ellipse2D;
 
 public class OvalArrow implements Arrow {

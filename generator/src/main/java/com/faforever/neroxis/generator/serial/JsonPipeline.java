@@ -4,9 +4,10 @@ import com.dslplatform.json.CompiledJson;
 import com.faforever.neroxis.util.serial.graph.JsonGraph;
 import com.faforever.neroxis.util.serial.graph.JsonGraphEdge;
 import com.faforever.neroxis.util.serial.graph.JsonGraphVertex;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Map;
 
 @Getter
 @Setter

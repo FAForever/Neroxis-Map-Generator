@@ -3,7 +3,7 @@
  */
 package com.faforever.neroxis.ngraph.util;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;

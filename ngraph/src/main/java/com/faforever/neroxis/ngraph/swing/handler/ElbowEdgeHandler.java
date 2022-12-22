@@ -10,7 +10,8 @@ import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.Resources;
 import com.faforever.neroxis.ngraph.view.CellState;
 import com.faforever.neroxis.ngraph.view.GraphView;
-import java.awt.Rectangle;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 

@@ -1,16 +1,12 @@
 package com.faforever.neroxis.ui.components;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.util.Arrays;
-import java.util.function.Supplier;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Arrays;
+import java.util.function.Supplier;
 
 @Getter
 public class CloseableTabComponent extends JPanel {

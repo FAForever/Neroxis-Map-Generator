@@ -15,7 +15,8 @@ import com.faforever.neroxis.ngraph.model.TerminalChange;
 import com.faforever.neroxis.ngraph.model.UndoableChange;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
 import com.faforever.neroxis.ngraph.util.Utils;
-import java.awt.Point;
+
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -170,8 +171,7 @@ public class LayoutManager extends EventSource {
         IGraphModel model = getGraph().getModel();
         Set<ICell> result = new HashSet<>();
 
-        if (change instanceof ChildChange) {
-            ChildChange cc = (ChildChange) change;
+        if (change instanceof ChildChange cc) {
             ICell parent = model.getParent(cc.getChild());
 
             if (cc.getChild() != null) {

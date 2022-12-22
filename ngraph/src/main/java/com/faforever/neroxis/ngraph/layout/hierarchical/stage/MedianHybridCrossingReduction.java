@@ -15,6 +15,7 @@ import com.faforever.neroxis.ngraph.layout.hierarchical.HierarchicalLayout;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphAbstractHierarchyCell;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyModel;
 import com.faforever.neroxis.ngraph.layout.hierarchical.model.GraphHierarchyRank;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

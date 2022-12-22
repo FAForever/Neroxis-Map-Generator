@@ -1,9 +1,9 @@
 package com.faforever.neroxis.ui.renderer;
 
-import java.awt.Component;
-import java.util.function.Function;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
+import java.util.function.Function;
 
 public class StringTableCellRenderer<T> extends DefaultTableCellRenderer {
     private final Function<T, String> stringConverter;

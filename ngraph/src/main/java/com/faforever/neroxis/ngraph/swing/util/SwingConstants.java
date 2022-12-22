@@ -3,18 +3,13 @@
  */
 package com.faforever.neroxis.ngraph.swing.util;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 public class SwingConstants {
     private static final Logger log = Logger.getLogger(SwingConstants.class.getName());

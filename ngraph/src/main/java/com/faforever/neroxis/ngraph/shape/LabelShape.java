@@ -6,9 +6,8 @@ import com.faforever.neroxis.ngraph.style.util.HorizontalAlignment;
 import com.faforever.neroxis.ngraph.style.util.VerticalAlignment;
 import com.faforever.neroxis.ngraph.util.RectangleDouble;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Rectangle;
+
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 
 public class LabelShape extends ImageShape {

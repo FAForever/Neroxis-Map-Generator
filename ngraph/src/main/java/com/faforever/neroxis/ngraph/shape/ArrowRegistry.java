@@ -7,6 +7,7 @@ import com.faforever.neroxis.ngraph.style.arrow.DiamondArrow;
 import com.faforever.neroxis.ngraph.style.arrow.OpenArrow;
 import com.faforever.neroxis.ngraph.style.arrow.OvalArrow;
 import com.faforever.neroxis.ngraph.util.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 

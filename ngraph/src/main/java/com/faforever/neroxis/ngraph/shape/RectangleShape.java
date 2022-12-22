@@ -8,7 +8,8 @@ import com.faforever.neroxis.ngraph.style.Style;
 import com.faforever.neroxis.ngraph.swing.util.SwingConstants;
 import com.faforever.neroxis.ngraph.util.Constants;
 import com.faforever.neroxis.ngraph.view.CellState;
-import java.awt.Rectangle;
+
+import java.awt.*;
 import java.util.Objects;
 
 public class RectangleShape extends BasicShape {

@@ -1,11 +1,12 @@
 package com.faforever.neroxis.ngraph.style;
 
 import com.faforever.neroxis.ngraph.style.util.StyleMapper;
+import lombok.Data;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
-import lombok.Data;
 
 @Data
 public class Style implements PropertyChangeListener {

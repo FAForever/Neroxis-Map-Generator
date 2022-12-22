@@ -1,9 +1,10 @@
 package com.faforever.neroxis.ngraph.event;
 
 import com.faforever.neroxis.ngraph.model.ICell;
-import java.awt.event.MouseEvent;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+
+import java.awt.event.MouseEvent;
 
 @EqualsAndHashCode(callSuper = true)
 @Value

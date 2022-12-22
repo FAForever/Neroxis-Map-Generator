@@ -11,7 +11,21 @@ import com.faforever.neroxis.exporter.ScriptGenerator;
 import com.faforever.neroxis.generator.cli.ParameterOptions;
 import com.faforever.neroxis.generator.cli.TuningOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
-import com.faforever.neroxis.generator.style.*;
+import com.faforever.neroxis.generator.style.BasicStyleGenerator;
+import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
+import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
+import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
+import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
+import com.faforever.neroxis.generator.style.HighReclaimStyleGenerator;
+import com.faforever.neroxis.generator.style.LandBridgeStyleGenerator;
+import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
+import com.faforever.neroxis.generator.style.LowMexStyleGenerator;
+import com.faforever.neroxis.generator.style.MountainRangeStyleGenerator;
+import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
+import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
+import com.faforever.neroxis.generator.style.StyleGenerator;
+import com.faforever.neroxis.generator.style.TestStyleGenerator;
+import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
@@ -34,11 +48,19 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static picocli.CommandLine.*;
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+import static picocli.CommandLine.Spec;
 
 @Getter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)

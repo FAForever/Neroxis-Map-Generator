@@ -12,6 +12,7 @@ import com.faforever.neroxis.ngraph.event.ExecuteEvent;
 import com.faforever.neroxis.ngraph.event.UndoEvent;
 import com.faforever.neroxis.ngraph.util.PointDouble;
 import com.faforever.neroxis.ngraph.util.UndoableEdit;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
@@ -1067,8 +1068,7 @@ public class GraphModel extends EventSource implements IGraphModel, Serializable
      * @param cell Cell that has been removed.
      */
     protected void cellRemoved(Object cell) {
-        if (cell instanceof ICell) {
-            ICell c = (ICell) cell;
+        if (cell instanceof ICell c) {
             int childCount = c.getChildCount();
 
             for (int i = 0; i < childCount; i++) {

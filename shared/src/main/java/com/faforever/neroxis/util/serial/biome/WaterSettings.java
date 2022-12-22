@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.faforever.neroxis.map.SCMap.*;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_COUNT;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_MOVEMENTS;
+import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_REPEATS;
+import static com.faforever.neroxis.map.SCMap.WAVE_TEXTURE_PATHS;
 
 /**
  * Used in disk operations to be converted into a material later

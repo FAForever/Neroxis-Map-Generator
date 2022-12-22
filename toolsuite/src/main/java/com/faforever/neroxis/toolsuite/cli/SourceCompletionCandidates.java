@@ -1,6 +1,7 @@
 package com.faforever.neroxis.toolsuite.cli;
 
 import com.faforever.neroxis.map.SymmetrySource;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Stream;
