@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -21,6 +22,7 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask steepHillsTexture;
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
+    protected IntegerMask terrainType;
 
     @Override
     protected void setupTexturePipeline() {
@@ -73,6 +75,23 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .blur(2);
         texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
         texturesHighMask.setComponents(steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
+
+        setupTerrainType(mapSize);
+    }
+
+    protected void setupTerrainType(int mapSize) {
+        terrainType.setSize(mapSize);
+
+        Integer[] terrainTypes = map.getBiome().getTerrainMaterials().getTerrainTypes();
+        terrainType.add(terrainTypes[0])
+                   .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
+                   .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
+                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
+                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
+                   .setToValue(steepHillsTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
+                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[6])
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[8]);
     }
 
     @Override
@@ -90,14 +109,16 @@ public class BasicTextureGenerator extends TextureGenerator {
         steepHillsTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
+        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
     }
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask);
+        Pipeline.await(texturesLowMask, texturesHighMask, terrainType);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
+            map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
         });
     }
 
