@@ -2,6 +2,7 @@ package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
@@ -651,6 +652,18 @@ public class SCMap {
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }
+    }
+
+    public void setTerrainTypeScaled(BufferedImage terrainType, IntegerMask mask) {
+        int terrainTypeWidth = terrainType.getWidth();
+        checkMaskSize(mask, terrainTypeWidth);
+        for (int x = 0; x < terrainTypeWidth; x++) {
+            for (int y = 0; y < terrainTypeWidth; y++) {
+                int val0 = mask.getPrimitive(x, y);
+                terrainType.getRaster().setPixel(x, y, new int[]{val0});
+            }
+        }
+
     }
 
     private int convertToRawTextureValue(float value) {
