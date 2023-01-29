@@ -83,19 +83,15 @@ public class BasicTextureGenerator extends TextureGenerator {
         terrainType.setSize(mapSize);
 
         Integer[] terrainTypes = map.getBiome().getTerrainMaterials().getTerrainTypes();
-        if (terrainTypes[0] == null) {
-            terrainType.add(1); // Default terrain type
-        } else {
-            terrainType.add(terrainTypes[0])
-                       .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
-                       .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
-                       .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
-                       .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
-                       .setToValue(steepHillsTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
-                       .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[6])
-                       .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
-                       .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[8]);
-        }
+        terrainType.add(terrainTypes[0])
+                   .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
+                   .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
+                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
+                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
+                   .setToValue(steepHillsTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
+                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[6])
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[8]);
     }
 
     @Override
