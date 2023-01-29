@@ -654,7 +654,7 @@ public class SCMap {
         }
     }
 
-    public void setTerrainTypeScaled(BufferedImage terrainType, IntegerMask mask) {
+    public void setTerrainType(BufferedImage terrainType, IntegerMask mask) {
         int terrainTypeWidth = terrainType.getWidth();
         checkMaskSize(mask, terrainTypeWidth);
         for (int x = 0; x < terrainTypeWidth; x++) {
