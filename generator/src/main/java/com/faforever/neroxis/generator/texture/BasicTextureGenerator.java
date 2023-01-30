@@ -99,13 +99,13 @@ public class BasicTextureGenerator extends TextureGenerator {
         terrainType.add(terrainTypes[0])
                    .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
                    .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
-                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
-                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
+                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
+                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
                    .setToValue(steepHillsTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
                    .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[6])
                    // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
-                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[8])
-                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[8])
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[7])
                    .setToValue(realWater, terrainTypes[9])
                    .setToValue(realWater.deflate(20), terrainTypes[10]);
     }
