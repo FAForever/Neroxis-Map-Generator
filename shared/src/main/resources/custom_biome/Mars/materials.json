@@ -24,6 +24,19 @@
     32.0,
     128.0
   ],
+  "terrainTypes": [
+    8,
+    5,
+    8,
+    8,
+    8,
+    8,
+    5,
+    156,
+    156,
+    221,
+    223
+  ],
   "normalPaths": [
     "/env/Desert/Layers/Des_Gravel_normal.dds",
     "/env/Desert/Layers/Des_sandLight_normal.dds",

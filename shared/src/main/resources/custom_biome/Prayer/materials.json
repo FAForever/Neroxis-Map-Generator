@@ -24,6 +24,19 @@
     16.0,
     128.0
   ],
+  "terrainTypes": [
+    84,
+    84,
+    82,
+    82,
+    82,
+    82,
+    40,
+    156,
+    159,
+    221,
+    223
+  ],
   "normalPaths": [
     "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
     "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
