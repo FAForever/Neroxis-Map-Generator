@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.texture;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
@@ -81,6 +82,18 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     protected void setupTerrainType(int mapSize) {
         terrainType.setSize(mapSize);
+        BooleanMask realWater = realLand.copy().invert().setSize(mapSize);
+
+        // setSize enforces symmetry, so we need to get rid of the symmetry settings first
+        SymmetrySettings noSymmetry = new SymmetrySettings(Symmetry.NONE);
+        accentGroundTexture.setSymmetrySettings(noSymmetry);
+        accentPlateauTexture.setSymmetrySettings(noSymmetry);
+        slopesTexture.setSymmetrySettings(noSymmetry);
+        accentSlopesTexture.setSymmetrySettings(noSymmetry);
+        steepHillsTexture.setSymmetrySettings(noSymmetry);
+        waterBeachTexture.setSymmetrySettings(noSymmetry);
+        accentRockTexture.setSymmetrySettings(noSymmetry);
+        rockTexture.setSymmetrySettings(noSymmetry);
 
         Integer[] terrainTypes = map.getBiome().getTerrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
@@ -109,7 +122,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         steepHillsTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
+        terrainType = new IntegerMask(1, random.nextLong(), new SymmetrySettings(Symmetry.NONE), "terrainType", true);
     }
 
     @Override
