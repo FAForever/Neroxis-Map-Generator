@@ -120,7 +120,6 @@ public class SCMap {
         navalRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
-        cubeMaps.add(new CubeMap("<default>", "/textures/environment/defaultenvcube.dds"));
         skyBox = new SkyBox();
 
         generatePreview = true;

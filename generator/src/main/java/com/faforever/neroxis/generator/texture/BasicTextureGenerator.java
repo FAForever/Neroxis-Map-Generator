@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -123,6 +124,9 @@ public class BasicTextureGenerator extends TextureGenerator {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
+            for (CubeMap cubeMap : map.getBiome().getTerrainMaterials().getCubeMaps()) {
+                map.addCubeMap(cubeMap);
+            }
         });
     }
 

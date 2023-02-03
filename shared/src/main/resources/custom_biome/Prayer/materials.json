@@ -1,5 +1,13 @@
 {
   "name": "Prayer",
+  "cubeMapNames": [
+    "<default>",
+    "<ship>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/defaultenvcube.dds",
+    "/textures/environment/defaultenvcube-mirrored.dds"
+  ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
