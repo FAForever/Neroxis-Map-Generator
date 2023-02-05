@@ -1,5 +1,13 @@
 {
   "name": "Loki",
+  "cubeMapNames": [
+    "<default>",
+    "<water>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/DefaultEnvCube.dds",
+    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvGrass007_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",

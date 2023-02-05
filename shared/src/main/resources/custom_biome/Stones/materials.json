@@ -1,5 +1,13 @@
 {
   "name": "Stones",
+  "cubeMapNames": [
+    "<default>",
+    "<water>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/DefaultEnvCube.dds",
+    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  ],
   "texturePaths": [
     "/env/paradise/layers/grass001_albedo.dds",
     "/env/paradise/layers/Rock001_albedo.dds",

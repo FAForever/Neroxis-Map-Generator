@@ -1,5 +1,13 @@
 {
   "name": "Desert",
+  "cubeMapNames": [
+    "<default>",
+    "<water>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/DefaultEnvCube.dds",
+    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  ],
   "texturePaths": [
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_SandMed02_albedo.dds",

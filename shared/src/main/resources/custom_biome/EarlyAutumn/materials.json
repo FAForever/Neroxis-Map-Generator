@@ -22,6 +22,14 @@
     6.0
   ],
   "name": "EarlyAutumn",
+  "cubeMapNames": [
+    "<default>",
+    "<water>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/DefaultEnvCube.dds",
+    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  ],
   "normalPaths": [
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
     "/env/evergreen2/layers/eg_grass001_normal.dds",

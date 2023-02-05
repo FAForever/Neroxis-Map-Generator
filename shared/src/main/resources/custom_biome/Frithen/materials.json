@@ -1,5 +1,13 @@
 {
   "name": "Frithen",
+  "cubeMapNames": [
+    "<default>",
+    "<water>"
+  ],
+  "cubeMapPaths": [
+    "/textures/environment/DefaultEnvCube.dds",
+    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  ],
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
     "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
