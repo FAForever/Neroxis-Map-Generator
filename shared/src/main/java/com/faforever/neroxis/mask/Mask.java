@@ -37,7 +37,7 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     @Getter
     private final String name;
     @Getter
-    protected SymmetrySettings symmetrySettings;
+    protected final SymmetrySettings symmetrySettings;
     private boolean immutable;
     private int plannedSize;
     @Getter

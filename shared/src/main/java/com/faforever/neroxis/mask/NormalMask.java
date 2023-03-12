@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.annotations.GraphParameter;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -12,20 +13,19 @@ import java.awt.image.WritableRaster;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class NormalMask extends VectorMask<Vector3, NormalMask> {
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, false);
+        this(size, seed, null, false);
     }
 
     @GraphMethod
     @GraphParameter(name = "name", value = "identifier")
     @GraphParameter(name = "parallel", value = "true")
     @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
-    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+    public NormalMask(int size, Long seed, String name, boolean parallel) {
+        super(size, seed, new SymmetrySettings(Symmetry.NONE), name, parallel);
     }
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
+        this(size, seed, name, false);
     }
 
     public NormalMask(NormalMask other) {
@@ -42,7 +42,7 @@ public class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     protected NormalMask(FloatMask other, float scale, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), other.getNextSeed(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -60,7 +60,7 @@ public class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name,
                       boolean parallel) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+        this(sourceImage.getHeight(), seed, name, parallel);
         Raster imageRaster = sourceImage.getData();
         set((x, y) -> {
             float[] components = imageRaster.getPixel(x, y, new float[4]);

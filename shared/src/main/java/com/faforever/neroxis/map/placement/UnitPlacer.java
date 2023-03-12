@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class UnitPlacer {
     public static final String[] T1_Land = {"UEL0201", "URL0107", "UAL0201", "XSL0201"};
@@ -54,7 +53,7 @@ public class UnitPlacer {
                                                  .stream()
                                                  .limit((MAX_UNIT_COUNT - army.getNumUnits()) / numUnitsInTemplate)
                                                  .peek(Vector::roundToNearestHalfPoint)
-                                                 .collect(Collectors.toList());
+                                                 .toList();
             for (Vector2 location : coordinates) {
                 BaseTemplate base = new BaseTemplate(location, units);
                 base.addUnits(army, group);
@@ -86,7 +85,7 @@ public class UnitPlacer {
                                                                    .getSpawnSymmetry()
                                                                    .getNumSymPoints())
                                                  .peek(Vector2::roundToNearestHalfPoint)
-                                                 .collect(Collectors.toList());
+                                                 .toList();
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
             for (Vector2 location : coordinates) {

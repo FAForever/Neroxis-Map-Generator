@@ -1,7 +1,6 @@
 package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
-import lombok.Value;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,8 +66,8 @@ public class VisualDebugger {
     }
 
     private static void updateVisibleCanvas(MaskListItem maskListItem) {
-        String maskName = maskListItem.getMaskName();
-        Mask<?, ?> mask = maskListItem.getMask();
+        String maskName = maskListItem.maskName();
+        Mask<?, ?> mask = maskListItem.mask();
         canvas.setMask(mask);
         frame.setTitle(String.format("Mask: %s MaskSize: %d", maskName, mask.getSize()));
     }
@@ -103,11 +102,7 @@ public class VisualDebugger {
         }
     }
 
-    @Value
-    public static class MaskListItem {
-        String maskName;
-        Mask<?, ?> mask;
-
+    public record MaskListItem(String maskName, Mask<?, ?> mask) {
         @Override
         public String toString() {
             return maskName;

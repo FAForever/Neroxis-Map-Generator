@@ -104,8 +104,8 @@ public class GeneratorGraphSerializationUtil {
                                                                                                             entry.getValue())));
 
                 jsonPipeline.getEdges().forEach(((jsonGraphEdge, sourceTarget) -> {
-                    MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.getSource());
-                    MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.getTarget());
+                    MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.source());
+                    MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.target());
                     MaskMethodEdge edge = JsonGraphMapUtils.map(jsonGraphEdge);
                     graph.addEdge(source, target, edge);
                     target.setParameter(edge.getParameterName(),

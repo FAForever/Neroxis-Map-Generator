@@ -491,9 +491,7 @@ public class FloatMask extends PrimitiveMask<Float, FloatMask> {
      */
     @GraphMethod(returnsSelf = false)
     public NormalMask copyAsNormalMask(float scale) {
-        NormalMask normalMask = new NormalMask(this, scale, getName() + "Normals");
-        normalMask.symmetrySettings = new SymmetrySettings(Symmetry.NONE);
-        return normalMask;
+        return new NormalMask(this, scale, getName() + "Normals");
     }
 
     public BufferedImage writeToImage(BufferedImage image, float scaleFactor) {

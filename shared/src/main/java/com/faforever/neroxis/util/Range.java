@@ -10,7 +10,7 @@ public class Range {
     float max;
     float range;
 
-    public Range(float min, float max) {
+    private Range(float min, float max) {
         if (max < min) {
             throw new IllegalArgumentException(String.format("Max %f greater than Min %f", max, min));
         }

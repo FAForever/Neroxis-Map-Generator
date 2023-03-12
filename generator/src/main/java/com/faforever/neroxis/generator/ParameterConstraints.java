@@ -2,15 +2,16 @@ package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.util.Range;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings({"unused"})
 @Value
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ParameterConstraints {
     Range landDensityRange;
     Range mountainDensityRange;
@@ -102,7 +103,7 @@ public class ParameterConstraints {
         Range mapSizeRange = Range.of(0, 2048);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
-        List<String> biomes = new ArrayList<>(Biomes.BIOMES_LIST);
+        List<String> biomes = Biomes.BIOMES_LIST;
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
@@ -161,7 +162,7 @@ public class ParameterConstraints {
         }
 
         public ParameterConstraintsBuilder biomes(String... biomeNames) {
-            biomes = Arrays.asList(biomeNames);
+            biomes = List.of(biomeNames);
             return this;
         }
     }

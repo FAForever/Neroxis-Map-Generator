@@ -1,13 +1,14 @@
 package com.faforever.neroxis.map;
 
-import lombok.Data;
+import lombok.Value;
 
+import java.util.Collection;
 import java.util.List;
 
-@Data
+@Value
 public class Army {
-    private final String id;
-    private final List<Group> groups;
+    String id;
+    List<Group> groups;
 
     public Group getGroup(String id) {
         return groups.stream().filter(group -> group.getId().equals(id)).findFirst().orElse(null);
@@ -26,6 +27,6 @@ public class Army {
     }
 
     public int getNumUnits() {
-        return groups.stream().mapToInt(group -> group.getUnits().size()).sum();
+        return groups.stream().map(Group::getUnits).mapToInt(Collection::size).sum();
     }
 }

@@ -118,7 +118,7 @@ public abstract class MaskGraphVertex<T extends Executable> {
 
         if (Mask.class.isAssignableFrom(getParameterClass(parameter))) {
             return Optional.ofNullable(maskParameters.get(parameter.getName()))
-                           .map(MaskVertexResult::getSourceVertex)
+                           .map(MaskVertexResult::sourceVertex)
                            .map(MaskGraphVertex::getIdentifier)
                            .orElse(null);
         }

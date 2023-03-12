@@ -56,12 +56,12 @@ public class BaseTemplate {
         LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
         SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scUnitsFile),
                                                    SCUnitSet.class);
-        for (SCUnitSet.SCUnit unit : scUnitSet.getUnits()) {
-            unit.getPos().subtract(scUnitSet.getCenter()).multiply(10f).roundXYToNearestHalfPoint();
-            if (units.containsKey(unit.getID())) {
-                units.get(unit.getID()).add(new Vector2(unit.getPos()));
+        for (SCUnitSet.SCUnit unit : scUnitSet.Units()) {
+            unit.pos().subtract(scUnitSet.Center()).multiply(10f).roundXYToNearestHalfPoint();
+            if (units.containsKey(unit.ID())) {
+                units.get(unit.ID()).add(new Vector2(unit.pos()));
             } else {
-                units.put(unit.getID(), new LinkedHashSet<>(List.of(new Vector2(unit.getPos()))));
+                units.put(unit.ID(), new LinkedHashSet<>(List.of(new Vector2(unit.pos()))));
             }
         }
         return units;

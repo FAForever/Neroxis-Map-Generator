@@ -11,7 +11,6 @@ import lombok.Data;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -21,9 +20,9 @@ public class Biomes {
     // ├-- props.json <required>
     // ├-- WaterSettings.scmwtr <required>
     // └-- Light.scmlighting <required>
-    public static final List<String> BIOMES_LIST = Arrays.asList("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                                                                 "Loki", "Mars", "Moonlight", "Prayer", "Stones",
-                                                                 "Syrtis", "WindingRiver", "Wonder");
+    public static final List<String> BIOMES_LIST = List.of("Brimstone", "Desert", "EarlyAutumn", "Frithen",
+                                                           "Loki", "Mars", "Moonlight", "Prayer", "Stones",
+                                                           "Syrtis", "WindingRiver", "Wonder");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(String folderPath) {

@@ -82,8 +82,8 @@ public class GraphSerializationUtil {
                 idVertexMap.values().forEach(graph::addVertex);
 
                 jsonGraph.getEdges().forEach(((jsonGraphEdge, sourceTarget) -> {
-                    MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.getSource());
-                    MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.getTarget());
+                    MaskGraphVertex<?> source = idVertexMap.get(sourceTarget.source());
+                    MaskGraphVertex<?> target = idVertexMap.get(sourceTarget.target());
                     graph.addEdge(source, target, JsonGraphMapUtils.map(jsonGraphEdge));
                 }));
             } catch (IOException e) {
