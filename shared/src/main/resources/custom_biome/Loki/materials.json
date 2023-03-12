@@ -5,8 +5,8 @@
     "<water>"
   ],
   "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+    "/textures/environment/SkyCube_TropicalOp06.dds",
+    "/textures/environment/SkyCube_TropicalOp06a.dds"
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvGrass007_albedo.dds",

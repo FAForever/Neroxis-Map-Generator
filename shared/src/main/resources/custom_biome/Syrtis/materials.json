@@ -5,8 +5,8 @@
     "<water>"
   ],
   "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+    "/textures/environment/SkyCube_RedRocks06.dds",
+    "/textures/environment/SkyCube_RedRocks06.dds"
   ],
   "texturePaths": [
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",

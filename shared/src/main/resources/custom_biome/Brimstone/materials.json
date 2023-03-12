@@ -27,8 +27,8 @@
     "<water>"
   ],
   "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+    "/textures/environment/SkyCube_RedRocks08a.dds",
+    "/textures/environment/SkyCube_RedRocks08a.dds"
   ],
   "normalPaths": [
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",

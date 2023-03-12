@@ -5,8 +5,8 @@
     "<water>"
   ],
   "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+    "/textures/environment/SkyCube_Desert03a.dds",
+    "/textures/environment/SkyCube_Desert03a.dds"
   ],
   "texturePaths": [
     "/env/paradise/layers/grass001_albedo.dds",

@@ -5,8 +5,8 @@
     "<water>"
   ],
   "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+    "/textures/environment/SkyCube_Tundra04a.dds",
+    "/textures/environment/SkyCube_Tundra04a.dds"
   ],
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
