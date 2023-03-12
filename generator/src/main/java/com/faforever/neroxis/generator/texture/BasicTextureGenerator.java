@@ -82,7 +82,6 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     protected void setupTerrainType(int mapSize) {
         terrainType.setSize(mapSize);
-        terrainType.startVisualDebugger();
         BooleanMask realWater = realLand.copy().invert().setSize(mapSize);
 
         Integer[] terrainTypes = map.getBiome().getTerrainMaterials().getTerrainTypes();
