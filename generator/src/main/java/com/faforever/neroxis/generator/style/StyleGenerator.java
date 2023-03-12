@@ -14,6 +14,8 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.AIMarkerPlacer;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -160,7 +162,7 @@ public abstract class StyleGenerator extends ElementGenerator {
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();
 
-        textureGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+        textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE), terrainGenerator);
         resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
         propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
         decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
