@@ -24,6 +24,19 @@
     8.0,
     128.0
   ],
+  "terrainTypes": [
+    7,
+    8,
+    7,
+    7,
+    7,
+    7,
+    8,
+    156,
+    156,
+    221,
+    223
+  ],
   "normalPaths": [
     "/env/paradise/layers/SandMed_normals.dds",
     "/env/paradise/layers/Rock001_normals.dds",

@@ -24,6 +24,19 @@
     16.0,
     128.0
   ],
+  "terrainTypes": [
+    200,
+    201,
+    201,
+    201,
+    200,
+    200,
+    200,
+    153,
+    153,
+    221,
+    223
+  ],
   "normalPaths": [
     "/env/Tundra/Layers/Tund_Rock_normal.dds",
     "/env/Tundra/Layers/Tund_Ice003_normal.dds",

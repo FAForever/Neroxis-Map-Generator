@@ -15,5 +15,17 @@ public class TerrainMaterials {
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
     private Integer[] previewColors = new Integer[TERRAIN_NORMAL_COUNT];
-    private Integer[] terrainTypes = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private Integer[] terrainTypes = {
+            1,  // ground
+            1,  // groundAccent
+            1,  // plateauAccent
+            1,  // slopes
+            1,  // slopesAccent
+            1,  // steepHills
+            40,  // beach
+            150,  // rock
+            150,  // rockAccent
+            221,  // shallowWater
+            223   // deepWater
+    };
 }

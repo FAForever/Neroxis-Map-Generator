@@ -7,7 +7,7 @@
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_Rock06_albedo.dds",
     "/env/Desert/Layers/Des_SandMed02_albedo.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
+    "/env/paradise/layers/sand000_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Sandwet01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
@@ -19,10 +19,23 @@
     10.0,
     10.0,
     7.0,
-    12.0,
+    8.0,
     16.0,
     32.0,
     128.0
+  ],
+  "terrainTypes": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    40,
+    154,
+    154,
+    221,
+    223
   ],
   "normalPaths": [
     "/env/Desert/Layers/Des_Gravel_normal.dds",
@@ -31,7 +44,7 @@
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
     "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
-    "/env/Desert/Layers/Des_Rock02_normal.dds",
+    "/env/Desert/Layers/Des_sandWet_normal.dds",
     "/env/Red Barrens/Layers/RB_Sand_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS"
   ],
@@ -42,7 +55,7 @@
     6.0,
     8.0,
     7.0,
-    4.0,
+    5.0,
     7.0,
     7.0
   ],
@@ -53,7 +66,7 @@
     -9940934,
     -11845328,
     -8293798,
-    -9490404,
+    -10069694,
     -13627131,
     -11329514
   ]
