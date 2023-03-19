@@ -18,9 +18,9 @@ allprojects {
     dependencies {
         implementation('info.picocli:picocli:4.6.3')
         implementation('com.github.therapi:therapi-runtime-javadoc:0.15.0')
-        compileOnly('org.projectlombok:lombok:1.18.24')
+        compileOnly('org.projectlombok:lombok:1.18.26')
 
-        annotationProcessor('org.projectlombok:lombok:1.18.24')
+        annotationProcessor('org.projectlombok:lombok:1.18.26')
         annotationProcessor('info.picocli:picocli-codegen:4.6.3')
         annotationProcessor('com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0')
 
