@@ -22,13 +22,15 @@
     6.0
   ],
   "name": "Brimstone",
-  "cubeMapNames": [
-    "<default>",
-    "<water>"
-  ],
-  "cubeMapPaths": [
-    "/textures/environment/SkyCube_RedRocks08a.dds",
-    "/textures/environment/SkyCube_RedRocks08a.dds"
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_RedRocks08a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_RedRocks08a.dds"
+    }
   ],
   "normalPaths": [
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",

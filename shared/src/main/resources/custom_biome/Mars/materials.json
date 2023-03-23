@@ -1,12 +1,14 @@
 {
   "name": "Mars",
-  "cubeMapNames": [
-    "<default>",
-    "<water>"
-  ],
-  "cubeMapPaths": [
-    "/textures/environment/SkyCube_Desert02.dds",
-    "/textures/environment/SkyCube_Desert02a.dds"
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Desert02.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Desert02a.dds"
+    }
   ],
   "texturePaths": [
     "/env/Desert/Layers/Des_Gravel_albedo.dds",

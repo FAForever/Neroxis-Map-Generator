@@ -120,6 +120,9 @@ public class SCMap {
         navalRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
         cubeMaps = new ArrayList<>();
+        for (CubeMap cubeMap : biome.getTerrainMaterials().getCubeMaps()) {
+            addCubeMap(cubeMap);
+        }
         skyBox = new SkyBox();
 
         generatePreview = true;

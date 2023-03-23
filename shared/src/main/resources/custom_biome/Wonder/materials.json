@@ -1,12 +1,14 @@
 {
   "name": "Wonder",
-  "cubeMapNames": [
-    "<default>",
-    "<water>"
-  ],
-  "cubeMapPaths": [
-    "/textures/environment/DefaultEnvCube.dds",
-    "/textures/environment/DefaultEnvCube_mirrored.dds"
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/DefaultEnvCube.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/DefaultEnvCube_mirrored.dds"
+    }
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",

@@ -1,12 +1,14 @@
 {
   "name": "Stones",
-  "cubeMapNames": [
-    "<default>",
-    "<water>"
-  ],
-  "cubeMapPaths": [
-    "/textures/environment/SkyCube_Desert03a.dds",
-    "/textures/environment/SkyCube_Desert03a.dds"
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    }
   ],
   "texturePaths": [
     "/env/paradise/layers/grass001_albedo.dds",

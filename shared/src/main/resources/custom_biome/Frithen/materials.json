@@ -1,12 +1,14 @@
 {
   "name": "Frithen",
-  "cubeMapNames": [
-    "<default>",
-    "<water>"
-  ],
-  "cubeMapPaths": [
-    "/textures/environment/SkyCube_Tundra04a.dds",
-    "/textures/environment/SkyCube_Tundra04a.dds"
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    }
   ],
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
