@@ -12,9 +12,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
@@ -127,21 +124,10 @@ public class BasicTextureGenerator extends TextureGenerator {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            setCubeMaps(
-                    map.getBiome().getTerrainMaterials().getCubeMapNames(),
-                    map.getBiome().getTerrainMaterials().getCubeMapPaths()
-            );
+            for (CubeMap cubeMap : map.getBiome().getTerrainMaterials().getCubeMaps()) {
+                map.addCubeMap(cubeMap);
+            }
         });
-    }
-
-    private void setCubeMaps(String[] cubeMapNames, String[] cubeMapPaths) {
-        List<CubeMap> cubeMaps = new ArrayList<>();
-        for (int i = 0; i < cubeMapNames.length; i++) {
-            cubeMaps.add(new CubeMap(cubeMapNames[i], cubeMapPaths[i]));
-        }
-        for (CubeMap cubeMap : cubeMaps) {
-            map.addCubeMap(cubeMap);
-        }
     }
 
     @Override

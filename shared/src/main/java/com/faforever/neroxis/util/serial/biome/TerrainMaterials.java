@@ -1,7 +1,11 @@
 package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
+import com.faforever.neroxis.map.CubeMap;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @CompiledJson
@@ -12,6 +16,7 @@ public class TerrainMaterials {
     private String name;
     private String[] cubeMapNames;
     private String[] cubeMapPaths;
+    private List<CubeMap> cubeMaps = makeCubeMaps(cubeMapNames, cubeMapPaths);
     private String[] texturePaths = new String[TERRAIN_TEXTURE_COUNT];
     private float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
@@ -30,4 +35,12 @@ public class TerrainMaterials {
             221,  // shallowWater
             223   // deepWater
     };
+
+    private static List<CubeMap> makeCubeMaps(String[] cubeMapNames, String[] cubeMapPaths) {
+        List<CubeMap> cubeMaps = new ArrayList<>();
+        for (int i = 0; i < cubeMapNames.length; i++) {
+            cubeMaps.add(new CubeMap(cubeMapNames[i], cubeMapPaths[i]));
+        }
+        return cubeMaps;
+    }
 }
