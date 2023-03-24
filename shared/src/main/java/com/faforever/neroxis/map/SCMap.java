@@ -59,7 +59,6 @@ public class SCMap {
     private final List<AIMarker> largeExpansionAIMarkers;
     private final List<AIMarker> navalAreaAIMarkers;
     private final List<AIMarker> navalRallyMarkers;
-    private final List<CubeMap> cubeMaps;
     private byte[] compressedNormal;
     private byte[] compressedShadows;
     private float heightMapScale = 1f / 128f;
@@ -119,10 +118,6 @@ public class SCMap {
         navalAreaAIMarkers = new ArrayList<>();
         navalRallyMarkers = new ArrayList<>();
         waveGenerators = new ArrayList<>();
-        cubeMaps = new ArrayList<>();
-        for (CubeMap cubeMap : biome.getTerrainMaterials().getCubeMaps()) {
-            addCubeMap(cubeMap);
-        }
         skyBox = new SkyBox();
 
         generatePreview = true;
@@ -448,18 +443,6 @@ public class SCMap {
 
     public void addWaveGenerator(WaveGenerator waveGenerator) {
         waveGenerators.add(waveGenerator);
-    }
-
-    public int getCubeMapCount() {
-        return cubeMaps.size();
-    }
-
-    public CubeMap getCubemap(int i) {
-        return cubeMaps.get(i);
-    }
-
-    public void addCubeMap(CubeMap cubeMap) {
-        cubeMaps.add(cubeMap);
     }
 
     private void scaleMapContent(float contentScale) {

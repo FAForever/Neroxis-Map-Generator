@@ -134,6 +134,10 @@ public class SCMapImporter {
             mapTerrainMaterials.getNormalScales()[i] = readFloat();
         }
 
+        for (CubeMap cubeMap : cubeMaps) {
+            mapTerrainMaterials.getCubeMaps().add(cubeMap);
+        }
+
         readInt(); // unknown
         readInt(); // unknown
 
@@ -245,10 +249,6 @@ public class SCMapImporter {
         }
         for (DecalGroup decalGroup : decalGroups) {
             map.addDecalGroup(decalGroup);
-        }
-        map.getCubeMaps().clear();
-        for (CubeMap cubeMap : cubeMaps) {
-            map.addCubeMap(cubeMap);
         }
         return map;
     }

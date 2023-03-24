@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
@@ -83,8 +84,9 @@ public class SCMapExporter {
         writeStringNull(map.getTerrainShaderPath());
         writeStringNull(map.getBackgroundPath());
         writeStringNull(map.getSkyCubePath());
-        writeInt(map.getCubeMapCount());
-        for (CubeMap cubeMap : map.getCubeMaps()) {
+        List<CubeMap> cubeMaps = map.getBiome().getTerrainMaterials().getCubeMaps();
+        writeInt(cubeMaps.size());
+        for (CubeMap cubeMap : cubeMaps) {
             writeStringNull(cubeMap.getName());
             writeStringNull(cubeMap.getPath());
         }
