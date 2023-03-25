@@ -49,7 +49,7 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
     protected void plateausSetup() {
         int mapSize = map.getSize();
         float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange()
-                                                             .normalize(generatorParameters.getPlateauDensity());
+                                                             .normalize(generatorParameters.plateauDensity());
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 

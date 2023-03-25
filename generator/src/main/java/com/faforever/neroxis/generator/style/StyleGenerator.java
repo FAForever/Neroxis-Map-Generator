@@ -112,30 +112,30 @@ public abstract class StyleGenerator extends ElementGenerator {
         this.generatorParameters = generatorParameters;
         random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                                                                                   generatorParameters.getTerrainSymmetry(),
-                                                                                   generatorParameters.getSpawnCount(),
-                                                                                   generatorParameters.getNumTeams());
-        map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
-        map.setUnexplored(generatorParameters.getVisibility() == Visibility.UNEXPLORED);
-        map.setGeneratePreview(generatorParameters.getVisibility() != Visibility.BLIND && !map.isUnexplored());
+                                                                                   generatorParameters.terrainSymmetry(),
+                                                                                   generatorParameters.spawnCount(),
+                                                                                   generatorParameters.numTeams());
+        map = new SCMap(generatorParameters.mapSize(), generatorParameters.biome());
+        map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
+        map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
         Pipeline.reset();
 
-        if (generatorParameters.getNumTeams() < 2) {
-            spawnSeparation = (float) generatorParameters.getMapSize() / generatorParameters.getSpawnCount() * 1.5f;
+        if (generatorParameters.numTeams() < 2) {
+            spawnSeparation = (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
             teamSeparation = 0;
-        } else if (generatorParameters.getNumTeams() == 2) {
+        } else if (generatorParameters.numTeams() == 2) {
             spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
             teamSeparation = map.getSize() / 2;
         } else {
-            if (generatorParameters.getNumTeams() < 8) {
+            if (generatorParameters.numTeams() < 8) {
                 spawnSeparation = random.nextInt(
-                        map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
+                        map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16)
                                   + map.getSize() / 16f;
             } else {
                 spawnSeparation = 0;
             }
-            teamSeparation = StrictMath.min(map.getSize() / generatorParameters.getNumTeams(), 256);
+            teamSeparation = StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
         }
 
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
@@ -144,7 +144,7 @@ public abstract class StyleGenerator extends ElementGenerator {
     @Override
     public void setupPipeline() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.getSpawnCount(), spawnSeparation,
+                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnSeparation,
                                                          teamSeparation, symmetrySettings));
 
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
@@ -196,7 +196,7 @@ public abstract class StyleGenerator extends ElementGenerator {
     }
 
     public String generatorsToString() {
-        if (generatorParameters.getVisibility() == null) {
+        if (generatorParameters.visibility() == null) {
             return "TerrainGenerator: "
                    + terrainGenerator.getClass().getSimpleName()
                    + "\nTextureGenerator: "

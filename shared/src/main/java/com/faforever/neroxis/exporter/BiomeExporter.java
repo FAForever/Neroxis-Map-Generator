@@ -5,7 +5,7 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.dds.DDSReader;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,22 +23,21 @@ public class BiomeExporter {
         Files.createDirectories(folderPath.resolve(biomeName));
 
         filename = folderPath.resolve(biomeName).resolve("Light.scmlighting").toString();
-        FileUtil.serialize(filename, biome.getLightingSettings());
+        FileUtil.serialize(filename, biome.lightingSettings());
 
         filename = folderPath.resolve(biomeName).resolve("WaterSettings.scmwtr").toString();
-        FileUtil.serialize(filename, biome.getWaterSettings());
+        FileUtil.serialize(filename, biome.waterSettings());
 
-        Integer[] previewColors = biome.getTerrainMaterials().getPreviewColors();
-        String[] texturePaths = biome.getTerrainMaterials().getTexturePaths();
+        Integer[] previewColors = biome.terrainMaterials().getPreviewColors();
+        String[] texturePaths = biome.terrainMaterials().getTexturePaths();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (previewColors[i] == null && !texturePaths[i].isEmpty()) {
                 previewColors[i] = getTexturePreviewColor(envDir, texturePaths[i]);
             }
         }
-        biome.getTerrainMaterials().setName(biomeName);
 
         filename = folderPath.resolve(biomeName).resolve("materials.json").toString();
-        FileUtil.serialize(filename, biome.getTerrainMaterials());
+        FileUtil.serialize(filename, biome.terrainMaterials());
     }
 
     public static Integer getTexturePreviewColor(Path envDir, String texturePath) throws IOException {

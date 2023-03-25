@@ -34,7 +34,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+        if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
             Pipeline.await(landWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {

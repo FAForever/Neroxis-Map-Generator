@@ -84,7 +84,7 @@ public class MapPopulator implements Callable<Integer> {
                                                                  symmetryRequiredSettings.getTerrainSymmetry());
 
         Random random = new Random();
-        boolean waterPresent = map.getBiome().getWaterSettings().isWaterPresent();
+        boolean waterPresent = map.getBiome().waterSettings().isWaterPresent();
         FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,
                                                 map.getHeightMapScale(), "heightmapBase");
         heightmapBase = heightmapBase.copy();
@@ -92,7 +92,7 @@ public class MapPopulator implements Callable<Integer> {
         heightmapBase.writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale());
         float waterHeight;
         if (waterPresent) {
-            waterHeight = map.getBiome().getWaterSettings().getElevation();
+            waterHeight = map.getBiome().waterSettings().getElevation();
         } else {
             waterHeight = heightmapBase.getMin();
         }
@@ -391,7 +391,7 @@ public class MapPopulator implements Callable<Integer> {
         if (biome != null) {
             map.getProps().clear();
             PropPlacer propPlacer = new PropPlacer(map, random.nextLong());
-            PropMaterials propMaterials = biome.getPropMaterials();
+            PropMaterials propMaterials = biome.propMaterials();
 
             BooleanMask flatEnough = slope.copyAsBooleanMask(.02f);
             BooleanMask flatish = slope.copyAsBooleanMask(.042f);

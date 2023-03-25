@@ -47,7 +47,7 @@ public abstract class TextureGenerator extends ElementGenerator {
         shadowsMask = heightmap.copy()
                                .resample(512)
                                .copyAsShadowMask(
-                                       generatorParameters.getBiome().getLightingSettings().getSunDirection());
+                                       generatorParameters.biome().lightingSettings().getSunDirection());
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(2);
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
@@ -66,7 +66,7 @@ public abstract class TextureGenerator extends ElementGenerator {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.getBiome().getLightingSettings()));
+                                                              generatorParameters.biome().lightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
@@ -90,7 +90,7 @@ public abstract class TextureGenerator extends ElementGenerator {
         reflectance = heightmap.copy()
                                .copyAsNormalMask(8f)
                                .resample(PreviewGenerator.PREVIEW_SIZE)
-                               .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection())
+                               .copyAsDotProduct(map.getBiome().lightingSettings().getSunDirection())
                                .add(1f)
                                .divide(2f);
     }

@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -461,10 +461,10 @@ public class SCMap {
     }
 
     private void scaleMapContent(float contentScale) {
-        this.biome.getWaterSettings().setElevation(this.biome.getWaterSettings().getElevation() * contentScale);
-        this.biome.getWaterSettings().setElevationDeep(this.biome.getWaterSettings().getElevationDeep() * contentScale);
-        this.biome.getWaterSettings()
-                  .setElevationAbyss(this.biome.getWaterSettings().getElevationAbyss() * contentScale);
+        this.biome.waterSettings().setElevation(this.biome.waterSettings().getElevation() * contentScale);
+        this.biome.waterSettings().setElevationDeep(this.biome.waterSettings().getElevationDeep() * contentScale);
+        this.biome.waterSettings()
+                  .setElevationAbyss(this.biome.waterSettings().getElevationAbyss() * contentScale);
 
         RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
         heightRescale.filter(heightmap, heightmap);
@@ -685,10 +685,10 @@ public class SCMap {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("SCMap%n"));
-        stringBuilder.append(String.format("Biome: %s%n", biome.getName()));
-        stringBuilder.append(String.format("%s%n", biome.getLightingSettings().toString()));
-        stringBuilder.append(String.format("%s%n", biome.getWaterSettings().toString()));
-        stringBuilder.append(String.format("Terrain Materials: %s%n", biome.getTerrainMaterials().toString()));
+        stringBuilder.append(String.format("Biome: %s%n", biome.name()));
+        stringBuilder.append(String.format("%s%n", biome.lightingSettings().toString()));
+        stringBuilder.append(String.format("%s%n", biome.waterSettings().toString()));
+        stringBuilder.append(String.format("Terrain Materials: %s%n", biome.terrainMaterials().toString()));
         stringBuilder.append(String.format("Size: %d%n", size));
         int numDecals = decals.size();
         for (int i = 0; i < numDecals; i++) {

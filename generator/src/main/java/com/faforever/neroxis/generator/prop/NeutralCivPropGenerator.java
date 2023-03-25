@@ -30,7 +30,7 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+        if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
             Pipeline.await(civReclaimMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {

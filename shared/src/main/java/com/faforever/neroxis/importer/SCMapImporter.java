@@ -20,7 +20,7 @@ import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.BufferedInputStream;
@@ -113,7 +113,7 @@ public class SCMapImporter {
         }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = new TerrainMaterials();
+        TerrainMaterials mapTerrainMaterials = new TerrainMaterials(null);
         int miniMapContourInterval = readInt();
         int miniMapDeepWaterColor = readInt();
         int miniMapContourColor = readInt();

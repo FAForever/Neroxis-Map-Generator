@@ -18,7 +18,7 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     public void setX(float x) {
-        components[0] = x;
+        components[Vector.X] = x;
     }
 
     public float getY() {
@@ -26,7 +26,7 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     public void setY(float y) {
-        components[1] = y;
+        components[Vector.Y] = y;
     }
 
     public float getW() {
@@ -34,7 +34,7 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     public void setW(float w) {
-        components[3] = w;
+        components[Vector.W] = w;
     }
 
     public float getZ() {
@@ -42,7 +42,7 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     public void setZ(float z) {
-        components[2] = z;
+        components[Vector.Z] = z;
     }
 
     @Override

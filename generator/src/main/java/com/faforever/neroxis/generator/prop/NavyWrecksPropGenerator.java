@@ -36,7 +36,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+        if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
             Pipeline.await(t2NavyWreckMask, navyFactoryWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
@@ -60,7 +60,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.reclaimDensity();
         t2NavyWreckMask.setSize(mapSize + 1);
         navyFactoryWreckMask.setSize(mapSize + 1);
 

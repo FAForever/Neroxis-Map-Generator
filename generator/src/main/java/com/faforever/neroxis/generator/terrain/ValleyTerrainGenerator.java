@@ -35,7 +35,7 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
     protected void mountainSetup() {
         int mapSize = map.getSize();
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
-                                                              .normalize(generatorParameters.getMountainDensity());
+                                                              .normalize(generatorParameters.mountainDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry()

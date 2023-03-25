@@ -18,7 +18,7 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
-        this.generatorParameters.getBiome().getWaterSettings().setElevation(waterHeight + plateauHeight - 1f);
+        this.generatorParameters.biome().waterSettings().setElevation(waterHeight + plateauHeight - 1f);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
         float plateauDensityMin = .65f;
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
         float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange()
-                                                             .normalize(generatorParameters.getPlateauDensity());
+                                                             .normalize(generatorParameters.plateauDensity());
         float scaledPlateauDensity = normalizedPlateauDensity * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 

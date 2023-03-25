@@ -28,7 +28,7 @@ public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator
     protected void mountainSetup() {
         int mapSize = map.getSize();
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
-                                                              .normalize(generatorParameters.getMountainDensity());
+                                                              .normalize(generatorParameters.mountainDensity());
         mountains.setSize(mapSize / 2);
 
         mountains.progressiveWalk(

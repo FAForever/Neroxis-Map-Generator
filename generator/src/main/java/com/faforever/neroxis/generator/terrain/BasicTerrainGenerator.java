@@ -73,7 +73,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise", true);
 
         spawnSize = 48;
-        waterHeight = generatorParameters.getBiome().getWaterSettings().getElevation();
+        waterHeight = generatorParameters.biome().waterSettings().getElevation();
         plateauHeight = 6f;
         oceanFloor = -16f;
         valleyFloor = -5f;
@@ -119,7 +119,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
             spawnLandMask.fillCircle(location, spawnSize, true);
         });
 
-        if (random.nextFloat() < generatorParameters.getPlateauDensity()) {
+        if (random.nextFloat() < generatorParameters.plateauDensity()) {
             map.getSpawns().forEach(spawn -> {
                 Vector3 location = spawn.getPosition();
                 spawnPlateauMask.fillCircle(location, spawnSize, true);
@@ -131,9 +131,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((generatorParameters.getRampDensity()
-                                         + generatorParameters.getPlateauDensity()
-                                         + generatorParameters.getMountainDensity()) / 3 * 2 + 1);
+        int numTeamConnections = (int) ((generatorParameters.rampDensity()
+                                         + generatorParameters.plateauDensity()
+                                         + generatorParameters.mountainDensity()) / 3 * 2 + 1);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
@@ -147,7 +147,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         float landDensityMax = .9f;
         float landDensityMin = .8f;
         float landDensityRange = landDensityMax - landDensityMin;
-        float scaledLandDensity = generatorParameters.getLandDensity() * landDensityRange + landDensityMin;
+        float scaledLandDensity = generatorParameters.landDensity() * landDensityRange + landDensityMin;
         int mapSize = map.getSize();
 
         land.setSize(mapSize / 16);
@@ -167,7 +167,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         float plateauDensityMax = .7f;
         float plateauDensityMin = .6f;
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
-        float scaledPlateauDensity = generatorParameters.getPlateauDensity() * plateauDensityRange + plateauDensityMin;
+        float scaledPlateauDensity = generatorParameters.plateauDensity() * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);
@@ -181,13 +181,13 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         if (random.nextBoolean()) {
             mountains.progressiveWalk(
-                    (int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
-                                                                                            .getNumSymPoints()),
+                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                                                                                         .getNumSymPoints()),
                     map.getSize() / 64);
         } else {
             mountains.randomWalk(
-                    (int) (generatorParameters.getMountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
-                                                                                            .getNumSymPoints()),
+                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                                                                                         .getNumSymPoints()),
                     map.getSize() / 64);
         }
         mountains.dilute(.5f, 4);
@@ -232,7 +232,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         ensureSpawnTerrain();
 
-        mountains.multiply(generatorParameters.getLandDensity() < .25f ? land.copy().deflate(24) : land);
+        mountains.multiply(generatorParameters.landDensity() < .25f ? land.copy().deflate(24) : land);
     }
 
     protected void ensureSpawnTerrain() {
@@ -381,8 +381,8 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     protected void initRamps() {
         float maxStepSize = map.getSize() / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.getRampDensity() * 20) / symmetrySettings.getTerrainSymmetry()
-                                                                                           .getNumSymPoints();
+        int numPaths = (int) (generatorParameters.rampDensity() * 20) / symmetrySettings.getTerrainSymmetry()
+                                                                                        .getNumSymPoints();
         int bound = map.getSize() / 4;
         ramps.setSize(map.getSize() + 1);
 

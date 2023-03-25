@@ -5,14 +5,11 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
-import lombok.Data;
 
-@Data
-public class Biome {
-    final String name;
-    final TerrainMaterials terrainMaterials;
-    final PropMaterials propMaterials;
-    final DecalMaterials decalMaterials;
-    final WaterSettings waterSettings;
-    final LightingSettings lightingSettings;
+public record Biome(String name,
+                    TerrainMaterials terrainMaterials,
+                    PropMaterials propMaterials,
+                    DecalMaterials decalMaterials,
+                    WaterSettings waterSettings,
+                    LightingSettings lightingSettings) {
 }

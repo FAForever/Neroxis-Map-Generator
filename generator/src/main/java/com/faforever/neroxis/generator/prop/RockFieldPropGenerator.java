@@ -28,15 +28,15 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, largeRockFieldMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = generatorParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(),
+            Biome biome = generatorParameters.biome();
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().getTreeGroups(),
                                   3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getRocks(),
+            propPlacer.placeProps(cliffRockMask.getFinalMask().subtract(noProps), biome.propMaterials().getRocks(),
                                   .5f, 3f);
             propPlacer.placeProps(largeRockFieldMask.getFinalMask().subtract(noProps),
-                                  biome.getPropMaterials().getRocks(), .5f, 3.5f);
+                                  biome.propMaterials().getRocks(), .5f, 3.5f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.getPropMaterials().getBoulders(), 20f);
+                                  biome.propMaterials().getBoulders(), 20f);
         });
     }
 
@@ -48,7 +48,7 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
 
     protected void setupRockFieldPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.reclaimDensity();
         largeRockFieldMask.setSize(mapSize / 4);
 
         largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f)

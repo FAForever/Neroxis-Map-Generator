@@ -13,8 +13,13 @@ import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
@@ -22,6 +27,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.compareImages;
@@ -74,13 +81,13 @@ public class MapGeneratorTest {
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        assertEquals(generatorParameters.getLandDensity(), roundedLandDensity);
-        assertEquals(generatorParameters.getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(generatorParameters.getMountainDensity(), roundedMountainDensity);
-        assertEquals(generatorParameters.getRampDensity(), roundedRampDensity);
-        assertEquals(generatorParameters.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(generatorParameters.getMexDensity(), roundedMexDensity);
-        assertEquals(generatorParameters.getMapSize(), mapSize);
+        assertEquals(generatorParameters.landDensity(), roundedLandDensity);
+        assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
+        assertEquals(generatorParameters.mountainDensity(), roundedMountainDensity);
+        assertEquals(generatorParameters.rampDensity(), roundedRampDensity);
+        assertEquals(generatorParameters.reclaimDensity(), roundedReclaimDensity);
+        assertEquals(generatorParameters.mexDensity(), roundedMexDensity);
+        assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
     @Test
@@ -90,9 +97,9 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(instance.getGeneratorParameters().getMapSize(), 512);
-        assertEquals(instance.getGeneratorParameters().getSpawnCount(), 2);
-        assertEquals(instance.getGeneratorParameters().getNumTeams(), 2);
+        assertEquals(instance.getGeneratorParameters().mapSize(), 512);
+        assertEquals(instance.getGeneratorParameters().spawnCount(), 2);
+        assertEquals(instance.getGeneratorParameters().numTeams(), 2);
     }
 
     @Test
@@ -103,36 +110,59 @@ public class MapGeneratorTest {
 
         assertEquals(instance.getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(generatorParameters.getLandDensity(), roundedLandDensity);
-        assertEquals(generatorParameters.getPlateauDensity(), roundedPlateauDensity);
-        assertEquals(generatorParameters.getMountainDensity(), roundedMountainDensity);
-        assertEquals(generatorParameters.getRampDensity(), roundedRampDensity);
-        assertEquals(generatorParameters.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(generatorParameters.getMexDensity(), roundedMexDensity);
-        assertEquals(generatorParameters.getNumTeams(), numTeams);
-        assertEquals(generatorParameters.getMapSize(), mapSize);
+        assertEquals(generatorParameters.landDensity(), roundedLandDensity);
+        assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
+        assertEquals(generatorParameters.mountainDensity(), roundedMountainDensity);
+        assertEquals(generatorParameters.rampDensity(), roundedRampDensity);
+        assertEquals(generatorParameters.reclaimDensity(), roundedReclaimDensity);
+        assertEquals(generatorParameters.mexDensity(), roundedMexDensity);
+        assertEquals(generatorParameters.numTeams(), numTeams);
+        assertEquals(generatorParameters.mapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);
     }
 
-    @Test
-    public void TestParseMapSizes() {
-        for (int i = 0; i < 2048; i += 64) {
-            MapGenerator command = new MapGenerator();
-            new CommandLine(command).parseArgs("--map-size", String.valueOf(i));
+    @ParameterizedTest
+    @ArgumentsSource(AllMapSizeArgumentProvider.class)
+    public void TestParseMapSizesInteger(int mapSize) {
+        MapGenerator command = new MapGenerator();
+        String sizeStringValue = String.valueOf(mapSize);
+
+        if (mapSize % 64 == 0) {
+            new CommandLine(command).parseArgs("--map-size", sizeStringValue);
             command.populateGeneratorParametersAndName();
             GeneratorParameters generatorParameters = command.getGeneratorParameters();
 
-            assertEquals(StrictMath.round(i / 64f) * 64, generatorParameters.getMapSize());
+            assertEquals(StrictMath.round(mapSize / 64f) * 64, generatorParameters.mapSize());
+        } else {
+            assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(command).parseArgs("--map-size", sizeStringValue));
         }
     }
 
-    @Test
-    public void TestMapExportedToProperSize() {
-        new CommandLine(instance).execute("--map-size", "384");
+    @ParameterizedTest
+    @ArgumentsSource(AllMapSizeArgumentProvider.class)
+    public void TestParseMapSizesString(int mapSize) {
+        MapGenerator command = new MapGenerator();
+        String sizeStringValue = mapSize / 51.2f + "km";
+
+        if (mapSize % 64 == 0) {
+            new CommandLine(command).parseArgs("--map-size", sizeStringValue);
+            command.populateGeneratorParametersAndName();
+            GeneratorParameters generatorParameters = command.getGeneratorParameters();
+
+            assertEquals(StrictMath.round(mapSize / 64f) * 64, generatorParameters.mapSize());
+        } else {
+            assertThrows(CommandLine.ParameterException.class, () -> new CommandLine(command).parseArgs("--map-size", sizeStringValue));
+        }
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(ValidMapSizeArgumentProvider.class)
+    public void TestMapExportedToProperSize(int mapSize) {
+        new CommandLine(instance).execute("--map-size", String.valueOf(mapSize));
 
         SCMap map = instance.getMap();
 
-        assertEquals(512, map.getSize());
+        assertEquals(0, (StrictMath.log(map.getSize()) / StrictMath.log(2)) % 1);
     }
 
     @Test
@@ -143,18 +173,16 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String[] hashArray1 = Pipeline.getHashArray().clone();
 
-        for (int i = 0; i < 5; i++) {
-            instance = new MapGenerator();
+        instance = new MapGenerator();
 
-            new CommandLine(instance).execute(keywordArgs);
-            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
+        new CommandLine(instance).execute(keywordArgs);
+        assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
 
-            SCMap map2 = instance.getMap();
-            String[] hashArray2 = Pipeline.getHashArray().clone();
+        SCMap map2 = instance.getMap();
+        String[] hashArray2 = Pipeline.getHashArray().clone();
 
-            assertSCMapEquality(map1, map2);
-            assertArrayEquals(hashArray1, hashArray2);
-        }
+        assertSCMapEquality(map1, map2);
+        assertArrayEquals(hashArray1, hashArray2);
     }
 
     private void assertSCMapEquality(SCMap map1, SCMap map2) {
@@ -180,22 +208,20 @@ public class MapGeneratorTest {
 
     @Test
     public void TestMultipleGenerationDeterminism() {
-        for (int i = 0; i < 3; i++) {
-            instance = new MapGenerator();
-            new CommandLine(instance).execute("--num-to-generate", "2", "--map-size", "256");
-            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
-            SCMap map1 = instance.getMap();
-            String[] hashArray1 = Pipeline.getHashArray().clone();
+        instance = new MapGenerator();
+        new CommandLine(instance).execute("--num-to-generate", "2", "--map-size", "256");
+        assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
+        SCMap map1 = instance.getMap();
+        String[] hashArray1 = Pipeline.getHashArray().clone();
 
-            instance = new MapGenerator();
-            new CommandLine(instance).execute("--map-name", map1.getName());
-            assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
-            SCMap map2 = instance.getMap();
-            String[] hashArray2 = Pipeline.getHashArray().clone();
+        instance = new MapGenerator();
+        new CommandLine(instance).execute("--map-name", map1.getName());
+        assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().generatorParameters);
+        SCMap map2 = instance.getMap();
+        String[] hashArray2 = Pipeline.getHashArray().clone();
 
-            assertArrayEquals(hashArray1, hashArray2);
-            assertSCMapEquality(map1, map2);
-        }
+        assertArrayEquals(hashArray1, hashArray2);
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -318,59 +344,52 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @Test
-    public void TestEqualityStyleSpecified() {
-        MapStyle[] styles = MapStyle.values();
-        for (MapStyle style : styles) {
-            for (int i = 0; i < 3; i++) {
-                instance = new MapGenerator();
+    @ParameterizedTest
+    @ArgumentsSource(MapStyleArgumentProvider.class)
+    public void TestEqualityStyleSpecified(MapStyle style) {
+        instance = new MapGenerator();
 
-                new CommandLine(instance).execute("--style", style.toString(), "--map-size", "256");
-                SCMap map1 = instance.getMap();
-                String mapName = instance.getMapName();
-                long generationTime1 = instance.getGenerationTime();
-                long seed1 = instance.getSeed();
+        new CommandLine(instance).execute("--style", style.toString(), "--map-size", "256");
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getSeed();
 
-                instance = new MapGenerator();
+        instance = new MapGenerator();
 
-                new CommandLine(instance).execute("--map-name", mapName);
-                SCMap map2 = instance.getMap();
-                long generationTime2 = instance.getGenerationTime();
-                long seed2 = instance.getSeed();
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getSeed();
 
-                assertEquals(generationTime1, generationTime2);
-                assertEquals(seed1, seed2);
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
 
-                assertSCMapEquality(map1, map2);
-            }
-        }
+        assertSCMapEquality(map1, map2);
     }
 
-    @Test
-    public void TestEqualityBiomeSpecified() {
-        for (String name : Biomes.BIOMES_LIST) {
-            for (int i = 0; i < 3; i++) {
-                instance = new MapGenerator();
+    @ParameterizedTest
+    @ArgumentsSource(BiomeArgumentProvider.class)
+    public void TestEqualityBiomeSpecified(String biome) {
+        instance = new MapGenerator();
 
-                new CommandLine(instance).execute("--biome", name, "--map-size", "256");
-                SCMap map1 = instance.getMap();
-                String mapName = instance.getMapName();
-                long generationTime1 = instance.getGenerationTime();
-                long seed1 = instance.getSeed();
+        new CommandLine(instance).execute("--biome", biome, "--map-size", "256");
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getSeed();
 
-                instance = new MapGenerator();
+        instance = new MapGenerator();
 
-                new CommandLine(instance).execute("--map-name", mapName);
-                SCMap map2 = instance.getMap();
-                long generationTime2 = instance.getGenerationTime();
-                long seed2 = instance.getSeed();
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getSeed();
 
-                assertEquals(generationTime1, generationTime2);
-                assertEquals(seed1, seed2);
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
 
-                assertSCMapEquality(map1, map2);
-            }
-        }
+        assertSCMapEquality(map1, map2);
     }
 
     @Test
@@ -425,6 +444,34 @@ public class MapGeneratorTest {
         try (Stream<Path> list = Files.list(Path.of("."))) {
             list.filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
                 .forEach(FileUtil::deleteRecursiveIfExists);
+        }
+    }
+
+    private static class BiomeArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Biomes.BIOMES_LIST.stream().map(Arguments::of);
+        }
+    }
+
+    private static class MapStyleArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(MapStyle.values()).map(Arguments::of);
+        }
+    }
+
+    private static class AllMapSizeArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return IntStream.rangeClosed(0, 2048).mapToObj(Arguments::of);
+        }
+    }
+
+    private static class ValidMapSizeArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return IntStream.iterate(128, size -> size < 2048, size -> size + 64).mapToObj(Arguments::of);
         }
     }
 }

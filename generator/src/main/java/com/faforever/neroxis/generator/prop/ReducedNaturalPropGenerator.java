@@ -9,17 +9,17 @@ public abstract class ReducedNaturalPropGenerator extends BasicPropGenerator {
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = generatorParameters.getBiome();
-            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.getPropMaterials().getTreeGroups(),
+            Biome biome = generatorParameters.biome();
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().getTreeGroups(),
                                   3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.getPropMaterials().getRocks(), .5f, 3.5f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().getRocks(), .5f, 3.5f);
         });
     }
 
     @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.reclaimDensity();
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
 

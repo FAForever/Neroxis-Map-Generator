@@ -29,9 +29,12 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -191,24 +194,24 @@ public class PipelinePane extends JPanel implements GraphListener<MaskGraphVerte
         float spawnSeparation;
         int teamSeparation;
         SCMap map = graphContext.getMap();
-        if (generatorParameters.getNumTeams() < 2) {
-            spawnSeparation = (float) generatorParameters.getMapSize() / generatorParameters.getSpawnCount() * 1.5f;
+        if (generatorParameters.numTeams() < 2) {
+            spawnSeparation = (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
             teamSeparation = 0;
-        } else if (generatorParameters.getNumTeams() == 2) {
+        } else if (generatorParameters.numTeams() == 2) {
             spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
+            teamSeparation = map.getSize() / generatorParameters.numTeams();
         } else {
-            if (generatorParameters.getNumTeams() < 8) {
+            if (generatorParameters.numTeams() < 8) {
                 spawnSeparation = random.nextInt(
-                        map.getSize() / 2 / generatorParameters.getNumTeams() - map.getSize() / 16)
+                        map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16)
                                   + map.getSize() / 16f;
             } else {
                 spawnSeparation = 0;
             }
-            teamSeparation = map.getSize() / generatorParameters.getNumTeams();
+            teamSeparation = map.getSize() / generatorParameters.numTeams();
         }
         DebugUtil.timedRun("Place Spawns", () -> new SpawnPlacer(map, random.nextLong()).placeSpawns(
-                generatorParameters.getSpawnCount(), spawnSeparation, teamSeparation,
+                generatorParameters.spawnCount(), spawnSeparation, teamSeparation,
                 graphContext.getSymmetrySettings()));
     }
 

@@ -9,16 +9,16 @@ public class BasicDecalGenerator extends DecalGenerator {
         Pipeline.await(fieldDecal, slopeDecal);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeDecals", () -> {
             decalPlacer.placeDecals(fieldDecal.getFinalMask(),
-                                    generatorParameters.getBiome().getDecalMaterials().getFieldNormals(), 32, 32, 24,
+                                    generatorParameters.biome().decalMaterials().getFieldNormals(), 32, 32, 24,
                                     32);
             decalPlacer.placeDecals(fieldDecal.getFinalMask(),
-                                    generatorParameters.getBiome().getDecalMaterials().getFieldAlbedos(), 64, 128, 24,
+                                    generatorParameters.biome().decalMaterials().getFieldAlbedos(), 64, 128, 24,
                                     32);
             decalPlacer.placeDecals(slopeDecal.getFinalMask(),
-                                    generatorParameters.getBiome().getDecalMaterials().getSlopeNormals(), 16, 32, 16,
+                                    generatorParameters.biome().decalMaterials().getSlopeNormals(), 16, 32, 16,
                                     32);
             decalPlacer.placeDecals(slopeDecal.getFinalMask(),
-                                    generatorParameters.getBiome().getDecalMaterials().getSlopeAlbedos(), 64, 128, 32,
+                                    generatorParameters.biome().decalMaterials().getSlopeAlbedos(), 64, 128, 32,
                                     48);
         });
     }

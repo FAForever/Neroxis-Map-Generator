@@ -41,11 +41,9 @@ public class WaterSettings {
     private float SunGlow;
     private String TexPathCubemap;
     private String TexPathWaterRamp;
-    private List<WaveTexture> WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS,
-                                                              WAVE_NORMAL_MOVEMENTS);
+    private List<WaveTexture> WaveTextures = makeWaveTextures(WAVE_TEXTURE_PATHS, WAVE_NORMAL_REPEATS, WAVE_NORMAL_MOVEMENTS);
 
-    private static List<WaveTexture> makeWaveTextures(String[] WaveTexturePaths, float[] WaveNormalRepeats,
-                                                      Vector2[] WaveNormalMovements) {
+    private static List<WaveTexture> makeWaveTextures(String[] WaveTexturePaths, float[] WaveNormalRepeats, Vector2[] WaveNormalMovements) {
         List<WaveTexture> textures = new ArrayList<>();
         for (int i = 0; i < WAVE_NORMAL_COUNT; i++) {
             textures.add(new WaveTexture(WaveTexturePaths[i], WaveNormalMovements[i], WaveNormalRepeats[i]));

@@ -55,7 +55,7 @@ public abstract class TerrainGenerator extends ElementGenerator {
 
     protected void passableSetup() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
-                generatorParameters.getBiome().getWaterSettings().getElevation());
+                generatorParameters.biome().waterSettings().getElevation());
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);

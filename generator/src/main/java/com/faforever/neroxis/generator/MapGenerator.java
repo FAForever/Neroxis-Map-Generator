@@ -70,7 +70,7 @@ public class MapGenerator implements Callable<Integer> {
     private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
     private final List<StyleGenerator> productionStyles = mapStyles.stream()
                                                                    .filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator))
-                                                                   .collect(Collectors.toList());
+                                                                   .toList();
     @Spec
     private CommandLine.Model.CommandSpec spec;
     // Set during generation
@@ -411,7 +411,7 @@ public class MapGenerator implements Callable<Integer> {
     private void encodeMapName() {
         CommandLine.ParseResult parseResult = spec.commandLine().getParseResult();
         if (this.mapName == null) {
-            Visibility visibility = generatorParameters.getVisibility();
+            Visibility visibility = generatorParameters.visibility();
 
             String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
             ByteBuffer seedBuffer = ByteBuffer.allocate(8);
@@ -419,32 +419,32 @@ public class MapGenerator implements Callable<Integer> {
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
             if (tuningOptions.getParameterOptions() != null) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() / 64),
-                                         (byte) generatorParameters.getNumTeams(),
-                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.getBiome().getName()),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getLandDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getPlateauDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getMountainDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getRampDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getReclaimDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.getMexDensity(), NUM_BINS),
-                                         (byte) generatorParameters.getTerrainSymmetry()
+                optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
+                                         (byte) (generatorParameters.mapSize() / 64),
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.biome().name()),
+                                         (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.rampDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
+                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS),
+                                         (byte) generatorParameters.terrainSymmetry()
                                                                    .ordinal()};
             } else if (tuningOptions.getVisibilityOptions() != null) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() / 64),
-                                         (byte) generatorParameters.getNumTeams(),
+                optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
+                                         (byte) (generatorParameters.mapSize() / 64),
+                                         (byte) generatorParameters.numTeams(),
                                          (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() / 64),
-                                         (byte) generatorParameters.getNumTeams(),
+                optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
+                                         (byte) (generatorParameters.mapSize() / 64),
+                                         (byte) generatorParameters.numTeams(),
                                          (byte) tuningOptions.getMapStyle().ordinal()};
             } else {
-                optionArray = new byte[]{(byte) generatorParameters.getSpawnCount(),
-                                         (byte) (generatorParameters.getMapSize() / 64),
-                                         (byte) generatorParameters.getNumTeams()};
+                optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
+                                         (byte) (generatorParameters.mapSize() / 64),
+                                         (byte) generatorParameters.numTeams()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
@@ -461,7 +461,7 @@ public class MapGenerator implements Callable<Integer> {
         try {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
-            Visibility visibility = generatorParameters.getVisibility();
+            Visibility visibility = generatorParameters.visibility();
             MapExporter.exportMap(outputPath, map, visibility == null, true);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
@@ -488,7 +488,7 @@ public class MapGenerator implements Callable<Integer> {
         }
 
         map = styleGenerator.generate(generatorParameters, random.nextLong());
-        Visibility visibility = styleGenerator.getGeneratorParameters().getVisibility();
+        Visibility visibility = styleGenerator.getGeneratorParameters().visibility();
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {

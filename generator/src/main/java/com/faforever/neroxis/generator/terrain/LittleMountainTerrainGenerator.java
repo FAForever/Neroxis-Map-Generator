@@ -27,7 +27,7 @@ public class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerato
     protected void mountainSetup() {
         int mapSize = map.getSize();
         float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
-                                                              .normalize(generatorParameters.getMountainDensity());
+                                                              .normalize(generatorParameters.mountainDensity());
         mountains.setSize(mapSize / 4);
 
         mountains.randomWalk(

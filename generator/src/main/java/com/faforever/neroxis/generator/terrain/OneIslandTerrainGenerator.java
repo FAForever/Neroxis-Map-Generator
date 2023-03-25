@@ -25,9 +25,9 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 2;
-        int numTeamConnections = (int) ((generatorParameters.getRampDensity()
-                                         + generatorParameters.getPlateauDensity()
-                                         + (1 - generatorParameters.getMountainDensity())) / 3 * 2 + 2);
+        int numTeamConnections = (int) ((generatorParameters.rampDensity()
+                                         + generatorParameters.plateauDensity()
+                                         + (1 - generatorParameters.mountainDensity())) / 3 * 2 + 2);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
@@ -41,7 +41,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     protected void landSetup() {
         int mapSize = map.getSize();
         float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.getLandDensity());
+                                                          .normalize(generatorParameters.landDensity());
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry()

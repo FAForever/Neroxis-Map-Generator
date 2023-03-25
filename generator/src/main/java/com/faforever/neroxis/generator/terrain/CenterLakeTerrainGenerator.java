@@ -30,7 +30,7 @@ public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
     protected void landSetup() {
         int mapSize = map.getSize();
         float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.getLandDensity());
+                                                          .normalize(generatorParameters.landDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - normalizedLandDensity) + 8) / symmetrySettings.getSpawnSymmetry()

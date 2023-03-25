@@ -18,7 +18,7 @@ import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
@@ -90,10 +90,10 @@ public class SCMapExporter {
         }
 
         // lighting
-        writeLightingSettings(map.getBiome().getLightingSettings());
+        writeLightingSettings(map.getBiome().lightingSettings());
 
         // water
-        writeWaterSettings(map.getBiome().getWaterSettings());
+        writeWaterSettings(map.getBiome().waterSettings());
 
         // wave generators
         writeInt(map.getWaveGeneratorCount());
@@ -102,7 +102,7 @@ public class SCMapExporter {
         }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = map.getBiome().getTerrainMaterials();
+        TerrainMaterials mapTerrainMaterials = map.getBiome().terrainMaterials();
         writeInt(map.getCartographicContourInterval());
         writeInt(map.getCartographicDeepWaterColor());
         writeInt(map.getCartographicMapContourColor());

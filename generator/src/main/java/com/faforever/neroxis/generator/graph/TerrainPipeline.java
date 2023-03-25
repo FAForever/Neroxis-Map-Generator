@@ -56,7 +56,7 @@ public class TerrainPipeline extends GeneratorPipeline {
     @Override
     protected void finalizePipeline(GeneratorGraphContext graphContext) {
         heightmap = heightMapVertex.getResult();
-        BooleanMask actualLand = heightmap.copyAsBooleanMask(graphContext.getBiome().getWaterSettings().getElevation());
+        BooleanMask actualLand = heightmap.copyAsBooleanMask(graphContext.getBiome().waterSettings().getElevation());
 
         slope = heightmap.copy().supcomGradient();
         impassable = slope.copyAsBooleanMask(.7f, "impassable").inflate(4);

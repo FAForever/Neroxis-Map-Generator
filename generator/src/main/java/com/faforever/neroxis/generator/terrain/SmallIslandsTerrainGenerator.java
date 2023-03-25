@@ -28,7 +28,7 @@ public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
     protected void landSetup() {
         int mapSize = map.getSize();
         float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.getLandDensity());
+                                                          .normalize(generatorParameters.landDensity());
         int maxMiddlePoints = 4;
         int numPaths = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 16 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 16);

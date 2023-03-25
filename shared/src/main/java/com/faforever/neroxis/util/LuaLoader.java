@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public final class LuaLoader {
     private LuaLoader() {
@@ -30,7 +31,8 @@ public final class LuaLoader {
     private static Globals buildEnvironment() throws IOException {
         Globals globals = JsePlatform.standardGlobals();
         try (InputStream inputStream = LuaLoader.class.getResourceAsStream("/lua/faf.lua")) {
-            globals.baselib.load(globals.load(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)));
+            byte[] bytes = Objects.requireNonNull(inputStream).readAllBytes();
+            globals.baselib.load(globals.load(new String(bytes, StandardCharsets.UTF_8)));
             return globals;
         }
     }

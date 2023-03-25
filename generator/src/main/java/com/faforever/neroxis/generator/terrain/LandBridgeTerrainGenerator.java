@@ -17,7 +17,7 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
     protected void landSetup() {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
-        int numPaths = 32 / generatorParameters.getSpawnCount();
+        int numPaths = 32 / generatorParameters.spawnCount();
 
         land.setSize(mapSize + 1);
         MapMaskMethods.connectTeammates(map, random.nextLong(), land, 8, 2, maxStepSize);
@@ -36,8 +36,8 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (16 * generatorParameters.getPlateauDensity()) / symmetrySettings.getSpawnSymmetry()
-                                                                                              .getNumSymPoints();
+        int numPaths = (int) (16 * generatorParameters.plateauDensity()) / symmetrySettings.getSpawnSymmetry()
+                                                                                           .getNumSymPoints();
         int bound = mapSize / 4;
         plateaus.setSize(mapSize + 1);
 

@@ -78,13 +78,13 @@ public class MaskGraphReflectUtil {
 
                 maskGraphMethodsMap.put(clazz, maskGraphMethods.stream()
                                                                .sorted(Comparator.comparing(Method::getName))
-                                                               .collect(Collectors.toUnmodifiableList()));
+                                                               .toList());
 
                 Arrays.stream(clazz.getConstructors())
                       .filter(constructor -> constructor.isAnnotationPresent(GraphMethod.class))
                       .findFirst()
                       .ifPresent(constructor -> graphConstructorsMap.put(clazz,
-                              (Constructor<? extends Mask<?, ?>>) constructor));
+                                                                         (Constructor<? extends Mask<?, ?>>) constructor));
             }
         });
     }
@@ -144,7 +144,7 @@ public class MaskGraphReflectUtil {
 
     public static List<Class<? extends Mask<?, ?>>> getConcreteMaskClasses() {
         return List.of(BooleanMask.class, FloatMask.class, NormalMask.class, IntegerMask.class, Vector2Mask.class,
-                Vector3Mask.class, Vector4Mask.class);
+                       Vector3Mask.class, Vector4Mask.class);
     }
 
     public static Class<?> getActualTypeClass(Class<? extends Mask<?, ?>> maskClass, Type type) {
@@ -167,7 +167,7 @@ public class MaskGraphReflectUtil {
         String parametersEllipsis = executable.getParameters().length > 4 ? "..." : "";
         if (executable instanceof Constructor) {
             return String.format("%s(%s%s)", executable.getDeclaringClass().getSimpleName(), parametersString,
-                    parametersEllipsis);
+                                 parametersEllipsis);
         } else {
             return String.format("%s(%s%s)", executable.getName(), parametersString, parametersEllipsis);
         }
@@ -175,11 +175,11 @@ public class MaskGraphReflectUtil {
 
     public static boolean classIsNumeric(Class<?> clazz) {
         return Number.class.isAssignableFrom(clazz)
-                || int.class.equals(clazz)
-                || float.class.equals(clazz)
-                || double.class.equals(clazz)
-                || byte.class.equals(clazz)
-                || short.class.equals(clazz);
+               || int.class.equals(clazz)
+               || float.class.equals(clazz)
+               || double.class.equals(clazz)
+               || byte.class.equals(clazz)
+               || short.class.equals(clazz);
     }
 
     public static Class<?> getClassFromString(String className) throws ClassNotFoundException {

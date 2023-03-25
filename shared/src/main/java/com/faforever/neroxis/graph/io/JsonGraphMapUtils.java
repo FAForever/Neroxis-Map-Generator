@@ -36,30 +36,30 @@ public class JsonGraphMapUtils {
     public static MaskGraphVertex<?> map(
             JsonGraphVertex jsonGraphVertex) throws ClassNotFoundException, NoSuchMethodException {
         Class<? extends MaskGraphVertex<?>> vertexClass = (Class<? extends MaskGraphVertex<?>>) MaskGraphReflectUtil.getClassFromString(
-                jsonGraphVertex.getClazz());
+                jsonGraphVertex.clazz());
         Class<? extends Mask<?, ?>> maskClass = (Class<? extends Mask<?, ?>>) MaskGraphReflectUtil.getClassFromString(
-                jsonGraphVertex.getMaskClass());
-        int parameterCount = jsonGraphVertex.getParameterClasses().size();
+                jsonGraphVertex.maskClass());
+        int parameterCount = jsonGraphVertex.parameterClasses().size();
         Class<?>[] parameterTypes = new Class[parameterCount];
         String[] parameterValues = new String[parameterCount];
         for (int i = 0; i < parameterCount; ++i) {
-            parameterTypes[i] = MaskGraphReflectUtil.getClassFromString(jsonGraphVertex.getParameterClasses().get(i));
-            parameterValues[i] = jsonGraphVertex.getParameterValues().get(i);
+            parameterTypes[i] = MaskGraphReflectUtil.getClassFromString(jsonGraphVertex.parameterClasses().get(i));
+            parameterValues[i] = jsonGraphVertex.parameterValues().get(i);
         }
 
         MaskGraphVertex<?> vertex;
         if (MaskConstructorVertex.class.equals(vertexClass)) {
             vertex = new MaskConstructorVertex(maskClass.getConstructor(parameterTypes));
         } else if (MaskMethodVertex.class.equals(vertexClass)) {
-            vertex = new MaskMethodVertex(maskClass.getMethod(jsonGraphVertex.getExecutable(), parameterTypes),
+            vertex = new MaskMethodVertex(maskClass.getMethod(jsonGraphVertex.executable(), parameterTypes),
                                           maskClass);
         } else if (MapMaskMethodVertex.class.equals(vertexClass)) {
             vertex = new MapMaskMethodVertex(
-                    MapMaskMethods.class.getMethod(jsonGraphVertex.getExecutable(), parameterTypes));
+                    MapMaskMethods.class.getMethod(jsonGraphVertex.executable(), parameterTypes));
         } else if (MaskOutputVertex.class.equals(vertexClass)) {
-            vertex = new MaskOutputVertex(jsonGraphVertex.getExecutable(), maskClass);
+            vertex = new MaskOutputVertex(jsonGraphVertex.executable(), maskClass);
         } else if (MaskInputVertex.class.equals(vertexClass)) {
-            vertex = new MaskInputVertex(jsonGraphVertex.getExecutable(), maskClass);
+            vertex = new MaskInputVertex(jsonGraphVertex.executable(), maskClass);
         } else {
             throw new IllegalArgumentException(String.format("Unrecognized vertex class: %s", vertexClass.getName()));
         }
@@ -71,12 +71,12 @@ public class JsonGraphMapUtils {
             }
         }
 
-        vertex.setIdentifier(jsonGraphVertex.getIdentifier());
+        vertex.setIdentifier(jsonGraphVertex.identifier());
 
         return vertex;
     }
 
     public static MaskMethodEdge map(JsonGraphEdge edge) {
-        return new MaskMethodEdge(edge.getResultName(), edge.getParameterName());
+        return new MaskMethodEdge(edge.resultName(), edge.parameterName());
     }
 }

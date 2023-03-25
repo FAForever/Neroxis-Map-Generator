@@ -45,24 +45,24 @@ public class GeneratorGraphContext implements GraphContext {
         plateauBrush = Brushes.MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.MOUNTAIN_BRUSHES.size()));
         oceanBrush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                                                                                   generatorParameters.getTerrainSymmetry(),
-                                                                                   generatorParameters.getSpawnCount(),
-                                                                                   generatorParameters.getNumTeams());
-        biome = generatorParameters.getBiome();
+                                                                                   generatorParameters.terrainSymmetry(),
+                                                                                   generatorParameters.spawnCount(),
+                                                                                   generatorParameters.numTeams());
+        biome = generatorParameters.biome();
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-        landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.getLandDensity());
+        landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.landDensity());
         plateauDensity = parameterConstraints.getPlateauDensityRange()
-                                             .normalize(generatorParameters.getPlateauDensity());
+                                             .normalize(generatorParameters.plateauDensity());
         mountainDensity = parameterConstraints.getMountainDensityRange()
-                                              .normalize(generatorParameters.getMountainDensity());
-        rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.getRampDensity());
-        mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.getMexDensity());
-        reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.getMexDensity());
+                                              .normalize(generatorParameters.mountainDensity());
+        rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.rampDensity());
+        mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.mexDensity());
+        reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.mexDensity());
         plateauHeight = 6f;
         landHeight = .25f;
-        waterHeight = biome.getWaterSettings().getElevation();
-        map = new SCMap(generatorParameters.getMapSize(), generatorParameters.getBiome());
-        mapSize = generatorParameters.getMapSize();
+        waterHeight = biome.waterSettings().getElevation();
+        map = new SCMap(generatorParameters.mapSize(), generatorParameters.biome());
+        mapSize = generatorParameters.mapSize();
         parser = new SpelExpressionParser();
         evalContext = new StandardEvaluationContext(this);
     }

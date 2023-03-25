@@ -33,7 +33,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void placeUnits() {
-        if ((generatorParameters.getVisibility() != Visibility.UNEXPLORED)) {
+        if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
             Pipeline.await(landWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeUnits", () -> {
@@ -56,7 +56,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.getReclaimDensity();
+        float reclaimDensity = generatorParameters.reclaimDensity();
         landWreckMask.setSize(mapSize / 8);
 
         landWreckMask.randomize((reclaimDensity * .8f + random.nextFloat() * .2f) * .005f).setSize(mapSize + 1);

@@ -11,7 +11,9 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.TexturePaint;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -33,7 +35,7 @@ public class PreviewGenerator {
     public static void generatePreview(SCMap map, SymmetrySettings symmetrySettings) throws IOException {
         FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);
         FloatMask sunReflectance = heightmap.copyAsNormalMask()
-                                            .copyAsDotProduct(map.getBiome().getLightingSettings().getSunDirection());
+                                            .copyAsDotProduct(map.getBiome().lightingSettings().getSunDirection());
         Vector4Mask textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1);
         Vector4Mask textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1);
         generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);
@@ -47,7 +49,7 @@ public class PreviewGenerator {
         }
         BufferedImage previewImage = map.getPreview();
         Graphics2D graphics = previewImage.createGraphics();
-        TerrainMaterials materials = map.getBiome().getTerrainMaterials();
+        TerrainMaterials materials = map.getBiome().terrainMaterials();
         List<FloatMask> scaledTextures = new ArrayList<>();
         FloatMask baseLayer = new FloatMask(PREVIEW_SIZE, null, new SymmetrySettings(Symmetry.NONE)).add(1f);
         scaledTextures.add(0, baseLayer);
@@ -79,7 +81,7 @@ public class PreviewGenerator {
 
     private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask reflectance,
                                             FloatMask textureLayer) {
-        LightingSettings lightingSettings = map.getBiome().getLightingSettings();
+        LightingSettings lightingSettings = map.getBiome().lightingSettings();
 
         float ambientCoefficient = .25f;
 
@@ -113,8 +115,8 @@ public class PreviewGenerator {
     private static BufferedImage getWaterLayer(SCMap map, FloatMask reflectance, FloatMask heightmap) {
         Color shallowColor = new Color(134, 233, 233);
         Color abyssColor = new Color(35, 49, 162);
-        LightingSettings lightingSettings = map.getBiome().getLightingSettings();
-        WaterSettings waterSettings = map.getBiome().getWaterSettings();
+        LightingSettings lightingSettings = map.getBiome().lightingSettings();
+        WaterSettings waterSettings = map.getBiome().waterSettings();
 
         BufferedImage waterLayer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
         Graphics2D waterLayerGraphics = waterLayer.createGraphics();

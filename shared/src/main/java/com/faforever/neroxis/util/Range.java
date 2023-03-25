@@ -1,22 +1,13 @@
 package com.faforever.neroxis.util;
 
-import lombok.Value;
-
 import java.util.Random;
 
-@Value
-public class Range {
-    float min;
-    float max;
-    float range;
+public record Range(float min, float max) {
 
-    private Range(float min, float max) {
+    public Range {
         if (max < min) {
             throw new IllegalArgumentException(String.format("Max %f greater than Min %f", max, min));
         }
-        this.min = min;
-        this.max = max;
-        this.range = max - min;
     }
 
     public static Range of(float min, float max) {
@@ -28,14 +19,14 @@ public class Range {
     }
 
     public float normalize(float value) {
-        return StrictMath.max(StrictMath.min((value - min) / range, 1f), 0f);
+        return StrictMath.max(StrictMath.min((value - min) / (max - min), 1f), 0f);
     }
 
     public float map(float value) {
-        return StrictMath.max(StrictMath.min(value * range + min, max), min);
+        return StrictMath.max(StrictMath.min(value * (max - min) + min, max), min);
     }
 
     public float getRandomFloat(Random random) {
-        return random.nextFloat() * range + min;
+        return random.nextFloat() * (max - min) + min;
     }
 }

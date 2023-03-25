@@ -38,8 +38,8 @@ public class BasicTextureGenerator extends TextureGenerator {
         shadows.add(shadowsInWater, 1f)
                .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
                .clampMax(1f);
-        int textureSize = generatorParameters.getMapSize() + 1;
-        int mapSize = generatorParameters.getMapSize();
+        int textureSize = generatorParameters.mapSize() + 1;
+        int mapSize = generatorParameters.mapSize();
         accentGroundTexture.setSize(textureSize)
                            .addPerlinNoise(mapSize / 8, 1f)
                            .addGaussianNoise(.05f)
@@ -83,7 +83,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         terrainType.setSize(mapSize);
         BooleanMask realWater = realLand.copy().invert().setSize(mapSize);
 
-        Integer[] terrainTypes = map.getBiome().getTerrainMaterials().getTerrainTypes();
+        Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
                    .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
                    .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
@@ -102,9 +102,9 @@ public class BasicTextureGenerator extends TextureGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        realLand = heightmap.copyAsBooleanMask(generatorParameters.getBiome().getWaterSettings().getElevation());
+        realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().getElevation());
         realPlateaus = heightmap.copyAsBooleanMask(
-                generatorParameters.getBiome().getWaterSettings().getElevation() + 3f);
+                generatorParameters.biome().waterSettings().getElevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
@@ -131,7 +131,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.getBiome().getLightingSettings()));
+                                                              generatorParameters.biome().lightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }

@@ -60,7 +60,7 @@ public class UnitPlacer {
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
                 symmetryPoints.forEach(symmetryPoint -> {
-                    BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.getUnits());
+                    BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.units());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
                         symBase.flip(spawnMask.getSymmetrySettings().getSpawnSymmetry());
                     }

@@ -30,7 +30,7 @@ public class LandBridgeStyleGenerator extends StyleGenerator {
         propGenerators.addAll(Arrays.asList(new LargeBattlePropGenerator(), new NavyWrecksPropGenerator(),
                                             new NeutralCivPropGenerator(), new RockFieldPropGenerator(),
                                             new SmallBattlePropGenerator()));
-        int mapSize = generatorParameters.getMapSize();
+        int mapSize = generatorParameters.mapSize();
         spawnSeparation = mapSize / 8f;
     }
 }

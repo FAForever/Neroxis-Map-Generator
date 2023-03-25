@@ -2,7 +2,8 @@ package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.LinkedHashSet;
 
 public class Vector2 extends Vector<Vector2> {
