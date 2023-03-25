@@ -36,6 +36,8 @@ public class BiomeExporter {
             }
         }
 
+        biome.terrainMaterials().setName(biomeName);
+
         filename = folderPath.resolve(biomeName).resolve("materials.json").toString();
         FileUtil.serialize(filename, biome.terrainMaterials());
     }

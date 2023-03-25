@@ -113,7 +113,7 @@ public class SCMapImporter {
         }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = new TerrainMaterials(null);
+        TerrainMaterials mapTerrainMaterials = new TerrainMaterials();
         int miniMapContourInterval = readInt();
         int miniMapDeepWaterColor = readInt();
         int miniMapContourColor = readInt();
