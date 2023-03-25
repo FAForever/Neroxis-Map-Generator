@@ -84,7 +84,7 @@ public class SCMapExporter {
         writeStringNull(map.getTerrainShaderPath());
         writeStringNull(map.getBackgroundPath());
         writeStringNull(map.getSkyCubePath());
-        List<CubeMap> cubeMaps = map.getBiome().getTerrainMaterials().getCubeMaps();
+        List<CubeMap> cubeMaps = map.getBiome().terrainMaterials().getCubeMaps();
         writeInt(cubeMaps.size());
         for (CubeMap cubeMap : cubeMaps) {
             writeStringNull(cubeMap.getName());
