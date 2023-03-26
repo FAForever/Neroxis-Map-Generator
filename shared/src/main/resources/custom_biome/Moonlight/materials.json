@@ -1,5 +1,15 @@
 {
   "name": "Moonlight",
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_RedRocks05.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_RedRocks05a.dds"
+    }
+  ],
   "texturePaths": [
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked02_albedo.DDS",

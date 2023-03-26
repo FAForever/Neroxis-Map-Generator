@@ -1,5 +1,15 @@
 {
   "name": "Loki",
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_TropicalOp06.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_TropicalOp06a.dds"
+    }
+  ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvGrass007_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",

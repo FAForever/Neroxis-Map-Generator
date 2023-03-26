@@ -22,6 +22,16 @@
     6.0
   ],
   "name": "WindingRiver",
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/DefaultEnvCube.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/DefaultEnvCube_mirrored.dds"
+    }
+  ],
   "normalPaths": [
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
     "/env/Evergreen/layers/grass000_normals.dds",
