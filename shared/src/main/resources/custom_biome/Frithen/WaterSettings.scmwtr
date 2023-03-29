@@ -9,7 +9,7 @@
     "x" : 0.09954818,
     "y" : -0.9626309
   },
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_tundra.dds",
   "sunReflection" : 5.0,
   "elevation" : 25.0,
   "surfaceColor" : {
@@ -59,7 +59,7 @@
   "fresnelBias" : 0.15,
   "sunStrength" : 10.0,
   "sunGlow" : 0.1,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "waterPresent" : true,
   "fresnelPower" : 1.5
 }

@@ -1,12 +1,12 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_desert.dds",
   "elevationDeep" : 20.0,
   "sunDirection" : {
     "z" : 0.2518569,
     "x" : 0.09954818,
     "y" : -0.9626309
   },
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "surfaceColor" : {
     "z" : 1.5,
     "x" : 0.0,

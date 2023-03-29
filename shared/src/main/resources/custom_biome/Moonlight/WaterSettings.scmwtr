@@ -1,5 +1,5 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_redrock01.dds",
   "sunDirection" : {
     "x" : 0.09954818,
     "z" : 0.2518569,
@@ -55,7 +55,7 @@
     "normalRepeat" : 0.5
   } ],
   "sunGlow" : 0.1,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "sunShininess" : 50.0,
   "colorLerp" : {
     "x" : 0.064,

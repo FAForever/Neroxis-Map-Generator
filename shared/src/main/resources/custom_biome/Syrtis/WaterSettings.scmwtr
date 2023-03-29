@@ -1,9 +1,9 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_redrock03.dds",
   "waterPresent" : true,
   "elevation" : 25.0,
   "elevationDeep" : 20.0,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "surfaceColor" : {
     "z" : 1.5,
     "x" : 0.0,

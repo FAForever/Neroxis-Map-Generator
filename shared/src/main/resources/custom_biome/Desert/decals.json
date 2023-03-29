@@ -5,12 +5,14 @@
     "/env/Common/decals/erosion007_normals.dds",
     "/env/Common/decals/erosion005_normals.dds",
     "/env/Common/decals/erosion008_normals.dds",
-    "/env/Common/decals/erosion_normals.dds",
-    "/env/Desert/Decals/dryCreek01LT_Normals.dds",
-    "/env/Desert/Decals/dryCreek02LT_Normals.dds",
-    "/env/Desert/Decals/dryCreek03LT_Normals.dds",
-    "/env/Desert/Decals/dryCreek04LT_Normals.dds",
-    "/env/Desert/Decals/dryCreek05LT_Normals.dds",
-    "/env/Desert/Decals/dryCreek06LT_Normals.dds"
+    "/env/Common/decals/Int001_normals.dds",
+    "/env/Common/decals/Int002_normals.dds",
+    "/env/Common/decals/Int003_normals.dds",
+    "/env/Common/decals/Int004_normals.dds",
+    "/env/Common/decals/Int005_normals.dds",
+    "/env/Common/decals/Int006_normals.dds",
+    "/env/Common/decals/Int007_normals.dds",
+    "/env/Common/decals/Int008_normals.dds",
+    "/env/Common/decals/Int009_normals.dds"
   ]
 }

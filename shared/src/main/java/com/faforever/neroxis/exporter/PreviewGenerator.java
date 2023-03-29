@@ -113,8 +113,8 @@ public class PreviewGenerator {
     }
 
     private static BufferedImage getWaterLayer(SCMap map, FloatMask reflectance, FloatMask heightmap) {
-        Color shallowColor = new Color(134, 233, 233);
-        Color abyssColor = new Color(35, 49, 162);
+        Color shallowColor = new Color(108, 157, 192);
+        Color abyssColor = new Color(60, 67, 137);
         LightingSettings lightingSettings = map.getBiome().lightingSettings();
         WaterSettings waterSettings = map.getBiome().waterSettings();
 

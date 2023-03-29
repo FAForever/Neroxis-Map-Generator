@@ -1,6 +1,6 @@
 {
   "elevation" : 25.0,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "unitReflection" : 0.5,
   "sunShininess" : 50.0,
   "waterPresent" : true,
@@ -51,7 +51,7 @@
     },
     "normalRepeat" : 0.5
   } ],
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_desert02.dds",
   "sunColor" : {
     "z" : 0.33864275,
     "x" : 0.81274265,

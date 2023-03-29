@@ -1,5 +1,5 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_lava.dds",
   "sunDirection" : {
     "x" : 0.09954818,
     "z" : 0.2518569,
@@ -44,7 +44,7 @@
     "texPath" : "/textures/engine/waves.dds",
     "normalRepeat" : 0.5
   } ],
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "sunGlow" : 0.1,
   "unitReflection" : 0.5,
   "sunReflection" : 5.0,

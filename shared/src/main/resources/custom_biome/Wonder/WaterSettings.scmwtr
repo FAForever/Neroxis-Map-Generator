@@ -58,7 +58,7 @@
   "elevationDeep" : 20.0,
   "fresnelBias" : 0.15,
   "refractionScale" : 0.375,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "sunShininess" : 50.0,
   "sunReflection" : 5.0,
   "elevation" : 25.0

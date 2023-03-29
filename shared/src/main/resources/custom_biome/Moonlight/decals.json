@@ -18,13 +18,6 @@
     "/env/Geothermal/decals/Crater_01_normals.dds",
     "/env/Geothermal/decals/Crater_02_normals.dds",
     "/env/Geothermal/decals/GT_noise02_normals.dds",
-    "/env/Geothermal/decals/GT_noise01_normals.dds",
-    "/env/Crystalline/decals/Cryst001_normals.dds",
-    "/env/Crystalline/decals/Cryst002_normals.dds",
-    "/env/Crystalline/decals/Cryst003_normals.dds",
-    "/env/Crystalline/decals/Cryst004_normals.dds",
-    "/env/Crystalline/decals/Cryst005_normals.dds",
-    "/env/Crystalline/decals/Cryst006_normals.dds",
-    "/env/Crystalline/decals/Cryst007_normals.dds"
+    "/env/Geothermal/decals/GT_noise01_normals.dds"
   ]
 }
