@@ -20,9 +20,9 @@ public class Biomes {
     // ├-- props.json <required>
     // ├-- WaterSettings.scmwtr <required>
     // └-- Light.scmlighting <required>
-    public static final List<String> BIOMES_LIST = List.of("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                                                           "Loki", "Mars", "Moonlight", "Prayer", "Stones",
-                                                           "Syrtis", "WindingRiver", "Wonder");
+    public static final List<String> BIOMES_LIST = List.of("Brimstone", "Desert", "EarlyAutumn", "Evergreen",
+                                                           "GreenPastures", "Ice", "Mars", "RedBarrens", "Stones",
+                                                           "Sunset", "Swamp", "ToxicSludge");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(String folderPath) {
