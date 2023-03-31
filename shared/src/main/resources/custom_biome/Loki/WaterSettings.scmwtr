@@ -50,7 +50,7 @@
   "refractionScale" : 0.375,
   "elevationDeep" : 18.0,
   "colorLerp" : {
-    "x" : 0.064,
+    "x" : 0.037,
     "y" : 0.119
   },
   "fresnelBias" : 0.15,

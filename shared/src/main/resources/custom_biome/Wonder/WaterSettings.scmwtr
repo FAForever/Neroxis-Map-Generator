@@ -1,9 +1,9 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterrampswamp01.dds",
   "sunColor" : {
-    "z" : 0.33864275,
-    "x" : 0.81274265,
-    "y" : 0.47409984
+    "z" : 0.72,
+    "x" : 0.61,
+    "y" : 0.55
   },
   "sunDirection" : {
     "z" : 0.2518569,
@@ -15,9 +15,9 @@
   "unitReflection" : 0.5,
   "skyReflection" : 1.5,
   "surfaceColor" : {
-    "z" : 1.5,
+    "z" : 0.13,
     "x" : 0.0,
-    "y" : 0.7
+    "y" : 0.24
   },
   "sunGlow" : 0.1,
   "sunStrength" : 10.0,
@@ -60,6 +60,6 @@
   "refractionScale" : 0.375,
   "elevationAbyss" : 3.0,
   "sunShininess" : 50.0,
-  "sunReflection" : 5.0,
+  "sunReflection" : 4.3,
   "elevation" : 25.0
 }

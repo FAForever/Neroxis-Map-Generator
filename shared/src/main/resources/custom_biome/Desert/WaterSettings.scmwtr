@@ -1,31 +1,31 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp_desert.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_desert03.dds",
   "elevationDeep" : 20.0,
   "sunDirection" : {
     "z" : 0.2518569,
     "x" : 0.09954818,
     "y" : -0.9626309
   },
-  "elevationAbyss" : 3.0,
+  "elevationAbyss" : 2.0,
   "surfaceColor" : {
-    "z" : 1.5,
-    "x" : 0.0,
-    "y" : 0.7
+    "z" : 0.44,
+    "x" : 0.83,
+    "y" : 0.56
   },
   "sunColor" : {
-    "z" : 0.33864275,
-    "x" : 0.81274265,
-    "y" : 0.47409984
+    "z" : 0.44,
+    "x" : 0.44,
+    "y" : 0.44
   },
   "waterPresent" : true,
   "elevation" : 25.0,
   "refractionScale" : 0.375,
-  "sunReflection" : 5.0,
+  "sunReflection" : 2.8,
   "fresnelPower" : 1.5,
   "unitReflection" : 0.5,
-  "skyReflection" : 1.5,
+  "skyReflection" : 0.53,
   "colorLerp" : {
-    "x" : 0.064,
+    "x" : 0.083,
     "y" : 0.119
   },
   "texPathCubemap" : "/textures/engine/waterCubemap.dds",

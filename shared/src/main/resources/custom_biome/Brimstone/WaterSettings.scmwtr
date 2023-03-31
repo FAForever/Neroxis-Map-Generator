@@ -41,25 +41,25 @@
   "sunStrength": 10.0,
   "texPathWaterRamp": "/textures/engine/waterramp_redrock03.dds",
   "colorLerp": {
-    "y": 0.119,
+    "y": 0.0,
     "x": 0.064
   },
   "surfaceColor": {
-    "z": 1.5,
-    "y": 0.7,
-    "x": 0.0
+    "z": 0.65,
+    "y": 0.55,
+    "x": 0.46
   },
-  "sunShininess": 50.0,
+  "sunShininess": 80.0,
   "sunColor": {
-    "z": 0.33864275,
-    "y": 0.47409984,
-    "x": 0.81274265
+    "z": 0.77,
+    "y": 0.86,
+    "x": 0.94
   },
   "refractionScale": 0.375,
   "waterPresent": true,
   "unitReflection": 0.5,
   "fresnelBias": 0.15,
-  "sunReflection": 5.0,
+  "sunReflection": 4.0,
   "texPathCubemap": "/textures/engine/waterCubemap.dds",
   "sunDirection": {
     "z": 0.2518569,
