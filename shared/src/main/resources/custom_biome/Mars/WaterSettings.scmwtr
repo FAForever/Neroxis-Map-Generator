@@ -10,7 +10,7 @@
     "z" : 0.06,
     "y" : 0.06
   },
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_Desert02a.dds",
   "colorLerp" : {
     "x" : 0.018,
     "y" : 0.294

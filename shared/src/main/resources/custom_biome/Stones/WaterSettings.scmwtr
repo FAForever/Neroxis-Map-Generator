@@ -12,7 +12,7 @@
     "x" : 0.037,
     "y" : 0.119
   },
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_Desert03a.dds",
   "surfaceColor" : {
     "z" : 0.52,
     "x" : 0.0,

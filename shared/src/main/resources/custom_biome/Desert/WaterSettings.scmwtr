@@ -28,7 +28,7 @@
     "x" : 0.083,
     "y" : 0.119
   },
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_Desert02a.dds",
   "sunGlow" : 0.1,
   "sunShininess" : 50.0,
   "fresnelBias" : 0.15,

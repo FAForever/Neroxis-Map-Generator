@@ -26,7 +26,7 @@
   "unitReflection": 0.5,
   "fresnelBias": 0.15,
   "sunReflection": 4.0,
-  "texPathCubemap": "/textures/engine/waterCubemap.dds",
+  "texPathCubemap": "/textures/environment/SkyCube_RedRocks08a.dds",
   "sunDirection": {
     "z": 0.2518569,
     "y": -0.9626309,

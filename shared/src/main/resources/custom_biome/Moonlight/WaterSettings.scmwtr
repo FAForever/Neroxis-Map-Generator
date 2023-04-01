@@ -22,7 +22,7 @@
   "fresnelPower" : 1.5,
   "waterPresent" : true,
   "skyReflection" : 1.5,
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_RedRocks05a.dds",
   "refractionScale" : 0.375,
   "sunStrength" : 10.0,
   "sunGlow" : 0.1,

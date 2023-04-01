@@ -32,7 +32,7 @@
     "x" : 0.75,
     "y" : 0.800000011920929
   },
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_TropicalOp06a.dds",
   "waveTextures": [
     {
       "normalRepeat": 0.02,
