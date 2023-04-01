@@ -35,7 +35,7 @@
   "sunShininess" : 11.0,
   "waveTextures": [
     {
-      "normalRepeat": 0.02,
+      "normalRepeat": 0.006,
       "normalMovement": {
         "y": 0.0229813,
         "x": 0.0192836
@@ -43,7 +43,7 @@
       "texPath": "/textures/engine/waves000.dds"
     },
     {
-      "normalRepeat": 0.05,
+      "normalRepeat": 0.012,
       "normalMovement": {
         "y": 0.0025,
         "x": 0.00433013
