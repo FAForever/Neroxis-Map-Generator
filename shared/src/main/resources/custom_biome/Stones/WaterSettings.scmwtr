@@ -22,35 +22,6 @@
   "sunGlow" : 0.1,
   "skyReflection" : 1.5,
   "refractionScale" : 0.375,
-  "waveTextures" : [ {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.5,
-      "y" : -0.95
-    },
-    "normalRepeat" : 9.0E-4
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.05,
-      "y" : -0.095
-    },
-    "normalRepeat" : 0.009
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.01,
-      "y" : 0.03
-    },
-    "normalRepeat" : 0.05
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 5.0E-4,
-      "y" : 9.0E-4
-    },
-    "normalRepeat" : 0.5
-  } ],
   "texPathWaterRamp" : "/textures/engine/waterramp_redrock03.dds",
   "sunColor" : {
     "z" : 0.58,
@@ -61,5 +32,39 @@
     "z" : 0.2518569,
     "x" : 0.09954818,
     "y" : -0.9626309
-  }
+  },
+  "waveTextures": [
+    {
+      "normalRepeat": 0.02,
+      "normalMovement": {
+        "y": 0.0229813,
+        "x": 0.0192836
+      },
+      "texPath": "/textures/engine/waves000.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.0025,
+        "x": 0.00433013
+      },
+      "texPath": "/textures/engine/waves.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.00751754,
+        "x": 0.00273616
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    },
+    {
+      "normalRepeat": 0.5,
+      "normalMovement": {
+        "y": 0.001,
+        "x": 0.0
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    }
+  ]
 }

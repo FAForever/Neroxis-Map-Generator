@@ -1,40 +1,6 @@
 {
   "elevationAbyss": 2.0,
   "fresnelPower": 1.5,
-  "waveTextures": [
-    {
-      "normalRepeat": 0.08,
-      "normalMovement": {
-        "y": 0.01,
-        "x": 0.0
-      },
-      "texPath": "/textures/engine/waves.dds"
-    },
-    {
-      "normalRepeat": 0.009,
-      "normalMovement": {
-        "y": 0.05,
-        "x": -0.08660255
-      },
-      "texPath": "/textures/engine/waves.dds"
-    },
-    {
-      "normalRepeat": 0.06,
-      "normalMovement": {
-        "y": 0.01494292,
-        "x": 0.001307336
-      },
-      "texPath": "/textures/engine/waves001.dds"
-    },
-    {
-      "normalRepeat": 0.5,
-      "normalMovement": {
-        "y": 0.004949748,
-        "x": 0.004949748
-      },
-      "texPath": "/textures/engine/waves001.dds"
-    }
-  ],
   "elevationDeep": 25.0,
   "sunGlow": 0.165,
   "skyReflection": 0.678,
@@ -66,5 +32,39 @@
     "y": -0.9626309,
     "x": 0.09954818
   },
-  "elevation": 29.0
+  "elevation": 29.0,
+  "waveTextures": [
+    {
+      "normalRepeat": 0.02,
+      "normalMovement": {
+        "y": 0.0229813,
+        "x": 0.0192836
+      },
+      "texPath": "/textures/engine/waves000.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.0025,
+        "x": 0.00433013
+      },
+      "texPath": "/textures/engine/waves.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.00751754,
+        "x": 0.00273616
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    },
+    {
+      "normalRepeat": 0.5,
+      "normalMovement": {
+        "y": 0.001,
+        "x": 0.0
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    }
+  ]
 }

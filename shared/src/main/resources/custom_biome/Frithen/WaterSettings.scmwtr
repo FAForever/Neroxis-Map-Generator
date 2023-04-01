@@ -17,35 +17,6 @@
     "x" : 0.0,
     "y" : 0.7
   },
-  "waveTextures" : [ {
-    "normalMovement" : {
-      "x" : 0.5,
-      "y" : -0.95
-    },
-    "texPath" : "/textures/engine/waves.dds",
-    "normalRepeat" : 9.0E-4
-  }, {
-    "normalMovement" : {
-      "x" : 0.05,
-      "y" : -0.095
-    },
-    "texPath" : "/textures/engine/waves.dds",
-    "normalRepeat" : 0.009
-  }, {
-    "normalMovement" : {
-      "x" : 0.01,
-      "y" : 0.03
-    },
-    "texPath" : "/textures/engine/waves.dds",
-    "normalRepeat" : 0.05
-  }, {
-    "normalMovement" : {
-      "x" : 5.0E-4,
-      "y" : 9.0E-4
-    },
-    "texPath" : "/textures/engine/waves.dds",
-    "normalRepeat" : 0.5
-  } ],
   "elevationDeep" : 20.0,
   "colorLerp" : {
     "x" : 0.046,
@@ -61,5 +32,39 @@
   "sunGlow" : 0.1,
   "elevationAbyss" : 3.0,
   "waterPresent" : true,
-  "fresnelPower" : 1.5
+  "fresnelPower" : 1.5,
+  "waveTextures": [
+    {
+      "normalRepeat": 0.02,
+      "normalMovement": {
+        "y": 0.0229813,
+        "x": 0.0192836
+      },
+      "texPath": "/textures/engine/waves000.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.0025,
+        "x": 0.00433013
+      },
+      "texPath": "/textures/engine/waves.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.00751754,
+        "x": 0.00273616
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    },
+    {
+      "normalRepeat": 0.5,
+      "normalMovement": {
+        "y": 0.001,
+        "x": 0.0
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    }
+  ]
 }
