@@ -6,9 +6,9 @@
     "y" : -0.9626309
   },
   "sunColor" : {
-    "x" : 0.06,
-    "z" : 0.06,
-    "y" : 0.06
+    "x" : 0.6,
+    "z" : 0.6,
+    "y" : 0.6
   },
   "texPathCubemap" : "/textures/environment/SkyCube_Desert02a.dds",
   "colorLerp" : {
@@ -18,7 +18,7 @@
   "elevationAbyss" : 3.0,
   "sunGlow" : 0.1,
   "unitReflection" : 0.5,
-  "sunReflection" : 0.6,
+  "sunReflection" : 1.1,
   "sunStrength" : 10.0,
   "surfaceColor" : {
     "x" : 0.0,
@@ -26,13 +26,13 @@
     "y" : 0.0
   },
   "elevationDeep" : 20.0,
-  "skyReflection" : 1.5,
+  "skyReflection" : 1.0,
   "fresnelPower" : 1.5,
   "fresnelBias" : 0.15,
   "waterPresent" : true,
   "elevation" : 25.0,
   "refractionScale" : 0.375,
-  "sunShininess" : 11.0,
+  "sunShininess" : 30.0,
   "waveTextures": [
     {
       "normalRepeat": 0.006,
