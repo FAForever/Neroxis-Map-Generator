@@ -18,7 +18,7 @@
   "elevationAbyss" : 3.0,
   "sunGlow" : 0.1,
   "unitReflection" : 0.5,
-  "sunReflection" : 0.18,
+  "sunReflection" : 0.6,
   "sunStrength" : 10.0,
   "surfaceColor" : {
     "x" : 0.0,

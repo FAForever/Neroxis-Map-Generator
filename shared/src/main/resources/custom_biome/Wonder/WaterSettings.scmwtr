@@ -13,7 +13,7 @@
   "texPathCubemap" : "/textures/engine/waterCubemap.dds",
   "waterPresent" : true,
   "unitReflection" : 0.5,
-  "skyReflection" : 1.5,
+  "skyReflection" : 0.7,
   "surfaceColor" : {
     "z" : 0.13,
     "x" : 0.0,
@@ -31,7 +31,7 @@
   "refractionScale" : 0.375,
   "elevationAbyss" : 3.0,
   "sunShininess" : 50.0,
-  "sunReflection" : 4.3,
+  "sunReflection" : 3.1,
   "elevation" : 25.0,
   "waveTextures": [
     {

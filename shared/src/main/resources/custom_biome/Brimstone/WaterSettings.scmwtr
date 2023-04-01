@@ -15,7 +15,7 @@
     "y": 0.55,
     "x": 0.46
   },
-  "sunShininess": 80.0,
+  "sunShininess": 50.0,
   "sunColor": {
     "z": 0.77,
     "y": 0.86,
@@ -25,7 +25,7 @@
   "waterPresent": true,
   "unitReflection": 0.5,
   "fresnelBias": 0.15,
-  "sunReflection": 4.0,
+  "sunReflection": 3.3,
   "texPathCubemap": "/textures/environment/SkyCube_RedRocks08a.dds",
   "sunDirection": {
     "z": 0.2518569,
