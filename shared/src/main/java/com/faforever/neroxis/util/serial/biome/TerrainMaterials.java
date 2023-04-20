@@ -10,6 +10,19 @@ import java.util.List;
 @Data
 @CompiledJson
 public class TerrainMaterials {
+    /* texture slots:
+    ground
+    groundAccent
+    plateauAccent
+    slopes
+    slopesAccent
+    beach
+    underWater
+    rock
+    rockAccent
+    macroTexture
+    */
+
     // engine limitations - must stay 9 and 10 always
     public static final int TERRAIN_TEXTURE_COUNT = 10;
     public static final int TERRAIN_NORMAL_COUNT = 9;
@@ -26,7 +39,6 @@ public class TerrainMaterials {
             1,  // plateauAccent
             1,  // slopes
             1,  // slopesAccent
-            1,  // steepHills
             40,  // beach
             150,  // rock
             150,  // rockAccent
