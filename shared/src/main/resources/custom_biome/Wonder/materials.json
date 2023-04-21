@@ -3,22 +3,22 @@
   "cubeMaps": [
     {
       "name": "<default>",
-      "path": "/textures/environment/DefaultEnvCube.dds"
+      "path": "/textures/environment/SkyCube_Geothermal02.dds"
     },
     {
       "name": "<water>",
-      "path": "/textures/environment/DefaultEnvCube_mirrored.dds"
+      "path": "/textures/environment/SkyCube_Geothermal02a.dds"
     }
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass005_albedo.dds",
-    "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass010_albedo.dds",
     "/env/Evergreen2/Layers/EvRock002b_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock006c_albedo.dds",
+    "/env/Tropical/Layers/TrRock006_albedo.dds",
     "/env/Evergreen2/Layers/EvRock007_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
@@ -30,7 +30,7 @@
     6.0,
     6.0,
     8.0,
-    32.0,
+    16.0,
     16.0,
     128.0
   ],

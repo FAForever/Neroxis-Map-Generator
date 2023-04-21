@@ -1,16 +1,16 @@
 {
   "texPathWaterRamp" : "/textures/engine/waterrampswamp01.dds",
   "sunColor" : {
-    "z" : 0.72,
-    "x" : 0.61,
-    "y" : 0.55
+    "z" : 0.52,
+    "x" : 0.51,
+    "y" : 0.53
   },
   "sunDirection" : {
     "z" : 0.2518569,
     "x" : 0.09954818,
     "y" : -0.9626309
   },
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_Geothermal02.dds",
   "waterPresent" : true,
   "unitReflection" : 0.5,
   "skyReflection" : 0.7,
