@@ -65,7 +65,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                            .clampMax(1f)
                            .setToValue(accentSlopes.copy().invert(), 0f)
                            .blur(16);
-        underWaterTexture.init(realWater, 0f, .7f)
+        underWaterTexture.init(realWater.deflate(1), 0f, .7f)
                          .add(scaledWaterDepth.multiply(.3f))
                          .clampMax(1f)
                          .blur(1);
