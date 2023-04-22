@@ -7,9 +7,9 @@
   },
   "fogStart" : 0.0,
   "sunAmbience" : {
-    "z" : 0.35,
-    "x" : 0.1754,
-    "y" : 0.19
+    "z" : 0.48,
+    "x" : 0.23,
+    "y" : 0.23
   },
   "sunColor" : {
     "z" : 1.59,
@@ -28,10 +28,10 @@
     "y" : 0.5849577
   },
   "shadowFillColor" : {
-    "z" : 0.09,
-    "x" : 0.0,
-    "y" : 0.0
+    "z" : 0.55,
+    "x" : 0.42,
+    "y" : 0.42
   },
-  "lightingMultiplier" : 0.7,
+  "lightingMultiplier" : 1.14,
   "fogEnd" : 1000.0
 }

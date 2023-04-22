@@ -16,8 +16,8 @@
     "/env/Red Barrens/Layers/RB_Cracked02_albedo.DDS",
     "/env/Red Barrens/Layers/RB_gravel01_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock08_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+    "/env/Lava/Layers/macrotexture000_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
     "/env/Geothermal/layers/Geo_Dirt_01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
@@ -29,7 +29,7 @@
     0.0,
     12.0,
     16.0,
-    32.0,
+    6.0,
     16.0,
     32.0,
     128.0
@@ -38,7 +38,6 @@
     5,
     5,
     5,
-    6,
     6,
     6,
     6,
@@ -53,8 +52,8 @@
     "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
     "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
-    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
     "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds"
   ],
@@ -65,7 +64,7 @@
     12.0,
     64.0,
     64.0,
-    4.0,
+    6.0,
     4.0,
     4.0
   ],

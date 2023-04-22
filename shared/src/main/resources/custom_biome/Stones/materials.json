@@ -16,7 +16,7 @@
     "/env/paradise/layers/dirt000_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
-    "/env/paradise/layers/dirt000_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
     "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
@@ -28,7 +28,7 @@
     0.0,
     0.0,
     16.0,
-    0.0,
+    8.0,
     8.0,
     32.0,
     8.0,
@@ -37,7 +37,6 @@
   "terrainTypes": [
     7,
     8,
-    7,
     7,
     7,
     7,
@@ -53,7 +52,7 @@
     "/env/paradise/layers/dirt000_normals.dds",
     "/env/paradise/layers/Rock001_normals.dds",
     "/env/paradise/layers/SandMed_normals.dds",
-    "/env/paradise/layers/grass000_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
     "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
     "/env/paradise/layers/Rock001_normals.dds",
     "/env/paradise/layers/Rock001_normals.dds"
@@ -64,7 +63,7 @@
     16.0,
     16.0,
     16.0,
-    4.0,
+    6.0,
     6.0,
     12.0,
     4.0

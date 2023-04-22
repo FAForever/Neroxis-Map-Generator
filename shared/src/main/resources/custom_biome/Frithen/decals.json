@@ -5,9 +5,13 @@
     "/env/Crystalline/decals/crystcrack01_normals.dds"
   ],
   "fieldAlbedos": [
+    "/env/Common/decals/Int001_normals.dds",
+    "/env/Common/decals/Int002_normals.dds",
+    "/env/Common/decals/Int003_normals.dds",
+    "/env/Common/decals/Int004_normals.dds",
+    "/env/Common/decals/Int005_normals.dds",
     "/env/Crystalline/decals/crystcrack01_albedo.dds",
     "/env/Tundra/Decals/Tund_Crack004_albedo.dds",
-    "/env/Tundra/Decals/Tund_Crack002_albedo.dds",
     "/env/Tundra/Decals/Tund_RockGround2_albedo.dds",
     "/env/Tundra/Decals/Tund_sandPatch_02_albedo.dds",
     "/env/Tundra/Decals/Tund_sandPatch_albedo.dds"

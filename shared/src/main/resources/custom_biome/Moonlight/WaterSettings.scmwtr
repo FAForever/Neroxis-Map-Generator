@@ -1,5 +1,5 @@
 {
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "texPathWaterRamp" : "/textures/engine/waterramp_redrock01.dds",
   "sunDirection" : {
     "x" : 0.09954818,
     "z" : 0.2518569,
@@ -15,51 +15,56 @@
   "elevationDeep" : 20.0,
   "elevation" : 25.0,
   "surfaceColor" : {
-    "x" : 1.4,
-    "z" : 1.8,
-    "y" : 1.5
+    "x" : 0.5,
+    "z" : 0.5,
+    "y" : 0.5
   },
   "fresnelPower" : 1.5,
   "waterPresent" : true,
   "skyReflection" : 1.5,
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
+  "texPathCubemap" : "/textures/environment/SkyCube_RedRocks08a.dds",
   "refractionScale" : 0.375,
   "sunStrength" : 10.0,
-  "waveTextures" : [ {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.5,
-      "y" : -0.95
-    },
-    "normalRepeat" : 9.0E-4
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.05,
-      "y" : -0.095
-    },
-    "normalRepeat" : 0.009
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 0.01,
-      "y" : 0.03
-    },
-    "normalRepeat" : 0.05
-  }, {
-    "texPath" : "/textures/engine/waves.dds",
-    "normalMovement" : {
-      "x" : 5.0E-4,
-      "y" : 9.0E-4
-    },
-    "normalRepeat" : 0.5
-  } ],
   "sunGlow" : 0.1,
-  "elevationAbyss" : 10.0,
+  "elevationAbyss" : 3.0,
   "sunShininess" : 50.0,
   "colorLerp" : {
     "x" : 0.064,
     "y" : 0.119
   },
-  "sunReflection" : 5.0
+  "sunReflection" : 2.0,
+  "waveTextures": [
+    {
+      "normalRepeat": 0.006,
+      "normalMovement": {
+        "y": 0.0229813,
+        "x": 0.0192836
+      },
+      "texPath": "/textures/engine/waves000.dds"
+    },
+    {
+      "normalRepeat": 0.012,
+      "normalMovement": {
+        "y": 0.0025,
+        "x": 0.00433013
+      },
+      "texPath": "/textures/engine/waves.dds"
+    },
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "y": 0.00751754,
+        "x": 0.00273616
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    },
+    {
+      "normalRepeat": 0.5,
+      "normalMovement": {
+        "y": 0.001,
+        "x": 0.0
+      },
+      "texPath": "/textures/engine/waves001.dds"
+    }
+  ]
 }

@@ -19,7 +19,7 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask accentSlopesTexture;
     protected FloatMask accentPlateauTexture;
     protected FloatMask slopesTexture;
-    protected FloatMask steepHillsTexture;
+    protected FloatMask underWaterTexture;
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
     protected IntegerMask terrainType;
@@ -28,10 +28,16 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected void setupTexturePipeline() {
         BooleanMask flat = slope.copyAsBooleanMask(.05f).invert();
         BooleanMask slopes = slope.copyAsBooleanMask(.15f);
-        BooleanMask accentSlopes = slope.copyAsBooleanMask(.55f).invert().subtract(flat);
-        BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
+        BooleanMask accentSlopes = slope.copyAsBooleanMask(.75f).invert().subtract(flat);
         BooleanMask rock = slope.copyAsBooleanMask(.75f);
         BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
+        float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
+                           generatorParameters.biome().waterSettings().getElevationAbyss();
+        FloatMask scaledWaterDepth = heightmap.copy()
+                                              .subtract(generatorParameters.biome().waterSettings().getElevation())
+                                              .multiply(-1f)
+                                              .divide(abyssDepth)
+                                              .clampMin(0f);
 
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
@@ -59,12 +65,10 @@ public class BasicTextureGenerator extends TextureGenerator {
                            .clampMax(1f)
                            .setToValue(accentSlopes.copy().invert(), 0f)
                            .blur(16);
-        steepHillsTexture.setSize(textureSize)
-                         .addPerlinNoise(mapSize / 8, 1f)
-                         .addGaussianNoise(.05f)
+        underWaterTexture.init(realWater.deflate(1), 0f, .7f)
+                         .add(scaledWaterDepth.multiply(.3f))
                          .clampMax(1f)
-                         .setToValue(steepHills.copy().invert(), 0f)
-                         .blur(8);
+                         .blur(1);
         waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
         accentRockTexture.setSize(textureSize)
@@ -74,14 +78,13 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .setToValue(accentRock.copy().invert(), 0f)
                          .blur(2);
         texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
-        texturesHighMask.setComponents(steepHillsTexture, waterBeachTexture, rockTexture, accentRockTexture);
+        texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, accentRockTexture);
 
         setupTerrainType(mapSize);
     }
 
     protected void setupTerrainType(int mapSize) {
         terrainType.setSize(mapSize);
-        BooleanMask realWater = realLand.copy().invert().setSize(mapSize);
 
         Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
@@ -89,13 +92,12 @@ public class BasicTextureGenerator extends TextureGenerator {
                    .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
                    .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
                    .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
-                   .setToValue(steepHillsTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
-                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[6])
+                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
                    // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
-                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[8])
-                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[7])
-                   .setToValue(realWater, terrainTypes[9])
-                   .setToValue(realWater.deflate(20), terrainTypes[10]);
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[7])
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[6])
+                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
+                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
     }
 
     @Override
@@ -110,7 +112,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
         accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture", true);
         slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
-        steepHillsTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "steepHillsTexture", true);
+        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
         terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
