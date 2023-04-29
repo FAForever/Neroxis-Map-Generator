@@ -1,14 +1,37 @@
 {
+  "previewColors": [
+    -12893661,
+    -14801654,
+    -14802163,
+    -12961746,
+    -11251391,
+    -12961746,
+    -12961746,
+    -12698052,
+    -12568527
+  ],
+  "normalScales": [
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    16.0,
+    4.0,
+    4.0,
+    6.0,
+    6.0
+  ],
   "name": "Loki",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_TropicalOp06.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_TropicalOp06a.dds"
-    }
+  "normalPaths": [
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen/layers/Dirt001_normals.dds",
+    "/env/Evergreen/layers/Dirt001_normals.dds",
+    "/env/Evergreen2/Layers/EvRock006_normal.dds",
+    "/env/Evergreen/layers/SandLight_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EvRock007_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/EvGrass007_albedo.dds",
@@ -17,10 +40,23 @@
     "/env/Evergreen2/Layers/Eg_Gravel01_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Gravel01_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel_albedo.dds",
+    "/env/Evergreen2/Layers/EG_Gravel_albedo.DDS",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/Evergreen2/Layers/EvRock007c_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
   ],
   "textureScales": [
     2.0,
@@ -34,49 +70,14 @@
     32.0,
     77.5
   ],
-  "terrainTypes": [
-    83,
-    83,
-    82,
-    81,
-    81,
-    81,
-    162,
-    159,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
-    "/env/Evergreen2/Layers/EvRock006_normal.dds",
-    "/env/Evergreen/layers/SandLight_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EvRock007_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
-  ],
-  "normalScales": [
-    6.0,
-    6.0,
-    6.0,
-    6.0,
-    16.0,
-    4.0,
-    4.0,
-    6.0,
-    6.0
-  ],
-  "previewColors": [
-    -12893661,
-    -14801654,
-    -14802163,
-    -12961746,
-    -11251391,
-    -12961746,
-    -12961746,
-    -12698052,
-    -12568527
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_TropicalOp06.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_TropicalOp06a.dds"
+    }
   ]
 }

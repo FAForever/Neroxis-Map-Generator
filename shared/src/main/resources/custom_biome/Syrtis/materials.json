@@ -1,14 +1,37 @@
 {
+  "previewColors": [
+    -9490404,
+    -11329514,
+    -10080227,
+    -11722475,
+    -12970227,
+    -12774645,
+    -12774645,
+    -12970227,
+    -9816284
+  ],
+  "normalScales": [
+    8.0,
+    6.0,
+    8.0,
+    16.0,
+    8.0,
+    12.0,
+    12.0,
+    4.0,
+    16.0
+  ],
   "name": "Syrtis",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_RedRocks06.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_RedRocks06.dds"
-    }
+  "normalPaths": [
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
   ],
   "texturePaths": [
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
@@ -22,6 +45,19 @@
     "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
     "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
   ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
+  ],
   "textureScales": [
     16.0,
     0.0,
@@ -34,49 +70,14 @@
     8.0,
     128.0
   ],
-  "terrainTypes": [
-    5,
-    6,
-    5,
-    6,
-    6,
-    6,
-    154,
-    154,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
-    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
-  ],
-  "normalScales": [
-    8.0,
-    6.0,
-    8.0,
-    16.0,
-    8.0,
-    12.0,
-    12.0,
-    4.0,
-    16.0
-  ],
-  "previewColors": [
-    -9490404,
-    -11329514,
-    -10080227,
-    -11722475,
-    -12970227,
-    -10080227,
-    -12774645,
-    -12970227,
-    -9816284
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_RedRocks06.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_RedRocks06.dds"
+    }
   ]
 }

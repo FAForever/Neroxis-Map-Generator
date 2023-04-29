@@ -1,14 +1,37 @@
 {
+  "previewColors": [
+    -9490404,
+    -8707325,
+    -8707325,
+    -10802148,
+    -11721450,
+    -12774645,
+    -14870243,
+    -13749699,
+    -11250332
+  ],
+  "normalScales": [
+    6.0,
+    16.0,
+    32.0,
+    12.0,
+    64.0,
+    64.0,
+    6.0,
+    4.0,
+    4.0
+  ],
   "name": "Moonlight",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_RedRocks05.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_RedRocks05a.dds"
-    }
+  "normalPaths": [
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
+    "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
+    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock06_normal.dds"
   ],
   "texturePaths": [
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
@@ -17,10 +40,23 @@
     "/env/Red Barrens/Layers/RB_gravel01_albedo.dds",
     "/env/Red Barrens/Layers/RB_Rock08_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
-    "/env/Lava/Layers/macrotexture000_albedo.dds",
+    "/env/lava/layers/lav_rock08_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
     "/env/Geothermal/layers/Geo_Dirt_01_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
   ],
   "textureScales": [
     8.0,
@@ -34,49 +70,14 @@
     32.0,
     128.0
   ],
-  "terrainTypes": [
-    5,
-    5,
-    5,
-    6,
-    6,
-    6,
-    157,
-    157,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS",
-    "/env/Red Barrens/Layers/RB_Rock09_normal.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds"
-  ],
-  "normalScales": [
-    6.0,
-    16.0,
-    32.0,
-    12.0,
-    64.0,
-    64.0,
-    6.0,
-    4.0,
-    4.0
-  ],
-  "previewColors": [
-    -9490404,
-    -8707325,
-    -8707325,
-    -10802148,
-    -11721450,
-    -11722475,
-    -12774645,
-    -13749699,
-    -11250332
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_RedRocks05.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_RedRocks05a.dds"
+    }
   ]
 }

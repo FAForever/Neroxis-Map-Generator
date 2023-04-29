@@ -1,14 +1,37 @@
 {
+  "previewColors": [
+    -12767974,
+    -11845324,
+    -10465488,
+    -12698052,
+    -8755895,
+    -11779787,
+    -13160666,
+    -13749699,
+    -14802660
+  ],
+  "normalScales": [
+    12.0,
+    6.0,
+    16.0,
+    16.0,
+    16.0,
+    6.0,
+    6.0,
+    12.0,
+    4.0
+  ],
   "name": "Stones",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_Desert03a.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_Desert03a.dds"
-    }
+  "normalPaths": [
+    "/env/paradise/layers/SandMed_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/dirt000_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/SandMed_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds"
   ],
   "texturePaths": [
     "/env/paradise/layers/grass001_albedo.dds",
@@ -16,11 +39,24 @@
     "/env/paradise/layers/dirt000_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+    "/env/evergreen2/layers/eg_dirt001_albedo.dds",
+    "/env/evergreen2/layers/eg_dirt002_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
     "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
   ],
   "textureScales": [
     0.0,
@@ -34,49 +70,14 @@
     8.0,
     128.0
   ],
-  "terrainTypes": [
-    7,
-    8,
-    7,
-    7,
-    7,
-    8,
-    156,
-    156,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/paradise/layers/SandMed_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/dirt000_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/SandMed_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds"
-  ],
-  "normalScales": [
-    12.0,
-    6.0,
-    16.0,
-    16.0,
-    16.0,
-    6.0,
-    6.0,
-    12.0,
-    4.0
-  ],
-  "previewColors": [
-    -12767974,
-    -11845324,
-    -10465488,
-    -12698052,
-    -8755895,
-    -10465488,
-    -11251391,
-    -13749699,
-    -14802660
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    }
   ]
 }

@@ -1,82 +1,83 @@
 {
+  "previewColors": [
+    -12767974,
+    -11845324,
+    -10465488,
+    -12698052,
+    -8755895,
+    -11251391,
+    -11251391,
+    -13749699,
+    -14802660
+  ],
+  "normalScales": [
+    12.0,
+    6.0,
+    16.0,
+    16.0,
+    16.0,
+    6.0,
+    6.0,
+    12.0,
+    4.0
+  ],
   "name": "Mars",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_Desert02.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_Desert02a.dds"
-    }
+  "normalPaths": [
+    "/env/paradise/layers/SandMed_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/dirt000_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/SandMed_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/paradise/layers/Rock001_normals.dds",
+    "/env/paradise/layers/Rock001_normals.dds"
   ],
   "texturePaths": [
-    "/env/Desert/Layers/Des_Gravel_albedo.dds",
-    "/env/Desert/Layers/Des_Rock_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark02_albedo.dds",
-    "/env/Desert/Layers/Des_Rock06_albedo.dds",
+    "/env/paradise/layers/grass001_albedo.dds",
+    "/env/paradise/layers/Rock001_albedo.dds",
+    "/env/paradise/layers/dirt000_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark02_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock_albedo.DDS",
-    "/env/Red Barrens/Layers/RB_Sandwet01_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+    "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
+    "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
   ],
   "textureScales": [
     0.0,
     0.0,
-    20.0,
-    10.0,
-    10.0,
-    7.0,
-    4.0,
+    0.0,
+    0.0,
     16.0,
+    8.0,
+    8.0,
     32.0,
+    8.0,
     128.0
   ],
-  "terrainTypes": [
-    8,
-    8,
-    8,
-    8,
-    8,
-    40,
-    154,
-    154,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/Desert/Layers/Des_Gravel_normal.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
-    "/env/Desert/Layers/Des_sandWet_normal.dds",
-    "/env/Desert/Layers/Des_sandDark_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
-    "/env/Red Barrens/Layers/RB_Cracked02_normal.DDS"
-  ],
-  "normalScales": [
-    5.0,
-    10.0,
-    6.0,
-    6.0,
-    8.0,
-    7.0,
-    4.0,
-    7.0,
-    7.0
-  ],
-  "previewColors": [
-    -10069694,
-    -9549004,
-    -7376820,
-    -9940934,
-    -11845328,
-    -8293798,
-    -10069694,
-    -13627131,
-    -11329514
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Desert03a.dds"
+    }
   ]
 }

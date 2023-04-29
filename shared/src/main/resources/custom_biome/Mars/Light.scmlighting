@@ -1,37 +1,37 @@
 {
-  "lightingMultiplier" : 1.2,
-  "bloom" : 0.08,
-  "fogColor" : {
-    "x" : 0.4518,
-    "z" : 0.0,
-    "y" : 0.0
+  "sunColor": {
+    "z": 0.62,
+    "y": 1.27,
+    "x": 1.54
   },
-  "sunAmbience" : {
-    "x" : 0.5,
-    "z" : 0.15,
-    "y" : 0.35
+  "fogEnd": 1000.0,
+  "fogColor": {
+    "z": 0.06,
+    "y": 0.19,
+    "x": 0.39
   },
-  "specularColor" : {
-    "x" : 0.0,
-    "z" : 0.0,
-    "y" : 0.0,
-    "w" : 0.0
+  "lightingMultiplier": 1.54,
+  "bloom": 0.08,
+  "specularColor": {
+    "z": 1.743966E-39,
+    "y": 0.0,
+    "x": 0.0,
+    "w": 0.0
   },
-  "fogStart" : 0.0,
-  "sunDirection" : {
-    "x" : 0.50000006,
-    "z" : 0.49999988,
-    "y" : 0.7071069
+  "shadowFillColor": {
+    "z": 0.7,
+    "y": 0.42,
+    "x": 0.45
   },
-  "sunColor" : {
-    "x" : 1.41,
-    "z" : 0.36,
-    "y" : 0.96
+  "fogStart": 0.0,
+  "sunAmbience": {
+    "z": 0.11,
+    "y": 0.57,
+    "x": 0.9
   },
-  "shadowFillColor" : {
-    "x" : 0.4122,
-    "z" : 0.27,
-    "y" : 0.27
-  },
-  "fogEnd" : 260.0
+  "sunDirection": {
+    "z": 0.37964055,
+    "y": 0.5,
+    "x": 0.7783785
+  }
 }

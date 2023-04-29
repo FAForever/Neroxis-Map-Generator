@@ -1,38 +1,6 @@
 {
-  "sunColor" : {
-    "z" : 0.50,
-    "x" : 0.66,
-    "y" : 0.57
-  },
-  "sunDirection" : {
-    "z" : 0.2518569,
-    "x" : 0.09954818,
-    "y" : -0.9626309
-  },
-  "texPathWaterRamp" : "/textures/engine/waterramp_tundra.dds",
-  "sunReflection" : 3.0,
-  "elevation" : 25.0,
-  "surfaceColor" : {
-    "z" : 1.5,
-    "x" : 0.0,
-    "y" : 0.7
-  },
-  "elevationDeep" : 20.0,
-  "colorLerp" : {
-    "x" : 0.046,
-    "y" : 0.119
-  },
-  "refractionScale" : 0.375,
-  "skyReflection" : 1.5,
-  "texPathCubemap" : "/textures/environment/SkyCube_Tundra04a.dds",
-  "unitReflection" : 0.5,
-  "sunShininess" : 50.0,
-  "fresnelBias" : 0.15,
-  "sunStrength" : 10.0,
-  "sunGlow" : 0.1,
-  "elevationAbyss" : 3.0,
-  "waterPresent" : true,
-  "fresnelPower" : 1.5,
+  "elevationAbyss": 3.0,
+  "fresnelPower": 10.0,
   "waveTextures": [
     {
       "normalRepeat": 0.006,
@@ -66,5 +34,37 @@
       },
       "texPath": "/textures/engine/waves001.dds"
     }
-  ]
+  ],
+  "elevationDeep": 20.0,
+  "sunGlow": 0.1,
+  "skyReflection": 0.18,
+  "sunStrength": 10.0,
+  "texPathWaterRamp": "/textures/engine/waterramp_tundra.dds",
+  "colorLerp": {
+    "y": 0.119,
+    "x": 0.05
+  },
+  "surfaceColor": {
+    "z": 0.9003,
+    "y": 0.7,
+    "x": 0.0
+  },
+  "sunShininess": 50.0,
+  "sunColor": {
+    "z": 1.59,
+    "y": 1.52,
+    "x": 1.5
+  },
+  "refractionScale": 0.38,
+  "waterPresent": true,
+  "unitReflection": 0.5,
+  "fresnelBias": 0.07,
+  "sunReflection": 3.0,
+  "texPathCubemap": "/textures/environment/SkyCube_Tundra04a.dds",
+  "sunDirection": {
+    "z": 0.2518569,
+    "y": -0.9626309,
+    "x": 0.09954818
+  },
+  "elevation": 25.0
 }

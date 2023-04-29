@@ -1,14 +1,37 @@
 {
+  "previewColors": [
+    -10065039,
+    -7364699,
+    -7102299,
+    -7102299,
+    -11709347,
+    -10065039,
+    -10065039,
+    -11709347,
+    -14408152
+  ],
+  "normalScales": [
+    4.0,
+    2.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    4.0
+  ],
   "name": "Frithen",
-  "cubeMaps": [
-    {
-      "name": "<default>",
-      "path": "/textures/environment/SkyCube_Tundra04a.dds"
-    },
-    {
-      "name": "<water>",
-      "path": "/textures/environment/SkyCube_Tundra04a.dds"
-    }
+  "normalPaths": [
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Tundra/Layers/Tund_Ice003_normal.dds",
+    "/env/Crystalline/layers/Cr_02_01_normal.dds",
+    "/env/Crystalline/layers/Cr_Rock002b_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds"
   ],
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
@@ -22,6 +45,19 @@
     "/env/Tundra/Layers/Tund_Rock_albedo.DDS",
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
+  "terrainTypes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    40,
+    150,
+    150,
+    221,
+    223
+  ],
   "textureScales": [
     2.0,
     16.0,
@@ -34,49 +70,14 @@
     16.0,
     128.0
   ],
-  "terrainTypes": [
-    200,
-    201,
-    201,
-    201,
-    200,
-    200,
-    153,
-    153,
-    221,
-    223
-  ],
-  "normalPaths": [
-    "/env/Tundra/Layers/Tund_Rock_normal.dds",
-    "/env/Tundra/Layers/Tund_Ice003_normal.dds",
-    "/env/Crystalline/layers/Cr_02_01_normal.dds",
-    "/env/Crystalline/layers/Cr_Rock002b_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
-    "/env/Tundra/Layers/Tund_Rock_normal.dds",
-    "/env/Tundra/Layers/Tund_Rock_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds"
-  ],
-  "normalScales": [
-    4.0,
-    2.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0,
-    4.0
-  ],
-  "previewColors": [
-    -10065039,
-    -7364699,
-    -7102299,
-    -7102299,
-    -11709347,
-    -11709347,
-    -10065039,
-    -11709347,
-    -14408152
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    }
   ]
 }
