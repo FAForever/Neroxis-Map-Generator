@@ -100,9 +100,15 @@ public class MapGenerator implements Callable<Integer> {
 
     public static void main(String[] args) {
         DebugUtil.timedRun("Execution", () -> {
-            CommandLine commandLine = new CommandLine(new MapGenerator());
-            commandLine.setAbbreviatedOptionsAllowed(true);
-            commandLine.execute(args);
+            CommandLine numToGenerateParser = new CommandLine(new MapGenerator());
+            numToGenerateParser.setAbbreviatedOptionsAllowed(true);
+            int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
+
+            for (int i = 0; i < numToGenerate; i++) {
+                CommandLine commandLine = new CommandLine(new MapGenerator());
+                commandLine.setAbbreviatedOptionsAllowed(true);
+                commandLine.execute(args);
+            }
             Pipeline.shutdown();
         });
     }
@@ -135,38 +141,30 @@ public class MapGenerator implements Callable<Integer> {
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
 
-        for (int i = 0; i < numToGenerate; i++) {
-            if (numToGenerate > 1) {
-                mapName = null;
-                seed = new Random().nextLong();
-                tuningOptions = new TuningOptions();
-            }
+        populateGeneratorParametersAndName();
 
-            populateGeneratorParametersAndName();
+        FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
+        System.out.println(mapName);
 
-            FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
-            System.out.println(mapName);
+        generate();
+        save();
 
-            generate();
-            save();
+        System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath()
+                                                                 .resolve(mapName)
+                                                                 .toAbsolutePath());
 
-            System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath()
-                                                                     .resolve(mapName)
-                                                                     .toAbsolutePath());
+        Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+                                        .map(VisibilityOptions::getVisibility)
+                                        .orElse(null);
+        if (visibility == null) {
+            System.out.printf("Seed: %d%n", seed);
+            System.out.println(styleGenerator.getGeneratorParameters().toString());
+            System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
+            System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
+            System.out.println(styleGenerator.generatorsToString());
 
-            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
-                                            .map(VisibilityOptions::getVisibility)
-                                            .orElse(null);
-            if (visibility == null) {
-                System.out.printf("Seed: %d%n", seed);
-                System.out.println(styleGenerator.getGeneratorParameters().toString());
-                System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
-                System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
-                System.out.println(styleGenerator.generatorsToString());
-
-                if (previewFolder != null) {
-                    SCMapExporter.exportPreview(previewFolder, map);
-                }
+            if (previewFolder != null) {
+                SCMapExporter.exportPreview(previewFolder, map);
             }
         }
 
