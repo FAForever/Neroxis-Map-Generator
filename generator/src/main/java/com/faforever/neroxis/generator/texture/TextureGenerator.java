@@ -41,18 +41,20 @@ public abstract strictfp class TextureGenerator extends ElementGenerator {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        FloatMask heightMap512 = heightmap.copy().resample(512);
+        FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
 
-        FloatMask heightDiff = heightMap512.copy()
-                                           .clampMin(generatorParameters.getBiome().getWaterSettings().getElevation())
-                                           .normalize();
+        FloatMask heightDiff = heightMapSize.copy()
+                                            .clampMin(generatorParameters.getBiome()
+                                                                         .getWaterSettings()
+                                                                         .getElevation())
+                                            .normalize();
 
-        normals = heightMap512.copyAsNormalMask(2f);
-        shadowsMask = heightMap512.copyAsShadowMask(generatorParameters.getBiome()
-                                                                       .getLightingSettings()
-                                                                       .getSunDirection());
+        normals = heightMapSize.copyAsNormalMask(2f);
+        shadowsMask = heightMapSize.copyAsShadowMask(generatorParameters.getBiome()
+                                                                        .getLightingSettings()
+                                                                        .getSunDirection());
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(2);
-        ambient = new FloatMask(512, random.nextLong(), symmetrySettings, "ambient", true).add(1f);
+        ambient = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "ambient", true).add(1f);
 
         ambient.subtract(heightDiff.copy().multiply(-1f).add(1f).multiply(.05f))
                .subtract(heightDiff.copy().blur(1).subtract(heightDiff).clampMin(0f).multiply(4f))
