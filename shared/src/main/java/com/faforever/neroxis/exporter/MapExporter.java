@@ -7,17 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MapExporter {
-    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportDecals) {
+    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportUtility) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
 
-            if (exportDecals) {
-                if (map.getCompressedNormal() != null) {
-                    SCMapExporter.exportNormals(mapPath, map);
-                }
-                if (map.getCompressedShadows() != null) {
-                    SCMapExporter.exportShadows(mapPath, map);
+            if (exportUtility) {
+                if (map.getRawNormalAndShadow() != null) {
+                    SCMapExporter.exportUtilityMap(mapPath, map);
                 }
             }
             if (exportPreview) {

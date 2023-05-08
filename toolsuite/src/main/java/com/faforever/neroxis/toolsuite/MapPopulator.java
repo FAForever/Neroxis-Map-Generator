@@ -23,6 +23,7 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
+import com.faforever.neroxis.util.vector.Vector3;
 import lombok.Getter;
 import picocli.CommandLine;
 
@@ -376,17 +377,6 @@ public class MapPopulator implements Callable<Integer> {
                                       accentRockTexture);
         }
 
-        if (erosionResolution != null) {
-            FloatMask erosionHeightMask = heightmapBase.copy()
-                                                       .resample(erosionResolution)
-                                                       .subtractAvg()
-                                                       .multiply(10f)
-                                                       .addPerlinNoise(erosionResolution / 16, 4f);
-            erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
-            NormalMask normal = erosionHeightMask.copyAsNormalMask();
-            map.setCompressedNormal(ImageUtil.compressNormal(normal));
-        }
-
         Biome biome = symmetryRequiredSettings.getBiome();
         if (biome != null) {
             map.getProps().clear();
@@ -445,6 +435,22 @@ public class MapPopulator implements Callable<Integer> {
             }
 
             map.setBiome(biome);
+        }
+
+        if (erosionResolution != null) {
+            FloatMask erosionHeightMask = heightmapBase.copy()
+                    .resample(erosionResolution)
+                    .subtractAvg()
+                    .multiply(10f)
+                    .addPerlinNoise(erosionResolution / 16, 4f);
+            erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
+            NormalMask normal = erosionHeightMask.copyAsNormalMask();
+            Vector3 sunDirection = new Vector3(0, 1, 0);
+            if (biome != null) {
+                sunDirection = biome.lightingSettings().getSunDirection();
+            }
+            FloatMask shadow = erosionHeightMask.copyAsShadowMask(sunDirection).copyAsFloatMask(0, 1);
+            map.setRawNormalAndShadow(ImageUtil.combineNormalAndShadow(normal, shadow));
         }
 
         if (populateAI) {

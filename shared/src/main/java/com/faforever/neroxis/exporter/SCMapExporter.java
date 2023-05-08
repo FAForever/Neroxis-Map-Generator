@@ -3,7 +3,6 @@ package com.faforever.neroxis.exporter;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.DecalType;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
@@ -116,7 +115,13 @@ public class SCMapExporter {
             writeFloat(0);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
+            if (i == 8) {
+                // We provide our own texture for this layer, so we need to modify the path
+                String path = "/maps/" + map.getName() + "/env/NormalAndShadow.dds";
+                writeStringNull(path);
+            } else {
+                writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
+            }
             writeFloat(mapTerrainMaterials.getTextureScales()[i]);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
@@ -231,44 +236,15 @@ public class SCMapExporter {
         }
     }
 
-    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedNormal = map.getCompressedNormal();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
-        Path writingPath = folderPath.resolve(decalPath);
+    public static void exportUtilityMap(Path folderPath, SCMap map) throws IOException {
+        byte[] rawNormalAndShadow = map.getRawNormalAndShadow();
+        Path stratumPath = Paths.get("env/NormalAndShadow.dds");
+        Path writingPath = folderPath.resolve(stratumPath);
         Files.createDirectories(writingPath.getParent());
-        map.getDecals()
-           .add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset, new Vector3(),
-                          size, 1000));
         try {
-            Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
+            Files.write(writingPath, rawNormalAndShadow, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            System.out.print("Could not write the normal map image\n" + e);
-        }
-    }
-
-    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedShadows = map.getCompressedShadows();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
-        Path writingPath = folderPath.resolve(decalPath);
-        Files.createDirectories(writingPath.getParent());
-        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
-                                      new Vector3(), size, 1000);
-        shadowDecal.setType(DecalType.WATER_ALBEDO);
-        map.getDecals().add(shadowDecal);
-        try {
-            Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            System.out.print("Could not write the shadow map image\n" + e);
+            System.out.print("Could not write the utility map image\n" + e);
         }
     }
 

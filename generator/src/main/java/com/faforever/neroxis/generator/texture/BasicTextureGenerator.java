@@ -30,7 +30,6 @@ public class BasicTextureGenerator extends TextureGenerator {
         BooleanMask slopes = slope.copyAsBooleanMask(.15f);
         BooleanMask accentSlopes = slope.copyAsBooleanMask(.75f).invert().subtract(flat);
         BooleanMask rock = slope.copyAsBooleanMask(.75f);
-        BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
         float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
                            generatorParameters.biome().waterSettings().getElevationAbyss();
         FloatMask scaledWaterDepth = heightmap.copy()
@@ -71,12 +70,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .blur(1);
         waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.setSize(textureSize)
-                         .addPerlinNoise(mapSize / 16, 1f)
-                         .addGaussianNoise(.05f)
-                         .clampMax(1f)
-                         .setToValue(accentRock.copy().invert(), 0f)
-                         .blur(2);
+        accentRockTexture.setSize(textureSize); // We use this texture as utility data storage now
         texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
         texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, accentRockTexture);
 
@@ -93,8 +87,6 @@ public class BasicTextureGenerator extends TextureGenerator {
                    .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
                    .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
                    .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
-                   // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
-                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[7])
                    .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[6])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
@@ -129,12 +121,10 @@ public class BasicTextureGenerator extends TextureGenerator {
     }
 
     @Override
-    public void setCompressedDecals() {
+    public void setUtilityChannel() {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.biome().lightingSettings()));
-            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
+            map.setRawNormalAndShadow(ImageUtil.combineNormalAndShadow(normals.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

@@ -84,7 +84,7 @@ public abstract class StyleGenerator extends ElementGenerator {
 
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
+        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setUtilityChannel);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
