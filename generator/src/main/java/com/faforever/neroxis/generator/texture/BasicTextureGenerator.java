@@ -20,7 +20,7 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask slopesTexture;
     protected FloatMask underWaterTexture;
     protected FloatMask rockTexture;
-    protected FloatMask accentRockTexture;
+    protected FloatMask pbrTexture;
     protected IntegerMask terrainType;
 
     @Override
@@ -69,9 +69,9 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .blur(1);
         waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
         rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
-        accentRockTexture.setSize(textureSize); // We use this texture as utility data storage now
+        pbrTexture.setSize(textureSize);
         texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
-        texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, accentRockTexture);
+        texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, pbrTexture);
 
         setupTerrainType(mapSize);
     }
@@ -105,7 +105,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
         underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
-        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
+        pbrTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
         terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
     }
 
