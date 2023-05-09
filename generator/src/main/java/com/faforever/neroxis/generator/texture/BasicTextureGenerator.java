@@ -8,7 +8,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public class BasicTextureGenerator extends TextureGenerator {
@@ -117,14 +116,6 @@ public class BasicTextureGenerator extends TextureGenerator {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-        });
-    }
-
-    @Override
-    public void setUtilityChannel() {
-        Pipeline.await(normals, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setRawNormalAndShadow(ImageUtil.combineNormalAndShadow(normals.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

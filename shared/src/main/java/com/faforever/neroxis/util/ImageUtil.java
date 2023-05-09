@@ -10,7 +10,8 @@ import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -138,25 +139,27 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static byte[] combineNormalAndShadow(NormalMask normal, FloatMask shadowMask) {
+    public static byte[] getPBRTextureBytes(NormalMask normalMask, FloatMask shadowMask, FloatMask ambientMask) {
+        if (shadowMask.getSize() != ambientMask.getSize() || shadowMask.getSize() != normalMask.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, ambient size %d, normal size %d".formatted(shadowMask.getSize(), ambientMask.getSize(), normalMask.getSize()));
+        }
         int size = shadowMask.getSize();
         int length = size * size * 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                Vector3 value = normal.get(x, y);
-                float shadow = shadowMask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
-                int b = (byte) StrictMath.min(StrictMath.max(shadow * 255, 0), 255);
+                Vector3 normalValue = normalMask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(ambientMask.get(x, y) * 255, 0), 255);
+                imageByteBuffer.put((byte) xV);
                 imageByteBuffer.put((byte) yV);
                 imageByteBuffer.put((byte) zV);
-                imageByteBuffer.put((byte) b);
-                imageByteBuffer.put((byte) xV);
+                imageByteBuffer.put((byte) wV);
             }
         }
-        return getRawBytes(size, imageByteBuffer);
+        return getRawDDSImageBytes(size, imageByteBuffer);
     }
 
     public static BufferedImage normalToARGB(NormalMask mask) {
@@ -192,10 +195,10 @@ public class ImageUtil {
                 imageByteBuffer.put((byte) wV);
             }
         }
-        return getCompressedBytes(size, imageByteBuffer);
+        return getCompressedDDSImageBytes(size, imageByteBuffer);
     }
 
-    private static byte[] getCompressedBytes(int size, ByteBuffer imageByteBuffer) {
+    private static byte[] getCompressedDDSImageBytes(int size, ByteBuffer imageByteBuffer) {
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
@@ -211,7 +214,7 @@ public class ImageUtil {
         return allBytes;
     }
 
-    private static byte[] getRawBytes(int size, ByteBuffer imageByteBuffer) {
+    private static byte[] getRawDDSImageBytes(int size, ByteBuffer imageByteBuffer) {
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);

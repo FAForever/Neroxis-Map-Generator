@@ -40,6 +40,7 @@ import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public class SCMapExporter {
+    public static final String PBR_DDS = "pbr.dds";
     public static File file;
     private static DataOutputStream out;
 
@@ -114,16 +115,12 @@ public class SCMapExporter {
         if (map.getMinorVersion() > 56) {
             writeFloat(0);
         }
+
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            if (i == 8) {
-                // We provide our own texture for this layer, so we need to modify the path
-                String path = "/maps/" + map.getName() + "/env/NormalAndShadow.dds";
-                writeStringNull(path);
-            } else {
-                writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
-            }
+            writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
             writeFloat(mapTerrainMaterials.getTextureScales()[i]);
         }
+
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
             writeFloat(mapTerrainMaterials.getNormalScales()[i]);
@@ -236,15 +233,16 @@ public class SCMapExporter {
         }
     }
 
-    public static void exportUtilityMap(Path folderPath, SCMap map) throws IOException {
-        byte[] rawNormalAndShadow = map.getRawNormalAndShadow();
-        Path stratumPath = Paths.get("env/NormalAndShadow.dds");
+    public static void exportPBR(Path folderPath, SCMap map) throws IOException {
+        byte[] rawNormalAndShadow = map.getRawPBRTexture();
+        Path decalsPath = Paths.get("env", "texture");
+        Path stratumPath = decalsPath.resolve(PBR_DDS);
         Path writingPath = folderPath.resolve(stratumPath);
         Files.createDirectories(writingPath.getParent());
         try {
             Files.write(writingPath, rawNormalAndShadow, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            System.out.print("Could not write the utility map image\n" + e);
+            System.out.print("Could not write the pbr map texture\n" + e);
         }
     }
 

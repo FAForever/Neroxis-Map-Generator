@@ -60,7 +60,7 @@ public class MapForcer implements Callable<Integer> {
         SymmetrySettings symmetrySettings = getSymmetrySettings();
         SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
         forceSymmetry(map, symmetrySettings);
-        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true, false);
+        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true);
         return 0;
     }
 

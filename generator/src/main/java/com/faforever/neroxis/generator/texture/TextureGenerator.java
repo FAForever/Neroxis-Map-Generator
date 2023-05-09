@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
@@ -23,6 +24,7 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected NormalMask normals;
     protected FloatMask shadows;
+    protected FloatMask ambient;
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
@@ -30,6 +32,7 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected Vector4Mask texturesHighPreviewMask;
     protected FloatMask heightmapPreview;
     protected FloatMask reflectance;
+    protected FloatMask perlinNoise;
 
     protected abstract void setupTexturePipeline();
 
@@ -38,34 +41,53 @@ public abstract class TextureGenerator extends ElementGenerator {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
-        normals = heightmap.copy()
-                           .resample(512)
-                           .addPerlinNoise(64, 12f)
-                           .addGaussianNoise(.025f)
-                           .blur(1)
-                           .copyAsNormalMask(2f);
-        shadowsMask = heightmap.copy()
-                               .resample(512)
-                               .copyAsShadowMask(
-                                       generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
+
+        FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
+
+        FloatMask heightDiff = heightMapSize.copy()
+                                            .clampMin(generatorParameters.biome()
+                                                                         .waterSettings()
+                                                                         .getElevation())
+                                            .normalize();
+
+        normals = heightMapSize
+                .addPerlinNoise(64, 12f)
+                .addGaussianNoise(.025f)
+                .blur(1)
+                .copyAsNormalMask(2f);
+        shadowsMask = heightMapSize
+                .copyAsShadowMask(
+                        generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(1);
+        ambient = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "ambient", true).add(1f);
+
+        ambient.subtract(heightDiff.copy().multiply(-1f).add(1f).multiply(.05f))
+               .subtract(heightDiff.copy().blur(1).subtract(heightDiff).clampMin(0f).multiply(4f))
+               .subtract(heightDiff.copy().blur(2).subtract(heightDiff).clampMin(0f).multiply(2f))
+               .subtract(heightDiff.copy().blur(4).subtract(heightDiff).clampMin(0f))
+               .subtract(heightDiff.copy().blur(8).subtract(heightDiff).clampMin(0f))
+               .subtract(heightDiff.copy().blur(16).subtract(heightDiff).clampMin(0f))
+               .subtract(heightDiff.copy().blur(32).subtract(heightDiff).clampMin(0f))
+               .subtract(heightDiff.copy().blur(64).subtract(heightDiff).clampMin(0f).multiply(.5f))
+               .subtract(heightDiff.copy().blur(128).subtract(heightDiff).clampMin(0f).multiply(.5f))
+               .blur(2)
+               .clampMin(0f);
+
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
                                            true);
+
+        perlinNoise = new FloatMask(map.getWaterDepthBiasMap()
+                                       .getHeight(), random.nextLong(), new SymmetrySettings(Symmetry.NONE), "perlin", true).addPerlinNoise(24, 1);
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, ambient, perlinNoise);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-        });
-    }
-
-    public void setUtilityChannel() {
-        Pipeline.await(normals, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setRawNormalAndShadow(ImageUtil.combineNormalAndShadow(normals.getFinalMask(), shadows.getFinalMask()));
+            map.setRawPBRTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), ambient.getFinalMask()));
+            map.setWaterDepthBiasMap(perlinNoise.getFinalMask().toImage());
         });
     }
 

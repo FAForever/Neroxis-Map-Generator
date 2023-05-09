@@ -460,7 +460,8 @@ public class MapGenerator implements Callable<Integer> {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
-            MapExporter.exportMap(outputPath, map, visibility == null, true);
+            SCMapExporter.exportPBR(outputPath, map);
+            MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             if (visibility == null && DebugUtil.DEBUG) {
@@ -523,6 +524,14 @@ public class MapGenerator implements Callable<Integer> {
         map.setName(mapName);
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
+
+        map.getBiome()
+           .terrainMaterials()
+           .getTexturePaths()[8] = Path.of("/maps", map.getFolderName(), "env", "texture", "pbr.dds")
+                                       .toString()
+                                       .replace("\\", "/");
+        map.getBiome().terrainMaterials().getTextureScales()[8] = 0;
+
         ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);

@@ -7,16 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MapExporter {
-    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview, boolean exportUtility) {
+    public static void exportMap(Path folderPath, SCMap map, boolean exportPreview) {
         try {
             Path mapPath = folderPath.resolve(map.getFolderName());
             Files.createDirectories(mapPath);
 
-            if (exportUtility) {
-                if (map.getRawNormalAndShadow() != null) {
-                    SCMapExporter.exportUtilityMap(mapPath, map);
-                }
-            }
             if (exportPreview) {
                 SCMapExporter.exportPreview(mapPath, map);
             }

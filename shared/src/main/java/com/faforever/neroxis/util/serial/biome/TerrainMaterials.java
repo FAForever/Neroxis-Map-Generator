@@ -19,7 +19,7 @@ public class TerrainMaterials {
     beach
     underWater
     rock
-    unused (utility texture slot)
+    pbr texture (generated)
     macroTexture
     */
 
@@ -41,7 +41,7 @@ public class TerrainMaterials {
             1,  // slopesAccent
             40,  // beach
             150,  // rock
-            150,  // unused
+            150,  // pbr texture (generated)
             221,  // shallowWater
             223   // deepWater
     };
