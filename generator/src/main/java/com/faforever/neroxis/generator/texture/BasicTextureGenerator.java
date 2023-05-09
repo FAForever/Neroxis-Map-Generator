@@ -7,8 +7,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -38,9 +36,9 @@ public class BasicTextureGenerator extends TextureGenerator {
                                               .clampMin(0f);
 
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.add(shadowsInWater, 1f)
-               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
+               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(map.getSize())))
                .clampMax(1f);
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
@@ -107,16 +105,6 @@ public class BasicTextureGenerator extends TextureGenerator {
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         pbrTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
         terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
-    }
-
-    @Override
-    public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
-            map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
-            map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-        });
     }
 
     @Override

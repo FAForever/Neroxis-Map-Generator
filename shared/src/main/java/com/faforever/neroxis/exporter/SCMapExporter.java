@@ -234,13 +234,13 @@ public class SCMapExporter {
     }
 
     public static void exportPBR(Path folderPath, SCMap map) throws IOException {
-        byte[] rawNormalAndShadow = map.getRawPBRTexture();
+        byte[] rawPBR = map.getRawPBRTexture();
         Path decalsPath = Paths.get("env", "texture");
         Path stratumPath = decalsPath.resolve(PBR_DDS);
         Path writingPath = folderPath.resolve(stratumPath);
         Files.createDirectories(writingPath.getParent());
         try {
-            Files.write(writingPath, rawNormalAndShadow, StandardOpenOption.CREATE);
+            Files.write(writingPath, rawPBR, StandardOpenOption.CREATE);
         } catch (IOException e) {
             System.out.print("Could not write the pbr map texture\n" + e);
         }
