@@ -460,7 +460,7 @@ public class MapGenerator implements Callable<Integer> {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
-            SCMapExporter.exportPBR(outputPath, map);
+            SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
             MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
