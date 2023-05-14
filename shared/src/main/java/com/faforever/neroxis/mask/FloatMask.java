@@ -449,15 +449,16 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE), getName() +
                                                                                                                 "Shadow", isParallel());
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
             Vector2 location = new Vector2(x, y);
             if (shadowMask.getPrimitive(location)) {
                 return;
             }
-            float startHeight = getPrimitive(location);
+            float startHeight = source.getPrimitive(location);
             int dist = 1;
             location.addPolar(angle, 1);
-            while (inBounds(location)) {
-                if (startHeight - getPrimitive(location) > dist * slope) {
+            while (source.inBounds(location)) {
+                if (startHeight - source.getPrimitive(location) > dist * slope) {
                     shadowMask.setPrimitive(location, true);
                 } else {
                     break;

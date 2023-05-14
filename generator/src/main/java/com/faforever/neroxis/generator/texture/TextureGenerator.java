@@ -50,11 +50,11 @@ public abstract class TextureGenerator extends ElementGenerator {
                                                                          .getElevation())
                                             .normalize();
 
-        normals = heightMapSize
-                .addPerlinNoise(64, 12f)
-                .addGaussianNoise(.025f)
-                .blur(1)
-                .copyAsNormalMask(2f);
+        normals = heightMapSize.copy()
+                               .addPerlinNoise(64, 12f)
+                               .addGaussianNoise(.025f)
+                               .blur(1)
+                               .copyAsNormalMask(2f);
         shadowsMask = heightMapSize
                 .copyAsShadowMask(
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
