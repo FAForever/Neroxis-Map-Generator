@@ -26,10 +26,7 @@ import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.TestStyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
-import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
@@ -460,6 +457,7 @@ public class MapGenerator implements Callable<Integer> {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
+            SCMapExporter.exportMapwideTexture(outputPath.resolve(mapName), map);
             SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
             MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
@@ -525,12 +523,21 @@ public class MapGenerator implements Callable<Integer> {
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
 
+        map.getBiome().terrainMaterials().getTexturePaths()[8] =
+                Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
+                .toString()
+                .replace("\\", "/");
         map.getBiome()
            .terrainMaterials()
-           .getTexturePaths()[8] = Path.of("/maps", map.getFolderName(), "env", "texture", "pbr.dds")
+           .getTexturePaths()[9] = Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
                                        .toString()
                                        .replace("\\", "/");
-        map.getBiome().terrainMaterials().getTextureScales()[8] = 0;
+        map.getBiome().terrainMaterials().getNormalPaths()[8] =
+                map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
+        // This sets the strength of the stratum normals
+        map.getBiome().terrainMaterials().getTextureScales()[8] = 1.0F;
+        // This needs to be 0 to trigger different normal calculations for the decals to match our provided normals
+        map.getBiome().terrainMaterials().getTextureScales()[9] = 0;
 
         ScriptGenerator.generateScript(map);
 

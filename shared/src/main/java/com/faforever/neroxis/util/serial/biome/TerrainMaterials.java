@@ -20,7 +20,7 @@ public class TerrainMaterials {
     underWater
     rock
     pbr texture (generated)
-    macroTexture
+    map-wide textures (generated)
     */
 
     // engine limitations - must stay 9 and 10 always
@@ -41,7 +41,7 @@ public class TerrainMaterials {
             1,  // slopesAccent
             40,  // beach
             150,  // rock
-            150,  // pbr texture (generated)
+            150,  // to be removed
             221,  // shallowWater
             223   // deepWater
     };

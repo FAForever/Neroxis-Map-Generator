@@ -30,17 +30,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.List;
 
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public class SCMapExporter {
-    public static final String PBR_DDS = "pbr.dds";
+    public static final String PBR_DDS = "heightRoughness.dds";
+    public static final String MAPWIDE_DDS = "mapwide.dds";
     public static File file;
     private static DataOutputStream out;
 
@@ -233,16 +231,29 @@ public class SCMapExporter {
         }
     }
 
-    public static void exportPBR(Path folderPath, SCMap map) throws IOException {
-        byte[] rawPBR = map.getRawPBRTexture();
-        Path decalsPath = Paths.get("env", "texture");
-        Path stratumPath = decalsPath.resolve(PBR_DDS);
-        Path writingPath = folderPath.resolve(stratumPath);
+    public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
+        byte[] rawPBR = map.getRawMapTexture();
+        Path textureDirectory = Paths.get("env", "texture");
+        Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
+        Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
         try {
             Files.write(writingPath, rawPBR, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            System.out.print("Could not write the pbr map texture\n" + e);
+            System.out.print("Could not write the map-wide texture\n" + e);
+        }
+    }
+
+    public static void exportPBR(Path folderPath, SCMap map) throws IOException {
+        Path textureDirectory = Paths.get("env", "texture");
+        Path filePath = textureDirectory.resolve(PBR_DDS);
+        Path writingPath = folderPath.resolve(filePath);
+        Path sourcePath = Paths.get("shared/src/main/resources/images/heightRoughness.dds");
+        Files.createDirectories(writingPath.getParent());
+        try {
+            Files.copy(sourcePath, writingPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.out.print("Could not write the pbr texture\n" + e);
         }
     }
 

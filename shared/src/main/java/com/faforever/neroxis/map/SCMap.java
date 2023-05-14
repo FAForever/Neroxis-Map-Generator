@@ -61,7 +61,7 @@ public class SCMap {
     private final List<AIMarker> largeExpansionAIMarkers;
     private final List<AIMarker> navalAreaAIMarkers;
     private final List<AIMarker> navalRallyMarkers;
-    private byte[] rawPBRTexture;
+    private byte[] rawMapTexture;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)

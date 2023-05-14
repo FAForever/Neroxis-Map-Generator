@@ -24,7 +24,7 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected NormalMask normals;
     protected FloatMask shadows;
-    protected FloatMask ambient;
+    protected FloatMask albedoOverlay;
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
@@ -44,14 +44,7 @@ public abstract class TextureGenerator extends ElementGenerator {
 
         FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
 
-        FloatMask heightDiff = heightMapSize.copy()
-                                            .clampMin(generatorParameters.biome()
-                                                                         .waterSettings()
-                                                                         .getElevation())
-                                            .normalize();
-
         normals = heightMapSize.copy()
-                               .addPerlinNoise(64, 12f)
                                .addGaussianNoise(.025f)
                                .blur(1)
                                .copyAsNormalMask(2f);
@@ -59,19 +52,7 @@ public abstract class TextureGenerator extends ElementGenerator {
                 .copyAsShadowMask(
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(0, 1).blur(1);
-        ambient = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "ambient", true).add(1f);
-
-        ambient.subtract(heightDiff.copy().multiply(-1f).add(1f).multiply(.05f))
-               .subtract(heightDiff.copy().blur(1).subtract(heightDiff).clampMin(0f).multiply(4f))
-               .subtract(heightDiff.copy().blur(2).subtract(heightDiff).clampMin(0f).multiply(2f))
-               .subtract(heightDiff.copy().blur(4).subtract(heightDiff).clampMin(0f))
-               .subtract(heightDiff.copy().blur(8).subtract(heightDiff).clampMin(0f))
-               .subtract(heightDiff.copy().blur(16).subtract(heightDiff).clampMin(0f))
-               .subtract(heightDiff.copy().blur(32).subtract(heightDiff).clampMin(0f))
-               .subtract(heightDiff.copy().blur(64).subtract(heightDiff).clampMin(0f).multiply(.5f))
-               .subtract(heightDiff.copy().blur(128).subtract(heightDiff).clampMin(0f).multiply(.5f))
-               .blur(2)
-               .clampMin(0f);
+        albedoOverlay = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "albedoOverly", true).add(.5f);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
@@ -82,11 +63,11 @@ public abstract class TextureGenerator extends ElementGenerator {
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, ambient, perlinNoise);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, albedoOverlay, perlinNoise);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setRawPBRTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), ambient.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), albedoOverlay.getFinalMask()));
             map.setWaterDepthBiasMap(perlinNoise.getFinalMask().toImage());
         });
     }
