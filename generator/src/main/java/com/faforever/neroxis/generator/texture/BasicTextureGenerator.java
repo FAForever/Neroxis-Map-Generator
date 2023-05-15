@@ -71,16 +71,16 @@ public class BasicTextureGenerator extends TextureGenerator {
                      .clampMin(0f)
                      .clampMax(1f);
         accentSlopesTexture.setSize(textureSize)
-                           .setToValue(accentSlopes.copy().deflate(8), -1f)
-                           .blur(12)
-                           .addPerlinNoise(mapSize / 30, .3f)
-                           .addPerlinNoise(mapSize / 10, .5f)
+                           .setToValue(accentSlopes.copy().deflate(10), -.6f)
+                           .blur(16)
+                           .addPerlinNoise(mapSize / 25, .2f)
+                           .addPerlinNoise(mapSize / 10, .2f)
                            .addGaussianNoise(.05f)
                            .multiply(-.4f)
                            .blur(2)
                            .clampMax(1f)
                            .clampMin(0f);
-        underWaterTexture.init(realWater.deflate(1), 0f, .7f)
+        underWaterTexture.init(realWater.copy().deflate(1), 0f, .7f)
                          .add(scaledWaterDepth.multiply(.3f))
                          .clampMax(1f)
                          .blur(1)
@@ -88,7 +88,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .multiply(2f)
                          .clampMin(0f)
                          .clampMax(1f);
-        waterBeachTexture.init(realWater.inflate(16).subtract(realPlateaus), 0f, -1f)
+        waterBeachTexture.init(realWater.copy().inflate(16).subtract(realPlateaus), 0f, -1f)
                          .blur(8)
                          .addPerlinNoise(mapSize / 8, .9f)
                          .multiply(-1f)
@@ -102,7 +102,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                    .multiply(2f)
                    .clampMin(0f)
                    .clampMax(1f);
-        roughnessOverlayTexture.init(realWater.inflate(4).subtract(realPlateaus), 5f, 3f).blur(6);
+        roughnessOverlayTexture.init(realWater.inflate(4).subtract(realPlateaus), .75f, .5f).blur(4);
         texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
         texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, roughnessOverlayTexture);
 
