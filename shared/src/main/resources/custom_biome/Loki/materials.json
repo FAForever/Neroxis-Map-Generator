@@ -23,15 +23,15 @@
     "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
-    2.0,
-    2.0,
-    2.0,
-    4.0,
-    4.0,
-    8.0,
-    8.0,
-    8.0,
-    32.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    1.0,
     77.5
   ],
   "terrainTypes": [
@@ -58,15 +58,15 @@
     "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
   ],
   "normalScales": [
-    6.0,
-    6.0,
-    6.0,
-    6.0,
-    16.0,
-    4.0,
-    4.0,
-    6.0,
-    6.0
+    18.0,
+    18.0,
+    18.0,
+    18.0,
+    18.0,
+    18.0,
+    18.0,
+    18.0,
+    1.0
   ],
   "previewColors": [
     -12893661,
