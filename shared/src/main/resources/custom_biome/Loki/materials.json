@@ -48,13 +48,13 @@
   ],
   "normalPaths": [
     "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
-    "/env/Evergreen/layers/Dirt001_normals.dds",
+    "/env/Evergreen2/layers/EG_Grass002_normal.dds",
+    "/env/Evergreen2/layers/EG_Grass001_normal.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
+    "/env/Evergreen2/layers/Eg_Gravel2_normal.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel_normal.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel_normal.dds",
     "/env/Evergreen2/Layers/EvRock006_normal.dds",
-    "/env/Evergreen/layers/SandLight_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EvRock007_normal.dds",
     "/env/Evergreen2/Layers/EG_Rock003_normal.dds"
   ],
   "normalScales": [
