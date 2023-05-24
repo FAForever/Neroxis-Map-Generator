@@ -113,12 +113,10 @@ public class SCMapExporter {
         if (map.getMinorVersion() > 56) {
             writeFloat(0);
         }
-
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
             writeFloat(mapTerrainMaterials.getTextureScales()[i]);
         }
-
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
             writeFloat(mapTerrainMaterials.getNormalScales()[i]);

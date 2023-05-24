@@ -32,7 +32,6 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected Vector4Mask texturesHighPreviewMask;
     protected FloatMask heightmapPreview;
     protected FloatMask reflectance;
-    protected FloatMask perlinNoise;
 
     protected abstract void setupTexturePipeline();
 
@@ -57,18 +56,14 @@ public abstract class TextureGenerator extends ElementGenerator {
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
                                            true);
-
-        perlinNoise = new FloatMask(map.getWaterDepthBiasMap()
-                                       .getHeight(), random.nextLong(), new SymmetrySettings(Symmetry.NONE), "perlin", true).addPerlinNoise(24, 1);
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, albedoOverlay, perlinNoise);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, albedoOverlay);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setRawMapTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), albedoOverlay.getFinalMask()));
-            map.setWaterDepthBiasMap(perlinNoise.getFinalMask().toImage());
         });
     }
 

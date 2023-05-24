@@ -55,6 +55,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
@@ -458,7 +459,9 @@ public class MapGenerator implements Callable<Integer> {
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
             SCMapExporter.exportMapwideTexture(outputPath.resolve(mapName), map);
-            SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
+            if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
+                SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
+            }
             MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
@@ -523,19 +526,20 @@ public class MapGenerator implements Callable<Integer> {
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
 
-        map.getBiome().terrainMaterials().getTexturePaths()[8] =
-                Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
-                .toString()
-                .replace("\\", "/");
-        map.getBiome()
-           .terrainMaterials()
-           .getTexturePaths()[9] = Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
+        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
+            map.getBiome().terrainMaterials().getTexturePaths()[8] =
+                    Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
+                            .toString()
+                            .replace("\\", "/");
+            map.getBiome().terrainMaterials().getNormalPaths()[8] =
+                    map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
+            // This sets the strength of the stratum normals
+            map.getBiome().terrainMaterials().getTextureScales()[8] = 1.0F;
+        }
+        map.getBiome().terrainMaterials().getTexturePaths()[9] =
+                Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
                                        .toString()
                                        .replace("\\", "/");
-        map.getBiome().terrainMaterials().getNormalPaths()[8] =
-                map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
-        // This sets the strength of the stratum normals
-        map.getBiome().terrainMaterials().getTextureScales()[8] = 1.0F;
         // This needs to be 0 to trigger different normal calculations for the decals to match our provided normals
         map.getBiome().terrainMaterials().getTextureScales()[9] = 0;
 

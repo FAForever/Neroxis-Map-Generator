@@ -19,7 +19,7 @@ public class TerrainMaterials {
     beach
     underWater
     rock
-    pbr texture (generated)
+    rockAccent
     map-wide textures (generated)
     */
 
@@ -41,7 +41,7 @@ public class TerrainMaterials {
             1,  // slopesAccent
             40,  // beach
             150,  // rock
-            150,  // to be removed
+            150,  // rockAccent
             221,  // shallowWater
             223   // deepWater
     };

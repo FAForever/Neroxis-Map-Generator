@@ -31,6 +31,7 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 @SuppressWarnings("unused")
 @Data
 public class SCMap {
+    public static final String SHADER_001_NAME = "Terrain001";
     public static final String PBR_SHADER_NAME = "TerrainPBR";
     public static final String XP_SHADER_NAME = "TTerrainXP";
     public static final int SIGNATURE = 443572557;
@@ -69,7 +70,7 @@ public class SCMap {
     private Vector4 playableArea;
     private int minorVersion = 56;
     private String description = "";
-    private String terrainShaderPath = PBR_SHADER_NAME;
+    private String terrainShaderPath = SHADER_001_NAME;
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private boolean generatePreview;
     private boolean isUnexplored;
