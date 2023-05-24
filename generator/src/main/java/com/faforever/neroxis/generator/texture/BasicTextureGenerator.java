@@ -93,6 +93,8 @@ public class BasicTextureGenerator extends TextureGenerator {
                    .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
                    .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
                    .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
+                   // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[7])
                    .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[6])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
