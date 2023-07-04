@@ -16,9 +16,7 @@ import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.placement.AIMarkerPlacer;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
-import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
@@ -85,9 +83,6 @@ public abstract class StyleGenerator extends ElementGenerator {
         Pipeline.start();
 
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
-        CompletableFuture<Void> aiMarkerFuture = CompletableFuture.runAsync(
-                () -> generateAIMarkers(terrainGenerator.getPassable(), terrainGenerator.getPassableLand(),
-                                        terrainGenerator.getPassableWater()));
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
         CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
@@ -96,7 +91,7 @@ public abstract class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
         CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
 
-        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, aiMarkerFuture,
+        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture,
                                                                           textureFuture, previewFuture, resourcesFuture,
                                                                           decalsFuture, propsFuture, unitsFuture,
                                                                           normalFuture)
@@ -171,24 +166,6 @@ public abstract class StyleGenerator extends ElementGenerator {
         textureGenerator.setupPipeline();
         propGenerator.setupPipeline();
         decalGenerator.setupPipeline();
-    }
-
-    protected void generateAIMarkers(BooleanMask passable, BooleanMask passableLand, BooleanMask passableWater) {
-        Pipeline.await(passable, passableLand, passableWater);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeAIMarkers", () -> {
-            CompletableFuture<Void> AmphibiousMarkers = CompletableFuture.runAsync(
-                    () -> AIMarkerPlacer.placeAIMarkers(passable.getFinalMask(), map.getAmphibiousAIMarkers(),
-                                                        "AmphPN%d"));
-            CompletableFuture<Void> LandMarkers = CompletableFuture.runAsync(
-                    () -> AIMarkerPlacer.placeAIMarkers(passableLand.getFinalMask(), map.getLandAIMarkers(),
-                                                        "LandPN%d"));
-            CompletableFuture<Void> NavyMarkers = CompletableFuture.runAsync(
-                    () -> AIMarkerPlacer.placeAIMarkers(passableWater.getFinalMask(), map.getNavyAIMarkers(),
-                                                        "NavyPN%d"));
-            CompletableFuture<Void> AirMarkers = CompletableFuture.runAsync(
-                    () -> AIMarkerPlacer.placeAirAIMarkers(map));
-            CompletableFuture.allOf(AmphibiousMarkers, LandMarkers, NavyMarkers, AirMarkers).join();
-        });
     }
 
     protected void setHeights() {
