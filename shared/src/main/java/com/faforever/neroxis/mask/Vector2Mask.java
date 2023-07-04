@@ -10,7 +10,7 @@ import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
+public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }

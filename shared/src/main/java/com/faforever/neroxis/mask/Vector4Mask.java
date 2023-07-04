@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
+public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
     }

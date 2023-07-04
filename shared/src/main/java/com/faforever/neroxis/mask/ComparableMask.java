@@ -4,7 +4,7 @@ import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> {
+public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> permits PrimitiveMask {
     protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }

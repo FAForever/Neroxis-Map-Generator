@@ -17,10 +17,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> {
+public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> permits NormalMask, Vector2Mask, Vector3Mask, Vector4Mask {
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
@@ -45,7 +44,7 @@ public abstract class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
         enqueue(dependencies -> {
-            List<FloatMask> sources = dependencies.stream().map(dep -> ((FloatMask) dep)).collect(Collectors.toList());
+            List<FloatMask> sources = dependencies.stream().map(dep -> ((FloatMask) dep)).toList();
             apply((x, y) -> {
                 T value = getZeroValue();
                 for (int i = 0; i < numComponents; ++i) {

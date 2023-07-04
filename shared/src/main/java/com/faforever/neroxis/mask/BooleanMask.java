@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
+public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
-    protected long[] mask;
+    private long[] mask;
     private int maskBooleanSize;
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -59,19 +59,19 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(size, seed, symmetrySettings, name, false);
     }
 
-    protected BooleanMask(BooleanMask other) {
+    BooleanMask(BooleanMask other) {
         this(other, (String) null);
     }
 
-    protected BooleanMask(BooleanMask other, String name) {
+    BooleanMask(BooleanMask other, String name) {
         super(other, name);
     }
 
-    protected <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
+    private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
         this(other, minValue, (String) null);
     }
 
-    protected <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
+    <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
@@ -93,11 +93,11 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }, other);
     }
 
-    protected static void setBit(int x, int y, boolean value, int size, long[] mask) {
+    private static void setBit(int x, int y, boolean value, int size, long[] mask) {
         setBit(bitIndex(x, y, size), value, mask);
     }
 
-    protected static void setBit(int bitIndex, boolean value, long[] mask) {
+    private static void setBit(int bitIndex, boolean value, long[] mask) {
         if (value) {
             mask[arrayIndex(bitIndex)] |= SINGLE_BIT_VALUE << bitIndex;
         } else {
@@ -113,11 +113,11 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return x * size + y;
     }
 
-    protected static boolean getBit(int x, int y, int size, long[] mask) {
+    private static boolean getBit(int x, int y, int size, long[] mask) {
         return getBit(bitIndex(x, y, size), mask);
     }
 
-    protected static boolean getBit(int bitIndex, long[] mask) {
+    private static boolean getBit(int bitIndex, long[] mask) {
         return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
     }
 
@@ -125,7 +125,7 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return (size * size / BOOLEANS_PER_LONG) + 1;
     }
 
-    protected void setPrimitive(int x, int y, boolean value) {
+    private void setPrimitive(int x, int y, boolean value) {
         setBit(x, y, value, getSize(), mask);
     }
 
@@ -249,7 +249,7 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return getBit(x, y, getSize(), mask);
     }
 
-    protected BooleanMask fill(long[] arrayToFillFrom, int maskBooleanSize) {
+    private BooleanMask fill(long[] arrayToFillFrom, int maskBooleanSize) {
         int arraySize = arrayToFillFrom.length;
         mask = new long[arraySize];
         this.maskBooleanSize = maskBooleanSize;
@@ -520,35 +520,35 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return count;
     }
 
-    protected BooleanMask add(ToBooleanBiIntFunction valueFunction) {
+    private BooleanMask add(ToBooleanBiIntFunction valueFunction) {
         return apply((x, y) -> addPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected BooleanMask subtract(ToBooleanBiIntFunction valueFunction) {
+    private BooleanMask subtract(ToBooleanBiIntFunction valueFunction) {
         return apply((x, y) -> subtractPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected BooleanMask multiply(ToBooleanBiIntFunction valueFunction) {
+    private BooleanMask multiply(ToBooleanBiIntFunction valueFunction) {
         return apply((x, y) -> multiplyPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected BooleanMask divide(ToBooleanBiIntFunction valueFunction) {
+    private BooleanMask divide(ToBooleanBiIntFunction valueFunction) {
         return apply((x, y) -> dividePrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected void addPrimitiveAt(int x, int y, boolean value) {
+    private void addPrimitiveAt(int x, int y, boolean value) {
         setPrimitive(x, y, value | getPrimitive(x, y));
     }
 
-    protected void subtractPrimitiveAt(int x, int y, boolean value) {
+    private void subtractPrimitiveAt(int x, int y, boolean value) {
         setPrimitive(x, y, !value & getPrimitive(x, y));
     }
 
-    protected void multiplyPrimitiveAt(int x, int y, boolean value) {
+    private void multiplyPrimitiveAt(int x, int y, boolean value) {
         setPrimitive(x, y, value & getPrimitive(x, y));
     }
 
-    protected void dividePrimitiveAt(int x, int y, boolean value) {
+    private void dividePrimitiveAt(int x, int y, boolean value) {
         setPrimitive(x, y, value ^ getPrimitive(x, y));
     }
 
@@ -566,7 +566,7 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
     }
 
-    protected void setPrimitive(Vector2 location, boolean value) {
+    void setPrimitive(Vector2 location, boolean value) {
         setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
     }
 
@@ -1468,8 +1468,8 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
-    protected BooleanMask applyWithOffset(BooleanMask other, BiIntBooleanConsumer action, int xOffset, int yOffset,
-                                          boolean center, boolean wrapEdges) {
+    private BooleanMask applyWithOffset(BooleanMask other, BiIntBooleanConsumer action, int xOffset, int yOffset,
+                                        boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();

@@ -11,7 +11,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class NormalMask extends VectorMask<Vector3, NormalMask> {
+public final class NormalMask extends VectorMask<Vector3, NormalMask> {
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, null, false);
     }
@@ -41,7 +41,7 @@ public class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, 1f, null);
     }
 
-    protected NormalMask(FloatMask other, float scale, String name) {
+    public NormalMask(FloatMask other, float scale, String name) {
         this(other.getSize(), other.getNextSeed(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {

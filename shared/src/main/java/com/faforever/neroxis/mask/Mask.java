@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract class Mask<T, U extends Mask<T, U>> {
+public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
     protected final Random random;

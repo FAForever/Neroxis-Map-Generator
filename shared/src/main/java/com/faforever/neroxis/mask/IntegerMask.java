@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-    protected int[][] mask;
+public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
+    private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, false);
@@ -46,19 +46,19 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(size, seed, symmetrySettings, name, false);
     }
 
-    protected IntegerMask(IntegerMask other) {
+    IntegerMask(IntegerMask other) {
         this(other, null);
     }
 
-    protected IntegerMask(IntegerMask other, String name) {
+    IntegerMask(IntegerMask other, String name) {
         super(other, name);
     }
 
-    protected IntegerMask(BooleanMask other, int low, int high) {
+    IntegerMask(BooleanMask other, int low, int high) {
         this(other, low, high, null);
     }
 
-    protected IntegerMask(BooleanMask other, int low, int high, String name) {
+    public IntegerMask(BooleanMask other, int low, int high, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -82,7 +82,7 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage, seed, symmetrySettings, null, false);
     }
 
-    protected void setPrimitive(int x, int y, int value) {
+    private void setPrimitive(int x, int y, int value) {
         mask[x][y] = value;
     }
 
@@ -94,7 +94,7 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return mask[x][y];
     }
 
-    protected void setPrimitive(Vector2 location, int value) {
+    private void setPrimitive(Vector2 location, int value) {
         setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
     }
 
@@ -230,7 +230,7 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return StrictMath.round(value);
     }
 
-    protected IntegerMask fill(int[][] maskToFillFrom) {
+    private IntegerMask fill(int[][] maskToFillFrom) {
         assertNotPipelined();
         int maskSize = maskToFillFrom.length;
         mask = new int[maskSize][maskSize];
@@ -240,31 +240,31 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return this;
     }
 
-    protected IntegerMask add(ToIntBiIntFunction valueFunction) {
+    private IntegerMask add(ToIntBiIntFunction valueFunction) {
         return apply((x, y) -> addPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected IntegerMask subtract(ToIntBiIntFunction valueFunction) {
+    private IntegerMask subtract(ToIntBiIntFunction valueFunction) {
         return apply((x, y) -> subtractPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected IntegerMask multiply(ToIntBiIntFunction valueFunction) {
+    private IntegerMask multiply(ToIntBiIntFunction valueFunction) {
         return apply((x, y) -> multiplyPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected IntegerMask divide(ToIntBiIntFunction valueFunction) {
+    private IntegerMask divide(ToIntBiIntFunction valueFunction) {
         return apply((x, y) -> dividePrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    protected void addPrimitiveAt(int x, int y, float value) {
+    private void addPrimitiveAt(int x, int y, float value) {
         mask[x][y] += value;
     }
 
-    protected void subtractPrimitiveAt(int x, int y, float value) {
+    private void subtractPrimitiveAt(int x, int y, float value) {
         mask[x][y] -= value;
     }
 
-    protected void multiplyPrimitiveAt(int x, int y, float value) {
+    private void multiplyPrimitiveAt(int x, int y, float value) {
         mask[x][y] *= value;
     }
 
@@ -276,7 +276,7 @@ public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return image;
     }
 
-    protected void dividePrimitiveAt(int x, int y, float value) {
+    private void dividePrimitiveAt(int x, int y, float value) {
         mask[x][y] /= value;
     }
 
