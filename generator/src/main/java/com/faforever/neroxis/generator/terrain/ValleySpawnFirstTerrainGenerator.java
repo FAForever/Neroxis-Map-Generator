@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
-    public ValleyTerrainGenerator() {
+public class ValleySpawnFirstTerrainGenerator extends PathedPlateauSpawnFirstTerrainGenerator {
+    public ValleySpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.75f, 1f)
                                                    .mountainDensity(.5f, 1)

@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
-    public CenterLakeTerrainGenerator() {
+public class CenterLakeSpawnFirstTerrainGenerator extends PathedSpawnFirstTerrainGenerator {
+    public CenterLakeSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .5f)
                                                    .rampDensity(.75f, 1f)

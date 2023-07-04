@@ -5,8 +5,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
-public class FloodedTerrainGenerator extends BasicTerrainGenerator {
-    public FloodedTerrainGenerator() {
+public class FloodedSpawnFirstTerrainGenerator extends BasicSpawnFirstTerrainGenerator {
+    public FloodedSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .plateauDensity(0, .25f)
                                                    .landDensity(0, .5f)

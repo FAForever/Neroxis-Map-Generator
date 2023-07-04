@@ -9,14 +9,13 @@ import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.BasicResourceGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
-import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.BasicSpawnFirstTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
@@ -33,14 +32,11 @@ public abstract class StyleGenerator extends ElementGenerator {
     protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
     protected final List<PropGenerator> propGenerators = new ArrayList<>();
     protected final List<DecalGenerator> decalGenerators = new ArrayList<>();
-    protected TerrainGenerator terrainGenerator = new BasicTerrainGenerator();
+    protected TerrainGenerator terrainGenerator = new BasicSpawnFirstTerrainGenerator();
     protected TextureGenerator textureGenerator = new BasicTextureGenerator();
     protected ResourceGenerator resourceGenerator = new BasicResourceGenerator();
     protected PropGenerator propGenerator = new BasicPropGenerator();
     protected DecalGenerator decalGenerator = new BasicDecalGenerator();
-    protected float spawnSeparation;
-    protected int teamSeparation;
-    private SpawnPlacer spawnPlacer;
 
     public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
                                                                                GeneratorParameters generatorParameters,
@@ -54,8 +50,8 @@ public abstract class StyleGenerator extends ElementGenerator {
 
     private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
                                                                                     T defaultGenerator) {
-        if (generators.size() > 0) {
-            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
+        if (!generators.isEmpty()) {
+            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).toList();
             List<Float> cumulativeWeights = new ArrayList<>();
             float sum = 0;
             for (float weight : weights) {
@@ -82,14 +78,14 @@ public abstract class StyleGenerator extends ElementGenerator {
 
         Pipeline.start();
 
-        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
+        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmap);
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
         CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
         CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
-        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
+        CompletableFuture<Void> resourcesFuture = heightMapFuture.thenRunAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
-        CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
-        CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
+        CompletableFuture<Void> propsFuture = resourcesFuture.thenRunAsync(propGenerator::placeProps);
+        CompletableFuture<Void> unitsFuture = resourcesFuture.thenRunAsync(propGenerator::placeUnits);
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture,
                                                                           textureFuture, previewFuture, resourcesFuture,
@@ -115,33 +111,10 @@ public abstract class StyleGenerator extends ElementGenerator {
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
         Pipeline.reset();
-
-        if (generatorParameters.numTeams() < 2) {
-            spawnSeparation = (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
-            teamSeparation = 0;
-        } else if (generatorParameters.numTeams() == 2) {
-            spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-            teamSeparation = map.getSize() / 2;
-        } else {
-            if (generatorParameters.numTeams() < 8) {
-                spawnSeparation = random.nextInt(
-                        map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16)
-                                  + map.getSize() / 16f;
-            } else {
-                spawnSeparation = 0;
-            }
-            teamSeparation = StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
-        }
-
-        spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
     @Override
     public void setupPipeline() {
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnSeparation,
-                                                         teamSeparation, symmetrySettings));
-
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, generatorParameters,
                                                              terrainGenerator);
@@ -168,11 +141,11 @@ public abstract class StyleGenerator extends ElementGenerator {
         decalGenerator.setupPipeline();
     }
 
-    protected void setHeights() {
+    private void setHeights() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setPlacements", () -> map.setHeights());
     }
 
-    public String generatorsToString() {
+    public final String generatorsToString() {
         if (generatorParameters.visibility() == null) {
             return "TerrainGenerator: "
                    + terrainGenerator.getClass().getSimpleName()

@@ -4,6 +4,7 @@ import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -20,20 +21,21 @@ public abstract class TerrainGenerator extends ElementGenerator {
     protected BooleanMask passableWater;
     protected FloatMask slope;
 
-    public void setHeightmapImage() {
+    protected SpawnPlacer spawnPlacer;
+    protected float spawnSeparation;
+    protected int teamSeparation;
+
+    public void setHeightmap() {
         Pipeline.await(heightmap);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> heightmap.getFinalMask()
-                                                                                                 .writeToImage(
-                                                                                                         map.getHeightmap(),
-                                                                                                         1
-                                                                                                         /
-                                                                                                         map.getHeightMapScale()));
+                                                                                                 .writeToImage(map.getHeightmap(),
+                                                                                                               1 /
+                                                                                                               map.getHeightMapScale()));
     }
 
     @Override
     public void setupPipeline() {
         terrainSetup();
-        //ensure heightmap is symmetric
         heightmap.forceSymmetry();
         passableSetup();
     }
@@ -49,6 +51,25 @@ public abstract class TerrainGenerator extends ElementGenerator {
         passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
         passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
         passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
+
+        if (generatorParameters.numTeams() < 2) {
+            spawnSeparation = (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
+            teamSeparation = 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
+            teamSeparation = map.getSize() / 2;
+        } else {
+            if (generatorParameters.numTeams() < 8) {
+                spawnSeparation = random.nextInt(
+                        map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16)
+                                  + map.getSize() / 16f;
+            } else {
+                spawnSeparation = 0;
+            }
+            teamSeparation = StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
+        }
+
+        spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
     protected abstract void terrainSetup();

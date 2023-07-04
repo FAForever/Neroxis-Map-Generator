@@ -2,7 +2,7 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public abstract class PathedPlateauTerrainGenerator extends BasicTerrainGenerator {
+public abstract class PathedPlateauSpawnFirstTerrainGenerator extends BasicSpawnFirstTerrainGenerator {
     @Override
     protected void plateausSetup() {
         int mapSize = map.getSize();

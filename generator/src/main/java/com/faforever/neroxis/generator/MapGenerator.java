@@ -12,20 +12,7 @@ import com.faforever.neroxis.generator.cli.ParameterOptions;
 import com.faforever.neroxis.generator.cli.TuningOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
-import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
-import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
-import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
-import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
-import com.faforever.neroxis.generator.style.HighReclaimStyleGenerator;
-import com.faforever.neroxis.generator.style.LandBridgeStyleGenerator;
-import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
-import com.faforever.neroxis.generator.style.LowMexStyleGenerator;
-import com.faforever.neroxis.generator.style.MountainRangeStyleGenerator;
-import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
-import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
-import com.faforever.neroxis.generator.style.TestStyleGenerator;
-import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
@@ -67,10 +54,7 @@ import static picocli.CommandLine.Spec;
 public class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
-    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
-    private final List<StyleGenerator> productionStyles = mapStyles.stream()
-                                                                   .filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator))
-                                                                   .toList();
+
     @Spec
     private CommandLine.Model.CommandSpec spec;
     // Set during generation

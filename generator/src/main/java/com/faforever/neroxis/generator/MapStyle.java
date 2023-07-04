@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
+import com.faforever.neroxis.generator.style.BigIslandsLastStyleGenerator;
 import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
 import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
@@ -23,6 +24,7 @@ import lombok.Getter;
 public enum MapStyle {
     BASIC(BasicStyleGenerator.class, true),
     BIG_ISLANDS(BigIslandsStyleGenerator.class, true),
+    BIG_ISLANDS_LAST(BigIslandsLastStyleGenerator.class, true),
     CENTER_LAKE(CenterLakeStyleGenerator.class, true),
     DROP_PLATEAU(DropPlateauStyleGenerator.class, true),
     FLOODED(FloodedStyleGenerator.class, true),

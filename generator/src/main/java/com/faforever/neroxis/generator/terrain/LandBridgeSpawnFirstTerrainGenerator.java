@@ -1,16 +1,25 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
-    public LandBridgeTerrainGenerator() {
+public class LandBridgeSpawnFirstTerrainGenerator extends PathedSpawnFirstTerrainGenerator {
+    public LandBridgeSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.25f, .75f)
                                                    .mexDensity(.5f, 1f)
                                                    .mapSizes(768, 1024)
                                                    .numTeams(2, 4)
                                                    .build();
+    }
+
+    @Override
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        spawnSeparation = generatorParameters.mapSize() / 8f;
     }
 
     @Override

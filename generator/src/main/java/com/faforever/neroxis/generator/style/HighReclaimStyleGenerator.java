@@ -3,10 +3,10 @@ package com.faforever.neroxis.generator.style;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
-import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.DropPlateauSpawnFirstTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.LittleMountainSpawnFirstTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MountainRangeSpawnFirstTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.ValleySpawnFirstTerrainGenerator;
 
 import java.util.Arrays;
 
@@ -25,8 +25,8 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
-        terrainGenerators.addAll(Arrays.asList(new DropPlateauTerrainGenerator(), new MountainRangeTerrainGenerator(),
-                                               new LittleMountainTerrainGenerator(), new ValleyTerrainGenerator()));
+        terrainGenerators.addAll(Arrays.asList(new DropPlateauSpawnFirstTerrainGenerator(), new MountainRangeSpawnFirstTerrainGenerator(),
+                                               new LittleMountainSpawnFirstTerrainGenerator(), new ValleySpawnFirstTerrainGenerator()));
         propGenerator = new HighReclaimPropGenerator();
     }
 }

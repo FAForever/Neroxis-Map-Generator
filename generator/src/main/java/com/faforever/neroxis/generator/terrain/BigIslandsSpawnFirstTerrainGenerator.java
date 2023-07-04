@@ -4,8 +4,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
-    public BigIslandsTerrainGenerator() {
+public class BigIslandsSpawnFirstTerrainGenerator extends PathedSpawnFirstTerrainGenerator {
+    public BigIslandsSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .75f)
                                                    .plateauDensity(0, .5f)

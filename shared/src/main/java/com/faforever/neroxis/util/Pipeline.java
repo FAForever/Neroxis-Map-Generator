@@ -131,10 +131,6 @@ public class Pipeline {
                                                        .map(Entry::getFuture)
                                                        .toArray(CompletableFuture<?>[]::new);
 
-        if (futures.length == 0) {
-            return started;
-        }
-
         return CompletableFuture.allOf(futures)
                                 .thenApplyAsync(aVoid -> dependencyList.stream()
                                                                        .map(Entry::getResult)
@@ -175,7 +171,11 @@ public class Pipeline {
         if (!isRunning()) {
             throw new IllegalStateException("Pipeline not started cannot await");
         }
-        getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
+
+        CompletableFuture<?>[] futureDependencies = getDependencyList(Arrays.asList(masks)).stream()
+                                                                                           .map(Entry::getFuture)
+                                                                                           .toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(futureDependencies).join();
     }
 
     public static void toFile(Path path) throws IOException {
@@ -198,10 +198,6 @@ public class Pipeline {
 
     public static void shutdown() {
         executorService.shutdown();
-    }
-
-    private static void abort() {
-        executorService.shutdownNow();
     }
 
     @Getter

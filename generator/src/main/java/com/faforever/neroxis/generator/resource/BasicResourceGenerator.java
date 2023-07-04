@@ -5,7 +5,7 @@ import com.faforever.neroxis.util.Pipeline;
 
 public class BasicResourceGenerator extends ResourceGenerator {
     @Override
-    public void placeResources() {
+    public final void placeResources() {
         Pipeline.await(resourceMask, waterResourceMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
             mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());

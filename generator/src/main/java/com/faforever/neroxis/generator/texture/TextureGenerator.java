@@ -36,11 +36,10 @@ public abstract class TextureGenerator extends ElementGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
-        heightmap = terrainGenerator.getHeightmap();
+        heightmap = terrainGenerator.getHeightmap().startVisualDebugger();
         slope = terrainGenerator.getSlope();
         normals = heightmap.copy()
                            .resample(512)
-                           .addPerlinNoise(64, 12f)
                            .addGaussianNoise(.025f)
                            .blur(1)
                            .copyAsNormalMask(2f);

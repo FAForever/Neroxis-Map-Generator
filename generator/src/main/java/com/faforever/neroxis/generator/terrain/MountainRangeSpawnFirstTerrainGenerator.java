@@ -5,8 +5,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
-public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator {
-    public MountainRangeTerrainGenerator() {
+public class MountainRangeSpawnFirstTerrainGenerator extends PathedPlateauSpawnFirstTerrainGenerator {
+    public MountainRangeSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(.75f, 1f)
                                                    .mountainDensity(.5f, 1)

@@ -114,7 +114,7 @@ public class MapPopulator implements Callable<Integer> {
                         random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BooleanMask spawns = land.copy();
                 spawns.multiply(passable).subtract(ramps).deflate(16);
-                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation);
+                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation, map.getSize() / 4);
             } else {
                 map.getSpawns().clear();
             }

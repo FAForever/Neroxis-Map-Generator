@@ -9,7 +9,7 @@ import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MountainRangeSpawnFirstTerrainGenerator;
 
 import java.util.Arrays;
 
@@ -27,7 +27,7 @@ public class MountainRangeStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
-        terrainGenerator = new MountainRangeTerrainGenerator();
+        terrainGenerator = new MountainRangeSpawnFirstTerrainGenerator();
         propGenerators.addAll(
                 Arrays.asList(new BasicPropGenerator(), new EnemyCivPropGenerator(), new LargeBattlePropGenerator(),
                               new NeutralCivPropGenerator(), new RockFieldPropGenerator(),

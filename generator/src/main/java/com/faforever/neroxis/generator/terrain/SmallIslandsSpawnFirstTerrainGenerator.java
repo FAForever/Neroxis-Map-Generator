@@ -7,8 +7,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
-public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
-    public SmallIslandsTerrainGenerator() {
+public class SmallIslandsSpawnFirstTerrainGenerator extends PathedSpawnFirstTerrainGenerator {
+    public SmallIslandsSpawnFirstTerrainGenerator() {
         parameterConstraints = ParameterConstraints.builder()
                                                    .landDensity(0f, .5f)
                                                    .plateauDensity(0, .5f)

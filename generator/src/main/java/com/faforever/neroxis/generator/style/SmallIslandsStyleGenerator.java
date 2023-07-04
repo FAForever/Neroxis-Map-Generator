@@ -6,7 +6,7 @@ import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.SmallIslandsSpawnFirstTerrainGenerator;
 
 import java.util.Arrays;
 
@@ -24,7 +24,7 @@ public class SmallIslandsStyleGenerator extends StyleGenerator {
     @Override
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
-        terrainGenerator = new SmallIslandsTerrainGenerator();
+        terrainGenerator = new SmallIslandsSpawnFirstTerrainGenerator();
         propGenerators.addAll(
                 Arrays.asList(new BasicPropGenerator(), new NavyWrecksPropGenerator(), new RockFieldPropGenerator(),
                               new SmallBattlePropGenerator()));
