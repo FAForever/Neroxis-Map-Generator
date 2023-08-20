@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        jgraph_version = '1.5.1'
+        jgraph_version = '1.5.2'
     }
 }
 
