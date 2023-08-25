@@ -14,7 +14,7 @@ public class RequiredMapPathMixin {
     @Getter
     private Path mapPath;
 
-    @Option(names = "--map-path", required = true, description = "Path to map folder")
+    @Option(names = "--map-path", required = true, description = "Map folder containing map to modify")
     public void setMapPath(Path mapPath) {
         CLIUtils.checkValidMapFolder(mapPath, spec);
         this.mapPath = mapPath;

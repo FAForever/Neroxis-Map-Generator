@@ -313,6 +313,11 @@ public class SCMap {
         return amphibiousAIMarkers.get(i);
     }
 
+    public void changeStratumSize(int stratumSize) {
+        textureMasksHigh = scaleImage(textureMasksHigh, stratumSize, stratumSize);
+        textureMasksLow = scaleImage(textureMasksLow, stratumSize, stratumSize);
+    }
+
     public void changeMapSize(int contentSize, int boundsSize, Vector2 boundOffset) {
         int oldSize = size;
         Vector2 topLeftOffset = new Vector2(boundOffset.getX() - (float) contentSize / 2,
