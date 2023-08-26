@@ -1,36 +1,36 @@
 {
   "texPathWaterRamp": "/textures/engine/waterrampswamp01.dds",
   "sunColor": {
-    "z": 0.52,
-    "x": 0.51,
-    "y": 0.53
+    "x": 3.39,
+    "y": 3.64,
+    "z": 2.67
   },
   "sunDirection": {
-    "z": 0.2518569,
-    "x": 0.09954818,
-    "y": -0.9626309
+    "x": -0.5862182,
+    "y": -0.70710695,
+    "z": 0.39540905
   },
   "texPathCubemap": "/textures/environment/SkyCube_Geothermal02.dds",
   "waterPresent": true,
   "unitReflection": 0.5,
-  "skyReflection": 0.7,
+  "skyReflection": 1.0,
   "surfaceColor": {
-    "z": 0.13,
-    "x": 0.0,
-    "y": 0.24
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
   },
   "sunGlow": 0.1,
   "sunStrength": 10.0,
   "fresnelPower": 1.5,
   "colorLerp": {
-    "x": 0.064,
-    "y": 0.119
+    "x": 0.137,
+    "y": 0.137
   },
   "elevationDeep": 20.0,
   "fresnelBias": 0.15,
   "refractionScale": 0.375,
   "elevationAbyss": 3.0,
-  "sunShininess": 50.0,
+  "sunShininess": 200.0,
   "sunReflection": 3.1,
   "elevation": 25.0,
   "waveTextures": [

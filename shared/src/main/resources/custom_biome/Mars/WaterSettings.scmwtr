@@ -1,19 +1,19 @@
 {
   "texPathWaterRamp": "/textures/engine/waterramp_redrock.dds",
   "sunDirection": {
-    "x": 0.09954818,
-    "z": 0.2518569,
-    "y": -0.9626309
+    "x": -0.50000006,
+    "y": -0.7071069,
+    "z": -0.49999988
   },
   "sunColor": {
-    "x": 0.6,
-    "z": 0.6,
-    "y": 0.6
+    "x": 4.43,
+    "y": 3.02,
+    "z": 1.13
   },
   "texPathCubemap": "/textures/environment/SkyCube_Desert02a.dds",
   "colorLerp": {
-    "x": 0.018,
-    "y": 0.294
+    "x": 0.137,
+    "y": 0.137
   },
   "elevationAbyss": 3.0,
   "sunGlow": 0.1,
@@ -21,9 +21,9 @@
   "sunReflection": 1.1,
   "sunStrength": 10.0,
   "surfaceColor": {
-    "x": 0.0,
-    "z": 0.0,
-    "y": 0.0
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
   },
   "elevationDeep": 20.0,
   "skyReflection": 1.0,
@@ -32,7 +32,7 @@
   "waterPresent": true,
   "elevation": 25.0,
   "refractionScale": 0.375,
-  "sunShininess": 30.0,
+  "sunShininess": 200.0,
   "waveTextures": [
     {
       "normalRepeat": 0.006,

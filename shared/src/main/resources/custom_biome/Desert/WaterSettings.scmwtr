@@ -2,20 +2,20 @@
   "texPathWaterRamp": "/textures/engine/waterramp_desert03.dds",
   "elevationDeep": 20.0,
   "sunDirection": {
-    "z": 0.2518569,
-    "x": 0.09954818,
-    "y": -0.9626309
+    "x": -0.7083398,
+    "y": -0.7058716,
+    "z": -0.1263912
   },
   "elevationAbyss": 2.0,
   "surfaceColor": {
-    "z": 0.44,
-    "x": 0.83,
-    "y": 0.56
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
   },
   "sunColor": {
-    "z": 0.44,
-    "x": 0.44,
-    "y": 0.44
+    "x": 4.37,
+    "y": 4.56,
+    "z": 4.71
   },
   "waterPresent": true,
   "elevation": 25.0,
@@ -23,14 +23,14 @@
   "sunReflection": 2.8,
   "fresnelPower": 1.5,
   "unitReflection": 0.5,
-  "skyReflection": 0.53,
+  "skyReflection": 1.0,
   "colorLerp": {
-    "x": 0.083,
-    "y": 0.119
+    "x": 0.137,
+    "y": 0.137
   },
   "texPathCubemap": "/textures/environment/SkyCube_Desert02a.dds",
   "sunGlow": 0.1,
-  "sunShininess": 50.0,
+  "sunShininess": 200.0,
   "fresnelBias": 0.15,
   "sunStrength": 10.0,
   "waveTextures": [

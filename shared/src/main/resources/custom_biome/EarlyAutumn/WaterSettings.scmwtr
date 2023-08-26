@@ -3,23 +3,23 @@
   "fresnelPower": 1.5,
   "elevationDeep": 25.0,
   "sunGlow": 0.165,
-  "skyReflection": 0.678,
+  "skyReflection": 1.0,
   "sunStrength": 3.9,
   "texPathWaterRamp": "/textures/engine/waterramp.dds",
   "colorLerp": {
-    "y": 0.119,
-    "x": 0.064
+    "x": 0.137,
+    "y": 0.137
   },
   "surfaceColor": {
-    "z": 1.5,
-    "y": 0.7,
-    "x": 0.0
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
   },
-  "sunShininess": 78.9,
+  "sunShininess": 200.0,
   "sunColor": {
-    "z": 0.35,
-    "y": 0.47,
-    "x": 0.52
+    "x": 4.34,
+    "y": 4.05,
+    "z": 3.58
   },
   "refractionScale": 0.38,
   "waterPresent": true,
@@ -28,9 +28,9 @@
   "sunReflection": 2.02,
   "texPathCubemap": "/textures/environment/skycube_evergreen01a.dds",
   "sunDirection": {
-    "z": 0.2518569,
-    "y": -0.9626309,
-    "x": 0.09954818
+    "x": -0.616104,
+    "y": -0.55909437,
+    "z": -0.55482364
   },
   "elevation": 29.0,
   "waveTextures": [

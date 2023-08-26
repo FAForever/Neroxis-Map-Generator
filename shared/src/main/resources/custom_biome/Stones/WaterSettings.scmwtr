@@ -2,36 +2,36 @@
   "elevation": 25.0,
   "elevationAbyss": 3.0,
   "unitReflection": 0.5,
-  "sunShininess": 75.0,
+  "sunShininess": 200.0,
   "waterPresent": true,
   "elevationDeep": 20.0,
   "sunStrength": 10.0,
   "sunReflection": 3.7,
   "fresnelBias": 0.15,
   "colorLerp": {
-    "x": 0.037,
-    "y": 0.119
+    "x": 0.137,
+    "y": 0.137
   },
   "texPathCubemap": "/textures/environment/SkyCube_Desert03a.dds",
   "surfaceColor": {
-    "z": 0.52,
-    "x": 0.0,
-    "y": 0.33
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
   },
   "fresnelPower": 1.5,
   "sunGlow": 0.1,
-  "skyReflection": 1.5,
+  "skyReflection": 1.0,
   "refractionScale": 0.375,
   "texPathWaterRamp": "/textures/engine/waterramp_redrock03.dds",
   "sunColor": {
-    "z": 0.58,
-    "x": 0.85,
-    "y": 0.75
+    "x": 4.84,
+    "y": 3.99,
+    "z": 1.95
   },
   "sunDirection": {
-    "z": 0.2518569,
-    "x": 0.09954818,
-    "y": -0.9626309
+    "x": -0.7783785,
+    "y": -0.5,
+    "z": -0.37964055
   },
   "waveTextures": [
     {
