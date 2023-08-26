@@ -38,12 +38,15 @@ public class BasicTextureGenerator extends TextureGenerator {
                                               .multiply(-1f)
                                               .divide(abyssDepth)
                                               .clampMin(0f);
-
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().invert().setSize(map.getSize()));
-        shadows.subtract(shadowsInWater, 1f)
-               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(map.getSize())))
-               .clampMin(0f);
+        
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
+        shadows.setToValue(shadowsInWater.copy(), 1f);
+        shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
+        shadows.subtract(realWater.copy().setSize(map.getSize()),
+                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
+               .blur(1);
+        
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
         accentGroundTexture.setSize(textureSize)

@@ -48,7 +48,7 @@ public abstract class TextureGenerator extends ElementGenerator {
         shadowsMask = heightMapSize
                 .copyAsShadowMask(
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
-        shadows = shadowsMask.copyAsFloatMask(1, 0).blur(1);
+        shadows = shadowsMask.copyAsFloatMask(1, 0);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
