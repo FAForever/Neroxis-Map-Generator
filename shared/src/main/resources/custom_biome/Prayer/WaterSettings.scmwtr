@@ -1,38 +1,38 @@
 {
-  "sunDirection" : {
-    "z" : 0.2518569,
-    "y" : -0.9626309,
-    "x" : 0.09954818
+  "sunDirection": {
+    "z": 0.2518569,
+    "y": -0.9626309,
+    "x": 0.09954818
   },
-  "sunColor" : {
-    "z" : 0.0,
-    "y" : 0.0,
-    "x" : 0.0
+  "sunColor": {
+    "z": 0.0,
+    "y": 0.0,
+    "x": 0.0
   },
-  "elevationDeep" : 20.0,
-  "elevationAbyss" : 3.0,
-  "waterPresent" : true,
-  "refractionScale" : 0.375,
-  "fresnelBias" : 0.15,
-  "elevation" : 25.0,
-  "fresnelPower" : 1.5,
-  "unitReflection" : 0.5,
-  "skyReflection" : 1.5,
-  "sunShininess" : 50.0,
-  "colorLerp" : {
-    "y" : 0.119,
-    "x" : 0.064
+  "elevationDeep": 20.0,
+  "elevationAbyss": 3.0,
+  "waterPresent": true,
+  "refractionScale": 0.375,
+  "fresnelBias": 0.15,
+  "elevation": 25.0,
+  "fresnelPower": 1.5,
+  "unitReflection": 0.5,
+  "skyReflection": 1.5,
+  "sunShininess": 50.0,
+  "colorLerp": {
+    "y": 0.119,
+    "x": 0.064
   },
-  "surfaceColor" : {
-    "z" : 0.0,
-    "y" : 0.0,
-    "x" : 0.0
+  "surfaceColor": {
+    "z": 0.0,
+    "y": 0.0,
+    "x": 0.0
   },
-  "sunGlow" : 0.1,
-  "texPathCubemap" : "/textures/engine/waterCubemap.dds",
-  "sunStrength" : 10.0,
-  "sunReflection" : 5.0,
-  "texPathWaterRamp" : "/textures/engine/waterramp.dds",
+  "sunGlow": 0.1,
+  "texPathCubemap": "/textures/engine/waterCubemap.dds",
+  "sunStrength": 10.0,
+  "sunReflection": 5.0,
+  "texPathWaterRamp": "/textures/engine/waterramp.dds",
   "waveTextures": [
     {
       "normalRepeat": 0.006,
