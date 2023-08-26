@@ -5,7 +5,6 @@ import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
@@ -24,7 +23,6 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected NormalMask normals;
     protected FloatMask shadows;
-    protected FloatMask albedoOverlay;
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
@@ -50,8 +48,7 @@ public abstract class TextureGenerator extends ElementGenerator {
         shadowsMask = heightMapSize
                 .copyAsShadowMask(
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
-        shadows = shadowsMask.copyAsFloatMask(0, 1).blur(1);
-        albedoOverlay = new FloatMask(map.getSize(), random.nextLong(), symmetrySettings, "albedoOverly", true).add(.5f);
+        shadows = shadowsMask.copyAsFloatMask(1, 0).blur(1);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
@@ -59,11 +56,11 @@ public abstract class TextureGenerator extends ElementGenerator {
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows, albedoOverlay);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), albedoOverlay.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

@@ -40,10 +40,10 @@ public class BasicTextureGenerator extends TextureGenerator {
                                               .clampMin(0f);
 
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
-        shadows.add(shadowsInWater, 1f)
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().invert().setSize(map.getSize()));
+        shadows.subtract(shadowsInWater, 1f)
                .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(map.getSize())))
-               .clampMax(1f);
+               .clampMin(0f);
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
         accentGroundTexture.setSize(textureSize)
@@ -120,12 +120,12 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, shadows, albedoOverlay);
+        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getPBRTextureBytes(normals.getFinalMask(), shadows.getFinalMask(), albedoOverlay.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

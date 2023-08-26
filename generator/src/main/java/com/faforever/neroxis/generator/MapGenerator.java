@@ -533,15 +533,14 @@ public class MapGenerator implements Callable<Integer> {
                             .replace("\\", "/");
             map.getBiome().terrainMaterials().getNormalPaths()[8] =
                     map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
-            // This sets the strength of the stratum normals
-            map.getBiome().terrainMaterials().getTextureScales()[8] = 1.0F;
         }
         map.getBiome().terrainMaterials().getTexturePaths()[9] =
                 Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
                                        .toString()
                                        .replace("\\", "/");
-        // This needs to be 0 to trigger different normal calculations for the decals to match our provided normals
-        map.getBiome().terrainMaterials().getTextureScales()[9] = 0;
+        // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain
+        // shader, so we set this to a sufficiently high value.
+        map.getBiome().terrainMaterials().getTextureScales()[9] = 10000;
 
         ScriptGenerator.generateScript(map);
 

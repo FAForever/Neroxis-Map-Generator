@@ -139,9 +139,9 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static byte[] getPBRTextureBytes(NormalMask normalMask, FloatMask shadowMask, FloatMask ambientMask) {
-        if (shadowMask.getSize() != ambientMask.getSize() || shadowMask.getSize() != normalMask.getSize()) {
-            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, ambient size %d, normal size %d".formatted(shadowMask.getSize(), ambientMask.getSize(), normalMask.getSize()));
+    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask shadowMask) {
+        if (shadowMask.getSize() != normalMask.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d".formatted(shadowMask.getSize(), normalMask.getSize()));
         }
         int size = shadowMask.getSize();
         int length = size * size * 4;
@@ -151,11 +151,10 @@ public class ImageUtil {
                 Vector3 normalValue = normalMask.get(x, y);
                 int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
                 int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
-                int wV = (byte) StrictMath.min(StrictMath.max(ambientMask.get(x, y) * 255, 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageByteBuffer.put((byte) xV);
                 imageByteBuffer.put((byte) yV);
-                imageByteBuffer.put((byte) zV);
+                imageByteBuffer.put((byte) 0);
                 imageByteBuffer.put((byte) wV);
             }
         }
