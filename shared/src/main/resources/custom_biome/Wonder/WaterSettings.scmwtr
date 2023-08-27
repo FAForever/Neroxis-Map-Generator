@@ -35,36 +35,36 @@
   "elevation": 25.0,
   "waveTextures": [
     {
-      "normalRepeat": 0.006,
+      "normalRepeat": 0.03,
       "normalMovement": {
-        "y": 0.0229813,
-        "x": 0.0192836
+        "x": 0.0192836,
+        "y": 0.0229813
       },
-      "texPath": "/textures/engine/waves000.dds"
-    },
-    {
-      "normalRepeat": 0.012,
-      "normalMovement": {
-        "y": 0.0025,
-        "x": 0.00433013
-      },
-      "texPath": "/textures/engine/waves.dds"
+      "texPath": "/textures/engine/waves2_400m.dds"
     },
     {
       "normalRepeat": 0.05,
       "normalMovement": {
-        "y": 0.00751754,
-        "x": 0.00273616
+        "x": 0.00433013,
+        "y": 0.0025
       },
-      "texPath": "/textures/engine/waves001.dds"
+      "texPath": "/textures/engine/waves2_400m.dds"
+    },
+    {
+      "normalRepeat": 0.167,
+      "normalMovement": {
+        "x": 0.00273616,
+        "y": 0.00751754
+      },
+      "texPath": "/textures/engine/waves2_120m.dds"
     },
     {
       "normalRepeat": 0.5,
       "normalMovement": {
-        "y": 0.001,
-        "x": 0.0
+        "x": 0.0,
+        "y": 0.001
       },
-      "texPath": "/textures/engine/waves001.dds"
+      "texPath": "/textures/engine/waves2_40m.dds"
     }
   ]
 }
