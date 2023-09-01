@@ -13,9 +13,9 @@
     "z": 0.1
   },
   "sunColor": {
-    "x": 4.37,
-    "y": 4.56,
-    "z": 4.71
+    "x": 3.73,
+    "y": 3.94,
+    "z": 4.08
   },
   "waterPresent": true,
   "elevation": 25.0,
@@ -30,41 +30,41 @@
   },
   "texPathCubemap": "/textures/environment/SkyCube_Desert02a.dds",
   "sunGlow": 0.1,
-  "sunShininess": 200.0,
+  "sunShininess": 400.0,
   "fresnelBias": 0.15,
   "sunStrength": 10.0,
   "waveTextures": [
     {
-      "normalRepeat": 0.03,
-      "normalMovement": {
-        "x": 0.0192836,
-        "y": 0.0229813
-      },
-      "texPath": "/textures/engine/waves2_400m.dds"
-    },
-    {
       "normalRepeat": 0.05,
       "normalMovement": {
-        "x": 0.00433013,
-        "y": 0.0025
+        "x": 1.9233e-09,
+        "y": -0.022
       },
-      "texPath": "/textures/engine/waves2_400m.dds"
+      "texPath": "/textures/engine/waves1_400m.dds"
     },
     {
       "normalRepeat": 0.167,
       "normalMovement": {
-        "x": 0.00273616,
-        "y": 0.00751754
+        "x": -0.00138919,
+        "y": 0.00787846
       },
-      "texPath": "/textures/engine/waves2_120m.dds"
+      "texPath": "/textures/engine/waves1_120m.dds"
     },
     {
       "normalRepeat": 0.5,
       "normalMovement": {
-        "x": 0.0,
-        "y": 0.001
+        "x": -0.0095,
+        "y": 0.0164545
       },
-      "texPath": "/textures/engine/waves2_40m.dds"
+      "texPath": "/textures/engine/waves1_40m.dds"
+    },
+    {
+      "normalRepeat": 0.8,
+      "normalMovement": {
+        "x": 9.61651e-10,
+        "y": -0.011
+      },
+      "texPath": "/textures/engine/waves1_120m.dds"
     }
   ]
 }

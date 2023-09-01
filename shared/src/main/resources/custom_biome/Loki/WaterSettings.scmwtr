@@ -1,9 +1,9 @@
 {
   "texPathWaterRamp": "/textures/engine/waterramp_redrock.dds",
   "sunColor": {
-    "x": 6.03,
-    "y": 3.61,
-    "z": 2.98
+    "x": 9.05,
+    "y": 5.39,
+    "z": 4.49
   },
   "sunDirection": {
     "x": 0.8986325,
@@ -13,7 +13,7 @@
   "sunStrength": 8.0,
   "sunReflection": 0.9,
   "unitReflection": 0.5,
-  "sunShininess": 200.0,
+  "sunShininess": 400.0,
   "skyReflection": 1.0,
   "sunGlow": 0.05,
   "waterPresent": true,
@@ -35,36 +35,36 @@
   "texPathCubemap": "/textures/environment/SkyCube_TropicalOp06a.dds",
   "waveTextures": [
     {
-      "normalRepeat": 0.03,
-      "normalMovement": {
-        "x": 0.0192836,
-        "y": 0.0229813
-      },
-      "texPath": "/textures/engine/waves2_400m.dds"
-    },
-    {
       "normalRepeat": 0.05,
       "normalMovement": {
-        "x": 0.00433013,
-        "y": 0.0025
+        "x": 1.9233e-09,
+        "y": -0.022
       },
-      "texPath": "/textures/engine/waves2_400m.dds"
+      "texPath": "/textures/engine/waves1_400m.dds"
     },
     {
       "normalRepeat": 0.167,
       "normalMovement": {
-        "x": 0.00273616,
-        "y": 0.00751754
+        "x": -0.00138919,
+        "y": 0.00787846
       },
-      "texPath": "/textures/engine/waves2_120m.dds"
+      "texPath": "/textures/engine/waves1_120m.dds"
     },
     {
       "normalRepeat": 0.5,
       "normalMovement": {
-        "x": 0.0,
-        "y": 0.001
+        "x": -0.0095,
+        "y": 0.0164545
       },
-      "texPath": "/textures/engine/waves2_40m.dds"
+      "texPath": "/textures/engine/waves1_40m.dds"
+    },
+    {
+      "normalRepeat": 0.8,
+      "normalMovement": {
+        "x": 9.61651e-10,
+        "y": -0.011
+      },
+      "texPath": "/textures/engine/waves1_120m.dds"
     }
   ]
 }
