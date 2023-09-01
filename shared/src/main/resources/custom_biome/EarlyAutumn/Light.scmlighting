@@ -1,8 +1,8 @@
 {
   "sunColor": {
-    "z": 1.14,
-    "y": 1.29,
-    "x": 1.38
+    "z": 0.8,
+    "x": 0.97,
+    "y": 0.9
   },
   "fogEnd": 750.0,
   "fogColor": {
@@ -10,7 +10,7 @@
     "y": 0.49,
     "x": 0.37
   },
-  "lightingMultiplier": 1.54,
+  "lightingMultiplier": 2.2,
   "bloom": 0.03,
   "specularColor": {
     "z": 0.0,
@@ -26,8 +26,8 @@
   "fogStart": 0.0,
   "sunAmbience": {
     "z": 0.0,
-    "y": 0.0,
-    "x": 0.0
+    "x": 0.0,
+    "y": 0.0
   },
   "sunDirection": {
     "z": 0.55482364,

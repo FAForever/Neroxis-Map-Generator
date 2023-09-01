@@ -1,20 +1,20 @@
 {
-  "lightingMultiplier": 0.55,
+  "lightingMultiplier": 2.2,
   "sunDirection": {
     "x": 4.525335e-08,
     "z": 0.25881904,
     "y": 0.9659258
   },
   "sunColor": {
-    "x": 1.5,
-    "z": 1.4,
-    "y": 1.2
+    "z": 0.35,
+    "x": 0.38,
+    "y": 0.3
   },
   "bloom": 0.083749995,
   "sunAmbience": {
-    "x": 0.31,
-    "z": 0.2,
-    "y": 0.2
+    "z": 0.05,
+    "x": 0.08,
+    "y": 0.05
   },
   "fogColor": {
     "x": 0.02,
