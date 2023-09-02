@@ -10,7 +10,7 @@ application {
 dependencies {
     implementation project(":shared")
     implementation("commons-codec:commons-codec:1.16.0")
-    implementation("org.springframework:spring-expression:6.0.10")
+    implementation("org.springframework:spring-expression:6.0.11")
     implementation("org.jgrapht:jgrapht-core:${jgraph_version}")
 
     annotationProcessor("info.picocli:picocli-codegen:4.7.5")
