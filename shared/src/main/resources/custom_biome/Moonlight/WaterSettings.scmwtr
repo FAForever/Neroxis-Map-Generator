@@ -37,32 +37,32 @@
     {
       "normalRepeat": 0.05,
       "normalMovement": {
-        "x": 1.9233e-09,
-        "y": -0.022
+        "x": 0.0,
+        "y": -0.012
       },
       "texPath": "/textures/engine/waves1_400m.dds"
     },
     {
       "normalRepeat": 0.167,
       "normalMovement": {
-        "x": -0.00138919,
-        "y": 0.00787846
+        "x": -0.00130236,
+        "y": 0.00738606
       },
       "texPath": "/textures/engine/waves1_120m.dds"
     },
     {
       "normalRepeat": 0.5,
       "normalMovement": {
-        "x": -0.0095,
-        "y": 0.0164545
+        "x": -0.003,
+        "y": 0.00519615
       },
       "texPath": "/textures/engine/waves1_40m.dds"
     },
     {
       "normalRepeat": 0.8,
       "normalMovement": {
-        "x": 9.61651e-10,
-        "y": -0.011
+        "x": -0.00105,
+        "y": -0.006
       },
       "texPath": "/textures/engine/waves1_120m.dds"
     }
