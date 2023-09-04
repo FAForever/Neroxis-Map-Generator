@@ -538,9 +538,8 @@ public class MapGenerator implements Callable<Integer> {
                 Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
                                        .toString()
                                        .replace("\\", "/");
-        // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain
-        // shader, so we set this to a sufficiently high value.
-        map.getBiome().terrainMaterials().getTextureScales()[9] = 10000;
+        // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain shader.
+        map.getBiome().terrainMaterials().getTextureScales()[9] = map.getSize() + 1;
 
         ScriptGenerator.generateScript(map);
 
