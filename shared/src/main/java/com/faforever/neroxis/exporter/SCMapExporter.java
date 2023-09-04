@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
 import com.faforever.neroxis.map.WaveGenerator;
+import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
@@ -23,11 +24,8 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
 import java.awt.image.RenderedImage;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.*;
@@ -243,15 +241,20 @@ public class SCMapExporter {
     }
 
     public static void exportPBR(Path folderPath, SCMap map) throws IOException {
-        Path textureDirectory = Paths.get("env", "texture");
-        Path filePath = textureDirectory.resolve(PBR_DDS);
-        Path writingPath = folderPath.resolve(filePath);
-        Path sourcePath = Paths.get("shared/src/main/resources/images/heightRoughness.dds");
-        Files.createDirectories(writingPath.getParent());
-        try {
-            Files.copy(sourcePath, writingPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            System.out.print("Could not write the pbr texture\n" + e);
+        URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.png");
+        if (sourceURL != null) {
+            BufferedImage image = ImageIO.read(sourceURL);
+            Path textureDirectory = Paths.get("env", "texture");
+            Path filePath = textureDirectory.resolve(PBR_DDS);
+            Path writingPath = folderPath.resolve(filePath);
+            Files.createDirectories(writingPath.getParent());
+            try {
+                ImageUtil.writeNormalDDS(image, writingPath);
+            } catch (IOException e) {
+                System.out.print("Could not write the pbr texture\n" + e);
+            }
+        } else {
+            System.out.print("Can't find pbr texture to write\n");
         }
     }
 
