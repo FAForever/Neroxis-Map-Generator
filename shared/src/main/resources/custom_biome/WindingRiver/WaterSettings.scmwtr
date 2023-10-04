@@ -7,8 +7,8 @@
   "sunStrength": 3.9,
   "texPathWaterRamp": "/textures/engine/waterramp.dds",
   "colorLerp": {
-    "x": 0.137,
-    "y": 0.137
+    "x": 0.1,
+    "y": 0.1
   },
   "surfaceColor": {
     "x": 0.1,
