@@ -249,7 +249,7 @@ public class SCMapExporter {
             Path writingPath = folderPath.resolve(filePath);
             Files.createDirectories(writingPath.getParent());
             try {
-                ImageUtil.writeNormalDDS(image, writingPath);
+                ImageUtil.writeCompressedDDS(image, writingPath);
             } catch (IOException e) {
                 System.out.print("Could not write the pbr texture\n" + e);
             }

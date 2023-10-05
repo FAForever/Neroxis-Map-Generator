@@ -116,7 +116,7 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static void writeNormalDDS(BufferedImage image, Path path) throws IOException {
+    public static void writeCompressedDDS(BufferedImage image, Path path) throws IOException {
         int size = image.getHeight();
         int length = size * size * 4;
         Raster imageRaster = image.getData();
@@ -137,6 +137,101 @@ public class ImageUtil {
                                               Squish.CompressionType.DXT5);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
+    }
+    
+    public static BufferedImage setHeightMap(BufferedImage baseImage, BufferedImage heightMap, int layer) {
+        if (heightMap.getColorModel().getNumComponents() != 1) {
+            throw new IllegalArgumentException("Height map needs to be greyscale.");
+        }
+        if (baseImage.getColorModel().getNumComponents() != 4) {
+            throw new IllegalArgumentException("base image needs to be RGBA.");
+        }
+        if (baseImage.getWidth() != heightMap.getWidth() * 4) {
+            throw new IllegalArgumentException((
+                    "Texture sizes are not compatible: base image width %d, height map width %d. " +
+                    "The height map needs to be quarter the resolution of the base image."
+            ).formatted(baseImage.getWidth(), heightMap.getWidth()));
+        }
+        int channel = 0;
+        return writeTextureIntoImage(baseImage, heightMap, layer, channel);
+    }
+
+    public static BufferedImage setRoughnessMap(BufferedImage baseImage, BufferedImage roughnessMap, int layer) {
+        if (roughnessMap.getColorModel().getNumComponents() != 1) {
+            throw new IllegalArgumentException("Roughness map needs to be greyscale.");
+        }
+        if (baseImage.getColorModel().getNumComponents() != 4) {
+            throw new IllegalArgumentException("base image needs to be RGBA.");
+        }
+        if (baseImage.getWidth() != roughnessMap.getWidth() * 4) {
+            throw new IllegalArgumentException((
+                    "Texture sizes are not compatible: base image width %d, roughness map width %d. " +
+                            "The roughness map needs to be quarter the resolution of the base image."
+            ).formatted(baseImage.getWidth(), roughnessMap.getWidth()));
+        }
+        int channel = 1;
+        return writeTextureIntoImage(baseImage, roughnessMap, layer, channel);
+    }
+
+    private static BufferedImage writeTextureIntoImage(BufferedImage baseImage, BufferedImage texture, int layer, int channel) {
+        int offsetX = baseImage.getWidth() / 2;
+        int offsetY = baseImage.getHeight() / 2;
+        int textureWidth = texture.getWidth();
+        int textureHeight = texture.getHeight();
+        WritableRaster baseImageRaster = baseImage.getRaster();
+        // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
+        texture = offsetHalf(texture);
+        Raster imageRaster = texture.getData();
+        for (int a = 0; a < textureWidth; a += textureWidth) {
+            for (int b = 0; b < textureHeight; b += textureHeight) {
+                for (int x = 0; x < textureWidth; x++) {
+                    for (int y = 0; y < textureHeight; y++) {
+                        int newX = x + a;
+                        int newY = y + b;
+                        if (layer % 2 == 1) {
+                            newX = x + offsetX;
+                        }
+                        if (layer % 4 >= 2) {
+                            newY = y + offsetY;
+                        }
+                        int roughness = imageRaster.getPixel(x, y, new int[1])[0];
+                        int[] baseImagePixel = baseImageRaster.getPixel(newX, newY, new int[4]);
+                        if (layer >= 4) {
+                            channel += 2;
+                        }
+                        baseImagePixel[channel] = roughness;
+                        baseImageRaster.setPixel(newX, newY, baseImagePixel);
+                    }
+                }
+            }
+        }
+        return baseImage;
+    }
+
+    public static BufferedImage offsetHalf(BufferedImage image) {
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        int offsetX = image.getWidth() / 2;
+        int offsetY = image.getHeight() / 2;
+        WritableRaster newImageRaster = newImage.getRaster();
+        Raster imageRaster = image.getData();
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int newX;
+                int newY;
+                if (x < offsetX) {
+                    newX = x + offsetX;
+                } else {
+                    newX = x - offsetX;
+                }
+                if (y < offsetY) {
+                    newY = y + offsetY;
+                } else {
+                    newY = y - offsetY;
+                }
+                newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel().getNumComponents()]));
+            }
+        }
+        return newImage;
     }
 
     public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask shadowMask) {
