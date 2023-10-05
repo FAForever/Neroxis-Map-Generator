@@ -200,9 +200,12 @@ public class ImageUtil {
                         if (layer % 4 >= 2) {
                             newY += offsetY;
                         }
-                        int roughness = imageRaster.getPixel(x, y, new int[1])[0];
+                        int value = imageRaster.getPixel(x, y, new int[1])[0];
+                        if (texture.getType() == BufferedImage.TYPE_USHORT_GRAY) {
+                            value /= 256;
+                        }
                         int[] baseImagePixel = baseImageRaster.getPixel(newX, newY, new int[4]);
-                        baseImagePixel[channel] = roughness;
+                        baseImagePixel[channel] = value;
                         baseImageRaster.setPixel(newX, newY, baseImagePixel);
                     }
                 }
