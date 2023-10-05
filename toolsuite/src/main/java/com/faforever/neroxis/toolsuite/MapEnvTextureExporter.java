@@ -7,6 +7,7 @@ import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,9 +50,12 @@ public class MapEnvTextureExporter implements Callable<Integer> {
                     }
                 }
             }
+            System.out.print("Writing png output\n");
             Path textureDirectory = outputFolderMixin.getOutputPath();
+            File outputFile = new File(textureDirectory.resolve("heightRoughness.png").toUri());
+            ImageIO.write(pbrTexture, "PNG", outputFile);
+            System.out.print("Writing dds output\n");
             Path filePath = textureDirectory.resolve("heightRoughness.dds");
-            Files.createDirectories(filePath.getParent());
             ImageUtil.writeCompressedDDS(pbrTexture, filePath);
         }
     }
