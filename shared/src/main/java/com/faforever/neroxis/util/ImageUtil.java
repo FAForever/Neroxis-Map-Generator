@@ -153,6 +153,9 @@ public class ImageUtil {
             ).formatted(baseImage.getWidth(), heightMap.getWidth()));
         }
         int channel = 0;
+        if (layer >= 4) {
+            channel = 2;
+        }
         return writeTextureIntoImage(baseImage, heightMap, layer, channel);
     }
 
@@ -170,6 +173,9 @@ public class ImageUtil {
             ).formatted(baseImage.getWidth(), roughnessMap.getWidth()));
         }
         int channel = 1;
+        if (layer >= 4) {
+            channel = 3;
+        }
         return writeTextureIntoImage(baseImage, roughnessMap, layer, channel);
     }
 
@@ -182,23 +188,20 @@ public class ImageUtil {
         // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
         texture = offsetHalf(texture);
         Raster imageRaster = texture.getData();
-        for (int a = 0; a < textureWidth; a += textureWidth) {
-            for (int b = 0; b < textureHeight; b += textureHeight) {
+        for (int a = 0; a <= 1; a++) {
+            for (int b = 0; b <= 1; b++) {
                 for (int x = 0; x < textureWidth; x++) {
                     for (int y = 0; y < textureHeight; y++) {
-                        int newX = x + a;
-                        int newY = y + b;
+                        int newX = x + a * textureWidth;
+                        int newY = y + b * textureHeight;
                         if (layer % 2 == 1) {
-                            newX = x + offsetX;
+                            newX += offsetX;
                         }
                         if (layer % 4 >= 2) {
-                            newY = y + offsetY;
+                            newY += offsetY;
                         }
                         int roughness = imageRaster.getPixel(x, y, new int[1])[0];
                         int[] baseImagePixel = baseImageRaster.getPixel(newX, newY, new int[4]);
-                        if (layer >= 4) {
-                            channel += 2;
-                        }
                         baseImagePixel[channel] = roughness;
                         baseImageRaster.setPixel(newX, newY, baseImagePixel);
                     }
