@@ -24,9 +24,9 @@
   "refractionScale": 0.375,
   "texPathWaterRamp": "/textures/engine/waterramp_redrock03.dds",
   "sunColor": {
-    "x": 7.46,
-    "y": 6.15,
-    "z": 2.97
+    "x": 5.25,
+    "y": 4.49,
+    "z": 1.66
   },
   "sunDirection": {
     "x": -0.7783785,

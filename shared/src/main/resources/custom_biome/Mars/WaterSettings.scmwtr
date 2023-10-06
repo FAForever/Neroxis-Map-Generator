@@ -6,9 +6,9 @@
     "z": -0.49999988
   },
   "sunColor": {
-    "x": 5.32,
-    "y": 3.59,
-    "z": 1.38
+    "x": 3.46,
+    "y": 2.83,
+    "z": 1.04
   },
   "texPathCubemap": "/textures/environment/SkyCube_Desert02a.dds",
   "colorLerp": {

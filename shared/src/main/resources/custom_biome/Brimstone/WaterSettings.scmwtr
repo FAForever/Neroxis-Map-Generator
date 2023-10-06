@@ -17,9 +17,9 @@
   },
   "sunShininess": 400.0,
   "sunColor": {
-    "x": 6.7,
-    "y": 6.22,
-    "z": 5.53
+    "x": 4.35,
+    "y": 4.08,
+    "z": 3.04
   },
   "refractionScale": 0.375,
   "waterPresent": true,

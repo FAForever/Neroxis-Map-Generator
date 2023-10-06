@@ -1,9 +1,9 @@
 {
   "texPathWaterRamp": "/textures/engine/waterramp_redrock.dds",
   "sunColor": {
-    "x": 9.05,
-    "y": 5.39,
-    "z": 4.49
+    "x": 8.43,
+    "y": 4.7,
+    "z": 2.63
   },
   "sunDirection": {
     "x": 0.8986325,
