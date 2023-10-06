@@ -1,14 +1,14 @@
 {
-  "lightingMultiplier": 2.2,
+  "lightingMultiplier": 1.5,
   "sunAmbience": {
-    "z": 0.12,
-    "x": 0.24,
-    "y": 0.17
+    "z": 0.17,
+    "x": 0.35,
+    "y": 0.25
   },
   "sunColor": {
-    "z": 0.65,
-    "x": 1.31,
-    "y": 0.78
+    "z": 0.95,
+    "x": 1.92,
+    "y": 1.15
   },
   "shadowFillColor": {
     "z": 0.62,

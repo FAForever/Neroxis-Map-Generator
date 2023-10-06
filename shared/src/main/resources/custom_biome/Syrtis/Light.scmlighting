@@ -1,5 +1,5 @@
 {
-  "lightingMultiplier": 2.2,
+  "lightingMultiplier": 1.4499999,
   "bloom": 0.08,
   "fogColor": {
     "z": 0.12,
@@ -7,9 +7,9 @@
     "y": 0.24
   },
   "sunColor": {
-    "z": 0.42,
-    "x": 0.88,
-    "y": 0.51
+    "z": 0.64,
+    "x": 1.33,
+    "y": 0.77
   },
   "sunDirection": {
     "z": 0.40673667,

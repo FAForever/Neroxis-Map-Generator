@@ -1,5 +1,5 @@
 {
-  "lightingMultiplier": 2.2,
+  "lightingMultiplier": 1.54,
   "specularColor": {
     "w": 0.0,
     "z": 1.743966e-39,
@@ -14,14 +14,14 @@
   },
   "bloom": 0.08,
   "sunColor": {
-    "z": 0.43,
-    "x": 1.08,
-    "y": 0.89
+    "z": 0.62,
+    "x": 1.54,
+    "y": 1.27
   },
   "sunAmbience": {
-    "z": 0.08,
-    "x": 0.63,
-    "y": 0.4
+    "z": 0.11,
+    "x": 0.9,
+    "y": 0.57
   },
   "fogStart": 0.0,
   "shadowFillColor": {
