@@ -244,9 +244,10 @@ public class ImageUtil {
         return newImage;
     }
 
-    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask shadowMask) {
-        if (shadowMask.getSize() != normalMask.getSize()) {
-            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d".formatted(shadowMask.getSize(), normalMask.getSize()));
+    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
+        if (shadowMask.getSize() != normalMask.getSize() || shadowMask.getSize() != waterDepth.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d, waterDepth size %d"
+                    .formatted(shadowMask.getSize(), normalMask.getSize(), waterDepth.getSize()));
         }
         int size = shadowMask.getSize();
         int length = size * size * 4;
@@ -256,10 +257,11 @@ public class ImageUtil {
                 Vector3 normalValue = normalMask.get(x, y);
                 int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
                 int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
                 int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageByteBuffer.put((byte) xV);
                 imageByteBuffer.put((byte) yV);
-                imageByteBuffer.put((byte) 0);
+                imageByteBuffer.put((byte) zV);
                 imageByteBuffer.put((byte) wV);
             }
         }
