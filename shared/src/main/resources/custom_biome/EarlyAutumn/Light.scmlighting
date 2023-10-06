@@ -1,8 +1,8 @@
 {
   "sunColor": {
-    "z": 1.14,
-    "y": 1.29,
-    "x": 1.38
+    "x": 0.63,
+    "y": 0.59,
+    "z": 0.44
   },
   "fogEnd": 750.0,
   "fogColor": {
@@ -10,7 +10,7 @@
     "y": 0.49,
     "x": 0.37
   },
-  "lightingMultiplier": 1.54,
+  "lightingMultiplier": 2.2,
   "bloom": 0.03,
   "specularColor": {
     "z": 0.0,
@@ -19,15 +19,15 @@
     "w": 0.0
   },
   "shadowFillColor": {
-    "z": 0.7,
-    "y": 0.54,
-    "x": 0.54
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
   },
   "fogStart": 0.0,
   "sunAmbience": {
-    "z": 0.0,
-    "y": 0.0,
-    "x": 0.0
+    "x": 0.25,
+    "y": 0.25,
+    "z": 0.32
   },
   "sunDirection": {
     "z": 0.55482364,

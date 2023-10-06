@@ -1,19 +1,19 @@
 {
-  "lightingMultiplier": 1.5,
+  "lightingMultiplier": 2.2,
   "sunAmbience": {
-    "z": 0.17,
-    "x": 0.35,
-    "y": 0.25
+    "x": 0.27,
+    "y": 0.24,
+    "z": 0.35
   },
   "sunColor": {
-    "z": 0.95,
-    "x": 1.92,
-    "y": 1.15
+    "x": 1.22,
+    "y": 0.68,
+    "z": 0.38
   },
   "shadowFillColor": {
-    "z": 0.62,
-    "x": 0.1,
-    "y": 0.2
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
   },
   "specularColor": {
     "z": 1.743966e-39,
