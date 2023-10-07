@@ -94,12 +94,15 @@ public class PreviewGenerator {
 
                 float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
 
-                newRGBA[0] = (int) (origRGBA[0] * (lightingSettings.getSunColor().getX() * coefficient)
-                                    + lightingSettings.getSunAmbience().getX());
-                newRGBA[1] = (int) (origRGBA[1] * (lightingSettings.getSunColor().getY() * coefficient)
-                                    + lightingSettings.getSunAmbience().getY());
-                newRGBA[2] = (int) (origRGBA[2] * (lightingSettings.getSunColor().getZ() * coefficient)
-                                    + lightingSettings.getSunAmbience().getZ());
+                newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.getSunColor().getX() * coefficient)
+                                    + lightingSettings.getSunAmbience().getX())
+                                    * lightingSettings.getLightingMultiplier());
+                newRGBA[1] = (int) (origRGBA[1] * ((lightingSettings.getSunColor().getY() * coefficient)
+                                    + lightingSettings.getSunAmbience().getY())
+                                    * lightingSettings.getLightingMultiplier());
+                newRGBA[2] = (int) (origRGBA[2] * ((lightingSettings.getSunColor().getZ() * coefficient)
+                                    + lightingSettings.getSunAmbience().getZ())
+                                    * lightingSettings.getLightingMultiplier());
 
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
                 newRGBA[1] = StrictMath.max(StrictMath.min(newRGBA[1], 255), 0);

@@ -26,10 +26,7 @@ import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.TestStyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
-import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
@@ -58,6 +55,8 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static com.faforever.neroxis.map.SCMap.MAP_WIDE_ASSETS_SHADER_NAME;
+import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
@@ -460,7 +459,11 @@ public class MapGenerator implements Callable<Integer> {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
-            MapExporter.exportMap(outputPath, map, visibility == null, true);
+            SCMapExporter.exportMapwideTexture(outputPath.resolve(mapName), map);
+            if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
+                SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
+            }
+            MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
             if (visibility == null && DebugUtil.DEBUG) {
@@ -523,6 +526,24 @@ public class MapGenerator implements Callable<Integer> {
         map.setName(mapName);
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
+
+        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
+            map.getBiome().terrainMaterials().getTexturePaths()[8] =
+                    Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
+                            .toString()
+                            .replace("\\", "/");
+            map.getBiome().terrainMaterials().getNormalPaths()[8] =
+                    map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
+        }
+        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME) || map.getTerrainShaderPath().equals(MAP_WIDE_ASSETS_SHADER_NAME)) {
+            map.getBiome().terrainMaterials().getTexturePaths()[9] =
+                    Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
+                            .toString()
+                            .replace("\\", "/");
+            // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain shader.
+            map.getBiome().terrainMaterials().getTextureScales()[9] = map.getSize() + 1;
+        }
+
         ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);

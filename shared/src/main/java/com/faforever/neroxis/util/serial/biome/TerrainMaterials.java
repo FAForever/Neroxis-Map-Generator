@@ -20,7 +20,7 @@ public class TerrainMaterials {
     underWater
     rock
     rockAccent
-    macroTexture
+    map-wide textures (generated)
     */
 
     // engine limitations - must stay 9 and 10 always

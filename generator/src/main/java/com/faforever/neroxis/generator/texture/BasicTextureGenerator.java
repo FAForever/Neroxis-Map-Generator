@@ -38,12 +38,15 @@ public class BasicTextureGenerator extends TextureGenerator {
                                               .multiply(-1f)
                                               .divide(abyssDepth)
                                               .clampMin(0f);
-
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(512));
-        shadows.add(shadowsInWater, 1f)
-               .blur(8, shadowsInWater.inflate(8).subtract(realLand.copy().setSize(512)))
-               .clampMax(1f);
+        
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
+        shadows.setToValue(shadowsInWater.copy(), 1f);
+        shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
+        shadows.subtract(realWater.copy().setSize(map.getSize()),
+                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
+               .blur(1);
+        
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
         accentGroundTexture.setSize(textureSize)
@@ -120,21 +123,12 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType);
+        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-        });
-    }
-
-    @Override
-    public void setCompressedDecals() {
-        Pipeline.await(normals, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.biome().lightingSettings()));
-            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

@@ -19,9 +19,7 @@ import com.faforever.neroxis.map.placement.PropPlacer;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
-import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import lombok.Getter;
 import picocli.CommandLine;
@@ -53,10 +51,6 @@ public class MapPopulator implements Callable<Integer> {
     private Set<Integer> texturesToPopulate;
     @CommandLine.Option(names = "--texture-size", description = "Size of the textures in pixels to use")
     private Integer textureImageSize;
-    @CommandLine.Option(names = "--erosion", description = "Resolution in pixels to use for an erosion map. If not specified no erosion map will be generated")
-    private Integer erosionResolution;
-    @CommandLine.Option(names = "--shadow", description = "Resolution in pixels to use for a shadow map. If not specified no shadow map will be generated")
-    private Integer shadowResolution;
     @CommandLine.ArgGroup(heading = "Options that require a symmetry be specified%n", exclusive = false)
     private SymmetryRequiredSettings symmetryRequiredSettings;
     private SCMap map;
@@ -67,7 +61,7 @@ public class MapPopulator implements Callable<Integer> {
     public Integer call() throws IOException {
         map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
         populate();
-        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true, erosionResolution != null);
+        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true);
         return 0;
     }
 
@@ -374,17 +368,6 @@ public class MapPopulator implements Callable<Integer> {
                                       slopesTexture, accentSlopesTexture);
             map.setTextureMasksScaled(map.getTextureMasksHigh(), steepHillsTexture, waterBeachTexture, rockTexture,
                                       accentRockTexture);
-        }
-
-        if (erosionResolution != null) {
-            FloatMask erosionHeightMask = heightmapBase.copy()
-                                                       .resample(erosionResolution)
-                                                       .subtractAvg()
-                                                       .multiply(10f)
-                                                       .addPerlinNoise(erosionResolution / 16, 4f);
-            erosionHeightMask.waterErode(100000, 100, .1f, .1f, 1f, 1f, 1, .25f);
-            NormalMask normal = erosionHeightMask.copyAsNormalMask();
-            map.setCompressedNormal(ImageUtil.compressNormal(normal));
         }
 
         Biome biome = symmetryRequiredSettings.getBiome();

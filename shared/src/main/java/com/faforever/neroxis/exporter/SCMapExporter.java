@@ -3,11 +3,11 @@ package com.faforever.neroxis.exporter;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.DecalType;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
 import com.faforever.neroxis.map.WaveGenerator;
+import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
@@ -24,23 +24,19 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
 import java.awt.image.RenderedImage;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.List;
 
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public class SCMapExporter {
+    public static final String PBR_DDS = "heightRoughness.dds";
+    public static final String MAPWIDE_DDS = "mapwide.dds";
     public static File file;
     private static DataOutputStream out;
 
@@ -231,44 +227,34 @@ public class SCMapExporter {
         }
     }
 
-    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedNormal = map.getCompressedNormal();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
-        Path writingPath = folderPath.resolve(decalPath);
+    public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
+        byte[] rawTexture = map.getRawMapTexture();
+        Path textureDirectory = Paths.get("env", "texture");
+        Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
+        Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
-        map.getDecals()
-           .add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset, new Vector3(),
-                          size, 1000));
         try {
-            Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
+            Files.write(writingPath, rawTexture, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            System.out.print("Could not write the normal map image\n" + e);
+            System.out.print("Could not write the map-wide texture\n" + e);
         }
     }
 
-    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
-        byte[] compressedShadows = map.getCompressedShadows();
-        final String fileFormat = "dds";
-        Path decalsPath = Paths.get("env", "decals");
-        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
-        Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
-        Path writingPath = folderPath.resolve(decalPath);
-        Files.createDirectories(writingPath.getParent());
-        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
-                                      new Vector3(), size, 1000);
-        shadowDecal.setType(DecalType.WATER_ALBEDO);
-        map.getDecals().add(shadowDecal);
-        try {
-            Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            System.out.print("Could not write the shadow map image\n" + e);
+    public static void exportPBR(Path folderPath, SCMap map) throws IOException {
+        URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.png");
+        if (sourceURL != null) {
+            BufferedImage image = ImageIO.read(sourceURL);
+            Path textureDirectory = Paths.get("env", "texture");
+            Path filePath = textureDirectory.resolve(PBR_DDS);
+            Path writingPath = folderPath.resolve(filePath);
+            Files.createDirectories(writingPath.getParent());
+            try {
+                ImageUtil.writeNormalDDS(image, writingPath);
+            } catch (IOException e) {
+                System.out.print("Could not write the pbr texture\n" + e);
+            }
+        } else {
+            System.out.print("Can't find pbr texture to write\n");
         }
     }
 

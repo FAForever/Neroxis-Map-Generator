@@ -38,7 +38,7 @@ public class MapStratumResizer implements Callable<Integer> {
     public Integer call() throws Exception {
         SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
         map.changeStratumSize(stratumSize);
-        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, false, false);
+        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, false);
         return 0;
     }
 

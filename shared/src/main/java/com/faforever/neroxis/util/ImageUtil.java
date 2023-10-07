@@ -5,13 +5,13 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -139,48 +139,26 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static byte[] compressNormal(NormalMask mask) {
-        int size = mask.getSize();
+    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask shadowMask) {
+        if (shadowMask.getSize() != normalMask.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d".formatted(shadowMask.getSize(), normalMask.getSize()));
+        }
+        int size = shadowMask.getSize();
         int length = size * size * 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                Vector3 value = mask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
-                imageByteBuffer.put((byte) yV);
-                imageByteBuffer.put((byte) zV);
-                imageByteBuffer.put((byte) 0);
+                Vector3 normalValue = normalMask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageByteBuffer.put((byte) xV);
+                imageByteBuffer.put((byte) yV);
+                imageByteBuffer.put((byte) 0);
+                imageByteBuffer.put((byte) wV);
             }
         }
-        return getCompressedBytes(size, imageByteBuffer);
-    }
-
-    public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
-        int size = mask.getSize();
-        int length = size * size * 4;
-        Vector3 shadowFillColor = lightingSettings.getShadowFillColor()
-                                                  .copy()
-                                                  .add(lightingSettings.getSunAmbience())
-                                                  .divide(4);
-        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
-        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                float value = mask.get(x, y);
-                int r = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getX() * 128, 0), 255);
-                int g = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getY() * 128, 0), 255);
-                int b = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getZ() * 128, 0), 255);
-                int a = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
-                imageByteBuffer.put((byte) r);
-                imageByteBuffer.put((byte) g);
-                imageByteBuffer.put((byte) b);
-                imageByteBuffer.put((byte) a);
-            }
-        }
-        return getCompressedBytes(size, imageByteBuffer);
+        return getRawDDSImageBytes(size, imageByteBuffer);
     }
 
     public static BufferedImage normalToARGB(NormalMask mask) {
@@ -216,10 +194,10 @@ public class ImageUtil {
                 imageByteBuffer.put((byte) wV);
             }
         }
-        return getCompressedBytes(size, imageByteBuffer);
+        return getCompressedDDSImageBytes(size, imageByteBuffer);
     }
 
-    private static byte[] getCompressedBytes(int size, ByteBuffer imageByteBuffer) {
+    private static byte[] getCompressedDDSImageBytes(int size, ByteBuffer imageByteBuffer) {
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
@@ -230,6 +208,25 @@ public class ImageUtil {
                                           Squish.CompressionType.DXT5, Squish.CompressionMethod.RANGE_FIT);
         int headerLength = headerBytes.length;
         int imageLength = imageBytes.length;
+        byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
+        System.arraycopy(imageBytes, 0, allBytes, headerLength, imageLength);
+        return allBytes;
+    }
+
+    private static byte[] getRawDDSImageBytes(int size, ByteBuffer imageByteBuffer) {
+        DDSHeader ddsHeader = new DDSHeader();
+        ddsHeader.setWidth(size);
+        ddsHeader.setHeight(size);
+        ddsHeader.setRGBBitCount(32);
+        ddsHeader.setRBitMask(0x000000FF);
+        ddsHeader.setGBitMask(0x0000FF00);
+        ddsHeader.setBBitMask(0x00FF0000);
+        ddsHeader.setABitMask(0xFF000000);
+        ddsHeader.toBytes();
+        byte[] headerBytes = ddsHeader.toBytes();
+        byte[] imageBytes = imageByteBuffer.array();
+        int headerLength = headerBytes.length;
+        int imageLength = size * size * 4;
         byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
         System.arraycopy(imageBytes, 0, allBytes, headerLength, imageLength);
         return allBytes;

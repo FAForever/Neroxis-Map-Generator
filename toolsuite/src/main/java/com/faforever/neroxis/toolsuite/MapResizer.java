@@ -49,7 +49,7 @@ public class MapResizer implements Callable<Integer> {
     public Integer call() throws Exception {
         SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
         resizeMap(map);
-        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true, false);
+        MapExporter.exportMap(outputFolderMixin.getOutputPath(), map, true);
         return 0;
     }
 
