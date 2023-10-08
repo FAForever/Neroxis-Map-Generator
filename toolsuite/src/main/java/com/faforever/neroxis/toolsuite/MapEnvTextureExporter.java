@@ -38,10 +38,8 @@ public class MapEnvTextureExporter implements Callable<Integer> {
         FloatMask heightMapSize = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
                 .startVisualDebugger()
                 .resample(map.getSize())
-                .divide(128f);
+                .divide(128f); // No idea why this is necessary
         NormalMask normals = heightMapSize.copy()
-                .addGaussianNoise(.025f)
-                .blur(1)
                 .copyAsNormalMask(2f);
 
         BooleanMask realLand = heightMapSize.copyAsBooleanMask(map.getBiome().waterSettings().getElevation());
