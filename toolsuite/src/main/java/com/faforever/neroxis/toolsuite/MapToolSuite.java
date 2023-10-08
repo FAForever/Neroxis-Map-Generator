@@ -6,7 +6,7 @@ import picocli.CommandLine;
 import static picocli.CommandLine.Command;
 
 @Command(name = "maptools", mixinStandardHelpOptions = true, description = "Tools to modify maps", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, synopsisSubcommandLabel = "COMMAND", subcommands = {
-        MapPopulator.class, MapResizer.class, MapStratumResizer.class, MapForcer.class, MapEvaluator.class, PbrTextureGenerator.class})
+        MapPopulator.class, MapResizer.class, MapStratumResizer.class, MapForcer.class, MapEvaluator.class, MapEnvTextureExporter.class, PbrTextureGenerator.class})
 public class MapToolSuite {
     private MapToolSuite() {
     }
