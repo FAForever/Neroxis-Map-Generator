@@ -7,7 +7,6 @@ import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,8 +14,10 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CommandLine.Command(name = "export-textures", mixinStandardHelpOptions = true, description = "Generate the helper textures", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-public class MapEnvTextureExporter implements Callable<Integer> {
+@CommandLine.Command(name = "generate-pbr", mixinStandardHelpOptions = true, 
+        description = "Generate the pbr texture from individual height and roughness textures", 
+        versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+public class PbrTextureGenerator implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
@@ -24,11 +25,11 @@ public class MapEnvTextureExporter implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        generate();
+        generatePbrTexture();
         return 0;
     }
     
-    public void generate() throws Exception {
+    public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputFolderMixin.getOutputPath())) {
             BufferedImage pbrTexture = new BufferedImage(4096, 4096, BufferedImage.TYPE_INT_ARGB);
             for (Path path : stream) {
