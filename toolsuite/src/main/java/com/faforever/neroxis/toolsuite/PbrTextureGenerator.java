@@ -52,9 +52,10 @@ public class PbrTextureGenerator implements Callable<Integer> {
                 }
             }
             Path textureDirectory = outputFolderMixin.getOutputPath();
-            System.out.print("Writing dds output\n");
             Path filePath = textureDirectory.resolve("heightRoughness.dds");
+            System.out.print("Compressing dds texture. This might take a while...\n");
             ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            System.out.print("Successfully wrote dds output\n");
         }
     }
 }
