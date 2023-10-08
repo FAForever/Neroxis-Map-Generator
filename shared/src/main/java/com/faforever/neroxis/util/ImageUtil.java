@@ -245,10 +245,11 @@ public class ImageUtil {
     }
 
     public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
-        if (shadowMask.getSize() != normalMask.getSize() || shadowMask.getSize() != waterDepth.getSize()) {
-            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d, waterDepth size %d"
-                    .formatted(shadowMask.getSize(), normalMask.getSize(), waterDepth.getSize()));
+        if (shadowMask.getSize() != normalMask.getSize()) {
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"
+                    .formatted(shadowMask.getSize(), normalMask.getSize()));
         }
+        waterDepth.resample(shadowMask.getSize());
         int size = shadowMask.getSize();
         int length = size * size * 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
