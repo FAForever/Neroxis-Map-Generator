@@ -135,10 +135,8 @@ public class ImageUtil {
         ddsHeader.setFourCC("DXT5");
         byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
                                               Squish.CompressionType.DXT5);
-        if (Files.exists(path)) {
-            // If we don't do this we get weird results when the file already exists
-            Files.delete(path);
-        }
+        // If we don't do this we get weird results when the file already exists
+        Files.deleteIfExists(path);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }

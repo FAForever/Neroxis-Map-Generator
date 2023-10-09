@@ -33,14 +33,11 @@ public class MapEnvTextureExporter implements Callable<Integer> {
     public void generateEnvTexture() throws Exception {
         System.out.print("Generating env texture\n");
         SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
-
-        // Copied from TextureGenerator and BasicTextureGenerator
+        
         FloatMask heightMapSize = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
-                .startVisualDebugger()
                 .resample(map.getSize())
                 .divide(128f); // No idea why this is necessary
-        NormalMask normals = heightMapSize.copy()
-                .copyAsNormalMask(2f);
+        NormalMask normals = heightMapSize.copyAsNormalMask(2f);
 
         BooleanMask realLand = heightMapSize.copyAsBooleanMask(map.getBiome().waterSettings().getElevation());
         BooleanMask realWater = realLand.copy().invert();
