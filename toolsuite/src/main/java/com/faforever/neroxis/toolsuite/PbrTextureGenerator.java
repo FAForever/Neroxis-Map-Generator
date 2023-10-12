@@ -32,8 +32,8 @@ public class PbrTextureGenerator implements Callable<Integer> {
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputFolderMixin.getOutputPath())) {
             BufferedImage pbrTexture = new BufferedImage(4096, 4096, BufferedImage.TYPE_INT_ARGB);
+            int filesProcessed = 0;
             for (Path path : stream) {
-                System.out.print("processing " + path + "\n");
                 if (Files.isRegularFile(path)) {
                     Pattern pattern = Pattern.compile("\\d+");
                     Matcher matcher = pattern.matcher(path.toFile().getName());
@@ -41,18 +41,26 @@ public class PbrTextureGenerator implements Callable<Integer> {
                         BufferedImage image = ImageIO.read(path.toFile());
                         String numberStr = matcher.group();
                         int layer = Integer.parseInt(numberStr);
-                        if (path.getFileName().toString().startsWith("Roughness")) {
-                            System.out.print("Writing roughness texture\n");
+                        if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
+                            System.out.printf("Writing roughness texture %s\n", path.getFileName());
                             pbrTexture = ImageUtil.setRoughnessMap(pbrTexture, image, layer);
-                        } else if (path.getFileName().toString().startsWith("Height")) {
-                            System.out.print("Writing height texture\n");
+                            filesProcessed++;
+                        } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
+                            System.out.printf("Writing height texture %s\n", path.getFileName());
                             pbrTexture = ImageUtil.setHeightMap(pbrTexture, image, layer);
+                            filesProcessed++;
                         }
                     }
                 }
             }
+            if (filesProcessed == 0) {
+                throw new RuntimeException("No files found to write into the pbr texture. " +
+                        "The files need to be named 'RoughnessX' or 'HeightX' where X is the number " +
+                        "that specifies the texture layer");
+            }
             Path textureDirectory = outputFolderMixin.getOutputPath();
             Path filePath = textureDirectory.resolve("heightRoughness.dds");
+            System.out.printf("Processed %d files.\n", filesProcessed);
             System.out.print("Compressing dds texture. This might take a while...\n");
             ImageUtil.writeCompressedDDS(pbrTexture, filePath);
             System.out.print("Successfully wrote dds output\n");
