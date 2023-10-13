@@ -522,6 +522,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return addComponent((x, y) -> value, component);
     }
 
+    @GraphMethod
+    public U setComponent(FloatMask other, int component) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            setComponent(source::get, component);
+        }, other);
+    }
+
     public U setComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);

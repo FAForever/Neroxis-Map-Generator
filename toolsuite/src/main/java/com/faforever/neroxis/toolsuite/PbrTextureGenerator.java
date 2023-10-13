@@ -2,6 +2,10 @@ package com.faforever.neroxis.toolsuite;
 
 import com.faforever.neroxis.cli.OutputFolderMixin;
 import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import picocli.CommandLine;
 
@@ -29,8 +33,11 @@ public class PbrTextureGenerator implements Callable<Integer> {
         return 0;
     }
     
+    SymmetrySettings noSymmetry = new SymmetrySettings(Symmetry.NONE);
+    
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputFolderMixin.getOutputPath())) {
+            Vector4Mask pbrMask = new Vector4Mask(4096, 0L, noSymmetry);
             BufferedImage pbrTexture = new BufferedImage(4096, 4096, BufferedImage.TYPE_INT_ARGB);
             int filesProcessed = 0;
             for (Path path : stream) {
@@ -43,11 +50,21 @@ public class PbrTextureGenerator implements Callable<Integer> {
                         int layer = Integer.parseInt(numberStr);
                         if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
                             System.out.printf("Writing roughness texture %s\n", path.getFileName());
-                            pbrTexture = ImageUtil.setRoughnessMap(pbrTexture, image, layer);
+                            FloatMask roughness = createOffsetMaskFromImage(image);
+                            int component = 1;
+                            if (layer >= 4) {
+                                component = 3;
+                            }
+                            pbrMask.setComponent(roughness, component);
                             filesProcessed++;
                         } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
                             System.out.printf("Writing height texture %s\n", path.getFileName());
-                            pbrTexture = ImageUtil.setHeightMap(pbrTexture, image, layer);
+                            FloatMask height = createOffsetMaskFromImage(image);
+                            int component = 0;
+                            if (layer >= 4) {
+                                component = 2;
+                            }
+                            pbrMask.setComponent(height, component);
                             filesProcessed++;
                         }
                     }
@@ -65,5 +82,16 @@ public class PbrTextureGenerator implements Callable<Integer> {
             ImageUtil.writeCompressedDDS(pbrTexture, filePath);
             System.out.print("Successfully wrote dds output\n");
         }
+    }
+
+    private FloatMask createOffsetMaskFromImage(BufferedImage image) {
+        // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
+        FloatMask mask = new FloatMask(image, 0L, noSymmetry);
+        FloatMask roughness = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
+        roughness.addWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
+        roughness.addWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
+        roughness.addWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
+        roughness.addWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
+        return roughness;
     }
 }
