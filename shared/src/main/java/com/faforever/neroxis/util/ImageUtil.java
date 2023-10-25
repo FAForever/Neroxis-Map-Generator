@@ -154,10 +154,7 @@ public class ImageUtil {
                     "The height map needs to be quarter the resolution of the base image."
             ).formatted(baseImage.getWidth(), heightMap.getWidth()));
         }
-        int channel = 0;
-        if (layer >= 4) {
-            channel = 2;
-        }
+        int channel = (layer >= 4) ? 2 : 0;
         return writeTextureIntoImage(baseImage, heightMap, layer, channel);
     }
 
@@ -174,10 +171,7 @@ public class ImageUtil {
                             "The roughness map needs to be quarter the resolution of the base image."
             ).formatted(baseImage.getWidth(), roughnessMap.getWidth()));
         }
-        int channel = 1;
-        if (layer >= 4) {
-            channel = 3;
-        }
+        int channel = (layer >= 4) ? 3 : 1;
         return writeTextureIntoImage(baseImage, roughnessMap, layer, channel);
     }
 

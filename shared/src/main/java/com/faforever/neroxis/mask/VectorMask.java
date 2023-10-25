@@ -526,7 +526,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public U setComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            setComponent(source::get, component);
+            setComponent(source::getPrimitive, component);
         }, other);
     }
 

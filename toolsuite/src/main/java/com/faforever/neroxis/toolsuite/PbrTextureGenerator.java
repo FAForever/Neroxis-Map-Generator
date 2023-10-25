@@ -51,19 +51,13 @@ public class PbrTextureGenerator implements Callable<Integer> {
                         if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
                             System.out.printf("Writing roughness texture %s\n", path.getFileName());
                             FloatMask roughness = createOffsetMaskFromImage(image);
-                            int component = 1;
-                            if (layer >= 4) {
-                                component = 3;
-                            }
+                            int component = (layer >= 4) ? 3 : 1;
                             pbrMask.setComponent(roughness, component);
                             filesProcessed++;
                         } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
                             System.out.printf("Writing height texture %s\n", path.getFileName());
                             FloatMask height = createOffsetMaskFromImage(image);
-                            int component = 0;
-                            if (layer >= 4) {
-                                component = 2;
-                            }
+                            int component = (layer >= 4) ? 2 : 0;
                             pbrMask.setComponent(height, component);
                             filesProcessed++;
                         }
