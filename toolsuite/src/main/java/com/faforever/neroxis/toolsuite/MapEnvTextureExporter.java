@@ -36,7 +36,7 @@ public class MapEnvTextureExporter implements Callable<Integer> {
         
         FloatMask heightMap = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
                 .resample(map.getSize())
-                .divide(128f); // No idea why this is necessary
+                .divide(128f); // The scmap binary scales by 128
         NormalMask normals = heightMap.copyAsNormalMask(2f);
 
         BooleanMask realLand = heightMap.copyAsBooleanMask(map.getBiome().waterSettings().getElevation());
