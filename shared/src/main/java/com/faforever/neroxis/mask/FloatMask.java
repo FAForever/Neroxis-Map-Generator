@@ -750,6 +750,13 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .sum();
     }
+    
+    public FloatMask setWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatConsumer) this::setPrimitive, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
 
     @Override
     @GraphMethod

@@ -37,8 +37,10 @@ public class PbrTextureGenerator implements Callable<Integer> {
     
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputFolderMixin.getOutputPath())) {
-            Vector4Mask pbrMask = new Vector4Mask(4096, 0L, noSymmetry);
-            BufferedImage pbrTexture = new BufferedImage(4096, 4096, BufferedImage.TYPE_INT_ARGB);
+            int size = 4096;
+            int offset = size / 2;
+            Vector4Mask pbrMask = new Vector4Mask(size, 0L, noSymmetry);
+            BufferedImage pbrTexture = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
             int filesProcessed = 0;
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
@@ -51,14 +53,24 @@ public class PbrTextureGenerator implements Callable<Integer> {
                         if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
                             System.out.printf("Writing roughness texture %s\n", path.getFileName());
                             FloatMask roughness = createOffsetMaskFromImage(image);
+                            if (image.getType() == BufferedImage.TYPE_USHORT_GRAY) {
+                                roughness.divide(256f);
+                            }
                             int component = (layer >= 4) ? 3 : 1;
-                            pbrMask.setComponent(roughness, component);
+                            int xOffset = (layer % 2 == 1) ? offset : 0;
+                            int yOffset = (layer % 4 >= 2) ? offset : 0;
+                            pbrMask.setComponentWithOffset(roughness, component, xOffset, yOffset, false, false);
                             filesProcessed++;
                         } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
                             System.out.printf("Writing height texture %s\n", path.getFileName());
                             FloatMask height = createOffsetMaskFromImage(image);
+                            if (image.getType() == BufferedImage.TYPE_USHORT_GRAY) {
+                                height.divide(256f);
+                            }
                             int component = (layer >= 4) ? 2 : 0;
-                            pbrMask.setComponent(height, component);
+                            int xOffset = (layer % 2 == 1) ? offset : 0;
+                            int yOffset = (layer % 4 >= 2) ? offset : 0;
+                            pbrMask.setComponentWithOffset(height, component, xOffset, yOffset, false, false);
                             filesProcessed++;
                         }
                     }
@@ -69,6 +81,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
                         "The files need to be named 'RoughnessX' or 'HeightX' where X is the number " +
                         "that specifies the texture layer");
             }
+            pbrMask.writeToImage(pbrTexture);
             Path textureDirectory = outputFolderMixin.getOutputPath();
             Path filePath = textureDirectory.resolve("heightRoughness.dds");
             System.out.printf("Processed %d files.\n", filesProcessed);
@@ -82,10 +95,10 @@ public class PbrTextureGenerator implements Callable<Integer> {
         // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
         FloatMask mask = new FloatMask(image, 0L, noSymmetry);
         FloatMask roughness = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
-        roughness.addWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.addWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.addWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
-        roughness.addWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
+        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
+        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
+        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
+        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
         return roughness;
     }
 }

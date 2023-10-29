@@ -3,6 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -675,5 +676,85 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, components);
 
         return components;
+    }
+
+    public U setComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatIntConsumer) this::setComponentAt, component, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
+
+    public U addComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatIntConsumer) this::addComponentAt, component, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
+
+    public U subtractComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatIntConsumer) this::subtractComponentAt, component, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
+
+    public U multiplyComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatIntConsumer) this::multiplyComponentAt, component, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
+
+    public U divideComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.get(0);
+            applyWithOffset(source, (BiIntFloatIntConsumer) this::divideComponentAt, component, xOffset, yOffset, center, wrapEdges);
+        }, other);
+    }
+
+    private U applyWithOffset(FloatMask other, BiIntFloatIntConsumer action, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+        return enqueue(() -> {
+            int size = getSize();
+            int otherSize = other.getSize();
+            int smallerSize = StrictMath.min(size, otherSize);
+            int biggerSize = StrictMath.max(size, otherSize);
+            if (smallerSize == otherSize) {
+                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, otherSize, size);
+                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, otherSize, size);
+                    other.apply((x, y) -> {
+                        int shiftX = coordinateXMap.get(x);
+                        int shiftY = coordinateYMap.get(y);
+                        if (inBounds(shiftX, shiftY)) {
+                            float value = other.getPrimitive(x, y);
+                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN, (sx, sy) -> action.accept(sx, sy, value, component));
+                        }
+                    });
+                } else {
+                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize, size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize, size);
+                        other.apply((x, y) -> {
+                            int shiftX = coordinateXMap.get(x);
+                            int shiftY = coordinateYMap.get(y);
+                            if (inBounds(shiftX, shiftY)) {
+                                action.accept(shiftX, shiftY, other.getPrimitive(x, y), component);
+                            }
+                        });
+                    });
+                }
+            } else {
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size, otherSize);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size, otherSize);
+                apply((x, y) -> {
+                    int shiftX = coordinateXMap.get(x);
+                    int shiftY = coordinateYMap.get(y);
+                    if (other.inBounds(shiftX, shiftY)) {
+                        action.accept(x, y, other.getPrimitive(shiftX, shiftY), component);
+                    }
+                });
+            }
+        });
     }
 }
