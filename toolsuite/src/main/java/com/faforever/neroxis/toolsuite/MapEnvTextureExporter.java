@@ -34,26 +34,26 @@ public class MapEnvTextureExporter implements Callable<Integer> {
         System.out.print("Generating env texture\n");
         SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
         
-        FloatMask heightMapSize = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
+        FloatMask heightMap = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
                 .resample(map.getSize())
                 .divide(128f); // No idea why this is necessary
-        NormalMask normals = heightMapSize.copyAsNormalMask(2f);
+        NormalMask normals = heightMap.copyAsNormalMask(2f);
 
-        BooleanMask realLand = heightMapSize.copyAsBooleanMask(map.getBiome().waterSettings().getElevation());
+        BooleanMask realLand = heightMap.copyAsBooleanMask(map.getBiome().waterSettings().getElevation());
         BooleanMask realWater = realLand.copy().invert();
-        BooleanMask shadowsMask = heightMapSize
+        BooleanMask shadowsMask = heightMap
                 .copyAsShadowMask(map.getBiome().lightingSettings().getSunDirection()).inflate(0.5f);
         FloatMask shadows = shadowsMask.copyAsFloatMask(1, 0);
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
-        shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
-        shadows.subtract(realWater.copy().setSize(map.getSize()),
+        shadowsInWater.add(realLand, shadowsInWater.copy().inflate(6));
+        shadows.subtract(realWater,
                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
                 .blur(1);
 
         float abyssDepth = map.getBiome().waterSettings().getElevation() -
                 map.getBiome().waterSettings().getElevationAbyss();
-        FloatMask scaledWaterDepth = heightMapSize.copy()
+        FloatMask scaledWaterDepth = heightMap.copy()
                 .subtract(map.getBiome().waterSettings().getElevation())
                 .multiply(-1f)
                 .divide(abyssDepth)
