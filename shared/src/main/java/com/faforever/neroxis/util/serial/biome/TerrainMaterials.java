@@ -11,18 +11,19 @@ import java.util.List;
 @CompiledJson
 public class TerrainMaterials {
     /* texture slots:
+    beach and seafloor
+    cliffAccent
+    cliff
     ground
     groundAccent
-    plateauAccent
     slopes
     slopesAccent
-    beach
-    underWater
-    rock
-    rockAccent
-    map-wide textures (generated)
+    plateauAccent
+    macroTexture
+    map-wide utility textures (generated)
     */
 
+    public static final int USED_LAYERS_COUNT = 8;
     // engine limitations - must stay 9 and 10 always
     public static final int TERRAIN_TEXTURE_COUNT = 10;
     public static final int TERRAIN_NORMAL_COUNT = 9;
@@ -32,16 +33,16 @@ public class TerrainMaterials {
     private float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
-    private String[] previewColors = new String[TERRAIN_NORMAL_COUNT];
+    private String[] previewColors = new String[USED_LAYERS_COUNT];
     private Integer[] terrainTypes = {
+            40,  // beach and seafloor
+            150,  // cliffAccent
+            150,  // cliff
             1,  // ground
             1,  // groundAccent
-            1,  // plateauAccent
             1,  // slopes
             1,  // slopesAccent
-            40,  // beach
-            150,  // rock
-            150,  // rockAccent
+            1,  // plateauAccent
             221,  // shallowWater
             223   // deepWater
     };

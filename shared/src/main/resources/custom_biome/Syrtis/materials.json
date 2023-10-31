@@ -11,72 +11,71 @@
     }
   ],
   "texturePaths": [
+    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+    "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
+    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
     "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
     "/env/Red Barrens/Layers/RB_Sandwet.dds",
-    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
     "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
     "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
-    "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
+    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
+    "/env/Red Barrens/Layers/macrotexture001_albedo.dds",
+    ""
   ],
   "textureScales": [
+    12.0,
+    8.0,
+    12.0,
     16.0,
-    0.0,
     0.0,
     32.0,
     0.0,
-    12.0,
-    12.0,
-    12.0,
-    8.0,
-    128.0
+    0.0,
+    128.0,
+    1.0
   ],
   "terrainTypes": [
-    5,
-    6,
-    5,
-    6,
-    6,
     6,
     154,
     154,
+    5,
+    6,
+    6,
+    6,
+    5,
     221,
     223
   ],
   "normalPaths": [
+    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+    "/env/Red Barrens/Layers/RB_Rock_normal.DDS",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
     "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
-    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
     "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
     "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
+    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
+    ""
   ],
   "normalScales": [
+    12.0,
+    16.0,
+    4.0,
     8.0,
     6.0,
-    8.0,
     16.0,
     8.0,
-    12.0,
-    12.0,
-    4.0,
-    16.0
+    8.0,
+    1.0
   ],
   "previewColors": [
+    "3d130b",
+    "6a3724",
+    "3a170d",
     "6f301c",
     "532016",
-    "66301d",
     "4d2115",
     "3a170d",
-    "66301d",
-    "3d130b",
-    "3a170d",
-    "6a3724"
+    "66301d"
   ]
 }

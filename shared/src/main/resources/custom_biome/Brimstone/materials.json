@@ -1,25 +1,24 @@
 {
   "previewColors": [
+    "3d130b",
+    "3b1910",
+    "381a11",
     "5b2c1c",
     "4b1a0b",
-    "421406",
     "4d2115",
     "532016",
-    "5b2c1c",
-    "3d130b",
-    "381a11",
-    "3b1910"
+    "421406"
   ],
   "normalScales": [
+    4.0,
+    6.0,
+    1.0,
     16.0,
     4.0,
+    13.75,
+    13.75,
     12.25,
-    13.75,
-    13.75,
-    4.0,
-    4.0,
-    1.0,
-    6.0
+    1.0
   ],
   "name": "Brimstone",
   "cubeMaps": [
@@ -33,49 +32,49 @@
     }
   ],
   "normalPaths": [
+    "/env/Desert/Layers/Des_sandLight_normal.dds",
+    "/env/red barrens/layers/rb_rock06_normal.dds",
+    "/env/red barrens/layers/rb_rock09_normal.dds",
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
     "/env/Evergreen/layers/grass000_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
     "/env/red barrens/layers/rb_cracked02_normal.dds",
     "/env/red barrens/layers/rb_sand_normal.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/red barrens/layers/rb_rock09_normal.dds",
-    "/env/red barrens/layers/rb_rock06_normal.dds"
+    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    ""
   ],
   "texturePaths": [
+    "/env/red barrens/layers/rb_sandwet_albedo.dds",
+    "/env/red barrens/layers/rb_rock07_albedo.dds",
+    "/env/red barrens/layers/rb_rock09_albedo.dds",
     "/env/red barrens/layers/rb_gravel01_albedo.dds",
     "/env/ancient-earth/layers/sandlight002_maroon_tint_albedo.dds",
-    "/env/ancient-earth/layers/sandlight002_maroon_tint_darker_albedo.dds",
     "/env/red barrens/layers/rb_cracked_albedo.dds",
     "/env/red barrens/layers/rb_sandwet01_albedo.dds",
-    "/env/red barrens/layers/rb_sandwet_albedo.dds",
-    "/env/red barrens/layers/rb_sandwet_albedo.dds",
-    "/env/red barrens/layers/rb_rock09_albedo.dds",
-    "/env/red barrens/layers/rb_rock07_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+    "/env/ancient-earth/layers/sandlight002_maroon_tint_darker_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
+    ""
   ],
   "textureScales": [
+    20.0,
+    12.0,
+    11.0,
     10.25,
     16.0,
-    12.25,
     7.25,
     14.0,
-    20.0,
-    20.0,
-    11.0,
-    12.0,
-    128.0
+    12.25,
+    128.0,
+    1.0
   ],
   "terrainTypes": [
-    5,
-    6,
-    6,
-    5,
-    5,
     6,
     154,
     154,
+    5,
+    6,
+    5,
+    5,
+    6,
     221,
     223
   ]

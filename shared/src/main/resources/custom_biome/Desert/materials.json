@@ -11,72 +11,71 @@
     }
   ],
   "texturePaths": [
+    "/env/Desert/Layers/Des_SandMed02_albedo.dds",
+    "/env/Desert/Layers/Des_Rock_albedo.dds",
+    "/env/Desert/Layers/Des_Rock06_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
     "/env/Desert/Layers/Des_SandMed02_albedo.dds",
-    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
     "/env/Desert/Layers/Des_SandMed_albedo.dds",
     "/env/Desert/Layers/Des_Gravel_albedo.dds",
-    "/env/Desert/Layers/Des_SandMed02_albedo.dds",
-    "/env/Paradise/Layers/Sand000_albedo.dds",
-    "/env/Desert/Layers/Des_Rock06_albedo.dds",
-    "/env/Desert/Layers/Des_Rock_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+    "/env/Desert/Layers/Des_SandMed01_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
+    ""
   ],
   "textureScales": [
-    4.0,
     0.0,
     16.0,
-    4.0,
-    0.0,
-    0.0,
-    4.0,
     8.0,
+    4.0,
+    0.0,
+    4.0,
+    0.0,
     16.0,
-    128.0
+    128.0,
+    1.0
   ],
   "terrainTypes": [
+    40,
+    150,
+    150,
     8,
     7,
     7,
     7,
     7,
-    40,
-    150,
-    150,
     221,
     223
   ],
   "normalPaths": [
+    "/env/Desert/Layers/Des_SandMed_normal.dds",
+    "/env/Desert/Layers/Des_Rock01_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Desert/Layers/Des_SandDark_normal.dds",
     "/env/Desert/Layers/Des_SandMed_normal.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
     "/env/Tundra/Layers/Tund_sandLight_normal.dds",
     "/env/Desert/Layers/Des_Gravel_normal.dds",
-    "/env/Desert/Layers/Des_SandMed_normal.dds",
-    "/env/Desert/Layers/Des_SandWet_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Desert/Layers/Des_Rock01_normal.dds"
+    "/env/Desert/Layers/Des_sandLight_normal.dds",
+    ""
   ],
   "normalScales": [
     4.0,
-    6.0,
     4.0,
+    4.0,
+    4.0,
+    6.0,
     8.0,
     4.0,
     4.0,
-    4.0,
-    4.0,
-    4.0
+    1.0
   ],
   "previewColors": [
+    "81725a",
+    "6e4b34",
+    "4b4130",
     "68503a",
     "81725a",
     "9c8865",
-    "9c8865",
     "665942",
-    "9c8865",
-    "81725a",
-    "4b4130",
-    "6e4b34"
+    "9c8865"
   ]
 }
