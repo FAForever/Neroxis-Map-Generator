@@ -28,11 +28,12 @@ public class BiomeExporter {
         filename = folderPath.resolve(biomeName).resolve("WaterSettings.scmwtr").toString();
         FileUtil.serialize(filename, biome.waterSettings());
 
-        Integer[] previewColors = biome.terrainMaterials().getPreviewColors();
+        String[] previewColors = biome.terrainMaterials().getPreviewColors();
         String[] texturePaths = biome.terrainMaterials().getTexturePaths();
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             if (previewColors[i] == null && !texturePaths[i].isEmpty()) {
-                previewColors[i] = getTexturePreviewColor(envDir, texturePaths[i]);
+                Color c = getTexturePreviewColor(envDir, texturePaths[i]);
+                previewColors[i] = String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
             }
         }
 
@@ -42,7 +43,7 @@ public class BiomeExporter {
         FileUtil.serialize(filename, biome.terrainMaterials());
     }
 
-    public static Integer getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
+    public static Color getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
         File file = Paths.get(envDir.toString(), texturePath).toFile();
         InputStream inputStream = new FileInputStream(file);
         byte[] buffer = new byte[inputStream.available()];
@@ -59,7 +60,7 @@ public class BiomeExporter {
                 avgG += pixColor.getGreen();
             }
             return new Color((int) avgR / pixels.length, (int) avgG / pixels.length,
-                             (int) avgB / pixels.length).getRGB();
+                             (int) avgB / pixels.length);
         }
         return null;
     }

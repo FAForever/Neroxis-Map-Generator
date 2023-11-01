@@ -59,7 +59,7 @@ public class PreviewGenerator {
             if (!materials.getTexturePaths()[i].isEmpty()) {
                 BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
-                layerGraphics.setColor(new Color(materials.getPreviewColors()[i]));
+                layerGraphics.setColor(new Color(Integer.parseInt(materials.getPreviewColors()[i], 16)));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
                 shadeLayer(layer, map, sunReflectance, scaledTextures.get(i));
                 TexturePaint layerPaint = new TexturePaint(layer,
