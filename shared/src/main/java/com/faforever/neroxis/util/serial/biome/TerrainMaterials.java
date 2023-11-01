@@ -32,7 +32,7 @@ public class TerrainMaterials {
     private float[] textureScales = new float[TERRAIN_TEXTURE_COUNT];
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
-    private Integer[] previewColors = new Integer[TERRAIN_NORMAL_COUNT];
+    private String[] previewColors = new String[TERRAIN_NORMAL_COUNT];
     private Integer[] terrainTypes = {
             1,  // ground
             1,  // groundAccent
