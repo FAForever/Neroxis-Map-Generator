@@ -68,19 +68,18 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .multiply(4f)
                 .clampMax(1f)
                 .subtract(waterBeach)
-                .subtract(cliffTexture.copy().subtract(0.2f).clampMin(0f))
-                .clampMin(0f);
+                .subtract(cliffTexture.copy().subtract(0.2f).clampMin(0f));
         debrisTexture.init(cliff.copy().inflate(8), 0f, 1f)
-                .addPerlinNoise(mapSize / 16, .5f)
+                .subtract(0.25f)
+                .addPerlinNoise(10, .2f)
                 .addGaussianNoise(.05f)
-                .clampMax(1f)
                 .setToValue(debris.copy().invert(), 0f)
                 .setToValue(realPlateaus, 0f)
                 .subtract(waterBeach)
-                .subtract(cliffTexture.copy().subtract(0.6f).clampMin(0f))
+                .subtract(cliffTexture.copy().subtract(0.7f).clampMin(0f))
+                .clampMin(0f)
                 .multiply(0.7f)
-                .blur(2)
-                .clampMin(0f);
+                .blur(1);
         plateauTexture.setSize(textureSize)
                 .setToValue(realPlateaus, 1.5f)
                 .multiply(slope.copy().multiply(-15f).add(1f).clampMin(0f))
