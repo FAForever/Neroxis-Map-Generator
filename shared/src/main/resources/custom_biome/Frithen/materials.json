@@ -12,15 +12,15 @@
   ],
   "texturePaths": [
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
-    "/env/Tundra/Layers/Tund_Rock_albedo.DDS",
     "/env/Tundra/Layers/Tund_melt001_albedo.dds",
+    "/env/Tundra/Layers/Tund_Rock_albedo.DDS",
     "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
     "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
     "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
     "/env/Tundra/Layers/Tund_melt001_albedo.dds",
     "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
-    ""
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     16.0,
@@ -31,8 +31,8 @@
     6.0,
     8.0,
     0.0,
-    128.0,
-    1.0
+    1.0,
+    128.0
   ],
   "terrainTypes": [
     200,
@@ -70,8 +70,8 @@
   ],
   "previewColors": [
     "666b71",
-    "242628",
     "4d545d",
+    "242628",
     "666b71",
     "8f9fa5",
     "93a0a5",

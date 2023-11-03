@@ -12,27 +12,27 @@
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
     "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
+    "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
     "/env/paradise/layers/grass001_albedo.dds",
     "/env/paradise/layers/Rock001_albedo.dds",
     "/env/Evergreen2/Layers/EvRock006_albedo.dds",
     "/env/paradise/layers/sand000_albedo.dds",
     "/env/paradise/layers/dirt000_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
-    ""
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     8.0,
-    8.0,
     32.0,
+    8.0,
     0.0,
     0.0,
     0.0,
     16.0,
     0.0,
-    128.0,
-    1.0
+    1.0,
+    128.0
   ],
   "terrainTypes": [
     8,
@@ -59,8 +59,8 @@
   ],
   "normalScales": [
     6.0,
-    4.0,
     12.0,
+    4.0,
     12.0,
     6.0,
     16.0,
@@ -70,8 +70,8 @@
   ],
   "previewColors": [
     "545141",
-    "1e211c",
     "2e323d",
+    "1e211c",
     "3d2d1a",
     "4b4134",
     "3e3e3c",

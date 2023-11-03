@@ -12,8 +12,8 @@ import java.util.List;
 public class TerrainMaterials {
     /* texture slots:
     beach and seafloor
-    cliffAccent
     cliff
+    cliffAccent
     ground
     groundAccent
     slopes
@@ -36,8 +36,8 @@ public class TerrainMaterials {
     private String[] previewColors = new String[USED_LAYERS_COUNT];
     private Integer[] terrainTypes = {
             40,  // beach and seafloor
-            150,  // cliffAccent
             150,  // cliff
+            150,  // cliffAccent
             1,  // ground
             1,  // groundAccent
             1,  // slopes

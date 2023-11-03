@@ -12,15 +12,15 @@
   ],
   "texturePaths": [
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock007_albedo.dds",
     "/env/Tropical/Layers/TrRock006_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock007_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Dirt002_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass009_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass010_albedo.dds",
     "/env/Evergreen2/Layers/EvRock002b_albedo.dds",
     "/env/Evergreen2/Layers/EvGrass005_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
-    ""
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     6.0,
@@ -31,13 +31,13 @@
     16.0,
     6.0,
     2.0,
-    128.0,
-    1.0
+    1.0,
+    128.0
   ],
   "terrainTypes": [
     3,
-    159,
     162,
+    159,
     81,
     83,
     83,
@@ -59,8 +59,8 @@
   ],
   "normalScales": [
     16.0,
-    8.0,
     20.0,
+    8.0,
     12.0,
     6.0,
     4.0,
@@ -70,8 +70,8 @@
   ],
   "previewColors": [
     "372f26",
-    "40403e",
     "453c34",
+    "40403e",
     "372f26",
     "242c11",
     "1e250a",

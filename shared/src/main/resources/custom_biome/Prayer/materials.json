@@ -12,32 +12,32 @@
   ],
   "texturePaths": [
     "/env/paradise/layers/sand000_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock005_albedo.dds",
     "/env/Evergreen2/Layers/EvRock004_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock005_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans03_albedo.dds",
     "/env/Evergreen2/Layers/Eg_Gravel004_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans01_albedo.dds",
     "/env/Evergreen2/Layers/EvTrans02_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
-    ""
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     7.0,
+    8.0,
     16.0,
-    8.0,
     0.0,
     4.0,
     8.0,
     0.0,
     4.0,
-    128.0,
-    1.0
+    1.0,
+    128.0
   ],
   "terrainTypes": [
     40,
-    159,
     162,
+    159,
     84,
     84,
     81,
@@ -48,8 +48,8 @@
   ],
   "normalPaths": [
     "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock003_normal.dds",
     "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock003_normal.dds",
     "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
     "/env/Evergreen2/Layers/EG_Gravel_normal.DDS",
     "/env/Evergreen2/Layers/Eg_Gravel2_normal.dds",
@@ -59,8 +59,8 @@
   ],
   "normalScales": [
     6.0,
-    8.0,
     16.0,
+    8.0,
     16.0,
     16.0,
     8.0,
@@ -70,8 +70,8 @@
   ],
   "previewColors": [
     "7a6549",
-    "403f48",
     "3d3b47",
+    "403f48",
     "3c4a19",
     "3c4a19",
     "726f5a",

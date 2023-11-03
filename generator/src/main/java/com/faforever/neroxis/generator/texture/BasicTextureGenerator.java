@@ -44,13 +44,13 @@ public class BasicTextureGenerator extends TextureGenerator {
         
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
+        cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
         cliffAccentTexture.setSize(textureSize)
                 .addPerlinNoise(mapSize / 16, 1f)
                 .addGaussianNoise(.05f)
                 .clampMax(1f)
                 .setToValue(extendedCliff.copy().invert(), 0f)
                 .blur(2);
-        cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
         groundTexture.setSize(textureSize)
                 .add(1f)
                 .subtract(waterBeach)
@@ -104,7 +104,7 @@ public class BasicTextureGenerator extends TextureGenerator {
 //            debrisTexture.multiply(0.5f).add(0.5f);
 //            plateauTexture.multiply(0.5f).add(0.5f);
         }
-        texturesLowMask.setComponents(cliffAccentTexture, cliffTexture, groundTexture, groundAccentTexture);
+        texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);
 
         setupTerrainType(mapSize);

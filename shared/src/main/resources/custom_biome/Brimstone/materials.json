@@ -1,8 +1,8 @@
 {
   "previewColors": [
     "3d130b",
-    "3b1910",
     "381a11",
+    "3b1910",
     "5b2c1c",
     "4b1a0b",
     "4d2115",
@@ -11,8 +11,8 @@
   ],
   "normalScales": [
     4.0,
-    6.0,
     1.0,
+    6.0,
     16.0,
     4.0,
     13.75,
@@ -33,8 +33,8 @@
   ],
   "normalPaths": [
     "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/red barrens/layers/rb_rock06_normal.dds",
     "/env/red barrens/layers/rb_rock09_normal.dds",
+    "/env/red barrens/layers/rb_rock06_normal.dds",
     "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
     "/env/Evergreen/layers/grass000_normals.dds",
     "/env/red barrens/layers/rb_cracked02_normal.dds",
@@ -44,27 +44,27 @@
   ],
   "texturePaths": [
     "/env/red barrens/layers/rb_sandwet_albedo.dds",
-    "/env/red barrens/layers/rb_rock07_albedo.dds",
     "/env/red barrens/layers/rb_rock09_albedo.dds",
+    "/env/red barrens/layers/rb_rock07_albedo.dds",
     "/env/red barrens/layers/rb_gravel01_albedo.dds",
     "/env/ancient-earth/layers/sandlight002_maroon_tint_albedo.dds",
     "/env/red barrens/layers/rb_cracked_albedo.dds",
     "/env/red barrens/layers/rb_sandwet01_albedo.dds",
     "/env/ancient-earth/layers/sandlight002_maroon_tint_darker_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds",
-    ""
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
   ],
   "textureScales": [
     20.0,
-    12.0,
     11.0,
+    12.0,
     10.25,
     16.0,
     7.25,
     14.0,
     12.25,
-    128.0,
-    1.0
+    1.0,
+    128.0
   ],
   "terrainTypes": [
     6,
