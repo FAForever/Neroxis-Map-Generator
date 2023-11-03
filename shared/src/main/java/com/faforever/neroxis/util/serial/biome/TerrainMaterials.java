@@ -17,8 +17,8 @@ public class TerrainMaterials {
     ground
     groundAccent
     slopes
-    slopesAccent
-    plateauAccent
+    debris
+    plateau
     macroTexture
     map-wide utility textures (generated)
     */
@@ -41,8 +41,8 @@ public class TerrainMaterials {
             1,  // ground
             1,  // groundAccent
             1,  // slopes
-            1,  // slopesAccent
-            1,  // plateauAccent
+            1,  // debris
+            1,  // plateau
             221,  // shallowWater
             223   // deepWater
     };
