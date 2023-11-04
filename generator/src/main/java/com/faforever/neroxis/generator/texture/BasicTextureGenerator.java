@@ -99,15 +99,9 @@ public class BasicTextureGenerator extends TextureGenerator {
                          .blur(1);
         roughnessModifierTexture.setSize(textureSize);
         if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-            roughnessModifierTexture.add(0.5f);
-//        } else if (map.getTerrainShaderPath().equals(LEGACY_SHADER_NAME)) {
-//            cliffAccentTexture.multiply(0.5f).add(0.5f);
-//            cliffTexture.multiply(0.5f).add(0.5f);
-//            groundTexture.multiply(0.5f).add(0.5f);
-//            groundAccentTexture.multiply(0.5f).add(0.5f);
-//            slopesTexture.multiply(0.5f).add(0.5f);
-//            debrisTexture.multiply(0.5f).add(0.5f);
-//            plateauTexture.multiply(0.5f).add(0.5f);
+            // The masks get scaled to the upper half later where they are > 0,
+            // so if we want to have an end value of about 0.5 we need 0.01
+            roughnessModifierTexture.add(0.01f);
         }
         texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);

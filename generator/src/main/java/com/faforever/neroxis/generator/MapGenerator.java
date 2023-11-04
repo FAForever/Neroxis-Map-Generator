@@ -528,16 +528,16 @@ public class MapGenerator implements Callable<Integer> {
         map.setFilePrefix(mapName);
 
         if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-            map.getBiome().terrainMaterials().getTexturePaths()[8] =
-                    Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
+            map.getBiome().terrainMaterials().getNormalPaths()[8] =
+                    Path.of("/maps", map.getFolderName(), "env", "layers", "heightRoughness.dds")
                             .toString()
                             .replace("\\", "/");
-            map.getBiome().terrainMaterials().getNormalPaths()[8] =
-                    map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
+            map.getBiome().terrainMaterials().getTexturePaths()[8] =
+                    map.getBiome().terrainMaterials().getTexturePaths()[9];
         }
         if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME) || map.getTerrainShaderPath().equals(MAP_WIDE_ASSETS_SHADER_NAME)) {
             map.getBiome().terrainMaterials().getTexturePaths()[9] =
-                    Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
+                    Path.of("/maps", map.getFolderName(), "env", "layers", "mapwide.dds")
                             .toString()
                             .replace("\\", "/");
             // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain shader.

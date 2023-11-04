@@ -32,7 +32,7 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 @Data
 public class SCMap {
     public static final String MAP_WIDE_ASSETS_SHADER_NAME = "Terrain002";
-    public static final String PBR_SHADER_NAME = "TerrainPBR";
+    public static final String PBR_SHADER_NAME = "Terrain301";
     public static final String LEGACY_SHADER_NAME = "TTerrainXP";
     public static final int SIGNATURE = 443572557;
     public static final int VERSION_MAJOR = 2;

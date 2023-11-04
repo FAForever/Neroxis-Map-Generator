@@ -229,7 +229,7 @@ public class SCMapExporter {
 
     public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
         byte[] rawTexture = map.getRawMapTexture();
-        Path textureDirectory = Paths.get("env", "texture");
+        Path textureDirectory = Paths.get("env", "layers");
         Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
         Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
@@ -244,7 +244,7 @@ public class SCMapExporter {
         URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.png");
         if (sourceURL != null) {
             BufferedImage image = ImageIO.read(sourceURL);
-            Path textureDirectory = Paths.get("env", "texture");
+            Path textureDirectory = Paths.get("env", "layers");
             Path filePath = textureDirectory.resolve(PBR_DDS);
             Path writingPath = folderPath.resolve(filePath);
             Files.createDirectories(writingPath.getParent());
