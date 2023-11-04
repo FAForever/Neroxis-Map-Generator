@@ -31,13 +31,6 @@ public class BasicTextureGenerator extends TextureGenerator {
         BooleanMask accentSlopes = slope.copyAsBooleanMask(.75f).invert().subtract(flat);
         BooleanMask rock = slope.copyAsBooleanMask(.75f);
         BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
-        float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
-                           generatorParameters.biome().waterSettings().getElevationAbyss();
-        FloatMask scaledWaterDepth = heightmap.copy()
-                                              .subtract(generatorParameters.biome().waterSettings().getElevation())
-                                              .multiply(-1f)
-                                              .divide(abyssDepth)
-                                              .clampMin(0f);
         BooleanMask realWater = realLand.copy().invert();
         
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
@@ -69,7 +62,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                            .setToValue(accentSlopes.copy().invert(), 0f)
                            .blur(16);
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
-                         .add(scaledWaterDepth.multiply(.3f))
+                         .add(scaledWaterDepth.copy().multiply(.3f))
                          .clampMax(1f)
                          .blur(1);
         waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
@@ -123,12 +116,12 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, shadows);
+        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, scaledWaterDepth, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), shadows.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

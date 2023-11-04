@@ -23,6 +23,7 @@ public abstract class TextureGenerator extends ElementGenerator {
     protected FloatMask slope;
     protected NormalMask normals;
     protected FloatMask shadows;
+    protected FloatMask scaledWaterDepth;
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
@@ -49,6 +50,14 @@ public abstract class TextureGenerator extends ElementGenerator {
                 .copyAsShadowMask(
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
+        float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
+                generatorParameters.biome().waterSettings().getElevationAbyss();
+        scaledWaterDepth = heightmap.copy()
+                .subtract(generatorParameters.biome().waterSettings().getElevation())
+                .multiply(-1f)
+                .divide(abyssDepth)
+                .clampMin(0f)
+                .clampMax(1f);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
@@ -56,11 +65,11 @@ public abstract class TextureGenerator extends ElementGenerator {
     }
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, shadows);
+        Pipeline.await(texturesLowMask, texturesHighMask, normals, scaledWaterDepth, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), shadows.getFinalMask()));
+            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
         });
     }
 

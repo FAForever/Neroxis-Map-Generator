@@ -116,7 +116,7 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static void writeNormalDDS(BufferedImage image, Path path) throws IOException {
+    public static void writeCompressedDDS(BufferedImage image, Path path) throws IOException {
         int size = image.getHeight();
         int length = size * size * 4;
         Raster imageRaster = image.getData();
@@ -135,14 +135,18 @@ public class ImageUtil {
         ddsHeader.setFourCC("DXT5");
         byte[] compressedData = compressImage(imageBytes.array(), ddsHeader.getWidth(), ddsHeader.getHeight(), null,
                                               Squish.CompressionType.DXT5);
+        // If we don't do this we get weird results when the file already exists
+        Files.deleteIfExists(path);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask shadowMask) {
+    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
         if (shadowMask.getSize() != normalMask.getSize()) {
-            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d".formatted(shadowMask.getSize(), normalMask.getSize()));
+            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"
+                    .formatted(shadowMask.getSize(), normalMask.getSize()));
         }
+        waterDepth.resample(shadowMask.getSize());
         int size = shadowMask.getSize();
         int length = size * size * 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
@@ -151,10 +155,11 @@ public class ImageUtil {
                 Vector3 normalValue = normalMask.get(x, y);
                 int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
                 int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
                 int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageByteBuffer.put((byte) xV);
                 imageByteBuffer.put((byte) yV);
-                imageByteBuffer.put((byte) 0);
+                imageByteBuffer.put((byte) zV);
                 imageByteBuffer.put((byte) wV);
             }
         }
