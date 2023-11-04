@@ -33,7 +33,12 @@ public class BasicTextureGenerator extends TextureGenerator {
         BooleanMask cliff = slope.copyAsBooleanMask(.75f);
         BooleanMask extendedCliff = slope.copyAsBooleanMask(.75f).inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
-        FloatMask waterBeach = realWater.copy().inflate(11).subtract(realPlateaus).copyAsFloatMask(0, 1).blur(12);
+        FloatMask waterBeach = realWater.copy().inflate(10)
+                .subtract(realPlateaus)
+                .subtract(slope.copyAsBooleanMask(.05f).invert())
+                .add(realWater)
+                .copyAsFloatMask(0, 1)
+                .blur(4);
         
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
@@ -46,7 +51,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         int mapSize = generatorParameters.mapSize();
         cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
         cliffAccentTexture.setSize(textureSize)
-                .addPerlinNoise(mapSize / 16, 1f)
+                .addPerlinNoise(32, 1f)
                 .addGaussianNoise(.05f)
                 .clampMax(1f)
                 .setToValue(extendedCliff.copy().invert(), 0f)
@@ -57,7 +62,7 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .subtract(cliffTexture)
                 .clampMin(0f);
         groundAccentTexture.setSize(textureSize)
-                           .addPerlinNoise(mapSize / 8, 1f)
+                           .addPerlinNoise(64, 1f)
                            .addGaussianNoise(.05f)
                            .clampMax(1f)
                            .multiply(groundTexture)
@@ -75,13 +80,14 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .addGaussianNoise(.05f)
                 .setToValue(debris.copy().invert(), 0f)
                 .setToValue(realPlateaus, 0f)
-                .subtract(waterBeach)
+                .subtract(realWater.copyAsFloatMask(0, 1).blur(4))
                 .subtract(cliffTexture.copy().subtract(0.7f).clampMin(0f))
                 .clampMin(0f)
                 .multiply(0.7f)
                 .blur(1);
         plateauTexture.setSize(textureSize)
-                .setToValue(realPlateaus, 1.5f)
+                .setToValue(realPlateaus, 0.5f)
+                .addPerlinNoise(40, .4f)
                 .multiply(slope.copy().multiply(-15f).add(1f).clampMin(0f))
                 .clampMin(0f)
                 .blur(2)
