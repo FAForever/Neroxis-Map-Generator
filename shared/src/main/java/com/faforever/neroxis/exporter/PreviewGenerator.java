@@ -61,7 +61,9 @@ public class PreviewGenerator {
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(new Color(Integer.parseInt(materials.getPreviewColors()[i], 16)));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
-                shadeLayer(layer, map, sunReflectance, scaledTextures.get(i));
+                FloatMask textureLayer = scaledTextures.get(i);
+                textureLayer.startVisualDebugger();
+                shadeLayer(layer, map, sunReflectance, textureLayer);
                 TexturePaint layerPaint = new TexturePaint(layer,
                                                            new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
                 graphics.setPaint(layerPaint);
