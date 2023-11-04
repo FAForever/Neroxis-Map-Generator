@@ -681,39 +681,39 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public U setComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatIntConsumer) this::setComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::setComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
     public U addComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatIntConsumer) this::addComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::addComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
     public U subtractComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatIntConsumer) this::subtractComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::subtractComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
     public U multiplyComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatIntConsumer) this::multiplyComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::multiplyComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
     public U divideComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyWithOffset(source, (BiIntFloatIntConsumer) this::divideComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::divideComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    private U applyWithOffset(FloatMask other, BiIntFloatIntConsumer action, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    private U applyComponentWithOffset(FloatMask other, BiIntFloatIntConsumer action, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();
