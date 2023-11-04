@@ -6,7 +6,7 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     public Vector4(Vector4 other) {
-        this(other.getX(), other.getY(), other.getW(), other.getZ());
+        this(other.getX(), other.getY(), other.getZ(), other.getW());
     }
 
     public Vector4(float x, float y, float z, float w) {
