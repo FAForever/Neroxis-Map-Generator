@@ -33,7 +33,7 @@ public class BasicTextureGenerator extends TextureGenerator {
         BooleanMask cliff = slope.copyAsBooleanMask(.75f);
         BooleanMask extendedCliff = slope.copyAsBooleanMask(.75f).inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
-        FloatMask waterBeach = realWater.copy().inflate(10)
+        FloatMask waterBeach = realWater.copy().inflate(11)
                 .subtract(realPlateaus)
                 .subtract(slope.copyAsBooleanMask(.05f).invert())
                 .add(realWater)
@@ -62,11 +62,11 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .subtract(cliffTexture)
                 .clampMin(0f);
         groundAccentTexture.setSize(textureSize)
-                           .addPerlinNoise(64, 1f)
-                           .addGaussianNoise(.05f)
-                           .clampMax(1f)
-                           .multiply(groundTexture)
-                           .blur(2)
+                .addPerlinNoise(64, 1f)
+                .addGaussianNoise(.05f)
+                .clampMax(1f)
+                .multiply(groundTexture)
+                .blur(2)
                 .clampMin(0f);
         slopesTexture.init(slope)
                 .subtract(0.05f)
@@ -81,18 +81,19 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .setToValue(debris.copy().invert(), 0f)
                 .setToValue(realPlateaus, 0f)
                 .subtract(realWater.copyAsFloatMask(0, 1).blur(4))
-                .subtract(cliffTexture.copy().subtract(0.7f).clampMin(0f))
+                .subtract(cliff, 0.9f)
                 .clampMin(0f)
                 .multiply(0.7f)
                 .blur(1);
         plateauTexture.setSize(textureSize)
-                .setToValue(realPlateaus, 0.5f)
-                .addPerlinNoise(40, .4f)
-                .multiply(slope.copy().multiply(-15f).add(1f).clampMin(0f))
+                .add(0.5f)
+                .addPerlinNoise(30, .4f)
+                .setToValue(realPlateaus.copy().invert(), 0f)
+                .multiply(slope.copyAsBooleanMask(0.01f).deflate(4), slope.copy().multiply(-10f).add(1f).clampMin(0f))
                 .clampMin(0f)
-                .blur(2)
+                .blur(4)
                 .clampMax(1f)
-                .subtract(cliffTexture.copy().subtract(0.2f).clampMin(0f));
+                .subtract(cliffTexture.copy().subtract(0.4f).clampMin(0f));
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
                          .add(scaledWaterDepth.copy().multiply(.3f))
                          .clampMax(1f)
