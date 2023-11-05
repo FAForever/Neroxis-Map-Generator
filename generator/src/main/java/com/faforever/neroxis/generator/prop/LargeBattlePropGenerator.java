@@ -19,10 +19,6 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
 
-    public LargeBattlePropGenerator() {
-        weight = 2;
-    }
-
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder().landDensity(.5f, 1f).reclaimDensity(.75f, 1f).build();

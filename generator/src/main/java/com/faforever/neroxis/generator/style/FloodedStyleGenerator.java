@@ -1,7 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.GeneratorOptions;
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.generator.WeightedConstrainedOptions;
+import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
@@ -10,12 +11,7 @@ import com.faforever.neroxis.generator.resource.WaterMexResourceGenerator;
 import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
-import java.util.List;
-
 public class FloodedStyleGenerator extends StyleGenerator {
-    public FloodedStyleGenerator() {
-        weight = 0f;
-    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -27,19 +23,20 @@ public class FloodedStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected GeneratorOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return new GeneratorOptions<>(new FloodedTerrainGenerator());
+    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new FloodedTerrainGenerator());
     }
 
     @Override
-    protected GeneratorOptions<ResourceGenerator> getResourceGeneratorOptions() {
-        return new GeneratorOptions<>(new WaterMexResourceGenerator());
+    protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new WaterMexResourceGenerator());
     }
 
     @Override
-    protected GeneratorOptions<PropGenerator> getPropGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicPropGenerator(),
-                                      List.of(new BasicPropGenerator(), new NavyWrecksPropGenerator()));
+    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
+        return new WeightedConstrainedOptions<>(new BasicPropGenerator(),
+                                                new WeightedOption<>(new BasicPropGenerator(), 1f),
+                                                new WeightedOption<>(new NavyWrecksPropGenerator(), 2f));
     }
 }
 

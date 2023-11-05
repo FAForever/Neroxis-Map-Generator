@@ -101,7 +101,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     @Override
-    protected void terrainSetup() {
+    protected void setupTerrainPipeline() {
         spawnMaskSetup();
         teamConnectionsSetup();
         landSetup();

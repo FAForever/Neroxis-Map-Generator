@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -10,8 +10,15 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
+import java.util.Random;
+
 @Getter
-public abstract class TerrainGenerator extends ElementGenerator {
+public abstract class TerrainGenerator implements HasParameterConstraints {
+    protected SCMap map;
+    protected Random random;
+    protected GeneratorParameters generatorParameters;
+    protected SymmetrySettings symmetrySettings;
+
     protected FloatMask heightmap;
     protected BooleanMask impassable;
     protected BooleanMask unbuildable;
@@ -30,18 +37,19 @@ public abstract class TerrainGenerator extends ElementGenerator {
                                                                                                          map.getHeightMapScale()));
     }
 
-    @Override
-    public void setupPipeline() {
-        terrainSetup();
+    public final void setupPipeline() {
+        setupTerrainPipeline();
         //ensure heightmap is symmetric
         heightmap.forceSymmetry();
-        passableSetup();
+        setupPassablePipeline();
     }
 
-    @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        this.map = map;
+        this.random = new Random(seed);
+        this.generatorParameters = generatorParameters;
+        this.symmetrySettings = symmetrySettings;
         heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
         slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
         impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
@@ -51,9 +59,9 @@ public abstract class TerrainGenerator extends ElementGenerator {
         passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
     }
 
-    protected abstract void terrainSetup();
+    protected abstract void setupTerrainPipeline();
 
-    protected void passableSetup() {
+    private void setupPassablePipeline() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
                 generatorParameters.biome().waterSettings().getElevation());
 

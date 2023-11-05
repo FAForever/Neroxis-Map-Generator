@@ -5,9 +5,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
-    public BigIslandsTerrainGenerator() {
-        weight = 2;
-    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {

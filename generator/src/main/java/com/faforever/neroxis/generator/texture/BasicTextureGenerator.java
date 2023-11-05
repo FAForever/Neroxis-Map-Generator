@@ -32,14 +32,14 @@ public class BasicTextureGenerator extends TextureGenerator {
         BooleanMask rock = slope.copyAsBooleanMask(.75f);
         BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
-        
+
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
         shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
         shadows.subtract(realWater.copy().setSize(map.getSize()),
                          shadowsInWater.copyAsFloatMask(0, 1).blur(6))
                .blur(1);
-        
+
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
         accentGroundTexture.setSize(textureSize)
@@ -121,13 +121,9 @@ public class BasicTextureGenerator extends TextureGenerator {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
+            map.setRawMapTexture(
+                    ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
+                                                     shadows.getFinalMask()));
         });
-    }
-
-    @Override
-    public void setupPipeline() {
-        setupTexturePipeline();
-        setupPreviewPipeline();
     }
 }

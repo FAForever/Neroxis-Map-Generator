@@ -1,7 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.GeneratorOptions;
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.generator.WeightedConstrainedOptions;
+import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
@@ -19,12 +20,7 @@ import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 
-import java.util.List;
-
 public class LowMexStyleGenerator extends StyleGenerator {
-    public LowMexStyleGenerator() {
-        weight = .5f;
-    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -37,25 +33,30 @@ public class LowMexStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected GeneratorOptions<ResourceGenerator> getResourceGeneratorOptions() {
-        return new GeneratorOptions<>(new LowMexResourceGenerator());
+    protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new LowMexResourceGenerator());
     }
 
     @Override
-    protected GeneratorOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicTerrainGenerator(),
-                                      List.of(new BasicTerrainGenerator(), new OneIslandTerrainGenerator(),
-                                              new LittleMountainTerrainGenerator(), new ValleyTerrainGenerator()));
+    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
+        return new WeightedConstrainedOptions<>(new BasicTerrainGenerator(),
+                                                new WeightedOption<>(new BasicTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new OneIslandTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new LittleMountainTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new ValleyTerrainGenerator(), 1f));
     }
 
     @Override
-    protected GeneratorOptions<PropGenerator> getPropGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicPropGenerator(),
-                                      List.of(new BasicPropGenerator(), new EnemyCivPropGenerator(),
-                                              new LargeBattlePropGenerator(),
-                                              new NavyWrecksPropGenerator(), new NeutralCivPropGenerator(),
-                                              new RockFieldPropGenerator(), new SmallBattlePropGenerator(),
-                                              new HighReclaimPropGenerator()));
+    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
+        return new WeightedConstrainedOptions<>(new BasicPropGenerator(),
+                                                new WeightedOption<>(new BasicPropGenerator(), 1f),
+                                                new WeightedOption<>(new NavyWrecksPropGenerator(), 2f),
+                                                new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
+                                                new WeightedOption<>(new LargeBattlePropGenerator(), 2f),
+                                                new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
+                                                new WeightedOption<>(new RockFieldPropGenerator(), 1f),
+                                                new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
+                                                new WeightedOption<>(new HighReclaimPropGenerator(), .5f));
     }
 }
 

@@ -1,9 +1,9 @@
 package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
-import com.faforever.neroxis.generator.ElementGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -16,9 +16,15 @@ import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.Random;
 
 @Getter
-public abstract class TextureGenerator extends ElementGenerator {
+public abstract class TextureGenerator implements HasParameterConstraints {
+    protected SCMap map;
+    protected Random random;
+    protected GeneratorParameters generatorParameters;
+    protected SymmetrySettings symmetrySettings;
+
     protected FloatMask heightmap;
     protected FloatMask slope;
     protected NormalMask normals;
@@ -36,7 +42,10 @@ public abstract class TextureGenerator extends ElementGenerator {
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        this.map = map;
+        this.random = new Random(seed);
+        this.generatorParameters = generatorParameters;
+        this.symmetrySettings = symmetrySettings;
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
 
@@ -51,13 +60,13 @@ public abstract class TextureGenerator extends ElementGenerator {
                         generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
         float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
-                generatorParameters.biome().waterSettings().getElevationAbyss();
+                           generatorParameters.biome().waterSettings().getElevationAbyss();
         scaledWaterDepth = heightmap.copy()
-                .subtract(generatorParameters.biome().waterSettings().getElevation())
-                .multiply(-1f)
-                .divide(abyssDepth)
-                .clampMin(0f)
-                .clampMax(1f);
+                                    .subtract(generatorParameters.biome().waterSettings().getElevation())
+                                    .multiply(-1f)
+                                    .divide(abyssDepth)
+                                    .clampMin(0f)
+                                    .clampMax(1f);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
@@ -69,7 +78,9 @@ public abstract class TextureGenerator extends ElementGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
+            map.setRawMapTexture(
+                    ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
+                                                     shadows.getFinalMask()));
         });
     }
 
@@ -78,14 +89,15 @@ public abstract class TextureGenerator extends ElementGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), reflectance.getFinalMask(), map,
-                                                 texturesLowPreviewMask.getFinalMask(), texturesHighPreviewMask.getFinalMask());
+                                                 texturesLowPreviewMask.getFinalMask(),
+                                                 texturesHighPreviewMask.getFinalMask());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
     }
 
-    protected void setupPreviewPipeline() {
+    private void setupPreviewPipeline() {
         texturesLowPreviewMask = texturesLowMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
@@ -97,8 +109,7 @@ public abstract class TextureGenerator extends ElementGenerator {
                                .divide(2f);
     }
 
-    @Override
-    public void setupPipeline() {
+    public final void setupPipeline() {
         setupTexturePipeline();
         setupPreviewPipeline();
     }

@@ -20,10 +20,6 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask baseMask;
     protected BooleanMask noBases;
 
-    public EnemyCivPropGenerator() {
-        weight = .5f;
-    }
-
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()

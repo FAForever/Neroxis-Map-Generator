@@ -1,7 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.GeneratorOptions;
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.generator.WeightedConstrainedOptions;
+import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
@@ -11,12 +12,7 @@ import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 
-import java.util.List;
-
 public class HighReclaimStyleGenerator extends StyleGenerator {
-    public HighReclaimStyleGenerator() {
-        weight = .25f;
-    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -30,15 +26,17 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected GeneratorOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicTerrainGenerator(),
-                                      List.of(new DropPlateauTerrainGenerator(), new MountainRangeTerrainGenerator(),
-                                              new LittleMountainTerrainGenerator(), new ValleyTerrainGenerator()));
+    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
+        return new WeightedConstrainedOptions<>(new BasicTerrainGenerator(),
+                                                new WeightedOption<>(new DropPlateauTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new MountainRangeTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new LittleMountainTerrainGenerator(), 1f),
+                                                new WeightedOption<>(new ValleyTerrainGenerator(), 1f));
     }
 
     @Override
-    protected GeneratorOptions<PropGenerator> getPropGeneratorOptions() {
-        return new GeneratorOptions<>(new HighReclaimPropGenerator());
+    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new HighReclaimPropGenerator());
     }
 }
 

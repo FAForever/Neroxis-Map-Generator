@@ -1,9 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.ElementGenerator;
-import com.faforever.neroxis.generator.GeneratorOptions;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.Visibility;
+import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
 import com.faforever.neroxis.generator.decal.DecalGenerator;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
@@ -14,7 +13,8 @@ import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
-import com.faforever.neroxis.generator.util.GeneratorSelector;
+import com.faforever.neroxis.generator.util.ConstrainedSelector;
+import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -22,36 +22,44 @@ import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
+import lombok.Getter;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class StyleGenerator extends ElementGenerator {
+public abstract class StyleGenerator implements HasParameterConstraints {
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
     private ResourceGenerator resourceGenerator;
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
     private SpawnPlacer spawnPlacer;
+    private SCMap map;
+    private Random random;
 
-    protected GeneratorOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicTerrainGenerator());
+    @Getter
+    private GeneratorParameters generatorParameters;
+    @Getter
+    private SymmetrySettings symmetrySettings;
+
+    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new BasicTerrainGenerator());
     }
 
-    protected GeneratorOptions<TextureGenerator> getTextureGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicTextureGenerator());
+    protected WeightedConstrainedOptions<TextureGenerator> getTextureGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new BasicTextureGenerator());
     }
 
-    protected GeneratorOptions<ResourceGenerator> getResourceGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicResourceGenerator());
+    protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new BasicResourceGenerator());
     }
 
-    protected GeneratorOptions<PropGenerator> getPropGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicPropGenerator());
+    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new BasicPropGenerator());
     }
 
-    protected GeneratorOptions<DecalGenerator> getDecalGeneratorOptions() {
-        return new GeneratorOptions<>(new BasicDecalGenerator());
+    protected WeightedConstrainedOptions<DecalGenerator> getDecalGeneratorOptions() {
+        return WeightedConstrainedOptions.single(new BasicDecalGenerator());
     }
 
     protected float getSpawnSeparation() {
@@ -122,23 +130,22 @@ public abstract class StyleGenerator extends ElementGenerator {
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
-    @Override
-    public void setupPipeline() {
+    private void setupPipeline() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
                            () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                          getTeamSeparation(), symmetrySettings));
 
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
-            terrainGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getTerrainGeneratorOptions(),
+            terrainGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getTerrainGeneratorOptions(),
+                                                                              generatorParameters);
+            textureGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getTextureGeneratorOptions(),
+                                                                              generatorParameters);
+            resourceGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getResourceGeneratorOptions(),
                                                                                generatorParameters);
-            textureGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getTextureGeneratorOptions(),
-                                                                               generatorParameters);
-            resourceGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getResourceGeneratorOptions(),
-                                                                                generatorParameters);
-            propGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getPropGeneratorOptions(),
+            propGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getPropGeneratorOptions(),
+                                                                           generatorParameters);
+            decalGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getDecalGeneratorOptions(),
                                                                             generatorParameters);
-            decalGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getDecalGeneratorOptions(),
-                                                                             generatorParameters);
         });
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);

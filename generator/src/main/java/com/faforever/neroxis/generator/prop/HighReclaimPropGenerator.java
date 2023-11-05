@@ -6,9 +6,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public class HighReclaimPropGenerator extends BasicPropGenerator {
-    public HighReclaimPropGenerator() {
-        weight = .5f;
-    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -19,10 +16,6 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
                                    .reclaimDensity(.8f, 1f)
                                    .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
                                    .build();
-    }
-
-    @Override
-    public void placeUnits() {
     }
 
     @Override
