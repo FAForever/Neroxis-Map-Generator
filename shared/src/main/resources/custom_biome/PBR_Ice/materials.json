@@ -1,0 +1,81 @@
+{
+  "name": "PBR_Ice",
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Tundra04a.dds"
+    }
+  ],
+  "texturePaths": [
+    "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
+    "/env/Tundra/Layers/Tund_melt001_albedo.dds",
+    "/env/Tundra/Layers/Tund_Rock_albedo.DDS",
+    "/env/Tundra/Layers/Tund_Rock03_albedo.DDS",
+    "/env/Tundra/Layers/Tund_Ice001_albedo.DDS",
+    "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
+    "/env/Tundra/Layers/Tund_melt001_albedo.dds",
+    "/env/Tundra/Layers/Tund_iceRock_albedo.dds",
+    "",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  ],
+  "textureScales": [
+    16.0,
+    16.0,
+    16.0,
+    2.0,
+    16.0,
+    6.0,
+    8.0,
+    0.0,
+    1.0,
+    128.0
+  ],
+  "terrainTypes": [
+    200,
+    153,
+    153,
+    200,
+    201,
+    201,
+    200,
+    201,
+    221,
+    223
+  ],
+  "normalPaths": [
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Tundra/Layers/Tund_Ice003_normal.dds",
+    "/env/Crystalline/layers/Cr_Rock002b_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
+    "/env/Crystalline/layers/Cr_02_01_normal.dds",
+    ""
+  ],
+  "normalScales": [
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    2.0,
+    4.0,
+    4.0,
+    4.0,
+    1.0
+  ],
+  "previewColors": [
+    "666b71",
+    "4d545d",
+    "242628",
+    "666b71",
+    "8f9fa5",
+    "93a0a5",
+    "4d545d",
+    "93a0a5"
+  ]
+}

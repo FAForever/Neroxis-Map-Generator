@@ -1,0 +1,70 @@
+{
+  "elevation": 25.0,
+  "elevationAbyss": 3.0,
+  "unitReflection": 0.5,
+  "sunShininess": 400.0,
+  "waterPresent": true,
+  "elevationDeep": 20.0,
+  "sunStrength": 10.0,
+  "sunReflection": 3.7,
+  "fresnelBias": 0.15,
+  "colorLerp": {
+    "x": 0.137,
+    "y": 0.137
+  },
+  "texPathCubemap": "/textures/environment/SkyCube_Desert03a.dds",
+  "surfaceColor": {
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
+  },
+  "fresnelPower": 1.5,
+  "sunGlow": 0.1,
+  "skyReflection": 1.0,
+  "refractionScale": 0.375,
+  "texPathWaterRamp": "/textures/engine/waterramp_desert.dds",
+  "sunColor": {
+    "x": 5.25,
+    "y": 4.49,
+    "z": 1.66
+  },
+  "sunDirection": {
+    "x": -0.7783785,
+    "y": -0.5,
+    "z": -0.37964055
+  },
+  "waveTextures": [
+    {
+      "normalRepeat": 0.05,
+      "normalMovement": {
+        "x": 0.0,
+        "y": -0.012
+      },
+      "texPath": "/textures/engine/waves1_400m.dds"
+    },
+    {
+      "normalRepeat": 0.167,
+      "normalMovement": {
+        "x": -0.00130236,
+        "y": 0.00738606
+      },
+      "texPath": "/textures/engine/waves1_120m.dds"
+    },
+    {
+      "normalRepeat": 0.5,
+      "normalMovement": {
+        "x": -0.003,
+        "y": 0.00519615
+      },
+      "texPath": "/textures/engine/waves1_40m.dds"
+    },
+    {
+      "normalRepeat": 0.8,
+      "normalMovement": {
+        "x": -0.00105,
+        "y": -0.006
+      },
+      "texPath": "/textures/engine/waves1_120m.dds"
+    }
+  ]
+}
