@@ -12,20 +12,17 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
-
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
-    protected FloatMask groundTexture;
-    protected FloatMask groundAccentTexture;
-    protected FloatMask debrisTexture;
-    protected FloatMask plateauTexture;
+    protected FloatMask accentGroundTexture;
+    protected FloatMask waterBeachTexture;
+    protected FloatMask accentSlopesTexture;
+    protected FloatMask accentPlateauTexture;
     protected FloatMask slopesTexture;
     protected FloatMask underWaterTexture;
-    protected FloatMask cliffTexture;
-    protected FloatMask cliffAccentTexture;
-    protected FloatMask roughnessModifierTexture;
+    protected FloatMask rockTexture;
+    protected FloatMask accentRockTexture;
     protected IntegerMask terrainType;
 
     public BasicTextureGenerator() {
@@ -38,16 +35,12 @@ public class BasicTextureGenerator extends TextureGenerator {
 
     @Override
     protected void setupTexturePipeline() {
-        BooleanMask debris = slope.copyAsBooleanMask(.2f);
-        BooleanMask cliff = slope.copyAsBooleanMask(.75f);
-        BooleanMask extendedCliff = slope.copyAsBooleanMask(.75f).inflate(2f);
+        BooleanMask flat = slope.copyAsBooleanMask(.05f).invert();
+        BooleanMask slopes = slope.copyAsBooleanMask(.15f);
+        BooleanMask accentSlopes = slope.copyAsBooleanMask(.75f).invert().subtract(flat);
+        BooleanMask rock = slope.copyAsBooleanMask(.75f);
+        BooleanMask accentRock = slope.copyAsBooleanMask(.75f).inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
-        FloatMask waterBeach = realWater.copy().inflate(11)
-                .subtract(realPlateaus)
-                .subtract(slope.copyAsBooleanMask(.05f).invert())
-                .add(realWater)
-                .copyAsFloatMask(0, 1)
-                .blur(4);
         
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
@@ -58,63 +51,39 @@ public class BasicTextureGenerator extends TextureGenerator {
         
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
-        cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
-        cliffAccentTexture.setSize(textureSize)
-                .addPerlinNoise(32, 1f)
-                .addGaussianNoise(.05f)
-                .clampMax(1f)
-                .setToValue(extendedCliff.copy().invert(), 0f)
-                .blur(2);
-        groundTexture.setSize(textureSize)
-                .add(1f)
-                .subtract(waterBeach)
-                .subtract(cliffTexture)
-                .clampMin(0f);
-        groundAccentTexture.setSize(textureSize)
-                .addPerlinNoise(64, 1f)
-                .addGaussianNoise(.05f)
-                .clampMax(1f)
-                .multiply(groundTexture)
-                .blur(2)
-                .clampMin(0f);
-        slopesTexture.init(slope)
-                .subtract(0.05f)
-                .multiply(4f)
-                .clampMax(1f)
-                .subtract(waterBeach)
-                .subtract(cliffTexture.copy().subtract(0.2f).clampMin(0f));
-        debrisTexture.init(cliff.copy().inflate(8), 0f, 1f)
-                .subtract(0.25f)
-                .addPerlinNoise(10, .2f)
-                .addGaussianNoise(.05f)
-                .setToValue(debris.copy().invert(), 0f)
-                .setToValue(realPlateaus, 0f)
-                .subtract(realWater.copyAsFloatMask(0, 1).blur(4))
-                .subtract(cliff, 0.9f)
-                .clampMin(0f)
-                .multiply(0.7f)
-                .blur(1);
-        plateauTexture.setSize(textureSize)
-                .add(0.5f)
-                .addPerlinNoise(30, .4f)
-                .setToValue(realPlateaus.copy().invert(), 0f)
-                .multiply(slope.copyAsBooleanMask(0.01f).deflate(4), slope.copy().multiply(-10f).add(1f).clampMin(0f))
-                .clampMin(0f)
-                .blur(4)
-                .clampMax(1f)
-                .subtract(cliffTexture.copy().subtract(0.4f).clampMin(0f));
+        accentGroundTexture.setSize(textureSize)
+                           .addPerlinNoise(mapSize / 8, 1f)
+                           .addGaussianNoise(.05f)
+                           .clampMax(1f)
+                           .setToValue(realWater, 0f)
+                           .blur(2);
+        accentPlateauTexture.setSize(textureSize)
+                            .addPerlinNoise(mapSize / 16, 1f)
+                            .addGaussianNoise(.05f)
+                            .clampMax(1f)
+                            .setToValue(realPlateaus.copy().invert(), 0f)
+                            .blur(8);
+        slopesTexture.init(slopes, 0f, .75f).blur(16).add(slopes, .5f).blur(16).clampMax(1f);
+        accentSlopesTexture.setSize(textureSize)
+                           .addPerlinNoise(mapSize / 16, .5f)
+                           .addGaussianNoise(.05f)
+                           .clampMax(1f)
+                           .setToValue(accentSlopes.copy().invert(), 0f)
+                           .blur(16);
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
                          .add(scaledWaterDepth.copy().multiply(.3f))
                          .clampMax(1f)
                          .blur(1);
-        roughnessModifierTexture.setSize(textureSize);
-        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-            // The masks get scaled to the upper half later where they are > 0,
-            // so if we want to have an end value of about 0.5 we need 0.01
-            roughnessModifierTexture.add(0.01f);
-        }
-        texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
-        texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);
+        waterBeachTexture.init(realWater.inflate(12).subtract(realPlateaus), 0f, 1f).blur(12);
+        rockTexture.init(rock, 0f, 1f).blur(4).add(rock, 1f).blur(2).clampMax(1f);
+        accentRockTexture.setSize(textureSize)
+                         .addPerlinNoise(mapSize / 16, 1f)
+                         .addGaussianNoise(.05f)
+                         .clampMax(1f)
+                         .setToValue(accentRock.copy().invert(), 0f)
+                         .blur(2);
+        texturesLowMask.setComponents(accentGroundTexture, accentPlateauTexture, slopesTexture, accentSlopesTexture);
+        texturesHighMask.setComponents(waterBeachTexture, underWaterTexture, rockTexture, accentRockTexture);
 
         setupTerrainType(mapSize);
     }
@@ -124,13 +93,14 @@ public class BasicTextureGenerator extends TextureGenerator {
 
         Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
-                   .setToValue(cliffAccentTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[1])
-                   .setToValue(cliffTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[2])
-                   .setToValue(groundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
-                   .setToValue(groundAccentTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
-                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[5])
-                   .setToValue(debrisTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[6])
-                   .setToValue(plateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
+                   .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
+                   .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
+                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
+                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
+                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
+                   // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[7])
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[6])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
                    .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
     }
@@ -141,16 +111,15 @@ public class BasicTextureGenerator extends TextureGenerator {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().getElevation());
         realPlateaus = heightmap.copyAsBooleanMask(
-                generatorParameters.biome().waterSettings().getElevation() + 5f);
-        cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture", true);
-        cliffTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffTexture", true);
-        groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture", true);
-        groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture", true);
+                generatorParameters.biome().waterSettings().getElevation() + 3f);
+        accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
+        accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
+        accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture", true);
         slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
-        debrisTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "debrisTexture", true);
-        plateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "plateauTexture", true);
         underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
-        roughnessModifierTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "roughnessModifierTexture", true);
+        rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
+        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
         terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
     }
 
