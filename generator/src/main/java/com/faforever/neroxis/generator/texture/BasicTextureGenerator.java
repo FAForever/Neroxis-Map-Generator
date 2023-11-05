@@ -25,8 +25,9 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask accentRockTexture;
     protected IntegerMask terrainType;
 
-    public BasicTextureGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
                 .biomes("Brimstone", "Desert", "EarlyAutumn", "Frithen",
                         "Loki", "Mars", "Moonlight", "Prayer", "Stones",
                         "Syrtis", "WindingRiver", "Wonder")
