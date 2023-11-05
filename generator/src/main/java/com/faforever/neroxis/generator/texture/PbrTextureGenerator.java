@@ -159,10 +159,4 @@ public class PbrTextureGenerator extends TextureGenerator {
             map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
         });
     }
-
-    @Override
-    public void setupPipeline() {
-        setupTexturePipeline();
-        setupPreviewPipeline();
-    }
 }
