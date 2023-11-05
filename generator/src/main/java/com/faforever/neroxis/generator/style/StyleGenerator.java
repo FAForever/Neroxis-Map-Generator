@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ElementGenerator;
+import com.faforever.neroxis.generator.GeneratorOptions;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
@@ -13,6 +14,7 @@ import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
+import com.faforever.neroxis.generator.util.GeneratorSelector;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -21,61 +23,64 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public abstract class StyleGenerator extends ElementGenerator {
-    protected final List<TerrainGenerator> terrainGenerators = new ArrayList<>();
-    protected final List<TextureGenerator> textureGenerators = new ArrayList<>();
-    protected final List<ResourceGenerator> resourceGenerators = new ArrayList<>();
-    protected final List<PropGenerator> propGenerators = new ArrayList<>();
-    protected final List<DecalGenerator> decalGenerators = new ArrayList<>();
-    protected TerrainGenerator terrainGenerator = new BasicTerrainGenerator();
-    protected TextureGenerator textureGenerator = new BasicTextureGenerator();
-    protected ResourceGenerator resourceGenerator = new BasicResourceGenerator();
-    protected PropGenerator propGenerator = new BasicPropGenerator();
-    protected DecalGenerator decalGenerator = new BasicDecalGenerator();
-    protected float spawnSeparation;
-    protected int teamSeparation;
+    private TerrainGenerator terrainGenerator;
+    private TextureGenerator textureGenerator;
+    private ResourceGenerator resourceGenerator;
+    private PropGenerator propGenerator;
+    private DecalGenerator decalGenerator;
     private SpawnPlacer spawnPlacer;
 
-    public static <T extends ElementGenerator> T selectRandomMatchingGenerator(Random random, List<T> generators,
-                                                                               GeneratorParameters generatorParameters,
-                                                                               T defaultGenerator) {
-        List<T> matchingGenerators = generators.stream()
-                                               .filter(generator -> generator.getParameterConstraints()
-                                                                             .matches(generatorParameters))
-                                               .collect(Collectors.toList());
-        return selectRandomGeneratorUsingWeights(random, matchingGenerators, defaultGenerator);
+    protected GeneratorOptions<TerrainGenerator> getTerrainGeneratorOptions() {
+        return new GeneratorOptions<>(new BasicTerrainGenerator());
     }
 
-    private static <T extends ElementGenerator> T selectRandomGeneratorUsingWeights(Random random, List<T> generators,
-                                                                                    T defaultGenerator) {
-        if (generators.size() > 0) {
-            List<Float> weights = generators.stream().map(ElementGenerator::getWeight).collect(Collectors.toList());
-            List<Float> cumulativeWeights = new ArrayList<>();
-            float sum = 0;
-            for (float weight : weights) {
-                sum += weight;
-                cumulativeWeights.add(sum);
-            }
-            float value = random.nextFloat() * cumulativeWeights.get(cumulativeWeights.size() - 1);
-            return cumulativeWeights.stream()
-                                    .filter(weight -> value <= weight)
-                                    .reduce((first, second) -> first)
-                                    .map(weight -> generators.get(cumulativeWeights.indexOf(weight)))
-                                    .orElse(defaultGenerator);
+    protected GeneratorOptions<TextureGenerator> getTextureGeneratorOptions() {
+        return new GeneratorOptions<>(new BasicTextureGenerator());
+    }
+
+    protected GeneratorOptions<ResourceGenerator> getResourceGeneratorOptions() {
+        return new GeneratorOptions<>(new BasicResourceGenerator());
+    }
+
+    protected GeneratorOptions<PropGenerator> getPropGeneratorOptions() {
+        return new GeneratorOptions<>(new BasicPropGenerator());
+    }
+
+    protected GeneratorOptions<DecalGenerator> getDecalGeneratorOptions() {
+        return new GeneratorOptions<>(new BasicDecalGenerator());
+    }
+
+    protected float getSpawnSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
+        } else if (generatorParameters.numTeams() == 2) {
+            return random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
         } else {
-            return defaultGenerator;
+            if (generatorParameters.numTeams() < 8) {
+                return random.nextInt(map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16) +
+                       map.getSize() / 16f;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    protected int getTeamSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            return map.getSize() / 2;
+        } else {
+            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
         }
     }
 
     public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
-
         setupPipeline();
 
         random = null;
@@ -90,9 +95,9 @@ public abstract class StyleGenerator extends ElementGenerator {
         CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
         CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
 
-        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture,
-                                                                          textureFuture, previewFuture, resourcesFuture,
-                                                                          decalsFuture, propsFuture, unitsFuture)
+        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
+                                                                          resourcesFuture, decalsFuture, propsFuture,
+                                                                          unitsFuture)
                                                                    .thenAccept(aVoid -> setHeights());
 
         placementFuture.join();
@@ -101,7 +106,7 @@ public abstract class StyleGenerator extends ElementGenerator {
         return map;
     }
 
-    protected void initialize(GeneratorParameters generatorParameters, long seed) {
+    private void initialize(GeneratorParameters generatorParameters, long seed) {
         this.generatorParameters = generatorParameters;
         random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
@@ -114,48 +119,33 @@ public abstract class StyleGenerator extends ElementGenerator {
 
         Pipeline.reset();
 
-        if (generatorParameters.numTeams() < 2) {
-            spawnSeparation = (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
-            teamSeparation = 0;
-        } else if (generatorParameters.numTeams() == 2) {
-            spawnSeparation = random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-            teamSeparation = map.getSize() / 2;
-        } else {
-            if (generatorParameters.numTeams() < 8) {
-                spawnSeparation = random.nextInt(
-                        map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16)
-                                  + map.getSize() / 16f;
-            } else {
-                spawnSeparation = 0;
-            }
-            teamSeparation = StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
-        }
-
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
     @Override
     public void setupPipeline() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnSeparation,
-                                                         teamSeparation, symmetrySettings));
+                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
+                                                         getTeamSeparation(), symmetrySettings));
 
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
-            terrainGenerator = selectRandomMatchingGenerator(random, terrainGenerators, generatorParameters,
-                                                             terrainGenerator);
-            textureGenerator = selectRandomMatchingGenerator(random, textureGenerators, generatorParameters,
-                                                             textureGenerator);
-            resourceGenerator = selectRandomMatchingGenerator(random, resourceGenerators, generatorParameters,
-                                                              resourceGenerator);
-            propGenerator = selectRandomMatchingGenerator(random, propGenerators, generatorParameters, propGenerator);
-            decalGenerator = selectRandomMatchingGenerator(random, decalGenerators, generatorParameters,
-                                                           decalGenerator);
+            terrainGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getTerrainGeneratorOptions(),
+                                                                               generatorParameters);
+            textureGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getTextureGeneratorOptions(),
+                                                                               generatorParameters);
+            resourceGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getResourceGeneratorOptions(),
+                                                                                generatorParameters);
+            propGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getPropGeneratorOptions(),
+                                                                            generatorParameters);
+            decalGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, getDecalGeneratorOptions(),
+                                                                             generatorParameters);
         });
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();
 
-        textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE), terrainGenerator);
+        textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE),
+                                    terrainGenerator);
         resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
         propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
         decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
@@ -172,16 +162,16 @@ public abstract class StyleGenerator extends ElementGenerator {
 
     public String generatorsToString() {
         if (generatorParameters.visibility() == null) {
-            return "TerrainGenerator: "
-                   + terrainGenerator.getClass().getSimpleName()
-                   + "\nTextureGenerator: "
-                   + textureGenerator.getClass().getSimpleName()
-                   + "\nResourceGenerator: "
-                   + resourceGenerator.getClass().getSimpleName()
-                   + "\nPropGenerator: "
-                   + propGenerator.getClass().getSimpleName()
-                   + "\nDecalGenerator: "
-                   + decalGenerator.getClass().getSimpleName();
+            return """
+                   TerrainGenerator: %s
+                   TextureGenerator: %s
+                   ResourceGenerator: %s
+                   PropGenerator: %s
+                   DecalGenerator: %s
+                   """.formatted(terrainGenerator.getClass().getSimpleName(),
+                                 textureGenerator.getClass().getSimpleName(),
+                                 resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
+                                 decalGenerator.getClass().getSimpleName());
         } else {
             return "";
         }

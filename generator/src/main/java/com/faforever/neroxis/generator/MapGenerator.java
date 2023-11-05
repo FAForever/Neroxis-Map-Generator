@@ -26,7 +26,11 @@ import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.TestStyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.generator.util.GeneratorSelector;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
@@ -66,7 +70,16 @@ import static picocli.CommandLine.Spec;
 public class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
-    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(), new CenterLakeStyleGenerator(), new BasicStyleGenerator(), new DropPlateauStyleGenerator(), new LandBridgeStyleGenerator(), new LittleMountainStyleGenerator(), new MountainRangeStyleGenerator(), new OneIslandStyleGenerator(), new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(), new HighReclaimStyleGenerator(), new LowMexStyleGenerator(), new FloodedStyleGenerator(), new TestStyleGenerator());
+    private final List<StyleGenerator> mapStyles = List.of(new BigIslandsStyleGenerator(),
+                                                           new CenterLakeStyleGenerator(), new BasicStyleGenerator(),
+                                                           new DropPlateauStyleGenerator(),
+                                                           new LandBridgeStyleGenerator(),
+                                                           new LittleMountainStyleGenerator(),
+                                                           new MountainRangeStyleGenerator(),
+                                                           new OneIslandStyleGenerator(),
+                                                           new SmallIslandsStyleGenerator(), new ValleyStyleGenerator(),
+                                                           new HighReclaimStyleGenerator(), new LowMexStyleGenerator(),
+                                                           new FloodedStyleGenerator(), new TestStyleGenerator());
     private final List<StyleGenerator> productionStyles = mapStyles.stream()
                                                                    .filter(styleGenerator -> !(styleGenerator instanceof TestStyleGenerator))
                                                                    .toList();
@@ -204,8 +217,13 @@ public class MapGenerator implements Callable<Integer> {
                                                           })
                                                           .collect(Collectors.toList());
             Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
-                                                                            .collect(Collectors.toMap(MapStyle::getGeneratorClass, style -> style));
-            styleGenerator = StyleGenerator.selectRandomMatchingGenerator(random, productionStyles, generatorParameters, new BasicStyleGenerator());
+                                                                            .collect(Collectors.toMap(
+                                                                                    MapStyle::getGeneratorClass,
+                                                                                    style -> style));
+            GeneratorOptions<StyleGenerator> styleGeneratorOptions = new GeneratorOptions<>(new BasicStyleGenerator(),
+                                                                                            productionStyles);
+            styleGenerator = GeneratorSelector.selectRandomMatchingGenerator(random, styleGeneratorOptions,
+                                                                             generatorParameters);
             tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
             try {
@@ -270,7 +288,9 @@ public class MapGenerator implements Callable<Integer> {
 
     private void checkParameters() {
         if (numTeams != 0 && spawnCount % numTeams != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Spawn Count `%d` not a multiple of Num Teams `%d`", spawnCount, numTeams));
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
+                                                                   spawnCount, numTeams));
         }
 
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
@@ -279,14 +299,17 @@ public class MapGenerator implements Callable<Integer> {
             parameterOptions.getTerrainSymmetry() != null &&
             numTeams % parameterOptions.getTerrainSymmetry()
                                        .getNumSymPoints() != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(), numTeams));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
+                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(),
+                    numTeams));
         }
     }
 
     private Symmetry getValidTerrainSymmetry() {
         List<Symmetry> terrainSymmetries = switch (spawnCount) {
-            case 2, 4, 8 ->
-                    new ArrayList<>(Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD, Symmetry.DIAG));
+            case 2, 4, 8 -> new ArrayList<>(
+                    Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
+                                  Symmetry.DIAG));
             default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
         };
         terrainSymmetries.remove(Symmetry.X);
@@ -335,22 +358,27 @@ public class MapGenerator implements Callable<Integer> {
 
     private void verifyNameArgs(String mapName, String[] nameArgs) {
         if (nameArgs.length < 4) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` does not specify a version", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Map name `%s` does not specify a version",
+                                                                   mapName));
         }
 
         String version = nameArgs[3];
         if (!VERSION.equals(version)) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Version for `%s` does not match this generator version", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
+                    "Version for `%s` does not match this generator version", mapName));
         }
 
         if (nameArgs.length < 5) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` does not specify a seed", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Map name `%s` does not specify a seed", mapName));
         }
     }
 
     private void verifyMapNamePrefix(String mapName) {
         if (!mapName.startsWith("neroxis_map_generator")) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format("Map name `%s` is not a generated map", mapName));
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Map name `%s` is not a generated map", mapName));
         }
     }
 
@@ -401,7 +429,8 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.rampDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
+        generatorParametersBuilder.biome(
+                Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
@@ -498,9 +527,10 @@ public class MapGenerator implements Callable<Integer> {
             descriptionBuilder.append("Style: ").append(tuningOptions.getMapStyle()).append("\n");
             descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
         } else {
-            descriptionBuilder.append(String.format("Map originally generated at %s UTC\n", DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
-                                                                                                             .format(Instant.ofEpochSecond(generationTime)
-                                                                                                                            .atZone(ZoneOffset.UTC))));
+            descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
+                                                    DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
+                                                                     .format(Instant.ofEpochSecond(generationTime)
+                                                                                    .atZone(ZoneOffset.UTC))));
         }
 
         if (Visibility.UNEXPLORED == visibility) {
@@ -530,16 +560,17 @@ public class MapGenerator implements Callable<Integer> {
         if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
             map.getBiome().terrainMaterials().getTexturePaths()[8] =
                     Path.of("/maps", map.getFolderName(), "env", "texture", "heightRoughness.dds")
-                            .toString()
-                            .replace("\\", "/");
+                        .toString()
+                        .replace("\\", "/");
             map.getBiome().terrainMaterials().getNormalPaths()[8] =
                     map.getBiome().terrainMaterials().getCubeMaps().get(0).getPath();
         }
-        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME) || map.getTerrainShaderPath().equals(MAP_WIDE_ASSETS_SHADER_NAME)) {
+        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME) ||
+            map.getTerrainShaderPath().equals(MAP_WIDE_ASSETS_SHADER_NAME)) {
             map.getBiome().terrainMaterials().getTexturePaths()[9] =
                     Path.of("/maps", map.getFolderName(), "env", "texture", "mapwide.dds")
-                            .toString()
-                            .replace("\\", "/");
+                        .toString()
+                        .replace("\\", "/");
             // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain shader.
             map.getBiome().terrainMaterials().getTextureScales()[9] = map.getSize() + 1;
         }
