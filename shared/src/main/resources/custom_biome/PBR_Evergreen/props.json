@@ -1,0 +1,25 @@
+{
+  "treeGroups": [
+    "/env/evergreen/props/trees/groups/Oak01_Group1_prop.bp",
+    "/env/evergreen/props/trees/groups/Oak01_Group2_prop.bp",
+    "/env/evergreen/props/trees/Oak01_s1_prop.bp",
+    "/env/evergreen/props/trees/Oak01_s2_prop.bp",
+    "/env/evergreen/props/trees/Oak01_s3_prop.bp",
+    "/env/ancient-earth/props/trees/oak1_s4_prop.bp"
+  ],
+  "rocks": [
+    "/env/evergreen/props/rocks/Rock01_prop.bp",
+    "/env/evergreen/props/rocks/Rock02_prop.bp",
+    "/env/evergreen/props/rocks/Rock03_prop.bp",
+    "/env/evergreen/props/rocks/Rock04_prop.bp",
+    "/env/evergreen/props/rocks/Rock05_prop.bp",
+    "/env/evergreen/props/rocks/RockPile01_prop.bp",
+    "/env/evergreen/props/rocks/RockPile02_prop.bp"
+  ],
+  "boulders": [
+    "/env/evergreen/props/rocks/fieldstone01_prop.bp",
+    "/env/evergreen/props/rocks/fieldstone02_prop.bp",
+    "/env/evergreen/props/rocks/fieldstone03_prop.bp",
+    "/env/evergreen/props/rocks/fieldstone04_prop.bp"
+  ]
+}

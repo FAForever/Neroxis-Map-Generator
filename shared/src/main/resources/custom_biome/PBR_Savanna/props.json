@@ -1,0 +1,18 @@
+{
+  "treeGroups": [
+    "/env/swamp/props/trees/groups/cypress01_Group1_prop.bp",
+    "/env/swamp/props/trees/groups/cypress01_Group2_prop.bp"
+  ],
+  "rocks": [
+    "/env/redrocks/props/Boulder02_prop.bp",
+    "/env/redrocks/props/Boulder03_prop.bp",
+    "/env/redrocks/props/Boulder04_prop.bp",
+    "/env/redrocks/props/Boulder05_prop.bp",
+    "/env/redrocks/props/Boulder06_prop.bp"
+  ],
+  "boulders": [
+    "/env/redrocks/props/SeaRock02_prop.bp",
+    "/env/redrocks/props/Rock03_prop.bp",
+    "/env/redrocks/props/Boulder01_prop.bp"
+  ]
+}
