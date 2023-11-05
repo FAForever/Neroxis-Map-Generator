@@ -7,8 +7,10 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
-    public OneIslandTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder().landDensity(0f, .75f).mapSizes(384, 1024).build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder().landDensity(0f, .75f).mapSizes(384, 1024).build();
     }
 
     @Override
@@ -40,8 +42,8 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.landDensity());
+        float normalizedLandDensity = getParameterConstraints().landDensityRange()
+                                                               .normalize(generatorParameters.landDensity());
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry()

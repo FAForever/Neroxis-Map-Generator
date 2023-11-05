@@ -6,19 +6,23 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
     public BigIslandsTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .75f)
-                                                   .plateauDensity(0, .5f)
-                                                   .mapSizes(768, 1024)
-                                                   .build();
         weight = 2;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .75f)
+                                   .plateauDensity(0, .5f)
+                                   .mapSizes(768, 1024)
+                                   .build();
     }
 
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.landDensity());
+        float normalizedLandDensity = getParameterConstraints().landDensityRange()
+                                                               .normalize(generatorParameters.landDensity());
         int maxMiddlePoints = 4;
         int numPaths = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 8);

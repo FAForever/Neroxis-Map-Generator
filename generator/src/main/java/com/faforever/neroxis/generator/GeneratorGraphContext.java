@@ -50,14 +50,14 @@ public class GeneratorGraphContext implements GraphContext {
                                                                                    generatorParameters.numTeams());
         biome = generatorParameters.biome();
         numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
-        landDensity = parameterConstraints.getLandDensityRange().normalize(generatorParameters.landDensity());
-        plateauDensity = parameterConstraints.getPlateauDensityRange()
+        landDensity = parameterConstraints.landDensityRange().normalize(generatorParameters.landDensity());
+        plateauDensity = parameterConstraints.plateauDensityRange()
                                              .normalize(generatorParameters.plateauDensity());
-        mountainDensity = parameterConstraints.getMountainDensityRange()
+        mountainDensity = parameterConstraints.mountainDensityRange()
                                               .normalize(generatorParameters.mountainDensity());
-        rampDensity = parameterConstraints.getRampDensityRange().normalize(generatorParameters.rampDensity());
-        mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.mexDensity());
-        reclaimDensity = parameterConstraints.getReclaimDensityRange().normalize(generatorParameters.mexDensity());
+        rampDensity = parameterConstraints.rampDensityRange().normalize(generatorParameters.rampDensity());
+        mexDensity = parameterConstraints.mexDensityRange().normalize(generatorParameters.mexDensity());
+        reclaimDensity = parameterConstraints.reclaimDensityRange().normalize(generatorParameters.mexDensity());
         plateauHeight = 6f;
         landHeight = .25f;
         waterHeight = biome.waterSettings().getElevation();

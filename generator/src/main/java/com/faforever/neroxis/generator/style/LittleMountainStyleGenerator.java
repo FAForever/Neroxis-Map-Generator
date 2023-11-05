@@ -14,12 +14,14 @@ import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import java.util.Arrays;
 
 public class LittleMountainStyleGenerator extends StyleGenerator {
-    public LittleMountainStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.5f, 1f)
-                                                   .mountainDensity(.25f, 1)
-                                                   .plateauDensity(0, .5f)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.5f, 1f)
+                                   .mountainDensity(.25f, 1)
+                                   .plateauDensity(0, .5f)
+                                   .build();
     }
 
     @Override

@@ -13,13 +13,17 @@ import java.util.Arrays;
 public class HighReclaimStyleGenerator extends StyleGenerator {
     public HighReclaimStyleGenerator() {
         weight = .25f;
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .mountainDensity(.75f, 1f)
-                                                   .plateauDensity(.5f, 1f)
-                                                   .rampDensity(0f, .25f)
-                                                   .reclaimDensity(.8f, 1f)
-                                                   .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
-                                                   .build();
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .mountainDensity(.75f, 1f)
+                                   .plateauDensity(.5f, 1f)
+                                   .rampDensity(0f, .25f)
+                                   .reclaimDensity(.8f, 1f)
+                                   .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
+                                   .build();
     }
 
     @Override

@@ -21,8 +21,12 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask noWrecks;
 
     public NavyWrecksPropGenerator() {
-        parameterConstraints = ParameterConstraints.builder().reclaimDensity(.5f, 1f).landDensity(0f, .5f).build();
         weight = 2;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder().reclaimDensity(.5f, 1f).landDensity(0f, .5f).build();
     }
 
     @Override

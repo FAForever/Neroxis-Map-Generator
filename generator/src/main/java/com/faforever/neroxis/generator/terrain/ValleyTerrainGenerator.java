@@ -8,12 +8,14 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
-    public ValleyTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.75f, 1f)
-                                                   .mountainDensity(.5f, 1)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.75f, 1f)
+                                   .mountainDensity(.5f, 1)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override
@@ -34,8 +36,8 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
     @Override
     protected void mountainSetup() {
         int mapSize = map.getSize();
-        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
-                                                              .normalize(generatorParameters.mountainDensity());
+        float normalizedMountainDensity = getParameterConstraints().mountainDensityRange()
+                                                                   .normalize(generatorParameters.mountainDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry()

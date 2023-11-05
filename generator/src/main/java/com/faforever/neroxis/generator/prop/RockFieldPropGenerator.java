@@ -13,8 +13,9 @@ import com.faforever.neroxis.util.Pipeline;
 public class RockFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask largeRockFieldMask;
 
-    public RockFieldPropGenerator() {
-        parameterConstraints = ParameterConstraints.builder().reclaimDensity(.25f, 1f).build();
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder().reclaimDensity(.25f, 1f).build();
     }
 
     @Override

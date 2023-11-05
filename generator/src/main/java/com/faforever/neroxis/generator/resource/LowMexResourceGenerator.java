@@ -3,12 +3,14 @@ package com.faforever.neroxis.generator.resource;
 import com.faforever.neroxis.generator.ParameterConstraints;
 
 public class LowMexResourceGenerator extends BasicResourceGenerator {
-    public LowMexResourceGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .mexDensity(0f, .25f)
-                                                   .mapSizes(384, 768)
-                                                   .spawnCount(0, 4)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .mexDensity(0f, .25f)
+                                   .mapSizes(384, 768)
+                                   .spawnCount(0, 4)
+                                   .build();
     }
 
     @Override
@@ -16,7 +18,7 @@ public class LowMexResourceGenerator extends BasicResourceGenerator {
         int mexCount;
         int mapSize = generatorParameters.mapSize();
         int spawnCount = generatorParameters.spawnCount();
-        float mexDensity = parameterConstraints.getMexDensityRange().normalize(generatorParameters.mexDensity());
+        float mexDensity = getParameterConstraints().mexDensityRange().normalize(generatorParameters.mexDensity());
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
             mexCount = (int) (10 + 2 * mexDensity);
@@ -28,7 +30,7 @@ public class LowMexResourceGenerator extends BasicResourceGenerator {
         if (mapSize < 512) {
             mexMultiplier = .9f;
         }
-        mexCount *= mexMultiplier;
+        mexCount = StrictMath.round(mexCount * mexMultiplier);
         return mexCount * spawnCount;
     }
 }

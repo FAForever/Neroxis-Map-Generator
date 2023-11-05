@@ -14,14 +14,16 @@ import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import java.util.Arrays;
 
 public class MountainRangeStyleGenerator extends StyleGenerator {
-    public MountainRangeStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.75f, 1f)
-                                                   .mountainDensity(.5f, 1)
-                                                   .plateauDensity(0, .5f)
-                                                   .mexDensity(.375f, 1)
-                                                   .mapSizes(256, 640)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.75f, 1f)
+                                   .mountainDensity(.5f, 1)
+                                   .plateauDensity(0, .5f)
+                                   .mexDensity(.375f, 1)
+                                   .mapSizes(256, 640)
+                                   .build();
     }
 
     @Override

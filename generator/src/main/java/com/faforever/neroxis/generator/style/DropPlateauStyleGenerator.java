@@ -16,11 +16,15 @@ import java.util.Arrays;
 public class DropPlateauStyleGenerator extends StyleGenerator {
     public DropPlateauStyleGenerator() {
         weight = .5f;
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.5f, 1f)
-                                                   .plateauDensity(.5f, 1)
-                                                   .mexDensity(.25f, 1)
-                                                   .build();
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.5f, 1f)
+                                   .plateauDensity(.5f, 1)
+                                   .mexDensity(.25f, 1)
+                                   .build();
     }
 
     @Override

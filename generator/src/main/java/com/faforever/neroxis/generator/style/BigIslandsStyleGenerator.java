@@ -15,11 +15,15 @@ import java.util.Arrays;
 public class BigIslandsStyleGenerator extends StyleGenerator {
     public BigIslandsStyleGenerator() {
         weight = 4;
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .75f)
-                                                   .plateauDensity(0, .5f)
-                                                   .mapSizes(768, 1024)
-                                                   .build();
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .75f)
+                                   .plateauDensity(0, .5f)
+                                   .mapSizes(768, 1024)
+                                   .build();
     }
 
     @Override

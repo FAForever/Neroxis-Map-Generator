@@ -7,12 +7,14 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
-    public DropPlateauTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.5f, 1f)
-                                                   .plateauDensity(.5f, 1)
-                                                   .mexDensity(.25f, 1)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.5f, 1f)
+                                   .plateauDensity(.5f, 1)
+                                   .mexDensity(.25f, 1)
+                                   .build();
     }
 
     @Override
@@ -48,8 +50,8 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void plateausSetup() {
         int mapSize = map.getSize();
-        float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange()
-                                                             .normalize(generatorParameters.plateauDensity());
+        float normalizedPlateauDensity = getParameterConstraints().plateauDensityRange()
+                                                                  .normalize(generatorParameters.plateauDensity());
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 

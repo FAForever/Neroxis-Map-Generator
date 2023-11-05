@@ -11,12 +11,16 @@ import java.util.Arrays;
 
 public class FloodedStyleGenerator extends StyleGenerator {
     public FloodedStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .plateauDensity(0, .25f)
-                                                   .landDensity(0, .5f)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
         weight = 0f;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .plateauDensity(0, .25f)
+                                   .landDensity(0, .5f)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override

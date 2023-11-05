@@ -44,7 +44,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
                 mexMultiplier = 1.25f;
             }
         }
-        mexCount *= mexMultiplier;
+        mexCount = StrictMath.round(mexCount * mexMultiplier);
         mexCount = StrictMath.max(mexCount, 9);
         return mexCount * spawnCount;
     }

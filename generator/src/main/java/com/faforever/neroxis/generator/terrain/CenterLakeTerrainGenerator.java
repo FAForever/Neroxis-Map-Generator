@@ -8,13 +8,14 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
-    public CenterLakeTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .5f)
-                                                   .rampDensity(.75f, 1f)
-                                                   .mexDensity(.25f, 1)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .5f)
+                                   .rampDensity(.75f, 1f)
+                                   .mexDensity(.25f, 1)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override
@@ -29,8 +30,8 @@ public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.landDensity());
+        float normalizedLandDensity = getParameterConstraints().landDensityRange()
+                                                               .normalize(generatorParameters.landDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - normalizedLandDensity) + 8) / symmetrySettings.getSpawnSymmetry()

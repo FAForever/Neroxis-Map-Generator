@@ -13,13 +13,15 @@ import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
 import java.util.Arrays;
 
 public class CenterLakeStyleGenerator extends StyleGenerator {
-    public CenterLakeStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .5f)
-                                                   .rampDensity(.75f, 1f)
-                                                   .mexDensity(.25f, 1)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .5f)
+                                   .rampDensity(.75f, 1f)
+                                   .mexDensity(.25f, 1)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override

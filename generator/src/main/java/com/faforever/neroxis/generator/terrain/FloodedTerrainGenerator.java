@@ -6,12 +6,14 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 public class FloodedTerrainGenerator extends BasicTerrainGenerator {
-    public FloodedTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .plateauDensity(0, .25f)
-                                                   .landDensity(0, .5f)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .plateauDensity(0, .25f)
+                                   .landDensity(0, .5f)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override
@@ -26,8 +28,8 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
         float plateauDensityMax = .7f;
         float plateauDensityMin = .65f;
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
-        float normalizedPlateauDensity = parameterConstraints.getPlateauDensityRange()
-                                                             .normalize(generatorParameters.plateauDensity());
+        float normalizedPlateauDensity = getParameterConstraints().plateauDensityRange()
+                                                                  .normalize(generatorParameters.plateauDensity());
         float scaledPlateauDensity = normalizedPlateauDensity * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 

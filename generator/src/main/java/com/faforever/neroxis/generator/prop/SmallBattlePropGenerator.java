@@ -19,8 +19,9 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
 
-    public SmallBattlePropGenerator() {
-        parameterConstraints = ParameterConstraints.builder().landDensity(.25f, 1f).reclaimDensity(.5f, 1f).build();
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder().landDensity(.25f, 1f).reclaimDensity(.5f, 1f).build();
     }
 
     @Override

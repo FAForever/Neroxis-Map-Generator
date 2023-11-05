@@ -4,13 +4,15 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
-    public LandBridgeTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.25f, .75f)
-                                                   .mexDensity(.5f, 1f)
-                                                   .mapSizes(768, 1024)
-                                                   .numTeams(2, 4)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.25f, .75f)
+                                   .mexDensity(.5f, 1f)
+                                   .mapSizes(768, 1024)
+                                   .numTeams(2, 4)
+                                   .build();
     }
 
     @Override

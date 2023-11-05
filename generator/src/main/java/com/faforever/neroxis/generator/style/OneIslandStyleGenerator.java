@@ -12,12 +12,14 @@ import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import java.util.Arrays;
 
 public class OneIslandStyleGenerator extends StyleGenerator {
-    public OneIslandStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .75f)
-                                                   .plateauDensity(0f, .75f)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .75f)
+                                   .plateauDensity(0f, .75f)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override

@@ -7,14 +7,18 @@ import com.faforever.neroxis.util.Pipeline;
 
 public class HighReclaimPropGenerator extends BasicPropGenerator {
     public HighReclaimPropGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .mountainDensity(.5f, 1f)
-                                                   .plateauDensity(.5f, 1f)
-                                                   .rampDensity(0f, .5f)
-                                                   .reclaimDensity(.8f, 1f)
-                                                   .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
-                                                   .build();
         weight = .5f;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .mountainDensity(.5f, 1f)
+                                   .plateauDensity(.5f, 1f)
+                                   .rampDensity(0f, .5f)
+                                   .reclaimDensity(.8f, 1f)
+                                   .biomes("Desert", "Frithen", "Loki", "Moonlight", "Wonder")
+                                   .build();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import lombok.Getter;
@@ -7,12 +8,11 @@ import lombok.Getter;
 import java.util.Random;
 
 @Getter
-public abstract class ElementGenerator {
+public abstract class ElementGenerator implements HasParameterConstraints {
     protected SCMap map;
     protected Random random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
-    protected ParameterConstraints parameterConstraints = ParameterConstraints.builder().build();
     protected float weight = 1;
 
     public abstract void setupPipeline();

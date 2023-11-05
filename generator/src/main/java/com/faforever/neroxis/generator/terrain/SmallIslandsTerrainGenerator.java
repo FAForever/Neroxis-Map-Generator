@@ -8,13 +8,14 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
-    public SmallIslandsTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(0f, .5f)
-                                                   .plateauDensity(0, .5f)
-                                                   .mexDensity(.5f, 1)
-                                                   .mapSizes(768, 1024)
-                                                   .build();
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(0f, .5f)
+                                   .plateauDensity(0, .5f)
+                                   .mexDensity(.5f, 1)
+                                   .mapSizes(768, 1024)
+                                   .build();
     }
 
     @Override
@@ -27,8 +28,8 @@ public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
-        float normalizedLandDensity = parameterConstraints.getLandDensityRange()
-                                                          .normalize(generatorParameters.landDensity());
+        float normalizedLandDensity = getParameterConstraints().landDensityRange()
+                                                               .normalize(generatorParameters.landDensity());
         int maxMiddlePoints = 4;
         int numPaths = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 16 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 16);

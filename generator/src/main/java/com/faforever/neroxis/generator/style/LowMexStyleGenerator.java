@@ -20,13 +20,17 @@ import java.util.Arrays;
 
 public class LowMexStyleGenerator extends StyleGenerator {
     public LowMexStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .mexDensity(0f, .25f)
-                                                   .mapSizes(256, 640)
-                                                   .spawnCount(0, 4)
-                                                   .numTeams(2, 2)
-                                                   .build();
         weight = .5f;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .mexDensity(0f, .25f)
+                                   .mapSizes(256, 640)
+                                   .spawnCount(0, 4)
+                                   .numTeams(2, 2)
+                                   .build();
     }
 
     @Override

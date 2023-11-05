@@ -21,12 +21,16 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask noBases;
 
     public EnemyCivPropGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .mountainDensity(0f, .75f)
-                                                   .plateauDensity(0f, .5f)
-                                                   .rampDensity(.5f, 1f)
-                                                   .build();
         weight = .5f;
+    }
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .mountainDensity(0f, .75f)
+                                   .plateauDensity(0f, .5f)
+                                   .rampDensity(.5f, 1f)
+                                   .build();
     }
 
     @Override

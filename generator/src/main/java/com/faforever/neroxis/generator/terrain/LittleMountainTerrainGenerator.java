@@ -6,12 +6,14 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 public class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerator {
-    public LittleMountainTerrainGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.5f, 1f)
-                                                   .mountainDensity(.25f, 1)
-                                                   .plateauDensity(0, .5f)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.5f, 1f)
+                                   .mountainDensity(.25f, 1)
+                                   .plateauDensity(0, .5f)
+                                   .build();
     }
 
     @Override
@@ -26,8 +28,8 @@ public class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerato
     @Override
     protected void mountainSetup() {
         int mapSize = map.getSize();
-        float normalizedMountainDensity = parameterConstraints.getMountainDensityRange()
-                                                              .normalize(generatorParameters.mountainDensity());
+        float normalizedMountainDensity = getParameterConstraints().mountainDensityRange()
+                                                                   .normalize(generatorParameters.mountainDensity());
         mountains.setSize(mapSize / 4);
 
         mountains.randomWalk(

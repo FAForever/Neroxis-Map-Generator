@@ -14,12 +14,14 @@ import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import java.util.Arrays;
 
 public class ValleyStyleGenerator extends StyleGenerator {
-    public ValleyStyleGenerator() {
-        parameterConstraints = ParameterConstraints.builder()
-                                                   .landDensity(.75f, 1f)
-                                                   .mountainDensity(.5f, 1)
-                                                   .mapSizes(384, 1024)
-                                                   .build();
+
+    @Override
+    public ParameterConstraints getParameterConstraints() {
+        return ParameterConstraints.builder()
+                                   .landDensity(.75f, 1f)
+                                   .mountainDensity(.5f, 1)
+                                   .mapSizes(384, 1024)
+                                   .build();
     }
 
     @Override
