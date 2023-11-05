@@ -1,5 +1,5 @@
 {
-  "texPathWaterRamp": "/textures/engine/waterramp_redrock01.dds",
+  "texPathWaterRamp": "/textures/engine/waterramp_redrock02.dds",
   "waterPresent": true,
   "elevation": 25.0,
   "elevationDeep": 20.0,

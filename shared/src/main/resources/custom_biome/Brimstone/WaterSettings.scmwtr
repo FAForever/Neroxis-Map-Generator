@@ -1,11 +1,11 @@
 {
-  "elevationAbyss": 3.0,
+  "elevationAbyss": 2.0,
   "fresnelPower": 1.5,
   "elevationDeep": 20.0,
   "sunGlow": 0.1,
   "skyReflection": 1.0,
   "sunStrength": 10.0,
-  "texPathWaterRamp": "/textures/engine/waterramp_redrock03.dds",
+  "texPathWaterRamp": "/textures/engine/waterramp_redrock02.dds",
   "colorLerp": {
     "x": 0.137,
     "y": 0.137

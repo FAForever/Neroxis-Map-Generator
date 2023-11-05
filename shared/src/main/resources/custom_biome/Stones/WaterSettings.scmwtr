@@ -22,7 +22,7 @@
   "sunGlow": 0.1,
   "skyReflection": 1.0,
   "refractionScale": 0.375,
-  "texPathWaterRamp": "/textures/engine/waterramp_redrock03.dds",
+  "texPathWaterRamp": "/textures/engine/waterramp_desert.dds",
   "sunColor": {
     "x": 5.25,
     "y": 4.49,
