@@ -12,9 +12,7 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
-
-public class BasicTextureGenerator extends TextureGenerator {
+public class PbrTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
     protected FloatMask groundTexture;
@@ -28,11 +26,11 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask roughnessModifierTexture;
     protected IntegerMask terrainType;
 
-    public BasicTextureGenerator() {
+    public PbrTextureGenerator() {
         parameterConstraints = ParameterConstraints.builder()
-                .biomes("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                        "Loki", "Mars", "Moonlight", "Prayer", "Stones",
-                        "Syrtis", "WindingRiver", "Wonder")
+                .biomes("PBR_Brimstone", "PBR_Desert", "PBR_EarlyAutumn","PBR_Evergreen",
+                        "PBR_Ice", "PBR_Loki", "PBR_RedBarrens", "PBR_Savanna", "PBR_Swamp",
+                        "PBR_Tropical")
                 .build();
     }
 
@@ -48,14 +46,14 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .add(realWater)
                 .copyAsFloatMask(0, 1)
                 .blur(4);
-        
+
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
         shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
         shadows.subtract(realWater.copy().setSize(map.getSize()),
-                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
-               .blur(1);
-        
+                        shadowsInWater.copyAsFloatMask(0, 1).blur(6))
+                .blur(1);
+
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
         cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
@@ -104,15 +102,11 @@ public class BasicTextureGenerator extends TextureGenerator {
                 .clampMax(1f)
                 .subtract(cliffTexture.copy().subtract(0.4f).clampMin(0f));
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
-                         .add(scaledWaterDepth.copy().multiply(.3f))
-                         .clampMax(1f)
-                         .blur(1);
-        roughnessModifierTexture.setSize(textureSize);
-        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-            // The masks get scaled to the upper half later where they are > 0,
-            // so if we want to have an end value of about 0.5 we need 0.01
-            roughnessModifierTexture.add(0.01f);
-        }
+                .add(scaledWaterDepth.copy().multiply(.3f))
+                .clampMax(1f)
+                .blur(1);
+        roughnessModifierTexture.setSize(textureSize).add(0.01f);
+        
         texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);
 
@@ -124,15 +118,15 @@ public class BasicTextureGenerator extends TextureGenerator {
 
         Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
-                   .setToValue(cliffAccentTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[1])
-                   .setToValue(cliffTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[2])
-                   .setToValue(groundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
-                   .setToValue(groundAccentTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
-                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[5])
-                   .setToValue(debrisTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[6])
-                   .setToValue(plateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
-                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
-                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
+                .setToValue(cliffAccentTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[1])
+                .setToValue(cliffTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[2])
+                .setToValue(groundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
+                .setToValue(groundAccentTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
+                .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[5])
+                .setToValue(debrisTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[6])
+                .setToValue(plateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[7])
+                .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
+                .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
     }
 
     @Override
