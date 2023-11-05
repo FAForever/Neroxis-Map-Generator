@@ -23,7 +23,8 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -74,31 +75,33 @@ public class MapEvaluator implements Callable<Integer> {
     }
 
     private static float getPositionedObjectScore(List<? extends PositionedObject> objects, Mask<?, ?> mask) {
-        if (objects.size() == 0) {
+        if (objects.isEmpty()) {
             return 0;
         }
 
         float locationScore = 0f;
         List<Vector3> locations = objects.stream().map(PositionedObject::getPosition).collect(Collectors.toList());
-        Set<Vector3> locationsSet = new HashSet<>(locations);
-        while (locationsSet.size() > 0) {
+        Set<Vector3> locationsSet = Collections.newSetFromMap(new IdentityHashMap<>());
+        locationsSet.addAll(locations);
+        while (!locationsSet.isEmpty()) {
             Vector3 location = locations.remove(0);
-            Vector2 symmetryPoint = mask.getSymmetryPointsWithOutOfBounds(location, SymmetryType.SPAWN).get(0);
-            Vector3 closestLoc = null;
-            float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
-            for (Vector3 other : locations) {
-                float dist = other.getXZDistance(symmetryPoint);
-                if (dist < minDist) {
-                    closestLoc = other;
-                    minDist = dist;
+            for (Vector2 symmetryPoint : mask.getSymmetryPointsWithOutOfBounds(location, SymmetryType.SPAWN)) {
+                Vector3 closestLoc = null;
+                float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
+                for (Vector3 other : locations) {
+                    float dist = other.getXZDistance(symmetryPoint);
+                    if (dist < minDist) {
+                        closestLoc = other;
+                        minDist = dist;
+                    }
                 }
+                locationsSet.remove(location);
+                if (closestLoc != null) {
+                    locationsSet.remove(closestLoc);
+                }
+                locationScore += minDist;
+                locations = new ArrayList<>(locationsSet);
             }
-            locationsSet.remove(location);
-            if (closestLoc != null) {
-                locationsSet.remove(closestLoc);
-            }
-            locationScore += minDist;
-            locations = new ArrayList<>(locationsSet);
         }
         return locationScore / (objects.size() / 2f);
     }
@@ -161,7 +164,7 @@ public class MapEvaluator implements Callable<Integer> {
     private void evaluate() {
         List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
                                           .filter(symmetry -> symmetry.getNumSymPoints() == 2)
-                                          .collect(Collectors.toList());
+                                          .toList();
         for (Symmetry symmetry : symmetries) {
             SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
             heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
