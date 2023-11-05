@@ -55,7 +55,7 @@ public class PreviewGenerator {
         scaledTextures.add(0, baseLayer);
         scaledTextures.addAll(Arrays.asList(textureMasksLow.splitComponentMasks()));
         scaledTextures.addAll(Arrays.asList(textureMasksHigh.splitComponentMasks()));
-        for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+        for (int i = 0; i < materials.getPreviewColors().length; i++) {
             if (!materials.getTexturePaths()[i].isEmpty()) {
                 BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
