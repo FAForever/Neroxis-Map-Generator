@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -23,6 +24,14 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
     protected IntegerMask terrainType;
+
+    public BasicTextureGenerator() {
+        parameterConstraints = ParameterConstraints.builder()
+                .biomes("Brimstone", "Desert", "EarlyAutumn", "Frithen",
+                        "Loki", "Mars", "Moonlight", "Prayer", "Stones",
+                        "Syrtis", "WindingRiver", "Wonder")
+                .build();
+    }
 
     @Override
     protected void setupTexturePipeline() {
