@@ -25,6 +25,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     protected FloatMask cliffAccentTexture;
     protected FloatMask roughnessModifierTexture;
     protected IntegerMask terrainType;
+    protected FloatMask waterSurfaceShadows;
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -53,6 +54,13 @@ public class PbrTextureGenerator extends TextureGenerator {
         shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
         shadows.subtract(realWater.copy().setSize(map.getSize()),
                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
+                .blur(1);
+        waterSurfaceShadows = heightmap.copy()
+                .clampMin(generatorParameters.biome().waterSettings().getElevation())
+                .copyAsShadowMask(generatorParameters.biome().lightingSettings().getSunDirection())
+                .inflate(0.5f)
+                .resample(map.getSize() / 2)
+                .copyAsFloatMask(1, 0)
                 .blur(1);
 
         int textureSize = generatorParameters.mapSize() + 1;
@@ -153,12 +161,16 @@ public class PbrTextureGenerator extends TextureGenerator {
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, scaledWaterDepth, shadows);
+        Pipeline.await(texturesLowMask, texturesHighMask, terrainType,
+                       normals, scaledWaterDepth, shadows, waterSurfaceShadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(), shadows.getFinalMask()));
+            map.setRawMapTexture(
+                    ImageUtil.getMapwideTextureBytes(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
+                            shadows.getFinalMask()));
+            map.setWaterSurfaceShadow(map.getWaterShadowMap(), waterSurfaceShadows.getFinalMask());
         });
     }
 }

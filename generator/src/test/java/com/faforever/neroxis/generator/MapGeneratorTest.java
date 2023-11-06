@@ -381,7 +381,7 @@ public class MapGeneratorTest {
         assertTrue(compareImages(map1.getWaterMap(), map2.getWaterMap()));
         assertTrue(compareImages(map1.getWaterFoamMap(), map2.getWaterFoamMap()));
         assertTrue(compareImages(map1.getWaterDepthBiasMap(), map2.getWaterDepthBiasMap()));
-        assertTrue(compareImages(map1.getWaterFlatnessMap(), map2.getWaterFlatnessMap()));
+        assertTrue(compareImages(map1.getWaterShadowMap(), map2.getWaterShadowMap()));
         assertTrue(compareImages(map1.getTerrainType(), map2.getTerrainType()));
     }
 }

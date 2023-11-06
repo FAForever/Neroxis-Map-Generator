@@ -175,7 +175,7 @@ public class SCMapExporter {
         writeInt(1); // unknown
         writeCompressedImage(map.getWaterMap(), waterDDSHeader); // watermap data
         writeImageBytes(map.getWaterFoamMap()); // water foam mask data
-        writeImageBytes(map.getWaterFlatnessMap()); // water flatness mask data
+        writeImageBytes(map.getWaterShadowMap()); // water surface shadow mask data
         writeImageBytes(map.getWaterDepthBiasMap()); // water depth bias mask data
 
         // terrain type

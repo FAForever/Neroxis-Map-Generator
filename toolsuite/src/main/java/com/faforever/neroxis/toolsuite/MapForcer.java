@@ -127,7 +127,7 @@ public class MapForcer implements Callable<Integer> {
         IntegerMask normalMask = new IntegerMask(map.getNormalMap(), null, symmetrySettings, "normal");
         IntegerMask waterMask = new IntegerMask(map.getWaterMap(), null, symmetrySettings, "water");
         IntegerMask waterFoamMask = new IntegerMask(map.getWaterFoamMap(), null, symmetrySettings, "waterFoam");
-        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterFlatnessMap(), null, symmetrySettings,
+        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterShadowMap(), null, symmetrySettings,
                                                         "waterFlatness");
         IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings,
                                                          "waterDepthBias");
@@ -164,7 +164,7 @@ public class MapForcer implements Callable<Integer> {
         normalMask.writeToImage(map.getNormalMap());
         waterMask.writeToImage(map.getWaterMap());
         waterFoamMask.writeToImage(map.getWaterFoamMap());
-        waterFlatnessMask.writeToImage(map.getWaterFlatnessMap());
+        waterFlatnessMask.writeToImage(map.getWaterShadowMap());
         waterDepthBiasMask.writeToImage(map.getWaterDepthBiasMap());
         terrainTypeMask.writeToImage(map.getTerrainType());
         textureMasksLowMask.writeToImage(map.getTextureMasksLow());
