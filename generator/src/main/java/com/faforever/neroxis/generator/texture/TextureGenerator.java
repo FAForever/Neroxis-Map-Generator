@@ -65,8 +65,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                     .subtract(generatorParameters.biome().waterSettings().getElevation())
                                     .multiply(-1f)
                                     .divide(abyssDepth)
-                                    .clampMin(0f)
-                                    .clampMax(1f);
+                                    .clampMin(0f);
 
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",

@@ -21,7 +21,7 @@ public class Biomes {
     // ├-- WaterSettings.scmwtr <required>
     // └-- Light.scmlighting <required>
     public static final List<String> BIOMES_LIST = List.of("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                                                           "Loki", "Mars", "Moonlight", "Prayer", "Stones",
+                                                           "PBR_Loki", "Mars", "Moonlight", "Prayer", "Stones",
                                                            "Syrtis", "WindingRiver", "Wonder");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 

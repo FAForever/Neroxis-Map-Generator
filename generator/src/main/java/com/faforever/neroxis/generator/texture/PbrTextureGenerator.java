@@ -114,7 +114,7 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .add(scaledWaterDepth.copy().multiply(.3f))
                 .clampMax(1f)
                 .blur(1);
-        roughnessModifierTexture.setSize(textureSize).add(0.01f);
+        roughnessModifierTexture.setSize(textureSize).add(0.5f);
         
         texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);

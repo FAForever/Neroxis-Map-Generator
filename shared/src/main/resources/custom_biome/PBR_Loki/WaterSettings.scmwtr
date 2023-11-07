@@ -17,7 +17,7 @@
   "skyReflection": 1.0,
   "sunGlow": 0.05,
   "waterPresent": true,
-  "elevationAbyss": 3.0,
+  "elevationAbyss": 10.0,
   "refractionScale": 0.375,
   "elevationDeep": 18.0,
   "colorLerp": {
