@@ -26,21 +26,36 @@ public class PbrTextureGenerator implements Callable<Integer> {
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
+    @CommandLine.Option(names = "--size", defaultValue = "1024", description = "Size of the input textures in pixels. Defaults to 1024.")
+    private Integer textureImageSize;
 
     @Override
     public Integer call() throws Exception {
+        if (!isPowerOfTwo(textureImageSize)) {
+            throw new IllegalArgumentException("Texture size must be a power of two!");
+        }
         generatePbrTexture();
         return 0;
     }
     
     SymmetrySettings noSymmetry = new SymmetrySettings(Symmetry.NONE);
+
+    public boolean isPowerOfTwo(int number) {
+        if(number <=0){
+            return false;
+        }
+        if ((number & -number) == number) {
+            return true;
+        }
+        return false;
+    }
     
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputFolderMixin.getOutputPath())) {
-            int size = 4096;
-            int offset = size / 2;
-            Vector4Mask pbrMask = new Vector4Mask(size, 0L, noSymmetry);
-            BufferedImage pbrTexture = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            int pbrTextureSize = textureImageSize * 4;
+            int offset = pbrTextureSize / 2;
+            Vector4Mask pbrMask = new Vector4Mask(pbrTextureSize, 0L, noSymmetry);
+            BufferedImage pbrTexture = new BufferedImage(pbrTextureSize, pbrTextureSize, BufferedImage.TYPE_INT_ARGB);
             int filesProcessed = 0;
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
@@ -55,6 +70,10 @@ public class PbrTextureGenerator implements Callable<Integer> {
                             FloatMask roughness = createOffsetMaskFromImage(image);
                             if (image.getType() == BufferedImage.TYPE_USHORT_GRAY) {
                                 roughness.divide(256f);
+                            } else if (image.getType() != BufferedImage.TYPE_BYTE_GRAY) {
+                                throw new RuntimeException("Unsupported image type! " +
+                                        "The image must be a single channel grayscale texture. " +
+                                        "No rgb or alpha channel allowed.");
                             }
                             int component = (layer >= 4) ? 3 : 1;
                             int xOffset = (layer % 2 == 1) ? offset : 0;
@@ -79,7 +98,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
             if (filesProcessed == 0) {
                 throw new RuntimeException("No files found to write into the pbr texture. " +
                         "The files need to be named 'RoughnessX' or 'HeightX' where X is the number " +
-                        "that specifies the texture layer");
+                        "that specifies the texture layer.");
             }
             pbrMask.writeToImage(pbrTexture);
             Path textureDirectory = outputFolderMixin.getOutputPath();
