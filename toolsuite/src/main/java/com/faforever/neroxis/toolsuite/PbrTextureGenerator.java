@@ -26,14 +26,18 @@ public class PbrTextureGenerator implements Callable<Integer> {
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
-    @CommandLine.Option(names = "--size", defaultValue = "1024", description = "Size of the input textures in pixels. Defaults to 1024.")
     private Integer textureImageSize;
+
+    @CommandLine.Option(names = "--size", defaultValue = "1024", description = "Size of the input textures in pixels. Defaults to 1024.")
+    public void setTextureImageSize(int size) {
+        if (!isPowerOfTwo(size)) {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Texture size must be a power of two!");
+        }
+        textureImageSize = size;
+    }
 
     @Override
     public Integer call() throws Exception {
-        if (!isPowerOfTwo(textureImageSize)) {
-            throw new IllegalArgumentException("Texture size must be a power of two!");
-        }
         generatePbrTexture();
         return 0;
     }
