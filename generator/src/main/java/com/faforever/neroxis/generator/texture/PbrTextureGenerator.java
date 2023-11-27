@@ -21,7 +21,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     protected FloatMask plateauTexture;
     protected FloatMask slopesTexture;
     protected FloatMask underWaterTexture;
-    protected FloatMask cliffTexture;
+    protected FloatMask waterBeachTexture;
     protected FloatMask cliffAccentTexture;
     protected FloatMask roughnessModifierTexture;
     protected IntegerMask terrainType;
@@ -48,6 +48,7 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .add(realWater)
                 .copyAsFloatMask(0, 1)
                 .blur(4);
+        FloatMask cliffMask = cliff.copyAsFloatMask(0, 1).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
 
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);
@@ -65,7 +66,9 @@ public class PbrTextureGenerator extends TextureGenerator {
 
         int textureSize = generatorParameters.mapSize() + 1;
         int mapSize = generatorParameters.mapSize();
-        cliffTexture.init(cliff, 0f, 1f).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
+        waterBeachTexture.setSize(textureSize)
+                .add(waterBeach)
+                .subtract(cliffMask);
         cliffAccentTexture.setSize(textureSize)
                 .addPerlinNoise(32, 1f)
                 .addGaussianNoise(.05f)
@@ -75,7 +78,7 @@ public class PbrTextureGenerator extends TextureGenerator {
         groundTexture.setSize(textureSize)
                 .add(1f)
                 .subtract(waterBeach)
-                .subtract(cliffTexture)
+                .subtract(cliffMask)
                 .clampMin(0f);
         groundAccentTexture.setSize(textureSize)
                 .addPerlinNoise(64, 1f)
@@ -89,7 +92,7 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .multiply(4f)
                 .clampMax(1f)
                 .subtract(waterBeach)
-                .subtract(cliffTexture.copy().subtract(0.2f).clampMin(0f));
+                .subtract(cliffMask.copy().subtract(0.2f).clampMin(0f));
         debrisTexture.init(cliff.copy().inflate(8), 0f, 1f)
                 .subtract(0.25f)
                 .addPerlinNoise(10, .2f)
@@ -109,14 +112,14 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .clampMin(0f)
                 .blur(4)
                 .clampMax(1f)
-                .subtract(cliffTexture.copy().subtract(0.4f).clampMin(0f));
+                .subtract(cliffMask.copy().subtract(0.4f).clampMin(0f));
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
                 .add(scaledWaterDepth.copy().multiply(.3f))
                 .clampMax(1f)
                 .blur(1);
         roughnessModifierTexture.setSize(textureSize).add(0.5f);
         
-        texturesLowMask.setComponents(cliffTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
+        texturesLowMask.setComponents(waterBeachTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);
 
         setupTerrainType(mapSize);
@@ -127,8 +130,8 @@ public class PbrTextureGenerator extends TextureGenerator {
 
         Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
         terrainType.add(terrainTypes[0])
-                .setToValue(cliffAccentTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[1])
-                .setToValue(cliffTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[2])
+                .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[1])
+                .setToValue(cliffAccentTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[2])
                 .setToValue(groundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[3])
                 .setToValue(groundAccentTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[4])
                 .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[5])
@@ -147,8 +150,8 @@ public class PbrTextureGenerator extends TextureGenerator {
         realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().getElevation());
         realPlateaus = heightmap.copyAsBooleanMask(
                 generatorParameters.biome().waterSettings().getElevation() + 5f);
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture", true);
-        cliffTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffTexture", true);
         groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture", true);
         groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture", true);
         slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);

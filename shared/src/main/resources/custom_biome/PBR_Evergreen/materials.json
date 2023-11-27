@@ -1,25 +1,4 @@
 {
-  "previewColors": [
-    "8f704c",
-    "4a4a49",
-    "49505d",
-    "091601",
-    "353e1d",
-    "34401a",
-    "68503a",
-    "303b19"
-  ],
-  "normalScales": [
-    4.0,
-    1.0,
-    6.0,
-    16.0,
-    4.0,
-    13.75,
-    13.75,
-    12.25,
-    1.0
-  ],
   "name": "PBR_Evergreen",
   "cubeMaps": [
     {
@@ -31,44 +10,65 @@
       "path": "/textures/environment/DefaultEnvCube_mirrored.dds"
     }
   ],
-  "normalPaths": [
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
-    "/env/Evergreen2/Layers/EvRock006_normal.dds",
-    "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
-    "/env/Evergreen/layers/grass000_normals.dds",
-    "/env/Evergreen/layers/grass001_normals.dds",
-    "/env/Evergreen/layers/SandLight_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
-    ""
-  ],
   "texturePaths": [
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock008_albedo.dds",
-    "/env/Geothermal/layers/Geo_Rock001_albedo.DDS",
-    "/env/Evergreen2/Layers/EvGrass006_albedo.dds",
-    "/env/Ancient-Earth/layers/EvGrass004_grass_blend_albedo.dds",
-    "/env/Evergreen2/Layers/EvGrass004_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock006c_albedo.dds",
     "/env/Desert/Layers/Des_SandDark02_albedo.dds",
-    "/env/Ancient-Earth/layers/EvGrass008_darker_albedo.dds",
-    "",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+    "/env/Evergreen2/Layers/EvRock007c_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass003_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass010a_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel004_albedo.dds",
+    "/env/Evergreen/layers/RockLight_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass010_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
+    "map/env/layers/mapwide.dds"
   ],
   "textureScales": [
-    20.0,
-    11.0,
-    12.0,
-    10.25,
-    16.0,
-    7.25,
-    14.0,
-    12.25,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
     1.0,
     128.0
   ],
+  "normalPaths": [
+    "/env/Evergreen2/Layers/EvRock006_normal.dds",
+    "/env/Tundra/Layers/Tund_Snow04_normal.DDS",
+    "/env/Evergreen2/Layers/EvRock007_normal.dds",
+    "/env/Evergreen/layers/RockMed_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+    "/env/Tundra/Layers/Tund_Rock_normal.dds",
+    "/env/Evergreen/layers/RockLight_normals.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "map/env/layers/heightRoughness.dds"
+  ],
+  "normalScales": [
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    31.0,
+    1.0
+  ],
+  "previewColors": [
+    "4a4a49",
+    "8f704c",
+    "49505d",
+    "091601",
+    "353e1d",
+    "34401a",
+    "68503a",
+    "303b19"
+  ],
   "terrainTypes": [
-    40,
     162,
+    40,
     159,
     83,
     82,
