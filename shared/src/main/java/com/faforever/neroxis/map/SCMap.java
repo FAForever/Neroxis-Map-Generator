@@ -478,6 +478,8 @@ public class SCMap {
                                       StrictMath.round(textureMasksHigh.getHeight() * contentScale));
         textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale),
                                      StrictMath.round(textureMasksLow.getHeight() * contentScale));
+        mapwideTexture = scaleImage(mapwideTexture, StrictMath.round(mapwideTexture.getWidth() * contentScale),
+                                    StrictMath.round(mapwideTexture.getHeight() * contentScale));
     }
 
     private void scaleMapBounds(float boundsScale, Vector2 topLeftOffset) {
@@ -485,6 +487,7 @@ public class SCMap {
         float waterMapScale = (float) waterMap.getWidth() / size;
         float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
         float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
+        float mapwideTextureScale = (float) mapwideTexture.getWidth() / size;
         preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
         Vector2 previewOffset = boundsScale > 1 ? new Vector2(128 - 128 / boundsScale,
                                                               128 - 128 / boundsScale) : new Vector2(-64 / boundsScale,
@@ -524,6 +527,10 @@ public class SCMap {
                                                         StrictMath.round(textureMasksLow.getWidth() * boundsScale),
                                                         StrictMath.round(textureMasksLow.getHeight() * boundsScale),
                                                         new Vector2(topLeftOffset).multiply(textureMaskLowScale));
+        mapwideTexture = insertImageIntoNewImageOfSize(mapwideTexture,
+                                                       StrictMath.round(mapwideTexture.getWidth() * boundsScale),
+                                                       StrictMath.round(mapwideTexture.getHeight() * boundsScale),
+                                                       new Vector2(topLeftOffset).multiply(mapwideTextureScale));
     }
 
     private void moveObjects(float contentScale, Vector2 offset) {
