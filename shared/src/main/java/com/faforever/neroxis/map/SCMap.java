@@ -62,7 +62,6 @@ public class SCMap {
     private final List<AIMarker> largeExpansionAIMarkers;
     private final List<AIMarker> navalAreaAIMarkers;
     private final List<AIMarker> navalRallyMarkers;
-    private byte[] rawMapTexture;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)
@@ -91,6 +90,7 @@ public class SCMap {
     private BufferedImage waterFlatnessMap;
     private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
+    private BufferedImage mapwideTexture;
     private int cartographicContourInterval = 100;
     private int cartographicDeepWaterColor = new Color(71, 140, 181).getRGB();
     private int cartographicMapContourColor = new Color(0, 0, 0).getRGB();

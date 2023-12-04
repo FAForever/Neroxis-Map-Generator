@@ -60,7 +60,7 @@ public class MapEnvTextureExporter implements Callable<Integer> {
                 .clampMin(0f)
                 .clampMax(1f);
 
-        map.setRawMapTexture(ImageUtil.getMapwideTextureBytes(normals, scaledWaterDepth, shadows));
+        map.setMapwideTexture(ImageUtil.getMapwideTexture(normals, scaledWaterDepth, shadows));
         SCMapExporter.exportMapwideTexture(requiredMapPathMixin.getMapPath(), map);
     }
 }
