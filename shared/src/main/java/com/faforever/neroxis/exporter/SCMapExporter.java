@@ -228,13 +228,13 @@ public class SCMapExporter {
     }
 
     public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
-        byte[] rawTexture = map.getRawMapTexture();
+        BufferedImage image = map.getMapwideTexture();
         Path textureDirectory = Paths.get("env", "texture");
         Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
         Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
         try {
-            Files.write(writingPath, rawTexture, StandardOpenOption.CREATE);
+            ImageUtil.writeRawDDS(image, writingPath);
         } catch (IOException e) {
             System.out.print("Could not write the map-wide texture\n" + e);
         }

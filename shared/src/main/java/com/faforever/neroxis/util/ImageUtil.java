@@ -141,15 +141,43 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
-    public static byte[] getMapwideTextureBytes(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
+    public static void writeRawDDS(BufferedImage image, Path path) throws IOException {
+        int size = image.getHeight();
+        int length = size * size * 4;
+        Raster imageRaster = image.getData();
+        ByteBuffer imageBytes = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int[] values = imageRaster.getPixel(x, y, new int[4]);
+                for (int val : values) {
+                    imageBytes.put((byte) val);
+                }
+            }
+        }
+        DDSHeader ddsHeader = new DDSHeader();
+        ddsHeader.setWidth(size);
+        ddsHeader.setHeight(size);
+        ddsHeader.setRGBBitCount(32);
+        ddsHeader.setRBitMask(0x000000FF);
+        ddsHeader.setGBitMask(0x0000FF00);
+        ddsHeader.setBBitMask(0x00FF0000);
+        ddsHeader.setABitMask(0xFF000000);
+        
+        // If we don't do this we get weird results when the file already exists
+        Files.deleteIfExists(path);
+        Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
+        Files.write(path, imageBytes.array(), StandardOpenOption.APPEND);
+    }
+
+    public static BufferedImage getMapwideTexture(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
         if (shadowMask.getSize() != normalMask.getSize()) {
             throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"
                     .formatted(shadowMask.getSize(), normalMask.getSize()));
         }
         waterDepth.resample(shadowMask.getSize());
         int size = shadowMask.getSize();
-        int length = size * size * 4;
-        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        WritableRaster imageRaster = image.getRaster();
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 normalValue = normalMask.get(x, y);
@@ -157,13 +185,10 @@ public class ImageUtil {
                 int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
                 int zV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
                 int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
-                imageByteBuffer.put((byte) xV);
-                imageByteBuffer.put((byte) yV);
-                imageByteBuffer.put((byte) zV);
-                imageByteBuffer.put((byte) wV);
+                imageRaster.setPixel(x, y, new int[]{xV, yV, zV, wV});
             }
         }
-        return getRawDDSImageBytes(size, imageByteBuffer);
+        return image;
     }
 
     public static BufferedImage normalToARGB(NormalMask mask) {
