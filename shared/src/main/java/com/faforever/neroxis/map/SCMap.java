@@ -91,12 +91,12 @@ public class SCMap {
     private BufferedImage waterFlatnessMap;
     private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
-    private int cartographicContourInterval = 1000;
-    private int cartographicDeepWaterColor = new Color(0, 34, 255).getRGB();
-    private int cartographicMapContourColor = new Color(255, 0, 0).getRGB();
-    private int cartographicMapShoreColor = new Color(161, 192, 255).getRGB();
-    private int cartographicMapLandStartColor = new Color(255, 255, 255).getRGB();
-    private int cartographicMapLandEndColor = new Color(0, 0, 0).getRGB();
+    private int cartographicContourInterval = 100;
+    private int cartographicDeepWaterColor = new Color(71, 140, 181).getRGB();
+    private int cartographicMapContourColor = new Color(0, 0, 0).getRGB();
+    private int cartographicMapShoreColor = new Color(141, 200, 225).getRGB();
+    private int cartographicMapLandStartColor = new Color(119, 101, 108).getRGB();
+    private int cartographicMapLandEndColor = new Color(206, 206, 176).getRGB();
 
     public SCMap(int size, Biome biome) {
         this.size = size;
