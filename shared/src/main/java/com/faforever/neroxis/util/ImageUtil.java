@@ -5,6 +5,7 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
@@ -189,6 +190,50 @@ public class ImageUtil {
             }
         }
         return image;
+    }
+
+    public static byte[] compressNormal(NormalMask mask) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector3 value = mask.get(x, y);
+                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+                imageByteBuffer.put((byte) yV);
+                imageByteBuffer.put((byte) zV);
+                imageByteBuffer.put((byte) 0);
+                imageByteBuffer.put((byte) xV);
+            }
+        }
+        return getCompressedDDSImageBytes(size, imageByteBuffer);
+    }
+
+    public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
+        int size = mask.getSize();
+        int length = size * size * 4;
+        Vector3 shadowFillColor = lightingSettings.getShadowFillColor()
+                                                  .copy()
+                                                  .add(lightingSettings.getSunAmbience())
+                                                  .divide(4);
+        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                float value = mask.get(x, y);
+                int r = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getX() * 128, 0), 255);
+                int g = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getY() * 128, 0), 255);
+                int b = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getZ() * 128, 0), 255);
+                int a = (byte) StrictMath.min(StrictMath.max((1 - value) * opacityScale * 255, 0), 255);
+                imageByteBuffer.put((byte) r);
+                imageByteBuffer.put((byte) g);
+                imageByteBuffer.put((byte) b);
+                imageByteBuffer.put((byte) a);
+            }
+        }
+        return getCompressedDDSImageBytes(size, imageByteBuffer);
     }
 
     public static BufferedImage normalToARGB(NormalMask mask) {

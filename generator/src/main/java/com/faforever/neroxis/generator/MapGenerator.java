@@ -47,7 +47,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.faforever.neroxis.map.SCMap.MAP_WIDE_ASSETS_SHADER_NAME;
 import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
@@ -451,10 +450,6 @@ public class MapGenerator implements Callable<Integer> {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
             Visibility visibility = generatorParameters.visibility();
-            SCMapExporter.exportMapwideTexture(outputPath.resolve(mapName), map);
-            if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-                SCMapExporter.exportPBR(outputPath.resolve(mapName), map);
-            }
             MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
@@ -530,9 +525,6 @@ public class MapGenerator implements Callable<Integer> {
                                                                        .getCubeMaps()
                                                                        .get(0)
                                                                        .getPath();
-        }
-        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME) ||
-            map.getTerrainShaderPath().equals(MAP_WIDE_ASSETS_SHADER_NAME)) {
             map.getBiome().terrainMaterials().getTexturePaths()[9] = Path.of("/maps", map.getFolderName(), "env",
                                                                              "texture", "mapwide.dds")
                                                                          .toString()

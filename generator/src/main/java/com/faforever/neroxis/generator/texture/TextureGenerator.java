@@ -84,6 +84,15 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         });
     }
 
+    public void setCompressedDecals() {
+        Pipeline.await(normals, shadows);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
+                    generatorParameters.biome().lightingSettings()));
+            map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
+        });
+    }
+
     public void generatePreview() {
         Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, reflectance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
