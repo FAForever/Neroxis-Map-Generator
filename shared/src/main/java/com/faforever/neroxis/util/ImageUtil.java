@@ -223,10 +223,10 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 float value = mask.get(x, y);
-                int r = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getX() * 128, 0), 255);
-                int g = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getY() * 128, 0), 255);
-                int b = (byte) StrictMath.min(StrictMath.max(value * shadowFillColor.getZ() * 128, 0), 255);
-                int a = (byte) StrictMath.min(StrictMath.max(value * opacityScale * 255, 0), 255);
+                int r = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getX() * 128, 0), 255);
+                int g = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getY() * 128, 0), 255);
+                int b = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getZ() * 128, 0), 255);
+                int a = (byte) StrictMath.min(StrictMath.max((1 - value) * opacityScale * 255, 0), 255);
                 imageByteBuffer.put((byte) r);
                 imageByteBuffer.put((byte) g);
                 imageByteBuffer.put((byte) b);
