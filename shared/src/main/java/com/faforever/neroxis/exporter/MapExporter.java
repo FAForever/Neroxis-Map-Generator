@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static com.faforever.neroxis.map.SCMap.LEGACY_SHADER_NAME;
+import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 
 public class MapExporter {
     public static void exportMap(Path folderPath, SCMap map, boolean exportPreview) {
@@ -21,7 +22,7 @@ public class MapExporter {
                 if (map.getCompressedShadows() != null) {
                     SCMapExporter.exportShadows(mapPath, map);
                 }
-            } else {
+            } else if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)){
                 SCMapExporter.exportMapwideTexture(folderPath.resolve(map.getFolderName()), map);
                 SCMapExporter.exportPBR(folderPath.resolve(map.getFolderName()), map);
             }
