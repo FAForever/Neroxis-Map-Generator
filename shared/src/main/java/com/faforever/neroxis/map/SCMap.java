@@ -69,7 +69,7 @@ public class SCMap {
     private Vector4 playableArea;
     private int minorVersion = 56;
     private String description = "";
-    private String terrainShaderPath = MAP_WIDE_ASSETS_SHADER_NAME;
+    private String terrainShaderPath = LEGACY_SHADER_NAME;
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private boolean generatePreview;
     private boolean isUnexplored;
