@@ -1,12 +1,6 @@
 package com.faforever.neroxis.exporter;
 
-import com.faforever.neroxis.map.CubeMap;
-import com.faforever.neroxis.map.Decal;
-import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.Prop;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.WaveGenerator;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
@@ -224,6 +218,47 @@ public class SCMapExporter {
             ImageIO.write(renderedImage, fileFormat, previewFile);
         } catch (IOException e) {
             System.out.print("Could not write the preview image\n" + e);
+        }
+    }
+
+    public static void exportNormals(Path folderPath, SCMap map) throws IOException {
+        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
+        byte[] compressedNormal = map.getCompressedNormal();
+        final String fileFormat = "dds";
+        Path decalsPath = Paths.get("env", "decals");
+        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
+        Path decalPath = decalsPath.resolve(String.format("map_normal.%s", fileFormat));
+        Path writingPath = folderPath.resolve(decalPath);
+        Files.createDirectories(writingPath.getParent());
+        map.getDecals()
+           .add(new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset, new Vector3(),
+                          size, 1000));
+        try {
+            Files.write(writingPath, compressedNormal, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            System.out.print("Could not write the normal map image\n" + e);
+        }
+    }
+
+    public static void exportShadows(Path folderPath, SCMap map) throws IOException {
+        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
+        byte[] compressedShadows = map.getCompressedShadows();
+        final String fileFormat = "dds";
+        Path decalsPath = Paths.get("env", "decals");
+        Path decalParent = Paths.get("/maps").resolve(map.getFolderName());
+        Path decalPath = decalsPath.resolve(String.format("map_shadows.%s", fileFormat));
+        Path writingPath = folderPath.resolve(decalPath);
+        Files.createDirectories(writingPath.getParent());
+        Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
+                                      new Vector3(), size, 1000);
+        shadowDecal.setType(DecalType.WATER_ALBEDO);
+        map.getDecals().add(shadowDecal);
+        try {
+            Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            System.out.print("Could not write the shadow map image\n" + e);
         }
     }
 

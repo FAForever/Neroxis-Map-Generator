@@ -31,7 +31,6 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 @SuppressWarnings("unused")
 @Data
 public class SCMap {
-    public static final String MAP_WIDE_ASSETS_SHADER_NAME = "Terrain002";
     public static final String PBR_SHADER_NAME = "TerrainPBR";
     public static final String LEGACY_SHADER_NAME = "TTerrainXP";
     public static final int SIGNATURE = 443572557;
@@ -62,6 +61,8 @@ public class SCMap {
     private final List<AIMarker> largeExpansionAIMarkers;
     private final List<AIMarker> navalAreaAIMarkers;
     private final List<AIMarker> navalRallyMarkers;
+    private byte[] compressedNormal;
+    private byte[] compressedShadows;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)
