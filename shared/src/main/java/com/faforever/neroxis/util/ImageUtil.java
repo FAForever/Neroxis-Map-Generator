@@ -141,6 +141,34 @@ public class ImageUtil {
         Files.write(path, compressedData, StandardOpenOption.APPEND);
     }
 
+    public static void writeRawDDS(BufferedImage image, Path path) throws IOException {
+        int size = image.getHeight();
+        int length = size * size * 4;
+        Raster imageRaster = image.getData();
+        ByteBuffer imageBytes = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int[] values = imageRaster.getPixel(x, y, new int[4]);
+                for (int val : values) {
+                    imageBytes.put((byte) val);
+                }
+            }
+        }
+        DDSHeader ddsHeader = new DDSHeader();
+        ddsHeader.setWidth(size);
+        ddsHeader.setHeight(size);
+        ddsHeader.setRGBBitCount(32);
+        ddsHeader.setRBitMask(0x000000FF);
+        ddsHeader.setGBitMask(0x0000FF00);
+        ddsHeader.setBBitMask(0x00FF0000);
+        ddsHeader.setABitMask(0xFF000000);
+        
+        // If we don't do this we get weird results when the file already exists
+        Files.deleteIfExists(path);
+        Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
+        Files.write(path, imageBytes.array(), StandardOpenOption.APPEND);
+    }
+
     public static BufferedImage getMapwideTexture(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
         if (shadowMask.getSize() != normalMask.getSize()) {
             throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"

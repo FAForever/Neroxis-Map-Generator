@@ -234,7 +234,7 @@ public class SCMapExporter {
         Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
         try {
-            ImageUtil.writeCompressedDDS(image, writingPath);
+            ImageUtil.writeRawDDS(image, writingPath);
         } catch (IOException e) {
             System.out.print("Could not write the map-wide texture\n" + e);
         }
