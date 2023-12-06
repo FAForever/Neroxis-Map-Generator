@@ -1,9 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-dependencies {
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
-
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
-}
