@@ -520,9 +520,6 @@ public class MapGenerator implements Callable<Integer> {
                                                                              "layers", "heightRoughness.dds")
                                                                          .toString()
                                                                          .replace("\\", "/");
-            map.getBiome().terrainMaterials().getTexturePaths()[8] = map.getBiome()
-                                                                       .terrainMaterials()
-                                                                       .getTexturePaths()[9];
             map.getBiome().terrainMaterials().getTexturePaths()[9] = Path.of("/maps", map.getFolderName(), "env",
                                                                              "layers", "mapwide.dds")
                                                                          .toString()
