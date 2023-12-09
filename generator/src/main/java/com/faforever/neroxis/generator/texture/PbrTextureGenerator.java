@@ -158,7 +158,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        map.setTerrainShaderPath(SCMap.PBR_SHADER_NAME);
+        this.map.setTerrainShaderPath(SCMap.PBR_SHADER_NAME);
         
         realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().getElevation());
         realPlateaus = heightmap.copyAsBooleanMask(
