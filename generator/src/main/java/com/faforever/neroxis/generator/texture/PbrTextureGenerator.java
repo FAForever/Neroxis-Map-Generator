@@ -70,32 +70,38 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .add(waterBeach)
                 .subtract(cliffMask);
         cliffAccentTexture.setSize(textureSize)
-                .addPerlinNoise(32, 1f)
-                .addGaussianNoise(.05f)
+                .add(0.2f)
+                .addPerlinNoise(mapSize / 32, 0.6f)
                 .clampMax(1f)
                 .setToValue(extendedCliff.copy().invert(), 0f)
-                .blur(2);
+                .blur(2)
+                .addGaussianNoise(.05f);
         groundTexture.setSize(textureSize)
                 .add(1f)
                 .subtract(waterBeach)
                 .subtract(cliffMask)
                 .clampMin(0f);
         groundAccentTexture.setSize(textureSize)
-                .addPerlinNoise(64, 1f)
+                .add(0.1f)
+                .addPerlinNoise(mapSize / 16, 0.5f)
+                .addPerlinNoise(mapSize / 6, 0.2f)
                 .addGaussianNoise(.05f)
                 .clampMax(1f)
                 .multiply(groundTexture)
-                .blur(2)
                 .clampMin(0f);
         slopesTexture.init(slope)
                 .subtract(0.05f)
                 .multiply(4f)
+                .addPerlinNoise(mapSize / 40, .2f)
+                .addPerlinNoise(mapSize / 8, .1f)
+                .addGaussianNoise(.05f)
+                .subtract(0.2f)
                 .clampMax(1f)
                 .subtract(waterBeach)
                 .subtract(cliffMask.copy().subtract(0.2f).clampMin(0f));
         debrisTexture.init(cliff.copy().inflate(8), 0f, 1f)
                 .subtract(0.25f)
-                .addPerlinNoise(10, .2f)
+                .addPerlinNoise(mapSize / 8, .2f)
                 .addGaussianNoise(.05f)
                 .setToValue(debris.copy().invert(), 0f)
                 .setToValue(realPlateaus, 0f)
@@ -106,18 +112,25 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .blur(1);
         plateauTexture.setSize(textureSize)
                 .add(0.5f)
-                .addPerlinNoise(30, .4f)
+                .addPerlinNoise(mapSize / 40, .4f)
                 .setToValue(realPlateaus.copy().invert(), 0f)
                 .multiply(slope.copyAsBooleanMask(0.01f).deflate(4), slope.copy().multiply(-10f).add(1f).clampMin(0f))
                 .clampMin(0f)
-                .blur(4)
-                .clampMax(1f)
-                .subtract(cliffMask.copy().subtract(0.4f).clampMin(0f));
+                .blur(3)
+                .subtract(cliffMask.copy().subtract(0.8f).clampMin(0f))
+                .blur(1)
+                .multiply(0.8f);
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
                 .add(scaledWaterDepth.copy().multiply(.3f))
                 .clampMax(1f)
                 .blur(1);
-        roughnessModifierTexture.setSize(textureSize).add(0.5f);
+        roughnessModifierTexture.setSize(textureSize)
+                .add(0.5f)
+                .addPerlinNoise(mapSize / 70, .1f);
+        
+        // due to the heightmapsplatting we effectively don't see a difference in very high or low values,
+        // so we compress the range a bit
+        slopesTexture.multiply(0.6f).add(slopesTexture.copyAsBooleanMask(0.01f), 0.3f);
         
         texturesLowMask.setComponents(waterBeachTexture, cliffAccentTexture, groundTexture, groundAccentTexture);
         texturesHighMask.setComponents(slopesTexture, debrisTexture, plateauTexture, roughnessModifierTexture);
