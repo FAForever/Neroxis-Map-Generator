@@ -114,10 +114,10 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .add(0.5f)
                 .addPerlinNoise(mapSize / 40, .4f)
                 .setToValue(realPlateaus.copy().invert(), 0f)
-                .multiply(slope.copyAsBooleanMask(0.01f).deflate(4), slope.copy().multiply(-10f).add(1f).clampMin(0f))
+                .multiply(slope.copyAsBooleanMask(0.01f).deflate(4), slope.copy().multiply(-8f).add(1f).clampMin(0f))
                 .clampMin(0f)
-                .blur(3)
-                .subtract(cliffMask.copy().subtract(0.8f).clampMin(0f))
+                .blur(2)
+                .setToValue(cliff, 0f)
                 .blur(1)
                 .multiply(0.8f);
         underWaterTexture.init(realWater.deflate(1), 0f, .7f)
