@@ -12,7 +12,7 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
+    public static final int NUM_DETERMINISM_REPEATS = 10;
     String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaebsicfsuqek5cm";
     long seed = 1234;
     byte spawnCount = 2;
@@ -91,7 +92,6 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(ValidMapSizeArgumentProvider.class)
-    @Disabled("Flaky Test, OOM")
     public void TestMapExportedToProperSize(int mapSize) {
         new CommandLine(instance).execute("--map-size", String.valueOf(mapSize));
 
@@ -100,7 +100,7 @@ public class MapGeneratorTest {
         assertEquals(0, (StrictMath.log(map.getSize()) / StrictMath.log(2)) % 1);
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestDeterminism() {
         new CommandLine(instance).execute(keywordArgs);
         assertEquals(instance.getGeneratorParameters(), instance.getStyleGenerator().getGeneratorParameters());
@@ -166,7 +166,7 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityTournamentStyle() {
         new CommandLine(instance).execute("--tournament-style", "--map-size", "256");
         SCMap map1 = instance.getMap();
@@ -216,7 +216,7 @@ public class MapGeneratorTest {
         assertFalse(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityBlind() {
         new CommandLine(instance).execute("--blind", "--map-size", "256");
         SCMap map1 = instance.getMap();
@@ -237,7 +237,7 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityUnexplored() {
         new CommandLine(instance).execute("--unexplored", "--map-size", "256");
         SCMap map1 = instance.getMap();
@@ -306,17 +306,15 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestUnexploredNoUnits() {
-        for (int i = 0; i < 10; ++i) {
-            instance = new MapGenerator();
-            new CommandLine(instance).execute("--unexplored", "--map-size", "256");
-            SCMap map = instance.getMap();
+        instance = new MapGenerator();
+        new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+        SCMap map = instance.getMap();
 
-            for (Army army : map.getArmies()) {
-                for (Group group : army.getGroups()) {
-                    assertEquals(0, group.getUnits().size());
-                }
+        for (Army army : map.getArmies()) {
+            for (Group group : army.getGroups()) {
+                assertEquals(0, group.getUnits().size());
             }
         }
     }
@@ -346,14 +344,22 @@ public class MapGeneratorTest {
     private static class BiomeArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Biomes.BIOMES_LIST.stream().map(Arguments::of);
+            return Biomes.BIOMES_LIST.stream().mapMulti(((biome, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(biome);
+                }
+            })).map(Arguments::of);
         }
     }
 
     private static class MapStyleArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(MapStyle.values()).map(Arguments::of);
+            return Arrays.stream(MapStyle.values()).mapMulti(((mapStyle, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(mapStyle);
+                }
+            })).map(Arguments::of);
         }
     }
 
