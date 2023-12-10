@@ -19,6 +19,7 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
 import java.awt.image.RenderedImage;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -276,20 +277,20 @@ public class SCMapExporter {
     }
 
     public static void exportPBR(Path folderPath, SCMap map) throws IOException {
-        URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.png");
-        if (sourceURL != null) {
-            BufferedImage image = ImageIO.read(sourceURL);
-            Path textureDirectory = Paths.get("env", "layers");
-            Path filePath = textureDirectory.resolve(PBR_DDS);
-            Path writingPath = folderPath.resolve(filePath);
-            Files.createDirectories(writingPath.getParent());
-            try {
-                ImageUtil.writeCompressedDDS(image, writingPath);
-            } catch (IOException e) {
-                System.out.print("Could not write the pbr texture\n" + e);
+        try {
+            URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.dds");
+            if (sourceURL != null) {
+                Path sourcePath = Paths.get(sourceURL.toURI());
+                Path textureDirectory = Paths.get("env", "layers");
+                Path filePath = textureDirectory.resolve(PBR_DDS);
+                Path writingPath = folderPath.resolve(filePath);
+                Files.createDirectories(writingPath.getParent());
+                Files.copy(sourcePath, writingPath, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                System.out.print("Can't find pbr texture to copy\n");
             }
-        } else {
-            System.out.print("Can't find pbr texture to write\n");
+        } catch (IOException | URISyntaxException e) {
+            System.out.print("Could not copy the pbr texture\n" + e);
         }
     }
 
