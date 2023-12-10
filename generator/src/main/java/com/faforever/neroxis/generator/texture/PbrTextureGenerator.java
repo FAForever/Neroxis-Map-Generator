@@ -38,7 +38,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     protected void setupTexturePipeline() {
         BooleanMask debris = slope.copyAsBooleanMask(.2f);
         BooleanMask cliff = slope.copyAsBooleanMask(.75f);
-        BooleanMask extendedCliff = slope.copyAsBooleanMask(.75f).inflate(2f);
+        BooleanMask extendedCliff = cliff.copy().inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
         FloatMask waterBeach = realWater.copy().inflate(11)
                 .subtract(realPlateaus)
@@ -48,10 +48,14 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .blur(4);
         FloatMask cliffMask = cliff.copyAsFloatMask(0, 1).blur(4).add(cliff, 1f).blur(2).add(cliff, 0.5f);
 
-        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
-        shadows.setToValue(shadowsInWater.copy(), 1f);
-        shadowsInWater.add(realLand.copy().setSize(map.getSize()), shadowsInWater.copy().inflate(6));
-        shadows.subtract(realWater.copy().setSize(map.getSize()),
+        int textureSize = generatorParameters.mapSize() + 1;
+        int mapSize = generatorParameters.mapSize();
+
+        BooleanMask realWaterMapSized = realWater.copy().setSize(mapSize);
+        BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWaterMapSized);
+        shadows.setToValue(shadowsInWater, 1f);
+        shadowsInWater.add(realLand.copy().setSize(mapSize), shadowsInWater.copy().inflate(6));
+        shadows.subtract(realWaterMapSized,
                         shadowsInWater.copyAsFloatMask(0, 1).blur(6))
                 .blur(1);
         waterSurfaceShadows = heightmap.copy()
@@ -62,8 +66,7 @@ public class PbrTextureGenerator extends TextureGenerator {
                 .copyAsFloatMask(1, 0)
                 .blur(1);
 
-        int textureSize = generatorParameters.mapSize() + 1;
-        int mapSize = generatorParameters.mapSize();
+
         waterBeachTexture.setSize(textureSize)
                 .add(waterBeach)
                 .subtract(cliffMask);
