@@ -30,9 +30,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                .biomes("PBR_Brimstone", "PBR_Desert", "PBR_EarlyAutumn","PBR_Evergreen",
-                        "PBR_Ice", "PBR_Loki", "PBR_RedBarrens", "PBR_Savanna", "PBR_Swamp",
-                        "PBR_Tropical")
+                .biomes("PBR_Loki")
                 .build();
     }
 
