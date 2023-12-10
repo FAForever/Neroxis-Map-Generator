@@ -12,6 +12,7 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -92,6 +93,7 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(ValidMapSizeArgumentProvider.class)
+    @Disabled("OOM")
     public void TestMapExportedToProperSize(int mapSize) {
         new CommandLine(instance).execute("--map-size", String.valueOf(mapSize));
 
