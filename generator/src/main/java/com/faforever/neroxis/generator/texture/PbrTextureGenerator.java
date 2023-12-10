@@ -184,7 +184,7 @@ public class PbrTextureGenerator extends TextureGenerator {
             map.setMapwideTexture(
                     ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
                             shadows.getFinalMask()));
-            map.setWaterSurfaceShadow(map.getWaterShadowMap(), waterSurfaceShadows.getFinalMask());
+            map.setWaterShadowMap(map.getWaterShadowMap(), waterSurfaceShadows.getFinalMask());
         });
     }
 }

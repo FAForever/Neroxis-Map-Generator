@@ -662,7 +662,7 @@ public class SCMap {
         }
     }
 
-    public void setWaterSurfaceShadow(BufferedImage waterShadowMap, FloatMask mask) {
+    public void setWaterShadowMap(BufferedImage waterShadowMap, FloatMask mask) {
         int waterShadowMapWidth = waterShadowMap.getWidth();
         checkMaskSize(mask, waterShadowMapWidth);
         for (int x = 0; x < waterShadowMapWidth; x++) {

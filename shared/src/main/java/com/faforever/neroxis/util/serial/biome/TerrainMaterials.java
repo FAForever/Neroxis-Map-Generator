@@ -21,5 +21,6 @@ public class TerrainMaterials {
     private String[] normalPaths = new String[TERRAIN_NORMAL_COUNT];
     private float[] normalScales = new float[TERRAIN_NORMAL_COUNT];
     private String[] previewColors = new String[TERRAIN_NORMAL_COUNT];
+    // Needs to have 10 entries
     private Integer[] terrainTypes = {};
 }
