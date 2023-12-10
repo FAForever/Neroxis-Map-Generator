@@ -29,7 +29,7 @@ public class BasicTextureGenerator extends TextureGenerator {
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
                 .biomes("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                        "Loki", "Mars", "Moonlight", "Prayer", "Stones",
+                        "Mars", "Moonlight", "Prayer", "Stones",
                         "Syrtis", "WindingRiver", "Wonder")
                 .build();
     }
