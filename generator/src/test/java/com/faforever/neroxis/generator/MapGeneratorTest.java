@@ -284,10 +284,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(BiomeArgumentProvider.class)
-    public void TestEqualityBiomeSpecified(String biome) {
+    public void TestEqualityBiomeSpecified(Biome biome) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--biome", biome, "--map-size", "256");
+        new CommandLine(instance).execute("--biome", biome.getValue(), "--map-size", "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
