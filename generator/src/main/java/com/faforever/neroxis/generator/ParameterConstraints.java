@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator;
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.util.Range;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -96,7 +97,7 @@ public record ParameterConstraints(Range landDensityRange,
         Range mapSizeRange = Range.of(0, 2048);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
-        List<String> biomes = Biomes.BIOMES_LIST;
+        List<String> biomes = Arrays.stream(Biome.values()).map(Biome::getValue).toList();
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,

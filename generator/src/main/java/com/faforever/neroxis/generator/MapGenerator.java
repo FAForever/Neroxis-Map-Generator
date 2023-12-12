@@ -121,6 +121,12 @@ public class MapGenerator implements Callable<Integer> {
         System.out.println(Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
     }
 
+    @Command(name = "biomes", aliases = {
+            "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printBiomes() {
+        System.out.println(Arrays.stream(Biome.values()).map(Biome::getValue).collect(Collectors.joining("\n")));
+    }
+
     @Override
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
@@ -213,7 +219,7 @@ public class MapGenerator implements Callable<Integer> {
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
         if (parameterOptions != null) {
             if (parameterOptions.getBiome() != null) {
-                generatorParametersBuilder.biome(parameterOptions.getBiome());
+                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiome()));
             }
             if (parameterOptions.getLandDensity() != null) {
                 generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
@@ -367,7 +373,7 @@ public class MapGenerator implements Callable<Integer> {
         randomizeOptions(generatorParametersBuilder);
 
         if (optionBytes.length == 11) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3])));
+            generatorParametersBuilder.biome(Biomes.loadBiome(Biome.values()[optionBytes[3]].getValue()));
             generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[4], NUM_BINS));
             generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
             generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
@@ -395,7 +401,7 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.biome(
-                Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
+                Biomes.loadBiome(Biome.values()[random.nextInt(Biome.values().length)].getValue()));
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
@@ -413,7 +419,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.biome().name()),
+                                         (byte) Biome.getIndexByValue(generatorParameters.biome().name()),
                                          (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),

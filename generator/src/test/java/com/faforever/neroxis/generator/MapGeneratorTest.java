@@ -346,7 +346,7 @@ public class MapGeneratorTest {
     private static class BiomeArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Biomes.BIOMES_LIST.stream().map(Arguments::of);
+            return Arrays.stream(Biome.values()).map(Arguments::of);
         }
     }
 
