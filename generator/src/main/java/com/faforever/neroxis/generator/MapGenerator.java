@@ -219,7 +219,7 @@ public class MapGenerator implements Callable<Integer> {
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
         if (parameterOptions != null) {
             if (parameterOptions.getBiome() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiome()));
+                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiome().getValue()));
             }
             if (parameterOptions.getLandDensity() != null) {
                 generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
@@ -419,7 +419,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) Biome.getIndexByValue(generatorParameters.biome().name()),
+                                         (byte) tuningOptions.getParameterOptions().getBiome().ordinal(),
                                          (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),

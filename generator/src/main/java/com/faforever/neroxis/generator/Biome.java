@@ -20,13 +20,4 @@ public enum Biome {
     WONDER("Wonder");
 
     private final String value;
-
-    public static int getIndexByValue(String value) {
-        for (int i = 0; i < values().length; i++) {
-            if (values()[i].getValue().equals(value)) {
-                return i;
-            }
-        }
-        return -1;
-    }
 }
