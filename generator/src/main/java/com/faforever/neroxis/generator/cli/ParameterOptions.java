@@ -61,6 +61,6 @@ public class ParameterOptions {
 
     @Option(names = "--biome", order = 8, description = "Texture biome for the generated map")
     public void setBiome(String biome) {
-        this.biome = Biome.valueOf(biome);
+        this.biome = Biome.getByValue(biome);
     }
 }

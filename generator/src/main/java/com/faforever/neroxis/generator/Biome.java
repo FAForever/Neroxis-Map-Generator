@@ -20,4 +20,13 @@ public enum Biome {
     WONDER("Wonder");
 
     private final String value;
+
+    public static Biome getByValue(String value) {
+        for (Biome biome : values()) {
+            if (biome.getValue().equalsIgnoreCase(value)) {
+                return biome;
+            }
+        }
+        return null;
+    }
 }
