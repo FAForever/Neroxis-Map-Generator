@@ -1,11 +1,11 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.biomes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Biome {
+public enum BiomeName {
     BRIMSTONE("Brimstone"),
     DESERT("Desert"),
     EARLYAUTUMN("EarlyAutumn"),
@@ -21,10 +21,10 @@ public enum Biome {
 
     private final String value;
 
-    public static Biome getByValue(String value) {
-        for (Biome biome : values()) {
-            if (biome.getValue().equalsIgnoreCase(value)) {
-                return biome;
+    public static BiomeName getByValue(String value) {
+        for (BiomeName biomeName : values()) {
+            if (biomeName.getValue().equalsIgnoreCase(value)) {
+                return biomeName;
             }
         }
         return null;

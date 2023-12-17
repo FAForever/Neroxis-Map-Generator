@@ -75,7 +75,7 @@ public class Biomes {
                     String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
         }
 
-        return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, decalMaterials, waterSettings,
+        return new Biome(BiomeName.getByValue(terrainMaterials.getName()), terrainMaterials, propMaterials, decalMaterials, waterSettings,
                          lightingSettings);
     }
 }

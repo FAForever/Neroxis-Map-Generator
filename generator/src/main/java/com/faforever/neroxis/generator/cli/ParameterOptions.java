@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.cli;
 
 import com.faforever.neroxis.cli.CLIUtils;
-import com.faforever.neroxis.generator.Biome;
+import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.generator.MapGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class ParameterOptions {
     private Float reclaimDensity;
     private Float mexDensity;
     private Symmetry terrainSymmetry;
-    private Biome biome;
+    private BiomeName biomeName;
 
     @Option(names = "--land-density", order = 1, description = "Land density for the generated map. Min: 0 Max: 1")
     public void setLandDensity(float density) {
@@ -60,7 +60,7 @@ public class ParameterOptions {
     }
 
     @Option(names = "--biome", order = 8, description = "Texture biome for the generated map")
-    public void setBiome(String biome) {
-        this.biome = Biome.getByValue(biome);
+    public void setBiomeName(String biome) {
+        this.biomeName = BiomeName.getByValue(biome);
     }
 }
