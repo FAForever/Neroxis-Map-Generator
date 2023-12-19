@@ -125,7 +125,7 @@ public class MapGenerator implements Callable<Integer> {
     @Command(name = "biomes", aliases = {
             "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printBiomes() {
-        System.out.println(Arrays.stream(BiomeName.values()).map(BiomeName::getValue).collect(Collectors.joining("\n")));
+        System.out.println(Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
