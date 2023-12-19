@@ -420,7 +420,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) tuningOptions.getParameterOptions().getBiomeName().ordinal(),
+                                         (byte) generatorParameters.biome().name().ordinal(),
                                          (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
