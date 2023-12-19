@@ -18,7 +18,7 @@ public record ParameterConstraints(Range landDensityRange,
                                    Range spawnCountRange,
                                    Range mapSizeRange,
                                    Range numTeamsRange,
-                                   List<String> biomes) {
+                                   List<BiomeName> biomes) {
     public static ParameterConstraintsBuilder builder() {
         return new ParameterConstraintsBuilder();
     }
@@ -98,7 +98,7 @@ public record ParameterConstraints(Range landDensityRange,
         Range mapSizeRange = Range.of(0, 2048);
         Range numTeamsRange = Range.of(0, 16);
         Range hydroCountRange = Range.of(0, 32);
-        List<String> biomes = Arrays.stream(BiomeName.values()).map(BiomeName::getValue).toList();
+        List<BiomeName> biomes = Arrays.stream(BiomeName.values()).toList();
 
         public ParameterConstraints build() {
             return new ParameterConstraints(landDensityRange, mountainDensityRange, plateauDensityRange,
@@ -156,7 +156,7 @@ public record ParameterConstraints(Range landDensityRange,
             return this;
         }
 
-        public ParameterConstraintsBuilder biomes(String... biomeNames) {
+        public ParameterConstraintsBuilder biomes(BiomeName... biomeNames) {
             biomes = List.of(biomeNames);
             return this;
         }

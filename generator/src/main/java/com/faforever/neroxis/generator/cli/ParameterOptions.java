@@ -54,13 +54,13 @@ public class ParameterOptions {
         this.mexDensity = CLIUtils.convertDensity(density, MapGenerator.NUM_BINS, spec);
     }
 
-    @Option(names = "--terrain-symmetry", order = 7, description = "Base terrain symmetry for the map. Values: ${COMPLETION-CANDIDATES}")
+    @Option(names = "--terrain-symmetry", order = 7, description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setTerrainSymmetry(Symmetry terrainSymmetry) {
         this.terrainSymmetry = terrainSymmetry;
     }
 
-    @Option(names = "--biome", order = 8, description = "Texture biome for the generated map")
-    public void setBiomeName(String biome) {
-        this.biomeName = BiomeName.getByValue(biome);
+    @Option(names = "--biome", order = 8, description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setBiomeName(BiomeName biome) {
+        this.biomeName = biome;
     }
 }

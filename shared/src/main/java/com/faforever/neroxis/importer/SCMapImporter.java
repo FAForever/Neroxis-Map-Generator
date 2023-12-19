@@ -199,7 +199,7 @@ public class SCMapImporter {
         in.close();
 
         SCMap map = new SCMap(widthInt,
-                              new Biome(BiomeName.getByValue("loaded"), mapTerrainMaterials, new PropMaterials(), new DecalMaterials(),
+                              new Biome(null, mapTerrainMaterials, new PropMaterials(), new DecalMaterials(),
                                         mapWaterSettings, mapLightingSettings));
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);

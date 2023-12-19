@@ -1,6 +1,7 @@
 package com.faforever.neroxis.toolsuite;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
@@ -461,9 +462,9 @@ public class MapPopulator implements Callable<Integer> {
         private Integer hydroCountPerPlayer;
         private Biome biome;
 
-        @CommandLine.Option(names = "--biome", description = "Name of included biome or path to custom biome folder")
-        private void setBiome(String pathOrBiome) {
-            biome = Biomes.loadBiome(pathOrBiome);
+        @CommandLine.Option(names = "--biome", description = "Name of included biome")
+        private void setBiome(BiomeName biomeName) {
+            biome = Biomes.loadBiome(biomeName);
         }
     }
 }
