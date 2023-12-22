@@ -17,15 +17,15 @@
   "skyReflection": 1.0,
   "sunGlow": 0.05,
   "waterPresent": true,
-  "elevationAbyss": 10.0,
+  "elevationAbyss": 20.0,
   "refractionScale": 0.375,
-  "elevationDeep": 18.0,
+  "elevationDeep": 45.0,
   "colorLerp": {
     "x": 0.17,
     "y": 0.17
   },
   "fresnelBias": 0.15,
-  "elevation": 25.0,
+  "elevation": 50.0,
   "fresnelPower": 1.6,
   "surfaceColor": {
     "x": 0.1,
