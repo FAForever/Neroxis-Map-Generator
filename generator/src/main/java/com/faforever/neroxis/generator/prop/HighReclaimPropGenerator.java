@@ -14,7 +14,7 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .5f)
                                    .reclaimDensity(.8f, 1f)
-                                   .biomes("Desert", "Frithen", "Moonlight", "Wonder")
+                                   .biomes("Desert", "Frithen", "Moonlight", "Sunset", "Wonder")
                                    .build();
     }
 
