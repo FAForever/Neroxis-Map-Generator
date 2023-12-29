@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.biomes.Biomes;
+import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
@@ -284,10 +284,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(BiomeArgumentProvider.class)
-    public void TestEqualityBiomeSpecified(String biome) {
+    public void TestEqualityBiomeSpecified(BiomeName biomeName) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--biome", biome, "--map-size", "256");
+        new CommandLine(instance).execute("--biome", biomeName.toString(), "--map-size", "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
@@ -346,7 +346,7 @@ public class MapGeneratorTest {
     private static class BiomeArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Biomes.BIOMES_LIST.stream().map(Arguments::of);
+            return Arrays.stream(BiomeName.values()).map(Arguments::of);
         }
     }
 

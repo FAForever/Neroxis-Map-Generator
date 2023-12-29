@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
@@ -121,6 +122,12 @@ public class MapGenerator implements Callable<Integer> {
         System.out.println(Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
     }
 
+    @Command(name = "biomes", aliases = {
+            "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printBiomes() {
+        System.out.println(Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
+    }
+
     @Override
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
@@ -212,8 +219,8 @@ public class MapGenerator implements Callable<Integer> {
     private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
         if (parameterOptions != null) {
-            if (parameterOptions.getBiome() != null) {
-                generatorParametersBuilder.biome(parameterOptions.getBiome());
+            if (parameterOptions.getBiomeName() != null) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiomeName()));
             }
             if (parameterOptions.getLandDensity() != null) {
                 generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
@@ -367,7 +374,7 @@ public class MapGenerator implements Callable<Integer> {
         randomizeOptions(generatorParametersBuilder);
 
         if (optionBytes.length == 11) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(Biomes.BIOMES_LIST.get(optionBytes[3])));
+            generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[3]]));
             generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[4], NUM_BINS));
             generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
             generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
@@ -395,7 +402,7 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.biome(
-                Biomes.loadBiome(Biomes.BIOMES_LIST.get(random.nextInt(Biomes.BIOMES_LIST.size()))));
+                Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
@@ -413,7 +420,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) Biomes.BIOMES_LIST.indexOf(generatorParameters.biome().name()),
+                                         (byte) generatorParameters.biome().name().ordinal(),
                                          (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
