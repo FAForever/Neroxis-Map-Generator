@@ -19,5 +19,5 @@ public enum BiomeName {
     WINDINGRIVER("WindingRiver"),
     WONDER("Wonder");
 
-    private final String value;
+    private final String folderName;
 }

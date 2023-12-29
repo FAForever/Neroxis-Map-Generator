@@ -8,10 +8,7 @@ import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import lombok.Data;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
 
 @Data
 public class Biomes {
@@ -23,7 +20,7 @@ public class Biomes {
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(BiomeName biomeName) {
-        String folderPath = biomeName.getValue();
+        String folderPath = biomeName.getFolderName();
         if (Biomes.class.getResource(CUSTOM_BIOMES_DIR + folderPath) != null) {
             folderPath = CUSTOM_BIOMES_DIR + folderPath;
             if (!folderPath.endsWith("/")) {
