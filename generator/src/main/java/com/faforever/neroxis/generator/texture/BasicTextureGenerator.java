@@ -12,6 +12,8 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
+import static com.faforever.neroxis.biomes.BiomeName.*;
+
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
@@ -28,9 +30,8 @@ public class BasicTextureGenerator extends TextureGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                .biomes("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                        "Mars", "Moonlight", "Prayer", "Stones",
-                        "Syrtis", "WindingRiver", "Wonder")
+                .biomes(BRIMSTONE, DESERT, EARLYAUTUMN, FRITHEN, MARS,
+                        MOONLIGHT, PRAYER, STONES, SYRTIS, WINDINGRIVER, WONDER)
                 .build();
     }
 

@@ -12,6 +12,8 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
+import static com.faforever.neroxis.biomes.BiomeName.SUNSET;
+
 public class PbrTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
@@ -30,7 +32,7 @@ public class PbrTextureGenerator extends TextureGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                .biomes("Sunset")
+                .biomes(SUNSET)
                 .build();
     }
 
