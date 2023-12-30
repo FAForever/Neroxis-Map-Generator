@@ -8,10 +8,7 @@ import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import lombok.Data;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
 
 @Data
 public class Biomes {
@@ -20,21 +17,14 @@ public class Biomes {
     // ├-- props.json <required>
     // ├-- WaterSettings.scmwtr <required>
     // └-- Light.scmlighting <required>
-    public static final List<String> BIOMES_LIST = List.of("Brimstone", "Desert", "EarlyAutumn", "Frithen",
-                                                           "Mars", "Moonlight", "Prayer", "Stones", "Sunset",
-                                                           "Syrtis", "WindingRiver", "Wonder");
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
-    public static Biome loadBiome(String folderPath) {
+    public static Biome loadBiome(BiomeName biomeName) {
+        String folderPath = biomeName.getFolderName();
         if (Biomes.class.getResource(CUSTOM_BIOMES_DIR + folderPath) != null) {
             folderPath = CUSTOM_BIOMES_DIR + folderPath;
             if (!folderPath.endsWith("/")) {
                 folderPath += "/";
-            }
-        } else {
-            folderPath = Path.of(folderPath).toString();
-            if (!folderPath.endsWith(File.separator)) {
-                folderPath += File.separator;
             }
         }
 
@@ -78,7 +68,7 @@ public class Biomes {
                     String.format("An error occurred while loading %s LightingSettings\n", folderPath), e);
         }
 
-        return new Biome(terrainMaterials.getName(), terrainMaterials, propMaterials, decalMaterials, waterSettings,
+        return new Biome(biomeName, terrainMaterials, propMaterials, decalMaterials, waterSettings,
                          lightingSettings);
     }
 }

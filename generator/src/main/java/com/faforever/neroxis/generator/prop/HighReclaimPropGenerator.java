@@ -5,6 +5,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
+import static com.faforever.neroxis.biomes.BiomeName.*;
+
 public class HighReclaimPropGenerator extends BasicPropGenerator {
 
     @Override
@@ -14,7 +16,7 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .5f)
                                    .reclaimDensity(.8f, 1f)
-                                   .biomes("Desert", "Frithen", "Moonlight", "Sunset", "Wonder")
+                                   .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
                                    .build();
     }
 
