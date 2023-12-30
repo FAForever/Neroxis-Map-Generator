@@ -23,7 +23,7 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .25f)
                                    .reclaimDensity(.8f, 1f)
-                                   .biomes(DESERT, FRITHEN, LOKI, MOONLIGHT, WONDER)
+                                   .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
                                    .build();
     }
 

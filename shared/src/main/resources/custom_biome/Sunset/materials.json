@@ -1,0 +1,81 @@
+{
+  "name": "Sunset",
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_TropicalOp06.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_TropicalOp06a.dds"
+    }
+  ],
+  "texturePaths": [
+    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Dirt001_albedo.dds",
+    "/env/Evergreen2/Layers/EvRock007c_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass007_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass004_albedo.dds",
+    "/env/Evergreen2/Layers/Eg_Gravel2_albedo.dds",
+    "/env/Paradise/layers/Rock001_albedo.dds",
+    "/env/Evergreen2/Layers/EvGrass005a_albedo.dds",
+    "/env/Evergreen/layers/macrotexture000_albedo.dds",
+    "map/env/layers/mapwide.dds"
+  ],
+  "textureScales": [
+    5.05,
+    5.02,
+    5.0,
+    4.95,
+    4.98,
+    5.07,
+    5.09,
+    4.92,
+    77.5,
+    1.0
+  ],
+  "normalPaths": [
+    "/env/Evergreen2/Layers/EvRock007_normal.dds",
+    "/env/Evergreen2/Layers/EG_Gravel_normal.dds",
+    "/env/Evergreen2/Layers/EG_Rock003_normal.dds",
+    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+    "/env/Paradise/layers/Grass000_normals.dds",
+    "/env/Evergreen2/Layers/EG_Rock_normal.dds",
+    "/env/Paradise/layers/Rock001_normals.dds",
+    "/env/Evergreen/layers/Dirt001_normals.dds",
+    "map/env/layers/heightRoughness.dds"
+  ],
+  "normalScales": [
+    15.1,
+    15.1,
+    15.1,
+    15.1,
+    20.1,
+    15.1,
+    15.1,
+    15.1,
+    1.0
+  ],
+  "previewColors": [
+    "3e3e3c",
+    "3a382e",
+    "403831",
+    "3b4223",
+    "1e250a",
+    "3a382e",
+    "545141",
+    "1e230d"
+  ],
+  "terrainTypes": [
+    162,
+    81,
+    159,
+    83,
+    83,
+    81,
+    81,
+    82,
+    221,
+    223
+  ]
+}

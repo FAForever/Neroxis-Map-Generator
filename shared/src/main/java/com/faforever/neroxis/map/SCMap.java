@@ -1,10 +1,7 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.IntegerMask;
-import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.mask.Vector4Mask;
+import com.faforever.neroxis.mask.*;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -31,7 +28,7 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 @SuppressWarnings("unused")
 @Data
 public class SCMap {
-    public static final String PBR_SHADER_NAME = "TerrainPBR";
+    public static final String PBR_SHADER_NAME = "Terrain301";
     public static final String LEGACY_SHADER_NAME = "TTerrainXP";
     public static final int SIGNATURE = 443572557;
     public static final int VERSION_MAJOR = 2;
@@ -88,7 +85,7 @@ public class SCMap {
     private BufferedImage textureMasksHigh;
     private BufferedImage waterMap;
     private BufferedImage waterFoamMap;
-    private BufferedImage waterFlatnessMap;
+    private BufferedImage waterShadowMap;
     private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
     private BufferedImage mapwideTexture;
@@ -132,10 +129,10 @@ public class SCMap {
 
         waterMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_INT_ARGB);
         waterFoamMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
-        waterFlatnessMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
+        waterShadowMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
         for (int y = 0; y < size / 2; y++) {
             for (int x = 0; x < size / 2; x++) {
-                waterFlatnessMap.getRaster().setPixel(x, y, new int[]{255});
+                waterShadowMap.getRaster().setPixel(x, y, new int[]{255});
             }
         }
         waterDepthBiasMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
@@ -469,8 +466,8 @@ public class SCMap {
                               StrictMath.round(waterMap.getHeight() * contentScale));
         waterFoamMap = scaleImage(waterFoamMap, StrictMath.round(waterFoamMap.getWidth() * contentScale),
                                   StrictMath.round(waterFoamMap.getHeight() * contentScale));
-        waterFlatnessMap = scaleImage(waterFlatnessMap, StrictMath.round(waterFlatnessMap.getWidth() * contentScale),
-                                      StrictMath.round(waterFlatnessMap.getHeight() * contentScale));
+        waterShadowMap = scaleImage(waterShadowMap, StrictMath.round(waterShadowMap.getWidth() * contentScale),
+                                    StrictMath.round(waterShadowMap.getHeight() * contentScale));
         waterDepthBiasMap = scaleImage(waterDepthBiasMap, StrictMath.round(waterDepthBiasMap.getWidth() * contentScale),
                                        StrictMath.round(waterDepthBiasMap.getHeight() * contentScale));
         terrainType = scaleImage(terrainType, StrictMath.round(terrainType.getWidth() * contentScale),
@@ -509,10 +506,10 @@ public class SCMap {
                                                      StrictMath.round(waterFoamMap.getWidth() * boundsScale),
                                                      StrictMath.round(waterFoamMap.getHeight() * boundsScale),
                                                      halvedTopLeftOffset);
-        waterFlatnessMap = insertImageIntoNewImageOfSize(waterFlatnessMap,
-                                                         StrictMath.round(waterFlatnessMap.getWidth() * boundsScale),
-                                                         StrictMath.round(waterFlatnessMap.getHeight() * boundsScale),
-                                                         halvedTopLeftOffset);
+        waterShadowMap = insertImageIntoNewImageOfSize(waterShadowMap,
+                                                       StrictMath.round(waterShadowMap.getWidth() * boundsScale),
+                                                       StrictMath.round(waterShadowMap.getHeight() * boundsScale),
+                                                       halvedTopLeftOffset);
         waterDepthBiasMap = insertImageIntoNewImageOfSize(waterDepthBiasMap,
                                                           StrictMath.round(waterDepthBiasMap.getWidth() * boundsScale),
                                                           StrictMath.round(waterDepthBiasMap.getHeight() * boundsScale),
@@ -611,9 +608,9 @@ public class SCMap {
         armies.forEach(army -> army.getGroups().forEach(group -> setObjectHeights(group.getUnits())));
     }
 
-    public void setWaterFlatnessMap(BufferedImage waterFlatnessMap) {
-        checkImageSize(waterFlatnessMap, size / 2);
-        this.waterFlatnessMap = waterFlatnessMap;
+    public void setWaterShadowMap(BufferedImage waterShadowMap) {
+        checkImageSize(waterShadowMap, size / 2);
+        this.waterShadowMap = waterShadowMap;
     }
 
     public void setWaterDepthBiasMap(BufferedImage waterDepthBiasMap) {
@@ -663,7 +660,17 @@ public class SCMap {
                 terrainType.getRaster().setPixel(x, y, new int[]{val0});
             }
         }
+    }
 
+    public void setWaterShadowMap(BufferedImage waterShadowMap, FloatMask mask) {
+        int waterShadowMapWidth = waterShadowMap.getWidth();
+        checkMaskSize(mask, waterShadowMapWidth);
+        for (int x = 0; x < waterShadowMapWidth; x++) {
+            for (int y = 0; y < waterShadowMapWidth; y++) {
+                int val0 = (int) (mask.getPrimitive(x, y) * 255);
+                waterShadowMap.getRaster().setPixel(x, y, new int[]{val0});
+            }
+        }
     }
 
     private int convertToRawTextureValue(float value) {

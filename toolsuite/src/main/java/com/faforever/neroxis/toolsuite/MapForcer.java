@@ -127,7 +127,7 @@ public class MapForcer implements Callable<Integer> {
         IntegerMask normalMask = new IntegerMask(map.getNormalMap(), null, symmetrySettings, "normal");
         IntegerMask waterMask = new IntegerMask(map.getWaterMap(), null, symmetrySettings, "water");
         IntegerMask waterFoamMask = new IntegerMask(map.getWaterFoamMap(), null, symmetrySettings, "waterFoam");
-        IntegerMask waterFlatnessMask = new IntegerMask(map.getWaterFlatnessMap(), null, symmetrySettings,
+        IntegerMask waterShadowMask = new IntegerMask(map.getWaterShadowMap(), null, symmetrySettings,
                                                         "waterFlatness");
         IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings,
                                                          "waterDepthBias");
@@ -142,7 +142,7 @@ public class MapForcer implements Callable<Integer> {
             normalMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
             waterMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
             waterFoamMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
-            waterFlatnessMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
+            waterShadowMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
             waterDepthBiasMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
             terrainTypeMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
             textureMasksLowMask.forceSymmetry(SymmetryType.SPAWN, reverseSide);
@@ -153,7 +153,7 @@ public class MapForcer implements Callable<Integer> {
             normalMask.forceSymmetry(angle);
             waterMask.forceSymmetry(angle);
             waterFoamMask.forceSymmetry(angle);
-            waterFlatnessMask.forceSymmetry(angle);
+            waterShadowMask.forceSymmetry(angle);
             waterDepthBiasMask.forceSymmetry(angle);
             terrainTypeMask.forceSymmetry(angle);
             textureMasksLowMask.forceSymmetry(angle);
@@ -164,7 +164,7 @@ public class MapForcer implements Callable<Integer> {
         normalMask.writeToImage(map.getNormalMap());
         waterMask.writeToImage(map.getWaterMap());
         waterFoamMask.writeToImage(map.getWaterFoamMap());
-        waterFlatnessMask.writeToImage(map.getWaterFlatnessMap());
+        waterShadowMask.writeToImage(map.getWaterShadowMap());
         waterDepthBiasMask.writeToImage(map.getWaterDepthBiasMap());
         terrainTypeMask.writeToImage(map.getTerrainType());
         textureMasksLowMask.writeToImage(map.getTextureMasksLow());

@@ -21,5 +21,6 @@ shadowJar {
                 "Implementation-Version": generatorVersion,
                 "Impletementation-Title": "Neroxis Map Generator"
     }
+    excludes += "**/source_images/*"
     duplicatesStrategy = DuplicatesStrategy.WARN
 }

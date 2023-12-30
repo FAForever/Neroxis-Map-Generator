@@ -230,7 +230,7 @@ public class SCMapImporter {
         map.setWaterFoamMap(
                 getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFoamMaskData)));
 
-        map.setWaterFlatnessMap(
+        map.setWaterShadowMap(
                 getBufferedImageFromRawData(BufferedImage.TYPE_BYTE_GRAY, getIntegerArray(waterFlatnessData)));
 
         map.setWaterDepthBiasMap(

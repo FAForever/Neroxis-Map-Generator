@@ -1,6 +1,13 @@
 package com.faforever.neroxis.exporter;
 
-import com.faforever.neroxis.map.*;
+import com.faforever.neroxis.map.CubeMap;
+import com.faforever.neroxis.map.Decal;
+import com.faforever.neroxis.map.DecalGroup;
+import com.faforever.neroxis.map.DecalType;
+import com.faforever.neroxis.map.Prop;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SkyBox;
+import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
@@ -18,12 +25,21 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
 import java.awt.image.RenderedImage;
-import java.io.*;
-import java.net.URL;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Objects;
 
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
@@ -175,7 +191,7 @@ public class SCMapExporter {
         writeInt(1); // unknown
         writeCompressedImage(map.getWaterMap(), waterDDSHeader); // watermap data
         writeImageBytes(map.getWaterFoamMap()); // water foam mask data
-        writeImageBytes(map.getWaterFlatnessMap()); // water flatness mask data
+        writeImageBytes(map.getWaterShadowMap()); // water surface shadow mask data
         writeImageBytes(map.getWaterDepthBiasMap()); // water depth bias mask data
 
         // terrain type
@@ -264,7 +280,7 @@ public class SCMapExporter {
 
     public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
         BufferedImage image = map.getMapwideTexture();
-        Path textureDirectory = Paths.get("env", "texture");
+        Path textureDirectory = Paths.get("env", "layers");
         Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
         Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
@@ -276,20 +292,16 @@ public class SCMapExporter {
     }
 
     public static void exportPBR(Path folderPath, SCMap map) throws IOException {
-        URL sourceURL = SCMapExporter.class.getResource("/images/heightRoughness.png");
-        if (sourceURL != null) {
-            BufferedImage image = ImageIO.read(sourceURL);
-            Path textureDirectory = Paths.get("env", "texture");
-            Path filePath = textureDirectory.resolve(PBR_DDS);
-            Path writingPath = folderPath.resolve(filePath);
-            Files.createDirectories(writingPath.getParent());
-            try {
-                ImageUtil.writeCompressedDDS(image, writingPath);
-            } catch (IOException e) {
-                System.out.print("Could not write the pbr texture\n" + e);
-            }
-        } else {
-            System.out.print("Can't find pbr texture to write\n");
+        Path textureDirectory = Path.of("env", "layers");
+        Path filePath = textureDirectory.resolve(PBR_DDS);
+        Path outPath = folderPath.resolve(filePath);
+
+        try (InputStream inputStream = Objects.requireNonNull(
+                SCMapExporter.class.getResourceAsStream("/images/heightRoughness.dds"))) {
+            Files.createDirectories(outPath.getParent());
+            Files.copy(inputStream, outPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            System.out.print("Could not copy the pbr texture\n" + e);
         }
     }
 

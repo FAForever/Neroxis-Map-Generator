@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.style;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.WeightedConstrainedOptions;
+import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
 import com.faforever.neroxis.generator.decal.DecalGenerator;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
@@ -12,6 +13,7 @@ import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
+import com.faforever.neroxis.generator.texture.PbrTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.util.ConstrainedSelector;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
@@ -47,7 +49,9 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     protected WeightedConstrainedOptions<TextureGenerator> getTextureGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BasicTextureGenerator());
+        return new WeightedConstrainedOptions<>(new BasicTextureGenerator(),
+                                                new WeightedOption<>(new BasicTextureGenerator(), 1f),
+                                                new WeightedOption<>(new PbrTextureGenerator(), 1f));
     }
 
     protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
