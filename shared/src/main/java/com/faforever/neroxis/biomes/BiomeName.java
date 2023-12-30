@@ -10,11 +10,11 @@ public enum BiomeName {
     DESERT("Desert"),
     EARLYAUTUMN("EarlyAutumn"),
     FRITHEN("Frithen"),
-    LOKI("Loki"),
     MARS("Mars"),
     MOONLIGHT("Moonlight"),
     PRAYER("Prayer"),
     STONES("Stones"),
+    SUNSET("Sunset"),
     SYRTIS("Syrtis"),
     WINDINGRIVER("WindingRiver"),
     WONDER("Wonder");
