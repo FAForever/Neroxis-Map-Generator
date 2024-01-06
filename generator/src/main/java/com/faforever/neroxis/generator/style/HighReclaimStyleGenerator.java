@@ -20,7 +20,7 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
                                    .mountainDensity(.75f, 1f)
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .25f)
-                                   .reclaimDensity(.8f, 1f)
+                                   .reclaimDensity(.4f, 1f)
                                    .build();
     }
 

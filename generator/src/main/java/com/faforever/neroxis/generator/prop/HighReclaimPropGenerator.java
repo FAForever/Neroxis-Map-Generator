@@ -19,7 +19,7 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
                                    .mountainDensity(.5f, 1f)
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .5f)
-                                   .reclaimDensity(.8f, 1f)
+                                   .reclaimDensity(.4f, 1f)
                                    .build();
     }
     
@@ -49,15 +49,15 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
         float reclaimDensity = generatorParameters.reclaimDensity();
+        int spawnCount = generatorParameters.spawnCount();
         treeMask.setSize(mapSize / 16);
-        cliffRockMask.setSize(mapSize / 16);
+        cliffRockMask.setSize(mapSize / 32);
         fieldStoneMask.setSize(mapSize / 4);
         fieldBoulderMask.setSize(mapSize / 4);
-        fieldStoneMask.startVisualDebugger();
 
-        cliffRockMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .5f).setSize(mapSize + 1);
+        cliffRockMask.randomize(reclaimDensity * .5f).setSize(mapSize + 1);
         cliffRockMask.multiply(impassable).dilute(.5f, 10).subtract(impassable).multiply(passableLand);
-        fieldBoulderMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .01f).setSize(mapSize + 1);
+        fieldBoulderMask.randomize(reclaimDensity * spawnCount * .0025f).setSize(mapSize + 1);
         fieldBoulderMask.multiply(passableLand).fillEdge(10, false);
         fieldStoneMask.init(fieldBoulderMask).dilute(.5f, 6).subtract(fieldBoulderMask).erode(.3f);
         treeMask.randomize((reclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
