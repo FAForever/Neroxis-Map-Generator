@@ -177,6 +177,9 @@ public class MapGenerator implements Callable<Integer> {
             populateRequiredGeneratorParameters(generatorParametersBuilder);
 
             randomizeOptions(generatorParametersBuilder);
+            if (biomeName != null) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(biomeName));
+            }
         }
 
         setStyleAndParameters(generatorParametersBuilder);
@@ -184,9 +187,6 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        if (biomeName != null) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(biomeName));
-        }
         if (tuningOptions.getMapStyle() == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
@@ -380,8 +380,12 @@ public class MapGenerator implements Callable<Integer> {
 
         randomizeOptions(generatorParametersBuilder);
 
+        if (optionBytes.length > 3) {
+            biomeName = BiomeName.values()[optionBytes[3]];
+            generatorParametersBuilder.biome(Biomes.loadBiome(biomeName));
+        }        
+
         if (optionBytes.length == 11) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[3]]));
             generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[4], NUM_BINS));
             generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
             generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
@@ -389,11 +393,11 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
             generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
-        } else if (optionBytes.length == 4) {
+        } else if (optionBytes.length == 5) {
             if (generationTime == 0) {
-                tuningOptions.setMapStyle(MapStyle.values()[optionBytes[3]]);
+                tuningOptions.setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else {
-                Visibility visibility = Visibility.values()[optionBytes[3]];
+                Visibility visibility = Visibility.values()[optionBytes[4]];
                 generatorParametersBuilder.visibility(visibility);
             }
         }
@@ -438,16 +442,20 @@ public class MapGenerator implements Callable<Integer> {
             } else if (tuningOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(), (byte) visibility.ordinal()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal(),
+                                         (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal(),
                                          (byte) tuningOptions.getMapStyle().ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
