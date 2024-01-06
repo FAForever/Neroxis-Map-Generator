@@ -22,7 +22,6 @@ public class ParameterOptions {
     private Float reclaimDensity;
     private Float mexDensity;
     private Symmetry terrainSymmetry;
-    private BiomeName biomeName;
 
     @Option(names = "--land-density", order = 1, description = "Land density for the generated map. Min: 0 Max: 1")
     public void setLandDensity(float density) {
@@ -57,10 +56,5 @@ public class ParameterOptions {
     @Option(names = "--terrain-symmetry", order = 7, description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setTerrainSymmetry(Symmetry terrainSymmetry) {
         this.terrainSymmetry = terrainSymmetry;
-    }
-
-    @Option(names = "--biome", order = 8, description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    public void setBiomeName(BiomeName biome) {
-        this.biomeName = biome;
     }
 }

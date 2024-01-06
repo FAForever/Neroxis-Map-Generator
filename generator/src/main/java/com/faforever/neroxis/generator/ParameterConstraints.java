@@ -71,7 +71,7 @@ public record ParameterConstraints(Range landDensityRange,
                                   .numTeams(generatorParameters.numTeams())
                                   .visibility(generatorParameters.visibility())
                                   .terrainSymmetry(generatorParameters.terrainSymmetry())
-                                  .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
+                                  .biome(generatorParameters.biome())
                                   .build();
     }
 
@@ -83,7 +83,6 @@ public record ParameterConstraints(Range landDensityRange,
                                          .rampDensity(rampDensityRange.getRandomFloat(random))
                                          .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
                                          .mexDensity(mexDensityRange.getRandomFloat(random))
-                                         .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
                                          .build();
     }
 
