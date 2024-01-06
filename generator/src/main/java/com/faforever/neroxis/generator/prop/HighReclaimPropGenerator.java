@@ -39,9 +39,9 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
                                   3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().getRocks(), .6f, 2.5f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().getRocks(), .6f, 2.5f);
+                                  biome.propMaterials().getRocks(), .5f, 2.5f);
             propPlacer.placeProps(fieldBoulderMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().getBoulders(), 5f, 10f);
+                                  biome.propMaterials().getBoulders(), 15f);
         });
     }
 
